@@ -81,12 +81,11 @@ func handle_player_succession(state: WorldState, team: TeamData) -> bool:
 		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
 		print("[GameOver] %s" % state.game_over_reason)
 		return false
-	state.player_forced_event = {
+	state.set_player_forced_event({
 		"action": "choose_heir",
 		"team_id": team.team_id,
 		"candidates": team.named_members.duplicate(),
-	}
-	state.player_forced_event_id = "heir_%d" % state.world.current_tick
+	}, "heir_%d" % state.world.current_tick)
 	print("[Heir] 玩家 leader 死亡，等待選繼承人 (Team%d, %d 候選)" % [
 		team.team_id, team.named_members.size()])
 	return true

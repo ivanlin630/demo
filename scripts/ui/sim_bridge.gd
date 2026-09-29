@@ -320,7 +320,25 @@ func get_and_clear_alerts() -> Array:
 #   ★★回傳形狀照 spec §3-1 逐字：{ ok, queued, seq }。
 #     ⇒ ★呼叫端原本當場讀 `message`／`ok` 的（實測 66 個呼叫端、54 個當場讀）
 #       現在拿不到結果 —— 那個【玩家回饋】要怎麼補，systems 還沒裁，本檔不自己選。
+# ★★★#8：按一下＝做一顆 tick（blueprint 裁 2026-09-29；用戶逐字「玩家的介面就是按啥做啥」）。
+#   ★掛在【這一個咽喉】而不是 UI 的呼叫點上 —— spec §2① 寫死的位置。
+#   ★★而它涵蓋的比 spec 說的多：活的呼叫點是 45 個不是 36
+#     （text_ui_main 36 ＋ encounter_view 5 ＋ popup_layer 4；main.gd 那 10 個是死樹 Main.tscn）
+#     ⇒ 這正是掛咽喉的理由：★★★【第 46 個呼叫點自動有這個行為】，貼 45 次的版本會漏掉它而沒人發現。
+#   ★例外＝自動推進中（Space／X 正在跑）按的令【照舊入列，不另加推進】—— 用既有謂詞，不新造狀態。
+#   ★★條件是 `queued` 而不是無條件：`unknown_command` 那一支【什麼都沒入列】
+#     ⇒ 它不是「一道令」，推它一顆 tick 會讓打錯字也走掉世界的時間。
+#     ★★★（這是我在 HOW 內自己定的那一個微決定，已寫在 handback 給 systems 覆核。）
 func command_player(name: String, args: Dictionary) -> Dictionary:
+	var r: Dictionary = _enqueue_command(name, args)
+	if bool(r.get("queued", false)) and not is_advancing():
+		request_advance(1)
+	return r
+
+# 原本的 `command_player` 本體（入列＋入列當下唯一會擋的兩件事）。
+# ★★改名而不是把推進塞進本體：讓【推進】與【入列】在讀的時候分得開 ——
+#   否則下一個人要在入列邏輯裡找一行推進，而那一行看起來像是入列的一部分。
+func _enqueue_command(name: String, args: Dictionary) -> Dictionary:
 	# ★★★入列當下【唯一】會擋的一件事（systems 裁 2026-09-24，(乙) 的那一句）：
 	#   `dispatch` 的 match 認不認得這個 name。★它不是合法性判斷 —— 合法性歸消費點，
 	#   而「這個 name 根本不存在」【不會因為推進一顆 tick 而改變】⇒ 擋在這裡沒有第二份真相。

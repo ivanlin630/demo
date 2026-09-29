@@ -7695,8 +7695,7 @@ func _maybe_request_join_player(state: WorldState, team: TeamData) -> bool:
 	var ppt: TeamData = state.teams.get(ptid)
 	if ppt == null or ppt.tile_pos != team.tile_pos: return false   # 同格才求   # gate-ok: ppt.tile_pos 只為【同格測試】——同格才求（co-location）
 	if not state.player_forced_event.is_empty(): return false        # 已有待處理 event
-	state.player_forced_event = { "action": "join_request", "from_id": team.team_id }
-	state.player_forced_event_id = str(randi())
+	state.set_player_forced_event({ "action": "join_request", "from_id": team.team_id }, str(randi()))
 	print("[JoinRequest] 流民 Team%d 求投靠玩家 Team%d" % [team.team_id, ptid])
 	return true
 
@@ -7905,10 +7904,13 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if old_owner_id != -1 and state.teams.has(old_owner_id):
 		var oid_team: TeamData = state.teams[old_owner_id]
 		if oid_team.leader_id == state.player_id and state.player_id != -1:
-			state.player_forced_event = {
+			# ★★★逐字保留「沒有 id」這個現況（本票不改行為）：這一處【從來沒有】設
+			#   `player_forced_event_id` ⇒ 面板的 `interaction_id` 是空字串 ⇒ UI 整個忽略它,
+			#   而它仍然佔住那個 `is_empty()` 槽位直到下一個整點逾時。★已呈報 systems 裁。
+			state.set_player_forced_event({
 				"from_id": team.team_id, "action": "uprising_alert",
 				"outpost_pos": team.tile_pos,
-			}
+			}, "")
 
 func _avg_named_loyalty(state: WorldState, team: TeamData) -> float:
 	var sum: float = 0.0

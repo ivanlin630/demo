@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -101,6 +101,9 @@ func _initialize() -> void:
 	await _test_p15b_footer_labels_same_source()
 	await _test_p16b_pending_zero_after_advance()
 	await _test_p18_unbounded_sentinel_is_named()
+	await _test_p20_forced_panel_three_lines()
+	await _test_p21_snap_both_directions()
+	await _test_p22_overlay_callsites_advance_one_tick()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2048,17 +2051,22 @@ func _test_p8_x_advances_one_hour() -> void:
 	#   ⇒ delta 還是 60 ⇒ 【1440 與 60 在卷面上長得一模一樣】⇒ 負對照【不紅】。
 	#   ⇒ ★被守的性質是「那個鍵【承諾】一小時」，而【走了多少】是世界的權利。
 	var asked: int = node._bridge.ticks_remaining()
-	print("   請求量=%d（TICKS_PER_HOUR=%d）" % [asked, WorldState.TICKS_PER_HOUR])
-	_check("★★按 X ⇒ 請求量正好是 TICKS_PER_HOUR（實測 %d／期望 %d）" % [
-		asked, WorldState.TICKS_PER_HOUR], asked == WorldState.TICKS_PER_HOUR)
+	# ★★#8 之後 X 是【吸附到下一個整點】不是固定一小時 ⇒ 期望值要從 t0 導出。
+	#   ★期望值用常數算，**不寫死 60**（負對照：把它換成字面值 ⇒ 換根時它不會跟著動）。
+	var want: int = WorldState.TICKS_PER_HOUR - (t0 % WorldState.TICKS_PER_HOUR)
+	print("   t0=%d｜請求量=%d（期望 %d ＝ TICKS_PER_HOUR %d − t0 %% TICKS_PER_HOUR %d）" % [
+		t0, asked, want, WorldState.TICKS_PER_HOUR, t0 % WorldState.TICKS_PER_HOUR])
+	_check("★★按 X ⇒ 請求量正好吸到下一個整點（實測 %d／期望 %d）" % [asked, want],
+		asked == want)
+	_check("★★★吸附量落在 1..TICKS_PER_HOUR（★0 是舊 bug 的長相：站在邊界原地不動）",
+		asked >= 1 and asked <= WorldState.TICKS_PER_HOUR)
 	var frames: int = 0
 	while node._bridge.is_advancing() and frames < 64:
 		node._process(0.1)
 		frames += 1
 	var delta: int = st.world.current_tick - t0
 	print("   實際走了 delta=%d frames=%d（★≤ 請求量：事件可以把它截短，不能讓它超過）" % [delta, frames])
-	_check("★★★世界走的不超過那個請求（delta=%d ≤ %d）" % [delta, WorldState.TICKS_PER_HOUR],
-		delta <= WorldState.TICKS_PER_HOUR)
+	_check("★★★世界走的不超過那個請求（delta=%d ≤ %d）" % [delta, want], delta <= want)
 	await _free_ui(node)
 	_cell("_test_p8_x_advances_one_hour")
 
@@ -2112,7 +2120,7 @@ func _test_p9_single_advance_path() -> void:
 # P10［頁腳有字＋單位統一］：keymap 的 X 那一項寫「1小時」不是「60tick」。
 # ★判準只看【那一項的字串】（[X] 到下一個 [ 之間），不是全檔掃 60。
 # 負對照：把 keymap 那一項改成 `[X]推進60tick` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
-func _test_p10_footer_x_says_one_hour() -> void:
+func _test_p10_footer_x_says_one_hour() -> void:   # ★名字留著（註冊表／點名表認它）
 	_selftest_gate("_test_p10_footer_x_says_one_hour").noop()
 	print("\n── P10 頁腳 X 那一項 ──")
 	var node = await _make_ui()
@@ -2125,7 +2133,10 @@ func _test_p10_footer_x_says_one_hour() -> void:
 		var nxt: int = rest.find("[")
 		var item: String = rest.substr(0, nxt) if nxt != -1 else rest
 		print("   那一項：「%s」" % item)
-		_check("★★那一項寫的是「1小時」", item.contains("1小時"))
+		# ★★#8 之後 X 的語意從【固定一小時】變成【吸附到下一個整點】
+		#   ⇒ 這一格守的東西變了 ⇒ ★它的綠必須是新的（「一張票改的就是閘」那一條）。
+		#   ★★而【不寫死 60】那一半逐字保留：用戶原話「記得統一單位 不要寫死60tick」。
+		_check("★★那一項寫的是「整點」（#8 吸附語意）", item.contains("整點"))
 		_check("★★★那一項沒有寫死的 60（用戶逐字：不要寫死60tick）", not item.contains("60"))
 	await _free_ui(node)
 	_cell("_test_p10_footer_x_says_one_hour")
@@ -2313,12 +2324,163 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 15
+const CONTROL_FLOOR_UI: int = 18   # ★+3：#7 P20／#8 P21／#8 P22 三格的負對照都已實測紅
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
+const CONTROL_FLOOR_FEP: int = 6    # forced_event_panel_bed（#7①③，2026-09-29）
+const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
+# ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
+#   不是讀 DTO：上一輪的教訓是「DTO 對」與「畫面對」是兩件事。
+# ★母體地板：先斷言強制事件真的在（forced_event 非空 ＋ 面板 interaction_id 對得上）,
+#   否則「面板沒有原樣 id」會在一個【根本沒有面板】的世界裡恆綠。
+# 負對照：讓 UI 不印後果／不回應那兩行（`for extra in []`） ⇒ 已於 feat/forced-event-panel（2026-09-29 這一輪） 實測紅
+func _test_p20_forced_panel_three_lines() -> void:
+	_selftest_gate("_test_p20_forced_panel_three_lines").noop()
+	print("
+── #7① 強制事件面板三行人話 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	var other := TeamData.new(); other.team_id = 7311; other.tile_pos = ppos
+	AnonTierSystem.add_anon(other, "平民", 5)
+	other.faction_id = -1
+	st.teams[7311] = other
+	# ★走 setter（本票的唯一寫入口）⇒ 順便讓到達事件真的經過它
+	st.set_player_forced_event({"action": "diplomacy", "from_id": 7311,
+		"proposal": "propose_alliance"}, "fe_ui_1")
+	node._bridge.request_advance(1)
+	node._process(0.1)   # U19 自動進 forced 模式
+	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
+	_check("★母體地板①：強制事件真的在（forced_event 非空）", not st.player_forced_event.is_empty())
+	_check("★母體地板②：面板拿到同一個 id（%s）" % String(fi.get("interaction_id", "")),
+		String(fi.get("interaction_id", "")) == "fe_ui_1")
+	var txt: String = node._build_interact_str()
+	print("   ── 玩家看到的那幾行 ──")
+	for l in txt.split("
+"):
+		if String(l).contains("⚠") or String(l).contains("接受＝") or String(l).contains("視同拒絕"):
+			print("   | " + String(l))
+	_check("①誰：面板有 Team7311", txt.contains("Team7311"))
+	_check("①誰：帶勢力欄（獨立/勢力N）", txt.contains("（獨立") or txt.contains("（勢力"))
+	_check("①誰：帶關係欄", txt.contains("關係："))
+	_check("②要什麼：人話「提議與你結盟」", txt.contains("提議與你結盟"))
+	_check("★★②不含原樣 id `propose_alliance`", not txt.contains("propose_alliance"))
+	_check("③接受後果那一行在", txt.contains("接受＝"))
+	_check("④不回應下場那一行在", txt.contains("視同拒絕"))
+	_check("★★★人話只印一次（舊版把 message 貼在每一個選項前面）",
+		txt.count("提議與你結盟") == 1)
+	await _free_ui(node)
+	_cell("_test_p20_forced_panel_three_lines")
+
+# ★★★#8 P2：吸附【兩向】—— 站在格線中間要吸到下一條線，站在線上要推整段（不是原地不動）。
+#   ★期望值一律【用常數算】，不寫死 60／1440（spec §4 P2 逐字）；
+#     ★★而本格另外斷言 `_snap_to` 的【源碼裡】沒有字面 60／1440 ——
+#     否則「期望值用常數算」與「實作用常數算」是兩件事，而只驗前者會讓後者偷偷寫死。
+#   ★★★tick 用 `_bridge.get_current_tick()`（live）不是 `_cached_snapshot`：
+#     本格刻意【不呼 _refresh()】就直接按鍵 —— 若實作讀快照，那份是舊的 ⇒ 會吸到前一格 ⇒ 紅。
+# 負對照：三支都點過 —— ①X 改回固定一小時（不吸附）②實作端寫死 60③★改讀 `_cached_snapshot` 的 tick（systems 寫死不准用的那一份，實測吸成 60 而非 53） ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
+func _test_p21_snap_both_directions() -> void:
+	_selftest_gate("_test_p21_snap_both_directions").noop()
+	print("
+── #8 P2 吸附兩向 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var H: int = WorldState.TICKS_PER_HOUR
+	var D: int = WorldState.TICKS_PER_DAY
+	var cases: Array = [
+		["X 在格線中間", KEY_X, 2 * H + 7, H - 7],
+		["X 剛好在整點上", KEY_X, 3 * H, H],
+		["Space 在格線中間", KEY_SPACE, D + 7, D - 7],
+		["Space 剛好在日界上", KEY_SPACE, 2 * D, D],
+	]
+	for c in cases:
+		st.world.current_tick = int(c[2])
+		node._bridge.cancel_advance()
+		# ★刻意不 _refresh()：要讓「讀快照」的實作在這裡紅
+		_press_key(node, int(c[1]))
+		var asked: int = node._bridge.ticks_remaining()
+		print("   %-16s tick=%-6d 請求量=%-6d（期望 %d）" % [String(c[0]), int(c[2]), asked, int(c[3])])
+		_check("%s：吸到下一條格線（實測 %d／期望 %d）" % [String(c[0]), asked, int(c[3])],
+			asked == int(c[3]))
+		_check("%s：請求量不是 0（0＝站在線上原地不動的舊 bug 長相）" % String(c[0]), asked != 0)
+		node._bridge.cancel_advance()
+	# ★實作端也不准寫死
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var body: String = ""
+	var at: int = src.find("func _snap_to(")
+	_check("★母體地板：找得到 `_snap_to`（找不到＝下面全是空談）", at != -1)
+	if at != -1:
+		body = src.substr(at, 240)
+		print("   _snap_to 源碼：%s" % body.split("
+")[1].strip_edges())
+		_check("★★實作端沒有字面 60", not body.contains("60"))
+		_check("★★實作端沒有字面 1440", not body.contains("1440"))
+	await _free_ui(node)
+	_cell("_test_p21_snap_both_directions")
+
+# ★★★#8：那 9 個呼叫點的【新行為】—— systems 2026-09-30 指定的一格。
+#   ★他的話：「那 9 個的風險是【咽喉漏了它們】，不是它們各自壞了」
+#   ⇒ 所以本格只問兩件：按下去之後 ①咽喉有沒有替它請求一顆 ②世界有沒有恰好 +1 且結果句出現。
+#   ★★走的是【真的 overlay 的按鍵處理器】（`_encounter_view._handle_key`），
+#     不是自己呼 `command_player` —— 既有的 take_loot 格就是後者，而它自己寫明
+#     「encounter_view 的 [K] 派的就是這個」＝它繞過了 overlay。
+#   ★★★而 `popup_layer` 那 4 個【沒有格、也不該有】：本輪量出它不可達
+#     （只被那棵死樹的 Main 場景實例化 ⇒ 玩家按不到）⇒ 為按不到的東西寫格是假覆蓋。
+#     ★同上：此處刻意不寫那個完整路徑字串（會誤觸 `defer-open`，它分不出引用與提及）。
+#   ★誠實限：5 個裡點了 2 個（戰後 K／L）。另三個（J 收編、F 投降、idle 的 J）沒點：
+#     它們需要 `encounter_active` 或可收編狀態的佈置，而本格要證的是【咽喉沒漏這個檔】——
+#     那件事一個呼叫點就證得了。★★不寫的話，下一個人會以為 5 個都驗過了。
+# 負對照：關掉咽喉那一行（`if false`）⇒ overlay 按鍵的請求量 0（★證明本格真的接在咽喉上，不是 overlay 自己會過） ⇒ 已於 feat/press-is-one-tick（2026-09-30 這一輪） 實測紅
+func _test_p22_overlay_callsites_advance_one_tick() -> void:
+	_selftest_gate("_test_p22_overlay_callsites_advance_one_tick").noop()
+	print("\n── #8 overlay 呼叫點也走咽喉 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var ev = node._encounter_view
+	_check("★母體地板：overlay 真的存在（text_ui_main:156 動態 load 的那一個）", ev != null)
+	if ev == null:
+		_cell("_test_p22_overlay_callsites_advance_one_tick")
+		return
+	for case in [["K 撿戰利品", KEY_K], ["L 留下戰利品", KEY_L]]:
+		var loser := TeamData.new()
+		loser.team_id = 7801
+		loser.tile_pos = pt.tile_pos
+		AnonTierSystem.add_anon(loser, "平民", 3)
+		loser.resources["food"] = 100.0
+		st.teams[7801] = loser
+		st.last_encounter_result = {"winner_id": ptid, "loser_id": 7801,
+			"loot_pool": {"food": 10.0}, "can_subjugate": false}
+		ev._post_combat = true
+		node._bridge.cancel_advance()
+		var t0: int = st.world.current_tick
+		var res0: int = st.command_results.size()
+		ev._handle_key(int(case[1]))
+		var asked: int = node._bridge.ticks_remaining()
+		print("   %-14s 按下後請求量=%d（期望 1）" % [String(case[0]), asked])
+		_check("%s：★咽喉沒漏這個檔（請求量 %d）" % [String(case[0]), asked], asked == 1)
+		var frames: int = 0
+		while node._bridge.is_advancing() and frames < 8:
+			node._process(0.1)
+			frames += 1
+		var dt: int = st.world.current_tick - t0
+		var said: String = ""
+		if st.command_results.size() > res0:
+			said = String(st.command_results[st.command_results.size() - 1].get("text", ""))
+		print("   %-14s tick %d → %d（+%d）｜結果句＝%s" % [
+			String(case[0]), t0, st.world.current_tick, dt, said])
+		_check("%s：世界恰好 +1 顆（+%d）" % [String(case[0]), dt], dt == 1)
+		_check("%s：結果句出現（非空）" % String(case[0]), said != "")
+		ev._post_combat = false
+		st.teams.erase(7801)
+	await _free_ui(node)
+	_cell("_test_p22_overlay_callsites_advance_one_tick")
+
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
 	print("\n── P19 負對照覆蓋率棘輪 ──")
@@ -2331,6 +2493,16 @@ func _test_p19_control_coverage_ratchet() -> void:
 		n_ui >= CONTROL_FLOOR_UI)
 	_check("★★command_replay_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cr, CONTROL_FLOOR_REPLAY],
 		n_cr >= CONTROL_FLOOR_REPLAY)
+	var n_fp: int = _count_fired("res://scripts/debug/forced_event_panel_bed.gd")
+	print("   forced_event_panel_bed %d（地板 %d）" % [n_fp, CONTROL_FLOOR_FEP])
+	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
+	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
+		n_fp >= CONTROL_FLOOR_FEP)
+	var n_p8: int = _count_fired("res://scripts/debug/press_is_one_tick_bed.gd")
+	print("   press_is_one_tick_bed %d（地板 %d）" % [n_p8, CONTROL_FLOOR_P8])
+	_check("★★母體地板：#8 那支床也數得到非零（%d）" % n_p8, n_p8 > 0)
+	_check("★★press_is_one_tick_bed 的紀錄數沒有往回走（%d >= %d）" % [n_p8, CONTROL_FLOOR_P8],
+		n_p8 >= CONTROL_FLOOR_P8)
 	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
 	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
 	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
