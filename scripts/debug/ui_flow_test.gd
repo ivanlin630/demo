@@ -2327,7 +2327,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 20   # ★+5：P20／P21／P22／P23／★不變量 #10 的 P24 都已實測紅
+const CONTROL_FLOOR_UI: int = 21   # ★+5：P20／P21／P22／P23／★不變量 #10 的 P24 都已實測紅
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -2646,7 +2646,10 @@ func _test_p24_number_keys_never_mean_response() -> void:
 #   ★★★母體地板：列舉到的 mode 數要與 spec 常數相符 ——
 #     否則這一格會在一個【只列舉到一個 mode】的世界裡恆綠。
 # ★這一格的價值不在「A 有沒有誤觸」，在把執法面從一個 mode 擴到全部。
-# 負對照：★尚未點火
+# 負對照：兩支都點過 —— ①把字母鍵搬到 `_input()` 最前面（不分 mode 都吃 A）
+#   ⇒ ★實測【11 個 mode 都會消費回應】（那就是擴面守住的東西的大小）
+#   ②把 `SPEC_UI_MODE_COUNT` 改成 12 ⇒ 母體地板 A 紅（13／12）
+#   ⇒ 已於 feat/letter-key-all-modes（2026-09-30 這一輪） 實測紅
 func _test_p25_letter_key_only_in_interact_mode() -> void:
 	_selftest_gate("_test_p25_letter_key_only_in_interact_mode").noop()
 	print("\n── 不變量 #10 擴面：字母鍵只在 interact 模式有意義 ──")
