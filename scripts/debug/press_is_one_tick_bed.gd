@@ -98,7 +98,7 @@ func _initialize() -> void:
 #   ★失敗的令也會 +1，而「+1」在兩種情形下長得【一模一樣】
 #   ⇒ 所以這一格同時跑一道【會被消費點拒絕】的令，把兩者並排印出來：
 #     那兩行的 tick 增量相同、而 ok 欄不同 ⇒ 卷面自己證明「+1」不足以當判準。
-# 負對照：把咽喉那一行 `request_advance(1)` 拿掉 ⇒ 請求量 0 ⇒ 必紅
+# 負對照：把咽喉那一行 `request_advance(1)` 關掉（`if false`）⇒ 請求量 0｜★blueprint 指定的陽性對照 ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
 func _test_p1_one_press_one_tick() -> void:
 	print("\n── P1 按一下＝一顆 ──")
 	var tri: Array = _fresh()
@@ -153,7 +153,7 @@ func _test_p1_one_press_one_tick() -> void:
 # ══ P2：`unknown_command` 那一支【不推進】════════════════════════════════
 # ★這是我在 HOW 內自己定的微決定（已寫 handback 給 systems 覆核）：
 #   什麼都沒入列 ⇒ 不是「一道令」⇒ 打錯字不該走掉世界的時間。
-# 負對照：把咽喉的條件從 `queued` 改成無條件 ⇒ 未知指令也推一顆 ⇒ 必紅
+# 負對照：把咽喉的條件從 `queued` 改成無條件 ⇒ 未知指令也推一顆 ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
 func _test_p2_unknown_command_does_not_advance() -> void:
 	print("\n── P2 未知指令不推進 ──")
 	var tri: Array = _fresh()
@@ -174,7 +174,7 @@ func _test_p2_unknown_command_does_not_advance() -> void:
 # ══ P3：自動推進中按令 ⇒ 不額外推進（spec §4 P4）═══════════════════════
 # ★★★這一格守的是【例外】：Space／X 正在跑時按的令照舊入列，不把長程推進【踩成 1】。
 #   ★母體地板：先斷言它真的在推進中（否則「沒有被踩掉」在一個沒有推進的世界裡恆綠）。
-# 負對照：把咽喉的 `not is_advancing()` 判斷拿掉 ⇒ 長程請求被踩成 1 ⇒ 必紅
+# 負對照：把咽喉的 `not is_advancing()` 判斷拿掉 ⇒ 長程請求被踩成 1（實測 1／期望 60） ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
 func _test_p3_advancing_is_the_exception() -> void:
 	print("\n── P3 推進中是例外 ──")
 	var tri: Array = _fresh()
@@ -203,7 +203,7 @@ func _test_p3_advancing_is_the_exception() -> void:
 #   ⇒ 所以把逐檔欄位印出來，讓數字自己講。
 # ★★同時斷言【咽喉只有一處】：`sim_bridge.gd` 裡 `request_advance(1)` 只出現一次。
 #   ⇒ 第二處出現＝有人又貼了一次，而那是「兩條推進路徑」那個舊病的復發形狀。
-# 負對照：把 `popup_layer.gd` 的一個呼叫點刪掉 ⇒ 4 → 3 ⇒ 必紅
+# 負對照：把 `popup_layer.gd` 的一個呼叫點換成 `pass` ⇒ 4 → 3 ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
 func _test_p4_one_chokepoint_covers_all_callsites() -> void:
 	print("\n── P4 咽喉母體 ──")
 	var files: Dictionary = {
@@ -252,7 +252,7 @@ func _test_p4_one_chokepoint_covers_all_callsites() -> void:
 #   那是 WHAT 不是 HOW」⇒ 本格【沒有】對「合理」下任何斷言。
 # ★它斷言的只有三件【機械】的事：①20 次真的都送出去了（母體非空）
 #   ②世界沒有崩（tick 走得動、守恆欄位還在）③冷卻欄位的值印出來了。
-# 負對照：把 ABUSE_N 改成 0 ⇒ 母體地板紅（★守的是「真的按了 20 次」）
+# 負對照：★尚未點火（ABUSE_N 改 0 ⇒ 母體地板紅；本輪沒點，因為它擾動的是床自己的常數不是產品）
 func _test_p5_abuse_population() -> void:
 	print("\n── P5 濫按母體（20 次連發；只印不判）──")
 	var tri: Array = _fresh()

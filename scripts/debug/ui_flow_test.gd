@@ -2323,11 +2323,12 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 16   # ★+1：#7 那一格的負對照已實測紅（2026-09-29）
+const CONTROL_FLOOR_UI: int = 17   # ★+2：#7 P20／#8 P21 兩格的負對照都已實測紅（2026-09-29）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
 const CONTROL_FLOOR_FEP: int = 6    # forced_event_panel_bed（#7①③，2026-09-29）
+const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8，2026-09-29；P5 那一格刻意未點火）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
@@ -2380,7 +2381,7 @@ func _test_p20_forced_panel_three_lines() -> void:
 #     否則「期望值用常數算」與「實作用常數算」是兩件事，而只驗前者會讓後者偷偷寫死。
 #   ★★★tick 用 `_bridge.get_current_tick()`（live）不是 `_cached_snapshot`：
 #     本格刻意【不呼 _refresh()】就直接按鍵 —— 若實作讀快照，那份是舊的 ⇒ 會吸到前一格 ⇒ 紅。
-# 負對照：★尚未點火
+# 負對照：三支都點過 —— ①X 改回固定一小時（不吸附）②實作端寫死 60③★改讀 `_cached_snapshot` 的 tick（systems 寫死不准用的那一份，實測吸成 60 而非 53） ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
 func _test_p21_snap_both_directions() -> void:
 	_selftest_gate("_test_p21_snap_both_directions").noop()
 	print("
@@ -2437,6 +2438,11 @@ func _test_p19_control_coverage_ratchet() -> void:
 	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
 	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
 		n_fp >= CONTROL_FLOOR_FEP)
+	var n_p8: int = _count_fired("res://scripts/debug/press_is_one_tick_bed.gd")
+	print("   press_is_one_tick_bed %d（地板 %d）" % [n_p8, CONTROL_FLOOR_P8])
+	_check("★★母體地板：#8 那支床也數得到非零（%d）" % n_p8, n_p8 > 0)
+	_check("★★press_is_one_tick_bed 的紀錄數沒有往回走（%d >= %d）" % [n_p8, CONTROL_FLOOR_P8],
+		n_p8 >= CONTROL_FLOOR_P8)
 	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
 	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
 	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
