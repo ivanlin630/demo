@@ -933,7 +933,9 @@ func get_forced_response_options(state: WorldState) -> Array[String]:
 func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 	var fe: Dictionary = state.player_forced_event
 	if fe.is_empty():
-		return { "ok": false, "msg": "無待處理強制事件" }
+		# ★同 ②′：空事件 ⇒ 靜默（headless 直呼這一支的人拿到同一個語意）
+		return { "ok": false, "msg": "", "silent": true,
+			"code": "forced_response_already_settled" }
 	# ★★★選項人話要在【handler 動世界之前】算：`_accept_join_request` 會把人搬過來,
 	#   而 join 的 label 是「收留（食物 -X,+N 人）」＝讀 **對方隊的人口** ⇒ 事後算得到 +0 人。
 	#   ★實測血證（本輪卷面）：「收留（食物 -0.0,+0 人）」而真實結果是「收留 3 人」。
@@ -1014,8 +1016,20 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 	return result
 
 func resolve_forced_response(state: WorldState, interaction_id: String, response_id: String) -> Dictionary:
+	# ★★★②′（spec §7，2026-09-30）：對一個【已經不存在】的強制事件回應 ⇒ **靜默 no-op**。
+	#   ★為什麼需要這條而不是「天然 no-op 就夠了」：#8 的咽喉只設 `_ticks_remaining=1`，
+	#     真正的 tick 在【下一幀】的 `_process` 才跑 ⇒ 按第一次之後、下一幀之前，
+	#     `_cached_snapshot` 還顯示面板 ⇒ 第二次按會【再入列一道】
+	#     ⇒ 兩道同一顆 tick 被消費：第一道成功、第二道撞到空事件。
+	#   ★★而它【不違反「拒絕禁靜默」】：那條守的是「玩家分不出被拒絕與沒吃到鍵」，
+	#     而這裡玩家【已經看到第一次的結果句了】—— 第二句是同一件事的第二次回音
+	#     （同 P15 那條「同一條指令的回音 ≤ 2 次」）。★★★用戶逐字：
+	#     「我按 T 跳出表單後 還是寫我拒絕事件」—— 那一句就是這條要消掉的東西。
+	#   ★code 仍然具名（不是 missing）⇒ `command_log` 留得住審計軌跡，只是不印給玩家。
 	if state.player_forced_event.is_empty():
-		return {"ok": false, "code": "forced_response_missing", "msg": "no active forced interaction"}
+		return {"ok": false, "code": "forced_response_already_settled",
+			"msg": "", "silent": true}
+	# ★而【id 不符】那一支刻意**不靜默**：那是對【另一個】事件的回應，玩家該知道。
 	if interaction_id != "" and interaction_id != state.player_forced_event_id:
 		return {"ok": false, "code": "forced_response_missing", "msg": "interaction expired or wrong id"}
 	var valid: Array[String] = get_forced_response_options(state)
@@ -1180,7 +1194,13 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 	if from_team == null or pt == null:
 		return { "ok": false, "msg": "隊伍不存在" }
 	match proposal:
-		"alliance", "surrender":
+		# ★★★`propose_alliance` 是 `diplomatic_ai_system.gd:146` 真的會寫的那個字串，
+		#   而它的語意與 `"alliance"` 完全相同 ⇒ 同一支 arm。
+		#   ★★這是【同一個病灶的第二次】：下面那支 arm 的註解記著第一次
+		#     （`demand_tribute` 原只認 `tribute`）⇒ 只加第三個字串等於等第三次
+		#     ⇒ 所以本票同時加一格【異源比對】（寄件端字串集合 A ＼ handler 認得的 B ＝ 指名豁免）
+		#     ⇒ 下一個人加新提案而忘了 handler，那一格會紅。
+		"alliance", "surrender", "propose_alliance":
 			# 雙方皆獨立時 _form_alliance 無效，需先建立勢力
 			if from_team.faction_id == -1 and pt.faction_id == -1:
 				state.create_faction(from_id)   # NPC 為領袖
@@ -1188,6 +1208,19 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
 		"tribute", "demand_tribute":   # _send_diplomacy_message 寫 "demand_tribute"（原只認 "tribute" → 未知提案類型 bug）
 			return _pay_extortion(state, from_id)
+		# ★★★`propose_trade`（`diplomatic_ai_system.gd:149`）：**沒有 handler 是刻意的** ——
+		#   「接受通商提案之後發生什麼」是 WHAT（systems 2026-09-30 裁，已呈報 blueprint）
+		#   ⇒ 本票只把拒絕句改成人話：玩家要看得懂【不是他按錯，是這個功能還沒有】。
+		"propose_trade":
+			return { "ok": false, "msg": "對方提議通商，而你目前還沒有回應通商的方式" }
+	# ★★★注意這裡【沒有】`tribute_offer`，而那是刻意的：
+	#   它的語意是【對方要給你進貢】（`TeamData.TASK_TRIBUTE_OFFER`，由 `interaction_system`
+	#   經 `npc.order_task` 寫進 proposal）⇒ 若把它併進上面那支 `"tribute"` arm，
+	#   會走 `_pay_extortion` ⇒ ★**變成玩家付錢給來進貢的人**。
+	#   ⇒ ★★「把所有字串都加進 match」是一個【看起來像修好】的錯，而它比現在的 bug 更糟：
+	#     現在是收不到貢品，改壞之後是倒付錢。
+	#   ⇒ ★★★守它的是 `forced_event_panel_bed` 那一格（按接受之後玩家 coin 不得減少），
+	#     負對照就是「故意併進去 ⇒ coin 減少 ⇒ 紅」（systems 裁 2026-09-30）。
 	return { "ok": false, "msg": "未知提案類型：%s" % proposal }
 
 func _accept_diplomacy_as_leader(state: WorldState, from_id: int) -> Dictionary:

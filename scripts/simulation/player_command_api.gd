@@ -82,7 +82,11 @@ func respond_to_forced(state: WorldState, interaction_id: String, response_id: S
 	if not pre.is_empty(): return pre
 	var result := _cmd_sys.resolve_forced_response(state, interaction_id, response_id)
 	if not result.get("ok", false):
-		return PlayerApiMapper.map_command_result(false, result.get("code", "action_unavailable"), result.get("msg", ""), {})
+		# ★★②′：`silent` 要【透傳】—— `map_command_result` 只留 ok/code/message/payload
+		#   ⇒ 不塞進 payload 的話這個旗子會在這一行【安靜地消失】，而消費點永遠看不到它。
+		var _pl: Dictionary = {"silent": true} if bool(result.get("silent", false)) else {}
+		return PlayerApiMapper.map_command_result(false,
+			result.get("code", "action_unavailable"), result.get("msg", ""), _pl)
 	if result.get("ok", false):
 		return PlayerApiMapper.map_command_result(true, "ok", result.get("msg", ""),
 			{"forced_interaction_resolved": true, "refresh_required": true})

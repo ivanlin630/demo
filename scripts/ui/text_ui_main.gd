@@ -721,7 +721,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
 	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
-	"interact":      "[1-9]選目標/行動 [Esc]返回",
+	"interact":      "[1-9]選目標/行動 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
 	"faction":       "[A]目標 [B]徵收率 [G]徵用國庫 [C]離開 [D]背叛 [E]解散 [1-9]下令成員 [F/Esc]關閉",
@@ -1366,6 +1366,25 @@ func _handle_interact_mode(keycode: int) -> void:
 		_interact_page = maxi(0, _interact_page - 1); _refresh(); return
 	if keycode == KEY_PERIOD:
 		_interact_page += 1; _refresh(); return
+	# ★★★不變量 #10（systems 2026-09-30）：【強制事件回應】與【自家隊動作】
+	#   不得共用同一段數字區間 —— 一個按鍵的意義不得由一個會在同一顆 tick 內改變的計數決定。
+	#   ★血證：面板消失（fe_count 2 → 0）之後再按同一個 KEY_1，實測執行了
+	#     establish_faction（建國）＋ train（扣 30 coin）。
+	#   ⇒ 強制事件回應改走【專屬字母鍵 A..Z】，而數字鍵 1–9 只給自家隊動作與目標。
+	#   ★★這不是 debounce（不吃按鍵、不改模式）：兩個母體各有自己的鍵空間
+	#     ⇒ 母體大小怎麼變，都不會讓某個鍵換意思。
+	#   ★★★上限＝26（A..Z）。choose_heir 的候選數若超過 26，第 27 個【按不到】——
+	#     那是一個真的限制，寫在這裡而不是假裝不存在；分頁要等它真的發生再做。
+	if _interact_target < 0 and keycode >= KEY_A and keycode <= KEY_Z:
+		var fi_k: Dictionary = _cached_snapshot.get("forced_interaction", {})
+		var fr_k: Array = fi_k.get("responses", [])
+		var li: int = keycode - KEY_A
+		if not String(fi_k.get("interaction_id", "")).is_empty() and li < fr_k.size():
+			var ra: Dictionary = fr_k[li].get("command_args", {})
+			var rr: Dictionary = _bridge.command_player("respond_to_forced", ra)
+			_set_feedback(rr.get("ok", true), rr.get("message", ""))
+			_refresh()
+		return
 	# 數字鍵 1–9（含頁偏移）
 	if keycode < KEY_1 or keycode > KEY_9:
 		return
@@ -1442,26 +1461,16 @@ func _handle_interact_mode(keycode: int) -> void:
 		return
 
 	# ── 目標選擇階段 ──
-	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
-	var fi_responses: Array = fi.get("responses", [])
-	var fe_count: int = fi_responses.size()
-
-	# forced_event 回應
-	if not fi.get("interaction_id", "").is_empty() and num < fe_count:
-		var resp_args: Dictionary = fi_responses[num].get("command_args", {})
-		var result: Dictionary = _bridge.command_player("respond_to_forced", resp_args)
-		# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
-		#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
-		#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
-		#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
-		#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
-		_set_feedback(result.get("ok", true), result.get("message", ""))
-		_refresh()
-		return
+	# ★★★不變量 #10：這裡【不再】有 forced 分支，也不再有 `fe_count` 偏移 ——
+	#   強制事件回應在上面的字母鍵那一段處理完就 return 了。
+	#   ★舊寫法（`num < fe_count` 之後接 self-actions）就是那條不變量禁止的形狀：
+	#     計數歸零的那一瞬間，全部數字鍵一起換了意義。
+	#   ★★而【刪掉偏移】是這一刀的本體：留著 `- fe_count` 就等於留著那個耦合，
+	#     只是把它藏得更深（面板在的時候數字鍵會整段位移）。
 
 	# P4-2:self/原地動作（hunt 等,直接執行不需選隊）
 	var self_acts: Array = _interact_action_split()["self"]
-	var self_idx: int = num - fe_count
+	var self_idx: int = num
 	if self_idx >= 0 and self_idx < self_acts.size():
 		var sa: Dictionary = self_acts[self_idx]
 		if not sa.get("enabled", true):
@@ -1483,7 +1492,7 @@ func _handle_interact_mode(keycode: int) -> void:
 		return
 
 	# pending_targets 選擇
-	var pending_idx: int = num - fe_count - self_acts.size()
+	var pending_idx: int = num - self_acts.size()
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	if pending_idx >= 0 and pending_idx < pending_tgts.size():
 		_interact_target = pending_tgts[pending_idx].get("target_id", -1)
@@ -1555,8 +1564,12 @@ func _build_interact_str() -> String:
 		for extra in [fi.get("consequence", ""), fi.get("no_response", "")]:
 			if String(extra) != "":
 				lines.append("   %s" % String(extra))
+		# ★★★不變量 #10：回應用【專屬字母鍵】列在這裡，★不進下面那個數字清單
+		#   ⇒ 玩家的「1」永遠是自家隊動作的第一項，面板在不在都一樣。
+		var _ri: int = 0
 		for r in fi.get("responses", []):
-			items.append("⚠ %s" % r.get("label", "?"))
+			lines.append("   [%s] %s" % [String.chr(65 + _ri), r.get("label", "?")])
+			_ri += 1
 	for sa in _interact_action_split()["self"]:   # P4-2:self/原地動作(hunt 等)直接可選,不需先選隊
 		var en: bool = sa.get("enabled", true)
 		items.append("%s%s" % [sa.get("label", sa.get("action_id", "")), "" if en else "（不可）"])
