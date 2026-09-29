@@ -20,7 +20,7 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 
 ## 怎麼跑
 
-**一律用 wrapper**(強制 UTF-8,避免 CP950 亂碼;並自動蓋產地/beacon 戳):
+**跑床／測試一律用 wrapper**(強制 UTF-8,避免 CP950 亂碼;並自動蓋產地/beacon 戳)；★**互動玩例外**(理由見下方②那一組註解)：
 
 ```powershell
 # ①先重建主 dir 的類別快取（新增 class_name 檔或 merge 之後必跑）
@@ -28,7 +28,10 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 .\tools\godot.ps1 --headless --import
 
 # ②玩(玩家文字介面；main_scene=TextUI.tscn)—— ★先跑完上面那行 --import
-#   ★★本行是【直呼 exe】而不是 wrapper —— 理由待確認(已列問題給藍圖)；其餘一律用 wrapper
+#   ★★本行是【直呼 exe】而不是 wrapper，理由兩個（藍圖核、systems 複核）：
+#   ①wrapper 有硬 timeout（godot.ps1:84 預設 360s）⇒ 一玩就超過六分鐘會被砍
+#   ②wrapper 把 stdout/stderr 導到暫存檔（:300 -RedirectStandardOutput）等結束才吐
+#     ⇒ ★玩家看不到【即時的】SCRIPT ERROR，而用戶兩輪玩測的回報靠的就是即時看到那些行
 .\tools\godot\Godot_v4.2.2-stable_win64.exe --path A:\GDS\demo
 
 # 觀測 GUI(主要看世界用):god-view 地圖+事件 ticker+隊伍 inspect+速度四檔
