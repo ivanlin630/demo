@@ -41,8 +41,19 @@ const SPEC_ARRIVAL_SITES: int = 8
 #     而改人話之後 `propose_trade` 進了 B ⇒ 差集只剩一個 ⇒ 集合相等紅。
 #     ★★★紅得對：那個紅說的是「你的分類法把兩件事當成一件」。
 const SPEC_UNKNOWN_OK: Array = ["tribute_offer"]
-const SPEC_REFUSED_BY_DESIGN: Array = ["propose_trade"]
-const SPEC_REFUSAL_SENTENCE: String = "對方提議通商，而你目前還沒有回應通商的方式"
+# ★★★2026-09-30 通商票之後這一組的語意【變了】，而我改斷言不刪格：
+#   ~~`SPEC_REFUSED_BY_DESIGN = ["propose_trade"]`（認得而刻意只回一句人話拒絕）~~
+#   ~~`SPEC_REFUSAL_SENTENCE = "對方提議通商，而你目前還沒有回應通商的方式"`~~
+#   ⇒ 藍圖裁 (b)：玩家接受通商【走 NPC 那一段同一份 code】⇒ 那一支 arm 不再只回一句話，
+#     它真的做事（`DiplomaticAiSystem.apply_trade_accept`）。
+#   ★而舊斷言【紅得對】：它守的行為被換掉了 ⇒ 這一票改的就是它
+#     （抓到它的是「改完守衛參數要重跑那支床本身」那條紀律，2026-09-30 立的）。
+#   ★★留著劃掉的兩行：下一個人才看得到「這裡曾經是一句人話拒絕」，
+#     而不是以為它從來就是做事的。
+const SPEC_HANDLED_BY_SHARED_CODE: Array = ["propose_trade"]
+# ★那一支 arm 必須呼【共用的那一份】而不是自己寫 —— 判準指到函式名，不指到效果
+#   （指到效果就會變成「玩家與 NPC 效果相同」那種同源恆真）。
+const SPEC_SHARED_FN: String = "apply_trade_accept"
 # ★三點各自的終端 print token（★認 token 不認整句：措辭改了不該誤報）
 const EXPECT_PRINT_TOKENS: Array = [
 	"forced_event 到達", "forced_event 回應", "forced_event 超時自動拒絕",
@@ -362,22 +373,28 @@ func _test_p9_proposal_strings_cross_source() -> void:
 	want.sort()
 	print("   ★A ＼ B ＝ %s（①完全不認得而正確 ＝ %s）" % [str(diff), str(want)])
 	_check("★★★A ＼ B 與【①完全不認得】那一組集合相等（多一個少一個都紅）", diff == want)
-	# ══ ②認得而刻意只回人話拒絕的那一組：斷言【那句人話真的在】
-	for e0 in SPEC_REFUSED_BY_DESIGN:
-		print("   ②`%s`：在 B 裡＝%s（handler 認得它）" % [String(e0), str(b_set.has(String(e0)))])
-		_check("②`%s` handler 認得它（否則它該在差集裡而不是這一組）" % String(e0),
+	# ══ ②認得【而且真的做事】的那一組（2026-09-30 通商票之後）
+	for e0 in SPEC_HANDLED_BY_SHARED_CODE:
+		print("   二：`%s` 在 B 裡＝%s（handler 認得它）" % [String(e0), str(b_set.has(String(e0)))])
+		_check("二：`%s` handler 認得它（否則它該在差集裡而不是這一組）" % String(e0),
 			b_set.has(String(e0)))
-	_check("②拒絕句是人話而不是「未知提案類型」（逐字比 spec 給的那句）",
-		pcs.contains(SPEC_REFUSAL_SENTENCE))
+	# ★斷言那一支 arm 呼【共用那一份】—— 抽出 arm 的本體再找函式名，不掃整個檔
+	var arm_at: int = pcs.find("\"propose_trade\":")
+	_check("★母體地板：找得到 `propose_trade` 那一支 arm（找不到＝本條不可判）", arm_at != -1)
+	var arm_body: String = pcs.substr(arm_at, 260) if arm_at != -1 else ""
+	print("   二：那一支 arm 有沒有呼 `%s` ＝ %s" % [
+		SPEC_SHARED_FN, str(arm_body.contains(SPEC_SHARED_FN))])
+	_check("★★★二：那一支 arm 呼【共用的那一份】（不是自己寫一份）",
+		arm_body.contains(SPEC_SHARED_FN))
 	# ══ 兩組的理由都必須在檔裡指名（不是裸清單）
 	var self_src: String = FileAccess.get_file_as_string(
 		"res://scripts/debug/forced_event_panel_bed.gd")
-	for e in (want + SPEC_REFUSED_BY_DESIGN):
+	for e in (want + SPEC_HANDLED_BY_SHARED_CODE):
 		_check("豁免 `%s` 在本檔有指名理由" % String(e),
 			self_src.contains("`" + String(e) + "`"))
 	# ══ defer token 狀態（★defers.tsv 是 systems 的檔 ⇒ 本格【印】不【改】）
 	var defers: String = FileAccess.get_file_as_string("res://docs/process/defers.tsv")
-	for e2 in (want + SPEC_REFUSED_BY_DESIGN):
+	for e2 in (want + SPEC_HANDLED_BY_SHARED_CODE):
 		print("   defers.tsv 有 `%s` 的 token 嗎 = %s" % [
 			String(e2), str(defers.contains(String(e2)))])
 	print("   ★上面兩行是【請求】不是斷言：defers.tsv 的 owner 是 systems（流程 doc）")

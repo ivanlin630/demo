@@ -121,7 +121,7 @@ func _initialize() -> void:
 # ★母體地板三道：①接受前的名聲值印出來（不然「+0.05」沒有主詞）
 #   ②`relations`／`relation_edges` 在【動之前】的內容也印出來（空的話「沒變」恆真）
 #   ③接受真的成立（ok=true）—— 失敗的接受當然什麼都不會動
-# 負對照：把 `apply_trade_accept` 的本體換成 `pass` ⇒ 名聲不動 ⇒ 必紅
+# 負對照：把 `apply_trade_accept` 的本體換成 `pass` ⇒ 雙向名聲各 +0.0000 ⇒ 已於 feat/trade-accept-same-code（2026-09-30 這一輪） 實測紅
 func _test_p1_accept_writes_reputation_only() -> void:
 	print("\n── P1 接受＝只寫名聲 ──")
 	var pair: Array = _fresh()
@@ -179,7 +179,7 @@ func _test_p1_accept_writes_reputation_only() -> void:
 #   這一格改問一個可以獨立改變的事實：**有幾個地方呼它**。
 #   ⇒ 第三個出現 ＝ 有人又抄了一份真相 ⇒ 紅。
 # ★母體地板：定義處真的找得到（找不到的話「呼叫點 2 個」可能是兩個錯字）。
-# 負對照：在任一檔多加一個呼叫 ⇒ 3 個 ⇒ 必紅
+# 負對照：在玩家 arm 多加一個呼叫 ⇒ 呼叫點 3 個 ⇒ 已於 feat/trade-accept-same-code（2026-09-30 這一輪） 實測紅
 func _test_p2a_exactly_two_callsites() -> void:
 	print("\n── P2(a) 呼叫點恰好 2 個 ──")
 	var files: Array = [
@@ -216,7 +216,7 @@ func _test_p2a_exactly_two_callsites() -> void:
 #   ⇒ 係數的字面【從 spec 常數取】而不是我手抄：常數住在 `DiplomaticAiSystem.TRADE_ACCEPT_REP`
 #     ⇒ ★★兩邊可以各自改（有人改係數 ⇒ 這一格用【新值】去 grep）⇒ 真比較。
 # ★母體地板：那個係數字面真的不是空字串（空的話「找不到它」恆真）。
-# 負對照：在玩家檔裡寫一行 `pt.update_reputation(...)` ⇒ 必紅
+# 負對照：讓玩家 arm 自己寫一行 `pt.update_reputation(...)` ⇒ 那一支 arm 出现 1 次 ⇒ 已於 feat/trade-accept-same-code（2026-09-30 這一輪） 實測紅
 func _test_p2b_player_file_has_no_copy() -> void:
 	print("\n── P2(b) 玩家檔沒有複製那份真相 ──")
 	var src: String = _code_only(FileAccess.get_file_as_string(
@@ -259,7 +259,7 @@ func ", 10)
 # ★★★裁定否決 (c) 的那句話就是這一格要執法的：**按了什麼都沒發生＝禁靜默的鏡像**。
 #   ⇒ 拒絕【零效果】是對的，而【沒有一句話】不對。
 # ★母體地板：先斷言拒絕真的被處理（forced_event 被清掉），否則「狀態沒變」恆真。
-# 負對照：把拒絕那一支的 msg 改成空字串 ⇒ 靜默 ⇒ 必紅
+# 負對照：把拒絕那一支的 msg 改成空字串 ⇒ 靜默（禁靜默的鏡像） ⇒ 已於 feat/trade-accept-same-code（2026-09-30 這一輪） 實測紅
 func _test_p3_refuse_is_zero_effect_but_speaks() -> void:
 	print("\n── P3 拒絕＝零效果但有人話 ──")
 	var pair: Array = _fresh()
@@ -294,7 +294,7 @@ func _test_p3_refuse_is_zero_effect_but_speaks() -> void:
 #   方向相反的提案（指名豁免）⇒ **確認仍綠，不要放寬它**。
 # ★★而本格【不重寫那個比對】——它去讀同格票那支床的常數，確認豁免集合沒有變大。
 #   ⇒ 為什麼不重跑比對：那會變成第二份判準，而兩份判準會漂。
-# 負對照：把 `SPEC_UNKNOWN_OK` 多塞一個字串 ⇒ 必紅
+# 負對照：把 `SPEC_UNKNOWN_OK` 多塞 `propose_trade` ⇒ 豁免集合被放寬 ⇒ 已於 feat/trade-accept-same-code（2026-09-30 這一輪） 實測紅
 func _test_p4_proposal_crosscheck_still_green() -> void:
 	print("\n── P4 提案字串比對沒有被放寬 ──")
 	var src: String = FileAccess.get_file_as_string(
