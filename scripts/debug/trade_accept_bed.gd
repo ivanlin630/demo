@@ -306,7 +306,7 @@ func _test_p4_proposal_crosscheck_still_green() -> void:
 		var t: String = l.strip_edges()
 		if t.begins_with("const SPEC_UNKNOWN_OK"):
 			unknown_ok = t
-		elif t.begins_with("const SPEC_REFUSED_BY_DESIGN"):
+		elif t.begins_with("const SPEC_HANDLED_BY_SHARED_CODE"):
 			refused = t
 	print("   %s" % unknown_ok)
 	print("   %s" % refused)
@@ -314,7 +314,14 @@ func _test_p4_proposal_crosscheck_still_green() -> void:
 		unknown_ok != "" and refused != "")
 	_check("★★★「完全不認得」那一組仍然只有那個方向相反的提案（沒有被放寬）",
 		unknown_ok.contains("tribute_offer") and not unknown_ok.contains("propose_trade"))
-	_check("★★`propose_trade` 仍在「認得而刻意只回人話」那一組的位置上被指名",
+	# ★★★2026-09-30 同一顆 commit 裡那一組被改名了（`SPEC_REFUSED_BY_DESIGN`
+	#   → `SPEC_HANDLED_BY_SHARED_CODE`，語意從「只回人話」變成「真的做事」）
+	#   ⇒ 而本格第一版 grep 的是【舊名字】⇒ 找不到 ⇒ 母體地板紅。
+	#   ★那個紅是對的，而它說的話很精確：「那支床被改過形狀，本格不可判」。
+	#   ★★教訓：**跨床引用【別人的常數名】就是第二份記錄** ——
+	#     改名的人不會知道有人在 grep 它。本格因此把「為什麼引用它」寫在這裡，
+	#     而它守的東西（豁免集合沒有被放寬）比那個名字重要。
+	_check("★★`propose_trade` 仍在「認得而真的做事」那一組被指名（改名後的那一組）",
 		refused.contains("propose_trade"))
 	print("   ★邊界：本格【不重跑】那個異源比對 —— 重跑等於第二份判準，而兩份判準會漂。")
 	print("     它只確認【豁免集合沒有變大】；比對本身由 `forced-event-panel` 那一格負責。")
