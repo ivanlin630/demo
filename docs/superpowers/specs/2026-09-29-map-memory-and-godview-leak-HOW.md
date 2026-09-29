@@ -188,7 +188,23 @@ P9 [格寬不變] 加了據點記號之後，每格仍然是 **4 字元**
 **⇒ 裁定**：`in_vision` 必須呼 `VisionSystem.vision_range(state, player_team)`
 （★它是**純讀**，不寫 state ⇒ `render-no-write` 仍然成立）；
 ★★`:4` 那一行要麼刪掉、要麼把註解改成真話（「這是基底值，不是有效半徑」）。
-★★★**誠實限**：日夜倍率是 sim 傳進來的，renderer 拿不到 ⇒ 它只能用預設 1.0
+★★★**訂正（blueprint 收窄、我核完）：那個誠實限【不必存在】**——
+  我核了整條鍵，**全部是純函式**：
+```
+day_night_system.gd:31 get_vision_mult(state)  → get_time_period(state)
+  → get_time_of_day(state) = float(state.world.current_tick % TICKS_PER_DAY) / TICKS_PER_DAY
+★全檔零寫入（唯二的 `.append` 在別的函式裡、對局部陣列）
+⇒ ★★**renderer 拿得到它** ⇒ 不必用預設 1.0、也不必在圖例旁寫落差
+```
+  ★而有兩件 HOW 要釘：
+   ①`sim_bridge.gd` 目前**沒有日夜出口**（grep `day_night`／`vision_mult`／`time_period` 零命中）
+     ⇒ ★★加**一支唯讀 accessor**（例 `get_vision_mult()`），
+       ★**不得讓 renderer 直接伸進 `_state`** —— 同【單一咽喉】那條
+   ②`DayNightSystem` 的方法是**非 static**（需實例）
+     ⇒ 用 runner 已有的 `_day_night_system` 那一份，★**不要每幀 `new()`**（它無狀態，
+       所以 new 不會錯——但那是【每幀配置一個物件】，沒理由）
+★舊的誠實限（以下一行）已作廢，留它是為了記住它曾經存在：
+~~日夜倍率是 sim 傳進來的，renderer 拿不到 ⇒ 它只能用預設 1.0~~
   ⇒ 那一段差要**寫在圖例旁邊或面板裡**，不要默默吃掉。
 
 ### 驗收補四格（前三是 blueprint 的、第四是本節抳出的）
