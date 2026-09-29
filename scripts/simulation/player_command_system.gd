@@ -1194,7 +1194,13 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 	if from_team == null or pt == null:
 		return { "ok": false, "msg": "隊伍不存在" }
 	match proposal:
-		"alliance", "surrender":
+		# ★★★`propose_alliance` 是 `diplomatic_ai_system.gd:146` 真的會寫的那個字串，
+		#   而它的語意與 `"alliance"` 完全相同 ⇒ 同一支 arm。
+		#   ★★這是【同一個病灶的第二次】：下面那支 arm 的註解記著第一次
+		#     （`demand_tribute` 原只認 `tribute`）⇒ 只加第三個字串等於等第三次
+		#     ⇒ 所以本票同時加一格【異源比對】（寄件端字串集合 A ＼ handler 認得的 B ＝ 指名豁免）
+		#     ⇒ 下一個人加新提案而忘了 handler，那一格會紅。
+		"alliance", "surrender", "propose_alliance":
 			# 雙方皆獨立時 _form_alliance 無效，需先建立勢力
 			if from_team.faction_id == -1 and pt.faction_id == -1:
 				state.create_faction(from_id)   # NPC 為領袖
@@ -1202,6 +1208,19 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
 		"tribute", "demand_tribute":   # _send_diplomacy_message 寫 "demand_tribute"（原只認 "tribute" → 未知提案類型 bug）
 			return _pay_extortion(state, from_id)
+		# ★★★`propose_trade`（`diplomatic_ai_system.gd:149`）：**沒有 handler 是刻意的** ——
+		#   「接受通商提案之後發生什麼」是 WHAT（systems 2026-09-30 裁，已呈報 blueprint）
+		#   ⇒ 本票只把拒絕句改成人話：玩家要看得懂【不是他按錯，是這個功能還沒有】。
+		"propose_trade":
+			return { "ok": false, "msg": "對方提議通商，而你目前還沒有回應通商的方式" }
+	# ★★★注意這裡【沒有】`tribute_offer`，而那是刻意的：
+	#   它的語意是【對方要給你進貢】（`TeamData.TASK_TRIBUTE_OFFER`，由 `interaction_system`
+	#   經 `npc.order_task` 寫進 proposal）⇒ 若把它併進上面那支 `"tribute"` arm，
+	#   會走 `_pay_extortion` ⇒ ★**變成玩家付錢給來進貢的人**。
+	#   ⇒ ★★「把所有字串都加進 match」是一個【看起來像修好】的錯，而它比現在的 bug 更糟：
+	#     現在是收不到貢品，改壞之後是倒付錢。
+	#   ⇒ ★★★守它的是 `forced_event_panel_bed` 那一格（按接受之後玩家 coin 不得減少），
+	#     負對照就是「故意併進去 ⇒ coin 減少 ⇒ 紅」（systems 裁 2026-09-30）。
 	return { "ok": false, "msg": "未知提案類型：%s" % proposal }
 
 func _accept_diplomacy_as_leader(state: WorldState, from_id: int) -> Dictionary:
