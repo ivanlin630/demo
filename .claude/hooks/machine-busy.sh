@@ -23,6 +23,30 @@ set -u
 #   ★血證：他寫 `machine-busy.sh; <指令>` —— ★★那個 `;` 讓檢查【只是印字】，
 #     而指令照樣跑上我的電池。⇒ ★★★「回傳碼 1」只有在呼叫端【接了】它的時候才算擋。
 #   ⇒ 所以把「要記得用 && 或 if」換成【本支自己執行那個指令】：★規矩變成會擋的東西。
+
+# ★★★ 2026-09-30：`kill -0` 在 Git Bash **看不到 Windows 行程** ⇒ 舊版的存活判準
+#   【永遠回「已不在」】⇒ 那一整支分枝從來沒有保護過任何人（沒接電的閘）。
+#   血証：systems 的電池 PID 18928 用 PowerShell 驗得到、而本檔報「已不在」⇒ 旗被誤清。
+#   ★而它的失效方向是【永遠說死】⇒ 與「真的没人在跑」在畫面上完全一樣。
+#   ★★上游一半：旗里的 pid 若是 bash 的 `$$`，任何 Windows 工具都解不開
+#     ⇒ 寫旗那一端要改成 `/proc/$$/winpid`（登記在 systems 待辦，merge-gates.sh 跑完再改）。
+_mb_alive() {
+  local p="${1:-}"
+  [ -n "$p" ] || return 1
+  kill -0 "$p" 2>/dev/null && return 0          # bash 內部 pid
+  tasklist //NH //FI "PID eq $p" 2>/dev/null | grep -qE "[[:space:]]${p}[[:space:]]" && return 0   # Windows pid
+  return 1
+}
+
+# ★自檢（兩個方向都要，否則它只是另一個永遠給同一個答案的守衛）
+if [ "${1:-}" = "--selfcheck" ]; then
+  _w="$(cat /proc/$$/winpid 2>/dev/null)"
+  _rc=0
+  if _mb_alive "${_w:-0}"; then echo "[machine-selfcheck] ✓ 陽性：自己的 winpid ${_w} 判為活"; else echo "[machine-selfcheck] ✗ 陽性失效：winpid ${_w} 被判死"; _rc=1; fi
+  if _mb_alive 999999; then echo "[machine-selfcheck] ✗ 陰性失效：不存在的 999999 被判為活"; _rc=1; else echo "[machine-selfcheck] ✓ 陰性：999999 判為死"; fi
+  exit $_rc
+fi
+
 _mb_cmd_mode=0
 if [ "${1:-}" = "--" ]; then _mb_cmd_mode=1; shift; fi
 _gc="$(git rev-parse --git-common-dir 2>/dev/null || echo .git)"
@@ -48,7 +72,7 @@ while IFS= read -r _wt; do
   pid=$(awk '{print $1; exit}' "$FLAG" 2>/dev/null)
   rest=$(awk '{$1=""; print; exit}' "$FLAG" 2>/dev/null)
   _where="${FLAG#$_root/}"
-  if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then
+  if [ -n "${pid:-}" ] && _mb_alive "$pid"; then
     echo "[machine] ⛔ BUSY：電池在跑（PID $pid${rest:+ —$rest}）"
     echo "[machine]   ⇒ 標記：$_where"
     echo "[machine]   ⇒ ★★這一格【不看 Godot 行程數】—— 電池在兩支床之間那個數是 0"
@@ -74,7 +98,7 @@ if [ "${n:-0}" != "0" ]; then
     for _bf in "$_mb_bdir"/*.txt; do
       [ -f "$_bf" ] || continue
       _bp=$(basename "$_bf" .txt)
-      if kill -0 "$_bp" 2>/dev/null; then
+      if _mb_alive "$_bp"; then
         _mb_ours=$((_mb_ours+1))
         echo "[machine]     ・我們的：$(head -1 "$_bf")"
       else
