@@ -7,26 +7,52 @@ extends SceneTree
 #   ⇒ 用戶逐字：「玩家的介面就是按啥做啥」。
 #
 # ★★掛鉤位置是 systems 寫死的：`SimBridge.command_player()` 這一個咽喉，
-#   不在 UI 的呼叫點上。★而本床的 P4 把【那個咽喉涵蓋幾個呼叫點】印成母體 ——
-#   理由是 spec §1① 的數字（36）低估了它自己：活的呼叫點是 45 個。
+#   不在 UI 的呼叫點上。★而本床的 P4 把【那個咽喉涵蓋幾個呼叫點】印成母體。
+# ★★★母體 ＝【從主場景可達的 UI 檔】，而它是**掃出來的**不是我分類的。
+#   ★這一欄訂正過【兩次】，而第二次錯的是我自己：
+#     ·systems 的 spec 寫 36（只數了 text_ui_main 一個檔）
+#     ·我回報 45（36＋encounter_view 5＋popup_layer 4）——★而 popup_layer **不是活的**：
+#       它只被 `scenes/Main.tscn`（整棵死樹）實例化、`main.gd:13` 引用，
+#       `text_ui_main` 一次都沒有碰它。
+#     ·真值 ＝ **41**（text_ui_main 36 ＋ encounter_view 5）
+#   ⇒ ★★我的錯法：拿「`text_ui_main:156` 動態 new」當活性判準，而那條我【只對
+#     encounter_view 查過】，popup_layer 我寫「同上」**沒有實際查**
+#     ⇒ 一張填滿的表不代表分類法對，只代表每列都找到了一個格子。
+#   ⇒ ★★★所以本格不再吃我寫的分類：它從 `project.godot` 的 `run/main_scene` 出發做
+#     可達性閉包，而斷言是【指名】不是【數數】（數數那次 77 就騙過一支閘）。
 #
 # ★誠實限：
 #   1. 吸附（X／Space 停在整點／隔日）在 `text_ui_main._snap_to()` ⇒ 需要 UI 節點
 #      ⇒ 那兩格在 `ui_flow_test`（P8 ＋ P21 兩向），不在這裡。
 #   2. P5 濫按【只印母體不下判斷】：「20 次之後對方該怎樣算合理」是 WHAT
 #      ⇒ 卷面交 blueprint 判（spec §5③ 逐字）。
+#   3. ★那 9 個（encounter_view 5 ＋ popup_layer 4）的【新行為】不在本床：
+#      P4 只數它們的存在。encounter_view 那 5 個的行為格在 `ui_flow_test`（P22），
+#      而 popup_layer 那 4 個【沒有格也不該有】—— 它們不可達，按不到。
 
 var _errors: int = 0
 var _cells_ran: Array = []
 
-# ★來自 spec §1① 的數字 ——★★而它是【被我訂正過】的：spec 寫 36，實際活的是 45。
-#   欄目逐檔寫出來，這樣下一個人看得到 36 是從哪裡來的、少算了什麼。
+
+# ★★★指名：從主場景可達的 UI 檔 —— 一支都不多不少。
+#   ★每一支的【活著的理由】逐支獨立核過（file:line），而不是把掃描結果抄進來：
+#     ·`text_ui_main.gd`      ＝ `TextUI.tscn` 的腳本（project.godot 的 run/main_scene）
+#     ·`encounter_view.gd`    ＝ `text_ui_main.gd:156` 動態 `load()`
+#     ·`sim_bridge.gd`        ＝ `class_name SimBridge`，text_ui_main 整支在用
+#     ·`team_ui_helper.gd`    ＝ `TeamUiHelper` 在 text_ui_main 有 5 處非註解命中
+#     ·`ui_pages.gd`          ＝ `UiPages` 在 text_ui_main 有 5 處非註解命中
+#     ·`text_map_renderer.gd` ＝ `sim_bridge.gd:182` 呼 `TextMapRenderer.render()`
+#       ★★它在 text_ui_main 裡【0 命中】—— 經第二層才到 ⇒ 這正是要做閉包不做單層的理由
+#   ★★後四支的 `command_player` 呼叫點都是 0；`sim_bridge` 那 1 個是
+#     `refresh_interaction_targets()` 的內部自呼（R² 核過 route 進咽喉、不是繞過）
+#     ⇒ 玩家按得到的母體 ＝ 36 ＋ 5 ＝ 41。
+const SPEC_LIVE_UI_FILES: Array = ["encounter_view.gd", "sim_bridge.gd", "team_ui_helper.gd",
+	"text_map_renderer.gd", "text_ui_main.gd", "ui_pages.gd"]
+const SPEC_CALLSITES_BRIDGE_SELF: int = 1   # ★sim_bridge 內部自呼（不是玩家按得到的呼叫點）
 const SPEC_CALLSITES_TEXT_UI: int = 36      # spec §1① 逐字那一個
-const SPEC_CALLSITES_ENCOUNTER: int = 5     # ★text_ui_main:156 動態 new 的活 overlay
-const SPEC_CALLSITES_POPUP: int = 4         # ★同上（裝備／取存物品）
-const SPEC_CALLSITES_DEAD_MAIN: int = 10    # ☠Main.tscn 死樹（不算在活母體裡）
-const SPEC_LIVE_CALLSITES: int = SPEC_CALLSITES_TEXT_UI + SPEC_CALLSITES_ENCOUNTER \
-	+ SPEC_CALLSITES_POPUP
+const SPEC_CALLSITES_ENCOUNTER: int = 5     # ★text_ui_main:156 動態 load 的活 overlay
+# ★玩家按得到的呼叫點 ＝ 活集合的呼叫點 − bridge 自呼那一個
+const SPEC_LIVE_CALLSITES: int = SPEC_CALLSITES_TEXT_UI + SPEC_CALLSITES_ENCOUNTER
 const ABUSE_N: int = 20                     # spec §4 P3：同一分鐘內連發幾次
 
 const EXPECTED_CELLS: Array = [
@@ -195,56 +221,172 @@ func _test_p3_advancing_is_the_exception() -> void:
 	_cell("_test_p3_advancing_is_the_exception")
 
 
-# ══ P4：一個咽喉涵蓋幾個呼叫點（母體，★含我對 spec 的訂正）═══════════════
-# ★★★為什麼要有這一格：spec §1① 寫「36 個呼叫點 ⇒ 一個位置涵蓋 36 個」，
-#   而實際【活著的】是 45 個（encounter_view 5 ＋ popup_layer 4 也是活 overlay，
-#   由 `text_ui_main:156` 動態 new）。
-#   ⇒ ★那個低估【不改變做法】（掛咽喉仍然對），但它會讓下一個人以為母體只有一個檔
-#   ⇒ 所以把逐檔欄位印出來，讓數字自己講。
-# ★★同時斷言【咽喉只有一處】：`sim_bridge.gd` 裡 `request_advance(1)` 只出現一次。
-#   ⇒ 第二處出現＝有人又貼了一次，而那是「兩條推進路徑」那個舊病的復發形狀。
-# 負對照：把 `popup_layer.gd` 的一個呼叫點換成 `pass` ⇒ 4 → 3 ⇒ 已於 feat/press-is-one-tick（2026-09-29 這一輪） 實測紅
+# ══ P4：咽喉涵蓋幾個呼叫點（母體＝【掃出來的可達集合】）═══════════════════
+# ★★★本格的形狀是被兩次錯誤逼出來的（見檔頭那段）：數字訂正了兩次，
+#   而兩次的錯法一樣 —— **用眼睛分類，然後把分類寫成常數**。
+#   ⇒ 所以活性在這裡是【掃出來的】：從 `project.godot` 的 `run/main_scene` 做可達性閉包。
+# ★★斷言是【指名】不是【數數】：集合雙向相等（多一支／少一支都紅）。
+#   數數那種判準 2026-09-23 被「行數 77」騙過一次（兩邊數字相等而集合不同）。
+# ★★★而死樹那一欄【必印】：它是「為什麼 45 是錯的」的唯一證據 ——
+#   只看到 41 的人會以為那些呼叫點不存在，而它們存在、只是沒有人能按到。
+# 負對照：在 text_ui_main 裡 load 一支死樹 UI（popup_layer）⇒ 活集合多一支 ⇒ 必紅
 func _test_p4_one_chokepoint_covers_all_callsites() -> void:
-	print("\n── P4 咽喉母體 ──")
-	var files: Dictionary = {
-		"res://scripts/ui/text_ui_main.gd": SPEC_CALLSITES_TEXT_UI,
-		"res://scripts/ui/encounter_view.gd": SPEC_CALLSITES_ENCOUNTER,
-		"res://scripts/ui/popup_layer.gd": SPEC_CALLSITES_POPUP,
-		"res://scripts/ui/main.gd": SPEC_CALLSITES_DEAD_MAIN,
-	}
+	print("\n── P4 咽喉母體（可達性掃描）──")
+	var proj: String = FileAccess.get_file_as_string("res://project.godot")
+	var root: String = ""
+	for l in proj.split("\n"):
+		if l.strip_edges().begins_with("run/main_scene="):
+			root = l.split("=")[1].strip_edges().replace('"', "")
+	print("   主場景（project.godot run/main_scene）= %s" % root)
+	_check("★母體地板：讀得到主場景（空的話整格不可判）", root != "")
+	if root == "":
+		_cell("_test_p4_one_chokepoint_covers_all_callsites")
+		return
+	var live_ui: Array = _reachable_ui(root)
+	print("   ★從主場景可達的 UI 檔（掃出來的）= %s" % str(live_ui))
+	var want: Array = SPEC_LIVE_UI_FILES.duplicate()
+	want.sort()
+	var missing: Array = []
+	var extra: Array = []
+	for w in want:
+		if not live_ui.has(w): missing.append(w)
+	for g in live_ui:
+		if not want.has(g): extra.append(g)
+	print("   指名比對：少了 %s｜多了 %s" % [str(missing), str(extra)])
+	_check("★★★活的 UI 檔集合與【指名】相符（少 %d／多 %d）" % [missing.size(), extra.size()],
+		missing.is_empty() and extra.is_empty())
 	var live_total: int = 0
-	for path in files:
-		var src: String = _code_only(FileAccess.get_file_as_string(path))
-		var n: int = 0
-		for l in src.split("\n"):
-			if l.contains("command_player(") and not l.strip_edges().begins_with("func "):
-				n += 1
-		var want: int = int(files[path])
-		# ★★★子字串誤中：`path.ends_with("main.gd")` 【也吃到 text_ui_main.gd】
-		#   ⇒ 36 被當死樹排掉、活母體變成 9 ⇒ 抓到它的是下面那個與常數比的地板。
-		#   ★修法＝比【檔名全等】不是比結尾（同 systems 今天 defer-gate 那個 `*scrip*` glob 的病）。
-		var is_dead_tree: bool = path.get_file() == "main.gd"
-		var tag: String = "死樹" if is_dead_tree else "活"
-		print("   %-40s %s 呼叫點 %d（期望 %d）" % [path.get_file(), tag, n, want])
-		_check("%s 的呼叫點數與常數相符（%d／%d）" % [path.get_file(), n, want], n == want)
-		if not is_dead_tree:
+	for fname in live_ui:
+		var n: int = _count_callsites("res://scripts/ui/" + String(fname))
+		var note: String = ""
+		if String(fname) == "sim_bridge.gd":
+			# ★咽喉自己那一個不算「玩家按得到的呼叫點」：它是 refresh_interaction_targets
+			#   的內部自呼。★★它仍然要被【列在活集合裡】—— 遺漏它就是上一版的盲點。
+			note = "（★咽喉自呼，不計入玩家按得到的母體）"
+		else:
 			live_total += n
-	print("   ★活的呼叫點合計 = %d（spec §1 只提了 text_ui_main 的 %d）" % [
-		live_total, SPEC_CALLSITES_TEXT_UI])
-	_check("★★★活母體合計與常數相符（%d／%d）" % [live_total, SPEC_LIVE_CALLSITES],
+		print("   活 %-22s 呼叫點 %d %s" % [String(fname), n, note])
+	print("   ★活的呼叫點合計 = %d（spec §1 原本寫 36；我回報過 45，而 45 是錯的）" % live_total)
+	_check("★★活母體合計與常數相符（%d／%d）" % [live_total, SPEC_LIVE_CALLSITES],
 		live_total == SPEC_LIVE_CALLSITES)
-	# ── 咽喉只有一處
+	_check("text_ui_main 的呼叫點數（%d／%d）" % [
+		_count_callsites("res://scripts/ui/text_ui_main.gd"), SPEC_CALLSITES_TEXT_UI],
+		_count_callsites("res://scripts/ui/text_ui_main.gd") == SPEC_CALLSITES_TEXT_UI)
+	_check("encounter_view 的呼叫點數（%d／%d）" % [
+		_count_callsites("res://scripts/ui/encounter_view.gd"), SPEC_CALLSITES_ENCOUNTER],
+		_count_callsites("res://scripts/ui/encounter_view.gd") == SPEC_CALLSITES_ENCOUNTER)
+	print("   ── 不在可達閉包裡（死樹）而仍有呼叫點的 UI 檔 ──")
+	print("     ★判準含【路徑引用】與【class_name 全域】兩輪 —— 少了第二輪的話")
+	print("       `sim_bridge.gd` 會被誤判成死樹（第一版就是，而它顯然活著）。")
+	var dead_total: int = 0
+	var da := DirAccess.open("res://scripts/ui")
+	if da != null:
+		da.list_dir_begin()
+		var nm: String = da.get_next()
+		while nm != "":
+			if nm.ends_with(".gd") and not live_ui.has(nm):
+				var dn: int = _count_callsites("res://scripts/ui/" + nm)
+				if dn > 0:
+					dead_total += dn
+					print("     %-22s 呼叫點 %d" % [nm, dn])
+			nm = da.get_next()
+		da.list_dir_end()
+	print("     死樹呼叫點合計 = %d ⇒ ★這一欄就是「為什麼 45 是錯的」的證據" % dead_total)
+	_check("★母體地板：死樹那一欄真的非空（空的話它證明不了任何事）", dead_total > 0)
 	var sb: String = _code_only(FileAccess.get_file_as_string("res://scripts/ui/sim_bridge.gd"))
 	var hooks: int = sb.count("request_advance(1)")
 	print("   sim_bridge 裡 request_advance(1) 出現 %d 次" % hooks)
 	_check("★咽喉只有一處（%d 次）—— 第二處＝有人又貼了一次" % hooks, hooks == 1)
-	# ── 而 UI 端【不得】自己各貼一份
 	var tu: String = _code_only(FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd"))
+	_check("★★UI 端沒有自己貼一份 request_advance(1)", not tu.contains("request_advance(1)"))
 	print("   ★邊界：本格數的是【呼叫點】不是【按鍵】—— 一個按鍵可能下多道令，")
-	print("     而反過來 36 個呼叫點裡有幾個共用同一個鍵；要問「涵蓋率」時數的是這一欄。")
-	_check("★★UI 端沒有自己貼一份 request_advance(1)",
-		not tu.contains("request_advance(1)"))
+	print("     而反過來多個呼叫點可能共用同一個鍵；問「涵蓋率」時數的是這一欄。")
 	_cell("_test_p4_one_chokepoint_covers_all_callsites")
+
+# 從一個場景／腳本出發的 res:// 可達性閉包 ⇒ 回傳可達的 scripts/ui/*.gd 檔名（排序）。
+# ★.gd 先剝整行註解（否則註解裡提到的路徑會被當成引用）；.tscn 不剝（它沒有 # 註解語法）。
+func _reachable_ui(root: String) -> Array:
+	var seen: Array = []
+	var queue: Array = [root]
+	while not queue.is_empty():
+		var cur: String = String(queue.pop_front())
+		if seen.has(cur):
+			continue
+		seen.append(cur)
+		var src: String = FileAccess.get_file_as_string(cur)
+		if src == "":
+			continue
+		var body: String = src if cur.ends_with(".tscn") else _code_only(src)
+		for line in body.split("\n"):
+			var a: int = line.find("res://")
+			while a != -1:
+				var rest: String = line.substr(a)
+				var bg: int = rest.find(".gd")
+				var bt: int = rest.find(".tscn")
+				var cut: int = -1
+				if bg != -1 and (bt == -1 or bg < bt): cut = bg + 3
+				elif bt != -1: cut = bt + 5
+				if cut == -1:
+					break
+				var path: String = rest.substr(0, cut)
+				if not seen.has(path) and not queue.has(path):
+					queue.append(path)
+				a = line.find("res://", a + cut)
+	# ★★★第二輪：`class_name` 全域 —— 它們【沒有任何 res:// 路徑】就能被抵達。
+	#   ★這個盲點是卷面自己抓到的：第一版把 `sim_bridge.gd` 印進死樹欄，
+	#     而它顯然活著（`text_ui_main` 整支都在用 `SimBridge`）——
+	#     它只是經 `class_name SimBridge` 進來的，不經路徑。
+	#   ⇒ ★★所以「掃 res:// 就等於掃可達性」在 GDScript 裡【不成立】，
+	#     而不補這一輪的話，本格的綠會【建立在掃描器的盲目上】：
+	#     一支只經 class_name 被用到的新 UI 檔會被判成死樹而沒有人知道。
+	var grew: bool = true
+	while grew:
+		grew = false
+		# ★★★剝註解：第一版用原始文字 ⇒ `sim_bridge.gd` 一行**註解**裡提到
+		#   `ObserverBridge` ⇒ `observer_bridge.gd` 被算成可達。
+		#   ⇒ 這與 P9／P2 那兩格同一條教訓：**判準要讀程式碼，不要讀我們談論它的字。**
+		var reached_text: String = ""
+		for p2 in seen:
+			if p2.ends_with(".gd"):
+				reached_text += _code_only(FileAccess.get_file_as_string(p2))
+			elif p2.ends_with(".tscn"):
+				reached_text += FileAccess.get_file_as_string(p2)
+		var da2 := DirAccess.open("res://scripts/ui")
+		if da2 != null:
+			da2.list_dir_begin()
+			var nm2: String = da2.get_next()
+			while nm2 != "":
+				var path2: String = "res://scripts/ui/" + nm2
+				if nm2.ends_with(".gd") and not seen.has(path2):
+					var cn: String = _class_name_of(path2)
+					if cn != "" and reached_text.contains(cn):
+						seen.append(path2)
+						grew = true
+				nm2 = da2.get_next()
+			da2.list_dir_end()
+	var out: Array = []
+	for p in seen:
+		if p.begins_with("res://scripts/ui/") and p.ends_with(".gd"):
+			out.append(String(p).get_file())
+	out.sort()
+	return out
+
+# 這支 .gd 宣告的 class_name（沒有就回空字串）。★只看【非註解】的宣告行。
+func _class_name_of(path: String) -> String:
+	for l in _code_only(FileAccess.get_file_as_string(path)).split("
+"):
+		var t: String = l.strip_edges()
+		if t.begins_with("class_name "):
+			return t.substr(11).strip_edges()
+	return ""
+
+func _count_callsites(path: String) -> int:
+	var src: String = _code_only(FileAccess.get_file_as_string(path))
+	var n: int = 0
+	for l in src.split("\n"):
+		if l.contains("command_player(") and not l.strip_edges().begins_with("func "):
+			n += 1
+	return n
 
 
 # ══ P5：濫按母體（★只印，不判 —— 「合理」是 WHAT）═════════════════════

@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -103,6 +103,7 @@ func _initialize() -> void:
 	await _test_p18_unbounded_sentinel_is_named()
 	await _test_p20_forced_panel_three_lines()
 	await _test_p21_snap_both_directions()
+	await _test_p22_overlay_callsites_advance_one_tick()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2420,6 +2421,64 @@ func _test_p21_snap_both_directions() -> void:
 		_check("★★實作端沒有字面 1440", not body.contains("1440"))
 	await _free_ui(node)
 	_cell("_test_p21_snap_both_directions")
+
+# ★★★#8：那 9 個呼叫點的【新行為】—— systems 2026-09-30 指定的一格。
+#   ★他的話：「那 9 個的風險是【咽喉漏了它們】，不是它們各自壞了」
+#   ⇒ 所以本格只問兩件：按下去之後 ①咽喉有沒有替它請求一顆 ②世界有沒有恰好 +1 且結果句出現。
+#   ★★走的是【真的 overlay 的按鍵處理器】（`_encounter_view._handle_key`），
+#     不是自己呼 `command_player` —— 既有的 take_loot 格就是後者，而它自己寫明
+#     「encounter_view 的 [K] 派的就是這個」＝它繞過了 overlay。
+#   ★★★而 `popup_layer` 那 4 個【沒有格、也不該有】：本輪量出它不可達
+#     （只被 `scenes/Main.tscn` 實例化 ⇒ 玩家按不到）⇒ 為按不到的東西寫格是假覆蓋。
+#   ★誠實限：5 個裡點了 2 個（戰後 K／L）。另三個（J 收編、F 投降、idle 的 J）沒點：
+#     它們需要 `encounter_active` 或可收編狀態的佈置，而本格要證的是【咽喉沒漏這個檔】——
+#     那件事一個呼叫點就證得了。★★不寫的話，下一個人會以為 5 個都驗過了。
+# 負對照：★尚未點火
+func _test_p22_overlay_callsites_advance_one_tick() -> void:
+	_selftest_gate("_test_p22_overlay_callsites_advance_one_tick").noop()
+	print("\n── #8 overlay 呼叫點也走咽喉 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var ev = node._encounter_view
+	_check("★母體地板：overlay 真的存在（text_ui_main:156 動態 load 的那一個）", ev != null)
+	if ev == null:
+		_cell("_test_p22_overlay_callsites_advance_one_tick")
+		return
+	for case in [["K 撿戰利品", KEY_K], ["L 留下戰利品", KEY_L]]:
+		var loser := TeamData.new()
+		loser.team_id = 7801
+		loser.tile_pos = pt.tile_pos
+		AnonTierSystem.add_anon(loser, "平民", 3)
+		loser.resources["food"] = 100.0
+		st.teams[7801] = loser
+		st.last_encounter_result = {"winner_id": ptid, "loser_id": 7801,
+			"loot_pool": {"food": 10.0}, "can_subjugate": false}
+		ev._post_combat = true
+		node._bridge.cancel_advance()
+		var t0: int = st.world.current_tick
+		var res0: int = st.command_results.size()
+		ev._handle_key(int(case[1]))
+		var asked: int = node._bridge.ticks_remaining()
+		print("   %-14s 按下後請求量=%d（期望 1）" % [String(case[0]), asked])
+		_check("%s：★咽喉沒漏這個檔（請求量 %d）" % [String(case[0]), asked], asked == 1)
+		var frames: int = 0
+		while node._bridge.is_advancing() and frames < 8:
+			node._process(0.1)
+			frames += 1
+		var dt: int = st.world.current_tick - t0
+		var said: String = ""
+		if st.command_results.size() > res0:
+			said = String(st.command_results[st.command_results.size() - 1].get("text", ""))
+		print("   %-14s tick %d → %d（+%d）｜結果句＝%s" % [
+			String(case[0]), t0, st.world.current_tick, dt, said])
+		_check("%s：世界恰好 +1 顆（+%d）" % [String(case[0]), dt], dt == 1)
+		_check("%s：結果句出現（非空）" % String(case[0]), said != "")
+		ev._post_combat = false
+		st.teams.erase(7801)
+	await _free_ui(node)
+	_cell("_test_p22_overlay_callsites_advance_one_tick")
 
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
