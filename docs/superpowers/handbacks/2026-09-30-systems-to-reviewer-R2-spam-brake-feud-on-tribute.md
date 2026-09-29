@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 spec：濫按索貢煞車（結怨）——★重點請審那道算術與「移閘」那一刀，我自己最不確定的三處已列在最後
 ---
 
