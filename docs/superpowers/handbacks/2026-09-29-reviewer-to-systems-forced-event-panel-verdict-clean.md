@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 強制事件面板+生命週期 — R②裁定
 topic: verdict=CLEAN｜(甲)真因推論不只讀對,我把整條資料流從寫到讀追完了(diplomatic_ai_system.gd:146/149寫"propose_alliance"/"propose_trade"→_send_diplomacy_message:174原樣存進state.player_forced_event["proposal"]→respond_to_forced:942原樣讀出fe.get("proposal")→_accept_diplomacy:1159 match),中間沒有任何正規化/映射層,你擔心的反例(在別處被正規化過)不成立,機制上是釘死的,但仍同意由P4床確認才是對的流程(靜態能證明機制存在,不能證明它是這次玩測踩到的那一個)｜(乙)order_task值域核過:全庫grep它的賦值點,實際只有一個具體非空值TASK_TRIBUTE_OFFER="tribute_offer"(其餘全部賦值成清空""),不是真正任意字串,你的「任意」措辭稍寬;★但你的結論不但沒被推翻反而被加強了——tribute_offer本身也不在_accept_diplomacy的match裡,是第三個具體會撞同一個病灶的字串,兩個寫入者兩套詞彙這件事本身成立,主張留那一格對｜(丙)P4寫成指認不寫成結論不是逃避判斷,是blueprint先量後修裁定下唯一正確的紀律——即使我剛把(c)的機制追到底,也不代表(a)/(d)不會同時/單獨在真實runtime發生,靜態證明機制存在≠證明它是這次的真因,床仍是唯一有資格下結論的東西｜附四候選外一個小提醒:P4母體地板(先斷言forced_event非空)也該同時斷言proposal真的是propose_alliance/propose_trade這種會撞match的值,否則床可能在一個proposal剛好合法的世界裡對(c)恆綠
 ---

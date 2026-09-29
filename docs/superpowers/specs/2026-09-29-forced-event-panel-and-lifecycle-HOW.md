@@ -16,7 +16,11 @@ owner: systems ｜ 2026-09-29 ｜ **player_reachable: yes**
    ⇒ ★★所以【選項】有人話而【事件本身】沒有 —— 缺的是那一半
 ③★★★`proposal` 有**兩個寫入者、兩套詞彙**（母體不是封閉集）：
    ·`diplomatic_ai_system.gd:174` 寫 `action` ∈ {demand_tribute, propose_alliance, propose_trade}
-   ·`interaction_system.gd:294` 寫 `npc.order_task`（★任意 task 字串）否則 fallback `"alliance"`
+   ·`interaction_system.gd:294` 寫 `npc.order_task`否則 fallback `"alliance"`
+     ★★訂正（R² 核出，我原本寫「任意字串」措辭過寬）：`order_task` 的賦值點全庫只有
+     一個具體非空值 `TASK_TRIBUTE_OFFER = "tribute_offer"`（其餘全是清空）
+     ⇒ ★★★而結論反而被加強：`tribute_offer` **也不在那個 match 裡**
+       ＝【第三個】會撞同一個病灶的具體字串
 ```
 
 ## ★★★§2 我核出來的一個【很可能的真因】（★而它仍然要由床確認，不由我斷言）
@@ -84,7 +88,11 @@ P4 ★★★[指認真因 A] 到達 → 入列 accept → 推進一小時 ⇒ **
 P5 [重複回應不產生 ✗] 入列 accept 三次 → 推進 ⇒ 只有一句接受、沒有 ✗ 句
 P6 [三點齊] 事件流含到達／回應／逾時三句（各自造一次）；終端 print 三點齊
 P7 ui-flow 綠；merge 前全電池 BATTERY_RC=0
-★★★母體地板：P4 要先斷言【到達真的發生了】（forced_event 非空）——
+★★★母體地板（★★R² 補一半）：P4 要先斷言【到達真的發生了】（forced_event 非空）
+  ★★★**並且同時斷言 `proposal` 真的是會撞 match 的那種值**
+    （propose_alliance／propose_trade／tribute_offer）—— 否則床會在一個
+    【proposal 剛好合法】的世界裡對 (c) 恆綠。
+  ——
   否則「沒有逾時句」在一個根本沒有事件的世界裡恆綠。
 ```
 
