@@ -229,7 +229,7 @@ func _test_p3_advancing_is_the_exception() -> void:
 #   數數那種判準 2026-09-23 被「行數 77」騙過一次（兩邊數字相等而集合不同）。
 # ★★★而死樹那一欄【必印】：它是「為什麼 45 是錯的」的唯一證據 ——
 #   只看到 41 的人會以為那些呼叫點不存在，而它們存在、只是沒有人能按到。
-# 負對照：在 text_ui_main 裡 load 一支死樹 UI（popup_layer）⇒ 活集合多一支 ⇒ 必紅
+# 負對照：在 `text_ui_main._snap_to` 裡 load 一支死樹 UI（popup_layer）⇒ 活集合多一支（少 0／多 1） ⇒ 已於 feat/press-is-one-tick（2026-09-30 這一輪） 實測紅
 func _test_p4_one_chokepoint_covers_all_callsites() -> void:
 	print("\n── P4 咽喉母體（可達性掃描）──")
 	var proj: String = FileAccess.get_file_as_string("res://project.godot")

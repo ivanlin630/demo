@@ -2324,12 +2324,12 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 17   # ★+2：#7 P20／#8 P21 兩格的負對照都已實測紅（2026-09-29）
+const CONTROL_FLOOR_UI: int = 18   # ★+3：#7 P20／#8 P21／#8 P22 三格的負對照都已實測紅
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
 const CONTROL_FLOOR_FEP: int = 6    # forced_event_panel_bed（#7①③，2026-09-29）
-const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8，2026-09-29；P5 那一格刻意未點火）
+const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
@@ -2433,7 +2433,7 @@ func _test_p21_snap_both_directions() -> void:
 #   ★誠實限：5 個裡點了 2 個（戰後 K／L）。另三個（J 收編、F 投降、idle 的 J）沒點：
 #     它們需要 `encounter_active` 或可收編狀態的佈置，而本格要證的是【咽喉沒漏這個檔】——
 #     那件事一個呼叫點就證得了。★★不寫的話，下一個人會以為 5 個都驗過了。
-# 負對照：★尚未點火
+# 負對照：關掉咽喉那一行（`if false`）⇒ overlay 按鍵的請求量 0（★證明本格真的接在咽喉上，不是 overlay 自己會過） ⇒ 已於 feat/press-is-one-tick（2026-09-30 這一輪） 實測紅
 func _test_p22_overlay_callsites_advance_one_tick() -> void:
 	_selftest_gate("_test_p22_overlay_callsites_advance_one_tick").noop()
 	print("\n── #8 overlay 呼叫點也走咽喉 ──")
