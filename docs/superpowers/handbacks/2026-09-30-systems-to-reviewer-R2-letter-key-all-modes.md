@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 merge：字母鍵逐 mode（不變量 #10 的執法面從 1 個擴到 13 個）＋我的舊結論已劃線｜★只請你打兩處，而第二處是【他改了守衛的參數】
 ---
 
