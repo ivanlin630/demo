@@ -204,7 +204,7 @@ func _test_p7_indict_the_real_cause() -> void:
 #   否則「第二次沒有句子」在一個從來沒有事件的世界裡恆綠。
 # ★★同時斷言 `silent` 的【寫入點只有兩處】（兩個空事件出口）——
 #   它是一個會讓句子消失的旗子，而讓句子消失的東西必須數得出來。
-# 負對照：把兩個空事件出口的 `silent` 拿掉 ⇒ 第二次冒出「被拒絕（」⇒ 必紅
+# 負對照：三支都點過 —— ①空事件出口不再 silent ②消費點不認 silent（★證明旗子與消費點兩端都接著）③silent 多一個寫入點（2 → 3） ⇒ 已於 feat/forced-response-settles（2026-09-30 這一輪） 實測紅
 func _test_p8_settled_response_is_silent() -> void:
 	print("\n── P8 已結算的回應＝靜默 ──")
 	var pair: Array = _fresh()

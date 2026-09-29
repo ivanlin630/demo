@@ -2325,11 +2325,12 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ·★誠實限：那句 print 在通過的閘裡【沒有人會讀到】（runner 不 dump 通過者的 stdout）
 #     ⇒ 它的可見性由電池摘要那件事負責，不由這裡加一格紅去補
 #     （★紅燈答不出可見性這個問題 —— 工具與問題不同軸）。
-const CONTROL_FLOOR_UI: int = 18   # ★+3：#7 P20／#8 P21／#8 P22 三格的負對照都已實測紅
+const CONTROL_FLOOR_UI: int = 19   # ★+4：#7 P20／#8 P21／#8 P22／#7②′ P23 四格都已實測紅
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
-const CONTROL_FLOOR_FEP: int = 6    # forced_event_panel_bed（#7①③，2026-09-29）
+const CONTROL_FLOOR_FEP: int = 7    # forced_event_panel_bed（#7①③ 六格 ＋ ②′ 的 P8；
+                                    #   ★P7 是【診斷】格，刻意不點火：它的工作是印證據欄不是守性質）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
@@ -2489,7 +2490,7 @@ func _test_p22_overlay_callsites_advance_one_tick() -> void:
 #       ⇒ 這一輪是「不做」不是「做了再刪」。
 #   ★★★母體地板：印出【按第一次之前】forced_event 非空、【按完】它是空的 ——
 #     否則「後兩次沒有輸出」在一個從來沒有事件的世界裡恆綠。
-# 負對照：★尚未點火
+# 負對照：把回應鍵從咽喉上拔掉（`if false`）⇒ 第一次按的請求量 0、tick 不 +1、面板還在 ⇒ 已於 feat/forced-response-settles（2026-09-30 這一輪） 實測紅
 func _test_p23_response_settles_on_press() -> void:
 	_selftest_gate("_test_p23_response_settles_on_press").noop()
 	print("\n── #7②′ 按了就結算＋空事件不說否定句 ──")
