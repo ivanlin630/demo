@@ -13,8 +13,8 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 - **資訊網**:belief 四源(親見/相遇/順風車/事件信使),傳聞失真、共位必見、死訊也是資訊;組織對成員的知識隨往來而定,失聯就是失聯。
 - **人口管線**:生育(盈餘驅動連續速率)→小孩→成年進匿名層→多管道晉升記名;成人死光小孩同滅;滅團/合併記帳。
 - **戰爭**:遭遇戰同一時鐘 1:1、潰退人格化、據點易主=接收經濟體。
-- **玩家層(可玩,2026-09-24 第一輪真人玩測後)**:玩家=附身一隊的鏡頭,遊戲入口=文字介面 `scenes/TextUI.tscn`(main_scene)。五個分頁 生存/經濟/威脅/社交/記憶(一頁答一個問題);畫面永遠是【上一顆完整 tick】的快照;指令走佇列(按鍵當下印「已排入」,下一次推進的第一顆 tick 執行並回結果句,拒絕必帶原因,頁腳常駐「待執行 N 道」);時間控制=空白鍵一天/X 鍵一小時/移動令自動推進;游標所在格即時印【真值·debug】面板(用戶為 debug 裁的 god-view 例外,非玩家該知道的);自家隊事件(離隊/死亡/成年/戰鬥)進事件流,他隊事件待感知門才放行。
-  - **還沒有的**:隊全滅時沒有「故事結束」畫面且世界會停(票已開,排後面);沒有存檔;「去問人」新版(對方肯不肯說由關係與人格秤、問到的進記憶)在合併中。
+- **玩家層(可玩,2026-09-24 第一輪真人玩測後)**:玩家=附身一隊的鏡頭,遊戲入口=文字介面 `scenes/TextUI.tscn`(main_scene)。五個分頁 生存/經濟/威脅/社交/記憶(一頁答一個問題);畫面永遠是【上一顆完整 tick】的快照;指令走佇列(按鍵當下印「已排入」,下一次推進的第一顆 tick 執行並回結果句,拒絕必帶原因,頁腳常駐「待執行 N 道」)；★而**成功那一句目前還不是 handler 自己寫的話** —— 畫面印「<動作>：完成」，67 條結果句到不了玩家(票在做);時間控制=空白鍵一天/X 鍵一小時/移動令自動推進;游標所在格即時印【真值·debug】面板(用戶為 debug 裁的 god-view 例外,非玩家該知道的);打聽(對方肯不肯說由關係/敵意/人格秤，問到的進記憶，他不知道的給不了)**已落地**(2026-09-25 merge，補驗 83/83)；自家隊事件(離隊/死亡/成年/戰鬥)進事件流,他隊事件待感知門才放行。
+  - **還沒有的**:隊全滅時沒有「故事結束」畫面且世界會停(票已開,排後面);沒有存檔。
 
 進度快照與各系統 log:[docs/progress.md](docs/progress.md)。
 
@@ -23,8 +23,12 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 **一律用 wrapper**(強制 UTF-8,避免 CP950 亂碼;並自動蓋產地/beacon 戳):
 
 ```powershell
-# ★玩(玩家文字介面;main_scene=TextUI.tscn)。merge 過之後第一次開之前先跑下面那行 --import,
-#   否則新 class_name 不在主 dir 的類別快取裡會 Parse Error(2026-09-24 血證)
+# ①先重建主 dir 的類別快取（新增 class_name 檔或 merge 之後必跑）
+#   ★不跑：新 class_name 不在快取裡 ⇒ 遊戲開不起來（Parse Error，2026-09-24 血證）
+.\tools\godot.ps1 --headless --import
+
+# ②玩(玩家文字介面；main_scene=TextUI.tscn)—— ★先跑完上面那行 --import
+#   ★★本行是【直呼 exe】而不是 wrapper —— 理由待確認(已列問題給藍圖)；其餘一律用 wrapper
 .\tools\godot\Godot_v4.2.2-stable_win64.exe --path A:\GDS\demo
 
 # 觀測 GUI(主要看世界用):god-view 地圖+事件 ticker+隊伍 inspect+速度四檔
@@ -35,9 +39,6 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 
 # headless 回歸測試
 .\tools\godot.ps1 --headless --script scripts/debug/headless_test.gd
-
-# 新增 class_name 檔後必跑
-.\tools\godot.ps1 --headless --import
 
 # merge 前跑全部 merge-gate(閘清單=註冊表 docs/process/merge-gates.tsv,runner 讀)
 bash .claude/hooks/merge-gates.sh
