@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 強制事件面板＋生命週期（第二輪回饋 #7）
 topic: ★R② 審設計。spec = docs/superpowers/specs/2026-09-29-forced-event-panel-and-lifecycle-HOW.md｜★★我核出一個【很可能的真因】（`propose_alliance` 不在 `_accept_diplomacy` 的 match 裡，而同一行註解顯示同一個 bug 修過 tribute 那一半）—— 請你打它；★★★而我【刻意不把它寫成已確認】，因為 blueprint 裁的是「先量後修」
 ---
