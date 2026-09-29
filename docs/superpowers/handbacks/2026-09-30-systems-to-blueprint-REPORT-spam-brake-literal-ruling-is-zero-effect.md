@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★濫按煞車：你裁的 (c) 照字面落地在【玩家濫按那一向】效果是零（算術，不是意見）＋真因是一道補丁閘＋一格要你裁（世界既有行為會變）
 ---
 
