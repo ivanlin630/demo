@@ -2,15 +2,17 @@
 from: implementer
 to: systems
 status: consumed
-topic: 同格檢查搬進 handler（含 attack）＋床 5 格＋負對照 5／5 紅。★★電池那一格是【空的不是綠的】：我那輪 BATTERY_RC=2（不可判），而擋住我的不是旗是「開跑前 Godot 必須是 0」
+topic: 同格檢查搬進 handler（含 attack）＋床 5 格＋負對照 5／5 紅｜★★電池補跑完成 87／87（rebase 到 f0a95cdc2）｜★★★而第二輪紅在 computed-prop：它抓到我床裡兩個【靜默 no-op】,而那讓 P5 原本是靠運氣過的
 ---
 
 # 同格票的 code／床／負對照都完成了。而電池那一格我【不填顏色】
 
-**branch** `feat/colocation-in-handler` @ `35a7268e5`
+**branch** `feat/colocation-in-handler` @ `f408bf240`（★已 rebase 到 `f0a95cdc2`；遠端 `ls-remote` 對過）
 （★遠端已用 `git ls-remote` 對過 sha 才寫這一行 —— 上一張票我把「push 的輸出尾巴」當成遠端狀態，錯過一次）
-**基底** `origin/main` @ `8db5c8f21`
-**電池** ★**BATTERY_RC=2（不可判，0 格跑）** —— 見 §⑤，**不是綠也不是紅**
+**基底** `origin/main` @ `f0a95cdc2`
+**電池** ★**BATTERY_RC=0（87／87 綠）**　run-id `22378-20260930-051354`　摘要檔已落
+**主詞三件**：run-id 唯一｜閘 id **集合**雙向相等（87／87，差集兩邊皆空）｜
+期間 HEAD 全程 `f408bf240`（commit 05:13:49、run 05:13:54）
 **註冊表** 86 → 87（新增 `colocation-gate`）
 
 ## ① 交付（spec §2 逐條）
@@ -66,7 +68,34 @@ topic: 同格檢查搬進 handler（含 attack）＋床 5 格＋負對照 5／5 
 ★**那三個數字**：洞的真實大小是 **7 個動詞**（不是我猜的）；「兩層不同軸」被量成 **47 個按不動的選項**；
 而你訂正我的那個洞的方向被量成 **`hunt` 被擋**。
 
-## ★★★⑤ 電池：我那輪是 `BATTERY_RC=2`（不可判）——【空的，不是待補的綠】
+## ★★★⑤ 電池：三輪，而中間那一輪的紅是這一票最有價值的東西
+
+```
+第一輪 BATTERY_RC=2（不可判，0 格跑）—— 開跑前 Godot 行程數 ＝ 2
+第二輪 BATTERY_RC=1 —— ★紅在 `computed-prop`（直寫站 baseline 1 → 3）
+第三輪 BATTERY_RC=0（87／87）run-id 22378-20260930-051354
+```
+
+### ★★★第二輪那個紅：它抓到我床裡兩個【靜默 no-op】
+
+```
+我在床裡寫了兩行 `pt.population = …`，而 `population` 是【計算屬性】（getter-only）
+⇒ 賦值【不報錯、也不生效】＝靜默 no-op
+★而那支閘的存在理由逐字寫著：「拿掉 setter 不會變 parse error ——
+  引擎不給這個保護，所以靜態閘是唯一的預防線」⇒ 它正是為這件事設的。
+★★而修它的時候才看到更糟的一層：**P5 那一格原本是靠 fixture 剛好滿足索貢前提過的**
+  —— 我以為是我佈置的，而我那行佈置從來沒生效。
+  ⇒ ★★★**運氣在卷面上跟佈置長得一模一樣**：兩者都給一個 ok=true。
+處置：
+  ·P1 那一行本來就不需要（玩家人口由 fixture 給）⇒ 刪掉
+  ·P5 改走合法路徑：`AnonTierSystem.remove_anon` 把【對方】的匿名人口搬掉，
+    而不是假裝把自己變大
+  ·★並補一條母體地板：把兩邊 pop 與「前提成立嗎」印出來【並斷言它】
+    ⇒ 實測玩家 10／對方 6（10 > 6×1.5 ＝ 9 成立）
+  ⇒ 閘重驗：`[COMPUTED-PROP] ✓ 直寫站與 baseline 逐行相同（1 站）`
+```
+
+## ⑤b 第一輪那個不可判（留著，因為它證明了一件事）
 
 ```
 [MERGE-GATES] ★★★本輪【不可判】：開跑前 Godot 行程數 ＝ 2（必須是 0）
@@ -112,7 +141,7 @@ topic: 同格檢查搬進 handler（含 attack）＋床 5 格＋負對照 5／5 
 ## ⑧ 下一站
 
 ```
-①你推完主線敲我 ⇒ 我跑同格票的電池（★那一格現在是空的，要把它填成有判決的）
+①★同格票的電池已補跑完成（87／87）⇒ 本票可審
 ②P25（字母鍵逐 mode）—— 依賴不變量 #10 的本體，要從【新 main】開分支
 ③通商那張 —— 要改的 `propose_trade` arm 在 `feat/forced-response-settles` 上，同樣等 main
 ④濫按煞車 —— 動工第一件事那一行 print 照你 spec §11c 寫兩句

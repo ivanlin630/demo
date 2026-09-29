@@ -83,8 +83,8 @@ P4 全電池 BATTERY_RC=0
   且那個數要跟 `get_available_actions` 列得出來的數對得上。
 ```
 
-**附：爆炸半徑收窄**：`execute_action_with_target` 吃 Dictionary（`team_id`／`member_id`）
-⇒ 與 int 那一條不衝突 ⇒ **本閘的爆炸半徑就是 `execute_action` 這一條**。
+~~**附：爆炸半徑收窄**：`execute_action_with_target` 吃 Dictionary ⇒ 本閘的爆炸半徑就是 `execute_action` 這一條。~~
+★★★**這句是錯的（R² 2026-09-30 抳倒）—— 見 §7。**
 
 ## §6 attack 納入（量出來的數字決定）
 
@@ -98,4 +98,71 @@ P4 全電池 BATTERY_RC=0
 ★★而這裡有一件比結論更值得記：**「attack」這個字住在兩個母體裏**
   （走 `execute_action` 的 1 支 ／ `pending_action {"type":"attack"}` 的遭遇戰單位級 4 支）
   ⇒ 若按字串數會報 5 支並拆票 ⇒ ★**數的是同名的字，不是同一個機制**。
+```
+
+---
+
+## ★★★§7 第三個管道：`recruit_named`（R² 抳倒我的負斷言，納入本票同一顆 commit）
+
+**我在 §5 寫「`execute_action_with_target` 不在爆炸半徑內」—— 那是錯的。我開檔重核了**：
+
+```
+execute_action_with_target → "recruit_named" → _recruit_named_internal(state, pt, from_team_id, person_id)
+  var tgt4: TeamData = state.teams.get(from_team_id)        ← from_team_id 來自 target dict（任意值）
+  … ResourceBank.set_amt(pt,"coin", …)                     ← 玩家付錢
+      ResourceBank.add(tgt4,"coin", RECRUIT_COST_NAMED, …)  ← 對方收錢
+      state.remove_member(tgt4, person_id, false)            ← 人離原隊
+      state.add_member(pt, person_id)                        ← 人入玩家隊
+★**完全沒有同格檢查** ⇒ 走程式介面可以【隔空向任意隊買走一個記名成員】
+  —— 而它**轉移人＋轉移 coin**，比隔空索貢更重。
+```
+
+### ★★我的錯法（今天第二次同族，而這一次更結構）
+
+```
+我用【哪一個入口】界定爆炸半徑，而不變量的母體是【哪些動作跟別隊發生作用】
+⇒ ★**入口不是母體**。而 `execute_action_with_target` 吃 Dictionary 這件事是真的，
+  它只是**與那個問題無關** —— 型別不同不代表它不跟別隊發生作用。
+★★而今天第一次同族是【好感不在指紋裏】（只查手寫那一套收錄機制）
+  ⇒ 兩次都是**我拿一個維度去代替母體**（一次是收錄機制、一次是入口）。
+⇒ ★★★**規矩：下「某條路不在爆炸半徑內」前，要先把母體的定義寫出來**，
+  而那個定義必須是【被守的性質】（跟別隊發生作用），不是【我審查的路徑】。
+```
+
+### §7a 裁：**納入本票**，不登 defer
+
+```
+R² 給了兩條路（納入／或至少在 defer 裡指名）⇒ 我裁**納入**。
+理由：同一個洞、同一條不變量、同一張票 ⇒ 登 defer 等於
+  **把一個已經有名字的活洞寫進表裏然後留著** —— 而表裏的名字不會堵住它。
+做法：直接覆用 `_colocation_gate` 的邏輯，掛在 `_recruit_named_internal` 的入口
+  （或 `execute_action_with_target` 的 `recruit_named` 那一支，位置由實作端選單一咽喉）
+★驗收加一格：P6 【跨隊招募也需同格】
+  直呼 API：不同格的隊 ⇒ ok=false 且 **人與 coin 兩邊都沒動**（逐欄印）
+  ｜負對照：拿掉那一行 ⇒ 人真的被買走、coin 真的轉移 ⇒ **必紅**
+  ★★而它要印【兩邊都沒動】不是只印 ok=false：
+    這一條路有**四個寫入**（付錢／收錢／離隊／入隊）⇒ 半途擋下來比沒擋更糟。
+```
+
+### ★§7b 口徑統一（R² 發現床裡的「8」與他算的「10」對不上）
+
+```
+兩個數其實都對，只是分母不同 ⇒ **两個都要寫上分母**：
+  ·需同格的動詞 ＝ **10**（`get_available_actions` 的 11 減掉2 個 early-return 的 `ignore`）
+  ·**原本零檢查**的 ＝ **8**（10 減掉2 個已有檢查的 `invite_settle`／`beg`）
+⇒ ★床裡那句要寫成「8／10 原本零檢查」而不是光寫 8。
+★★而加入 `recruit_named` 之後分母也要动：它不在 `get_available_actions` 的集合裡
+  （它走另一個入口）⇒ **閘的母體定義要從「動詞清單」改成「跟別隊發生作用的動作」**，
+  並在卷面上把兩個入口各自的數分開印。
+```
+
+### §7c R² 提的其餘四件（已收，不需改設計）
+
+```
+①錯點確實錨在 `TEAM_TARGET_ACTIONS.has(action)` 第一行；`hunt` 不在清單裡
+  ⇒ 連 `teams.get` 都不會執行到 ⇒ 我訂正的那個誤擋不成立（形狀對、結果被錨點擋下來）
+②`computed-prop` 實際涵蓋 TeamData **全部 5 個**計算屬性（不只 `population`）
+  ⇒ ★我那個「它只盯一個屬性」的擕心已被既有工具涵蓋 ⇒ **又一個我沒查就說的負斷言**
+③`CONTROL_FLOOR_FEP` 確實是 10（取大的）
+④P3 單向盲區 ＝ 合理範圍邊界（正反兩方向的失效模式本質不同）
 ```

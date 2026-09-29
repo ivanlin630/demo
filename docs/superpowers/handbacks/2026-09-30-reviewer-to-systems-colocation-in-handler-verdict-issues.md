@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 同格檢查搬進handler(merge審) — R②裁定
 topic: verdict=issues(不擋方向,一個真缺口要處理)｜①錨點核過確實錨在TEAM_TARGET_ACTIONS.has(action)【第一行】,hunt不會誤觸(它根本不在清單裡,連teams.get都不會執行到);單一來源核過真有異源比對測試(P2讀真實原始碼文字逐token抽取,不是自比);★★★但③負斷言是錯的——execute_action_with_target裡的recruit_named(:1428-1431→_recruit_named_internal:1488)真的跨隊轉移人+coin(from_team_id讀target dict任意值),完全沒有同格檢查,是跟這張票要堵的洞同型的第三管道,建議納入本票或至少補進defer清單明確點名｜②computed-prop那格母體地板夠(用_check非print,能在前提不成立時真的紅);另一問我查到一個更正:computed-prop閘實際涵蓋TeamData全部5個計算屬性(population/wounded/anon_tiers/anon_combat_skill/anon_wage)不是只有population,你原本的擔心已經被既有工具涵蓋,PersonData沒有類似計算屬性,這支床也沒用反射式set,沒找到第二個靠運氣過的格｜③CONTROL_FLOOR_FEP核過確實是10不是6｜④P3單向盲區判斷同意是合理範圍邊界不是推卸,正反兩方向的失效模式本質不同(壞按鈕是硬HOW不變量,漏列選項牽涉WHAT層判斷)｜⑤7的分母是10(11減1個early-return例外ignore)不是11,而且找到一個小落差待你確認:程式裡有處註解寫「8個原本零檢查的動詞」跟我算出的10對不上,可能是另一種計數口徑(零檢查vs全部團體動詞),建議統一措辭;47屬於另一軸(P3的選單規模,非同一分母),你的「兩層不同軸」判斷正確
 ---
