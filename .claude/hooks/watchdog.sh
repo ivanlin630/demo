@@ -431,7 +431,9 @@ while true; do
         :   # ★該角色自己掛了 beacon 且信正是給他 ⇒ 合法豁免，靜默
       else
         class="UNRESPONSIVE"; via="pre-RUNNING/beacon-exempt-checked"
-        detail="  ${to} 活著但 ${bn} 已 open $(dur "$a") 沒消費"
+        detail="  ${to} 活著但 ${bn} 已 open $(dur "$a") 沒消費
+  ★派工信 open ≠ 停工：**一張正在做的票，它的派工信本來就該是 open**
+  ⇒ ★★判停工要配合下面【feat lane】與【worktree 檔案變動】兩欄，不要只看這一行"
         [ -n "${running:-}" ] && detail="${detail}
   ★有長工作在跑（${running}），但它不是 ${to} 的 beacon ⇒ 不構成豁免"
       fi
@@ -465,6 +467,13 @@ while true; do
     echo "${icon} STALL / ${class}${via:+ via:${via}}"
     echo "$detail"
     echo "  活著：${alive:-（無）}"
+    # ★★☰2026-09-29（implementer 提、blueprint 轉、systems 立）：【同時在線的角色數】。
+    #   ★「只有一個角色停」與「大家都停」的**處置完全相反**：
+    #     前者＝那一支卡住（要人去按）；後者＝外部因素（額度中断）⇒ **什麼都不用做**。
+    #   ★★血證 2026-09-29：額度中断四天半、全體零產出，而當時有人把它讀成
+    #     「某一支卡在權限提示」⇒ ★**分辨法就是這一個數字**。
+    _n_alive=$(printf "%s" "${alive:-}" | wc -w | tr -d " ")
+    echo "  ★同時在線的角色數＝${_n_alive}／6（★接近 0 ⇒ 外部因素，不是某一支卡住；接近 6 而閘仍紅 ⇒ 真的是那一支）"
     echo "  長工作：${running:-無}"
     # ★★★2026-09-22（blueprint 令，systems 實作）：舊版這裡只印【main 最後一顆 commit】，
     #   ★而共用 main dir 下【任何人】commit 都會把它刷新 ⇒ 它永遠看起來很新。
