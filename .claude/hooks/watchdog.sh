@@ -198,7 +198,19 @@ long_running() {
   if [ -f "$_bf" ]; then
     local _bage=$(( now - $(stat -c %Y "$_bf" 2>/dev/null || echo 0) ))
     if [ "$_bage" -lt "${MG_FLAG_MAX_S:-3600}" ]; then
-      echo "battery(旗齡 $(dur "$_bage"))"; return
+      # ★★☰2026-09-30（blueprint 抳到的第二半）：上一版只跟得到【看得到】，
+      #   而 UNRESPONSIVE 的豁免要求 `running == beacon:<角色>` ⇒ `battery(…)` 對不上
+      #   ⇒ ★報告寫著「有長工作在跑」又寫「不構成豁免」＝**看得到但不算數**，
+      #     而那跟看不到同一個結果。
+      #   ⇒ ★★修法：旗裡有 `role=` 就回【與 beacon 同形】的字串
+      #     ⇒ **直接走既有的豁免路徑**，不新增一條分支（新分支＝新的沒人驗的路）。
+      #   ★★★而沒有 `role=` 時【不假裝知道主人】：回 battery(…主人未知)
+      #     ⇒ 它仍然壓住 RUNAWAY，但不會替任何人担保【有回應】。
+      local _brole=$(sed -n "s/.*role=\([^ ]*\).*//p" "$_bf" 2>/dev/null | head -1)
+      if [ -n "${_brole:-}" ] && [ "$_brole" != "?" ]; then
+        echo "beacon:${_brole}"; return
+      fi
+      echo "battery(旗齡 $(dur "$_bage")，主人未知)"; return
     fi
   fi
   for f in "$HOOKD"/.busy.*; do

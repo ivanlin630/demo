@@ -110,8 +110,14 @@ $(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{ $1=""; sub(/^ /
 EOF_MGWT
 # ★只寫數字在第一行（後面那些欄位是給【人】讀的，程式只讀第一個 token）——
 #   含跳脫字元的寫法在寫檔時會變成真的換行，今天已經咬過兩次。
-printf '%s tree=%s since=%s
-' "$$" "$(pwd)" "$(date +%FT%T)" > "$MG_RUNFLAG"
+# ★★☰2026-09-30（blueprint 抳到的第二半）：旗要寫【主人】。
+#   看門狗已經看得到旗了，却判「它不是 <角色> 的 beacon ⇒ 不構成豁免」
+#   ⇒ ★**「看得到但不算數」跟「看不到」同一個結果**。
+#   ⇒ ★★而主人的唯一權威來源是【跑它的那個終端自己】 ⇒ 寫 $SESSION_ROLE，
+#     ★★★**不要拿 tree 路徑去推角色** —— worktree 名與角色沒有權威對應表，
+#     推出來的對應會因為有人改名字而默默錯。
+printf '%s tree=%s role=%s since=%s
+' "$$" "$(pwd)" "${SESSION_ROLE:-?}" "$(date +%FT%T)" > "$MG_RUNFLAG"
 # 只留數字：不要用含跳脫字元的寫法（那個跳脫在寫檔時會變成真的換行，今天已經咬過兩次）
 _mg_godot_n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' | tr -dc '0-9')
 if [ "${_mg_godot_n:-0}" != "0" ]; then
