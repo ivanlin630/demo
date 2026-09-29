@@ -40,7 +40,21 @@ owner: systems ｜ 2026-09-29 ｜ **player_reachable: yes**
 ```
 段1（唯讀，先做，10 分鐘）：印 `state.team_tile_known.get(player_tid, {}).size()`
   ·非空 ⇒ ②那一半可以純 render 做 ⇒ 照 §3 走
-  ·★空 ⇒ **停下來回報**：要讓它非空必須在【sim 側】每 tick 為玩家隊 harvest
+  ·★空 ⇒ **blueprint 已預裁（2026-09-29，8edefa413）**，而他的形狀比我提的好：
+    ★★★**不准為玩家隊開一條 harvest 特例** —— 那違反 #43「玩家隊零特毊物理」
+      與資訊網「一個訊息模型零特例」。
+      ⇒ ★真因是 **harvest 掛錯層了**：它掛在【NPC 決策路徑】裡
+        （`_find_occupy_target` 內；`strategic_ai` 那一支還沒有 production 呼叫點）
+      ⇒ ★★**知不知道一格是【感知】的事，不是【決策】的事**
+      ⇒ ★★★修法：tile 知識 harvest **搬到感知層、對全部隊跑**
+        （跟視野更新同一趟：`sim_runner.gd:743 _step1b_update_vision`
+         → `VisionSystem.tick_discovery()`，註冊在 `:221` 的 `grp: "hour"`）
+        ⇒ fp 變、基準同 commit 落地；★render 側仍禁 harvest。
+    ★★★而我要把一件 blueprint 沒提的代價寫在這裡：成本。
+      `harvest_tile_known()` 是一個 **(2r+1)² 的方形迴圍**（`VISION_RADIUS = 3` ⇒ 49 格）
+      × 每隊 × 每個 hour-tick ⇒ ★**要量 per-tick 成本，不得只看功能**
+      （而它本來就只在【有隊在找佔領目標】時跑過 ⇒ 次數會長很多）
+      ⇒ ★★P5 多一欄：**改前後的 per-tick 中位數與 p99**（不是撇絕門檿，是要有數）。
     ⇒ ★★那是寫入 ⇒ **world-fp 會變** ⇒ 與 blueprint 「純 render、fp 不變」的假設衝突
     ⇒ ★★★而 render 路徑**不得自己 harvest**（`render-no-write` 已 merged）——
       所以這不是實作端可以繞過的，它是一個要 blueprint 知道的代價。
