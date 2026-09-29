@@ -2646,10 +2646,10 @@ func _test_p24_number_keys_never_mean_response() -> void:
 #   ★★★母體地板：列舉到的 mode 數要與 spec 常數相符 ——
 #     否則這一格會在一個【只列舉到一個 mode】的世界裡恆綠。
 # ★這一格的價值不在「A 有沒有誤觸」，在把執法面從一個 mode 擴到全部。
-# 負對照：兩支都點過 —— ①把字母鍵搬到 `_input()` 最前面（不分 mode 都吃 A）
-#   ⇒ ★實測【11 個 mode 都會消費回應】（那就是擴面守住的東西的大小）
-#   ②把 `SPEC_UI_MODE_COUNT` 改成 12 ⇒ 母體地板 A 紅（13／12）
-#   ⇒ 已於 feat/letter-key-all-modes（2026-09-30 這一輪） 實測紅
+# 負對照：①把字母鍵搬到 `_input()` 最前面（不分 mode 都吃 A）⇒ ★實測 11 個 mode 都會消費回應 ②把 `SPEC_UI_MODE_COUNT` 改成 12 ⇒ 母體地板 A 紅（13／12） ⇒ 已於 feat/letter-key-all-modes（2026-09-30 這一輪） 實測紅
+#   ★★★而這一行【必須是單行】：`_count_fired` 要求「# 負對照：開頭 ＋ 含 ⇒ 已於 ＋ 以 實測紅 結尾」
+#     都在同一行 —— 我第一版把它拆成四行 ⇒ 紀錄數沒進帳（20）而地板已抬到 21 ⇒ 棘輪紅。
+#     ★那個紅是對的：它說的是「你抬了地板卻沒有留下可數的紀錄」。
 func _test_p25_letter_key_only_in_interact_mode() -> void:
 	_selftest_gate("_test_p25_letter_key_only_in_interact_mode").noop()
 	print("\n── 不變量 #10 擴面：字母鍵只在 interact 模式有意義 ──")
