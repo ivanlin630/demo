@@ -571,7 +571,8 @@ func _consume_player_commands(state: WorldState) -> void:
 		# ★★「空的才退回『完成』」那一支：★★★實測 2026-09-25 全庫 67／67 都帶話
 		#   ⇒ 它今天是【0 命中】的分支。保留它是為了將來新增的 handler，
 		#     而它【不是】靠註解說自己有用：P3 用【注入式】對照餵一個回空 msg 的假 handler 點它。
-		var say: String = ("%s：%s" % [PlayerCommandApi.describe(name, args), why]) if why != "" 			else ("%s：完成" % PlayerCommandApi.describe(name, args))
+		var say: String = ("%s：完成" % PlayerCommandApi.describe(name, args)) if why == "" \
+			else ("%s：%s" % [PlayerCommandApi.describe(name, args), why])
 		state.command_results.append({
 			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
 			"text": say if ok
