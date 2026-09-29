@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 成功結果句用 handler 自己的話 —— 做完；6 支負對照全紅；★而床本身踩了五個我自己的錯，第五個是「檔案不是我以為我寫的那樣，而它安靜」
 ---
 

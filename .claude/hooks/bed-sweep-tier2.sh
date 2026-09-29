@@ -86,6 +86,11 @@ if [ "${1:-}" = "--check-staleness" ]; then
     echo "[tier2]   ⇒ 這道閘的意義＝【掃描停了要有人知道】，不是掃描本身"
     echo "[tier2]   ★★★而它同時【就是觸發器】：merge 一定會發生，所以它一定會被跑到"
     echo "[tier2]     修法：bash .claude/hooks/bed-sweep-tier2.sh"
+    echo "[tier2]   ★超期【不是回歸】：它說的是【沒有人跑過】，不是【跑了而壞了】"
+    echo "[tier2]   ★★而它會【成批】到期：停工（額度中断、長假）期間所有 staleness 型的閘同時超期"
+    echo "[tier2]   ⇒ ★★★復工後第一輪電池若紅的全是這一型，**不要去找哪裡壞了** —— 跑一次就好"
+    echo "[tier2]   ★而跑完之後要看它有沒有真的報 diff：若印【首次建立 baseline】或【鍵不唯一】"
+    echo "[tier2]     ⇒ ★★那一輪的「綠→紅 0 支」**不是健康證明**，只是「這一輪沒比」"
     exit 1
   fi
   echo "[TIER2-STALENESS] PASS 上次全床掃描 $age 天前（上限 $MAX_AGE_DAYS）"
@@ -122,6 +127,14 @@ TMP="docs/measurements/.bed-sweep-inprogress.tsv"
 #   續掃永遠沒有東西可續，而且每一次跑都【靜默銷毀上一次的成果】。
 #   ⇒ ★★只在【檔案不存在】時建立；要重頭掃請自己先刪掉它（顯式動作）。
 if [ ! -f "$TMP" ]; then : > "$TMP"; fi
+# ★★☰2026-09-29 血證（systems，而它是我今天自己跑出來的）：
+#   續掋檔是【故意不截断】的，而 `bed-triage-sweep.sh:130` 會【跳過已有判決的床】
+#   ⇒ ★一份 **21 天前的續掋檔**讓這一輪「全床掃描」**一支床都沒跑**
+#     （機械證據：.godot-runs.log 在掃描期間零新增行；TMP 的 mtime 也沒動）
+#   ⇒ ★★而它仍然**蓋了時戳**⇒ staleness 閘轉綠，而什麼都沒被驗 ⇒ **假綠**。
+#   ⇒ ★★★結構修法（同「實跑 0 格＝紅」那一條）：**這一輪沒有新增任何一列 ⇒ ABORT、不蓋時戳**。
+_rows_before=$(grep -c "^scripts/" "$TMP" 2>/dev/null)
+case "$_rows_before" in ""|*[!0-9]*) _rows_before=0;; esac
 echo "[tier2] 全床掃描開始（$(grep -c . "$LIST") 支）"
 PER_BED_TIMEOUT="${PER_BED_TIMEOUT:-600}" bash .claude/hooks/bed-triage-sweep.sh "$LIST" "$TMP" >/dev/null 2>&1
 rc=$?
@@ -134,6 +147,16 @@ rc=$?
 #     母體壞掉跟母體為空是同一類處置，不是兩類。
 rows=$(grep -c '^scripts/' "$TMP" 2>/dev/null)
 case "$rows" in ''|*[!0-9]*) rows="NaN";; esac
+_rows_new=$(( ${rows:-0} - _rows_before ))
+case "$rows" in *[!0-9]*) _rows_new=-1;; esac
+if [ "$_rows_new" -le 0 ]; then
+  echo "[tier2] ★★★ABORT：這一輪【新增 0 列】（跑前 $_rows_before 列，跑後 ${rows} 列）"
+  echo "[tier2]   ⇒ ★成因幾乎一定是【續掋檔已經滿】：bed-triage-sweep.sh 跳過已有判決的床"
+  echo "[tier2]   ⇒ ★★所以它不是「掃完了、沒有變化」，是**一支都沒跑**"
+  echo "[tier2]   ★★★修法（顯式動作）：rm docs/measurements/.bed-sweep-inprogress.tsv 再跑"
+  echo "[tier2]   ★而本輪**不蓋時戳、不更新 baseline** —— 否則 staleness 閘會在什麼都沒驗的情況下轉綠"
+  exit 3
+fi
 if [ "$rc" != "0" ] || [ "$rows" = "0" ] || [ "$rows" = "NaN" ]; then
   echo "[tier2] ★ABORT：掃描沒有產出（rc=$rc rows=$rows）⇒ ★不更新 baseline、不蓋時間戳"
   echo "[tier2]   （★空結果不得被讀成「沒有變化」——那正是恆綠）"
@@ -172,7 +195,11 @@ if [ -n "$_dupes" ]; then
   echo "[tier2] ✗ baseline 的鍵【不唯一】⇒ diff 結果不可信（本輪不報 diff）："
   echo "$_dupes" | head -6 | sed 's/^/[tier2]     ★重複鍵：/'
   echo "[tier2]   ★理由：比對用的是 head -1 ⇒ 它會靜默地挑一列；能造假警報就能蓋掉真的。"
-  echo "[tier2]   ★★修法：重建 baseline（整表重寫、一床一列），不要手改那幾列。"
+  echo "[tier2]   ★★修法【要看重複在哪一張表】："
+  echo "[tier2]     ·重複在 baseline ⇒ 重建 baseline（整表重寫、一床一列）"
+  echo "[tier2]     ·★重複在【續掋檔】（.bed-sweep-inprogress.tsv）⇒ **刪掉續掋檔重掃**"
+  echo "[tier2]     ★★ 2026-09-29 血證：真正重複的是續掋檔（它每跑一輪就 append），
+     而舊訊息只說「重建 baseline」⇒ **修錯的東西，而重複下一輪又回來**"
   _dupe_bad=1
 else
   _dupe_bad=0
