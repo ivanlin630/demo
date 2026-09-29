@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 濫按母體（#8 P3）裁定：demand_tribute ×20 ⇒ 20／20 全成功、無煞車
 topic: ★第 21 次該被擋——但擋它的不是冷卻常數，是【被索貢那一方的決策讀到「我一分鐘前才付過你」】：索貢成功寫一條恩怨帳 typed 邊（被誰索、多少、何時），handle_diplomacy_message 對 demand_tribute 的評估讀該邊 ⇒ 短期內重複索貢＝拒絕＋怨累積，累積到門檻走既有敵對／宣戰路徑｜★★不選 (a) 對稱冷卻（那是把補丁閘複製到兩邊）、不選 (b)（玩家特例）、不選 (c)（「遞減無上限」不是設計）｜NPC 寄件端的 diplomacy_reject_cooldown 留著但登為補丁債
 ---
