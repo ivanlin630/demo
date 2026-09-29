@@ -2335,7 +2335,7 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
                                     # ★★★rebase 衝突的正解是【取大的那個】：我那條分支帶的是
                                     #   合併前的 6，取它就是把棘輪地板往回調 —— 而那正是棘輪
                                     #   存在要擋的事（它只會在「往回走」時紅，而往回調常數會讓它閉嘴）。
-const CONTROL_FLOOR_COLOC: int = 5  # colocation_gate_bed（同格閘，2026-09-30；五格全點火）
+const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅

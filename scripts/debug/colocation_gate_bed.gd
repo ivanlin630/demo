@@ -80,7 +80,7 @@ func _code_only(src: String) -> String:
 #   ⇒ 所以四個欄位逐一斷言，而不是相信「ok=false 就代表什麼都沒發生」。
 # ★母體地板三道：①目標真的不同格 ②那個人真的在對方隊上（不然「沒被搬走」恆真）
 #   ③玩家真的付得起（付不起的話 ok=false 可能是金幣不足而不是閘）
-# 負對照：把 `refuse_if_not_colocated` 那一行拿掉 ⇒ 人真的被買走、coin 真的轉移 ⇒ 必紅
+# 負對照：把 `refuse_if_not_colocated` 那一行拿掉 ⇒ ★實測玩家 coin 真的少了（人被買走） ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
 func _test_p6_recruit_named_is_the_third_channel() -> void:
 	print("\n── P6 第三個管道：recruit_named ──")
 	var pair: Array = _fresh()
