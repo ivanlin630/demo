@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 濫按煞車（你 3ea1b4c7d 的裁定）
 topic: ★好消息：**讀的那一半已經存在** —— `tribute_accept` 早就在讀 `feud` typed 邊並扣分（`TRIBUTE_W_FEUD`），所以你的裁定只缺【寫入】那一半，票比你想的小｜★★★壞消息：你寫的「『近期』視窗用恩怨帳【既有衰減】」—— **那個衰減不存在**。恩怨邊【永不隨時間衰減】⇒ 照原文做，玩家索貢一次就被【永久】拒絕，而床會綠
 ---
