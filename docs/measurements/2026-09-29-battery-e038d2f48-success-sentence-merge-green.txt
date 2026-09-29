@@ -1,0 +1,103 @@
+# 電池卷面：成功結果句 merge 的合併點驗收
+# ★照 2026-09-29 新規矩：合併做在專用 worktree（tmp/merge-success-sentence），綠了才把 main fast-forward 上去
+# ★★被驗的樹＝e038d2f48（84／84、RC=0、registry 與 runner 皆 clean、開跑與結束同一棵樹）
+#   最終 main＝60cbc6117 ＝ 被驗的樹 ＋ 一顆【docs-only】狀態信 commit
+#   ⇒ 那一顆我【沒有】拿整輪電池驗，而是單獨驗了它唯一會碰到的四支閘：
+#     mailbox-integrity／mailbox-size／defer-gate／bed-kind-gate 全 rc=0
+# ★★★而第一次開跑被拒（不是紅）：開跑前 Godot=2 —— 是前一輪被記憶體砍掉的掃描還在收尾的兩張床
+#   ⇒ 正解是【等】不是【清】；而 machine-busy 幾秒前才回 FREE ⇒ 取樣式判準的過期讀數
+
+run-id: 50056-20260929-163425
+runner-self: 752ba124
+[TREE] HEAD-start=e038d2f48 HEAD-end=e038d2f48
+[TREE] registry=clean runner=clean code-dirty=0
+range: MG_FROM=0 MG_TO=0｜註冊表 84 支｜實跑 84 支
+baseline: 上一次 main 基線紅數=未讀｜本輪紅數=0
+BATTERY_RC: 0
+---- 逐格（id / 秒 / 結果）----
+constitution	4s	PASS
+bare-tick	9s	PASS
+build-duration	4s	PASS
+bed-parse	84s	PASS
+bed-arm	4s	PASS
+ki-anchor	5s	PASS
+mailbox-integrity	40s	PASS
+cherrypick-fidelity	2s	PASS
+ki-status	12s	PASS
+single-writer	0s	PASS
+tree-div	1s	PASS
+headless	25s	PASS
+cross-run-static	12s	PASS
+own-camp-link	7s	PASS
+zero-caller	4s	PASS
+exam-freeze	0s	PASS
+print-join	0s	PASS
+belief-freshness-invariant	7s	PASS
+unified-commerce	7s	PASS
+defer-open	24s	PASS
+defer-phrase	1s	PASS
+modulo-phase	0s	PASS
+ledger-drop-visible	7s	PASS
+lod-split	0s	PASS
+valuation-clamp	6s	PASS
+world-schedule-due	7s	PASS
+envoy-ptype	7s	PASS
+mailbox-size	0s	PASS
+mailbox-broadcast	1s	PASS
+board-price	7s	PASS
+swallow-setter	0s	PASS
+tier2-sweep-staleness	1s	PASS
+minor-merge	6s	PASS
+escrow-audit	7s	PASS
+computed-prop	1s	PASS
+bed-kind	2s	PASS
+wage-penalty	7s	PASS
+payroll-urgency	7s	PASS
+merchant-turnover	14s	PASS
+team-ui	7s	PASS
+player-entry-smoke	9s	PASS
+ui-flow	12s	PASS
+command-replay	28s	PASS
+player-event-feed	8s	PASS
+inquiry-v1	13s	PASS
+success-sentence	9s	PASS
+ui-logic	7s	PASS
+value-key	2s	PASS
+value-key-selfcheck	1s	PASS
+plan-speed	7s	PASS
+material-buy	7s	PASS
+gateA	7s	PASS
+gateA-hysteresis	6s	PASS
+restock-burn	14s	PASS
+failure-feedback-coverage	9s	PASS
+gather-purity	7s	PASS
+role-commit-scope	1s	PASS
+watchdog-beacon	1s	PASS
+live-team-census	1s	PASS
+fp-longwindow	36s	PASS
+live-team-ratchet	0s	PASS
+grudge-ledger-a	7s	PASS
+raid-expected-value	7s	PASS
+stale-pos-recon	7s	PASS
+anchoredness-freshness	7s	PASS
+outpost-belief	7s	PASS
+sister-sites-outpost	7s	PASS
+occupy-target-belief	7s	PASS
+phase-tree-net-cost	6s	PASS
+phase-root-conservation	9s	PASS
+fp-gather-sensitivity	38s	PASS
+day-length-single-source	10s	PASS
+det-observation-noise	7s	PASS
+crisis-override	6s	PASS
+world-fp	270s	PASS
+world-fp-ctrl	547s	PASS
+intel-wake-godview	4s	PASS
+intel-wake-direction	12s	PASS
+globalmsg-shape	6s	PASS
+faction-drive-once	20s	PASS
+shape-falsifier	27s	PASS
+pass-stagger	65s	PASS
+fp-excludes-derived	6s	PASS
+player-fp-sentinel	11s	PASS
+---- ★綠著印出來、否則沒人看得到的話（carry 規則見本檔 MG_CARRY_RE）----
+（本輪沒有）
