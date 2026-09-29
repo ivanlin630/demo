@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 字母鍵逐mode(不變量#10擴面) — R²
 topic: verdict=CLEAN,可merge。①13的列舉核過無漏:grep「func _handle_」精確13個、逐一與var聲明的13個_mode:bool旗標1:1對應、且_input()的if/return鏈也是同13個逐一dispatch,三條獨立管道(handler函式/旗標宣告/dispatch鏈)數出來都是13,沒有簽章寫法不同或用match分派繞過列舉的個案;地板C核過真的能紅(was_set在按鍵前量、node.get同名讀回,打錯名字會讓was_set恆false讓floor_seen湊不齊13)｜②(a)核過21與可數紀錄一致(grep單行負對照紀錄剛好21筆=CONTROL_FLOOR_UI);(b)核過本輪只改了兩個守衛參數(CONTROL_FLOOR_UI 20→21、新增SPEC_UI_MODE_COUNT=13),兩個都被同一顆commit的87/87全電池覆蓋,不是只跑負對照;你的merge前重跑集合追加「本輪改過參數的守衛逐一重跑它自己」那句判對,是直接規則不是靠檔案異動的間接代理,而且跟本票剛好示範的失效同型,建議收；非阻塞:CONTROL_FLOOR_UI那行註解仍寫「★+5:P20/P21/P22/P23/P24」,是舊留言(20那版就在,fcc77268a已有),沒有更新成把P25算進去,下一個讀常數的人會少算一格,跟同格票那條「檔頭舊結論」是同一種形狀,建議順手補
 ---
