@@ -2332,6 +2332,10 @@ const CONTROL_FLOOR_REPLAY: int = 2
 const CONTROL_FLOOR_FEED: int = 7
 const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P8／P9／P10）
                                     #   ★P7 從診斷升成回歸之後也有了負對照（與 P9 同一個擾動）
+                                    # ★★★rebase 衝突的正解是【取大的那個】：我那條分支帶的是
+                                    #   合併前的 6，取它就是把棘輪地板往回調 —— 而那正是棘輪
+                                    #   存在要擋的事（它只會在「往回走」時紅，而往回調常數會讓它閉嘴）。
+const CONTROL_FLOOR_COLOC: int = 5  # colocation_gate_bed（同格閘，2026-09-30；五格全點火）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
@@ -2648,6 +2652,11 @@ func _test_p19_control_coverage_ratchet() -> void:
 	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
 	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
 		n_fp >= CONTROL_FLOOR_FEP)
+	var n_cg: int = _count_fired("res://scripts/debug/colocation_gate_bed.gd")
+	print("   colocation_gate_bed %d（地板 %d）" % [n_cg, CONTROL_FLOOR_COLOC])
+	_check("★★母體地板：同格那支床也數得到非零（%d）" % n_cg, n_cg > 0)
+	_check("★★colocation_gate_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cg, CONTROL_FLOOR_COLOC],
+		n_cg >= CONTROL_FLOOR_COLOC)
 	var n_p8: int = _count_fired("res://scripts/debug/press_is_one_tick_bed.gd")
 	print("   press_is_one_tick_bed %d（地板 %d）" % [n_p8, CONTROL_FLOOR_P8])
 	_check("★★母體地板：#8 那支床也數得到非零（%d）" % n_p8, n_p8 > 0)

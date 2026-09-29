@@ -136,7 +136,7 @@ func _initialize() -> void:
 # ★母體地板兩道：①目標真的存在且真的【不同格】②對方真的有東西可以被拿走
 #   —— 否則「coin 沒少」會在一個【本來就沒有 coin】的世界裡恆綠。
 # ★★而本格【逐一指名】那 8 個原本零檢查的動詞（spec §3 要求），不是只驗一個。
-# 負對照：把 `_colocation_gate` 的呼叫拿掉 ⇒ 索貢在隔空成立且對方 coin 真的少 ⇒ 必紅
+# 負對照：把 `_colocation_gate` 的呼叫拿掉 ⇒ ★★★實測【7 個動詞在隔空成立】（＝這個洞原本的大小） ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
 func _test_p1_remote_is_refused_with_human_words() -> void:
 	print("\n── P1 隔空 ⇒ 人話拒絕 ──")
 	var pair: Array = _fresh()
@@ -188,7 +188,7 @@ func _test_p1_remote_is_refused_with_human_words() -> void:
 #   ⇒ 這一格斷言兩者【集合相等】：有人往那支函式加一個新團體動詞而忘了常數 ⇒ 紅。
 # ★★而它是真比較不是一句話講兩次：兩邊能各自獨立改變（一邊是常數、一邊是函式體的 append）。
 # ★母體地板：抽出來的 append 集合非空，且與 spec 的總數相符（抽取壞了會回空集合）。
-# 負對照：從 `get_available_actions` 拿掉一個 append ⇒ 集合差一個 ⇒ 必紅
+# 負對照：從 `get_available_actions` 拿掉一個 append（gather_intel）⇒ 集合差一個 ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
 func _test_p2_verb_set_is_cross_checked() -> void:
 	print("\n── P2 動詞集合異源比對 ──")
 	var src: String = FileAccess.get_file_as_string(
@@ -243,7 +243,7 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 #   ⇒ 它們可以各自改而不影響對方 ⇒ 這是真比較。
 # ★而矛盾的症狀比沒有選項更壞：玩家看到一個【按不動】的選項。
 # ★母體地板：畫面真的列出了至少一個 target（列 0 個的話這一格恆綠）。
-# 負對照：把畫面側的過濾拿掉（改成列全世界）⇒ 出現按不動的選項 ⇒ 必紅
+# 負對照：把畫面側的同格過濾拿掉 ⇒ ★實測【47 個被閘擋掉】＝47 個按不動的選項 ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
 func _test_p3_menu_and_handler_do_not_contradict() -> void:
 	print("\n── P3 畫面與 handler 不矛盾 ──")
 	var pair: Array = _fresh()
@@ -292,7 +292,7 @@ func _test_p3_menu_and_handler_do_not_contradict() -> void:
 #   ⇒ `execute_action(state, <一支遠的別隊 id>, "hunt")` 會把 hunt 誤判成隔空
 #   ⇒ ★誤判方向是【擋掉合法動作】，症狀是「某些自家隊動作偶爾莫名被拒」—— 比洞更難查。
 # ★母體地板：那個 target_id 真的對應一支【存在且不同格】的隊（否則這一格證不了東西）。
-# 負對照：把閘的第一個條件（`TEAM_TARGET_ACTIONS.has(action)`）拿掉 ⇒ hunt 被擋 ⇒ 必紅
+# 負對照：把閘的第一個條件（`TEAM_TARGET_ACTIONS.has(action)`）拿掉 ⇒ hunt 被擋（★＝我第一版那個洞：判準錨在引數的值） ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
 func _test_p4_self_actions_are_not_blocked_by_a_stray_target_id() -> void:
 	print("\n── P4 自家隊動作不被亂傳的 target 擋掉 ──")
 	var pair: Array = _fresh()
@@ -323,7 +323,7 @@ func _test_p4_self_actions_are_not_blocked_by_a_stray_target_id() -> void:
 # ══ P5：同格時行為完全不變（spec §3 P2「我沒把功能門死」）═══════════════════
 # ★母體地板：先斷言真的同格，並印出索貢前後的 coin —— 否則「行為不變」可以靠
 #   「什麼都沒發生」滿足。
-# 負對照：把閘改成【無條件擋】⇒ 同格也被拒 ⇒ 必紅
+# 負對照：把閘改成【無條件擋】⇒ 同格索貢也被拒（＝把功能門死） ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
 func _test_p5_colocated_behaviour_unchanged() -> void:
 	print("\n── P5 同格時行為不變 ──")
 	var pair: Array = _fresh()
