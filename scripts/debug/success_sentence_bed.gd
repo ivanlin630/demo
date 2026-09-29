@@ -83,6 +83,7 @@ func _initialize() -> void:
 
 # ══════════ P1［換得上：結果句 ＝ 動作人話 ＋ handler 的話］══════════
 # 負對照：把組裝那一行改回寫死「完成」⇒ 必紅
+# 負對照：把成功那一支的條件改成 `if true`（＝無條件寫死「完成」） ⇒ 已於 feat/success-sentence（2026-09-29） 實測紅
 func _test_p1_handler_words_reach_the_player() -> void:
 	_cur_cell = "_test_p1_handler_words_reach_the_player"
 	print("\n── P1 handler 的話到得了玩家 ──")
@@ -116,6 +117,7 @@ func _test_p1_handler_words_reach_the_player() -> void:
 #     ⇒ 不分類的話卷面會出現讀不出內容的列，而那看起來像抽取壞了
 # ★★★母體地板：印出來的條數要跟【來自 spec 的常數】比 ——
 #   不要拿「印了幾條」跟「掃到幾條」比（那是自己跟自己比，寫幾條都會綠）。
+# 負對照：從 registry 拿掉一個 action（51→50）／或把一個成功回傳的 `"ok": true` 改成 `1 == 1`（67→66） ⇒ 已於 feat/success-sentence（2026-09-29） 實測紅
 func _test_p2_population_is_visible() -> void:
 	_cur_cell = "_test_p2_population_is_visible"
 	print("\n── P2 母體看得見（三欄＋邊界句）──")
@@ -242,6 +244,7 @@ func _test_p2_population_is_visible() -> void:
 # ══════════ P3［空的仍退回「完成」—— ★注入式對照］══════════
 # ★★★它的母體今天是 0：實測 67／67 都帶話 ⇒ 不注入的話這一格是【恆綠的空母體】。
 #   ⇒ 所以餵一個【回空 msg】的假 handler，並★把命中次數印出來（不只印結果）。
+# 負對照：把條件改成 `if false`（＝空 msg 也照用）⇒ 實測印出空冒號「行動：take_loot：」 ⇒ 已於 feat/success-sentence（2026-09-29） 實測紅
 func _test_p3_empty_falls_back_by_injection() -> void:
 	_cur_cell = "_test_p3_empty_falls_back_by_injection"
 	print("\n── P3 空的仍退回「完成」（注入式）──")
@@ -282,6 +285,7 @@ func _test_p3_empty_falls_back_by_injection() -> void:
 
 
 # ══════════ P4［拒絕那一支沒動：句子逐字不變］══════════
+# 負對照：把拒絕那一支的「：被拒絕（」改成別的措辭 ⇒ 已於 feat/success-sentence（2026-09-29） 實測紅
 func _test_p4_rejection_branch_untouched() -> void:
 	_cur_cell = "_test_p4_rejection_branch_untouched"
 	print("\n── P4 拒絕那一支逐字不變 ──")
@@ -303,6 +307,7 @@ func _test_p4_rejection_branch_untouched() -> void:
 #   那正是這張票敢動 67 條句子的前提。
 # ★負對照：把 `res=%d` 改成印 `str(state.command_results)` ⇒ world-fp 必變 ⇒ 這一格必紅。
 #   ★★★此擾動【不得 commit】：`state_fingerprint.gd` 是所有 fp 基準的根。
+# 負對照：把 `state_fingerprint.gd` 的 `command_results.size()` 改成 `str(state.command_results)`。★★此擾動【不得 commit】：那個檔是所有 fp 基準的根 ⇒ 已於 feat/success-sentence（2026-09-29） 實測紅
 func _test_p5_text_is_not_in_the_fingerprint() -> void:
 	_cur_cell = "_test_p5_text_is_not_in_the_fingerprint"
 	print("\n── P5 結果句的文字不進 fp ──")
