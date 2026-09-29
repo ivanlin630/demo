@@ -366,7 +366,7 @@ func _input(event: InputEvent) -> void:
 			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_refresh()
 		KEY_SPACE:
-			_bridge.request_advance(WorldState.TICKS_PER_DAY)
+			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_DAY))
 		# ★★★推進一小時（spec §4b，用戶裁 #6）——★【不新開推進路徑】：照上面 SPACE 那一支的
 		#   寫法呼叫【既有的】 `request_advance()`。理由是 2026-09-24 剛踩過的那條：
 		#   兩個推進路徑其中一個沒跟上 ⇒ 我們不再製造第三條。
@@ -375,7 +375,7 @@ func _input(event: InputEvent) -> void:
 		#   而複製出來的那一份【不會跟著轉】。
 		# ★Esc 中斷沿用 SPACE 那一支已經有的行為（`:422` 的 `cancel_advance()`），不另外做。
 		KEY_X:
-			_bridge.request_advance(WorldState.TICKS_PER_HOUR)
+			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_HOUR))
 		KEY_G:
 			_input_mode = true
 			_input_mode_type = "numeric"
@@ -720,7 +720,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [X]推進1小時 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [Esc]返回",
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -1491,6 +1491,16 @@ func _handle_interact_mode(keycode: int) -> void:
 		_refresh()
 
 # P4-2:分離 self/原地動作(hunt/hunt_beast/establish_faction 等 allowed_kinds 非 team)
+# ★★★#8 吸附格線（spec §2②）：從現在推到【下一個 C 的倍數】。
+#   ★站在邊界（餘 0）⇒ 餘數為 0 ⇒ 回 C ＝ 推整段，**不是 0**（公式本身就給這個答案，不必特例）。
+#   ★★tick 一律呼 `_bridge.get_current_tick()`（`sim_bridge.gd` 的 live 讀）——
+#     ★★★**不得用 `_cached_snapshot` 那一份**：它只在 `_refresh()` 才更新，而 #8 的
+#     「按一下推一顆」會讓它跟世界差一顆 ⇒ 用快照算會吸到【前一格】。
+#     （這一句是 systems 寫死的，不是我挑的：spec §2② 逐字。）
+#   ★單位只准引用 `WorldState.TICKS_PER_HOUR`／`TICKS_PER_DAY`，不准寫 60／1440。
+func _snap_to(c: int) -> int:
+	return c - (_bridge.get_current_tick() % c)
+
 # 與 team-target 動作。forced 另由 forced_interaction.responses 處理;move_to/cancel_move 有專鍵。
 func _interact_action_split() -> Dictionary:
 	var team_acts: Array = []

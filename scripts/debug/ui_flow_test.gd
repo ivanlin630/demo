@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -102,6 +102,7 @@ func _initialize() -> void:
 	await _test_p16b_pending_zero_after_advance()
 	await _test_p18_unbounded_sentinel_is_named()
 	await _test_p20_forced_panel_three_lines()
+	await _test_p21_snap_both_directions()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2049,17 +2050,22 @@ func _test_p8_x_advances_one_hour() -> void:
 	#   ⇒ delta 還是 60 ⇒ 【1440 與 60 在卷面上長得一模一樣】⇒ 負對照【不紅】。
 	#   ⇒ ★被守的性質是「那個鍵【承諾】一小時」，而【走了多少】是世界的權利。
 	var asked: int = node._bridge.ticks_remaining()
-	print("   請求量=%d（TICKS_PER_HOUR=%d）" % [asked, WorldState.TICKS_PER_HOUR])
-	_check("★★按 X ⇒ 請求量正好是 TICKS_PER_HOUR（實測 %d／期望 %d）" % [
-		asked, WorldState.TICKS_PER_HOUR], asked == WorldState.TICKS_PER_HOUR)
+	# ★★#8 之後 X 是【吸附到下一個整點】不是固定一小時 ⇒ 期望值要從 t0 導出。
+	#   ★期望值用常數算，**不寫死 60**（負對照：把它換成字面值 ⇒ 換根時它不會跟著動）。
+	var want: int = WorldState.TICKS_PER_HOUR - (t0 % WorldState.TICKS_PER_HOUR)
+	print("   t0=%d｜請求量=%d（期望 %d ＝ TICKS_PER_HOUR %d − t0 %% TICKS_PER_HOUR %d）" % [
+		t0, asked, want, WorldState.TICKS_PER_HOUR, t0 % WorldState.TICKS_PER_HOUR])
+	_check("★★按 X ⇒ 請求量正好吸到下一個整點（實測 %d／期望 %d）" % [asked, want],
+		asked == want)
+	_check("★★★吸附量落在 1..TICKS_PER_HOUR（★0 是舊 bug 的長相：站在邊界原地不動）",
+		asked >= 1 and asked <= WorldState.TICKS_PER_HOUR)
 	var frames: int = 0
 	while node._bridge.is_advancing() and frames < 64:
 		node._process(0.1)
 		frames += 1
 	var delta: int = st.world.current_tick - t0
 	print("   實際走了 delta=%d frames=%d（★≤ 請求量：事件可以把它截短，不能讓它超過）" % [delta, frames])
-	_check("★★★世界走的不超過那個請求（delta=%d ≤ %d）" % [delta, WorldState.TICKS_PER_HOUR],
-		delta <= WorldState.TICKS_PER_HOUR)
+	_check("★★★世界走的不超過那個請求（delta=%d ≤ %d）" % [delta, want], delta <= want)
 	await _free_ui(node)
 	_cell("_test_p8_x_advances_one_hour")
 
@@ -2113,7 +2119,7 @@ func _test_p9_single_advance_path() -> void:
 # P10［頁腳有字＋單位統一］：keymap 的 X 那一項寫「1小時」不是「60tick」。
 # ★判準只看【那一項的字串】（[X] 到下一個 [ 之間），不是全檔掃 60。
 # 負對照：把 keymap 那一項改成 `[X]推進60tick` ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
-func _test_p10_footer_x_says_one_hour() -> void:
+func _test_p10_footer_x_says_one_hour() -> void:   # ★名字留著（註冊表／點名表認它）
 	_selftest_gate("_test_p10_footer_x_says_one_hour").noop()
 	print("\n── P10 頁腳 X 那一項 ──")
 	var node = await _make_ui()
@@ -2126,7 +2132,10 @@ func _test_p10_footer_x_says_one_hour() -> void:
 		var nxt: int = rest.find("[")
 		var item: String = rest.substr(0, nxt) if nxt != -1 else rest
 		print("   那一項：「%s」" % item)
-		_check("★★那一項寫的是「1小時」", item.contains("1小時"))
+		# ★★#8 之後 X 的語意從【固定一小時】變成【吸附到下一個整點】
+		#   ⇒ 這一格守的東西變了 ⇒ ★它的綠必須是新的（「一張票改的就是閘」那一條）。
+		#   ★★而【不寫死 60】那一半逐字保留：用戶原話「記得統一單位 不要寫死60tick」。
+		_check("★★那一項寫的是「整點」（#8 吸附語意）", item.contains("整點"))
 		_check("★★★那一項沒有寫死的 60（用戶逐字：不要寫死60tick）", not item.contains("60"))
 	await _free_ui(node)
 	_cell("_test_p10_footer_x_says_one_hour")
@@ -2364,6 +2373,52 @@ func _test_p20_forced_panel_three_lines() -> void:
 		txt.count("提議與你結盟") == 1)
 	await _free_ui(node)
 	_cell("_test_p20_forced_panel_three_lines")
+
+# ★★★#8 P2：吸附【兩向】—— 站在格線中間要吸到下一條線，站在線上要推整段（不是原地不動）。
+#   ★期望值一律【用常數算】，不寫死 60／1440（spec §4 P2 逐字）；
+#     ★★而本格另外斷言 `_snap_to` 的【源碼裡】沒有字面 60／1440 ——
+#     否則「期望值用常數算」與「實作用常數算」是兩件事，而只驗前者會讓後者偷偷寫死。
+#   ★★★tick 用 `_bridge.get_current_tick()`（live）不是 `_cached_snapshot`：
+#     本格刻意【不呼 _refresh()】就直接按鍵 —— 若實作讀快照，那份是舊的 ⇒ 會吸到前一格 ⇒ 紅。
+# 負對照：★尚未點火
+func _test_p21_snap_both_directions() -> void:
+	_selftest_gate("_test_p21_snap_both_directions").noop()
+	print("
+── #8 P2 吸附兩向 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var H: int = WorldState.TICKS_PER_HOUR
+	var D: int = WorldState.TICKS_PER_DAY
+	var cases: Array = [
+		["X 在格線中間", KEY_X, 2 * H + 7, H - 7],
+		["X 剛好在整點上", KEY_X, 3 * H, H],
+		["Space 在格線中間", KEY_SPACE, D + 7, D - 7],
+		["Space 剛好在日界上", KEY_SPACE, 2 * D, D],
+	]
+	for c in cases:
+		st.world.current_tick = int(c[2])
+		node._bridge.cancel_advance()
+		# ★刻意不 _refresh()：要讓「讀快照」的實作在這裡紅
+		_press_key(node, int(c[1]))
+		var asked: int = node._bridge.ticks_remaining()
+		print("   %-16s tick=%-6d 請求量=%-6d（期望 %d）" % [String(c[0]), int(c[2]), asked, int(c[3])])
+		_check("%s：吸到下一條格線（實測 %d／期望 %d）" % [String(c[0]), asked, int(c[3])],
+			asked == int(c[3]))
+		_check("%s：請求量不是 0（0＝站在線上原地不動的舊 bug 長相）" % String(c[0]), asked != 0)
+		node._bridge.cancel_advance()
+	# ★實作端也不准寫死
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var body: String = ""
+	var at: int = src.find("func _snap_to(")
+	_check("★母體地板：找得到 `_snap_to`（找不到＝下面全是空談）", at != -1)
+	if at != -1:
+		body = src.substr(at, 240)
+		print("   _snap_to 源碼：%s" % body.split("
+")[1].strip_edges())
+		_check("★★實作端沒有字面 60", not body.contains("60"))
+		_check("★★實作端沒有字面 1440", not body.contains("1440"))
+	await _free_ui(node)
+	_cell("_test_p21_snap_both_directions")
 
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
