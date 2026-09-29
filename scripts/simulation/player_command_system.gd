@@ -203,8 +203,21 @@ const TEAM_TARGET_ACTIONS: Array = [
 func _colocation_gate(state: WorldState, action: String, target_id: int, pt: TeamData) -> Dictionary:
 	if not TEAM_TARGET_ACTIONS.has(action):
 		return {}   # ★★契約上 target 不是別隊（自家隊動作／tile 動作）⇒ 本閘無關
+	return refuse_if_not_colocated(state, target_id, pt)
+
+# 距離檢查【本體】。★★★它與上面那支的分工：
+#   ·`_colocation_gate` ＝【動詞閘】那個入口（`execute_action` 那條路，target 是 int 且
+#     動詞決定契約）
+#   ·本支 ＝ 那個入口用的判斷，而**第二個入口直接呼它**：
+#     `_recruit_named_internal`（`execute_action_with_target` 那條路）的契約是
+#     **靜態已知的**——它永遠是「向另一支隊買一個記名成員」⇒ 不需要問動詞。
+#   ★★這個分工是 R² 擋件擋出來的（systems 裁 2026-09-30）：
+#     我原本照用「吃 Dictionary 那條不在爆炸半徑內」這個結論而**沒有自己核**，
+#     ⇒ ★★★而那句話的錯法是【拿入口當母體】：不變量的母體是
+#       「哪些動作跟別隊發生作用」，不是「它從哪個函式進來」。
+func refuse_if_not_colocated(state: WorldState, target_id: int, pt: TeamData) -> Dictionary:
 	if pt == null:
-		return {}   # ★沒有玩家隊 ⇒ 這一閘沒有主詞；null 由上面既有的守衛負責回話
+		return {}   # ★沒有玩家隊 ⇒ 這一閘沒有主詞；null 由既有的守衛負責回話
 	var tgt: TeamData = state.teams.get(target_id)
 	if tgt == null:
 		return {}   # ★目標不存在 ⇒ 由各 handler 自己回話（不搶它的措辭）
@@ -1491,6 +1504,18 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	var p: PersonData     = state.persons.get(person_id)
 	if tgt4 == null or p == null or p.team_id != from_team_id:
 		return { "ok": false, "msg": "成員不存在或已離隊" }
+	# ★★★第三個管道的同格閘（R² 擋件、systems 裁 2026-09-30 納入本票）：
+	#   這條路的 `from_team_id` 直接來自 target dict（任意值）⇒ 走程式介面
+	#   可以【隔空向任意隊買走一個記名成員】——而它比隔空索貢更重。
+	# ★位置在【第一個寫入之前】，而那不是風格：這條路有**四個寫入**
+	#   （玩家付錢／對方收錢／人離原隊／人入玩家隊）
+	#   ⇒ ★★半途擋下來比沒擋更糟（人離了原隊而沒入玩家隊＝憑空消失）
+	#   ⇒ 所以閘必須在第一個 `ResourceBank` 呼叫之前。
+	# ★而它排在【存在檢查之後、金幣檢查之前】：id 亂傳要先聽到「成員不存在」，
+	#   而不同格的人不該先被告知「金幣不足」（那句會把他引去湊錢）。
+	var _far_r: Dictionary = refuse_if_not_colocated(state, from_team_id, pt)
+	if not _far_r.is_empty():
+		return _far_r
 	var coin: float = float(pt.resources.get("coin", 0))
 	if coin < RECRUIT_COST_NAMED:
 		return { "ok": false, "msg": "金幣不足（named 需%d）" % int(RECRUIT_COST_NAMED) }

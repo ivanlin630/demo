@@ -40,6 +40,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p3_menu_and_handler_do_not_contradict",
 	"_test_p4_self_actions_are_not_blocked_by_a_stray_target_id",
 	"_test_p5_colocated_behaviour_unchanged",
+	"_test_p6_recruit_named_is_the_third_channel",
 ]
 
 
@@ -68,6 +69,80 @@ func _code_only(src: String) -> String:
 			continue
 		out += l + "\n"
 	return out
+
+# ══ P6：第三個管道 —— `recruit_named` 跨隊搬人＋搬 coin ═══════════════════
+# ★★★R² 擋件抓到的（systems 裁 2026-09-30 納入本票，不登 defer）：那條路的
+#   `from_team_id` 直接來自 target dict（任意值）⇒ 走程式介面可以
+#   【隔空向任意隊買走一個記名成員】—— 而它比隔空索貢更重。
+# ★★★而本格要印的是【人與 coin 兩邊都沒動】，不是只印 ok=false：
+#   那條路有**四個寫入**（玩家付錢／對方收錢／人離原隊／人入玩家隊）
+#   ⇒ **半途擋下來比沒擋更糟**（人離了原隊而沒入玩家隊＝憑空消失）
+#   ⇒ 所以四個欄位逐一斷言，而不是相信「ok=false 就代表什麼都沒發生」。
+# ★母體地板三道：①目標真的不同格 ②那個人真的在對方隊上（不然「沒被搬走」恆真）
+#   ③玩家真的付得起（付不起的話 ok=false 可能是金幣不足而不是閘）
+# 負對照：把 `refuse_if_not_colocated` 那一行拿掉 ⇒ 人真的被買走、coin 真的轉移 ⇒ 必紅
+func _test_p6_recruit_named_is_the_third_channel() -> void:
+	print("\n── P6 第三個管道：recruit_named ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var cmd: PlayerCommandSystem = pair[1]
+	var tid: int = _other_team_id(st)
+	if tid == -1:
+		_cell("_test_p6_recruit_named_is_the_third_channel")
+		return
+	var tgt: TeamData = _place(st, tid, false)
+	var pt: TeamData = st.teams.get(st.get_player_team_id())
+	_check("★母體地板 A：目標真的不同格", pt.tile_pos != tgt.tile_pos)
+	var pid: int = -1
+	for m in tgt.named_members:
+		if st.persons.has(int(m)):
+			pid = int(m)
+			break
+	print("   對方 Team%d 的記名成員 = %s ⇒ 取 P%d" % [tid, str(tgt.named_members), pid])
+	_check("★母體地板 B：那個人真的在對方隊上（不然「沒被搬走」恆真）",
+		pid != -1 and st.persons.has(pid) and st.persons[pid].team_id == tid)
+	if pid == -1:
+		_cell("_test_p6_recruit_named_is_the_third_channel")
+		return
+	pt.resources["coin"] = 1000.0
+	_check("★母體地板 C：玩家真的付得起（%.0f coin）" % float(pt.resources["coin"]),
+		float(pt.resources.get("coin", 0)) >= PlayerCommandSystem.RECRUIT_COST_NAMED)
+	var before_player_coin: float = float(pt.resources.get("coin", 0))
+	var before_target_coin: float = float(tgt.resources.get("coin", 0))
+	var before_owner: int = st.persons[pid].team_id
+	var before_in_target: bool = tgt.named_members.has(pid)
+	var before_in_player: bool = pt.named_members.has(pid)
+	var r: Dictionary = cmd.execute_action_with_target(st, "recruit_named",
+		{"team_id": tid, "member_id": pid, "tile_q": -1, "tile_r": -1})
+	print("   隔空 recruit_named ⇒ ok=%s msg=%s" % [str(r.get("ok", "?")), String(r.get("msg", ""))])
+	_check("★隔空被拒（ok=false）", not bool(r.get("ok", true)))
+	_check("★★訊息是人話（含「格」字）", String(r.get("msg", "")).contains("格"))
+	print("   玩家 coin %.1f → %.1f｜對方 coin %.1f → %.1f｜P%d 的隊 %d → %d" % [
+		before_player_coin, float(pt.resources.get("coin", 0)),
+		before_target_coin, float(tgt.resources.get("coin", 0)),
+		pid, before_owner, st.persons[pid].team_id])
+	_check("★★★一：玩家 coin 沒少",
+		is_equal_approx(float(pt.resources.get("coin", 0)), before_player_coin))
+	_check("★★★二：對方 coin 沒多",
+		is_equal_approx(float(tgt.resources.get("coin", 0)), before_target_coin))
+	_check("★★★三：那個人還在對方隊的 roster 上（%s → %s）" % [
+		str(before_in_target), str(tgt.named_members.has(pid))],
+		tgt.named_members.has(pid) == before_in_target)
+	_check("★★★四：那個人沒有進玩家隊的 roster（%s → %s）" % [
+		str(before_in_player), str(pt.named_members.has(pid))],
+		pt.named_members.has(pid) == before_in_player)
+	_check("★★★五：那個人的 team_id 沒變（%d → %d）" % [before_owner, st.persons[pid].team_id],
+		st.persons[pid].team_id == before_owner)
+	print("   ★為什麼要五條而不是一條 ok=false：這條路有四個寫入 ⇒")
+	print("     半途擋下來比沒擋更糟（人離了原隊而沒入玩家隊＝憑空消失）")
+	print("     ⇒ 「ok=false」答不出「世界有沒有被動過一半」。")
+	_place(st, tid, true)
+	var r2: Dictionary = cmd.execute_action_with_target(st, "recruit_named",
+		{"team_id": tid, "member_id": pid, "tile_q": -1, "tile_r": -1})
+	print("   同格 recruit_named ⇒ ok=%s msg=%s" % [str(r2.get("ok", "?")), String(r2.get("msg", ""))])
+	_check("★同格時仍然買得到（功能沒被門死）", bool(r2.get("ok", false)))
+	_cell("_test_p6_recruit_named_is_the_third_channel")
+
 
 # 剝行尾註解。★`#` 只在【引號外】才算註解起點（引號計數奇偶），否則字串裡的 `#` 會切斷該行。
 # ★★★這一支取代的是【兩處已經被咬過的地方】（systems 要求寫明，否則下一個人寫第三個）：
@@ -121,6 +196,7 @@ func _initialize() -> void:
 	_test_p3_menu_and_handler_do_not_contradict()
 	_test_p4_self_actions_are_not_blocked_by_a_stray_target_id()
 	_test_p5_colocated_behaviour_unchanged()
+	_test_p6_recruit_named_is_the_third_channel()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c): miss.append(c)
@@ -233,8 +309,17 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 	_check("★spec §3 的加法成立（否則分類法漏了一格）",
 		(from_const.size() - exempt) + exempt == SPEC_TEAM_TARGET_TOTAL)
 	# ★★動工時量到的現況：哪幾個【自己】本來就查同格（本閘之前）
-	print("   ★動工時現況：11 個裡只有 %s 自己查同格 ⇒ 其餘 %d 個【零檢查】"
-		% [str(MEASURED_SELF_CHECKING), from_const.size() - exempt - MEASURED_SELF_CHECKING.size()])
+	# ★★★口徑（systems 2026-09-30 統一）：兩個數都對，而【分母不同】⇒ 一律連分母寫。
+	#   需同格的動詞 ＝ 11 − early-return 的 `ignore` ＝ **10**
+	#   原本零檢查     ＝ 10 − 已有檢查的 `invite_settle`／`beg` ＝ **8**
+	#   ⇒ 只寫「8」會讓讀的人以為母體是 8。
+	print("   ★口徑：需同格 %d／%d（減 early-return %d）｜原本零檢查 %d／%d（減已有檢查的 %s）"
+		% [from_const.size() - exempt, from_const.size(), exempt,
+			from_const.size() - exempt - MEASURED_SELF_CHECKING.size(),
+			from_const.size() - exempt, str(MEASURED_SELF_CHECKING)])
+	print("   ★★而本闘的母體【不是】這份動詞清單而已：`recruit_named` 走另一個入口")
+	print("     （`execute_action_with_target`）⇒ 它不在這 11 個裡，而它也要同格 ⇒ 見 P6。")
+	print("     ⇒ 母體的定義是【跟別隊發生作用的動作】，不是【某一份動詞清單】。")
 	for sc in MEASURED_SELF_CHECKING:
 		var fn_at: int = src.find("func _action_" + String(sc))
 		var fn_body: String = src.substr(fn_at, 900) if fn_at != -1 else ""
