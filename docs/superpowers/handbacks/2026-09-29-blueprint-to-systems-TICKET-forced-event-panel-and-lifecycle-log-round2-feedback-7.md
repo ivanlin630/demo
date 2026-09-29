@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第二輪玩測回饋 #7（用戶 2026-09-29）：強制事件看不懂、按 1 一直排、按 T 出來變拒絕；UI 與終端 log 都不夠
 topic: ★三件：①強制事件面板要用人話說【誰／要什麼／接受會發生什麼】（現況 mapper 只有「Team11 提議 alliance」這種半生字串，proposal id 原樣印）②回應入列後面板要鎖住並顯示「已排入回應：接受」，同一事件的重複回應去重（同 refresh_targets 那條）③強制事件生命週期三點（到達／玩家回應／逾時自動拒絕）全部進玩家事件流＋終端 print；★而「按 T 出來後變拒絕」的真因我【不下斷言】——要一支床走完「到達→入列接受→推進一小時→結果」，床會說是逾時競態、還是重複回應的「無待處理強制事件」被讀成拒絕、還是 _accept_diplomacy 回 ok=false
 ---
