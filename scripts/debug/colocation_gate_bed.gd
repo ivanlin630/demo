@@ -151,7 +151,12 @@ func _test_p1_remote_is_refused_with_human_words() -> void:
 	var pt: TeamData = st.teams.get(st.get_player_team_id())
 	print("   玩家 @%s／目標 Team%d @%s" % [str(pt.tile_pos), tid, str(tgt.tile_pos)])
 	_check("★母體地板 B：真的不同格（同格的話整格恆綠）", pt.tile_pos != tgt.tile_pos)
-	pt.population = maxi(pt.population, 1)
+	# ★★★`population` 是【計算屬性】（getter-only）⇒ 直接賦值是【靜默 no-op】：
+	#   我第一版寫 `pt.population = maxi(pt.population, 1)` ——不報錯、也不生效。
+	#   ★抓到它的是 `computed-prop` 那支閘（直寫站 baseline 1 → 3）
+	#     ⇒ 而那支閘的存在理由逐字寫著「拿掉 setter 不會變 parse error ——
+	#       引擎不給這個保護，所以靜態閘是唯一的預防線」。
+	#   ⇒ ★★這一行本來就不需要：玩家隊的人口由 fixture 給，本格不靠它。
 	tgt.resources["coin"] = 200.0
 	tgt.resources["food"] = 200.0
 	_check("★母體地板 C：對方真的有東西可被拿走（coin %.0f）" % float(tgt.resources["coin"]),
@@ -347,7 +352,19 @@ func _test_p5_colocated_behaviour_unchanged() -> void:
 	var pt: TeamData = st.teams.get(st.get_player_team_id())
 	_check("★母體地板 A：真的同格", pt.tile_pos == tgt.tile_pos)
 	tgt.resources["coin"] = 300.0
-	pt.population = maxi(pt.population, int(tgt.population * 1.5) + 1)
+	# ★索貢的前提是【玩家人口 > 對方 ×1.5】，而 `population` 是計算屬性不能直寫
+	#   ⇒ 走合法路徑：把【對方】的匿名人口搬掉，而不是假裝把自己變大。
+	#   ★★我第一版寫 `pt.population = …` ⇒ 靜默 no-op ⇒ 這一格當時是靠
+	#     【fixture 剛好滿足前提】過的，而那是運氣不是佈置（`computed-prop` 閘抓到）。
+	while tgt.population > 1 and float(pt.population) <= float(tgt.population) * 1.5:
+		var moved: int = AnonTierSystem.remove_anon(tgt, AnonCohort.TIER_PLEB, 1)
+		if moved <= 0:
+			break
+	print("   佈置：玩家 pop=%d／對方 pop=%d（索貢前提：玩家 > 對方 ×1.5 ＝ %s）" % [
+		pt.population, tgt.population,
+		str(float(pt.population) > float(tgt.population) * 1.5)])
+	_check("★母體地板 B：索貢的前提真的成立（不成立的話 ok=false 不代表閘擋了它）",
+		float(pt.population) > float(tgt.population) * 1.5)
 	var before: float = float(tgt.resources.get("coin", 0))
 	var r: Dictionary = cmd.execute_action(st, tid, "demand_tribute")
 	print("   同格索貢：ok=%s msg=%s｜對方 coin %.1f → %.1f" % [
