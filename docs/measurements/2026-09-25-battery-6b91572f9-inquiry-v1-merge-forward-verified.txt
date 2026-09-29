@@ -1,0 +1,101 @@
+# 電池卷面：打聽 v1 merge 的【往前補驗】
+# ★合併 commit b13220a0a 在還沒驗之前就被別人的一推帶上 origin/main ⇒ 處置＝往前補驗，不改歷史
+# ★★合併點那一輪 RC=1，唯一紅＝mailbox-integrity 的 consumed→open 回退（我自己下的正當指令觸發）
+#   ⇒ 已窄化：免紅要在信裡帶 reopened:<理由>，且豁免紅綠都印
+# ★★★本輪跑在公開頂端 6b91572f9：83／83、RC=0、registry 與 runner 皆 clean、同一棵樹 ⇒ 補驗完成
+# ★誠實限：頂端後來多了一顆純 spec commit（b391f2739），沒有任何閘讀它 —— 不假裝它被驗過
+# ★★另一個實測：摘要 writer 的 _mg_root 走 git-common-dir ⇒ 從 worktree 跑時卷面落在【主 dir】
+
+run-id: 20155-20260925-013704
+runner-self: 752ba124
+[TREE] HEAD-start=6b91572f9 HEAD-end=6b91572f9
+[TREE] registry=clean runner=clean code-dirty=0
+range: MG_FROM=0 MG_TO=0｜註冊表 83 支｜實跑 83 支
+baseline: 上一次 main 基線紅數=未讀｜本輪紅數=0
+BATTERY_RC: 0
+---- 逐格（id / 秒 / 結果）----
+constitution	4s	PASS
+bare-tick	8s	PASS
+build-duration	4s	PASS
+bed-parse	77s	PASS
+bed-arm	5s	PASS
+ki-anchor	4s	PASS
+mailbox-integrity	39s	PASS
+cherrypick-fidelity	2s	PASS
+ki-status	12s	PASS
+single-writer	1s	PASS
+tree-div	0s	PASS
+headless	24s	PASS
+cross-run-static	12s	PASS
+own-camp-link	7s	PASS
+zero-caller	3s	PASS
+exam-freeze	1s	PASS
+print-join	0s	PASS
+belief-freshness-invariant	6s	PASS
+unified-commerce	6s	PASS
+defer-open	23s	PASS
+defer-phrase	1s	PASS
+modulo-phase	0s	PASS
+ledger-drop-visible	6s	PASS
+lod-split	1s	PASS
+valuation-clamp	7s	PASS
+world-schedule-due	7s	PASS
+envoy-ptype	6s	PASS
+mailbox-size	1s	PASS
+mailbox-broadcast	0s	PASS
+board-price	6s	PASS
+swallow-setter	1s	PASS
+tier2-sweep-staleness	0s	PASS
+minor-merge	7s	PASS
+escrow-audit	7s	PASS
+computed-prop	1s	PASS
+bed-kind	1s	PASS
+wage-penalty	7s	PASS
+payroll-urgency	7s	PASS
+merchant-turnover	12s	PASS
+team-ui	7s	PASS
+player-entry-smoke	8s	PASS
+ui-flow	13s	PASS
+command-replay	25s	PASS
+player-event-feed	7s	PASS
+inquiry-v1	12s	PASS
+ui-logic	7s	PASS
+value-key	2s	PASS
+value-key-selfcheck	1s	PASS
+plan-speed	6s	PASS
+material-buy	7s	PASS
+gateA	6s	PASS
+gateA-hysteresis	6s	PASS
+restock-burn	12s	PASS
+failure-feedback-coverage	8s	PASS
+gather-purity	6s	PASS
+role-commit-scope	2s	PASS
+watchdog-beacon	0s	PASS
+live-team-census	2s	PASS
+fp-longwindow	33s	PASS
+live-team-ratchet	0s	PASS
+grudge-ledger-a	6s	PASS
+raid-expected-value	6s	PASS
+stale-pos-recon	7s	PASS
+anchoredness-freshness	7s	PASS
+outpost-belief	6s	PASS
+sister-sites-outpost	7s	PASS
+occupy-target-belief	7s	PASS
+phase-tree-net-cost	6s	PASS
+phase-root-conservation	9s	PASS
+fp-gather-sensitivity	38s	PASS
+day-length-single-source	10s	PASS
+det-observation-noise	7s	PASS
+crisis-override	6s	PASS
+world-fp	265s	PASS
+world-fp-ctrl	525s	PASS
+intel-wake-godview	5s	PASS
+intel-wake-direction	12s	PASS
+globalmsg-shape	7s	PASS
+faction-drive-once	19s	PASS
+shape-falsifier	27s	PASS
+pass-stagger	64s	PASS
+fp-excludes-derived	6s	PASS
+player-fp-sentinel	11s	PASS
+---- ★綠著印出來、否則沒人看得到的話（carry 規則見本檔 MG_CARRY_RE）----
+（本輪沒有）
