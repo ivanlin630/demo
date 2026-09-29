@@ -119,7 +119,7 @@ func _text_of(st: WorldState, kind: String) -> String:
 #   ②`proposal` 真的是會撞 match 的那種值（propose_alliance／propose_trade／tribute_offer）
 #     —— 否則床會在一個【proposal 剛好合法】的世界裡對 (c) 恆綠。
 # ★★★(a) 欄在 #8 之後改印【次序】不印【時間】：消費點與逾時在同一顆 tick 的第幾步。
-# 負對照：★尚未點火（本格是【診斷】：它的工作是印出證據欄，不是守一個性質）
+# 負對照：把 `propose_alliance` 從 handler 的 match 拿掉 ⇒ 回歸斷言（ok=true）紅（★同一個擾動也讓 P9 的差集紅 —— 一個擾動打兩格是對的：它們守同一件事的兩面） ⇒ 已於 feat/forced-response-settles（2026-09-30 這一輪） 實測紅
 func _test_p7_indict_the_real_cause() -> void:
 	print("\n── P7 指認真因（四候選證據欄）──")
 	var pair: Array = _fresh()
@@ -295,7 +295,7 @@ func _test_p8_settled_response_is_silent() -> void:
 #        全庫 `order_task` 的具體賦值（`TeamData.TASK_TRIBUTE_OFFER`）。
 #      ⇒ ★若有人日後寫第二個具體 order_task 值而沒有經過那個常數，本格【看不到它】
 #        —— 那是這一格已知的洞，寫在這裡而不是假裝 A 是封閉的。
-# 負對照：把 `propose_alliance` 從 handler 的 match 拿掉 ⇒ 差集多一個 ⇒ 必紅
+# 負對照：把 `propose_alliance` 從 handler 的 match 拿掉 ⇒ 差集多一個（少 0／多 1） ⇒ 已於 feat/forced-response-settles（2026-09-30 這一輪） 實測紅
 func _test_p9_proposal_strings_cross_source() -> void:
 	print("\n── P9 提案字串異源比對 ──")
 	# ══ A：寄件端
@@ -391,7 +391,7 @@ func _test_p9_proposal_strings_cross_source() -> void:
 #   ⇒ systems 裁：那一格的工作就是去跑它。
 # ★而它同時是一道【柵欄】：防止未來有人「順手把所有字串都加進 match」。
 # ★母體地板：先斷言玩家真的【有錢可以被扣】（0 coin 的話「沒有減少」恆真）。
-# 負對照：把 `tribute_offer` 併進 `"tribute", "demand_tribute"` 那支 arm ⇒ coin 減少 ⇒ 必紅
+# 負對照：把 `tribute_offer` 併進 `"tribute", "demand_tribute"` 那支 arm ⇒ ★★★實測 coin 500 → 375（玩家倒付 125）—— 這一支把我的【推論】變成【量測】 ⇒ 已於 feat/forced-response-settles（2026-09-30 這一輪） 實測紅
 func _test_p10_reverse_tribute_must_not_charge_the_player() -> void:
 	print("\n── P10 對方要進貢 ⇒ 玩家不得付錢 ──")
 	var pair: Array = _fresh()
