@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -105,6 +105,7 @@ func _initialize() -> void:
 	await _test_p21_snap_both_directions()
 	await _test_p22_overlay_callsites_advance_one_tick()
 	await _test_p23_response_settles_on_press()
+	await _test_p24_number_keys_never_mean_response()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -247,7 +248,7 @@ func _test_forced_choose_heir_ui() -> void:
 	for r in fi.get("responses", []): resp_ids.append(r.get("response_id", ""))
 	_check("forced responses 列候選（非只拒絕）", resp_ids.size() == 2 and ("heir_%d" % int(cands[0])) in resp_ids)
 	# 驅動選第一候選（forced 回應 = num 0 → KEY_1,因 fe_count>0 時 idx 0 對應第一 response）
-	node._handle_interact_mode(KEY_1)
+	node._handle_interact_mode(KEY_A)   # ★不變量 #10：forced 回應走專屬字母鍵
 	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
 	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
 	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
@@ -284,7 +285,7 @@ func _test_forced_aid_request_ui() -> void:
 	_check("forced responses 含 give（非只拒絕）", "give" in resp_ids and "refuse" in resp_ids)
 	# give 是第一 response（options ["give","refuse"]）→ KEY_1
 	var food_before: float = float(pt.resources["food"]) + float(b.resources["food"])
-	node._handle_interact_mode(KEY_1)
+	node._handle_interact_mode(KEY_A)   # ★不變量 #10：forced 回應走專屬字母鍵
 	# ★★★指令佇列化之後，按鍵只是【入列】—— 世界要等下一顆 tick 才變（2026-09-24 實測）。
 	#   ★我原本的分類表掃的是【床裡的 command_player 呼叫點】，而這一格是
 	#     透過真實輸入路徑下指令（command_player 在 text_ui_main.gd 裡）⇒ ★★掃不到。
@@ -2364,7 +2365,9 @@ func _test_p20_forced_panel_three_lines() -> void:
 	print("   ── 玩家看到的那幾行 ──")
 	for l in txt.split("
 "):
-		if String(l).contains("⚠") or String(l).contains("接受＝") or String(l).contains("視同拒絕"):
+		# ★把【專屬鍵位那幾行】也印出來（不變量 #10 之後回應是 [A].. 不是 [1]..）
+		if (String(l).contains("⚠") or String(l).contains("接受＝")
+				or String(l).contains("視同拒絕") or String(l).begins_with("   [")):
 			print("   | " + String(l))
 	_check("①誰：面板有 Team7311", txt.contains("Team7311"))
 	_check("①誰：帶勢力欄（獨立/勢力N）", txt.contains("（獨立") or txt.contains("（勢力"))
@@ -2375,6 +2378,10 @@ func _test_p20_forced_panel_three_lines() -> void:
 	_check("④不回應下場那一行在", txt.contains("視同拒絕"))
 	_check("★★★人話只印一次（舊版把 message 貼在每一個選項前面）",
 		txt.count("提議與你結盟") == 1)
+	# ★★★不變量 #10：回應在【專屬字母鍵】上，而數字清單【不含】它們
+	_check("★★★回應列在專屬字母鍵上（畫面有 `[A] `）", txt.contains("[A] "))
+	_check("★★數字清單不含回應（`[1] ` 那一行不是接受／拒絕）",
+		not txt.contains("[1] ✓ 接受") and not txt.contains("[1] ✗ 拒絕"))
 	await _free_ui(node)
 	_cell("_test_p20_forced_panel_three_lines")
 
@@ -2512,8 +2519,8 @@ func _test_p23_response_settles_on_press() -> void:
 	_check("★母體地板 A：按第一次【之前】forced_event 非空", not st.player_forced_event.is_empty())
 	var t0: int = st.world.current_tick
 	var res0: int = st.command_results.size()
-	# ── 第一次按：走真鍵路徑（KEY_1 ＝ 第一個 forced response）
-	node._handle_interact_mode(KEY_1)
+	# ── 第一次按：走真鍵路徑（★不變量 #10 之後：KEY_A ＝ 第一個 forced response）
+	node._handle_interact_mode(KEY_A)
 	print("   第一次按：請求量=%d（★#8 的咽喉）" % node._bridge.ticks_remaining())
 	_check("第一次按 ⇒ 咽喉請求一顆", node._bridge.ticks_remaining() == 1)
 	var frames: int = 0
@@ -2536,7 +2543,7 @@ func _test_p23_response_settles_on_press() -> void:
 	# ── 緊接著再按同一個鍵 2 次：★兩次都必須【完全沒有輸出】
 	var res1: int = st.command_results.size()
 	for n in range(2):
-		node._handle_interact_mode(KEY_1)
+		node._handle_interact_mode(KEY_A)
 		var f2: int = 0
 		while node._bridge.is_advancing() and f2 < 8:
 			node._process(0.1)
@@ -2551,25 +2558,78 @@ func _test_p23_response_settles_on_press() -> void:
 		not joined.contains("被拒絕") and not joined.contains("無待處理"))
 	_check("★再按沒有走到強制事件那條路（沒有「回應事件」前綴）",
 		not joined.contains("回應事件"))
-	# ══════════ ★★★[DISCOVERY] 比 spec 預期嚴重得多的一件事 ══════════
-	#   spec §7 ②′ 寫「連按第 2／3 次天然 no-op（forced_event 已空）」——★**實測不是 no-op**：
-	#   面板消失後 `fe_count` 變 0 ⇒ `_handle_interact_mode` 裡那個
-	#   `if ... and num < fe_count` 不再成立 ⇒ 同一個 `KEY_1` 掉進【self-actions】那一支
-	#   ⇒ 實測它執行了 `establish_faction`（建國）與 `train`（-30 coin）。
-	#   ★★★索引在面板關掉之後【換了意思】，而玩家的手指還在同一個鍵上。
-	#   ⇒ 這是【設計選擇】（回應完要不要離開互動模式／要不要吃掉那一次按鍵）
-	#     ⇒ 我不自己裁，已寫 handback 給 systems。
-	#   ★★而這一格【現在斷言缺陷仍在】—— 那是刻意的：
-	#     修好之後 `extra` 會變空 ⇒ 這一格紅 ⇒ 那個紅就是【提醒把這一格翻過來】的鈴。
-	#     ⇒ 不這樣做的話，修好之後沒有任何東西會告訴下一個人這裡曾經有個洞。
+	# ══════════ ★★★那個鈴響了，而這是翻過來之後的斷言 ══════════
+	#   歷史（★留著，不刪）：spec §7 ②′ 寫「連按第 2／3 次天然 no-op」——實測不是。
+	#   面板消失後 fe_count 變 0 ⇒ 舊寫法的 `num < fe_count` 不再成立
+	#   ⇒ 同一個 KEY_1 掉進【self-actions】⇒ 實測執行了
+	#      `establish_faction`（建國）＋ `train`（扣 30 coin）。
+	#   ⇒ 那時這一格【斷言缺陷仍在】，並寫著「修好之後這一格會紅，那個紅就是鈴」。
+	#   ★★★2026-09-30：鈴真的響了 —— 不變量 #10 落地（forced 回應改走專屬字母鍵）之後
+	#     `extra` 變空 ⇒ 那一格紅 ⇒ 我把它【翻過來】而不是刪掉（systems 裁：改斷言不要刪格）。
+	#   ★而歷史留在這裡的理由：斷言現在說「連按沒有輸出」，
+	#     而【為什麼要專門驗這件事】只有這段字回答得了。
 	if not extra.is_empty():
-		print("   [DISCOVERY] ★連按【不是】no-op：同一個鍵掉進 self-actions ⇒ 真的執行了：")
+		print("   ★不該出現的輸出（專屬鍵位之後應為空）：")
 		for e in extra:
-			print("     · %s" % String(e))
-	_check("[DISCOVERY] 缺陷仍在（新增 %d 句；★修好之後這一格會紅 ⇒ 那是提醒把它翻過來的鈴）"
-		% extra.size(), not extra.is_empty())
+			print("     - %s" % String(e))
+	_check("★★★連按【完全沒有輸出】（新增 %d 句，期望 0）—— 專屬鍵位之後兩個母體不共用鍵空間"
+		% extra.size(), extra.is_empty())
 	await _free_ui(node)
 	_cell("_test_p23_response_settles_on_press")
+
+# ★★★不變量 #10 本身的守衛（2026-09-30）：兩個母體不共用鍵空間。
+#   ★判準不是「連按沒輸出」（那是症狀），是【面板開著的時候 `KEY_1` 就已經是自家隊動作】
+#     ⇒ 面板關掉時沒有任何數字鍵換意思 ⇒ 玩家的手指按在哪就是哪。
+#   ★★舊寫法（`num < fe_count` 之後接 self-actions）在這一格會紅：那時 KEY_1 是「接受」。
+#   ★★★母體地板兩道：①面板真的開著（forced_event 非空）②self-actions 真的非空
+#     —— 空的話「KEY_1 不是回應」會在一個【沒有東西可按】的世界裡恆綠。
+# 負對照：把 forced 回應接回數字鍵（`num < fe_count` 那一支）⇒ KEY_1 變成回應 ⇒ 必紅
+func _test_p24_number_keys_never_mean_response() -> void:
+	_selftest_gate("_test_p24_number_keys_never_mean_response").noop()
+	print("\n── 不變量 #10：數字鍵永遠不是回應 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var npc := TeamData.new()
+	npc.team_id = 7511
+	npc.tile_pos = pt.tile_pos
+	npc.faction_id = -1
+	AnonTierSystem.add_anon(npc, "平民", 4)
+	st.teams[7511] = npc
+	st.set_player_forced_event({"action": "diplomacy", "from_id": 7511,
+		"proposal": "propose_alliance"}, "fe_ui_p24")
+	node._bridge.cancel_advance()
+	node._bridge.request_advance(1)
+	node._process(0.1)
+	_check("★母體地板 A：面板真的開著（forced_event 非空）", not st.player_forced_event.is_empty())
+	var self_acts: Array = node._interact_action_split()["self"]
+	print("   面板開著時的 self-actions 數 = %d｜第一項 = %s" % [
+		self_acts.size(), String(self_acts[0].get("action_id", "")) if not self_acts.is_empty() else "（無）"])
+	_check("★母體地板 B：self-actions 非空（空的話下面恆綠）", not self_acts.is_empty())
+	if self_acts.is_empty():
+		await _free_ui(node)
+		_cell("_test_p24_number_keys_never_mean_response")
+		return
+	# ── 面板開著時按 KEY_1：★它必須是【自家隊動作】，不是回應
+	var res0: int = st.command_results.size()
+	node._handle_interact_mode(KEY_1)
+	var pend: Array = node._bridge.pending_command_labels(3)
+	print("   面板開著按 KEY_1 ⇒ 佇列尾端 = %s" % str(pend))
+	_check("★★★面板開著按 KEY_1【不是】回應事件（佇列裡沒有「回應事件」）",
+		not "".join(PackedStringArray(pend)).contains("回應事件"))
+	_check("★★而 forced_event 還在（KEY_1 沒有把它消費掉）", not st.player_forced_event.is_empty())
+	var frames: int = 0
+	while node._bridge.is_advancing() and frames < 8:
+		node._process(0.1)
+		frames += 1
+	var said: String = ""
+	for i in range(res0, st.command_results.size()):
+		said += String(st.command_results[i].get("text", "")) + " "
+	print("   結果句 = %s" % said)
+	_check("★KEY_1 做的是自家隊動作（結果句有「行動：」前綴）", said.contains("行動："))
+	await _free_ui(node)
+	_cell("_test_p24_number_keys_never_mean_response")
 
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
