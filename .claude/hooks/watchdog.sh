@@ -184,6 +184,23 @@ long_running() {
   #     (`bash-guard.sh` 已改成心跳 mtime,本檔沒有) —— 同型另一處沒跟著改。
   #   ★★★改成與 bash-guard 同一個判準:【心跳 mtime】。窗放寬到 3 分鐘,
   #     理由是 watchdog 的呼叫間隔比 bash-guard 稀疏,60s 窗會在兩次心跳之間誤判成沒人在跑。
+  # ★★☰2026-09-30（blueprint 抳到，systems 修）：【電池在跑】是最便宜的免死金牌，
+  #   而本支之前看不到它 ⇒ 報「長工作：無」而 machine-busy 同時說電池 PID 44021 在跑。
+  #   ★成因（排查出來的）：下面那條鍰全是【取樣式】而電池是一串短跑 ——
+  #     兩支床之間 Godot 真的是 0；而 file-activity 只看主 dir 的 scripts／docs/measurements
+  #     與 worktree 的 scripts ⇒ 在 worktree 跑的電池實際上哪一層都不會命中。
+  #   ★★結構解：讀【构造的標記檔】（跟 machine-busy 同一份）而不是取樣行程。
+  #     而它必然在主 dir：merge-gates.sh 的 `_mg_root` 走 git-common-dir
+  #     ⇒ 就算電池跑在 worktree，旗也插在主 dir 這一份。
+  #   ★★★帶鮮度上限：一顆被砍的電池會留下過期旗，而一個【永久免死金牌】
+  #     等於把看門狗關掉 ⇒ 超過 MG_FLAG_MAX_S 就不算，且年齡印在名字裡。
+  local _bf="$HOOKD/.merge-gates-running"
+  if [ -f "$_bf" ]; then
+    local _bage=$(( now - $(stat -c %Y "$_bf" 2>/dev/null || echo 0) ))
+    if [ "$_bage" -lt "${MG_FLAG_MAX_S:-3600}" ]; then
+      echo "battery(旗齡 $(dur "$_bage"))"; return
+    fi
+  fi
   for f in "$HOOKD"/.busy.*; do
     [ -n "$(find "$f" -mmin -3 2>/dev/null)" ] && { echo "beacon:${f##*/.busy.}"; return; }
   done
