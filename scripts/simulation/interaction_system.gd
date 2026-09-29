@@ -288,18 +288,17 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 				# 路徑 2：NPC 外交提案
 				elif npc.current_task == TeamData.TASK_DIPLOMACY:
 					if state.player_forced_event.is_empty():   # 不覆蓋現有強制事件
-						state.player_forced_event = {
+						state.set_player_forced_event({
 							"from_id":  npc_id,
 							"action":   "diplomacy",
 							"proposal": npc.order_task if npc.order_task != "" else "alliance"
-						}
-						state.player_forced_event_id = str(randi()) + "_" + str(randi())
+						}, str(randi()) + "_" + str(randi()))
 					return
 				# 路徑 3：NPC 勒索
 				elif npc.current_task == TeamData.TASK_LOOT:
 					if state.player_forced_event.is_empty():
-						state.player_forced_event = { "from_id": npc_id, "action": "extort" }
-						state.player_forced_event_id = str(randi()) + "_" + str(randi())
+						state.set_player_forced_event({ "from_id": npc_id, "action": "extort" },
+							str(randi()) + "_" + str(randi()))
 					return
 				# 路徑 4：NPC 無敵意 → 玩家可主動選擇互動
 				else:
@@ -1511,13 +1510,12 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 		return { "ok": false, "msg": "對象不存在" }
 	# 玩家 target → forced event
 	if target.leader_id == state.player_id and state.player_id != -1:
-		state.player_forced_event = {
+		state.set_player_forced_event({
 			"from_id": beggar_id,
 			"action": "aid_request",
 			"beggar_food": float(beggar.resources.get("food", 0)),
 			"beggar_pop": beggar.population,
-		}
-		state.player_forced_event_id = "aid_%d_%d" % [beggar_id, state.world.current_tick]
+		}, "aid_%d_%d" % [beggar_id, state.world.current_tick])
 		return { "ok": true, "pending": true, "msg": "等玩家回應" }
 	# NPC 自決
 	var target_leader: PersonData = state.persons.get(target.leader_id)

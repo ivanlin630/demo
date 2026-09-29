@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -101,6 +101,7 @@ func _initialize() -> void:
 	await _test_p15b_footer_labels_same_source()
 	await _test_p16b_pending_zero_after_advance()
 	await _test_p18_unbounded_sentinel_is_named()
+	await _test_p20_forced_panel_three_lines()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2319,6 +2320,50 @@ const CONTROL_FLOOR_REPLAY: int = 2
 const CONTROL_FLOOR_FEED: int = 7
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
+# ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
+#   不是讀 DTO：上一輪的教訓是「DTO 對」與「畫面對」是兩件事。
+# ★母體地板：先斷言強制事件真的在（forced_event 非空 ＋ 面板 interaction_id 對得上）,
+#   否則「面板沒有原樣 id」會在一個【根本沒有面板】的世界裡恆綠。
+# 負對照：★尚未點火
+func _test_p20_forced_panel_three_lines() -> void:
+	_selftest_gate("_test_p20_forced_panel_three_lines").noop()
+	print("
+── #7① 強制事件面板三行人話 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	var other := TeamData.new(); other.team_id = 7311; other.tile_pos = ppos
+	AnonTierSystem.add_anon(other, "平民", 5)
+	other.faction_id = -1
+	st.teams[7311] = other
+	# ★走 setter（本票的唯一寫入口）⇒ 順便讓到達事件真的經過它
+	st.set_player_forced_event({"action": "diplomacy", "from_id": 7311,
+		"proposal": "propose_alliance"}, "fe_ui_1")
+	node._bridge.request_advance(1)
+	node._process(0.1)   # U19 自動進 forced 模式
+	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
+	_check("★母體地板①：強制事件真的在（forced_event 非空）", not st.player_forced_event.is_empty())
+	_check("★母體地板②：面板拿到同一個 id（%s）" % String(fi.get("interaction_id", "")),
+		String(fi.get("interaction_id", "")) == "fe_ui_1")
+	var txt: String = node._build_interact_str()
+	print("   ── 玩家看到的那幾行 ──")
+	for l in txt.split("
+"):
+		if String(l).contains("⚠") or String(l).contains("接受＝") or String(l).contains("視同拒絕"):
+			print("   | " + String(l))
+	_check("①誰：面板有 Team7311", txt.contains("Team7311"))
+	_check("①誰：帶勢力欄（獨立/勢力N）", txt.contains("（獨立") or txt.contains("（勢力"))
+	_check("①誰：帶關係欄", txt.contains("關係："))
+	_check("②要什麼：人話「提議與你結盟」", txt.contains("提議與你結盟"))
+	_check("★★②不含原樣 id `propose_alliance`", not txt.contains("propose_alliance"))
+	_check("③接受後果那一行在", txt.contains("接受＝"))
+	_check("④不回應下場那一行在", txt.contains("視同拒絕"))
+	_check("★★★人話只印一次（舊版把 message 貼在每一個選項前面）",
+		txt.count("提議與你結盟") == 1)
+	await _free_ui(node)
+	_cell("_test_p20_forced_panel_three_lines")
+
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
 	print("\n── P19 負對照覆蓋率棘輪 ──")

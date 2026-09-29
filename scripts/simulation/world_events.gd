@@ -62,6 +62,14 @@ const FUNC_KINDS: Array = [
 	                       #     `ambition_rung >= RUNG_EXPAND` 才選得了擴張），
 	                       #   ★★★而 S3 把 INTENT 從 10 小時搬到 T3=3 日 ⇒ 升階最多 3 日才反映到意圖。
 	                       #     S3 之前這個延遲是 10 小時，所以當時看不見。
+	# ══ 本票新增（spec 2026-09-29 #7③）：強制事件的【生命週期三點】 ══
+	# ★★★原本三點【一點都不在】玩家事件流裡：到達只有 UI 面板（玩家離開面板就再也看不到）、
+	#   回應結果只有指令佇列那一句、逾時只有一行 `str(dict)` 的終端 debug print。
+	#   ⇒ 用戶逐字「像 team11 找我要幹嘛我 UI 看不到 至少終端 LOG 要記錄吧?」
+	# ★三種的 subject 都是【玩家自己的隊】（事情是關於玩家被找上門）⇒ 走自家隊 self-knowledge。
+	"forced_event_arrived",   # ★WorldState.set_player_forced_event（唯一寫入口,8 個產生端都經過）
+	"forced_event_resolved",  # ★PlayerCommandSystem.respond_to_forced（★帶 handler 自己回的 msg）
+	"forced_event_timeout",   # ★SimRunner hour-tick 自動拒絕
 ]
 
 # ③狀態跨線型（本刀新增偵測點）
@@ -290,6 +298,27 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 			return "%s：%d 名未成年長大成人" % [who, int(info.get("n", 0))]
 		"member_joined":
 			return "%s：招到 %d 人" % [who, int(info.get("n", 0))]
+		# ── 強制事件三點。★★★片語一律呼 `PlayerApiMapper.action_phrase`：
+		#   面板與事件流【同一張表】，否則兩邊各自漂＝本票要修的那個病自己復發。
+		"forced_event_arrived":
+			var fw_a: String = _forced_what(info)
+			var fid_a: int = int(info.get("from_id", -1))
+			return fw_a if fid_a == -1 else "Team%d 找上門：%s" % [fid_a, fw_a]
+		"forced_event_resolved":
+			# ★結果那一段用 handler 自己回的 `msg`（零第二份真相；同 09-28 結果句那張票的原則）
+			var fid_r: int = int(info.get("from_id", -1))
+			var subj_r: String = "「%s」" % _forced_what(info)
+			if fid_r != -1:
+				subj_r = "Team%d 的「%s」" % [fid_r, _forced_what(info)]
+			return "你對%s回應了「%s」：%s" % [subj_r,
+				String(info.get("response_label", info.get("response", "?"))),
+				String(info.get("msg", ""))]
+		"forced_event_timeout":
+			var fid_t: int = int(info.get("from_id", -1))
+			var subj_t: String = "「%s」" % _forced_what(info)
+			if fid_t != -1:
+				subj_t = "Team%d 的「%s」" % [fid_t, _forced_what(info)]
+			return "你沒有回應%s⇒ 視同拒絕" % subj_t
 		"leader_death":          return "%s 的領袖死了" % who
 		"team_extinct":          return "%s 全滅了" % who
 		"teams_erased":          return "%s 沒了" % who
@@ -302,6 +331,12 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"plan_invalidated":      return "%s 的計畫行不通了" % who
 		"rung_changed":          return "%s 的野心變了" % who
 		_:                       return "%s：%s" % [who, kind]
+
+# ★`from_id` 可以是 -1（choose_heir 沒有對方）⇒ 三句各自有自己的框,不硬套同一個前綴。
+#   ★★這一格是實測抓到的：第一版印出「Team-1 找上門」。
+static func _forced_what(info: Dictionary) -> String:
+	return PlayerApiMapper.action_phrase(String(info.get("action", "")),
+		String(info.get("proposal", "")))
 
 static func _team_name(state: WorldState, tid: int) -> String:
 	if tid == -1 or not state.teams.has(tid):

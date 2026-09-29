@@ -934,6 +934,11 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 	var fe: Dictionary = state.player_forced_event
 	if fe.is_empty():
 		return { "ok": false, "msg": "無待處理強制事件" }
+	# ★★★選項人話要在【handler 動世界之前】算：`_accept_join_request` 會把人搬過來,
+	#   而 join 的 label 是「收留（食物 -X,+N 人）」＝讀 **對方隊的人口** ⇒ 事後算得到 +0 人。
+	#   ★實測血證（本輪卷面）：「收留（食物 -0.0,+0 人）」而真實結果是「收留 3 人」。
+	var _label_pre: String = PlayerApiMapper.forced_label(String(fe.get("action", "")),
+		response, state, fe)
 	var result: Dictionary
 	match fe.get("action", ""):
 		"diplomacy":
@@ -986,6 +991,24 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				result = _action_choose_heir(state, -1, _get_player_team(state), _get_player_team_id(state))
 		_:
 			result = { "ok": false, "msg": "未知強制事件類型" }
+	# ★★★生命週期第二點（spec 2026-09-29 #7③）：回應結果進玩家事件流＋終端。
+	#   ★位置刻意在【清除之前】—— `fe` 還活著,否則 from_id／proposal 全部是預設值。
+	#   ★★結果那一段用 `result.msg`（handler 自己回的話）＝零第二份真相。
+	var _ptid_fe: int = state.get_player_team_id()
+	if _ptid_fe != -1:
+		var _fe_action: String = String(fe.get("action", ""))
+		var _info_fe: Dictionary = {
+			"from_id": int(fe.get("from_id", -1)),
+			"action": _fe_action,
+			"proposal": String(fe.get("proposal", "")),
+			"response": response,
+			"response_label": _label_pre,
+			"ok": bool(result.get("ok", false)),
+			"msg": String(result.get("msg", "")),
+		}
+		WorldEvents.emit(state, "forced_event_resolved", [_ptid_fe], false, _info_fe)
+		print("[PlayerCmd] forced_event 回應: %s" % WorldEvents.describe(state,
+			"forced_event_resolved", [_ptid_fe], _info_fe))
 	state.player_forced_event = {}
 	state.player_forced_event_id = ""
 	return result

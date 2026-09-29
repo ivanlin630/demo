@@ -288,6 +288,8 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 		"interaction_type": "",
 		"source": {"team_id": -1, "team_name": "", "member_id": -1, "member_name": ""},
 		"message": "",
+		"consequence": "",
+		"no_response": "",
 		"responses": []
 	}
 	var evt: Dictionary = state.player_forced_event
@@ -297,30 +299,30 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 	var from_id: int = evt.get("from_id", -1)
 	var action: String = evt.get("action", "")
 	var proposal: String = evt.get("proposal", "")
+	var who: String = source_display(state, from_id)
 	var msg: String = ""
 	# msg：per-action 文案（display 文案,單一處,保留 per-action）
 	match action:
-		"diplomacy":
-			msg = "Team%d 要求你納貢" % from_id if proposal == "demand_tribute" else "Team%d 提議 %s" % [from_id, proposal]
-		"extort":
-			msg = "Team%d 勒索你" % from_id
+		"choose_heir":
+			msg = action_phrase(action, proposal)   # ★不冠「誰」：死的是自家領袖,沒有對方
 		"join_request":
 			var ft: TeamData = state.teams.get(from_id)
-			msg = "Team%d 求投靠（%d 人）" % [from_id, ft.population if ft != null else 0]
+			msg = "%s%s（%d 人）" % [who, action_phrase(action, proposal),
+				ft.population if ft != null else 0]
 		"aid_request":
 			var ft2: TeamData = state.teams.get(from_id)
-			msg = "Team%d 向你乞食（%d 人）" % [from_id, ft2.population if ft2 != null else 0]
-		"choose_heir":
-			msg = "領袖殞落,擇繼承人"
+			msg = "%s%s（%d 人）" % [who, action_phrase(action, proposal),
+				ft2.population if ft2 != null else 0]
 		_:
-			msg = "Team%d 強制事件" % from_id
+			# ★未知 action 也不吞（`action_phrase` 的 fallback 會把原樣 id 印在括號裡）
+			msg = "%s%s" % [who, action_phrase(action, proposal)]
 	# responses：單一源 = get_forced_response_options，每 id 配 label（不可 drift）
 	var pcs := PlayerCommandSystem.new()
 	var responses: Array = []
 	for rid in pcs.get_forced_response_options(state):
 		responses.append({
 			"response_id": rid,
-			"label": _forced_label(action, rid, state, evt),
+			"label": forced_label(action, rid, state, evt),
 			"command_args": { "interaction_id": iid, "response_id": rid }
 		})
 	return {
@@ -333,11 +335,89 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 			"member_name": ""
 		},
 		"message": msg,
+		"consequence": accept_consequence(action, proposal),
+		"no_response": no_response_line(action),
 		"responses": responses
 	}
 
+# ── 強制事件的人話（★★★三張表【與 `forced_label` 同處】：spec §3① 裁「不另開表」）──
+#   ★理由是 drift：選項有人話而事件本身沒有,正是因為那兩半【不在同一個地方】被維護。
+
+# proposal → 「要什麼」片語。
+# ★★★母體【不是封閉集】（spec §1③）：`proposal` 有兩個寫入者、兩套詞彙
+#   （`diplomatic_ai_system.gd:174` 寫 propose_*；`interaction_system.gd:294` 寫 `order_task`
+#    ⇒ 第三個具體字串 `tribute_offer`）⇒ ★認不得的 id **印出來不吞掉**：
+#   下一個新 proposal 會在玩家畫面上自己現形,而不是靜默變成空字串。
+static func proposal_phrase(proposal: String) -> String:
+	match proposal:
+		"alliance", "propose_alliance":  return "提議與你結盟"
+		"propose_trade":                 return "提議與你通商"
+		"surrender":                     return "提議向你投降"
+		"tribute", "demand_tribute":     return "要求你納貢"
+		"tribute_offer":                 return "要向你進貢"
+	return "提議（未知：%s）" % proposal
+
+# action → 「要什麼」片語。★★★world_events.describe（生命週期三句）也呼這一支
+#   ⇒ 面板與事件流【同一張表】；否則兩邊會各自漂（這正是本票要修的那個病）。
+static func action_phrase(action: String, proposal: String) -> String:
+	match action:
+		"diplomacy":    return proposal_phrase(proposal)
+		"extort":       return "勒索你"
+		"join_request": return "求投靠"
+		"aid_request":  return "向你乞食"
+		"choose_heir":  return "領袖殞落,要你擇繼承人"
+	return "（未知事件：%s）" % action
+
+# 「接受＝什麼後果」一句。★同樣：認不得就把 id 印出來。
+static func accept_consequence(action: String, proposal: String) -> String:
+	match action:
+		"diplomacy":
+			match proposal:
+				"alliance", "propose_alliance": return "接受＝與對方結盟（互不侵犯）"
+				"propose_trade":                return "接受＝與對方通商"
+				"surrender":                    return "接受＝收下對方的歸順"
+				"tribute", "demand_tribute":    return "接受＝付出一筆糧食"
+				"tribute_offer":                return "接受＝收下對方的貢品"
+			return "接受＝後果未知（提案：%s）" % proposal
+		"extort":       return "接受＝付錢了事"
+		"join_request": return "接受＝對方整隊併入你"
+		"aid_request":  return "接受＝撥一批糧食給對方"
+		"choose_heir":  return "選擇＝由他繼承你的位置"
+	return "接受＝後果未知（事件：%s）" % action
+
+# 「不回應會怎樣」一句。
+# ★★刻意【不寫任何 tick 數】：逾時是在 `sim_runner` 的 hour-tick 那一格清掉的
+#   ⇒ 真實語意是「下一個整點」而不是「從現在起一小時」,而寫死 60 兩種意思都會錯。
+static func no_response_line(action: String) -> String:
+	if action == "choose_heir":
+		return "不回應＝世界停住,直到你選出繼承人"   # choose_heir 不逾時（sim_runner 明確排除）
+	return "不回應＝下一個整點視同拒絕（最多 1 小時）"
+
+# 「誰」——隊號＋勢力＋關係摘要。
+# ★★★關係取自【玩家自己隊的 `known_reputations`】＝ belief,不是 god-view 真值（感知鐵律）。
+static func source_display(state: WorldState, from_id: int) -> String:
+	if from_id == -1:
+		return "某支隊伍"
+	var t: TeamData = state.teams.get(from_id)
+	var fac: String = ("勢力%d" % t.faction_id) if (t != null and t.faction_id >= 0) else "獨立"
+	return "Team%d（%s，關係：%s）" % [from_id, fac, relation_summary(player_known_rep(state, from_id))]
+
+static func player_known_rep(state: WorldState, tid: int) -> float:
+	var pt: TeamData = state.teams.get(state.get_player_team_id())
+	if pt == null:
+		return 0.5   # ★沒有玩家隊 ⇒ 中性,不是「敵視」
+	return float(pt.known_reputations.get(tid, 0.5))
+
+# 0..1 的 reputation → 摘要詞。★玩家從來沒看過這個數字（本票是第一個顯示它的地方）。
+static func relation_summary(v: float) -> String:
+	if v >= 0.75: return "親密"
+	if v >= 0.55: return "友好"
+	if v >= 0.45: return "普通"
+	if v >= 0.25: return "冷淡"
+	return "敵視"
+
 # 每個 forced response id 的顯示 label（per-action,單一處）
-static func _forced_label(action: String, rid: String, state: WorldState, evt: Dictionary) -> String:
+static func forced_label(action: String, rid: String, state: WorldState, evt: Dictionary) -> String:
 	match action:
 		"diplomacy":
 			match rid:

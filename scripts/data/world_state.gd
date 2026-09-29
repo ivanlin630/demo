@@ -985,6 +985,30 @@ func get_player_team_id() -> int:
 		return -1
 	return p.team_id
 
+# ── 強制事件的【唯一寫入口】（spec 2026-09-29 #7③）──────────────────────────
+# ★★★為什麼是【一個 setter】而不是在 8 個寫入端各 emit 一次：
+#   `player_forced_event` 的賦值點有 8 處（diplomatic_ai／event_system／faction_ai×2／
+#   interaction_system×3／recruit_tutorial）⇒ 逐處 emit ＝【清單保證】：
+#   ★下一個新增強制事件的人不會知道還要 emit,而漏掉的樣子就是「玩家沒看到」＝靜默。
+#   ⇒ 走 setter ＝【構造保證】,同 `erase_teams` 那個窄口的理由（本檔 :784 先例）。
+# ★到達事件的 subject ＝【玩家自己的隊】（這件事是關於玩家被找上門）
+#   ⇒ 走 `_player_perceives` 的①自家隊 self-knowledge,不碰他隊那道牆。
+func set_player_forced_event(evt: Dictionary, event_id: String) -> void:
+	player_forced_event = evt
+	player_forced_event_id = event_id
+	var ptid: int = get_player_team_id()
+	if ptid == -1 or evt.is_empty():
+		return   # ★沒有玩家 ⇒ 不喚事件（觀察者世界不該長出玩家事件）
+	var info: Dictionary = {
+		"from_id": int(evt.get("from_id", -1)),
+		"action": String(evt.get("action", "")),
+		"proposal": String(evt.get("proposal", "")),
+	}
+	# ★wake_thinking = false：這是【給玩家看的資訊事件】,不是要改 NPC 排程（同 #4 那四種的理由）
+	WorldEvents.emit(self, "forced_event_arrived", [ptid], false, info)
+	print("[PlayerCmd] forced_event 到達: %s" % WorldEvents.describe(self,
+		"forced_event_arrived", [ptid], info))
+
 func snapshot_faction_member(team_id: int, tick: int) -> void:
 	var t: TeamData = teams.get(team_id) as TeamData
 	if t == null or t.faction_id == -1:

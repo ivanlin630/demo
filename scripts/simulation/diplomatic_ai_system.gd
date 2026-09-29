@@ -168,12 +168,11 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		var player_person: PersonData = state.persons.get(state.player_id)
 		if player_person != null and target.team_id == player_person.team_id:
 			if state.player_forced_event.is_empty():
-				state.player_forced_event = {
+				state.set_player_forced_event({
 					"action": "diplomacy",
 					"from_id": sender.team_id,
 					"proposal": action,
-				}
-				state.player_forced_event_id = str(randi())   # gate-ok: rng: event-ID str(randi())(非決策骰)
+				}, str(randi()))   # gate-ok: rng: event-ID str(randi())(非決策骰)
 				# 設冷卻：玩家拒/超時後不立刻重發（原玩家路徑漏設 → 隔空 spam）
 				sender.diplomacy_reject_cooldown[target.team_id] = \
 					state.world.current_tick + REJECT_COOLDOWN

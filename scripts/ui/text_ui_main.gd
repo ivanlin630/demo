@@ -1539,9 +1539,14 @@ func _build_interact_str() -> String:
 	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
 	var items: Array = []
 	if not fi.get("interaction_id", "").is_empty():
-		var msg: String = fi.get("message", "強制事件")
+		# ★三行人話印【一次】在選項上方（舊版把 message 貼在每一個選項前面
+		#   ⇒ 玩家看到 N 份同一句而後果／逾時那兩句根本沒有地方放）
+		lines.append("⚠ %s" % fi.get("message", "強制事件"))
+		for extra in [fi.get("consequence", ""), fi.get("no_response", "")]:
+			if String(extra) != "":
+				lines.append("   %s" % String(extra))
 		for r in fi.get("responses", []):
-			items.append("⚠ %s：%s" % [msg, r.get("label", "?")])
+			items.append("⚠ %s" % r.get("label", "?"))
 	for sa in _interact_action_split()["self"]:   # P4-2:self/原地動作(hunt 等)直接可選,不需先選隊
 		var en: bool = sa.get("enabled", true)
 		items.append("%s%s" % [sa.get("label", sa.get("action_id", "")), "" if en else "（不可）"])

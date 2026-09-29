@@ -665,7 +665,18 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 					else:
 						TaskArbiter.release(beggar_t)
 					beggar_t.previous_task = ""
-			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
+			# ★★★生命週期第三點（spec 2026-09-29 #7③）：逾時進玩家事件流＋人話終端。
+			#   ★舊版印的是 `str(dict)` —— 那是 debug 卷面,不是玩家看得懂的一句。
+			var _ptid_to: int = state.get_player_team_id()
+			var _info_to: Dictionary = {
+				"from_id": int(fe_timeout.get("from_id", -1)),
+				"action": String(fe_timeout.get("action", "")),
+				"proposal": String(fe_timeout.get("proposal", "")),
+			}
+			if _ptid_to != -1:
+				WorldEvents.emit(state, "forced_event_timeout", [_ptid_to], false, _info_to)
+			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % WorldEvents.describe(state,
+				"forced_event_timeout", [_ptid_to], _info_to))
 			state.player_forced_event = {}
 			state.player_forced_event_id = ""
 		if phase_timing: _t = _pht("near.forced_event", _t)
