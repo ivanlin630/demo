@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: #9 補二（用戶 2026-09-29：「記憶與可視距離如何互相參照? 畢竟有偵查範圍與模糊處理」）
 topic: ★三層一張圖：現在看得到（半徑內＝真值）／記得（最後一次觀測）／聽說（relay 進 belief 的）——★★renderer 只畫 belief store 說的，【不自己模糊、不自己過期、不自己算半徑】：模糊住在資訊模型（distorted claim），過期用既有 BELIEF_STALE_TICKS（belief_pos 已回 (-1,-1)），半徑用 VisionSystem.VISION_RADIUS（renderer 已引用）；斥候的視野＝另一支隊的 belief，回報到了才變你的記憶
 ---

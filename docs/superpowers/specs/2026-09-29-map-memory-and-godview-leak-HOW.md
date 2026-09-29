@@ -159,3 +159,47 @@ P8 [圖例] 地圖下方那一行圖例存在，且**四態都在圖例裡**
 P9 [格寬不變] 加了據點記號之後，每格仍然是 **4 字元**
    ｜★★這一格守的是 axial 切變的列對齊（擐寬一個字元就歪整張圖）
 ```
+
+## ★★★§8 三層一張圖（blueprint AMEND 9b）＋★★★HOW 抳出一個真缺陷：畫面的「現在看得到」用錯了來源
+
+### WHAT 定的三層（全收）
+```
+現在  半徑内＝真值
+記得  最後一次观測：地形永久／據點到被否證／他隊到 `BELIEF_STALE_TICKS` 過期
+聆說  relay 進 belief 的，**同畫法**，來源只在面板
+★renderer 只畫 belief store 說的：【不自己模糊、不自己過期、不自己算半徑】
+  ·模糊 → 資訊模型（distorted claim）；renderer **不得畫回真位置**
+  ·過期 → `BELIEF_STALE_TICKS`（`belief_pos` 已回 (-1,-1)）
+  ·子隊在外＝另一支隊，回報到了才進你的表
+```
+
+### ★★★HOW 抳出的缺陷：「半徑】在 sim 裡**每隊、随時間變**，而 renderer 用平常數
+```
+`text_map_renderer.gd:4`  const VISION_RADIUS: int = VisionSystem.VISION_RADIUS
+                          # 註解寫「引用 sim 權威源（單一真值）」
+`text_map_renderer.gd:54` var in_vision: bool = dist <= VISION_RADIUS      ← ★平半徑
+★而 sim 的【單一權威】是一支**函式**（它自己的註解就寫「單一權威」）：
+  `vision_system.gd:11 vision_range(state, team, time_vision_mult)`
+    = roundi((VISION_RADIUS + 偵查技能 * SCOUT_BONUS) * 地形倍率 * 時間倍率)
+  ⇒ ★★**有偵查的隊看得比地圖畫的遠**；地形與日夜也會移動那條線
+  ⇒ ★★★而 `:4` 那行的註解【是假的】：它引的是**基底常數**，不是權威函式
+     （同一族：「註解替它編好了理由」）
+```
+**⇒ 裁定**：`in_vision` 必須呼 `VisionSystem.vision_range(state, player_team)`
+（★它是**純讀**，不寫 state ⇒ `render-no-write` 仍然成立）；
+★★`:4` 那一行要麼刪掉、要麼把註解改成真話（「這是基底值，不是有效半徑」）。
+★★★**誠實限**：日夜倍率是 sim 傳進來的，renderer 拿不到 ⇒ 它只能用預設 1.0
+  ⇒ 那一段差要**寫在圖例旁邊或面板裡**，不要默默吃掉。
+
+### 驗收補四格（前三是 blueprint 的、第四是本節抳出的）
+```
+P10 [過期由 sim 決定] 把 `BELIEF_STALE_TICKS` 改大一倍 ⇒ `N?` 活一倍
+    ｜★守的是「renderer 不自己過期」：若 renderer 自己算，這一格不會動
+P11 [失真不被修回] 餵一筆 distorted claim ⇒ 畫在**失真位置**且面板標「聆說」
+    ｜★★負對照：renderer 改成畫真位置 ⇒ 必紅
+P12 [子隊要回報] 子隊走出去而未回報 ⇒ 那幾格仍是 `?`
+P13 ★★★[半徑跟得上 sim] 給玩家隊一個高偵查成員 ⇒ **大寫區跟著變大**
+    ｜★負對照：用平常數（`VisionSystem.VISION_RADIUS`）⇒ 區域不變 ⇒ 必紅
+    ｜★★母體地板：先印 `vision_range()` 的回傳值（基底 vs 加偵查）
+      —— 兩個數相等的話這一格恆綠（而那表示樣本選錯了）
+```
