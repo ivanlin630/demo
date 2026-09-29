@@ -283,6 +283,16 @@ func _test_p3_menu_and_handler_do_not_contradict() -> void:
 		print("   ★畫面列了卻被閘擋掉的：%s ⇒ 那是【按不動的選項】" % str(blocked))
 	_check("★★★畫面列出的每一個 target 都過得了閘（%d 個被擋）" % blocked.size(),
 		blocked.is_empty())
+	# ★★★本格【只驗單向】：「畫面列出的都過得了閘」。
+	#   反向（過得了閘的都必須被畫面列出）**刻意不加**，而理由是它需要先定一個 WHAT：
+	#   ★**畫面該不該列交戰中的隊**（`refresh_colocation_targets` 目前用
+	#     `other.combat_target != -1` 把它們濾掉）⇒ 反向會把那個【故意不列】算成矛盾。
+	#   ⇒ systems 2026-09-30 裁：不加，而把這句寫在這裡 ——
+	#     ★★讓這個空白【有主詞、有下一步】，而不是一個沒人知道存在的盲區
+	#     （他會把那個 WHAT 問題帶給藍圖）。
+	print("   ★邊界：本格只驗單向。反向（過得了閘的都必須被列出）需先定 WHAT：")
+	print("     【畫面該不該列交戰中的隊】—— 目前 `combat_target != -1` 被濾掉，")
+	print("     而反向會把那個故意不列算成矛盾 ⇒ 已呈報藍圖，不在本票。")
 	_cell("_test_p3_menu_and_handler_do_not_contradict")
 
 
