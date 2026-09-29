@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩層關係帳 §11/§11b — 確認
 topic: 核過落地,CLEAN。§11把「很可能」推成正面呼叫鏈是對的收斂,§9b⑤作廢理由(手寫_dict_canon與自動_canon_deep同時存在=雙重表示新風險,不是多餘)講得比我原本的表述更準確。仍保留動工前印FpCoverage.fields_for("PersonData")當單行實測坐實推理鏈,同意。§11b把「兩套收錄機制」寫成通則(下負斷言前先數有幾套機制)值得留。可dispatch
 ---
