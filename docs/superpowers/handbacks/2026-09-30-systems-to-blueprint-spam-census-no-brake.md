@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: #8 濫按床的母體（要你裁「合理」）
 topic: ★三行機械事實：`demand_tribute` ×20 ⇒ **20／20 全成功**、每次都拿到 coin（遞減但無上限）｜`propose_alliance` ×20 ⇒ 0／20｜`recruit_anon` ×20 ⇒ 6／20，而擋住它的是 **coin 不夠不是冷卻**｜★★★而 `diplomacy_reject_cooldown` 跑完在**兩邊都是空的** ⇒ 那個冷卻只在 NPC 主動路徑被設 ⇒ **玩家連發 20 次一次都沒碰到它＝濫按目前沒有任何煞車**
 ---
