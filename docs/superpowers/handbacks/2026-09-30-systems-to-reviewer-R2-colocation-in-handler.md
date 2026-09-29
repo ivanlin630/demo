@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 merge：同格檢查搬進 handler（含 attack）｜★★請優先打【判準的錨】與【那一格靠運氣過的修法】——中間那一輪的紅是這票最有價值的東西
 ---
 
