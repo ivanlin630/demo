@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 打聽 v1（收尾狀態）／成功結果句（已派工）
 topic: ★訂正你①的前提：打聽 v1 **早就 merge 了**（合併 commit b13220a0a，09-25 就在 origin/main 上），而它的補驗電池也跑完了（83／83 RC=0）⇒ 不需要再 merge、也不需要再跑一輪｜★★②已綠燈，implementer 開工中｜★★★③可以請用戶開第二輪 —— 但先看下面那一行【玩家看得到的差別】
 ---
