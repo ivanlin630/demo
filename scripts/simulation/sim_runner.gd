@@ -562,10 +562,20 @@ func _consume_player_commands(state: WorldState) -> void:
 		# ★★★結果句（spec §3-5②）：成功一句、拒絕一句【帶原因】。
 		#   ★拒絕【禁靜默】—— 沒有這一句，玩家分不出「被拒絕」與「沒吃到鍵」。
 		#   ★★原因取自 handler 自己回的 message ⇒ 零第二份真相（這正是 (丁) 被否決的理由）。
+		# ★★★而那條原則原本【只套用在一半的分支上】（2026-09-25 做打聽 v1 時撞到）：
+		#   `why` 算出來了，卻只餵給【拒絕】那一支；成功那一支寫死「完成」
+		#   ⇒ 全庫 67 個成功回傳都帶話（「索貢成功（獲得 N coin）」「拔擢 X 為記名成員」…）
+		#     而【一句都到不了玩家】—— 玩家只看到「<動作人話>：完成」。
 		var why: String = String(res.get("message", res.get("msg", "")))
+		# ★保留 `describe` 當前綴（不是只印 why）—— 前綴是玩家分辨【哪一道指令】的那一半。
+		# ★★「空的才退回『完成』」那一支：★★★實測 2026-09-25 全庫 67／67 都帶話
+		#   ⇒ 它今天是【0 命中】的分支。保留它是為了將來新增的 handler，
+		#     而它【不是】靠註解說自己有用：P3 用【注入式】對照餵一個回空 msg 的假 handler 點它。
+		var say: String = ("%s：完成" % PlayerCommandApi.describe(name, args)) if why == "" \
+			else ("%s：%s" % [PlayerCommandApi.describe(name, args), why])
 		state.command_results.append({
 			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
-			"text": ("%s：完成" % PlayerCommandApi.describe(name, args)) if ok
+			"text": say if ok
 				else ("%s：被拒絕（%s）" % [PlayerCommandApi.describe(name, args),
 					why if why != "" else "沒有給原因"])})
 
