@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -106,6 +106,7 @@ func _initialize() -> void:
 	await _test_p22_overlay_callsites_advance_one_tick()
 	await _test_p23_response_settles_on_press()
 	await _test_p24_number_keys_never_mean_response()
+	await _test_p25_letter_key_only_in_interact_mode()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2335,6 +2336,10 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
                                     # ★★★rebase 衝突的正解是【取大的那個】：我那條分支帶的是
                                     #   合併前的 6，取它就是把棘輪地板往回調 —— 而那正是棘輪
                                     #   存在要擋的事（它只會在「往回走」時紅，而往回調常數會讓它閉嘴）。
+# ★UI 的 mode 數（＝`_handle_*_mode(keycode` 這一族）。P25 的母體地板拿它比對。
+#   ★★它是【spec 側的數】：動工時我用 grep 數過 13 個；有人新增一個 mode 而沒有
+#     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
+const SPEC_UI_MODE_COUNT: int = 13
 const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
@@ -2634,6 +2639,83 @@ func _test_p24_number_keys_never_mean_response() -> void:
 	_check("★KEY_1 做的是自家隊動作（結果句有「行動：」前綴）", said.contains("行動："))
 	await _free_ui(node)
 	_cell("_test_p24_number_keys_never_mean_response")
+# ★★★不變量 #10 的執法面要【擴到全部 mode】（systems 裁 2026-09-30）：
+#   每一個 mode 都是一個【獨立的意義來源】—— 專屬字母鍵只在 interact 模式內驗過，
+#   而「按 A 會不會在別的 mode 誤觸回應」是另一個問題。
+#   ★★母體【不得手抄】：從 `_handle_*_mode` 這一族機械列舉（同 P4 那個閉包的做法）。
+#   ★★★母體地板：列舉到的 mode 數要與 spec 常數相符 ——
+#     否則這一格會在一個【只列舉到一個 mode】的世界裡恆綠。
+# ★這一格的價值不在「A 有沒有誤觸」，在把執法面從一個 mode 擴到全部。
+# 負對照：★尚未點火
+func _test_p25_letter_key_only_in_interact_mode() -> void:
+	_selftest_gate("_test_p25_letter_key_only_in_interact_mode").noop()
+	print("\n── 不變量 #10 擴面：字母鍵只在 interact 模式有意義 ──")
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var modes: Array = []
+	for l in src.split("\n"):
+		var t: String = l.strip_edges()
+		if t.begins_with("func _handle_") and t.contains("_mode(keycode"):
+			var nm: String = t.substr(5, t.find("(") - 5)
+			modes.append(nm.trim_prefix("_handle"))
+	modes.sort()
+	print("   列舉到 %d 個 mode：%s" % [modes.size(), str(modes)])
+	_check("★母體地板 A：列舉到的 mode 數與 spec 常數相符（%d／%d）" % [
+		modes.size(), SPEC_UI_MODE_COUNT], modes.size() == SPEC_UI_MODE_COUNT)
+	_check("★母體地板 B：`_interact_mode` 真的在列舉結果裡（否則抽取壞了）",
+		modes.has("_interact_mode"))
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var npc := TeamData.new()
+	npc.team_id = 7611
+	npc.tile_pos = pt.tile_pos
+	npc.faction_id = -1
+	AnonTierSystem.add_anon(npc, "平民", 4)
+	st.teams[7611] = npc
+	var consumed_in: Array = []
+	var floor_seen: int = 0
+	for m in modes:
+		var flag: String = String(m)
+		st.set_player_forced_event({"action": "diplomacy", "from_id": 7611,
+			"proposal": "propose_alliance"}, "fe_p25_" + flag)
+		node._bridge.cancel_advance()
+		for m2 in modes:
+			node.set(String(m2), false)
+		node.set(flag, true)
+		# ★母體地板 C：那個旗標真的被設起來了（`set()` 打錯名字會靜默 no-op）
+		#   ★★★而這個值要在【按鍵之前】量，並且【印同一個值】——
+		#     我第一版印的是按鍵【之後】的旗標 ⇒ 卷面上 `_faction_mode 旗標=false`
+		#     而地板卻通過 13／13（按 A 讓那個 mode 自己關掉了）
+		#     ⇒ ★同一欄印的值與斷言的值來自【不同時刻】＝一個沒有主詞的數字。
+		var was_set: bool = bool(node.get(flag))
+		if was_set:
+			floor_seen += 1
+		_press_key(node, KEY_A)
+		var still_set: bool = bool(node.get(flag))
+		var pend: String = "".join(PackedStringArray(node._bridge.pending_command_labels(3)))
+		var ate: bool = pend.contains("回應事件")
+		if ate:
+			consumed_in.append(flag)
+		print("   %-24s 旗標(按前)=%s%s 按 A ⇒ 佇列%s" % [
+			flag, str(was_set),
+			("（★按 A 之後它自己關掉了）" if was_set and not still_set else ""),
+			"【有回應事件】" if ate else "沒有回應事件"])
+		node._bridge.cancel_advance()
+		st.pending_commands.clear()
+		st.player_forced_event = {}
+		st.player_forced_event_id = ""
+	_check("★★★母體地板 C：每一個 mode 的旗標都真的被設起來（%d／%d）—— `set()` 打錯名字是靜默 no-op"
+		% [floor_seen, modes.size()], floor_seen == modes.size())
+	print("   ★消費了 forced 回應的 mode ＝ %s（期望只有 _interact_mode）" % str(consumed_in))
+	_check("★★★只有 `_interact_mode` 會吃字母鍵（實測 %s）" % str(consumed_in),
+		consumed_in == ["_interact_mode"])
+	for m3 in modes:
+		node.set(String(m3), false)
+	await _free_ui(node)
+	_cell("_test_p25_letter_key_only_in_interact_mode")
+
+
 
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()

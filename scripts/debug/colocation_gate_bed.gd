@@ -18,8 +18,14 @@ extends SceneTree
 # ★誠實限：
 #   1. 本床走 `PlayerCommandSystem` 直呼（＝第三條管道本身），不經 UI。
 #      畫面側那一處【不拆】（它的工作是「選單要列誰」不是執法）⇒ 兩層一致性是 P3。
-#   2. `execute_action_with_target`（吃 Dictionary 的那條）不在本閘的爆炸半徑內
-#      —— 它的 target 是 member 不是 team（systems 核過）⇒ 本床不驗它。
+#   2. ~~`execute_action_with_target`（吃 Dictionary 的那條）不在本閘的爆炸半徑內~~
+#      ★★★這句是 systems 說錯的，而【P6 就是推翻它的那一格】：
+#      `recruit_named` 走那條入口、跨隊搬人＋搬 coin、原本零同格檢查。
+#      ★錯法＝用【哪一個入口】代替【母體】，而母體的定義是【跟別隊發生作用的動作】
+#        —— 「它吃 Dictionary」是真的，但與這個問題無關。
+#      ⇒ 本閘現在涵蓋兩個入口：`execute_action`（10／11 需同格）
+#        ＋ `execute_action_with_target` 的 `recruit_named`（契約靜態已知，不必問動詞）。
+#      ★★留著劃掉的這一行比刪掉有用：下一個人會看到「這裡曾經有人用入口代替母體」。
 
 var _errors: int = 0
 var _cells_ran: Array = []
