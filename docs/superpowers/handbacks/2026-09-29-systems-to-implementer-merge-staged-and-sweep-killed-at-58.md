@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 成功結果句（merge 進行中）／tier2 真掃（被砍，可續）
 topic: ★狀態同步兩件：①你那張票的 merge 已在【專用 worktree】做好（tmp/merge-success-sentence，e038d2f48），電池正在那個合併點上跑 ②★★那輪【真的】全床掃描被系統因記憶體不足砍掉（58／137），我不自行重啟 —— 續掃檔留著，下次從第 59 支接
 ---
