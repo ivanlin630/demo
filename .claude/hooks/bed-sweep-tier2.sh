@@ -199,9 +199,26 @@ alerts=0
 # ★★★訂正（2026-09-17）：舊版只查 $BASELINE（diff 舊側），而重複鍵在 $TMP（新側）
 #   ⇒ ★它不是「表乾淨所以不亮」，是「看錯表所以永遠不亮」。
 _dupes=$( { awk -F'	' '/^scripts\//{print $1}' "$TMP" 2>/dev/null | sort | uniq -d; awk -F'	' '/^scripts\//{print $1}' "$BASELINE" 2>/dev/null | sort | uniq -d; } | sort -u)   # ★★★兩表【各自】查再聯集 —— 接起來再 uniq -d 會讓【每一支】都重複（實測 137 vs 4）⇒ _dupe_bad 恆真 ⇒ 告警靜默關掉而畫面不紅
-if [ -n "$_dupes" ]; then
+# ★★☰2026-09-29 窄化（systems）：**重複而【值一致】不是歧義** ——
+#   舊版只要鍵重複就拒絕報 diff，而今天那一支的兩列是**逐位元相同**的
+#   （`data_test.gd  not-a-bed  0  extends Node ⇒ --script 跑不了`）
+#   ⇒ ★拒絕的理由是「`head -1` 會靜默地挑一列」，而兩列一樣時【挑哪一列都一樣】
+#   ⇒ ★★所以只在【值不一致】時拒絕；一致的重複降成一行警告（仍要印）
+#   ⇒ ★★★而根因已在 bed-triage-sweep.sh 修掉（`not-a-bed` 沒进跳過清單）
+_dupes_bad=""
+for _dk in $_dupes; do
+  _n_distinct=$( { awk -F'	' -v k="$_dk" '$1==k{print $2"|"$3"|"$4}' "$TMP" 2>/dev/null; awk -F'	' -v k="$_dk" '$1==k{print $2"|"$3"|"$4}' "$BASELINE" 2>/dev/null; } | sort -u | wc -l | tr -d " ")
+  [ "${_n_distinct:-2}" -gt 1 ] && _dupes_bad="${_dupes_bad}${_dk}
+"
+done
+if [ -n "$_dupes" ] && [ -z "$_dupes_bad" ]; then
+  echo "[tier2] ⚠重複鍵但【值逐位元一致】⇒ 不影響 diff（仍要修）：$(printf '%s' "$_dupes" | tr '
+' ' ')"
+  echo "[tier2]   ★根因：續掋檔每輪 append；`not-a-bed` 原本沒进跳過清單（已修）"
+fi
+if [ -n "$_dupes_bad" ]; then
   echo "[tier2] ✗ baseline 的鍵【不唯一】⇒ diff 結果不可信（本輪不報 diff）："
-  echo "$_dupes" | head -6 | sed 's/^/[tier2]     ★重複鍵：/'
+  printf '%b' "$_dupes_bad" | head -6 | sed 's/^/[tier2]     ★值不一致的重複鍵：/'
   echo "[tier2]   ★理由：比對用的是 head -1 ⇒ 它會靜默地挑一列；能造假警報就能蓋掉真的。"
   echo "[tier2]   ★★修法【要看重複在哪一張表】："
   echo "[tier2]     ·重複在 baseline ⇒ 重建 baseline（整表重寫、一床一列）"

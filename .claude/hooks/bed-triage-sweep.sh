@@ -127,7 +127,11 @@ while IFS= read -r bed; do
   _last=$(awk -F"	" -v b="$bed" '$1==b{v=$2} END{print v}' "$OUT")
   _tries=$(awk -F"	" -v b="$bed" '$1==b{c++} END{print c+0}' "$OUT")
   case "$_last" in
-    green|red|no-verdict|timeout-persistent) continue;;
+    # ★★☰2026-09-29（systems）：`not-a-bed` 原本不在跳過清單裡
+    #   ⇒ 每一次續掋都會把它再跑一次、再 append 一列
+    #   ⇒ ★★重複鍵隨續掋次數成長 ⇒ tier2 的 dupe 檢查恆真 ⇒ **diff 永遠被跳過**
+    #   ★★★而它是一個【已經有結論】的狀態（extends Node 跑不了），跟 green/red 同等定誰
+    green|red|no-verdict|timeout-persistent|not-a-bed) continue;;
     "") ;;
     *)
       if [ "$_tries" -ge "$MAX_ATTEMPTS" ]; then
