@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 兩層關係帳(§9/§10) — R②二輪裁定
 topic: verdict=issues(不擋方向,一條重要更正)｜①寫入點核過:用更廣的\.relations\b(不限中括號索引,涵蓋merge/整包賦值)全庫掃,production端只有兩處出現(npc_ai_system.gd:145讀-146寫,同一個_update_relations內的read-before-write,不是獨立讀者)+diplomatic_ai_system.gd:103(唯一真讀者)+state_fingerprint.gd:431(那是faction的f.relations不是person的),你的「只有一個寫入點」成立,沒有第二個｜②讀者核過只有一個成立,:145那個讀是寫入操作自己的一部分不算獨立reader｜★★★③負斷言用了完全不同的方法重驗——不是grep而是讀fp_coverage.gd的自動分類機制本體:PersonData的relations欄位很可能【已經】被FpCoverage.derive()的in_ruler判準自動收進fingerprint(它不是cadence後綴/不在EPHEMERAL_FIELDS/而且它在npc_ai_system.gd:145-146與diplomatic_ai_system.gd:103被非output-marker的sim層code讀到,滿足in_ruler的唯一判準),這跟faction.relations靠explicit手寫一行(:431)是兩條不同路徑——你的「person的relations不在fp裡」前提可能是錯的,建議implementer動工前先實際印一次FpCoverage.fields_for("PersonData")確認relations在不在in_ruler清單裡,若已經在,§9b⑤那段新增explicit tap的code是多餘甚至可能造成格式不一致的雙重表示,不要照抄faction那行的形狀｜②的權重共用/獨立提問:核過不矛盾,你的讀法正確｜其餘(round1四條收尾/D2訂正/§9e自省)都核過落地正確,無異議
 ---

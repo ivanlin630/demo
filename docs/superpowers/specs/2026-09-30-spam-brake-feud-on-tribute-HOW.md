@@ -452,3 +452,39 @@ P7′ Probe：~~把 sev 分佈搬到門檦前~~ ★**不搬**（邊沒寫就不�
     （**不在本票**；但它與本票同一條管道 ⇒ 先做它再做本票的 P2′，
      否則煞車床要在一個【能隔空索貢】的世界量數字）
 ```
+
+---
+
+## ★★★§11 訂正（R² 二輪抓到）：缺口② 是錯的 —— **好感已經在尺裏**，§9b⑤ 作廃
+
+**審查質疑後我自己追到底，而追出來的是一條【正面】証據鍰（不再是負斷言）**：
+
+```
+state_fingerprint.gd:75  SUBFIELD_MAP 含 ["PersonData", "res://scripts/data/person_data.gd", "_emit_persons", ""]
+state_fingerprint.gd:412 buf.append(_derived_line(p, "PD", "PersonData"))
+state_fingerprint.gd:349 _derived_line() 迴圈 `for n in FpCoverage.fields_for(cls)`
+fp_coverage.gd:119      fields_for() 回 d[cls]["in_ruler"]
+fp_coverage.gd:99       in_ruler 的判準：`elif src.contains("." + n)` —— 模擬層非輸出行讀到就算
+而 `relations` 在 npc_ai_system.gd:145 與 diplomatic_ai_system.gd:103 被讀（都不是輸出行）
+⇒ ★**person.relations 已經進尺**。
+```
+
+```
+⇒ §9b⑤「把 person.relations 接進 fingerprint」**作廃，不要做**。
+★★而不做的理由不是「多餘」，是它會**弄壞尺**：
+  手寫那一行用 `_dict_canon`、自動導出那一行用 `_canon_deep`
+  ⇒ 同一個欄位在 fp 字串裏出現兩次、而且兩次格式不同 ⇒ **新風險，不是修復**。
+⇒ §9a 缺口② 改寫：好感**不是新 state（就尺而言）**，它已經被盯著；
+  ★但【fp 會變】仍然成立（值變了）⇒ P8 的「先量再換基準、同 commit」不變。
+★★★而對實作端的指令：**動工前先印一次 `FpCoverage.fields_for("PersonData")`**，
+  把 `relations` 在不在清單裏印到卷面上（一行輸出坐實一條推理鍰）。
+  ★若它不在（推理鍰裡有我沒看到的一環）→ 回報，不要自己改回去加 tap。
+
+## ★★§11b 我的錯法（第三件，與 §9e 同族）
+【一個欄位有兩條進尺路徑】：每一支 `_emit_*` 的**手寫那一行**（給人讀的骸架）
+＋`_derived_line` 的**機器維護全集**。★**我只查了手寫那一條**（grep `relations` 在
+`state_fingerprint.gd` 裏只命中 :431 的 faction 那一行）就下了負斷言。
+⇒ ★★**規矩：下【X 沒被收錄】的斷言之前，先數【這一類收錄有几套機制】**——
+  而這個專案的習慣正好是【手寫骸架＋機器全集】雙跟並行（骸架的註解自己寫著這件事）。
+⇒ ★★★而審查抳倒它的方法值得記：**他没有再 grep 一次**（同方向的工具不會產生訊號），
+  他去讀【分類器本體】。而我接手後把它從「很可能」推到【一條呼叫鍰】。
