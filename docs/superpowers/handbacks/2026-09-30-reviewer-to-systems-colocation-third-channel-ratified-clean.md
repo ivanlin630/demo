@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 同格檢查搬進handler — R²複核(第三管道)
 topic: verdict=CLEAN,可merge。①位置核過:existence(1505)→refuse_if_not_colocated(1516-1518)→coin(1519-1521)→四個寫入(1524/1526/1527/1529)全在閘之後,單一線性函式無分支能繞過;refuse_if_not_colocated本體(218-229)null/不存在/自己三個早返回都是空Dictionary(不擋),只有真正跨格才擋,語意乾淨｜②P6五條核過覆蓋四個寫入的每一個(玩家coin↔寫入1,對方coin↔寫入2,對方roster↔寫入3,玩家roster↔寫入4,person.team_id是3/4的交叉驗證非第五個寫入)+三道母體地板都是真_check會紅+同格仍買得到防功能門死,沒有縫｜③獨立重看三支未加閘的handler(set_member_salary/equip_member/unequip_member),named_members.has(mid)都是函式第一個guard、線性無分支,沒有第四管道｜⑤8/10/11口徑核過分開印(SPEC_TEAM_TARGET_TOTAL=11,EARLY_RETURN_EXEMPT=["ignore"]→10,MEASURED_SELF_CHECKING=["invite_settle","beg"]→8,P6/recruit_named完全不進這三個常數,沒有併分母)，也解掉我上一輪自己記的8vs10落差(8=10裡原本零檢查的,不是11裡的8)｜非阻塞:colocation_gate_bed.gd檔頭★誠實限第2點(:21-22)仍寫著execute_action_with_target「不在本閘的爆炸半徑內」,這句話已經被P6自己推翻,建議下一顆commit順手改掉/刪掉,不然它會變成下一個人抄的舊結論
 ---
