@@ -9,7 +9,8 @@ topic: ★三層一張圖：現在看得到（半徑內＝真值）／記得（�
 # 一、參照規則（WHAT）
 
 ```
-①現在：以你這隊為中心 VisionSystem.VISION_RADIUS 內＝真值（共位必見），畫大寫／隊號。半徑是 sim 權威源，renderer 已引用不另抄。
+①現在：以你這隊為中心【有效視野】內＝真值（共位必見），畫大寫／隊號。
+   ★更正（systems 抓到，2026-09-29）：本句原寫「VisionSystem.VISION_RADIUS」——那是【基底常數】不是權威；權威是 vision_range(state, team, mult)（含偵查技能／地形／日夜）。renderer 必須呼它（純讀）；text_map_renderer.gd:4 那行「引用 sim 權威源」的註解是假的，要刪或改真話。日夜倍率若 get_vision_mult(state) 為純函式則同樣呼它，不預設 1.0。
 ②記得：半徑外、team_tile_known 有的格＝最後一次觀測。三種內容三種壽命，都不由 renderer 決定：
    地形＝永久（世界裡地形不變）；據點＝到被否證或新觀測覆蓋；他隊位置＝到 belief_pos 說過期（BELIEF_STALE_TICKS 既有常數）⇒ 過期那格回地形字元。
 ③聽說：relay／訊息進 belief 的格與隊，跟②同樣畫法（小寫／N?），來源差異只在游標面板印「來源：親見／聽說（來自 TeamX）」，不另造字元——字元語言只表達「現在／記得／沒去過」三態，來源與新鮮度走面板。
