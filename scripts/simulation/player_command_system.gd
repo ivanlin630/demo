@@ -933,7 +933,9 @@ func get_forced_response_options(state: WorldState) -> Array[String]:
 func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 	var fe: Dictionary = state.player_forced_event
 	if fe.is_empty():
-		return { "ok": false, "msg": "無待處理強制事件" }
+		# ★同 ②′：空事件 ⇒ 靜默（headless 直呼這一支的人拿到同一個語意）
+		return { "ok": false, "msg": "", "silent": true,
+			"code": "forced_response_already_settled" }
 	# ★★★選項人話要在【handler 動世界之前】算：`_accept_join_request` 會把人搬過來,
 	#   而 join 的 label 是「收留（食物 -X,+N 人）」＝讀 **對方隊的人口** ⇒ 事後算得到 +0 人。
 	#   ★實測血證（本輪卷面）：「收留（食物 -0.0,+0 人）」而真實結果是「收留 3 人」。
@@ -1014,8 +1016,20 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 	return result
 
 func resolve_forced_response(state: WorldState, interaction_id: String, response_id: String) -> Dictionary:
+	# ★★★②′（spec §7，2026-09-30）：對一個【已經不存在】的強制事件回應 ⇒ **靜默 no-op**。
+	#   ★為什麼需要這條而不是「天然 no-op 就夠了」：#8 的咽喉只設 `_ticks_remaining=1`，
+	#     真正的 tick 在【下一幀】的 `_process` 才跑 ⇒ 按第一次之後、下一幀之前，
+	#     `_cached_snapshot` 還顯示面板 ⇒ 第二次按會【再入列一道】
+	#     ⇒ 兩道同一顆 tick 被消費：第一道成功、第二道撞到空事件。
+	#   ★★而它【不違反「拒絕禁靜默」】：那條守的是「玩家分不出被拒絕與沒吃到鍵」，
+	#     而這裡玩家【已經看到第一次的結果句了】—— 第二句是同一件事的第二次回音
+	#     （同 P15 那條「同一條指令的回音 ≤ 2 次」）。★★★用戶逐字：
+	#     「我按 T 跳出表單後 還是寫我拒絕事件」—— 那一句就是這條要消掉的東西。
+	#   ★code 仍然具名（不是 missing）⇒ `command_log` 留得住審計軌跡，只是不印給玩家。
 	if state.player_forced_event.is_empty():
-		return {"ok": false, "code": "forced_response_missing", "msg": "no active forced interaction"}
+		return {"ok": false, "code": "forced_response_already_settled",
+			"msg": "", "silent": true}
+	# ★而【id 不符】那一支刻意**不靜默**：那是對【另一個】事件的回應，玩家該知道。
 	if interaction_id != "" and interaction_id != state.player_forced_event_id:
 		return {"ok": false, "code": "forced_response_missing", "msg": "interaction expired or wrong id"}
 	var valid: Array[String] = get_forced_response_options(state)

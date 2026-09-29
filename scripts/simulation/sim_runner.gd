@@ -566,6 +566,15 @@ func _consume_player_commands(state: WorldState) -> void:
 		#   `why` 算出來了，卻只餵給【拒絕】那一支；成功那一支寫死「完成」
 		#   ⇒ 全庫 67 個成功回傳都帶話（「索貢成功（獲得 N coin）」「拔擢 X 為記名成員」…）
 		#     而【一句都到不了玩家】—— 玩家只看到「<動作人話>：完成」。
+		# ★★★②′（spec §7）：`silent` ⇒ 這一道【不產玩家看得到的句子】。
+		#   ★位置在 `command_log` 之後 ⇒ 審計軌跡留著（那一道令確實被按過、被消費過），
+		#     消失的只有【要不要印給玩家】那一半。
+		#   ★★母體窄到一個情境：目前全庫只有「對已結算的強制事件再按一次」會設它
+		#     （`player_command_system` 的兩處空事件出口）⇒ 床用 grep 斷言它沒有第三個寫入點。
+		#   ★★★它【不是】「拒絕禁靜默」的破口：那條守的是玩家分不出「被拒絕」與「沒吃到鍵」，
+		#     而這裡玩家【已經看到第一次的結果句】—— 第二句是同一件事的第二次回音。
+		if bool(res.get("payload", {}).get("silent", false)) or bool(res.get("silent", false)):
+			continue
 		var why: String = String(res.get("message", res.get("msg", "")))
 		# ★保留 `describe` 當前綴（不是只印 why）—— 前綴是玩家分辨【哪一道指令】的那一半。
 		# ★★「空的才退回『完成』」那一支：★★★實測 2026-09-25 全庫 67／67 都帶話

@@ -15,9 +15,10 @@ extends SceneTree
 #      的 `_test_p20_forced_panel_three_lines` 驗（那一格印出整段畫面）。
 #   2. P5 讀的是【原始碼】不是 stdout：它擋「那一行被刪掉」，不擋「它真的印出來」；
 #      而到達／回應兩句在 headless 卷面上有實證（本輪逐字貼進 handback）。
-#   3. ★★★本票【不含】②面板鎖＋去重、④「按 T 變拒絕」的真因指認 ——
-#      systems 2026-09-29 裁：#8（按一下＝一顆 tick）會換掉那兩格要量的時序，
-#      ⇒ 現在量會量到一個【即將被換掉的世界】。這兩件等 #8 落地後重寫 spec 再做。
+#   3. ★★★②④ 於 2026-09-30 重派（spec §7）：②′＝按了就結算（鎖旗與去重兩層【刪掉】，
+#      不是簡化 —— 它們守的那段時間在 #8 之後不存在了）、④′＝(a) 從「逾時競態」降級成
+#      「同一顆 tick 內的 pipeline 次序」。⇒ ④′ 是本檔的 P7；②′ 的玩家層那一格在
+#      `ui_flow_test::_test_p23_response_settles_on_press`（它要真的按鍵）。
 
 var _errors: int = 0
 var _cells_ran: Array = []
@@ -38,6 +39,8 @@ const EXPECTED_CELLS: Array = [
 	"_test_p4_three_lifecycle_points_in_feed",
 	"_test_p5_three_terminal_prints_exist",
 	"_test_p6_one_table_not_two",
+	"_test_p7_indict_the_real_cause",
+	"_test_p8_settled_response_is_silent",
 ]
 
 
@@ -88,6 +91,164 @@ func _text_of(st: WorldState, kind: String) -> String:
 			return String(e.get("text", ""))
 	return ""
 
+# ══ P7：④′ 指認真因（★【指認】不是【通過】）═══════════════════════════════
+# ★★★spec §7 的形狀：床【不預判】哪一個候選成立，它把四個候選各自的證據欄印出來。
+#   而 systems 加了一句：(c) 是唯一他已經有 file:line 的
+#   （`player_command_system.gd` 的 `_accept_diplomacy` match 沒有 propose_alliance 那一支）
+#   ⇒ ★若卷面印出來【不是 (c)】，那件事本身是一個發現（表示還有第五個候選）。
+# ★★母體地板兩條（spec §4 逐字＋R² 補的那半）：
+#   ①到達真的發生（forced_event 非空）
+#   ②`proposal` 真的是會撞 match 的那種值（propose_alliance／propose_trade／tribute_offer）
+#     —— 否則床會在一個【proposal 剛好合法】的世界裡對 (c) 恆綠。
+# ★★★(a) 欄在 #8 之後改印【次序】不印【時間】：消費點與逾時在同一顆 tick 的第幾步。
+# 負對照：★尚未點火（本格是【診斷】：它的工作是印出證據欄，不是守一個性質）
+func _test_p7_indict_the_real_cause() -> void:
+	print("\n── P7 指認真因（四候選證據欄）──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	_npc_at_player(st, 7320)
+	var PROPOSAL: String = "propose_alliance"   # ★diplomatic_ai_system:174 真的會寫的那個值
+	st.set_player_forced_event({"action": "diplomacy", "from_id": 7320,
+		"proposal": PROPOSAL}, "fe_p7")
+	# ── 母體地板
+	_check("母體地板 A：到達真的發生（forced_event 非空）", not st.player_forced_event.is_empty())
+	var hits_match: Array = ["propose_alliance", "propose_trade", "tribute_offer"]
+	_check("母體地板 B：proposal 真的是會撞 match 的那種值（%s）" % PROPOSAL,
+		hits_match.has(PROPOSAL))
+	# ── 按接受（走 #8 的咽喉：入列 ＋ 自動請求一顆）
+	var before_res: int = st.command_results.size()
+	var before_ev: int = st.player_events.size()
+	var r: Dictionary = bridge.command_player("respond_to_forced",
+		{"interaction_id": "fe_p7", "response_id": "accept"})
+	print("   入列回傳：ok=%s queued=%s｜請求量=%d" % [
+		str(r.get("ok", "?")), str(r.get("queued", false)), bridge.ticks_remaining()])
+	bridge.tick_step()
+	# ── 證據欄①：消費點的回傳（逐字）
+	print("   ── 消費點的結果句（逐字）──")
+	for i in range(before_res, st.command_results.size()):
+		var e: Dictionary = st.command_results[i]
+		print("     ok=%-5s %s" % [str(e.get("ok", "?")), String(e.get("text", ""))])
+	if st.command_results.size() == before_res:
+		print("     （一句都沒有 —— ★若這是靜默出口，它是 ②′ 那條；否則是 TTL 咬掉了）")
+	# ── 證據欄②：事件流那幾句
+	print("   ── 玩家事件流新增的句子 ──")
+	for j in range(before_ev, st.player_events.size()):
+		print("     [%s] %s" % [String(st.player_events[j].get("kind", "")),
+			String(st.player_events[j].get("text", ""))])
+	# ── 四候選各自的證據欄（★全印，不預判）
+	var all_text: String = ""
+	for i2 in range(before_res, st.command_results.size()):
+		all_text += String(st.command_results[i2].get("text", "")) + "\n"
+	for j2 in range(before_ev, st.player_events.size()):
+		all_text += String(st.player_events[j2].get("text", "")) + "\n"
+	print("   ══ 四候選證據欄 ══")
+	# (a) 次序（★#8 之後這一欄印【步序】不印【時間】）
+	var sr_src: String = _code_only(FileAccess.get_file_as_string(
+		"res://scripts/simulation/sim_runner.gd"))
+	var lines_sr: PackedStringArray = sr_src.split("\n")
+	var consume_at: int = -1
+	var timeout_at: int = -1
+	for k in range(lines_sr.size()):
+		var t: String = lines_sr[k].strip_edges()
+		if consume_at == -1 and t == "_consume_player_commands(state)":
+			consume_at = k + 1
+		if timeout_at == -1 and t.contains("forced_event 超時自動拒絕"):
+			timeout_at = k + 1
+	print("   (a) 次序：消費點在源碼第 %d 行／逾時判定在第 %d 行（同一顆 tick 內）" % [
+		consume_at, timeout_at])
+	print("       ⇒ 消費在逾時%s ⇒ ★這是【決定性的 pipeline 次序】不是玩家手速"
+		% ("【之前】" if consume_at < timeout_at and consume_at != -1 else "【之後】"))
+	var kinds_now: Array = _kinds(st)
+	print("       ⇒ 事件流：resolved=%s／timeout=%s" % [
+		str(kinds_now.has("forced_event_resolved")), str(kinds_now.has("forced_event_timeout"))])
+	_check("(a) 母體地板：那兩個步序都找得到（消費 %d／逾時 %d）" % [consume_at, timeout_at],
+		consume_at != -1 and timeout_at != -1)
+	# (b) 重複回應
+	print("   (b) 重複回應：卷面有沒有「無待處理強制事件」= %s" % str(all_text.contains("無待處理強制事件")))
+	# (c) _accept_diplomacy 回 false
+	print("   (c) 未知提案類型：卷面有沒有「未知提案類型」= %s｜含 %s = %s" % [
+		str(all_text.contains("未知提案類型")), PROPOSAL, str(all_text.contains(PROPOSAL))])
+	# (d) 措辭撞車 —— ★★★「事件有沒有真的被接受」要讀【結構欄位】不是搜字串：
+	#   我第一版搜「結盟」⇒ 命中的是【提案名】「提議與你結盟」而不是接受確認句
+	#   ⇒ 那一欄印出 true 而事實是 ok=false。★同一族第四次（判準搜到的是它的名字不是它的結果）。
+	var accepted: bool = false
+	for i3 in range(before_res, st.command_results.size()):
+		if bool(st.command_results[i3].get("ok", false)):
+			accepted = true
+	print("   (d) 措辭撞車：卷面有沒有「被拒絕（」= %s｜★而事件【真的被接受了嗎】（讀 ok 欄）= %s" % [
+		str(all_text.contains("被拒絕（")), str(accepted)])
+	print("       ⇒ (d) 要成立必須【兩件同時】：事件真的被接受 ＋ 畫面那句是佇列的拒絕語")
+	print("         ⇒ ok=%s ⇒ (d) %s" % [str(accepted), "成立" if accepted else "不成立（事件根本沒被接受）"])
+	# ★★★而 match 那一支到底認不認得它 —— 這一欄是靜態的，直接讀 code（不預判，只是把事實擺上來）
+	var pcs_src: String = _code_only(FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd"))
+	var at: int = pcs_src.find("func _accept_diplomacy")
+	var body: String = pcs_src.substr(at, 700) if at != -1 else ""
+	print("   ★(c) 的靜態證據：`_accept_diplomacy` 的 match 裡有 `%s` 嗎 = %s" % [
+		PROPOSAL, str(body.contains(PROPOSAL))])
+	_check("★母體地板：找得到 `_accept_diplomacy` 的函式體（找不到＝這一欄不可判）", at != -1)
+	print("   ★★★本格【不下結論】：上面五欄交由讀的人指認。")
+	print("     而 systems 說 (c) 是唯一他有 file:line 的候選 ⇒ 若卷面指的不是 (c)，")
+	print("     那是一個【發現】（第五個候選），要寫進 handback 不要當噪音。")
+	_cell("_test_p7_indict_the_real_cause")
+
+# ══ P8：②′ 的靜默出口（對已結算的強制事件再回應 ⇒ 不產任何句子）══════════
+# ★★★為什麼這一格【不在 ui_flow 裡】：ui_flow 的 P23 量到玩家連按時，第二次按
+#   根本走不到 `respond_to_forced` —— 它掉進 self-actions（P23 的 [DISCOVERY]）
+#   ⇒ ★所以靜默出口目前【從 UI 是 0 命中的】，它守的是那個洞被修好之後的世界。
+#   ★★而一個 0 命中的分支若沒有自己的格，就只剩註解在替它說話（同 09-28 那條教訓）
+#     ⇒ 這一格用【直呼】把它點著。
+# ★母體地板：先斷言第一次回應【真的結算了】（forced_event 從非空變空），
+#   否則「第二次沒有句子」在一個從來沒有事件的世界裡恆綠。
+# ★★同時斷言 `silent` 的【寫入點只有兩處】（兩個空事件出口）——
+#   它是一個會讓句子消失的旗子，而讓句子消失的東西必須數得出來。
+# 負對照：把兩個空事件出口的 `silent` 拿掉 ⇒ 第二次冒出「被拒絕（」⇒ 必紅
+func _test_p8_settled_response_is_silent() -> void:
+	print("\n── P8 已結算的回應＝靜默 ──")
+	var pair: Array = _fresh()
+	var st: WorldState = pair[0]
+	var runner: SimRunner = pair[1]
+	var bridge := SimBridge.new(runner, st)
+	_npc_at_player(st, 7330)
+	st.set_player_forced_event({"action": "diplomacy", "from_id": 7330,
+		"proposal": "propose_alliance"}, "fe_p8")
+	_check("母體地板 A：到達真的發生", not st.player_forced_event.is_empty())
+	bridge.command_player("respond_to_forced",
+		{"interaction_id": "fe_p8", "response_id": "refuse"})
+	bridge.tick_step()
+	_check("★母體地板 B：第一次回應真的結算了（forced_event 變空）",
+		st.player_forced_event.is_empty())
+	var base: int = st.command_results.size()
+	var log0: int = st.command_log.size()
+	# ── 第二、三次：對一個已經不存在的事件回應
+	for _k in range(2):
+		bridge.command_player("respond_to_forced",
+			{"interaction_id": "fe_p8", "response_id": "refuse"})
+		bridge.tick_step()
+	var added: Array = []
+	for i in range(base, st.command_results.size()):
+		added.append(String(st.command_results[i].get("text", "")))
+	print("   第二、三次回應新增的結果句 = %s（期望空）" % str(added))
+	print("   而 command_log 新增 %d 筆（★期望 2：審計軌跡要留著）" % (st.command_log.size() - log0))
+	_check("★★★靜默：兩次都沒有產生任何結果句（新增 %d）" % added.size(), added.is_empty())
+	_check("★★審計軌跡留著：command_log 有記到那兩道（新增 %d／期望 2）"
+		% (st.command_log.size() - log0), st.command_log.size() - log0 == 2)
+	# ── `silent` 的寫入點只有兩處（★會讓句子消失的東西必須數得出來）
+	var pcs: String = _code_only(FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd"))
+	var writers: int = 0
+	for l in pcs.split("\n"):
+		if l.contains("\"silent\": true"):
+			writers += 1
+	print("   `\"silent\": true` 在 player_command_system 的寫入點 = %d（期望 2）" % writers)
+	_check("★`silent` 只有兩個寫入點（兩個空事件出口）＝%d" % writers, writers == 2)
+	print("   ★邊界：本格【不】斷言「拒絕禁靜默」沒被破 —— 那條守的是")
+	print("     『玩家分不出被拒絕與沒吃到鍵』，而這裡玩家已經看過第一次的結果句。")
+	print("     ⇒ 真正的判準是【同一條指令的回音 ≤ 2 次】（ui_flow P15 那一格）。")
+	_cell("_test_p8_settled_response_is_silent")
+
 # 只看【程式碼】不看整行註解（★血證：上一輪兩次被自己寫的註解汙染計數）
 func _code_only(src: String) -> String:
 	var out: String = ""
@@ -106,6 +267,8 @@ func _initialize() -> void:
 	_test_p4_three_lifecycle_points_in_feed()
 	_test_p5_three_terminal_prints_exist()
 	_test_p6_one_table_not_two()
+	_test_p7_indict_the_real_cause()
+	_test_p8_settled_response_is_silent()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c): miss.append(c)
