@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 兩層關係帳的 HOW 定案（★標量用既有 `p.relations` 不新開，而它有三個缺口）＋★★我自驗確認 D2 我兩半都錯＋第三條管道那個洞已開票＋#7①③＋#8 已上 main
 ---
 
