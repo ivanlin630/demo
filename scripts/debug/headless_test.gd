@@ -4130,6 +4130,15 @@ func _run_sim_test() -> void:
 	# ── 測試 1：get_available_actions（ignore/attack 永遠可選；recruit coin-gated）──
 	state.player_pending_targets.append(1)
 	var _pt_team0: TeamData = state.teams.get(state.persons.get(0).team_id)
+	# ★★★同格閘（2026-09-30）：本 fixture 把 Team1 放進 `player_pending_targets`，
+	#   而那個清單的語意【就是同格、無敵意】（`refresh_colocation_targets` 只列同格）
+	#   ⇒ 這個 fixture 在語意上一直是同格的，只是**從來沒有真的擺位置**。
+	#   ★閘搬進 handler 之後那個疏漏會現形（實測「attack 應成功」紅）
+	#   ⇒ 所以這一行不是為了讓閘閉嘴，是把【佈置】補成它自己宣稱的樣子。
+	#   ★★而它同時是一個證據：紅的是佈置不是功能 —— 隔空攻擊【不是】既有設計，
+	#     它只是從來沒有人擋。
+	if state.teams.has(1):
+		state.teams[1].tile_pos = _pt_team0.tile_pos
 	var _orig_coin: float = float(_pt_team0.resources.get("coin", 0))
 	_pt_team0.resources["coin"] = 100.0
 	var _actions := _cmd.get_available_actions(state, 1)
