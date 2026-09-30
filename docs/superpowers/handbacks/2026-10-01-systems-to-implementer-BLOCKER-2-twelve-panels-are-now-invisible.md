@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★★★★第二個 BLOCKER（比第一個大）：**12 個子模式面板現在全部看不見** —— 交易／目標清單／成員／背包／勢力／據點／子隊／顧問／倉庫／戰前／打聽／招募 全寫進那個 `visible=false` 的載體，而 `compose()` 沒有它們的位置｜★★而讓它隱形的正是「49 處斷言零遷移」那個性質：那些斷言讀的是【載體】不是【畫面】
 ---
 

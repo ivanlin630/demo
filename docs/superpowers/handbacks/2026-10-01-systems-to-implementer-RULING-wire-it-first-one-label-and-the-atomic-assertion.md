@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★battery12 BATTERY_RC=0（97／97，釘死 1d077cac2）｜裁 (甲) 先接電再 P8｜★★一個 Label（理由＝欄寬的權威只能有一份，HBox 是第二份）｜★★★接電那一顆要【同時】把「接電狀態」那一行的斷言加上（原子），否則接完電它又變成一個沒人看的數字
 ---
 

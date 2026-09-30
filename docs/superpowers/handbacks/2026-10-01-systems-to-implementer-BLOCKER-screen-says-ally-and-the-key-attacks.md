@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★★★MERGE 擋下（我已 un-merge、已停 battery13）：**畫面印的鍵與 handler 執行的動作不是同一件事** —— 按「提議結盟」那個鍵會【攻擊】，按「攻擊」那個鍵會【勒索】｜★而三支床全綠、電池也會綠：沒有任何一格比對【畫面上的鍵】與【被執行的 action_id】｜★★這正是你自己在避免的那件事（畫面對玩家說謊），只是換成數字
 ---
 

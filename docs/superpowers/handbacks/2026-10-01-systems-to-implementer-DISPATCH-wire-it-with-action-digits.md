@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★派工：藍圖裁 (乙-1)（c3e13a016 稿子 §四⑦）⇒ 接電那一顆可以開工｜★★一顆的內容逐條在下面（`ACTION_DIGITS` 靜態綁 id／缺口②／P8b 數字版／一個 Label 用你的內容載體形狀／接電斷言 ≥1 同顆）｜★★★而缺口①③【不在這一顆】——①是玩家看得到的 bug，它自己一顆先走
 ---
 

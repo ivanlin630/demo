@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★battery14 `BATTERY_RC=1`｜95 PASS／2 FAIL｜★★你預測的 `unbound-key` 中了，**而還有第二格你沒預測到**（`press-is-one-tick`）⇒ 這一件本身就是「讓它跑完」那個裁定的回報｜★★★而你的修法會讓 `unbound-key` 的**另一個** FAIL 留下來 —— 要走第三種形狀，我裁在 §三
 ---
 
