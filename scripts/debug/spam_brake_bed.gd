@@ -129,8 +129,8 @@ func _test_p0_affinity_is_already_in_the_ruler() -> void:
 # ══ P1′：小索貢 ⇒ 好感動、記憶【不動】════════════════════════════════════
 # ★印【實際進公式的 severity】而不是我以為的那個：它＝(coin_before − coin_after)／coin_before
 #   —— 量出來的，不是抄 * 0.1 那一行（抄的那份會與世界漂開）。
-# 負對照 a：拿掉 _update_relations 的 "tributed" 那一列 ⇒ 好感不動 ⇒ 必紅
-# ★★負對照 b：把 "tributed": 0.30 加進 FEUD_SEVERITY ⇒ 小索貢突然寫起 feud 邊 ⇒ 必紅
+# 負對照：拿掉 _update_relations 的 "tributed" 那一列（delta = 0）⇒ 本格 9 處紅 ⇒ 已於 feat/spam-brake（2026-09-30 這一輪） 實測紅
+# 負對照：把 "tributed": 0.30 加進 FEUD_SEVERITY ⇒ 本檔 P1 的表格斷言＋P5′ 小事那一格紅 ⇒ 已於 feat/spam-brake（2026-09-30 這一輪） 實測紅
 #   （它守的是【誰的值被讀】：.get(type, intensity) 讓「把名字加進表」同時打破
 #     「拿走幾成」與「兩層分界」，而卷面上沒有其他差別。）
 func _test_p1_small_tribute_moves_affinity_not_memory() -> void:
@@ -171,6 +171,17 @@ func _test_p1_small_tribute_moves_affinity_not_memory() -> void:
 	_check("★★★feud 邊【仍然是 0】（小事不入記憶＝用戶逐字）", feud_after == 0.0)
 	_check("★而它不過門檻是【算得出來的】：severity×factor %.4f < FEUD_MIN %.2f" % [
 		sev * factor, NpcAiSystem.FEUD_MIN], sev * factor < NpcAiSystem.FEUD_MIN)
+	# ★★★這一格是【負對照 b 教我加的】：把 "tributed" 加進 FEUD_SEVERITY 之後，
+	#   本格的其他斷言【全部照舊綠】—— 因為這個領袖太溫和（factor 0.490）：
+	#   0.30 × 0.490 ＝ 0.147 仍然不過門檻 ⇒ 邊還是 0。
+	#   ⇒ 真的接住那個擾動的是 P5′（義氣/好戰 0.9 ⇒ factor 1.19 ⇒ 0.357 過門檻）。
+	#   ★而「拿走幾成到不到得了記憶層」這件事本身應該在【這裡】有一格，
+	#     因為它是 P1′ 的主題（severity ＝ 比例，不是表裡的固定值）：
+	print("   ★FEUD_SEVERITY 裡有沒有 tributed ＝ %s（表裡有 ⇒ `.get(type, intensity)` 會把比例換成固定值）"
+		% str(NpcAiSystem.FEUD_SEVERITY.has("tributed")))
+	_check("★★★`tributed` 不在 FEUD_SEVERITY 表裡 ⇒ 進 form_feud 的 severity 是【這一次拿走幾成】"
+		+ "（進表的話十次小索貢與一次大索貢會同值，而卷面上沒有其他差別）",
+		not NpcAiSystem.FEUD_SEVERITY.has("tributed"))
 	_cell("_test_p1_small_tribute_moves_affinity_not_memory")
 
 
@@ -180,7 +191,7 @@ func _test_p1_small_tribute_moves_affinity_not_memory() -> void:
 #   (b) 印 score_no_edge，★而且印【除數】—— 門檻要比每次的平均值，不是比累計
 #       （這是「112 個 tick 累計 56 秒直接跟 1000ms 比」那個誤判的形狀）
 #   (c) ★領袖人格釘死 ＋ 床自己算出【理論上第幾次翻】再跟實測序列對一次
-# 負對照：拿掉 tribute_accept 的好感項 ⇒ 20／20 全 accept ⇒ 必紅
+# 負對照：拿掉 tribute_accept 的好感項（score += 0.0）⇒ 20／20 全 accept、4 處紅 ⇒ 已於 feat/spam-brake（2026-09-30 這一輪） 實測紅
 func _test_p2_spam_sequence_flips_to_refuse() -> void:
 	print("\n── P2′ 連索 %d 次的序列 ──" % SPAM_PRESSES)
 	var arr: Array = _fresh()
@@ -303,7 +314,7 @@ func _test_p3b_no_decay_yet() -> void:
 
 
 # ══ P4：NPC↔NPC 同格勒索也走同一條路（玩家零特殊物理）═══════════════════
-# 負對照：把寫入只掛在玩家那一支 ⇒ 這一格必紅
+# 負對照：把寫入只掛在玩家那一支（同格勒索那半拿掉）⇒ 本格紅 ⇒ 已於 feat/spam-brake（2026-09-30 這一輪） 實測紅
 func _test_p4_npc_vs_npc_walks_the_same_path() -> void:
 	print("\n── P4 NPC↔NPC 同格勒索走同一條路 ──")
 	var arr: Array = _fresh()
@@ -336,7 +347,7 @@ func _test_p4_npc_vs_npc_walks_the_same_path() -> void:
 
 # ══ P5′：兩層不串 ═════════════════════════════════════════════════════════
 # 大事（severity 0.9）⇒ 邊有了【且】好感也動；小事（0.1）⇒ 只有好感動、邊仍 0
-# 負對照：把 _update_relations 搬到門檻後面 ⇒ 小事好感不動 ⇒ 必紅
+# 負對照：把 _update_relations 搬到門檻後面（只有寫得出邊才寫好感）⇒ 7 處紅 ⇒ 已於 feat/spam-brake（2026-09-30 這一輪） 實測紅
 #   （★這就是「門檻下零丟棄」的守衛。）
 func _test_p5_two_tiers_do_not_cross() -> void:
 	print("\n── P5′ 兩層不串（大事進記憶、小事只進好感）──")
@@ -367,6 +378,7 @@ func _test_p5_two_tiers_do_not_cross() -> void:
 # ══ P7′：好感層自己的母體 ═════════════════════════════════════════════════
 # ★★★好感一直有人在寫，而它【從來沒有任何 tap】⇒ 這不是本票製造的盲點，是本票照到的。
 #   ⇒ 沒有這個計數，「改進好感的那些事」在量測上完全不存在（全量暫態可觀測性）。
+# 負對照：把 Probe.bump("affinity.delta." + type) 拿掉 ⇒ 本格紅 ⇒ 已於 feat/spam-brake（2026-09-30 這一輪） 實測紅
 func _test_p7_affinity_has_its_own_population() -> void:
 	print("\n── P7′ 好感層有自己的母體（affinity.delta.<type>）──")
 	var ai := NpcAiSystem.new()
