@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: fp 基準已落在 feat/spam-brake（`1f7b43f2b`）＋三件證據齊｜★兩跑逐字相同（final_fp 與 traj_fp 都相同）｜★★附一個你沒要求的獨立佐證：我這棵樹【不含通商】而量到的值與你合併樹一樣 ⇒ 從另一個方向再坐實一次歸因
 ---
 
