@@ -58,8 +58,7 @@ def restore(payload):
 
 
 def run(_payload):
-    env = dict(os.environ, PSExecutionPolicyPreference='Bypass',
-               PYTHONIOENCODING='utf-8', GODOT_TIMEOUT='180')
+    env = nc.child_env(PYTHONIOENCODING='utf-8', GODOT_TIMEOUT='180')
     r = subprocess.run(['powershell', '-NoProfile', '-File', './tools/godot.ps1',
                         '--headless', '--script', BED],
                        capture_output=True, text=True, encoding='utf-8',
