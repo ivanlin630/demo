@@ -38,6 +38,10 @@ const A_PAGES: String  = "┬─ ["          # ★自帶 `┬` ⇒ 組框時**�
 const A_ACTION: String = "─ 動作（"
 const A_FEED: String   = "─ 事件（"
 const A_FOOT: String   = " 鍵："          # 底部鍵位那一行
+# ★★子模式面板的錨 —— ★**刻意不進 `REGION_ANCHORS`**：它與 map+pages **互斥**
+#   （非空時取代那個框）⇒ 它不是第七區，而 P1「六個錨各剛好一次」在有面板時
+#   本來就不該要求 `┌─ 地圖（`／`┬─ [` 出現。★★而那一點要由床證：見 P30。
+const A_PANEL: String  = "─ 面板（"
 const REGION_ANCHORS: Array = [A_TOP, A_MAP, A_PAGES, A_ACTION, A_FEED, A_FOOT]
 
 # ══ 頂列六欄（spec §2②：★指名六欄，不是「頂列非空」）═══════════════════════════
@@ -231,14 +235,39 @@ static func foot_block(result_line: String, keymap: String) -> String:
 	])
 
 
+# ══ ★★★【子模式面板】—— 非空時**取代** map+pages 那個框（systems 裁 2026-10-01 BLOCKER-2）
+#   ★缺陷（我引入的形狀造成的）：舊的 `_event_label` 載著 **12 個子模式面板**
+#     （戰前／交易／**目標清單**／成員／背包／勢力／據點／子隊／顧問／倉庫／打聽／招募），
+#     而 `_render_screen()` 每次 render 都把它 `visible = false`、
+#     而 `compose()` **沒有它們的位置** ⇒ 那 12 個面板【從來沒有進畫面】。
+#   ⇒ ★★「選目標」最致命：玩家看不到目標清單，而動作清單要先選到目標才會出現
+#     ⇒ **新版面的整條入口是黑的**。
+#   ⇒ ★★★而三支床全綠，因為它們讀的是 `node._event_label.text`（**載體**）不是畫面
+#     —— 而那正是「49 處斷言零遷移」那個性質的另一面：
+#     **那 49 格從此不看畫面**。判準寫在床的 P30 旁邊。
+#   ★放在 map+pages 的位置：子模式本來就是「接管畫面」的語意，
+#     而放那裡保住「顯示只有一個」（不是再加一區）。
+static func panel_block(panel_body: String) -> String:
+	var w: Array = box_widths()
+	var lines: Array = []
+	lines.append(_fill_to(A_PANEL + "接管畫面）", TextUiLayout.COLS, "─"))
+	for l in panel_body.split("\n"):
+		lines.append(TextUiLayout.clip_to(String(l), TextUiLayout.COLS))
+	return "\n".join(lines)
+
+
 # ══ 六區組成整個畫面（★順序固定：任何模式都不搬，模式只改【動作區】的內容）═════
 # regions：top(Dictionary)／map(String)／pages(String)／map_note／tabs／
 #          action(Array)／feed(Array)／result(String)／keymap(String)
 static func compose(regions: Dictionary) -> String:
+	var panel: String = String(regions.get("panel", ""))
+	# ★★★子模式面板非空 ⇒ **取代** map+pages 那個框（見 `panel_block` 上方的理由）
+	var mid: String = panel_block(panel) if panel.strip_edges() != "" else map_pages_box(
+		String(regions.get("map", "")), String(regions.get("pages", "")),
+		String(regions.get("map_note", "")), String(regions.get("tabs", "")))
 	return "\n".join([
 		top_row(regions.get("top", {}) as Dictionary),
-		map_pages_box(String(regions.get("map", "")), String(regions.get("pages", "")),
-			String(regions.get("map_note", "")), String(regions.get("tabs", ""))),
+		mid,
 		action_block(regions.get("action", []) as Array),
 		feed_block(regions.get("feed", []) as Array),
 		foot_block(String(regions.get("result", "")), String(regions.get("keymap", ""))),

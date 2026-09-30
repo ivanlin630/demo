@@ -805,6 +805,12 @@ func _render_screen(pend_txt: String) -> void:
 		"tabs": String(UiPages.header(_page_idx)).trim_prefix("["),
 		"map": _map_label.text,
 		"pages": _state_label.text,
+		# ★★★子模式面板（BLOCKER-2）：`_event_label` 載著 12 個子模式面板，
+		#   而它 `visible = false` ⇒ 不傳進來的話那 12 個面板【玩家一個都看不到】
+		#   —— 而「選目標」也在裡面 ⇒ 新版面的整條入口會是黑的。
+		#   ★而它只在【子模式中】非空：主畫面時 `_event_label` 載的是事件 log，
+		#     而那一份已經有替代品（`feed` 區吃 `_feed_rows`）⇒ 主畫面不傳（否則印兩份）。
+		"panel": _event_label.text if _current_mode_name() != "main" else "",
 		"action": rows,
 		"feed": _feed_rows,
 		"result": _feedback_line.text,
@@ -1610,10 +1616,20 @@ func _handle_interact_mode(keycode: int) -> void:
 		return
 
 	# 翻頁（選單 >9 項時）：[,] 上一頁 / [.] 下一頁
-	if keycode == KEY_COMMA:
-		_interact_page = maxi(0, _interact_page - 1); _refresh(); return
-	if keycode == KEY_PERIOD:
-		_interact_page += 1; _refresh(); return
+	# ★★★【動作層不分頁 ⇒ 那兩個鍵在動作層是「已綁而無作用」】（systems 裁 BLOCKER-2 ④）
+	#   ⇒ 與缺口② 同一族：`binds_key` 說綁了、而 handler 什麼都不做 ⇒ 玩家零回饋。
+	#   ⇒ ★聚焦目標時走**未綁定鍵的統一出口**（吃掉、印一句話、什麼都不改）；
+	#     ★★目標清單那一層的分頁**不動**（那裡的鍵本來就是位置語意）。
+	if keycode == KEY_COMMA or keycode == KEY_PERIOD:
+		if _interact_target >= 0:
+			_refuse_unbound_key("互動", keycode)
+			return
+		if keycode == KEY_COMMA:
+			_interact_page = maxi(0, _interact_page - 1)
+		else:
+			_interact_page += 1
+		_refresh()
+		return
 	# ★★★不變量 #10（systems 2026-09-30）：【強制事件回應】與【自家隊動作】
 	#   不得共用同一段數字區間 —— 一個按鍵的意義不得由一個會在同一顆 tick 內改變的計數決定。
 	#   ★血證：面板消失（fe_count 2 → 0）之後再按同一個 KEY_1，實測執行了

@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -111,6 +111,7 @@ func _initialize() -> void:
 	await _test_p27_forced_takes_over_and_keys_speak()
 	await _test_p28_screen_is_the_composed_one()
 	await _test_p29_key_on_screen_runs_that_row()
+	await _test_p30_submode_panels_reach_the_screen()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -220,8 +221,17 @@ func _test_join_request_ui() -> void:
 	st.player_forced_event_id = "t1"
 	node._bridge.request_advance(1)   # _process 早段需 is_advancing 才往下跑
 	node._process(0.1)   # U19 自動進 forced 模式
-	var s: String = node._event_label.text
-	_check("forced 顯收留選項", s.contains("收留") or s.contains("投靠") or s.contains("婉拒"))
+	# ★★★改讀【玩家畫面】不是載體（systems 裁 BLOCKER-2 ③）——
+	#   這一格原本讀 `_event_label.text`（載體）⇒ 而載體 `visible = false`
+	#   ⇒ 它**問不出「玩家看得到嗎」** ⇒ 那正是 BLOCKER-2 隱形的機制。
+	#   ★而載體那一半留一個 `_check` 當**對照**：內容在載體裡而【不在畫面上】時，
+	#     兩條的紅綠會**分開** ⇒ 一眼看得出病在「內容沒生出來」還是「內容沒進畫面」。
+	var s_carrier: String = node._event_label.text
+	var s: String = String(node._screen_label.text) if node._screen_label != null else ""
+	_check("forced 的選項【內容】生出來了（載體）",
+		s_carrier.contains("收留") or s_carrier.contains("投靠") or s_carrier.contains("婉拒"))
+	_check("★forced 顯收留選項（★讀【玩家畫面】）",
+		s.contains("收留") or s.contains("投靠") or s.contains("婉拒"))
 	await _free_ui(node)
 
 # Q7-1：forced choose_heir → UI DTO responses 列候選（非只拒絕）→ 選擇 → leader 接位 + forced 清
@@ -355,11 +365,15 @@ func _test_recruit_named_reachable() -> void:
 		await _free_ui(node); return
 	node._handle_interact_mode(KEY_1 + int(rkey) - 1)   # 按【畫面印的那個鍵】→ 進招募子模式
 	# 斷言：進入招募子選單（顯記名候選 + 匿名選項）
-	var rs: String = node._event_label.text
+	# ★同上（BLOCKER-2 ③）：讀【玩家畫面】，而載體那一半留一個對照
+	var rs_carrier: String = node._event_label.text
+	var rs: String = String(node._screen_label.text) if node._screen_label != null else ""
+	_check("★招募子選單的【內容】生出來了（載體）",
+		rs_carrier.contains("叛徒") or rs_carrier.contains("記名"))
 	print("  recruit 子選單文字: %s" % rs.replace("\n", " | "))
 	_check("進招募子模式（_current_mode_name=recruit）", node._current_mode_name() == "recruit")
-	_check("子選單顯記名候選（叛徒）", rs.contains("叛徒") or rs.contains("記名"))
-	_check("子選單顯匿名選項", rs.contains("匿名"))
+	_check("★子選單顯記名候選（叛徒）（★讀【玩家畫面】）", rs.contains("叛徒") or rs.contains("記名"))
+	_check("★子選單顯匿名選項（★讀【玩家畫面】）", rs.contains("匿名"))
 	# 選記名候選（第 1 個）→ recruit_named 真執行
 	var coin_before: float = float(st.teams[ptid].resources.get("coin", 0))
 	node._handle_recruit_mode(KEY_1)
@@ -3131,6 +3145,82 @@ func _test_p29_key_on_screen_runs_that_row() -> void:
 	print("   ★★★而「未綁鍵」那個字原本也是謊：改之前 `ignore` 排在位置 1 ⇒ 按 [1] 真的按得到它。")
 	await _free_ui(node)
 	_cell("_test_p29_key_on_screen_runs_that_row")
+
+
+# 負對照：`_render_screen` 不傳 `panel` ⇒ 本格紅並指名哪幾個面板不見了 ⇒ 待實測
+# ══ P30：★★★★★【跨側】12 個子模式面板真的出現在玩家畫面上（BLOCKER-2）═════════
+# ★缺陷（我引入的形狀造成的，systems 核出）：`_event_label` 載著 **12 個子模式面板**，
+#   而 `_render_screen()` 每次 render 都把它 `visible = false`、而 `compose()` 沒有它們的位置
+#   ⇒ 那 12 個面板【從來沒有進畫面】。★「選目標」也在裡面 ⇒ 新版面的整條入口是黑的。
+# ★★而三支床全綠，因為它們讀的是 `node._event_label.text`（**載體**）不是畫面。
+#   ⇒ ★★★而那正是「49 處斷言零遷移」那個性質的另一面：**那 49 格從此不看畫面**。
+#     判準：**當一個改動讓「所有既有斷言都不用改」時，要問一次
+#     「那些斷言原本在看什麼，而它們現在還看得到嗎」** ——
+#     零遷移可能是**它們與被改的那件事失去了連結**，而那在卷面上是一片綠。
+# ★而 P28 也接不到它：它數的是六個錨，**子模式面板不在錨的母體裡** ⇒ 不是壞掉，是**沒被問到**。
+# ⇒ ★★★★★所以這一格是【跨側】的：一邊是載體（內容從哪來）、一邊是畫面（玩家看到什麼）。
+func _test_p30_submode_panels_reach_the_screen() -> void:
+	_selftest_gate("_test_p30_submode_panels_reach_the_screen").noop()
+	print("\n── P30 子模式面板真的進畫面 ──")
+	# ★母體【機械數】：`_event_label.text = _build_<name>_str()` 的賦值點
+	#   ⇒ 而模式旗標從名字**導出**（`_build_X_str` → `_X_mode`）—— 不手抄一份 12 個名字的清單
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var builders: Array = []
+	for line in src.split("\n"):
+		var t: String = line.strip_edges()
+		if t.begins_with("#"):
+			continue
+		if t.begins_with("_event_label.text = _build_") and t.ends_with("_str()"):
+			var nm: String = t.trim_prefix("_event_label.text = _build_").trim_suffix("_str()")
+			builders.append(nm)
+	print("   機械數到 `_event_label.text = _build_*_str()` 的賦值點 ＝ %d 個：%s" % [
+		builders.size(), str(builders)])
+	_check("★★母體地板：真的數到賦值點（0 ⇒ 下面一次都不跑 ⇒ 本格不可判不是綠）",
+		builders.size() > 0)
+	var node = await _make_ui()
+	var walked: Array = []
+	var na: Array = []
+	var missing: Array = []
+	for nm in builders:
+		var flag: String = "_%s_mode" % String(nm)
+		# ★旗標名從 builder 名導出 ⇒ 導不出來要**具名報**，不是靜默跳過
+		if node.get(flag) == null:
+			na.append("%s（導不出旗標 `%s`）" % [String(nm), flag])
+			continue
+		node._close_all_modes()
+		node.set(flag, true)
+		node._refresh()
+		var carrier: String = String(node._event_label.text)
+		if carrier.strip_edges() == "":
+			na.append("%s（這一輪載體是空的 ⇒ 沒有面板可比，不是「進了畫面」）" % String(nm))
+			continue
+		walked.append(String(nm))
+		# ★比對用【載體的第一行非空文字】—— 整段比會被框的 clip 影響（那是版面不是內容）
+		var probe: String = ""
+		for cl in carrier.split("\n"):
+			if String(cl).strip_edges() != "":
+				probe = TextUiLayout.clip_to(String(cl).strip_edges(), 40)
+				break
+		var screen: String = String(node._screen_label.text)
+		var hit: bool = probe != "" and screen.contains(probe)
+		print("   %-14s 載體首行「%s」⇒ 在畫面上 ＝ %s" % [String(nm), probe.substr(0, 34), str(hit)])
+		if not hit:
+			missing.append("%s（「%s」）" % [String(nm), probe.substr(0, 24)])
+	print("   ── 三數相加 ＝ 母體 ──")
+	print("   走到 %d 個｜不適用 %d 個｜母體 %d 個" % [walked.size(), na.size(), builders.size()])
+	for x in na:
+		print("     · 不適用：%s" % String(x))
+	_check("★★三數相加 ＝ 母體（%d ＋ %d ＝ %d）" % [
+		walked.size(), na.size(), builders.size()],
+		walked.size() + na.size() == builders.size())
+	_check("★母體地板：這一輪真的走到子模式（%d；0 ⇒ 下面那條恆綠）" % walked.size(),
+		walked.size() > 0)
+	_check("★★★★★每一個走到的子模式，它的面板都出現在【玩家畫面】上（不見的：%s）"
+		% str(missing), missing.is_empty())
+	print("   ★★而這一格與 P28 的差別：P28 數六個錨（子模式面板**不在錨的母體裡**）")
+	print("     ⇒ P28 接不到這件事 —— **不是壞掉，是沒被問到**。")
+	await _free_ui(node)
+	_cell("_test_p30_submode_panels_reach_the_screen")
 
 
 
