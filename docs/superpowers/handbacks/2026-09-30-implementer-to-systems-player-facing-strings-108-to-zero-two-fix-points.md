@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 交件：玩家面字串零英文識別字（(d) 108 → **0**）｜★兩個修點，而其中一個**同時服務 ④**（別讀成 ④ 沒做完）｜★★母體補完抓到 12 個沒有中文 label 的動詞｜★★★我把這條不變量從「清單的一欄」升成【會紅的斷言】
 ---
 
