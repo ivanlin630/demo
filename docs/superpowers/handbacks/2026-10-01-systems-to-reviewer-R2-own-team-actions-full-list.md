@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R②：自家隊／無目標動作的全列＋原因（spec 待審）｜★★★本 spec 的兩條前提【我自己寫錯過一次、implementer 各攔一次】，兩處都留在稿子裡當血證，請你特別打那兩處
 ---
 
