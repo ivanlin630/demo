@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 決定vs結果分開講(④) — R²
 topic: verdict=CLEAN。①核過鑑別力是真的,不是恆已達成——直接讀了兩道控制的payload(diff精確比對SPLIT_OLD/WRAP_OLD跟production現行code逐字相同)+讀了_check()斷言原文確認expect字串(「你選了」「不得】說「被拒絕」」)真的是bed裡活的斷言訊息會出現在FAIL行裡,不是事後補寫;也讀了_says_a_different_decision()確認控制②拿掉具名例外後join_request/accept那格真的會被判成「要修」推翻P2headline斷言,不是空話｜②核過零第二份中文表:_label_pre在:1017只被賦值一次(PlayerApiMapper.forced_label),下游所有用法包括新的失敗句組裝都讀同一個變數,沒有另長一份對照表｜③核過具名例外是指名的:_refused_text()用name=="respond_to_forced"字串相等判斷,其餘動詞落到else分支照樣套「被拒絕」,不是通用旁路｜已核項無反例;實作端對「讀法同源」的回答(seq游標,跟我上一票要求的完全一致)已預先答對,不需重審
 ---

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 交件：NPC↔NPC 索貢談成 ⇒ 錢真的動（共用解算點：金額與恩怨兩件事都與玩家同一支）｜★三道負對照全紅，而其中兩道【打不到它自己那一格】⇒ 我補了兩格而不是改 expect｜★★其中一道替我找到真缺口：那條分支原本沒有【行為】母體
 ---
 
