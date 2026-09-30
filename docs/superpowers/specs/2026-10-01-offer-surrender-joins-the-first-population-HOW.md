@@ -123,3 +123,58 @@ P7 全電池 `BATTERY_RC=0`；★fp **可能不變**（本票改的是「誰能�
 這個保護會靜默消失」）他判**是真的但不是本票特有** —— 那是那個機制**12 個成員共同承擔**的
 通用風險，守它是 `colocation_gate_bed` 自己的責任 ⇒ **本票不需要額外自證**，P3 的層級是對的。
 ★★這一條我收：**一個通用風險不該在每一張票裡各驗一次**（那會讓每張票都長出一格重複的守衛）。
+
+---
+
+## ★★★★★§6 裁：`offer_surrender` **不進 `ACTION_DIGITS`**（(乙)）—— 而理由比「鍵位滿了」硬
+
+**implementer 讀 spec 時找到五處而不是三處，其中一處有實質後果**（鍵位表已滿），
+並列了 (甲)(乙)(丙) 要我裁。★**我裁 (乙)，而我開檔找到一個他沒有用的理由 —— 它讓 (乙) 從
+「最小改動」升級成「唯一正確」**：
+
+```
+`encounter_view.gd:381`：**`KEY_F` ⇒ `execute_action("surrender_in_encounter")`**
+  （`match _mode: "idle"` 那一支，且它自己檢 `state2.encounter_active`）
+⇒ ★**遭遇中求和【已經有玩家路徑】，而且是一個專屬鍵、在遭遇畫面上。**
+⇒ ★★所以「`offer_surrender` 拿不到鍵 ⇒ 玩家看得到而按不到」這個顧慮**前提不成立**：
+  玩家要在遭遇中求和，他按的是**遭遇畫面的 F**，不是互動清單裡的某個數字。
+⇒ ★★★而若給 `offer_surrender` 一個數字鍵，那就是**同一個意圖兩條路**
+  —— 而那正是這個專案反覆在治的病（兩份真相 ／ 第三條管道）。
+```
+
+**⇒ 裁定三條**：
+```
+①`offer_surrender` **不進 `ACTION_DIGITS`**（不佔 1..9 的任何一個）。
+②它**照樣在列上**、`enabled=false`、原因 ＝ 引擎給的「你沒有在戰鬥中」——
+   ★而它在互動那一屏**幾乎永遠是 disabled**（遭遇中畫面被遭遇檢視接管）
+   ⇒ 那是**誠實的**：玩家看得到這個動詞存在、也看得到它為什麼現在不能做。
+   ★★而原因裡**不要寫「按 F」**：那是 UI 知識，而原因是引擎給的（既有分工）。
+③★★★**明文登記一筆統一債（我另開 defer 列）**：
+   `offer_surrender`（帶 target）與 `surrender_in_encounter`（不帶 target）
+   **是同一個意圖的兩個動詞** ⇒ **不要為 `offer_surrender` 綁鍵**，
+   否則玩家面會出現兩條路；而長期該收成一個（哪一個活下來 ＝ WHAT，不在本票）。
+```
+
+### ★§6b 那五處的訂正表（母體以掃描為準）
+
+```
+①`available_actions_bed.gd:26`  SPEC_TEAM_TARGET_TOTAL 11 → 12
+②`colocation_gate_bed.gd:36`    SPEC_TEAM_TARGET_TOTAL 11 → 12（★R² 找到的）
+③`colocation_gate_bed.gd:36` 那一行**註解裡手抄的 11 個名字** ⇒ 補 `offer_surrender`
+④★**新增（implementer 找到的第五處）**：`text_ui_view.gd:78` 的上限說明逐字寫著
+   「今天 `TEAM_TARGET_ACTIONS` 是 11 個 ⇒ **已經有 2 個沒有鍵**」
+   ⇒ 12 之後那句是假的（會是 **3** 個）⇒ **一起改**，
+   ★而照 §6① 之後那 3 個是 `ignore`／`beg`／`offer_surrender`（要具名列出）。
+⑤【不要動】`available_actions_bed.gd:29 SPEC_CONSTANT_SYMBOL`（存名字字串）
+   ／`available_actions_bed.gd:38 SPEC_PAYLOAD_SITES = 11`（★**另一個 11**：呼叫點數，同值不同義）
+   ⇒ ★★**訂正我自己**：我在寄出的信裡把後者寫成「同檔 `colocation_gate_bed.gd:38`」，
+     而 colocation 那個檔的 `:38` 是 `SPEC_EARLY_RETURN_EXEMPT = ["ignore"]`。
+     **spec 原文是對的，錯在我信裡那句壓縮** —— 而這是今天第二次同一個形狀
+     （第一次：我把「gate 已存在」的註解壓縮成「要補 gate」）
+     ⇒ ★★★判準：**壓縮一句 file:line 的時候，`同檔`／`同一處`／`同理` 這幾個詞
+       會把讀者送到錯的檔** —— 要嘛寫全路徑，要嘛不要壓縮。
+★母體以**掃描**為準：`git grep TEAM_TARGET_ACTIONS scripts/ docs/` ⇒ implementer 實測 **10 個檔**
+  （其中兩處是註解、一處在另一支床、★一處是 `available_actions_controls.py`＝**負對照的錨**）
+  ⇒ 交件報那個掃描的數，不要報這份清單。
+```
+
