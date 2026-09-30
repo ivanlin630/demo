@@ -869,7 +869,7 @@ func _test_p8_two_readers_on_the_same_input() -> void:
 #   ⇒ 本格把它變成斷言：(d) ＝ 0，而非 0 時把每一筆印出來（不是只印數字）。
 # ★★它與 P11 分工：P11 守【表有沒有缺】，本格守【句子有沒有漏英文】——
 #   兩者都可能單獨壞（表全了而 describe 改回原樣印／describe 對了而新動詞沒 label）。
-# 負對照：把 describe() 的 action_id 改回原樣印 ⇒ 本格必紅（那一族整批回來）
+# 負對照：把 describe() 的 action_id 改回原樣印 ⇒ (d) 從 0 變 58 筆 ⇒ 已於 feat/player-facing-strings（2026-09-30 這一輪） 實測紅
 func _test_p12_no_raw_identifiers_this_round() -> void:
 	print("
 ── P12 (d) 這一族本輪必須 0 筆 ──")
@@ -890,6 +890,7 @@ func _test_p12_no_raw_identifiers_this_round() -> void:
 # ★★★這一格就是找出那 12 個漏網的那一格：舊表只收了【選單會列的】那些，
 #   而 registry 有 51 個鍵 ⇒ 其餘 12 個玩家按得到卻只看得到原樣 id。
 #   ⇒ 而它是常駐的：以後新增動詞沒寫中文 ⇒ 這一格紅並把名字印出來。
+# 負對照：拿掉一個動詞的中文 label（build_facility）⇒ 缺 1 個 ⇒ 已於 feat/player-facing-strings（2026-09-30 這一輪） 實測紅
 # ★母體不是我手抄的清單：它是 `_action_registry` 的鍵（動詞從哪來就從那裡數）。
 func _test_p11_every_action_has_a_label() -> void:
 	print("
