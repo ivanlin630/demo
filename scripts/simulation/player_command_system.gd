@@ -40,7 +40,20 @@ var _action_registry: Dictionary = {}
 #     已就地具名登 defer（見那兩個標記）。
 #   ★具名排除：`recruit`（泛用招募）**不列** —— 它不是「現在不能做」而是
 #     **尚未實裝此機制**（藍圖④）⇒ 列出來設 false 會讓玩家等一個不存在的東西。
-const STUB_NOT_IMPLEMENTED: Array = ["recruit"]   # ★排除理由見上：尚未實裝此機制（非「停用」）
+# ★★★【待裁：清單目前刻意是空的】—— 機制在，內容等上游回答（2026-10-01，implementer）
+#   藍圖④要求「STUB 的泛用 `recruit` 不列」，而我照字面做完之後 `ui_flow` 立刻紅一格：
+#     `scripts/debug/ui_flow_test.gd:340`「team 行動清單含 recruit」
+#   ⇒ 開檔追下去：`text_ui_main.gd` 的 `elif action_id == "recruit":`（:1497 附近）
+#     是**招募子選單的唯一開啟點**，而那個子選單是 `recruit_named`（記名招募，走
+#     `execute_action_with_target`）在玩家面的**唯一入口**。
+#   ⇒ ★所以「不列 recruit」照字面做 ＝ **把記名招募整條路門死** ——
+#     而那正是我在按鍵三態那張票抓到過的同一族（漏一個名字＝關掉一個功能）。
+#   ⇒ ★★處置：**機制留著、清單留空**（`recruit` 仍然列出來），並把這件事呈報上游：
+#     要麼 (a) `recruit` 留在列上（它不是動作，是子選單的入口）、而它的 handler 誠實回「選一種招募方式」，
+#     要麼 (b) 把 `recruit_named` 用別的方式送進玩家面，那時 `recruit` 才可以不列。
+#   ⇒ ★★★而我**沒有**為了讓床綠而去改 `ui_flow` 那一格的斷言：那一格是對的，
+#     它抓到的是一個真實後果。改它才是弱化。
+const STUB_NOT_IMPLEMENTED: Array = []   # ★待裁（見上）；機制已接電：清單一有名字就會生效
 
 func get_action_availability(state: WorldState, target_id: int) -> Array:
 	var out: Array = []

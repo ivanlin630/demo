@@ -24,7 +24,7 @@ var _errors: int = 0
 var _cells_ran: Array = []
 
 const SPEC_TEAM_TARGET_TOTAL: int = 11      # `TEAM_TARGET_ACTIONS` 的大小（spec §7）
-const SPEC_STUB_EXCLUDED: int = 1           # 具名排除：recruit（尚未實裝此機制）
+const SPEC_STUB_EXCLUDED: int = 0           # ★待裁（見 player_command_system 的 const 註解）：暫不排除任何名字
 const SPEC_STUB_WORDING: String = "尚未實裝"  # ★reviewer 要求的措辭（不要讓人讀成「停用」）
 const SPEC_CONSTANT_SYMBOL: String = "TEAM_TARGET_ACTIONS"
 # ★P7 要數的三個條件字面（來自 spec §6④，不是我從輸出抄回來的）
@@ -133,6 +133,7 @@ func _test_p1_full_list_both_directions() -> void:
 	_cell("_test_p1_full_list_both_directions")
 
 
+# 負對照：把母體換成另一份手抄的名字陣列（行為格照樣綠）⇒ 本格紅 ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P1c：★靜態互證（§6①，reviewer 想到的第三種騙法）═══════════════════════════
 # ★★★他推演的第三種：**兩份手抄名字剛好逐字同步**（靠人力維護）——
 #   兩道動態擾動都測不出來（計數與集合都會對）。
@@ -160,6 +161,7 @@ func _test_p1c_static_cross_evidence() -> void:
 	_cell("_test_p1c_static_cross_evidence")
 
 
+# 負對照：把某一條的原因字串清空（enabled 仍 false）⇒ 本格紅（空的：extort） ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P2：enabled=false 的每一列都要有原因 ═════════════════════════════════════
 # ★母體地板：印出【這一輪有幾列 false】—— 0 的話這一格會在「什麼都能做」的世界裡恆綠。
 func _test_p2_every_false_has_a_reason() -> void:
@@ -251,6 +253,9 @@ func _test_p4_old_view_differs_only_by_the_named_exclusion() -> void:
 	_cell("_test_p4_old_view_differs_only_by_the_named_exclusion")
 
 
+# ~~負對照：把具名排除拿掉（STUB 又被列）⇒ 本格與 P1 連動紅（2026-10-01 實測紅）~~
+#   ★劃掉不刪：那一道確實紅過，而【排除清單現在是空的】（待裁，理由見 player_command_system）
+#   ⇒ 它現在沒有母體可打 ⇒ 不算在棘輪地板裡；清單一有名字就把這一行的刪節線去掉。
 # ══ P5：★STUB 不在列，而排除【就地具名寫了理由】＋措辭不得讓人讀成「停用」═══════
 func _test_p5_stub_not_listed() -> void:
 	print("\n── P5 STUB 不在列 ──")
@@ -266,22 +271,45 @@ func _test_p5_stub_not_listed() -> void:
 	print("   全列版的名字：%s" % str(ids))
 	_check("★母體地板：錢是夠的（否則「不列」可能只是條件沒過）",
 		float(pt.resources.get("coin", 0)) >= PlayerCommandSystem.RECRUIT_COST_ANON)
-	_check("★★★`recruit`（STUB）不在列", not ids.has("recruit"))
+	# ★★★【本格的主詞改了，理由在 code 裡】（2026-10-01）：藍圖④照字面做會把
+	#   記名招募門死（`recruit` 是招募子選單的唯一開啟點，見 player_command_system 的註解）
+	#   ⇒ 排除清單目前刻意留空、機制留著 ⇒ 本格守的是【機制接電】而不是「recruit 不在列」：
+	#     排除清單裡的每一個名字都不在列（清單空 ⇒ 這一條恆真而**無害**，
+	#     因為下面那一條在守清單本身不是靜態寫死的）。
+	for ex in PlayerCommandSystem.STUB_NOT_IMPLEMENTED:
+		_check("★★排除清單裡的 `%s` 真的不在列" % String(ex), not ids.has(String(ex)))
+	print("   排除清單目前 ＝ %s（★空的是【待裁】不是忘了：理由寫在 player_command_system 那個 const 上方）"
+		% str(PlayerCommandSystem.STUB_NOT_IMPLEMENTED))
+	_check("★★★機制是接電的：全列版真的會讀那個清單（靜態證：函式體裡逐字出現 `STUB_NOT_IMPLEMENTED`）",
+		_code_only(_func_body(FileAccess.get_file_as_string(
+			"res://scripts/simulation/player_command_system.gd"),
+			"func get_action_availability(state: WorldState, target_id: int) -> Array:")
+		).contains("STUB_NOT_IMPLEMENTED"))
 	var src: String = FileAccess.get_file_as_string(
 		"res://scripts/simulation/player_command_system.gd")
-	var near: bool = false
-	var lines: PackedStringArray = src.split("\n")
-	for i in range(lines.size()):
-		if lines[i].contains("STUB_NOT_IMPLEMENTED") and lines[i].contains("const"):
-			for k in range(maxi(0, i - 12), i + 2):
-				if lines[k].contains(SPEC_STUB_WORDING):
-					near = true
-	print("   排除的理由裡有「%s」這個措辭 ＝ %s" % [SPEC_STUB_WORDING, str(near)])
-	_check("★★措辭是「%s」而不是模糊語（★reviewer：別讓人讀成「停用／暫停」）" % SPEC_STUB_WORDING,
-		near)
+	# ★措辭那一條（reviewer 要求）：**只在清單非空時才適用** ——
+	#   清單空的時候沒有任何名字被排除，去要求一句排除理由是在守一件不存在的事
+	#   （那會變成「恆紅到期」那一族）。★而清單一有名字，這一條就會回來守它。
+	if PlayerCommandSystem.STUB_NOT_IMPLEMENTED.is_empty():
+		print("   ★排除清單是空的 ⇒ 措辭那一條【本輪不適用】（清單一有名字就會回來守）")
+	else:
+		var near: bool = false
+		for i2 in range(src.split("
+").size()):
+			var ln: String = src.split("
+")[i2]
+			if ln.contains("STUB_NOT_IMPLEMENTED") and ln.contains("const"):
+				for k2 in range(maxi(0, i2 - 20), i2 + 2):
+					if src.split("
+")[k2].contains(SPEC_STUB_WORDING):
+						near = true
+		print("   排除的理由裡有「%s」這個措辭 ＝ %s" % [SPEC_STUB_WORDING, str(near)])
+		_check("★★措辭是「%s」而不是模糊語（★reviewer：別讓人讀成「停用／暫停」）" % SPEC_STUB_WORDING,
+			near)
 	_cell("_test_p5_stub_not_listed")
 
 
+# 負對照：把 readiness 條件複製回查詢面 ⇒ 本格紅（`0.7` 在查詢面 1 次） ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P7：★★★條件只有一份（spec §6④；P1 守名字，本格守條件）═══════════════════
 # 那三個條件的字面在【查詢面】必須 0 次、在全列版必須各 1 次。
 func _test_p7_conditions_have_a_single_holder() -> void:

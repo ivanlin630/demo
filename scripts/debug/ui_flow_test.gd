@@ -2348,6 +2348,7 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
 const SPEC_UI_MODE_COUNT: int = 13
 const CONTROL_FLOOR_DVO: int = 2  # decision_vs_outcome_bed（分開講／具名例外）
+const CONTROL_FLOOR_AVAIL: int = 3  # available_actions_bed（三道：母體換手抄／條件複製回查詢面／原因清空；★第四道「排除拿掉」的母體目前是空的＝待裁，見床裡劃掉那一行）
 const CONTROL_FLOOR_STRINGS: int = 2  # scripted_exploration_bed 的字串兩格（P11 表覆蓋／P12 零英文）
 const CONTROL_FLOOR_NPCTRIB: int = 3  # npc_tribute_transfer_bed（三道：自己寫一份／拿掉恩怨／塞進表）
 const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
@@ -2754,6 +2755,10 @@ func _test_p19_control_coverage_ratchet() -> void:
 	print("   decision_vs_outcome_bed %d（地板 %d）" % [n_dv, CONTROL_FLOOR_DVO])
 	_check("★★decision_vs_outcome_bed 的紀錄數沒有往回走（%d >= %d）" % [n_dv, CONTROL_FLOOR_DVO],
 		n_dv >= CONTROL_FLOOR_DVO)
+	var n_av: int = _count_fired("res://scripts/debug/available_actions_bed.gd")
+	print("   available_actions_bed %d（地板 %d）" % [n_av, CONTROL_FLOOR_AVAIL])
+	_check("★★available_actions_bed 的紀錄數沒有往回走（%d >= %d）" % [n_av, CONTROL_FLOOR_AVAIL],
+		n_av >= CONTROL_FLOOR_AVAIL)
 	var n_st: int = _count_fired("res://scripts/debug/scripted_exploration_bed.gd")
 	print("   scripted_exploration_bed %d（地板 %d）" % [n_st, CONTROL_FLOOR_STRINGS])
 	_check("★★scripted_exploration_bed 的紀錄數沒有往回走（%d >= %d）" % [n_st, CONTROL_FLOOR_STRINGS],
