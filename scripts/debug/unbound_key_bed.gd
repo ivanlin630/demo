@@ -344,7 +344,11 @@ func _test_p4_bound_keys_still_work() -> void:
 #   舊寫法把 `in_faction` 前提擺在任何 key 比對之前 ⇒ 按任何未綁定鍵都會關掉面板
 #   ⇒ 在畫面上與「我按了一個沒用的鍵把它關掉」一模一樣。
 # ★母體地板：先斷言玩家【真的不在勢力裡】（在勢力裡的話這一格測的是另一條路）。
-# 負對照：把前提檢查搬回未綁定出口之前 ⇒ 旗標變 false ⇒ 必紅
+# 負對照：把前提檢查搬回未綁定出口之前 ⇒ 4 格紅（P1 的 26 個違反＋本格的面板被關） ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
+# ★★★而點火它的第一版報 NOT-RED，而那是【我的 expect 字串抓錯】：我拄的是 spec 的措辭
+#   「旗標不變」，而床印的是「面板【没有】被關掉」
+#   ⇒ 真的紅了卻被我讀成沒紅。★紀律：負對照的 expect 要從【床自己的輸出】拄，不從 spec 拄。
+
 func _test_p6_faction_precondition_does_not_close_on_unbound() -> void:
 	print("\n── P6 不在勢力裡，未綁定鍵不得關閉面板 ──")
 	var node = await _make_ui()
