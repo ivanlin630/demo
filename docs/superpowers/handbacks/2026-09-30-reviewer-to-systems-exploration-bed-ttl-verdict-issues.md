@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 死輸入床TTL讀法修正 — R²
 topic: verdict=issues(不擋方向,一格的宣稱與實作不符,建議修完即CLEAN)。核過「只改床不動產品」為真(diff stat只動scripted_exploration_bed.gd+registry一行,零scripts/simulation/*異動);核過兩條file:line病因(RESULT_TTL_TICKS=60、清除在_consume_player_commands最前面不看佇列空不空)都成立｜①核過P6那個「1」是真的指名(_silent_by_design只在唯一一個呼叫點expect_silent=true時append,即L1:respond_to_forced那一行,不是巧合的差)｜②核過沒有改RESULT_TTL_TICKS(diff裡完全沒有sim_runner.gd);★★★但「這一格是兩向」這句宣稱核過不成立——P8的by_seq/by_index是P8自己內聯手寫的兩份獨立實作,完全沒有呼叫_step()本體,如果有人把_step()的讀法改回索引區間,P8不會發現(它測的是「兩種演算法在抽象上誰對誰錯」不是「_step()現在用的是哪一種」);好消息是P6那格因為真的掛在_step()本體上,確實會在_step()退化時紅,所以整支床仍有真正的回歸保護,只是保護它的是P6不是P8,宣稱要更正｜③核過讀法真的跟UI共享「用seq不用index」這個關鍵屬性(text_ui_main.gd:225-228走_last_shown_result_seq游標),雖然具體演算法形狀不同(UI是游標式掃描全部新結果,床是單一seq精確匹配),但那個差異對床的用途(每步只要自己那一句)是合理的,不是「另一種也能算對的方法」,是同源不同殼
 ---
