@@ -452,7 +452,10 @@ func _action_propose_alliance(state: WorldState, target_id: int, pt: TeamData, p
 		_diplomatic._form_alliance(state, pt, tgt)
 		print("[PlayerCmd] 同盟成立，勢力%d" % pt.faction_id)
 	state.player_pending_targets.erase(target_id)
-	return { "ok": resp == "accept", "msg": "外交結果: %s" % resp }
+	# ★玩家面字串零英文識別字（⑤ 那張票的不變量）：`resp` 是引擎的 id（accept／refuse／reject）
+	#   ⇒ 不能直接印給玩家。★中文來自唯一生產者 `PlayerApiMapper`，不在這裡寫第二份。
+	return { "ok": resp == "accept",
+		"msg": "外交結果：%s" % PlayerApiMapper.diplomacy_reply_label(resp) }
 
 func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)
@@ -1330,7 +1333,7 @@ func _action_invite_settle(state: WorldState, target_id: int, pt: TeamData, pt_i
 		target_pos = pt.tile_pos   # 互動選單路徑未設 settle_pos → 預設玩家腳下 outpost（emit gate 已保證站在自家 outpost）
 	var tile: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
 	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != pt_id:
-		return { "ok": false, "msg": "目標非自家 outpost" }
+		return { "ok": false, "msg": "那一格不是你自己的據點" }
 	# 評估接受
 	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "invite_settle")
 	if resp == "accept":

@@ -3,11 +3,12 @@
 用法（工作區要乾淨；★改動要先 commit 再跑，否則還原會把未 commit 的改動一起帶走）：
     python scripts/debug/available_actions_controls.py
 
-★★★七道控制分別打【七件不同的事】，而每一道都指名它會紅在哪一格：
+★★★八道控制分別打【八件不同的事】，而每一道都指名它會紅在哪一格：
   ①名字的來源（P1c）②條件的唯一持有者（P7）③原因非空（P2）
   ④【行為證】宣告過的入口寫一個欄位（P9）⑤【反向掃】把一個宣告拿掉（P10 必須指名它）
   ⑥label 的生產搬回信封那一側（P11 唯一生產者）
   ★★⑦抽取式的範圍限定拿掉 ⇒ 多吞 ⇒ 那條【反方向】的地板必紅
+  ★★★⑧入口那一格關掉 ⇒ P12（退化狀態）必紅 —— battery10 那條舊 assert 的語意
 ★★而原本的④「具名排除拿掉」已【下架】：排除清單現在是空的（systems 裁 2026-10-01
   維持「機制接電＋清單暫空」）⇒ 它沒有母體可打 ⇒ 床裡那一行留著刪節線與理由，
   ★清單一有名字就把它加回來。
@@ -74,6 +75,12 @@ SCOPE_OLD = '''	var body: String = _body_of(src, "_setup_registry")
 SCOPE_NEW = '''	var body: String = src
 	var pairs: Array = []'''
 
+# ⑧★把【入口那一格】關掉（讓 `recruit`／`gather_intel` 回去走一般的 match 條件）
+#   ⇒ P12 必紅（退化狀態下入口被錢擋掉）。
+#   ★而它就是 battery10 那條舊 assert 編碼的舊語意 —— 現在它是一格會紅的守衛。
+OPENER_OLD = '''		elif SUBMENU_OPENERS.has(act):'''
+OPENER_NEW = '''		elif false and SUBMENU_OPENERS.has(act):'''
+
 CONTROLS = [
     ('①母體換成另一份手抄陣列', '逐字引用', (PCS, NAMES_OLD, NAMES_NEW)),
     ('②把 readiness 條件複製回查詢面', '在查詢面 0 次', (QRY, DUP_OLD, DUP_NEW)),
@@ -81,6 +88,7 @@ CONTROLS = [
     ('★④宣告過的入口寫一個欄位', '呼它前後世界不變', (PCS, PURE_OLD, PURE_NEW)),
     ('★★⑤把一個宣告拿掉（反向掃要指名它）', '的漏網（指名：["gather_intel"]）', (PCS, DECL_OLD, DECL_NEW)),
     ('★⑥label 的生產搬回信封那一側', '在這一段 0 次，實測 1）', (QRY, LABEL_OLD, LABEL_NEW)),
+    ('★★★⑧入口那一格關掉（退化狀態）', '在【沒錢】的世界裡仍然可做', (PCS, OPENER_OLD, OPENER_NEW)),
     ('★★⑦抽取式的範圍限定拿掉（多吞方向）', '多吞的：["action → _fe_action", "response_label → _label_pre"]', (BED_F, SCOPE_OLD, SCOPE_NEW)),
 ]
 
