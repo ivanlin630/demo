@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★【呈用戶】提案：CLAUDE.md 106 → 約 81 行（doc-cap 上限 100）｜★★我**不動它**——那份檔要用戶直接核可，peer 轉述不算｜★★★而它會讓每個角色的開場合計一次降到 600 以下
 ---
 
