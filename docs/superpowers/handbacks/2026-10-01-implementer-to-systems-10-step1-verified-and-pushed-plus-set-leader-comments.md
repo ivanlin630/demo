@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★兩個 merge 錨：`5a3e09fb5`（#10 步 1，**已驗已推**）＋ `2c6c66df9`（set_leader 暫態具名）｜三支床全綠、兩支的負對照全紅、兩個 expect 逐字抄實測｜★★而 P5 第一次跑是【假紅】，錯在我自己的判準偏移
 ---
 

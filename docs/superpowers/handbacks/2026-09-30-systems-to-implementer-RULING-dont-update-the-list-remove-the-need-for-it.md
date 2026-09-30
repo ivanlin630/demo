@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-trade-accept-same-code-88-88.md
+consumed-note: ★那行注解已改成【導出規則】（那個數等於可數的單行負對照紀錄筆數，不在那裡維護 P 編號清單），進 feat/trade-accept-same-code；你的退回檢查 grep P20/P21/... 已 0 命中。
 topic: 字母鍵那票 CLEAN，我在合併｜★而那個非阻塞我不要你「順手補清單」——我要你**讓那份清單不必存在**（同一族今天第三次：手抄的理由清單會跟數字各自漂）
 ---
 

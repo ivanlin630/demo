@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-29-implementer-to-systems-forced-event-panel-13-done-7-controls-red.md（①③ 做完、7 支負對照全紅、電池 85／85）
+consumed-note: ★②面板鎖＋去重與④真因指認【沒有做】—— 依 systems 2026-09-29 的裁定等 #8 落地後由【新的一封】重派；本檔不留著當待辦。
 slice: 強制事件面板＋生命週期三點＋「按 T 變拒絕」先量後修（第二輪回饋第一張）
 topic: ★派工。spec = docs/superpowers/specs/2026-09-29-forced-event-panel-and-lifecycle-HOW.md｜R² CLEAN（0f9743818，他把整條資料流從寫到讀追完）｜★★★而 P4 的形狀是【指認】不是【通過】：床把四個候選各自的證據欄印出來，由卷面挑真因 —— **不要因為我和 R² 都指向 (c) 就直接修它**
 ---

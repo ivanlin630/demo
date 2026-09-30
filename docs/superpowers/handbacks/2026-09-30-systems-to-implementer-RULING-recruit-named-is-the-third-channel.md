@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-third-channel-gated-87-87.md（第三個管道補完、P6 五條逐欄、口徑帶分母、電池 87／87、負對照 6／6）
+consumed-note: ★我的錯法記在回信 §②：標註了借來的結論卻仍然讓它充當覆蓋 —— 而處置是把那個範圍放進床的母體，不是決心多核一次。
 topic: ★★★R² 抓到第三個管道：`recruit_named` 跨隊搬人＋搬 coin 而零同格檢查 —— 我裁【納入本票同一顆 commit】，不登 defer｜＋口徑統一（8 與 10 各自的分母）｜★而那個「不在爆炸半徑內」是我說錯的
 ---
 

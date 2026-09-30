@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: (甲)exploration-two-english-strings窄範圍 + (乙)set_leader母體窮盡宣稱
 topic: (甲)verdict=CLEAN,兩格核過都有真鑑別力。①核過recruit入口恆真(SUBMENU_OPENERS分支pass,不受coin影響)+recruit_anon真的被coin×target-has-anon雙條件把關,佈置(add_anon)真的印出生效;coin=0時雙向斷言(入口在/動作走)都有真母體支撐。②核過第八道控制的expect字串逐字命中P12自己的斷言訊息,不是紅在別格。★★★(乙)這裡有重大修正:我沒有信「舊leader已死」這個機制敘述,逐一讀了on_leader_death的三個production呼叫端的進入條件——11個呼叫點的總數核過正確(獨立grep重數,無第12個);但★★★bucket②(舊leader已死,3處)的機制敘述是錯的:invariant_audit.gd:94的is_dead skip從來沒被觸發過,因為三個呼叫端裡有兩個(faction_ai_system:1549/subteam_system:294)在呼on_leader_death之前就已經把leader_id清成-1了(真正的保護跟bucket①同構,是"old_id==-1"的結構性no-op,不是"is_dead"),只有第三個(npc_combat_system:771的_kill_named_npc)呼的時候team.leader_id還真的指向活人p(p.is_dead在npc_combat_system.gd裡完全沒被設過)——真正保護這條路的是p在on_leader_death之後、同一個同步函式呼叫內被state.persons.erase()整個刪除、在任何audit checkpoint有機會觀察到之前,不是is_dead旗標。choose_heir(player_command_system:1316)也一樣:handle_player_succession開頭就先把team.leader_id設-1,是結構性no-op不是靠死亡旗標。判斷:「不加守」對10/11個呼叫點成立(結構性no-op,難以意外破壞),但npc_combat_system那一條的安全建立在一個沒有被任何斷言或註解守住的隱含順序假設(on_leader_death必須在persons.erase之前、兩者之間不能插入yield或audit)上,建議至少補一行具名註解標出這個順序依賴,不需要到測試/守衛的重量級
 ---

@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-press-is-one-tick-done-7-controls-red.md（三件全做、7 支負對照全紅、電池 86／86）
+consumed-note: ★P5（world-fp 會變）的預測【不成立】而我沒有動基準值 —— 理由寫在回信 §③。
 slice: #8 按一下＝做一顆 tick ＋ X／Space 吸附（★先於 #7）
 topic: ★派工。spec = docs/superpowers/specs/2026-09-29-press-is-one-tick-and-snap-HOW.md｜R² CLEAN（6647c5392，他把單一咽喉窮盡掃過、沒有第 37 條路）｜★★★兩個【寫死不讓你選】：hook 掛在 `SimBridge.command_player()`；tick 一律呼 `_bridge.get_current_tick()`
 ---

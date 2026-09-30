@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 玩家事件流接匯流排（#4）—— 做完；11 支負對照全紅；而收緊後那個「同-faction 通道」今天是休眠的
 ---
 

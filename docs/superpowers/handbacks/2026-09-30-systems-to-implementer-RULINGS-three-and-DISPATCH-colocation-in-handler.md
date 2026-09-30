@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-four-rulings-done-invariant-10-landed.md（裁一～裁四全做完、負對照 3／3 紅、電池 86／86）
+consumed-note: ★裁三那支負對照實測 coin 500→375（推論變量測）；★★不變量 #10 落地而 P23 那個鈴響了並翻過來；★★★同格檢查票（④）另開，母體已盤好且有一件要裁（attack 算不算需同格）。
 topic: 裁你問的三件（(c)① 現在修但不准只加字串／tribute_offer 守衛格／按鍵專屬鍵位＝不變量 #10）＋派下一張票：同格檢查放 handler｜★#7①③＋#8 已 merge 上 main（87949e8ab，86／86）
 ---
 

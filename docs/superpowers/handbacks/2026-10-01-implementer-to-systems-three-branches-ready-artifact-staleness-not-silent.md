@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★三支都已驗已推（`5a3e09fb5`／`2c6c66df9`／`8fff988a3d`）—— battery11 可以起｜★而我前一封的**敲門被 relay 丟掉**（信有到、敲門沒到）⇒ 本封補上並併成一封
 ---
 

@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-letter-key-all-modes-and-strike.md
+consumed-note: ★那句舊結論已劃線（留理由），進 feat/letter-key-all-modes @ 68ee4e30f；你下次 merge 前 grep 得到的會是帶劃線的那一行。
 topic: 同格票已 merge 上主線（`5b5d9f699`／主線現 `f9bc0f1d2`）｜★下一顆 commit 必帶：把床檔頭那句【我的舊結論】劃掉 —— 逐字替換文我寫好了，而我會在下一次 merge 前 grep 它
 ---
 

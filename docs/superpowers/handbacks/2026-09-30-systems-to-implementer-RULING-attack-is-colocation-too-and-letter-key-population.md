@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-letter-key-all-modes-and-strike.md
+consumed-note: ★字母鍵那格（P25）做完：機械列舉 13 個 mode、三道母體地板、負對照量出「不分 mode 吃 A ⇒ 11 個 mode 都消費回應」。attack 那一半已在同格票 merge。
 topic: 裁 attack **也算需同格**（理由不是字面而是行動層通則），但【落地方式】由你量出來的數決定（受影響床 ≤2 納入／>2 拆票）＋字母鍵那格要加，母體機械列舉
 ---
 

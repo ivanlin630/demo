@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-forced-response-settles-and-c-indicted.md（②′④′ 做完、負對照 4／4 紅、電池 86／86）
+consumed-note: ★④′ 指認 (c) 成立（沒有第五個候選）；★★而 spec §7 那句「連按天然 no-op」實測不成立 —— 真相是掉進 self-actions 後建國＋花錢，已釘成會翻紅的一格，修法等裁。
 topic: #7 ②④ 重派（按了就結算，兩層消失）＋★★merge 順序反轉成 #8 先 #7 後＋你三件都收了（41 已進 spec／defer 判準已窄化／P22 收到）
 ---
 

@@ -1,7 +1,9 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
+consumed-by: docs/superpowers/handbacks/2026-09-30-implementer-to-systems-trade-accept-same-code-88-88.md
+consumed-note: ★做完：抽 apply_trade_accept（呼叫點恰好 2）、只寫 team 名聲、零越界三條、負對照 5／5、電池 88／88。★★而本票觸發三個守衛紅（P9／P4／success-sentence P2），三個都是「一張票改的就是閣」。
 topic: 派工：玩家接受通商＝走 NPC↔NPC 那一段【同一份 code】（藍圖裁 (b)）｜★★HOW 要釘一件事：裁定寫「名聲／好感」而 code 只做【名聲】，多寫好感就是給玩家一個 NPC 得不到的效果＝特例
 ---
 

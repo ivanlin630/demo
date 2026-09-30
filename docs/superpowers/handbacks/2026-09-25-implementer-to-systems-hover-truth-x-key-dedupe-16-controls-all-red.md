@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 游標真值＋X 鍵＋待辦去重列名 —— 做完；16 支負對照全紅；而三個我自己剛寫的格是空的，是對照抓的
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 打聽 v1 —— 做完；8 支負對照全紅；四個數全給；＋今天這一族的第四、五個位置（判準的視窗大小／錨點的身分）
 ---
 
