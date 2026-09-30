@@ -539,6 +539,23 @@ func _registry_pairs(src: String) -> Array:
 			pairs.append([String(parts[1]), rhs])
 	return pairs
 
+# ★只為卷面：**裸掃整個檔案**的版本（不參與分類）—— 它存在的唯一理由是讓
+#   「限定範圍」與「不限定」的差距**每一次跑都印出來**，而不是寫在註解裡讓人自己相信。
+func _registry_pairs_naked(src: String) -> Array:
+	var pairs: Array = []
+	for l in src.split("
+"):
+		var t: String = l.strip_edges()
+		if t.begins_with("#") or not t.begins_with("\"") or not t.ends_with(","):
+			continue
+		var parts: Array = t.split("\"")
+		if parts.size() < 3:
+			continue
+		var rhs: String = String(parts[2]).replace(":", "").replace(",", "").strip_edges()
+		if rhs.begins_with("_"):
+			pairs.append([String(parts[1]), rhs])
+	return pairs
+
 # ★★★【可達性要追到底】—— reviewer 2026-10-01 抓到的：`establish_faction` 被我分進
 #   「不可經由 action id 抵達」那一堆，而**那個理由是假的**：registry 指到
 #   `_action_establish_faction_cmd`（:188），而它下一行就 `return establish_faction(state)`
@@ -688,6 +705,23 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	for pr3 in _registry_pairs(src):
 		if not src.contains("func " + String(pr3[1]) + "("):
 			not_a_func.append("%s → %s" % [String(pr3[0]), String(pr3[1])])
+	# ★★★(c) 血證與【那句運氣】要印在卷面上（systems 裁 2026-10-01）——
+	#   因為「寫在註解裡」的東西不會被讀，而一個沒有記下運氣的數字會被讀成「這個抽取式沒問題」。
+	var naked: Array = _registry_pairs_naked(src)
+	var over: Array = []
+	for pn in naked:
+		var found: bool = false
+		for ps in _registry_pairs(src):
+			if String(ps[0]) == String(pn[0]) and String(ps[1]) == String(pn[1]):
+				found = true
+		if not found:
+			over.append("%s → %s" % [String(pn[0]), String(pn[1])])
+	print("     ★★血證（reviewer 2026-10-01）：裸掃整個檔案 %d 條／限定 `_setup_registry` 之後 %d 條"
+		% [naked.size(), n_reg])
+	print("       ⇒ 多吞的 %d 對，具名：%s（:1163／:1166 附近，"
+		% [over.size(), str(over)] + "它們是 `respond_to_forced` 組信封時的區域變數名）")
+	print("     ★★★而【這次沒有腐蝕紅綠是運氣】：那兩個 RHS 剛好不等於本輪追蹤的 9 支目標函式名。")
+	print("       ⇒ 運氣要寫在卷面上，否則下一個人會把它讀成「這個抽取式沒問題」。")
 	print("     ★多吞方向：抽到的 handler 名字裡【不是本檔函式】的 ＝ %s" % str(not_a_func))
 	_check("★★★抽取式沒有多吞（每一個抽到的 handler 都是本檔的一支函式；多吞的：%s）"
 		% str(not_a_func), not_a_func.is_empty())

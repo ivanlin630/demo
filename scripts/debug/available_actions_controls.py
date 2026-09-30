@@ -3,10 +3,11 @@
 用法（工作區要乾淨；★改動要先 commit 再跑，否則還原會把未 commit 的改動一起帶走）：
     python scripts/debug/available_actions_controls.py
 
-★★★六道控制分別打【六件不同的事】，而每一道都指名它會紅在哪一格：
+★★★七道控制分別打【七件不同的事】，而每一道都指名它會紅在哪一格：
   ①名字的來源（P1c）②條件的唯一持有者（P7）③原因非空（P2）
   ④【行為證】宣告過的入口寫一個欄位（P9）⑤【反向掃】把一個宣告拿掉（P10 必須指名它）
   ⑥label 的生產搬回信封那一側（P11 唯一生產者）
+  ★★⑦抽取式的範圍限定拿掉 ⇒ 多吞 ⇒ 那條【反方向】的地板必紅
 ★★而原本的④「具名排除拿掉」已【下架】：排除清單現在是空的（systems 裁 2026-10-01
   維持「機制接電＋清單暫空」）⇒ 它沒有母體可打 ⇒ 床裡那一行留著刪節線與理由，
   ★清單一有名字就把它加回來。
@@ -26,6 +27,7 @@ BED = 'scripts/debug/available_actions_bed.gd'
 BANNER = 'available_actions DONE ==='
 PCS = 'scripts/simulation/player_command_system.gd'
 QRY = 'scripts/simulation/player_query_api.gd'
+BED_F = 'scripts/debug/available_actions_bed.gd'   # ★床自己也可以是擾動對象（抽取式在床裡）
 
 # ①★把母體換成【另一份手抄的名字陣列】（＝reviewer 想到的第三種騙法）
 #   ⇒ 行為格（P1）會照樣綠（名字剛好同步），而 P1c 的靜態互證必須紅。
@@ -63,6 +65,15 @@ DECL_NEW = 'const SUBMENU_OPENERS: Array = ["recruit"]'
 LABEL_OLD = '				act, String(row2.get("label", "")),'
 LABEL_NEW = '				act, _action_label(act),'
 
+# ⑦★★把抽取式的【範圍限定】拿掉（裸掃整個檔案）⇒ 條數變大 ⇒ 必紅（systems 裁 2026-10-01 (b)）
+#   ★它紅在「多吞」那條地板上（多吞的兩對 RHS 是區域變數，不是本檔的函式）。
+#   ★★而它【不是】釘「＝51」：釘死條數會腐爛（`_setup_registry` 每加一條動作就要改），
+#     而「拿掉限定會變大」永遠為真且不腐爛。
+SCOPE_OLD = '	var body: String = _body_of(src, "_setup_registry")
+	var pairs: Array = []'
+SCOPE_NEW = '	var body: String = src
+	var pairs: Array = []'
+
 CONTROLS = [
     ('①母體換成另一份手抄陣列', '逐字引用', (PCS, NAMES_OLD, NAMES_NEW)),
     ('②把 readiness 條件複製回查詢面', '在查詢面 0 次', (QRY, DUP_OLD, DUP_NEW)),
@@ -70,6 +81,7 @@ CONTROLS = [
     ('★④宣告過的入口寫一個欄位', '呼它前後世界不變', (PCS, PURE_OLD, PURE_NEW)),
     ('★★⑤把一個宣告拿掉（反向掃要指名它）', '的漏網（指名：["gather_intel"]）', (PCS, DECL_OLD, DECL_NEW)),
     ('★⑥label 的生產搬回信封那一側', '在這一段 0 次，實測 1）', (QRY, LABEL_OLD, LABEL_NEW)),
+    ('★★⑦抽取式的範圍限定拿掉（多吞方向）', 'TODO-EXPECT', (BED_F, SCOPE_OLD, SCOPE_NEW)),
 ]
 
 
