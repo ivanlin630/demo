@@ -3042,3 +3042,110 @@ blueprint 裁（情報必進 belief／代價＝對方同意）→ HOW spec → R
 ★★★落在 gitignore 底下是刻意的：共用 main dir 下每跑一輪就動一個 tracked 檔 ＝ 保證衝突。
   要當 merge 證據 ⇒ **明確複製成有名字的檔再 commit**。
 ```
+
+---
+
+## 2026-09-29／30｜玩家可觸面這一輪全部落地（7 merge）＋★★★一支【已經不再量任何東西】的守衛床被找出來
+
+**這一段的主線不是七張票，是兩件判準層的事**：①一支床可以【綠不起來也紅不起來】而卷面上看不出差別；
+②我們的回訪條件有一族錨在【會因為別人做事而單調成長的計數】上。
+
+### (甲) 進 main 的（依序）
+
+```
+87949e8ab  #7①③＋#8（提案字串／反向提案守衛）
+5b5d9f699  同格檢查搬進 handler（★★判準錨在【動作契約】不是入口——recruit_named 是第三個通道）
+2a5db991c  專屬鍵位（字母鍵）全模式
+3b9c9ab3c  交易接受走 NPC 同一份 code ＋ 未綁鍵語意 ＋ 濫按煞車（兩層關係帳）
+09cc655f0  控制判決三態（NO-VERDICT／NOT-RED／RED-OK）＋ selfcheck
+b777c282f  死輸入探索床（scripted exploration）
+0cc5dd10b  merge feat/leader-id-chokepoint（R² CLEAN）
+```
+
+### ★★(乙) 死輸入探索床交出來的數：**131 步 / 115 症狀 / 5 個成因**
+
+```
+★最值錢的一格不是 115，是【41 筆靜默步驟共用同一個前置條件：遭遇戰進行中】
+  ⇒ 那就是用戶逐字說的「按了沒反應」。
+★★而 70 個症狀有【同一個修點】⇒ **症狀數 ≠ 工作量**（先分成因再排序，不要照症狀清單派工）。
+藍圖裁 (a)：遭遇戰中的非戰鬥指令 ⇒ ok=false ＋「遭遇戰進行中，先處理戰鬥」。
+```
+
+### ★★★(丙) 兩層關係帳（用戶逐字裁）：小恩小怨走好感，大恩大怨才入記憶
+
+```
+·好感 ＝ `p.relations` 純量（線性 clamp）；記憶 ＝ 具型別的邊（`form_feud`，門檻 FEUD_MIN=0.30）
+·★藍圖原本裁的 (c)「把 add_edge 移到門檻前」**零效果**：索貢嚴重度 0.1 × 人格乘子 ≤1.3 ＝ 0.13 < 0.30
+  ⇒ 我把算術報上去，用戶直接換掉整個設計 ⇒ ★**一個設計裁定要能被算術推翻**。
+·★★`tributed` 刻意【不進】FEUD_SEVERITY 表：一進表，`.get(type, intensity)` 就把「拿走幾成」
+  靜默換成表裡的固定值（那條有自己的負對照咬著）。
+```
+
+### ★★★★(丁) 今天真正的產物：`lod_reaction_rate_bed` —— 一支【不再量任何東西】的守衛
+
+電池上唯一的紅是 `defer-open`，躺著的那列是「床會紅而沒人跑它」。★而它的舊 met_check 錨錯了：
+「註冊表點名的 debug 床 ≥ 60 支」是一個**會因為別人做事而單調成長**的計數 ——
+今天把它推過 60 的是 leader-chokepoint 那張票把**它自己的驗收床**註冊進表（59→60），
+**與「有人要處理床的可見度」零關係**。
+
+```
+★找對的軸（舊行自己寫「母體未知、raw 數字是錯的軸」）：
+  488 支 debug；寬軸「含 _ok 字樣」236（計進了 print 字串裡的 join.to_task_ok 之類）；
+  ★窄軸 ＝ 自己定了 `func _ok(` ＝真的有判決函式 ＝ 199。
+  跟得到的 ＝ 註冊表 59 ∪ tier2 母體（*_test.gd）143 ＝ 184 ⇒ ★缺口 ＝ 53。
+  逐支開檔：38 支已標 acceptance（票做完了 ⇒ 「沒人跑」對這一類是正確行為）；
+  15 支未標 ⇒ 判完 14 支是票綁的驗收床、★1 支是真的常駐守衛。
+★★★那 1 支 ＝ `scripts/debug/lod_reaction_rate_bed.gd`（LOD 等價律的唯一【數值】守衛；
+  `lod-split-guard` 是靜態反向斷言，不驗數值）：
+  ·沒註冊 ⇒ 自 2026-08-20 之後沒有人跑過它
+  ·而期間生育被改寫成 team-level 連續累積器（`reaction_system.gd:290 _tick_breed`）
+  ·⇒ 舊預設窗長 20（＝20 小時）在新機制下永遠生不出一個 minor：
+    實測 20 窗 FAILS=2、1200 窗（50 日）仍 FAILS=2、★6000 窗（250 日）ALL PASS、ratio=1.00、8 秒
+  ·★★所以它的紅【不是產品壞】，是【它量的機制被換掉而沒有人回來看這支床】
+    ⇒ ★★★那是「床會紅而沒人跑」的最完整形狀：不是「床紅了沒人看」，
+      是**「床已經不再量任何東西了，而沒有人知道」**。
+★誠實限寫進床裡：breed 那兩格在累積器改寫後【結構上恆等】（elapsed_days 由真實 tick 差算出，
+  trials 只改多久呼一次）⇒ 它們現在守的是「有人把 elapsed 換回 cadence 常數」；
+  ★★真正還在分辨 near/far 的是 work_morale（w_eff=1-(1-0.1)^trials）與 unrest（±1×trials）兩格。
+```
+
+**處置（★擠進既有那一支閘，不新開一支）**：`bed-kind-gate.sh` 加**存量掃描** ——
+全部宣告 `invariant` 的床逐支問它在不在註冊表，**不受 diff 限制**。
+舊行為只看本次觸及的床 ⇒ 兩個方向漏得靜默：①存量已宣告卻沒接電；
+★②**有人把某一列從註冊表刪掉而不碰那支床** ⇒ 宣告還在、電斷了、沒有任何訊號。
+配成對對照 2 格（未接電必紅／已接電不得紅）＋母體地板 ≥1。實測 27/27 已接電。
+
+**結案書的成立謂詞**（被推翻 ⇒ 結案自動失效）：【每一支在前 8 行宣告 `@bed-kind: invariant` 的
+`scripts/debug/*.gd`，它的 basename 都出現在 `docs/process/merge-gates.tsv` 裡】。
+★而這條謂詞**現在有人在看**：它就是上面那段存量掃描本體 ⇒ 被推翻的那天閘會紅，
+不靠人記得回來讀結案書。
+
+### (戊) 這一輪我自己犯的（判準層）
+
+```
+①★負斷言建在【手寫的那一行】上：我斷言「person.relations 不在指紋裡」，而我只看了手寫的
+  `_emit_*`，沒看機器推導的 `FpCoverage` 路徑 ⇒ 錯。修法是**追一條正面呼叫鏈**
+  （state_fingerprint:412 → :349 → fp_coverage:119/:99），而那也讓原本計畫的 tap 作廢
+  （會用不同的序列化器把同一欄表示兩次）。
+②★★【入口不是母體】：我斷言 `execute_action_with_target` 不在同格檢查的爆炸半徑內，
+  而 `recruit_named` 會跨隊搬一個人＋錢而完全沒有同格檢查 ⇒ 裁進同一顆 commit（不是登 defer）。
+③★★★【床的輸出不是產品事實】：leader-chokepoint 的 spec 前提「①有血證」不成立 ——
+  `invariant_audit.gd:94` 的 reverse 檢查逐字寫「dead 留屍跳過」，而 choose_heir 只在 leader 死後
+  fire ⇒ production 碰不到那筆紅；那支床是合成 forced_event 而沒把舊 leader 標死。
+  ⇒ **「某支床報了 X」與「production 會發生 X」之間永遠隔著兩層：床的佈置、稽核自己的豁免規則。**
+④我 merge 了 spam-brake 而**沒有跑實作端的 R²**（自己抓到，補送）。
+⑤合成動作會吃掉中間那一步的檢查：把 merge＋電池串成一條背景指令 ⇒ 沒跑 `git status`
+  ⇒ 在還有衝突標記的樹上開跑 ⇒ 3 筆 NO-EXPECT。
+```
+
+### (己) 順手結掉的兩列 defer
+
+```
+·`godot-wrapper-batch-timeout-unexplained` ⇒ 病因找到了（implementer）：shell 已 export
+  PSExecutionPolicyPreference，驅動器又把【同名不同大小寫】的鍵塞進 env dict ⇒ PowerShell 的
+  Start-Process 丟例外 ⇒ ★**Godot 一次都沒被啟動**，而 wrapper 等到 deadline ⇒ 記成 timeout。
+  ★★而找到它的是【三態判決】：三道控制報 NO-VERDICT（不是 NOT-RED）⇒ 他去看輸出而不是改守衛。
+·`beds-that-can-red-but-nobody-runs-them` ⇒ 見 (丁)。
+·新登一列：`subteam-leader-role-unruled`（reviewer 要求；錨在 code 裡那行機器可讀標記，
+  ★所以【把標記刪掉】也會讓它亮 ⇒ 刪除不是靜默的）。
+```
