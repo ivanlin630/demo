@@ -58,8 +58,7 @@ def patch(payload):
         src2, n = re.subn(r'(跑的是哪一棵樹：sha )\S+', r'\g<1>' + new, src, count=1)
         if n != 1:
             return False
-        open(f, 'w', encoding='utf-8', newline='
-').write(src2)
+        open(f, 'w', encoding='utf-8', newline='\n').write(src2)
         return True
     if src.count(old) != 1:
         return False
