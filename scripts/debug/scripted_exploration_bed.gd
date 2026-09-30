@@ -65,12 +65,16 @@ const EXPECTED_CELLS: Array = [
 	"_test_p5_four_rules_have_teeth",
 	"_test_p6_artifacts",
 	"_test_p7_positive_control_fixtures",
+	"_test_p8_two_readers_on_the_same_input",
 ]
 
 var _contradictions: Array = []      # 每筆 {rule, where, cause, detail}
 var _steps_walked: int = 0
 var _silent_by_design: Array = []    # ★按設計靜默的步：要被列出來，不是被吞掉
 var _tree_sha: String = ""
+# ★讀法的母體地板：這一輪【預期幾句／實得幾句】（systems 要求①）
+var _expected_sentences: int = 0
+var _got_sentences: int = 0
 
 
 func _cell(name: String) -> void:
@@ -270,9 +274,16 @@ func _step(bridge: SimBridge, st: WorldState, where: String,
 	#   ⇒ ★★改成用【那一道指令自己的 seq】去找它的結果句 —— seq 由 `command_player` 回傳，
 	#     它不會因為別人被剪掉而改變。
 	var sentence: String = ""
+	var got_n: int = 0
 	for row_r in st.command_results:
 		if int(row_r.get("seq", -999)) == my_seq:
 			sentence += String(row_r.get("text", ""))
+			got_n += 1
+	# ★★★母體地板（systems 要求①）：新讀法要印【預期幾句／實得幾句】兩個數，
+	#   不是只印結果 —— 舊讀法之所以能騙我一整輪，就是因為它只印「結果是空的」。
+	#   ★一道被消費的指令預期恰好 1 句（silent 那一支除外 ⇒ 0 句，而它是具名例外）。
+	_expected_sentences += 1
+	_got_sentences += got_n
 	var bad: Array = []
 	var va: String = _rule_a(coin_before, CoinAudit.total(st), InvariantAudit.check(st))
 	var vb: String = _rule_b(response_for_b, sentence)
@@ -645,6 +656,12 @@ func _test_p6_artifacts() -> void:
 	for ck3 in by_cause.keys():
 		print("     · %d 筆 ← %s" % [int(by_cause[ck3]), String(ck3)])
 	print("   ★設計上的靜默 %d 步：%s" % [_silent_by_design.size(), str(_silent_by_design)])
+	print("   ★★讀法的母體地板：本輪預期 %d 句／實得 %d 句（差額 %d ＝ 設計上的靜默那幾步）" % [
+		_expected_sentences, _got_sentences, _expected_sentences - _got_sentences])
+	_check("★★★讀法沒有漏句：預期 − 實得 ＝ 設計上的靜默步數（%d − %d ＝ %d／靜默 %d）" % [
+		_expected_sentences, _got_sentences, _expected_sentences - _got_sentences,
+		_silent_by_design.size()],
+		_expected_sentences - _got_sentences == _silent_by_design.size())
 	var back: String = FileAccess.get_file_as_string("res://" + stamp + ".tsv")
 	var rows: int = back.split("\n").size() - 2
 	print("   落檔：%s.tsv（%d 列資料）／%s.txt" % [stamp, rows, stamp])
@@ -772,6 +789,54 @@ func _test_p7_positive_control_fixtures() -> void:
 	_cell("_test_p7_positive_control_fixtures")
 
 
+# ══ P8：★兩種讀法在【同一個輸入】上對照 —— 證「新讀法不會再被 TTL 騙」═══════════
+# ★★★systems 的要求逐字：負對照要證【這個讀法不會再被 TTL 騙】，不是證【現在沒有 41 筆】。
+#   ⇒ 而「動輸入不動事實」：本格動的是**步數**（推到遠超過 TTL 的 60），
+#     **不改** `sim_runner` 的 `RESULT_TTL_TICKS`（那是改事實讓症狀消失）。
+# ★做法：走 N 步（N > 60）無害指令，每一步同時用【兩種讀法】數它的句子：
+#   ·新讀法：比對那一道指令自己的 `seq`
+#   ·舊讀法：`range(before_n, command_results.size())` 的索引區間
+#   ⇒ 新讀法必須 N／N；★★舊讀法必須【少於 N】——它少掉的那些就是它當初騙我的那些。
+# ★★★而這一格是【兩向】的：哪天有人把讀法改回索引區間，它會紅在「新讀法 N／N」那一條。
+func _test_p8_two_readers_on_the_same_input() -> void:
+	print("
+── P8 兩讀法對照（步數推到遠超過 TTL）──")
+	var tri: Array = _fresh()
+	var st: WorldState = tri[0]
+	var bridge: SimBridge = tri[2]
+	var ttl: int = SimRunner.RESULT_TTL_TICKS
+	var steps: int = ttl + 30            # ★遠超過 TTL（不是剛好跨過）
+	var by_seq: int = 0
+	var by_index: int = 0
+	for i in range(steps):
+		var before_n: int = st.command_results.size()
+		var r: Dictionary = bridge.command_player("cancel_move", {})
+		if not bool(r.get("queued", false)):
+			continue
+		var my_seq: int = int(r.get("seq", -1))
+		if not bridge.is_advancing():
+			bridge.request_advance(1)
+		while bridge.is_advancing():
+			bridge.tick_step()
+		# 新讀法
+		for row_r in st.command_results:
+			if int(row_r.get("seq", -999)) == my_seq:
+				by_seq += 1
+		# 舊讀法（就是騙了我一整輪的那一個）
+		for k in range(before_n, st.command_results.size()):
+			by_index += 1
+	print("   TTL ＝ %d tick（sim_runner.RESULT_TTL_TICKS）｜本格走 %d 步（★遠超過它）" % [ttl, steps])
+	print("   新讀法（比 seq）數到 %d／%d" % [by_seq, steps])
+	print("   舊讀法（索引區間）數到 %d／%d ← ★少掉的那些就是它當初報成「靜默」的那些" % [
+		by_index, steps])
+	_check("★★★新讀法在【遠超過 TTL】的輸入上仍然數對（%d／%d）" % [by_seq, steps],
+		by_seq == steps)
+	_check("★★舊讀法在【同一個輸入】上數不對（%d < %d）—— 這一條就是那 41 筆的機制證明" % [
+		by_index, steps], by_index < steps)
+	print("   ★而本格【沒有】改 `RESULT_TTL_TICKS`：動的是輸入（步數），不是事實。")
+	_cell("_test_p8_two_readers_on_the_same_input")
+
+
 func _initialize() -> void:
 	_tree_sha = _read_sha()
 	print("=== scripted_exploration bed ===")
@@ -784,6 +849,7 @@ func _initialize() -> void:
 	_test_p4_walk_forced_events()
 	_test_p5_four_rules_have_teeth()
 	_test_p7_positive_control_fixtures()
+	_test_p8_two_readers_on_the_same_input()
 	_test_p6_artifacts()   # ★產物最後跑：它要收 P7 的那幾筆
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
