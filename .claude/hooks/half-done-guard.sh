@@ -33,7 +33,27 @@ _chk_a_merge_in_flight() {   # 合併在飛：tmp/merge-* 領先 origin/main 而
     if [ "${_uniq:-0}" = "0" ]; then
       echo "a) 殘骸分支：$b @ ${tip:0:9} 不在 origin/main，但【零獨有實作 commit】⇒ 可安全刪（它只是沒清掉）"
     else
-      echo "a) 合併在飛：$b @ ${tip:0:9} 不在 origin/main 且有 ${_uniq} 顆獨有 commit ⇒ 那些工作沒推出去"
+      # ★★★【第三格，2026-10-01 systems 立】：獨有 commit 可能【全部都在別的遠端 ref 上】。
+      #   ★血證：`tmp/merge-lead` 是**電池 worktree 的分支**，我一直 `merge --ff-only main` 推它；
+      #     某次 merge 被我 un-merge 之後它還指著那顆 ⇒ 本格報「8 顆獨有 commit ⇒ 那些工作沒推出去」
+      #     ⇒ **而那 8 顆全都在 `origin/feat/text-ui-layout-v2` 上，一顆都沒遺失。**
+      #   ⇒ ★★原本只有兩格（零獨有＝可刪／有獨有＝沒推出去），而我的情況是**第三格**
+      #     —— 這正是「二分法的 else 吞掉第三格」那一族：一句**方向錯的警告**會讓人去找一個不存在的損失。
+      #   ⇒ ★★★判準：**獨有 commit 的數量不是結論，它們【還在不在別的地方】才是。**
+      _orphan=0
+      for _c in $(git -C "$ROOT" log --format=%h --no-merges "origin/main..$b" 2>/dev/null); do
+        _elsewhere=0
+        for _r in $(git -C "$ROOT" for-each-ref --format='%(refname)' 'refs/remotes/origin/*' 2>/dev/null); do
+          [ "$_r" = "refs/remotes/origin/main" ] && continue
+          if git -C "$ROOT" merge-base --is-ancestor "$_c" "$_r" 2>/dev/null; then _elsewhere=1; break; fi
+        done
+        [ "$_elsewhere" = "0" ] && _orphan=$((_orphan+1))
+      done
+      if [ "$_orphan" = "0" ]; then
+        echo "a) 本機殘留的 merge／ff：$b @ ${tip:0:9} 領先 origin/main ${_uniq} 顆，★而那 ${_uniq} 顆【全部都在別的遠端分支上】⇒ 工作沒有遺失，只有這個本機 ref 沒收回（把它 reset 回 origin/main 即可）"
+      else
+        echo "a) 合併在飛：$b @ ${tip:0:9} 不在 origin/main 且有 ${_orphan} 顆【只存在於本機】的 commit（共 ${_uniq} 顆獨有）⇒ 那些工作沒推出去"
+      fi
     fi
   done
 }
@@ -103,6 +123,28 @@ if [ "${1:-}" = "--selfcheck" ]; then
     _c2=$(_chk_a_merge_in_flight); _c none "$_c2" "a 還原後不再紅"
   else
     echo "  ⚠ a 陽性對照跳過（commit-tree 不可用）⇒ 本格不可判，不是綠"; fail=1
+  fi
+
+  # ★★★a 的【第三格】陽性對照（2026-10-01 加）：造一支指向【別的遠端分支 tip】的 tmp/ 分支
+  #   ⇒ 它領先 origin/main，而那些 commit 全都在別的遠端 ref 上 ⇒ 必須報「本機殘留」不是「沒推出去」。
+  #   ★沒有這一格的話，第三格就是【沒接電的分支】：它的沉默跟正確一模一樣。
+  _other=$(git -C "$ROOT" for-each-ref --format='%(refname)' 'refs/remotes/origin/*' 2>/dev/null     | grep -v 'refs/remotes/origin/main$'     | while IFS= read -r _r; do
+        if [ -n "$(git -C "$ROOT" log --format=%h --no-merges "origin/main..$_r" 2>/dev/null | head -1)" ]; then
+          echo "$_r"; break
+        fi
+      done)
+  if [ -n "${_other:-}" ]; then
+    _tmpb3="tmp/merge-selfcheck3-$$"
+    git -C "$ROOT" update-ref "refs/heads/$_tmpb3" "$(git -C "$ROOT" rev-parse "$_other")"
+    _c8=$(_chk_a_merge_in_flight)
+    if printf '%s' "$_c8" | grep -q "本機殘留的 merge"; then
+      echo "  ✓ ★★★a 第三格：領先 origin/main 而那些 commit 都在別的遠端分支上 ⇒ 報【本機殘留】"
+    else
+      echo "  ✗ ★★★a 第三格：期望【本機殘留】而它說：$_c8"; fail=1
+    fi
+    git -C "$ROOT" update-ref -d "refs/heads/$_tmpb3"
+  else
+    echo "  ⚠ ★a 第三格對照跳過（此刻沒有一支 origin/* 領先 origin/main）⇒ 本格不可判，不是綠"; fail=1
   fi
 
   # c) 造一封只在磁碟上的 open 信
