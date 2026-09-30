@@ -2382,7 +2382,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 28   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 30   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -3290,6 +3290,11 @@ func _test_p30_submode_panels_reach_the_screen() -> void:
 
 
 
+# ══ P19：負對照覆蓋率棘輪 —— ★這一格【自己被改過】（2026-10-01）═══════════════
+# ★舊版是一串手抄呼叫（每支床三行＋一個地板常數）⇒ 漏一支是靜默的。
+#   ⇒ 改成【地板表唯一一份 ＋ 逐支比對 ＋ 反向掃】之後，它自己要有負對照。
+# 負對照：把一支床從地板表裡拿掉（`trade_accept_bed`）⇒ 反向掃紅並指名「trade_accept_bed.gd（5 條）」而 rc 由 0 變 1 ⇒ 已於 ffcaee7ef（2026-10-01 這一輪） 實測紅
+# 負對照：拿掉 `command_replay_bed` 的一條紀錄行 ⇒ 棘輪紅並指名「command_replay_bed.gd（1 < 2）」且該列印「★往回走了」 ⇒ 已於 ffcaee7ef（2026-10-01 這一輪） 實測紅
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
 	print("\n── P19 負對照覆蓋率棘輪 ──")
