@@ -11,12 +11,9 @@
   - ❌ **行為規則（腳本，禁）**：`if 食物<X then 塞糧`、判斷器（prescribe 而非 weigh）、替 NPC 決定的行為 subsystem = 違憲。描述「NPC 該怎麼選」。
 - **強制閘**：掃「替 NPC 決定的碼」——引擎外硬編 action selection / 判斷器 prescribe / 行為 subsystem = fail。
   - **機械實體（序0 立，2026-07-05）= site-freeze 防閘**：`scripts/debug/constitution_gate.gd` 掃 `scripts/simulation/` 的 `TaskArbiter.transition/try_set` 呼叫面（= 引擎外 task 指派落點），指紋 `<relpath>::<enclosing_func>` 比對 `constitution_baseline.txt`（32 指紋凍結，8 known 違憲以 `# 序N` 標 arc 溶入序）。**契約**：current ⊆ baseline，新增=FAIL、移除(arc 溶解)=PASS（印 `removed` 作 arc 進度信號）。
-  - **arc 溶入進度**：**序1 threat done ✅**（merged 804432e，`_dispatch_threat_response`→`rank_threat`；seeded 46/8/1/380→48/8/1/382）。**序2 solo done ✅**（merged f7ce320，`_evaluate_solo` argmax→`rank_scored`+去 `_tag_weight` 硬鎖+capability-grounded attack；融合+反向驗綠；seeded 48→**52/8/1/380**；★揭框架債：`_tag_weight` 隱形去衝突閘 + 「建設」恆 applicable→loop3 idle-gate 餓死風險，yield 橋補，真修在序6）。**序3 rung_task done ✅**（merged 50dc86f，查表撕除→archetype/rung 當 weight+訓練 option；idle-filler 走 `rank_ambient`[收窄排 survival/threat，FLEE churn 86→0]；★揭序1 率18 部分 churn 假象→threat 5b 改確定性 live-seam；seeded 52→**48/8/1/380**）。**序4 vendetta done ✅**（merged 2506e6e，hand dispatch→`feud_pull` 掛攻擊 option；優先序→權重序[血仇>致富=weight、威脅>血仇=PRIO_THREAT]；融合驗 4 錨綠+S2b 不 DORMANT；seeded 零漂移）。**序3.5 threat-preempt done ✅**（merged 4afbcaf，忙碌目標 idle-gate seam 修；PREEMPT_MARGIN=2.0；TASK_PRODUCE 納入；反龜縮 flee 0→12；seeded 48→52/9/1/381）。**序5 prosperity done ✅**（merged 16ab3bc，arc 最大；cascade 決策→攻擊 option[readiness→intent_fit×readiness factor、富 prey]；scout-verify 保 scaffolding `_commit_conquest_attack`[S3/S4 誘殺保]；刪 cascade+yield 閘+reroute；融合驗 6 錨綠；seeded 52/8/1/380 非凍死；★unready 征服隊改掠奪=capability grounding，成員 raid 暫失待序6）。**序6 faction 成員 dispatch done ✅**（merged 2b4a427，最高收斂動主幹；`_assign_member_tasks` if/elif→成員走 `_decide_unified`；V2-cmd 自消+成員 raid 接回+縫#3 結清；★只改成員 gate 非全域 uses_unified=序3.5 preempt 保；seeded 52→49/8/1/381）。**序7 ReactionSystem done ✅**（merged 2edf120，★reframe=其實小：唯一行為=聚合 panic-flee bridge→`ctx.team_panic`→引擎 survival FLEE；保 9 反應=consequence scaffolding；FLEE 三源序保；team_panic=決策模型情緒腳首接線；gate 32→31）。**序8 灰項 done ✅**（merged 57f7d39，`strategic_ai::_dispatch_trade_net` 死路撕除→引擎貿易/買糧/囤貨承接；gate 31→30 全為保留 scaffolding；seeded 零漂移）。**★★憲法 8 違憲全溶完（序1-8）——決策不統一 arc 完成。** gate 30 sites 全為 world-mechanic dispatch 落點/scaffolding（非違憲）。**arc 尾待：撤 pre-commit site-freeze 閘 → 轉全掃常駐鏈**（另 slice）。**arc 後平行軌**：gen readiness recalibrate（先 probe slice 補死因/winner→重跑 baseline→才調，待藍圖）+ 決策模型接線脊椎（感知腳 audit done：位置god-view→戰力欄→記憶腳；情緒腳序7起步）+ 全 pipeline 工作流切換（決策模型脊椎開軌時）。融合非刪守則：每張驗 repertoire 沒少 + 該出現還出現，seeded 漂移允許但 QA 判合理非退化。
-  - **coverage 誠實限制**：閘只鎖 TaskArbiter mutation 面，**不**覆蓋「return task 字串供他處消費」式違憲（如 `ambition_ladder.rung_task`）——那類靠 arc 逐張溶解 + review，非機械閘。閘目標=「無新增引擎外 task 指派」，非完備語意偵測。
-  - **arc 期間硬掛（藍圖 wave1-order-gate 裁定提前）**：本地 `.git/hooks/pre-commit`——staged 含 `scripts/simulation/*.gd` 時跑閘，FAIL 拒 commit（worktree 共用 → 實作 commit 也擋）。**arc 尾**轉常駐全掃鏈並撤此 hook。hook 在 `.git`（本地非版控，arc-temporary）。
+  - **arc 溶入進度（序1–序N 的 merged sha／seeded 數）／coverage 誠實限制／arc 期間 `pre-commit` 硬掛／後勤應用例** → `process/detail/invariants-cases.md` 同標題節。★搬走的是進度與細則，上面那條**契約**（current ⊆ baseline）就是規則本體。
 - **零例外**：絕境=survival utility 在引擎內支配（非 override 繞過）；遠方=疏非慢非笨（引擎決策，非變笨）。此二處驗沒偷寫行為腳本。
 - **稽核收斂主軸**：既有行為 subsystem/判斷器 → 溶進引擎（非特例）。連 [[project_unified_decision_framework]] / [[project_unification_matrix]] / 「架構已定別打補丁」。
-- **應用例（藍圖 tick60 裁3）**：後勤=引擎 domain 非 subsystem——「食物不足-on-journey 登記成引擎子需求？塞乾糧/買/搶/覓食 被當 affordance 匹配？」缺→接進引擎;禁建「沿途補給 subsystem」。
 
 ### ★北極星：遭遇=統一反應（arc 收斂點，藍圖 encounter-north-star 2026-07-05，WHAT owner=game-design.md「★遭遇=統一反應」節）
 
@@ -102,20 +99,7 @@
 仲裁拒單／組隊失敗／資源不足／路不通 → **必須**回饋（失敗記憶 + 壓低該選項下輪分數，**或** T0 喚醒重想）。
 ★**同一原因禁無記憶反覆撞**。
 
-### systems HOW 裁定（WHAT 只釘「禁靜默 + 禁無記憶重撞」，其餘我定）
-1. **形狀統一走「連續折價」、不走「硬 cooldown」**。
-   codebase 現有**兩個前例、形狀不同**：`join_rejected` + `JOIN_REJECT_COOLDOWN_TICKS`（★**＝2 天**；值見 code —— ★★2026-09-01 訂正：此處原寫死 `=480`，那是**換根前**的 tick 數，真值已是 2880。**時長不變、tick 數會變 ⇒ 文件寫時長**）（**硬 cooldown**：到期前完全排除）vs §4c `site_failed` + `quality_multiplier`（**連續折價**：TTL 線性衰減、乘進既有 util）。
-   ★**選後者**：硬 cooldown ＝ **絕對門檻 pre-empt 引擎** ＝ 補丁閘家族（憲法禁）；連續折價讓**引擎自己秤**（絕境時仍可壓過折價再試一次）——與本日生育修（硬懸崖→連續）同一方向。
-   → `join_rejected` 的 cooldown 形狀**列為待統一項**（非本輪、但別再擴散第三種形狀）。
-2. **失敗記憶放哪**：★**不放 leader `p.memory`**——那條 FIFO `MEMORY_MAX=20` 與人際記憶共用、**已知會被擠掉**（§4c eviction 監看項）。放**隊層** `recent_failures: {key → {tick, count}}`，`key = (option, target)`；**過期即 prune**（bounded，不無界成長）。**入 fingerprint**（它是直接因果態、會改變下輪 argmax）。
-3. **哪些升 T0**：**「失效」升 T0、「劣勢」只折價**——
-   - **T0 喚醒**（當前計畫已不可行）：路不通／目標消失／仲裁拒絕**已承諾**的任務。
-   - **只折價**（該選項這次不划算，但計畫仍成立）：資源不足／組隊人手不夠／到場後沒貨。
-4. **反射弧三段對齊**：**成功**半邊 ＝ §4c 結果反饋（`site_thrived`）；**失敗**半邊 ＝ 本律；**喚醒**半邊 ＝ T0 事件匯流排。三者共用同一組語彙（事件 → 記憶 → 下輪 util）。
-
-### 落地順序（與現有工單接合）
-- **第一份清單 ＝ convoy dispatch-drop 列舉**（`faction_ai:3977-4006` **7 個靜默 `return false`**）——本律使它從「找效能斷點」升級為**合規盤點**：★**每個 drop 點要嘛消滅、要嘛變成有反饋的失敗事件**，**不准原樣留著**。
-- 其後：`order.abandoned`（94.4% 靜默到期）／JOIN／建設 try_set 失敗／trade market bail 各族，逐族納管。
+- **systems HOW 裁定（連續折價非硬 cooldown／失敗記憶放哪／哪些升 T0／反射弧三段）＋落地順序（convoy dispatch-drop 7 個靜默 `return false` 起）** → `process/detail/invariants-cases.md` 同標題節。★★WHAT 只釘上面那兩句（禁靜默 ＋ 禁無記憶重撞），**那兩句就是規則本體**。
 
 ## ★★★感知鐵律的**鏡像**：決策也不得【讀不到自己的狀態】（2026-08-25）
 
@@ -145,8 +129,7 @@
 
 ## ★其餘不變量 → 索引（2026-08-25 #4：本檔只留【憲法級】）
 
-**理由**：★**`invariants.md` 是「每 session 開頭讀一次」的檔** ⇒ ★★**它必須短到真的會被讀完。**
-★**非憲法級的條目仍然有效，只是搬到按需讀的地方** —— **`docs/process/detail/invariants-cases.md`（同標題節）。**
+**理由**：★**本檔是「每 session 開頭讀一次」的檔 ⇒ 它必須短到真的會被讀完**；★★非憲法級的條目**仍然有效**，只是搬到按需讀的 **`docs/process/detail/invariants-cases.md`（同標題節）**。
 
 | 條目 |
 |---|
@@ -170,8 +153,7 @@
 | ★★★觀測器**禁任何副作用**（不只禁耗 RNG）——2026-08-25 擴充；★**2026-09-10 再擴：查詢面不得交出【本體】**（回傳引用的 Dictionary/Array ⇒ 觀測者可以改被觀測物；血證 `get_decision_snapshot` 交出 `ctx_snapshot` 本體，而症狀是【對照變成跟自己比】）；★★★**2026-09-23 三擴：一支【被當成查詢用】的指令，它原本的副作用要在查詢版裡【走不到】**——血證：招募的「開選單」改走查詢面時，失敗路徑會 `erase(pending_targets)`（`player_command_system` 招募支）⇒ 查詢竟會清掉世界狀態；**修法是讓查詢版先擋掉那條路（檢查目標存在），不是把 erase 刪掉**（那個清理沒消失：隊伍死亡時 `world_state.gd:878` 本來就會做）。★**通則：把一支函式從【指令】重新分類成【查詢】時，要逐條路徑問「這條路上有沒有寫」，而不是只看成功路徑**——★★成功路徑純讀、失敗路徑寫，是這一族最常見的長相） |
 | ★means-end / 前提解析的「無手段終止」不得靜默（2026-08-25） |
 
-> ★**搬家不是廢止**：**每一條都在 `detail` 檔裡完整保留，原文在 `git log`。**
-> ★★**要引用時查 `detail`；★開場只需要記得憲法級那幾條。**
+> ★**搬家不是廢止**：每一條都在 `detail` 檔裡完整保留、原文在 `git log`；★★**要引用時查 `detail`，開場只需要記得憲法級那幾條。**
 
 ## ★★★近期立的不變量（一條一行；★血證／為什麼一律在 `process/detail/invariants-cases.md` 同標題節）
 

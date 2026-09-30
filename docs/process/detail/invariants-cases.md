@@ -1375,3 +1375,34 @@ DecisionContext   = 真欄位,本來就對 —— 一行都不要動
 ★★**先量再開藥**（本專案的老規矩），**而修法形狀（frame 預算上限＋批次切片）等數字。**
 ★★★而過去所有 perf 量測（merge gate 656s／tick per second／LOD）量的都是**總時**
 —— **這條問的是【最壞單 frame】，兩者正交**。
+
+---
+
+## ★★★ 沙盒憲法的閘：arc 溶入進度／coverage 誠實限／arc 期間 pre-commit 硬掛／應用例
+〔2026-10-01 從 `invariants.md` 搬來（開場必讀區超限）。★搬走的是【進度與細則】，規則本文（憲法那三行）一行都沒少。〕
+
+  - **arc 溶入進度**：**序1 threat done ✅**（merged 804432e，`_dispatch_threat_response`→`rank_threat`；seeded 46/8/1/380→48/8/1/382）。**序2 solo done ✅**（merged f7ce320，`_evaluate_solo` argmax→`rank_scored`+去 `_tag_weight` 硬鎖+capability-grounded attack；融合+反向驗綠；seeded 48→**52/8/1/380**；★揭框架債：`_tag_weight` 隱形去衝突閘 + 「建設」恆 applicable→loop3 idle-gate 餓死風險，yield 橋補，真修在序6）。**序3 rung_task done ✅**（merged 50dc86f，查表撕除→archetype/rung 當 weight+訓練 option；idle-filler 走 `rank_ambient`[收窄排 survival/threat，FLEE churn 86→0]；★揭序1 率18 部分 churn 假象→threat 5b 改確定性 live-seam；seeded 52→**48/8/1/380**）。**序4 vendetta done ✅**（merged 2506e6e，hand dispatch→`feud_pull` 掛攻擊 option；優先序→權重序[血仇>致富=weight、威脅>血仇=PRIO_THREAT]；融合驗 4 錨綠+S2b 不 DORMANT；seeded 零漂移）。**序3.5 threat-preempt done ✅**（merged 4afbcaf，忙碌目標 idle-gate seam 修；PREEMPT_MARGIN=2.0；TASK_PRODUCE 納入；反龜縮 flee 0→12；seeded 48→52/9/1/381）。**序5 prosperity done ✅**（merged 16ab3bc，arc 最大；cascade 決策→攻擊 option[readiness→intent_fit×readiness factor、富 prey]；scout-verify 保 scaffolding `_commit_conquest_attack`[S3/S4 誘殺保]；刪 cascade+yield 閘+reroute；融合驗 6 錨綠；seeded 52/8/1/380 非凍死；★unready 征服隊改掠奪=capability grounding，成員 raid 暫失待序6）。**序6 faction 成員 dispatch done ✅**（merged 2b4a427，最高收斂動主幹；`_assign_member_tasks` if/elif→成員走 `_decide_unified`；V2-cmd 自消+成員 raid 接回+縫#3 結清；★只改成員 gate 非全域 uses_unified=序3.5 preempt 保；seeded 52→49/8/1/381）。**序7 ReactionSystem done ✅**（merged 2edf120，★reframe=其實小：唯一行為=聚合 panic-flee bridge→`ctx.team_panic`→引擎 survival FLEE；保 9 反應=consequence scaffolding；FLEE 三源序保；team_panic=決策模型情緒腳首接線；gate 32→31）。**序8 灰項 done ✅**（merged 57f7d39，`strategic_ai::_dispatch_trade_net` 死路撕除→引擎貿易/買糧/囤貨承接；gate 31→30 全為保留 scaffolding；seeded 零漂移）。**★★憲法 8 違憲全溶完（序1-8）——決策不統一 arc 完成。** gate 30 sites 全為 world-mechanic dispatch 落點/scaffolding（非違憲）。**arc 尾待：撤 pre-commit site-freeze 閘 → 轉全掃常駐鏈**（另 slice）。**arc 後平行軌**：gen readiness recalibrate（先 probe slice 補死因/winner→重跑 baseline→才調，待藍圖）+ 決策模型接線脊椎（感知腳 audit done：位置god-view→戰力欄→記憶腳；情緒腳序7起步）+ 全 pipeline 工作流切換（決策模型脊椎開軌時）。融合非刪守則：每張驗 repertoire 沒少 + 該出現還出現，seeded 漂移允許但 QA 判合理非退化。
+  - **coverage 誠實限制**：閘只鎖 TaskArbiter mutation 面，**不**覆蓋「return task 字串供他處消費」式違憲（如 `ambition_ladder.rung_task`）——那類靠 arc 逐張溶解 + review，非機械閘。閘目標=「無新增引擎外 task 指派」，非完備語意偵測。
+  - **arc 期間硬掛（藍圖 wave1-order-gate 裁定提前）**：本地 `.git/hooks/pre-commit`——staged 含 `scripts/simulation/*.gd` 時跑閘，FAIL 拒 commit（worktree 共用 → 實作 commit 也擋）。**arc 尾**轉常駐全掃鏈並撤此 hook。hook 在 `.git`（本地非版控，arc-temporary）。
+- **應用例（藍圖 tick60 裁3）**：後勤=引擎 domain 非 subsystem——「食物不足-on-journey 登記成引擎子需求？塞乾糧/買/搶/覓食 被當 affordance 匹配？」缺→接進引擎;禁建「沿途補給 subsystem」。
+
+---
+
+## ★執行失敗反饋鐵律 —— systems HOW 裁定 ＋ 落地順序
+〔2026-10-01 從 `invariants.md` 搬來。★★憲法級的規則本文（「執行失敗＝事件，必反饋決策層，禁靜默丟棄」＋「同一原因禁無記憶反覆撞」）**留在 `invariants.md`**；
+搬來的是**形狀怎麼做**與**先做哪一族** —— 而它們引用了 `faction_ai:3977-4006` 這種會漂的行號，正是該住在按需讀檔的東西。〕
+
+### systems HOW 裁定（WHAT 只釘「禁靜默 + 禁無記憶重撞」，其餘我定）
+1. **形狀統一走「連續折價」、不走「硬 cooldown」**。
+   codebase 現有**兩個前例、形狀不同**：`join_rejected` + `JOIN_REJECT_COOLDOWN_TICKS`（★**＝2 天**；值見 code —— ★★2026-09-01 訂正：此處原寫死 `=480`，那是**換根前**的 tick 數，真值已是 2880。**時長不變、tick 數會變 ⇒ 文件寫時長**）（**硬 cooldown**：到期前完全排除）vs §4c `site_failed` + `quality_multiplier`（**連續折價**：TTL 線性衰減、乘進既有 util）。
+   ★**選後者**：硬 cooldown ＝ **絕對門檻 pre-empt 引擎** ＝ 補丁閘家族（憲法禁）；連續折價讓**引擎自己秤**（絕境時仍可壓過折價再試一次）——與本日生育修（硬懸崖→連續）同一方向。
+   → `join_rejected` 的 cooldown 形狀**列為待統一項**（非本輪、但別再擴散第三種形狀）。
+2. **失敗記憶放哪**：★**不放 leader `p.memory`**——那條 FIFO `MEMORY_MAX=20` 與人際記憶共用、**已知會被擠掉**（§4c eviction 監看項）。放**隊層** `recent_failures: {key → {tick, count}}`，`key = (option, target)`；**過期即 prune**（bounded，不無界成長）。**入 fingerprint**（它是直接因果態、會改變下輪 argmax）。
+3. **哪些升 T0**：**「失效」升 T0、「劣勢」只折價**——
+   - **T0 喚醒**（當前計畫已不可行）：路不通／目標消失／仲裁拒絕**已承諾**的任務。
+   - **只折價**（該選項這次不划算，但計畫仍成立）：資源不足／組隊人手不夠／到場後沒貨。
+4. **反射弧三段對齊**：**成功**半邊 ＝ §4c 結果反饋（`site_thrived`）；**失敗**半邊 ＝ 本律；**喚醒**半邊 ＝ T0 事件匯流排。三者共用同一組語彙（事件 → 記憶 → 下輪 util）。
+
+### 落地順序（與現有工單接合）
+- **第一份清單 ＝ convoy dispatch-drop 列舉**（`faction_ai:3977-4006` **7 個靜默 `return false`**）——本律使它從「找效能斷點」升級為**合規盤點**：★**每個 drop 點要嘛消滅、要嘛變成有反饋的失敗事件**，**不准原樣留著**。
+- 其後：`order.abandoned`（94.4% 靜默到期）／JOIN／建設 try_set 失敗／trade market bail 各族，逐族納管。
