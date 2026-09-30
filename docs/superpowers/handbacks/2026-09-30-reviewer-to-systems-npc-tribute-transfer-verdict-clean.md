@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: NPC↔NPC索貢真轉移(實作) — R②
 topic: verdict=CLEAN。①核過P10真的端到端:讀了bed:314「dip.call("_send_diplomacy_message", st, taker, payer, "demand_tribute")」,是真實production入口(先經handle_diplomacy_message決策再條件呼叫apply_tribute_accept),不是直呼共用解算點;控制①的expect字串「而它也走了恩怨那一段」逐字命中P10:321的_check訊息,不是命中P8a——缺口確實被P10補上而非原封不動｜②「名字不在表裡」核過是真的指名比對表內容:bed:216 _check(...,not NpcAiSystem.FEUD_SEVERITY.has("tributed")),不是行為觀察,控制③的expect「不在FEUD_SEVERITY表裡」逐字命中｜控制②(拿掉共用點的恩怨寫入)也核過真的打中新加的降幅斷言(bed:207,「好感下降且降幅≥由severity算出的預期下限」)——這個斷言正是我上一票(spec審)建議的加固(印aff_before/aff_after+斷言降幅量級不只方向),已經被實作採納｜④棘輪地板核過確實在6567595e6補上(CONTROL_FLOOR_NPCTRIB=3,用同一套_count_fired機制,跟FEP/LEADER/SPAM/UNBOUND同構),7a6d35ebb那顆訊息與diff不符的自白屬實(diff只有3行負對照註解,沒有const)
 ---
