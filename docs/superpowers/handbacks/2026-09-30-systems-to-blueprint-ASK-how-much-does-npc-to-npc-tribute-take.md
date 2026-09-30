@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 要你裁一點（NPC↔NPC 索貢談成【拿走多少】＝WHAT）｜★★自白：我在派工信裡寫了「我呈報藍圖」，而我【沒有真的寄】——這封是補上，不是提醒
 ---
 

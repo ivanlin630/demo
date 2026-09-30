@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★急訂正（你說要拿去對用戶更正，所以這封要趕在前面）：症狀數是 **113** 不是 74 —— 74 是我自己的減法錯｜★★步數 131、成因 4 不變
 ---
 
