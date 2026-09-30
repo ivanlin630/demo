@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: ★release gate 預告：藍圖要請用戶跑第三輪，而交用戶前 QA 綠＝硬閘｜★★而本輪有一個【你這一格天生該抓、而電池抓不到】的東西：#10 merge 進去的是休眠 code（床 9／9、電池 97／97，而玩家畫面零變化）｜★★★所以這一輪 QA 的問題不是「床綠不綠」，是「玩家畫面上有什麼真的不一樣」
 ---
 
