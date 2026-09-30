@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -109,6 +109,7 @@ func _initialize() -> void:
 	await _test_p25_letter_key_only_in_interact_mode()
 	await _test_p26_ui_stack_step1()
 	await _test_p27_forced_takes_over_and_keys_speak()
+	await _test_p28_screen_is_the_composed_one()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2981,6 +2982,44 @@ func _test_p27_forced_takes_over_and_keys_speak() -> void:
 		% str(missing), missing.is_empty())
 	await _free_ui(node)
 	_cell("_test_p27_forced_takes_over_and_keys_speak")
+
+
+# 負對照：把 `_refresh()` 裡那一行 `_render_screen(_pend_txt)` 拿掉 ⇒ 本格紅 ⇒ 待實測
+# ══ P28：★★★【行為證】玩家真的看到合成畫面（接電那一顆的牙齒）════════════════
+# ★為什麼要有這一格：床那一側的接電檢查是**靜態**的（grep 函式體），
+#   而它第一版甚至分不出【定義了】與【被呼叫了】—— 守衛得了它自己要守的病。
+#   ⇒ ★★這一格走**真的節點**：`_screen_label.text` 上六個錨要各剛好一次，
+#     而舊的六個 Label 必須 `visible == false`（欄寬單一權威）。
+#   ⇒ ★★★它與床那一格的差別：床證「排版層算得對」，這一格證「**玩家看到的是它**」。
+func _test_p28_screen_is_the_composed_one() -> void:
+	_selftest_gate("_test_p28_screen_is_the_composed_one").noop()
+	print("
+── P28 玩家真的看到合成畫面 ──")
+	var node = await _make_ui()
+	node._refresh()
+	var screen: String = String(node._screen_label.text) if node._screen_label != null else ""
+	print("   `_screen_label` 長度 ＝ %d 字" % screen.length())
+	_check("★母體地板：那個 Label 存在且非空（空 ⇒ 下面的 count 全部是 0 ⇒ 恆紅或恆綠都沒意義）",
+		node._screen_label != null and screen.length() > 0)
+	for a in TextUiView.REGION_ANCHORS:
+		var n: int = screen.count(String(a))
+		print("   %-12s 出現 %d 次" % [String(a), n])
+		_check("★★★玩家的畫面上 `%s` 剛好一次（實測 %d）" % [String(a), n], n == 1)
+	# ★舊六個 Label ＝ 內容載體 ⇒ 不顯示（否則畫面上有兩份欄寬權威）
+	var visible_carriers: Array = []
+	for pair in [["_map_label", node._map_label], ["_state_label", node._state_label],
+			["_event_label", node._event_label], ["_hint_line", node._hint_line],
+			["_log_strip", node._log_strip], ["_feedback_line", node._feedback_line]]:
+		if pair[1] != null and bool(pair[1].visible):
+			visible_carriers.append(String(pair[0]))
+	print("   還在顯示的【內容載體】＝ %s（應為空）" % str(visible_carriers))
+	_check("★★★舊六個 Label 都不顯示（顯示兩份 ⇒ 兩份欄寬權威，而打起來沒有一格會紅）",
+		visible_carriers.is_empty())
+	# ★而它們的【內容】必須還在（49 處斷言靠它）
+	_check("★★內容載體的內容還在（`_state_label` 非空 ⇒ 既有 49 處斷言不會變成空字串比對）",
+		String(node._state_label.text).length() > 0)
+	await _free_ui(node)
+	_cell("_test_p28_screen_is_the_composed_one")
 
 
 

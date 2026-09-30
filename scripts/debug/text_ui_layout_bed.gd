@@ -560,18 +560,28 @@ func _initialize() -> void:
 	#   ⇒ ★所以本床全綠的意思是【排版層算得對】，**不是**【玩家看到新版面】。
 	#   ★★這就是「沒接電的閘」那一族的**產品版**：東西寫好了與東西被接上是兩個獨立動作，
 	#     而只做前一個的長相跟兩個都做完全一樣（床綠、卷面漂亮、玩家畫面沒變）。
-	var _view_callers: int = 0
-	for _f in ["res://scripts/ui/text_ui_main.gd", "res://scripts/ui/main.gd"]:
-		if FileAccess.get_file_as_string(String(_f)).contains("TextUiView"):
-			_view_callers += 1
-	print("  ⑤★★★接電狀態：`TextUiView` 在玩家畫面那幾個檔裡的呼叫端 ＝ %d" % _view_callers)
-	print("     ★這一行【原本只是印出來】（那時是 0 ⇒ 排版層是休眠 code）——")
-	print("       而 systems 裁：接電那一顆要【同時】把斷言加上，否則接完電它就從")
-	print("       「宣告一個已知缺口」變成**一個沒有人看的數字**，而下一次有人把接電拆掉")
-	print("       （例如改 `_refresh()` 繞回舊路）★★它會安靜回到 0 而沒有人會紅。")
-	print("     ⇒ ★★★形狀與「基準不要先放主線」相同而**方向相反**：**斷言不要晚於那個事實**。")
-	_check("★★★接電了：`TextUiView` 真的被玩家畫面那一側呼（%d ≥ 1）" % _view_callers,
-		_view_callers >= 1)
+	# ★★★【這一條原本自己得了它要守的病】（2026-10-01 實測）：
+	#   第一版 grep「`text_ui_main.gd` 裡有沒有 `TextUiView`」⇒ 而負對照把
+	#   `_refresh()` 裡那一行 `_render_screen(_pend_txt)` 拿掉之後，**它照樣是 1**
+	#   —— 因為 `_render_screen()` 的**定義**還在檔裡。
+	#   ⇒ ★它分不出【定義了】與【被呼叫了】，而那正是「寫好了 ≠ 接上了」那一族，
+	#     也就是這一行存在的理由。**守衛得了它自己要守的病。**
+	#   ⇒ ★★修法：縮到 `_refresh()` 的【函式體】裡找那個呼叫點；
+	#     而真正有牙齒的那一半在 `ui_flow_test` 的行為格（合成畫面上六個錨各一次）。
+	var _ui_src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var _refresh_body: String = _code_only(_func_body(_ui_src, "func _refresh() -> void:"))
+	var _render_body: String = _code_only(_func_body(_ui_src,
+		"func _render_screen(pend_txt: String) -> void:"))
+	print("  ⑤★★★接電狀態（縮到函式體）：`_refresh()` 裡呼 `_render_screen` ＝ %d 次"
+		% _refresh_body.count("_render_screen("))
+	print("     而 `_render_screen()` 裡呼 `TextUiView.compose` ＝ %d 次"
+		% _render_body.count("TextUiView.compose"))
+	_check("★母體地板：兩支函式體都抓到了（抓不到 ⇒ 下面兩條恆綠）",
+		_refresh_body.length() > 0 and _render_body.length() > 0)
+	_check("★★★接電了①：`_refresh()` 真的呼 `_render_screen`（%d ≥ 1）"
+		% _refresh_body.count("_render_screen("), _refresh_body.count("_render_screen(") >= 1)
+	_check("★★★接電了②：`_render_screen()` 真的呼 `TextUiView.compose`（%d ≥ 1）"
+		% _render_body.count("TextUiView.compose"), _render_body.count("TextUiView.compose") >= 1)
 	print("\n=== text_ui_layout DONE === errors: %d｜到場點名 %d／%d" % [
 		_errors, _cells_ran.size(), EXPECTED_CELLS.size()])
 	quit(1 if _errors > 0 else 0)
