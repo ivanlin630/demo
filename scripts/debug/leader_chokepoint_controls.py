@@ -25,8 +25,11 @@ ROUTED_NEW = '''	team.leader_id = heir_id
 	heir.role = "leader"'''
 
 # ②把 subteam 的具名理由拿掉 ⇒ P2 的「直寫仍在【且】理由就地寫著」必紅
-REASON_OLD = '#   ⇒ 不走的理由是【走了會多做一件本票沒授權的事】：`set_leader` 會設 `role = "leader"`，'
-REASON_NEW = '#   （理由被拿掉了）'
+#   ★★第一版我挑的是【另一行】（含 `role = "leader"` 的那一行），而 P2 讀的 token 是
+#     「role 語意」—— 它在下一行 ⇒ 擾動了一行而判準讀的是另一行 ⇒ 報 NOT-RED。
+#   ⇒ ★判準的粒度：負對照要擾動【判準真的在讀的那一行】，否則它測的是別的東西。
+REASON_OLD = '#     而子隊 leader 的 role 語意**沒有人裁過**（他同時是母隊的 advisor 人選）'
+REASON_NEW = '#     （理由被拿掉了）'
 
 # ③把 population 那一處的 set_leader 拿掉 ⇒ P2 的「已改 ＝ 4／4」必紅
 POP_OLD = '\t\tstate.set_leader(ot, promoted.id)'
