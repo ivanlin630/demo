@@ -103,7 +103,7 @@ ${UNREAD}"
   ③查別人：`bash .claude/hooks/peers.sh` 的 ADDR 欄
 登記完再處理未讀 handback / 用戶請求。別的角色寫 to:${ROLE_KEY} 的信會主動喚醒你。詳 docs/process/07_mailbox_trigger.md。
 
-★★剛開場（含 /clear·/compact 重觸）：掛完信箱後、動工前，**先重讀你那格 docs**（00_roles §文檔導覽表 map role→doc）。/compact 洗掉 active 記憶，別靠殘存印象動工——最容易忘的規則就在那幾份 md，動工前塞回。
+★★剛開場（含 /clear·/compact 重觸）：掛完信箱後、動工前，**先重讀你那格 docs**（★哪幾份 ＝ **本 hook 上面那一行 `CTX` 自己點名的那幾份**；★★`00_roles.md` **不再維護對照表** —— 它那一節逐字寫著「這裡不再維護一張會 drift 的對照表，開場該讀哪一格＝以 SessionStart hook 注入為準」⇒ 舊寫法是一個**循環指標**：hook 指向一個說「去看 hook」的章節。systems 修 2026-09-30）。/compact 洗掉 active 記憶，別靠殘存印象動工——最容易忘的規則就在那幾份 md，動工前塞回。
 
 ★★無斷點自動鏈（用戶定 2026-07-09）：收 handback = 做完 + 立刻推下一站（寫下一站信,鏈自動流）。禁自造斷點（park／排隊／下個 session／等下再做）。只為**真需用戶裁決**才停（願景 fork／授權／喬不攏優先序），給具體待裁問題非「要不要繼續/收工」。其餘角色間自動鏈到底。詳 00_roles §無斷點自動鏈。
 
