@@ -229,6 +229,20 @@ func _rule_e(response_or_action: String, ok: bool, coin_before: float, coin_afte
 	return "玩家付了 %.1f coin 而【這一側什麼都沒增加】（人口 %d→%d、資源沒增加），" % [
 		coin_before - coin_after, pop_before, pop_after] + "而結果句說它成功了"
 
+# ★★★共用讀法（R² 2026-09-30 抓到的：P8 原本自己內聯一份 ⇒ 若 `_step()` 的讀法退化，
+#   P8 不會發現 ⇒ 我宣稱的「兩向」是假的，而真正在守它的是 P6 那個母體地板）。
+#   ⇒ 處置照 R² 的第一個建議：**抽成共用函式**，`_step()` 與 P8 都呼它
+#     ⇒ 「兩向」從此是真的（P8 動的是同一份 code）。
+#   ★這一支就是「一個真相只存一份」在【判準】這一層的版本。
+func _sentences_for_seq(st: WorldState, my_seq: int) -> Array:
+	var text: String = ""
+	var n: int = 0
+	for row in st.command_results:
+		if int(row.get("seq", -999)) == my_seq:
+			text += String(row.get("text", ""))
+			n += 1
+	return [text, n]
+
 # 走一步：下一道指令、推一顆 tick、核四條。回 [句子, 違反清單]
 # expect_silent ＝ 這一步【按設計】不該有句子（消費點自己帶 silent 旗子）。
 #   ★★它不是豁免權：卷面會把它列成「設計上的靜默」，而不是悄悄不算 ——
@@ -273,12 +287,9 @@ func _step(bridge: SimBridge, st: WorldState, where: String,
 	#     （而它們全部落在第二趟 kind=team，正是因為第一趟 14+51 步剛好跨過 60。）
 	#   ⇒ ★★改成用【那一道指令自己的 seq】去找它的結果句 —— seq 由 `command_player` 回傳，
 	#     它不會因為別人被剪掉而改變。
-	var sentence: String = ""
-	var got_n: int = 0
-	for row_r in st.command_results:
-		if int(row_r.get("seq", -999)) == my_seq:
-			sentence += String(row_r.get("text", ""))
-			got_n += 1
+	var pair_read: Array = _sentences_for_seq(st, my_seq)   # ★共用讀法（P8 也呼這一支）
+	var sentence: String = String(pair_read[0])
+	var got_n: int = int(pair_read[1])
 	# ★★★母體地板（systems 要求①）：新讀法要印【預期幾句／實得幾句】兩個數，
 	#   不是只印結果 —— 舊讀法之所以能騙我一整輪，就是因為它只印「結果是空的」。
 	#   ★一道被消費的指令預期恰好 1 句（silent 那一支除外 ⇒ 0 句，而它是具名例外）。
@@ -797,7 +808,11 @@ func _test_p7_positive_control_fixtures() -> void:
 #   ·新讀法：比對那一道指令自己的 `seq`
 #   ·舊讀法：`range(before_n, command_results.size())` 的索引區間
 #   ⇒ 新讀法必須 N／N；★★舊讀法必須【少於 N】——它少掉的那些就是它當初騙我的那些。
-# ★★★而這一格是【兩向】的：哪天有人把讀法改回索引區間，它會紅在「新讀法 N／N」那一條。
+# ★★★【兩向】怎麼成立（R² 訂正過我一次，紀錄留著）：
+#   我第一版說「P8 是兩向的」，而它當時**自己內聯**一份讀法 ⇒ `_step()` 的讀法退化它不會發現
+#   ⇒ 那個宣稱指錯了測。★真正在守回歸的是 P6 的母體地板（預期 − 實得 ＝ 設計靜默）。
+#   ⇒ 現在 P8 與 `_step()` **呼同一支** `_sentences_for_seq()` ⇒ 兩向成立：
+#     哪天有人把那一支改回索引區間，P8 與 P6 會一起紅（實測見 commit 訊息）。
 func _test_p8_two_readers_on_the_same_input() -> void:
 	print("
 ── P8 兩讀法對照（步數推到遠超過 TTL）──")
@@ -818,10 +833,9 @@ func _test_p8_two_readers_on_the_same_input() -> void:
 			bridge.request_advance(1)
 		while bridge.is_advancing():
 			bridge.tick_step()
-		# 新讀法
-		for row_r in st.command_results:
-			if int(row_r.get("seq", -999)) == my_seq:
-				by_seq += 1
+		# 新讀法 ★呼【共用的那一支】—— R² 的要求：P8 必須動到 `_step()` 真的在用的那份 code，
+		#   否則 P8 綠而 `_step()` 的讀法退化了它也不會知道。
+		by_seq += int(_sentences_for_seq(st, my_seq)[1])
 		# 舊讀法（就是騙了我一整輪的那一個）
 		for k in range(before_n, st.command_results.size()):
 			by_index += 1
