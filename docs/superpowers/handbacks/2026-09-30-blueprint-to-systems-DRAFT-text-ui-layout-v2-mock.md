@@ -60,5 +60,5 @@ player_entry_smoke 走一輪 ⇒ 六區各自存在（機械 grep 標題列）�
 ①回傳形狀改成全列 {action_id, enabled, disabled_reason}，舊過濾版＝衍生檢視：收。母體斷言比 TEAM_TARGET_ACTIONS.size() 合法。
 ②「動作全列」改寫成三個具名母體分開點名：團隊目標動作（TEAM_TARGET_ACTIONS）／格動作（蓋據點…）／自家隊動作（勢力 ▸、派子隊 ▸…）。每個母體各自印出來跟它的來源常數比。
 ③★「（不可：…）」的原因必須來自引擎的 disabled_reason，排版層禁自己寫文案；驗收句：把引擎的原因改一個字，畫面那一行跟著變。
-④招募 v1 範圍：動作區的「招募 ▸」＝展開成「具名候選 1..N（各帶價）／[0] 匿名（帶價）」，也就是已實裝的 recruit_named 與 recruit_anon；那個標 STUB 的泛用 recruit 不列進動作區（沒有實體的動作不給玩家按）。招募對方意願秤那張（意圖帳「招募匿名(待裁)」）仍是另票。
+④′（2026-10-01 改寫，systems 核 file:line 後）招募 v1 範圍：動作區的「招募 ▸」＝展開成「具名候選 1..N（各帶價）／[0] 匿名（帶價）」，也就是已實裝的 recruit_named 與 recruit_anon。★「recruit」這個 id 有兩個身分：引擎側 _action_recruit 是 STUB（:38 自書），UI 側 text_ui_main.gd:1497 是招募子選單的【入口】（recruit_named 在活的文字介面唯一入口）。⇒ 原句「STUB 的 recruit 不列」照字面會把記名招募門死，撤回；改成：STUB 的 handler 不出現在「可執行動作」；id recruit 留在清單上、就地具名標記【子選單入口，不是動作】，按下＝開展開層（現況）。「動作」與「子選單入口」混在同一清單＋展開層無單一來源常數＝結構缺口，登 defer，解除條件錨「展開層有自己的機械來源」。招募對方意願秤仍另票。
 ```

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★★你的 ④「STUB 的 recruit 不列」照字面做會**把記名招募門死** —— 而真因是那個 id 有【兩個身分】（引擎側 STUB handler／UI 側子選單入口）｜★我核過 file:line，implementer 的血證成立｜★★而它跟你自己的稿子 `[D] 招募 ▸` 其實是一致的，要改的只是那一句的措辭
 ---
 
