@@ -1580,20 +1580,32 @@ func _log_event(msg: String) -> void:
 func _interact_mode_binds_key(keycode: int) -> bool:
 	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD:
 		return true
-	# ★★★【缺口②，systems 裁 2026-10-01】：宣告要跟【真實行為】對齊。
-	#   原本這裡無條件對 A..Z 回 true，而 handler 那一支要求 `_interact_target < 0`
-	#   ⇒ 聚焦目標時按字母：`_refuse_unbound_key` **不會** fire（因為這裡說「綁了」），
-	#     而 handler 落到 `if keycode < KEY_1 …: return` ⇒ **靜默 return**。
-	#   ⇒ ★三態（不關模式／不落底層／不改狀態）**剛好都滿足，而那是意外不是設計**
-	#     —— 玩家得到的是「完全沒有回饋」，而那正是未綁定鍵那張票要消滅的東西。
-	#   ⇒ ★★所以字母只在【回應真的可按】的時候算「綁了」：沒聚焦目標 ＋ 真的有強制事件。
-	#     ★★★而缺口① 修好之後，「有強制事件而玩家聚焦著目標」這個狀態**不會再出現**
-	#       ⇒ 這兩條是同一件事的兩半：①保證玩家按得到，②保證按不到的時候【有話說】。
+	# ★★★【缺口②的紀錄，而它的第一版修法被我自己推翻了 —— 兩版都留著】（2026-10-01）
+	#   ·病：原本這裡無條件對 A..Z 回 true，而 handler 那一支要求 `_interact_target < 0`
+	#     ⇒ 聚焦目標時按字母：`_refuse_unbound_key` **不會** fire（因為這裡說「綁了」），
+	#     而 handler 落到 `if keycode < KEY_1 …: return` ⇒ **靜默 return**
+	#     ⇒ ★三態剛好都滿足，而那是**意外不是設計** —— 玩家得到「完全沒有回饋」。
+	#   ·~~第一版修法：讓字母只在【回應真的可按】時算「綁了」（沒聚焦 ＋ 真的有強制事件）~~
+	#     ★★★劃掉的理由（見下面那一段）：那讓**謂詞變成狀態相依**，而它打破了
+	#     `unbound_key_bed` 的異源比對 —— **一個對的目標配了一個錯的位置**。
+	#   ·現行修法：**謂詞保持靜態**（宣告鍵空間），而「這個狀態下做不做事」搬進 handler，
+	#     由它明確呼 `_refuse_unbound_key` ⇒ 缺口② 的目標（按不到時要【有話說】）照樣成立。
+	#   ★而缺口① 修好之後，「有強制事件而玩家聚焦著目標」這個狀態**不會再出現**
+	#     ⇒ ①②仍是同一件事的兩半：①保證玩家按得到，②保證按不到的時候有話說。
+	# ★★★【謂詞回到靜態】（2026-10-01，我自己預測到的一個紅逼出來的）——
+	#   我在缺口② 把這裡改成**狀態相依**（聚焦目標 ⇒ false／沒有強制事件 ⇒ false），
+	#   而 `unbound_key_bed.gd:195-215` 做的是【異源比對】：
+	#   **這個謂詞** vs **床機械掃描 handler 函式體**抽出的已綁集合，逐鍵比對。
+	#   ⇒ 掃描端看到 handler 裡 `keycode >= KEY_A and keycode <= KEY_Z` ⇒ 展開 A..Z 為已綁；
+	#     而我的狀態相依謂詞在 fresh UI 上對 A..Z 回 false ⇒ **26 處不一致** ⇒ 那一格紅。
+	#   ⇒ ★★而那不是產品回歸，是我**打破了那支床的設計前提**（它假設謂詞是靜態的）。
+	#   ⇒ ★★★判準：**「這個鍵屬於這個模式嗎」與「這個鍵現在做不做事」是兩個問題**，
+	#     而把後者塞進前者的謂詞，會讓**所有拿前者當母體的守衛失去主詞**。
+	#     ·謂詞 ＝ 宣告鍵空間 ⇒ **靜態**
+	#     ·handler ＝ 這個狀態下它做不做事 ⇒ **動態**，而它必須【有話說】
+	#       （見 `_handle_interact_mode` 裡那個 `_refuse_unbound_key("互動", …)`）
 	if keycode >= KEY_A and keycode <= KEY_Z:
-		if _interact_target >= 0:
-			return false   # 聚焦目標時字母沒有意義 ⇒ 交給未綁定鍵的統一出口（會印一句話）
-		return not String(_cached_snapshot.get("forced_interaction", {})
-			.get("interaction_id", "")).is_empty()
+		return true   # ★字母屬於互動模式的鍵空間（強制回應獨佔它）—— 靜態宣告
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		return true
 	return false
@@ -1639,6 +1651,13 @@ func _handle_interact_mode(keycode: int) -> void:
 	#     ⇒ 母體大小怎麼變，都不會讓某個鍵換意思。
 	#   ★★★上限＝26（A..Z）。choose_heir 的候選數若超過 26，第 27 個【按不到】——
 	#     那是一個真的限制，寫在這裡而不是假裝不存在；分頁要等它真的發生再做。
+	# ★★★聚焦目標時字母【沒有意義】⇒ 明確走未綁定鍵的統一出口（吃掉、印一句話、什麼都不改）。
+	#   ★這一段原本是靠謂詞回 false **間接**達成的，而那讓謂詞變成狀態相依
+	#   ⇒ 打破了 `unbound_key_bed` 的異源比對（它假設謂詞是靜態的）。
+	#   ⇒ ★★所以判斷搬到【這裡】：謂詞宣告鍵空間（靜態），handler 決定這個狀態下做不做事。
+	if _interact_target >= 0 and keycode >= KEY_A and keycode <= KEY_Z:
+		_refuse_unbound_key("互動", keycode)
+		return
 	if _interact_target < 0 and keycode >= KEY_A and keycode <= KEY_Z:
 		var fi_k: Dictionary = _cached_snapshot.get("forced_interaction", {})
 		var fr_k: Array = fi_k.get("responses", [])
