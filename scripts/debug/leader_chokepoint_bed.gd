@@ -177,9 +177,13 @@ func _test_p2_site_accounting() -> void:
 	var ex_src_raw: String = FileAccess.get_file_as_string(EXEMPT_FILE)
 	var ex_src: String = _code_only(ex_src_raw)
 	var still_direct: bool = ex_src.contains("sub.leader_id        = sub_leader_id")
-	var has_reason: bool = ex_src_raw.contains("具名例外") and ex_src_raw.contains("role 語意")
-	print("   %-34s 直寫仍在 ＝ %s｜就地具名理由 ＝ %s" % [
-		EXEMPT_FILE.get_file(), str(still_direct), str(has_reason)])
+	# ★★★判準讀【機器可讀的標記】不讀散文：同一個詞會出現在好幾行註解裡
+	#   ⇒ 讀散文的判準，負對照擾動一行卻打不到它（我今天連兩次報 NOT-RED 就是這個）。
+	var marker: String = "named-exemption: subteam-leader-role-unruled"
+	var marker_n: int = ex_src_raw.count(marker)
+	var has_reason: bool = marker_n == 1 and ex_src_raw.contains("具名例外")
+	print("   %-34s 直寫仍在 ＝ %s｜具名標記出現 %d 次（要恰好 1）" % [
+		EXEMPT_FILE.get_file(), str(still_direct), marker_n])
 	_check("★已改走 chokepoint 的 ＝ %d／%d" % [routed, SPEC_ROUTED], routed == SPEC_ROUTED)
 	_check("★★具名不改的那一處：直寫仍在【且】理由就地寫著（只有其中一個 ⇒ 紅）",
 		still_direct and has_reason)

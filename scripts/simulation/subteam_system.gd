@@ -65,6 +65,10 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.order_target_id  = order_target_id
 	sub.order_task       = order_task
 	# ★★★具名例外（spec 2026-09-30 §3①：不能走 chokepoint 的要就地寫理由）：
+	# named-exemption: subteam-leader-role-unruled
+	#   ★★這一行標記是【給守衛讀的】，理由是給人讀的 —— 兩者分開：
+	#     判準若去比對散文，同一個詞出現在好幾行註解裡就會讓負對照打不準
+	#     （我第一版的負對照就是這樣連兩次報 NOT-RED，而那不是它沒有鑑別力，是我擾動錯行）。
 	#   本處【刻意不走 `state.set_leader`】，而 chokepoint 要的三件事這條路都已經有：
 	#     ①leader_id ＝ 這一行 ②出母 roster ＝ `:79 remove_member(parent, …, false)`
 	#     ③team_id 回指 ＝ `:80 sub_leader.team_id = sub.team_id`
