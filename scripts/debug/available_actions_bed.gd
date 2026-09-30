@@ -500,7 +500,7 @@ func _registry_names_for(src: String, fn: String) -> Array:
 	return names
 
 
-# 負對照：讓一個宣告過的入口寫一個欄位 ⇒ 本格紅 ⇒ 待實測
+# 負對照：讓一個宣告過的入口寫一個欄位（`pt.readiness = 0.123`）⇒ 本格紅 ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P9：★行為證 —— 每一個【宣告過的入口】呼它前後世界不變（systems 裁 (b)）══════
 # ★母體 ＝ `SUBMENU_OPENERS`（宣告在一處）；地板：它不得是空的（空 ⇒ 本格恆綠）。
 func _test_p9_declared_openers_are_pure() -> void:
@@ -527,7 +527,7 @@ func _test_p9_declared_openers_are_pure() -> void:
 	_cell("_test_p9_declared_openers_are_pure")
 
 
-# 負對照：把一個宣告過的入口從 `SUBMENU_OPENERS` 拿掉 ⇒ 本格必須【指名】它 ⇒ 待實測
+# 負對照：把 `gather_intel` 從 `SUBMENU_OPENERS` 拿掉 ⇒ 本格必須指名它（指名：["gather_intel"]） ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P10：★★★反向掃 —— 沒有宣告而回 payload 的，逐列問「它改世界嗎」（systems 裁 (c)）══
 # ★這一格才是「漏宣告不再是靜默的」那一半：(a)+(b) 只能守住已經宣告的那些，
 #   而 2026-10-01 漏掉的那一個（`gather_intel`）正是**沒有被宣告**的那一個。
