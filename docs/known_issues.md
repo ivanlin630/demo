@@ -2704,7 +2704,24 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 ## 主動升匿名 = correct but DORMANT（2026-08-12、blueprint 裁 merge banked）
 `_try_promote_advisor`（領主 deliberate 提拔 anon→named 補 bench、解 named-scarcity）已 merged 修 §4 第 3 路。**formula genuine+bounded 正確**（promote_util=demand×pmult×quality、spare≥desired→0 非逢缺必補、多疑 util→0、add_member 非 subteam、machine-demonstrate 21/21）**但結構性 DORMANT**：quality=tier_combat/0.7、新村 anon 全平民 tier（combat0.1→quality0.1429）→ util_max=0.171 < THRESHOLD 0.3 **數學證明從不 fire**（只新兵+ tier 才可能）。∴ named-scarcity 未紓解、promotion **待 anon tier-up 進程**（平民靠經驗/戰訓→新兵→promotion-worthy）某天做時自動 fire。結構 gap（平民該不該可提拔/nobody 怎麼變 officer）= WHAT-level 用戶裁 a/b/c（a 絕境-relative bar field-promote / b anon tier-up 進程 richest 大 arc 連 [[project_anon_cohort_refactor]] 2c-2 / c 接受 named-scarcity genuine 弱勢 park）。連統一派遣（anon-drain 真根已修 MERGED）。
 
-## ★CONFIRMED tap-gap：faction-leave 4 出口無 Probe tap（2026-08-12、③長期故事驗證 first-pass 揭）
+## ✅【已解決 2026-09-30，systems 逐處核過】~~★CONFIRMED tap-gap：faction-leave 4 出口無 Probe tap~~（2026-08-12 揭）
+
+```
+★核法（不是讀報告，是開檔數呼叫端）：
+·`world_state.gd:550 clear_team_faction()` 現在只是 `set_team_faction(team, -1, reason)` 的轉呼
+·而 `set_team_faction()` 本體接了 tap：`faction.change_total`／`faction.leave_total`／
+  ★`faction.leave.<reason>`（含 `unknown_reason` 那一格 —— 呼叫端漏傳 reason 不會靜默）／`faction.join`
+·`LEAVE_*` 具名常數 **12 個**，而**全部 7 處** `clear_team_faction` 呼叫端都傳了具名 reason：
+   diplomatic_ai:415(BETRAYAL)／faction_ai:7880(UPRISING_INDEPENDENT)／:7887(UPRISING_EXILE)／
+   :7992(DEFECT_SURRENDER_FAIL)／:7996(DEFECT_INDEPENDENT)／
+   player_command:696(PLAYER)／:716(PLAYER_BETRAY)
+⇒ ★原條目點名的那 4 個出口（起義自立／起義流亡／defection B／defection C）**逐一都有 tap 了**。
+★★而它還有一支專屬的驗收床：`scripts/debug/a27_faction_leave_tap_bed.gd`
+  （A#27，互斥且窮盡 ＋ 分母 ＋「四個出口都 0」那一格的母體地板）。
+```
+
+★留著條目不刪（劃掉＋寫理由）：下一個人要分得出「它好了」與「它從來沒壞過」。
+
 `clear_team_faction` 出口中 **4 個無 `Probe.bump`（只 print）**：`faction_ai_system.gd::_evaluate_uprising()`（起義自立脫離）/ `:5158`（起義流亡脫離）/ `:5259`（defection path B 投降強鄰 fail→clear）/ `:5262`（defection path C 獨立）。相對地 defect（`reaction_system` → `death.defect_leave`）+ betray（`diplomatic_ai_system.gd`（★L2 錨：檔級） → `g3.betrayal`）出口**有** tap。→ 起義/自立/defection 型 faction-leave **Probe 不可見** = 憲法級觀測盲點（全量暫態可觀測性不變量 [[feedback_full_transient_observability]]）、令 story-audit 見 faction_id→-1 卻無事件留痕（measurer #3 真根）。**cheap 修**（4 出口各加 tap，如 `uprising.secede`/`uprising.exile`/`defection.surrender_fail`/`defection.independent`）+ un-blind 未來 long-game audit。blueprint 排 fix 優先序中。
 
 ## 記檔：用戶眼球「思考時間長」= O(N²) wall-clock perf + print-overhead（2026-08-13、③story-audit GUI 觀察）
