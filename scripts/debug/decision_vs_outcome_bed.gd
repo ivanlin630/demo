@@ -101,7 +101,7 @@ func _says_a_different_decision(rid: String, sentence: String) -> String:
 
 # ══ P1：那一筆 —— join_request 按接受而隊伍已滿 ═══════════════════════════════
 # ★母體地板：先斷言【隊伍真的滿了】（不滿的話這一格測的是成功那條路）。
-# 負對照：把 `respond_to_forced` 那段「分開講」拿掉 ⇒ 句子只剩「被拒絕（…）」⇒ 必紅
+# 負對照：把 `respond_to_forced` 那段「分開講」拿掉 ⇒ 「你選了」那一半消失 ⇒ 已於 feat/decision-vs-outcome（2026-09-30 這一輪） 實測紅
 func _test_p1_join_request_full_team() -> void:
 	print("\n── P1 join_request 按接受而隊伍已滿 ──")
 	var tri: Array = _fresh()
@@ -130,7 +130,7 @@ func _test_p1_join_request_full_team() -> void:
 
 # ══ P2：★母體 —— 回應集 × forced_event 的全部組合（三數相加＝總數）═══════════
 # ★★★這一格才是本票的產出：那一筆只是第二個實例，而「還有第三個嗎」只能靠母體回答。
-# 負對照：把 P1 那段「分開講」拿掉 ⇒ 至少一個組合落進【要修】⇒ 必紅
+# 負對照：把 sim_runner 對 respond_to_forced 的具名例外拿掉 ⇒ 失敗句又被套「被拒絕」 ⇒ 已於 feat/decision-vs-outcome（2026-09-30 這一輪） 實測紅
 func _test_p2_all_combinations() -> void:
 	print("\n── P2 母體：回應集 × forced_event 全部組合 ──")
 	var total: int = 0
