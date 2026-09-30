@@ -585,8 +585,19 @@ func _consume_player_commands(state: WorldState) -> void:
 		state.command_results.append({
 			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
 			"text": say if ok
-				else ("%s：被拒絕（%s）" % [PlayerCommandApi.describe(name, args),
-					why if why != "" else "沒有給原因"])})
+				else _refused_text(name, args, why)})
+
+# 失敗那一半的句子。★★★`respond_to_forced` 是【具名例外】，理由是語意：
+#   玩家按了「接受」而世界說「隊伍已滿」⇒ 那不是【被拒絕】（沒有人拒絕他），
+#   而那一句由 `respond_to_forced` 自己組好了兩半（我的決定 ＋ 世界的結果）
+#   ⇒ 這裡只負責【不要再套一層「被拒絕」】，否則同一句話會把玩家的決定說成別人的拒絕。
+# ★其餘動詞照舊：它們的 ok=false 真的就是「這道指令被拒絕了」。
+func _refused_text(name: String, args: Dictionary, why: String) -> String:
+	var head: String = PlayerCommandApi.describe(name, args)
+	var reason: String = why if why != "" else "沒有給原因"
+	if name == "respond_to_forced":
+		return "%s：%s" % [head, reason]
+	return "%s：被拒絕（%s）" % [head, reason]
 
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置

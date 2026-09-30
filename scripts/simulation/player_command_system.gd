@@ -1088,6 +1088,18 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 			"forced_event_resolved", [_ptid_fe], _info_fe))
 	state.player_forced_event = {}
 	state.player_forced_event_id = ""
+	# ★★★決定 vs 結果要【分開講】（spec 2026-09-30 §2①，藍圖那一族的第二個實例）：
+	#   handler 失敗時回的是【世界的結果】（例：「隊伍已滿，無法收留」），
+	#   而玩家按的是【接受】⇒ 兩件事都真，但混成一句話之後玩家讀成「我按的沒生效」。
+	#   ⇒ 這裡把它拆成兩半：我的決定（`_label_pre`＝選項自己的 label，零第二份真相）
+	#     ＋ 世界的結果（handler 的 msg）。
+	#   ★★而「沒有生效」這一句要留著：它回答玩家真正在問的那個問題。
+	#   ★★★不做的事：不動 handler 的 msg（那是世界的話）、不新增一張中文表
+	#     —— `_label_pre` 已經是那個唯一來源（`PlayerApiMapper.forced_label`）。
+	if not bool(result.get("ok", false)) and not bool(result.get("silent", false)):
+		var _why: String = String(result.get("msg", ""))
+		if _why != "" and _label_pre != "":
+			result["msg"] = "你選了「%s」，但%s ⇒ 沒有生效" % [_label_pre, _why]
 	return result
 
 func resolve_forced_response(state: WorldState, interaction_id: String, response_id: String) -> Dictionary:
