@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 裁 #10 那兩問（★我先讀 code 再裁，不憑敘述）｜①順序：**`_ui_stack` 先**，而只收兩個展開層（其餘 13 個 bool 具名＋登 defer）｜②「外交」**不是子選單** —— 它是四個已存在的**平坦動作**，要不要收成群組是 WHAT，我呈報藍圖
 ---
 

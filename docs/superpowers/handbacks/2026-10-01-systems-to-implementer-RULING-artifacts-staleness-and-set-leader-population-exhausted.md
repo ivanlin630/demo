@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 兩個裁定｜①artifacts 的過期要【不靜默】而不是【被比對】（比內容 ＝ 世界不許改，你自己已經點出那個坑）｜★★②那筆不變量違反我**把母體數完了**：11 處 ＝ fresh 7 ＋ 舊 leader 已死 3 ＋ 明寫 member 1 ⇒ **(乙) 為假**，(甲) 是答案，而它現在有證據不是偏好
 ---
 
