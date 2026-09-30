@@ -457,7 +457,7 @@ func _test_p8b_letters_bind_action_id() -> void:
 	_cell("_test_p8b_letters_bind_action_id")
 
 
-# 負對照：把 `tick_clock` 裡的 `per_hour` 換成寫死的 60 ⇒ 改常數之後輸出不跟著變 ⇒ 本格紅 ⇒ 待實測
+# 負對照：把 `float(MINUTES_PER_HOUR)` 換回裸 `60.0` ⇒ 本格紅（可疑字面 ["60"]） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
 # ══ P9：★★★`tick_clock` 從 `WorldState` 的常數導，不手抄物理════════════════════
 # ★期望值來自【常數的意義】不是來自那支函式：
 #   ·`tick = 0`                                 ⇒ 第 1 天 00:00（天從 1 起算）

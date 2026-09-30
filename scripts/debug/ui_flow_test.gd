@@ -2340,7 +2340,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 # ★★★【本區常數一律取大】（棘輪地板；rebase 衝突一律取大）——
 #   往回調會讓守衛閉嘴，而卷面看起來像「衝突解完了」。
 #   ★而上面那一區（`SPEC_UI_STACK_PENDING`）方向【相反：只准變小】⇒ 兩區刻意分開。
-const CONTROL_FLOOR_UI: int = 24   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 25   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -2375,7 +2375,7 @@ const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一�
 #   ★★★③字母改成由位置決定（P8b）—— 而 ③ 打的是不變量 #10 的病：意義由位置／計數決定。
 #   ★登進【這一格】而不是新開一支閘：棘輪機制已經存在，我的床原本【不在它的母體裡】
 #     ⇒ 那三筆紀錄被拿掉會是靜默的（同「沒有人在讀那份產出」那一族）。
-const CONTROL_FLOOR_LAYOUT: int = 3  # text_ui_layout_bed
+const CONTROL_FLOOR_LAYOUT: int = 4  # text_ui_layout_bed（★＋P9 手抄物理那一道）
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
@@ -2984,7 +2984,7 @@ func _test_p27_forced_takes_over_and_keys_speak() -> void:
 	_cell("_test_p27_forced_takes_over_and_keys_speak")
 
 
-# 負對照：把 `_refresh()` 裡那一行 `_render_screen(_pend_txt)` 拿掉 ⇒ 本格紅 ⇒ 待實測
+# 負對照：把 `_refresh()` 裡那一行 `_render_screen(_pend_txt)` 拿掉 ⇒ 本格紅（六個錨全部實測 0 ＋ 舊六個 Label 又顯示出來） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
 # ══ P28：★★★【行為證】玩家真的看到合成畫面（接電那一顆的牙齒）════════════════
 # ★為什麼要有這一格：床那一側的接電檢查是**靜態**的（grep 函式體），
 #   而它第一版甚至分不出【定義了】與【被呼叫了】—— 守衛得了它自己要守的病。
