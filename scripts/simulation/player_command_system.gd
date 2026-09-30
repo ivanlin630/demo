@@ -27,41 +27,87 @@ var _action_registry: Dictionary = {}
 
 # ── 主動互動 ────────────────────────────────────────────────
 
-# 查詢對 target_id 可用的行動（已過濾條件）
-# 返回 Array[String]，子集合自：
-#   "ignore"           → 永遠可選
-#   "attack"           → 永遠可選
-#   "trade"            → target 有 coin OR 玩家有 coin
-#   "propose_alliance" → target 非同勢力
-#   "demand_tribute"   → 玩家 population > target.population × 1.5
-#   "extort"           → 玩家 readiness >= 0.7
-#   "recruit"          → 永遠可選（STUB — 招募邏輯尚未實裝）
-func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
-	var actions: Array[String] = ["ignore", "attack"]
+# ★★★全列版（spec 2026-09-30「動作全列＋原因」）：對 `TEAM_TARGET_ACTIONS` 的每一個名字
+#   回一列 `{action_id, enabled, disabled_reason}` —— ★**原因與判斷在同一個回傳裡**
+#   （沿用 `_colocation_gate` 已在用的形狀：不回 bool，回那句人話）。
+#   ★★而它是【那些條件的唯一持有者】：`get_available_actions` 變成衍生檢視，
+#     而 `player_query_api` 的三處停用列（pop 1.5 倍／readiness 0.7／coin）已整段刪掉
+#     —— 那三處是同一組條件的第二份，而兩邊各改一次就會出現
+#     「選單說可以、handler 說不行」。★P7 就是那一格的守衛。
+#   ★★★母體邊界：本支只涵蓋【團隊目標動作】那一類（22 個信封呼叫點裡的 4 個：
+#     `player_query_api.gd:296` 那條啟用路徑與原本 :319／:336／:355 三處停用路徑）。
+#     格動作／自家隊動作／庫存那四處【不在本支】—— 它們沒有來源常數或界線不可機械讀，
+#     已就地具名登 defer（見那兩個標記）。
+#   ★具名排除：`recruit`（泛用招募）**不列** —— 它不是「現在不能做」而是
+#     **尚未實裝此機制**（藍圖④）⇒ 列出來設 false 會讓玩家等一個不存在的東西。
+const STUB_NOT_IMPLEMENTED: Array = ["recruit"]   # ★排除理由見上：尚未實裝此機制（非「停用」）
+
+func get_action_availability(state: WorldState, target_id: int) -> Array:
+	var out: Array = []
 	var pt: TeamData  = _get_player_team(state)
 	var tgt: TeamData = state.teams.get(target_id)
-	if pt == null or tgt == null:
-		return actions
-	if _can_trade(state, pt, tgt):
-		actions.append("trade")
-	if tgt.faction_id != pt.faction_id:
-		actions.append("propose_alliance")
-	if pt.population > int(tgt.population * 1.5):
-		actions.append("demand_tribute")
-	if pt.readiness >= 0.7:
-		actions.append("extort")
-	var coin: float = float(pt.resources.get("coin", 0))
-	if coin >= RECRUIT_COST_ANON:
-		actions.append("recruit")
-	# recruit_anon：有 coin 且目標有匿名人口可招（與 recruit 並列，直接執行版）
-	if coin >= RECRUIT_COST_ANON and _target_has_anon(tgt):
-		actions.append("recruit_anon")
-	# invite_settle：玩家站在自家 outpost → 可邀目標前來定居
-	if _can_invite_settle(state, pt, tgt):
-		actions.append("invite_settle")
-	actions.append("gather_intel")
-	# beg：玩家主動乞討（對稱性——NPC 會乞食,玩家亦可）。需求/接受由 _resolve_aid_request 自決,非需時自然被拒
-	actions.append("beg")
+	for name in TEAM_TARGET_ACTIONS:
+		var act: String = String(name)
+		if STUB_NOT_IMPLEMENTED.has(act):
+			continue   # ★尚未實裝此機制（不是停用）⇒ 不列；母體 11 → 10
+		var ok: bool = true
+		var why: String = ""
+		if pt == null or tgt == null:
+			ok = false
+			why = "沒有可操作的隊伍或目標"
+		else:
+			match act:
+				"ignore", "attack", "gather_intel", "beg":
+					pass   # 無條件（beg 的需求由 `_resolve_aid_request` 自決）
+				"trade":
+					if not _can_trade(state, pt, tgt):
+						ok = false
+						why = "雙方都沒有可交易的錢"
+				"propose_alliance":
+					if tgt.faction_id == pt.faction_id:
+						ok = false
+						why = "對方已經和你同一個勢力"
+				"demand_tribute":
+					if pt.population <= int(tgt.population * 1.5):
+						ok = false
+						why = "人口不足（需超過對方 1.5 倍；你 %d、對方 %d）" % [
+							pt.population, tgt.population]
+				"extort":
+					if pt.readiness < 0.7:
+						ok = false
+						why = "準備值不足（需 ≥ 0.7，現為 %.1f）" % pt.readiness
+				"recruit_anon":
+					var coin_a: float = float(pt.resources.get("coin", 0))
+					if coin_a < RECRUIT_COST_ANON:
+						ok = false
+						why = "金幣不足（需 %d，現 %d）" % [int(RECRUIT_COST_ANON), int(coin_a)]
+					elif not _target_has_anon(tgt):
+						ok = false
+						why = "對方沒有可招募的無名之人"
+				"invite_settle":
+					if not _can_invite_settle(state, pt, tgt):
+						ok = false
+						why = "你不在自家據點上，無法邀請對方定居"
+				_:
+					ok = false
+					why = "（未知動作：%s）" % act
+		out.append({"action_id": act, "enabled": ok, "disabled_reason": why})
+	return out
+
+# 查詢對 target_id 可用的行動 —— ★**衍生檢視**（spec §2②）：
+#   它現在是「全列版裡 enabled 的那些名字」，而順序沿用 `TEAM_TARGET_ACTIONS` 的宣告順序。
+#   ★★5 個既有呼叫端一個都不用改 ⇒ 「一個真相一份」是結構性的，不是紀律性的。
+#   ★★★而檔頭原本那段手寫註解表（「attack → 永遠可選／demand_tribute → pop > 1.5×…」）
+#     **已刪掉**（spec §2④）：留著它就是同一組規則的第二份，
+#     而第二份表會在下一次改條件時安靜地說謊。真判斷在全列版的 match 裡。
+#   ★誠實限（與 spec P4 的字面有一處衝突，我照藍圖④做並回報）：
+#     舊版會在 coin 足夠時列出泛用 `recruit`，而全列版把它具名排除
+#     ⇒ 本支的回傳與舊版**只差那一個名字**，不是逐字相同。
+func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
+	var actions: Array[String] = []
+	for row in get_action_availability(state, target_id):
+		if bool(row.get("enabled", false)):
+			actions.append(String(row.get("action_id", "")))
 	return actions
 
 # UI 覆蓋審計用：回傳全 registry action id（_test_action_ui_coverage 驗每個都有 UI 路徑）

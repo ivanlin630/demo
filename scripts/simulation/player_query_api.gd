@@ -291,10 +291,22 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 	var p: PersonData = state.persons.get(state.player_id)
 	var ptid: int = p.team_id if p != null else -1
 	if focus_team_id != -1 and focus_team_id != ptid and state.teams.has(focus_team_id):
-		var team_actions: Array[String] = cmd_sys.get_available_actions(state, focus_team_id)
-		for act in team_actions:
+		# ★★★動作全列＋原因（spec 2026-09-30）：這裡原本硬寫 `true, ""`
+		#   ⇒ `enabled` 恆 true、`disabled_reason` 恆空，而那兩個欄位早就在信封的型別裡。
+		#   ⇒ 現在吃【全列版】：可做與不可做**都列**，而原因是引擎給的（排版層不寫文案）。
+		#   ★★而原本那三處「停用列」（demand_tribute／extort／recruit 各一段）**已整段刪掉** ——
+		#     它們的條件（pop 1.5 倍／readiness 0.7／coin）是 `get_available_actions` 的第二份，
+		#     而兩邊各改一次就會出現「選單說可以、handler 說不行」。★P7 守這一件。
+		var rows: Array = cmd_sys.get_action_availability(state, focus_team_id)
+		var team_actions: Array[String] = []
+		for row in rows:
+			if bool(row.get("enabled", false)):
+				team_actions.append(String(row.get("action_id", "")))
+		for row2 in rows:
+			var act: String = String(row2.get("action_id", ""))
 			actions.append(PlayerApiMapper.map_available_action(
-				act, _action_label(act), true, "",
+				act, _action_label(act),
+				bool(row2.get("enabled", false)), String(row2.get("disabled_reason", "")),
 				{
 					"allowed_kinds": PackedStringArray(["team"]),
 					"requires_visible_target": true,
@@ -308,66 +320,22 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				}
 			))
 
-		# Disabled actions (shown in menu with reason)
-		var tgt_team: TeamData = state.teams.get(focus_team_id)
-		var pt_team: TeamData  = state.teams.get(ptid) if ptid != -1 else null
-		if pt_team != null and tgt_team != null:
-			# demand_tribute: disabled when population condition not met
-			if not team_actions.has("demand_tribute"):
-				var tribute_ok: bool = pt_team.population > int(tgt_team.population * 1.5)
-				if not tribute_ok:
-					actions.append(PlayerApiMapper.map_available_action(
-						"demand_tribute", "索貢", false,
-						"人口不足（需超過對方 1.5 倍）",
-						{
-							"allowed_kinds": PackedStringArray(["team"]),
-							"requires_visible_target": true,
-							"requires_forced_interaction": false,
-							"allows_self_target": false
-						},
-						"execute_action",
-						{
-							"action_id": "demand_tribute",
-							"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
-						}
-					))
-			# extort: disabled when readiness < 0.7
-			if not team_actions.has("extort"):
-				actions.append(PlayerApiMapper.map_available_action(
-					"extort", "勒索", false,
-					"準備值不足（需 ≥ 0.7，現為%.1f）" % pt_team.readiness,
-					{
-						"allowed_kinds": PackedStringArray(["team"]),
-						"requires_visible_target": true,
-						"requires_forced_interaction": false,
-						"allows_self_target": false
-					},
-					"execute_action",
-					{
-						"action_id": "extort",
-						"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
-					}
-				))
-			# recruit: disabled when coin < RECRUIT_COST_ANON
-			if not team_actions.has("recruit"):
-				var pt_coin: float = float(pt_team.resources.get("coin", 0))
-				if pt_coin < PlayerCommandSystem.RECRUIT_COST_ANON:
-					actions.append(PlayerApiMapper.map_available_action(
-						"recruit", "招募", false,
-						"金幣不足（需%d，現%d）" % [int(PlayerCommandSystem.RECRUIT_COST_ANON), int(pt_coin)],
-						{
-							"allowed_kinds": PackedStringArray(["team"]),
-							"requires_visible_target": true,
-							"requires_forced_interaction": false,
-							"allows_self_target": false
-						},
-						"execute_action",
-						{
-							"action_id": "recruit",
-							"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
-						}
-					))
+		# ★★★原本這裡有三段【停用列】（demand_tribute／extort／recruit），
+		#   它們各自重寫一次條件（pop 1.5 倍／readiness 0.7／coin）⇒ 同一組規則的第二份。
+		#   ⇒ spec 2026-09-30 §6④：全列版成為那些條件的**唯一持有者** ⇒ 這三段整段刪掉。
+		#   ★刪掉不是「少了功能」：不可做的那些現在由上面那個迴圈一起列出來，
+		#     而原因是引擎給的（`disabled_reason`），不是這裡手寫的文案。
+		#   ★★P7 就是這件事的守衛：那三個條件的字面在這條路上只准出現一次。
 
+	# ★★★【具名登記：這一類的界線不可機械讀】（spec 2026-09-30 §7）
+	#   unreadable-boundary: tile-actions
+	#   ⇒ 依 `allowed_kinds` 數，「格動作」只有 1 個（move_to）；
+	#     而依「真的看腳下這格」數有 4 個（move_to／hunt／hunt_beast／camp ——
+	#     那三個的註解自己寫著「依腳下 tile」卻宣告 `kind=none`）。
+	#   ★★兩個數都不是錯的：問題是**這一類沒有被定義**。
+	#     而 `offer_surrender`（宣告 `kind=team` 卻放在 Layer 5 無目標區塊）是同一族的第三種。
+	#   ★解除條件＝`allowed_kinds` 的宣告與「實際讀不讀腳下這格」對齊
+	#     —— 不是「有人寫一張清單」（寫清單解不掉沒有定義的問題）。
 	# move_to (cursor set)
 	if cursor_q != -1 and cursor_r != -1:
 		actions.append(PlayerApiMapper.map_available_action(
@@ -395,6 +363,13 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			"cancel_move", {}
 		))
 
+	# ★★★【具名登記：這一類沒有來源常數】（spec 2026-09-30 §7，defer 錨在下面這行標記）
+	#   no-source-constant: own-team-actions
+	#   ⇒ 下面這一整段（cancel_move／establish_faction／take_loot／leave_loot／
+	#     subjugate_enemy／confirm_gather_intel／hunt／hunt_beast／camp／train／promote_anon
+	#     ＝ 11 個）的名字**全部是字面**，沒有任何 `const` 可以當母體
+	#   ⇒ 所以本票**不做**這一類的母體（做了就是手抄第二份清單）。
+	#   ★解除條件＝有人為這一類立一個來源常數（那時把這行標記刪掉，延後閘會提醒）。
 	# Layer 5: player-team global actions (no target required)
 	var pt_data: TeamData = state.teams.get(ptid) if ptid != -1 else null
 	if pt_data != null and pt_data.faction_id == -1:
