@@ -912,6 +912,13 @@ const LAYER_RECRUIT: String = "recruit"
 const LAYER_INTEL: String   = "gather_intel"
 const UI_STACK_LAYERS: Array = [LAYER_RECRUIT, LAYER_INTEL]
 
+# ★★★【綁了但現在沒有對象】那一句 —— 與「此鍵在此模式無作用」是**兩句不同的話**
+#   （systems 裁 2026-10-01：沒有綁／綁了沒對象，玩家要知道的是不同的事）。
+#   ★它是 production 這一側的**唯一一份**；`unbound_key_bed` 另外持有一份字面
+#     當【外部期望】—— ★★那不是重複：床拿產品的常數來比＝同源恆真
+#     （寫什麼都綠），所以那一份字面**必須**住在床裡。
+const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
+
 var _ui_stack: Array = []
 
 func _ui_push(layer: String) -> void:
@@ -1651,14 +1658,19 @@ func _handle_interact_mode(keycode: int) -> void:
 	#     ⇒ 母體大小怎麼變，都不會讓某個鍵換意思。
 	#   ★★★上限＝26（A..Z）。choose_heir 的候選數若超過 26，第 27 個【按不到】——
 	#     那是一個真的限制，寫在這裡而不是假裝不存在；分頁要等它真的發生再做。
-	# ★★★聚焦目標時字母【沒有意義】⇒ 明確走未綁定鍵的統一出口（吃掉、印一句話、什麼都不改）。
-	#   ★這一段原本是靠謂詞回 false **間接**達成的，而那讓謂詞變成狀態相依
-	#   ⇒ 打破了 `unbound_key_bed` 的異源比對（它假設謂詞是靜態的）。
-	#   ⇒ ★★所以判斷搬到【這裡】：謂詞宣告鍵空間（靜態），handler 決定這個狀態下做不做事。
-	if _interact_target >= 0 and keycode >= KEY_A and keycode <= KEY_Z:
-		_refuse_unbound_key("互動", keycode)
-		return
-	if _interact_target < 0 and keycode >= KEY_A and keycode <= KEY_Z:
+	# ★★★【字母鍵只問一件事：這個字母有對應的回應嗎】（systems 裁 2026-10-01 第三形狀）
+	#   ★不變量 #10：字母鍵空間**專屬**強制事件回應 ⇒ 有沒有聚焦目標【不影響】它的意義
+	#     ⇒ 所以這裡**沒有** `_interact_target` 的分支（上一版有，那是我為了補
+	#       「謂詞狀態相依」而加的補償；根拔掉之後它沒有理由存在）。
+	#   ★★而【沒有綁】與【綁了但現在沒有對象】是**兩句不同的話**：
+	#     ·沒有綁      ⇒ `_refuse_unbound_key` 的「此鍵在此模式無作用」（玩家要知道「別按這個」）
+	#     ·綁了沒對象  ⇒ 本段這一句（玩家要知道「現在沒事可回應」）
+	#     ⇒ ★★★把兩件事壓成同一句話，就是上一版打破 `unbound_key_bed`
+	#       異源比對的原因（它讓「這個鍵屬於這個模式嗎」變成狀態相依）。
+	#   ★★★★而這一段原本【完全靜默】（沒有回應時不印任何話）—— 那是「已綁而零回饋」，
+	#     且 `unbound_key_bed` P8 的四桶把它算進【有句子】那一桶（`_set_feedback`
+	#     在**兄弟分支**裡）⇒ 一個分類器的假綠。現在兩條路都有話說。
+	if keycode >= KEY_A and keycode <= KEY_Z:
 		var fi_k: Dictionary = _cached_snapshot.get("forced_interaction", {})
 		var fr_k: Array = fi_k.get("responses", [])
 		var li: int = keycode - KEY_A
@@ -1666,7 +1678,9 @@ func _handle_interact_mode(keycode: int) -> void:
 			var ra: Dictionary = fr_k[li].get("command_args", {})
 			var rr: Dictionary = _bridge.command_player("respond_to_forced", ra)
 			_set_feedback(rr.get("ok", true), rr.get("message", ""))
-			_refresh()
+		else:
+			_set_feedback(false, LETTER_NO_RESPONSE_MSG)
+		_refresh()
 		return
 	# 數字鍵 1–9（含頁偏移）
 	if keycode < KEY_1 or keycode > KEY_9:

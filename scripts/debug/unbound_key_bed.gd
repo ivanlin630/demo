@@ -41,6 +41,10 @@ const CANDIDATE_KEYS: Array = [
 const SPEC_MODE_COUNT: int = 13
 # ★回饋句的 token（★認 token 不認整句：措辭改了不該誤報，而語意改了要紅）
 const SPEC_FEEDBACK_TOKEN: String = "此鍵在此模式無作用"
+# ★★★【綁了但現在沒有對象】那一句的**外部期望** —— ★**刻意不讀**
+#   `TextUiMain.LETTER_NO_RESPONSE_MSG`：拿產品的常數來比自己＝同源恆真
+#   （產品那邊改成什麼字這一格都綠）⇒ 兩邊必須能各自獨立改變。
+const SPEC_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
 
 const EXPECTED_CELLS: Array = [
 	"_test_p2_population_is_derived_not_handpicked",
@@ -48,6 +52,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p3_escape_is_not_unbound",
 	"_test_p4_bound_keys_still_work",
 	"_test_p6_faction_precondition_does_not_close_on_unbound",
+	"_test_p9_bound_letter_without_object_says_a_different_thing",
 	"_test_p7_not_allowed_says_why",
 	"_test_p8_early_return_census",
 ]
@@ -151,6 +156,7 @@ func _initialize() -> void:
 	await _test_p4_bound_keys_still_work()
 	await _test_p6_faction_precondition_does_not_close_on_unbound()
 	await _test_p7_not_allowed_says_why()
+	await _test_p9_bound_letter_without_object_says_a_different_thing()
 	_test_p8_early_return_census()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
@@ -441,6 +447,76 @@ func _test_p7_not_allowed_says_why() -> void:
 	_cell("_test_p7_not_allowed_says_why")
 
 
+# ══ P9：★★【綁了但現在沒有對象】要說另一句話（systems 裁 2026-10-01 第三形狀）═══
+# ★這一格的獵物是一個**實測到的靜默**：互動模式按字母、而當下沒有強制事件可回應
+#   ⇒ 舊 code 完全不印任何話、不改任何東西（`text_ui_main.gd` 字母那一段直接 `return`）。
+#   ★★而 P8 的四桶把它算進【有句子】那一桶 —— 因為 `_set_feedback` 在**兄弟分支**裡
+#     ⇒ 一個**分類器的假綠**：靜默那條路沒有句子，而桶子說它有。
+#   ⇒ ★★★所以這一格不是「再驗一次 P8」：P8 讀 code、本格按鍵讀畫面。
+# ★★★★而它同時守【字母鍵的意義不依賴有沒有聚焦目標】（不變量 #10：字母鍵空間
+#   專屬強制回應）⇒ 兩個子情境（沒有聚焦目標／聚焦著目標）**必須得到同一句話**。
+#   ★上一版真的有一個 `_interact_target >= 0` 的分支，而它會印「此鍵在此模式無作用」
+#     ⇒ 那一句是錯的話（鍵是綁著的，只是沒有對象）⇒ 本格就是為了它不要回來。
+# 負對照：把 handler 那一句改回呼 `_refuse_unbound_key` ⇒ 本格必紅並指名子情境與鍵 ⇒ 待實測
+func _test_p9_bound_letter_without_object_says_a_different_thing() -> void:
+	print("
+── P9 綁了但現在沒有對象 ⇒ 另一句話 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var pt: TeamData = st.teams.get(st.get_player_team_id())
+	# 佈置：★確定【沒有】強制事件 —— 有的話按 A 會送出回應，那一格測的是另一件事
+	st.player_forced_event_id = ""
+	node._refresh_snapshot()
+	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
+	print("   佈置：forced_interaction.interaction_id ＝ 「%s」（要是空的）" % String(fi.get("interaction_id", "")))
+	_check("★母體地板 A：真的沒有強制事件（有的話按 A 會送出回應 ⇒ 本格沒有主詞）",
+		String(fi.get("interaction_id", "")).is_empty())
+	# ★母體地板 B：`KEY_A` 在互動模式真的【有綁】—— 這一條同時釘住「謂詞是靜態的」
+	_check("★★母體地板 B：`KEY_A` 在互動模式真的有綁（回 false ⇒ 本格測的是「沒有綁」那一類）",
+		bool(node.call("_interact_mode_binds_key", KEY_A)))
+	# 同格的另一支隊：給子情境（乙）當聚焦目標用
+	var other := TeamData.new()
+	other.team_id = 7911
+	other.tile_pos = pt.tile_pos
+	AnonTierSystem.add_anon(other, AnonCohort.TIER_PLEB, 3)
+	st.teams[7911] = other
+	node._bridge.refresh_interaction_targets()
+	var bad: Array = []
+	var same: Array = []
+	for case in [{"name": "沒有聚焦目標", "tgt": -1}, {"name": "聚焦著目標", "tgt": 7911}]:
+		node._close_all_modes()
+		node.set("_interact_mode", true)
+		node._interact_target = int(case["tgt"])
+		node._interact_page = 0
+		node._feedback_line.text = ""
+		var fp_before: String = StateFingerprint.compute(st)
+		var q_before: int = st.pending_commands.size()
+		node.call("_handle_interact_mode", KEY_A)
+		var said: String = String(node._feedback_line.text)
+		print("   %-12s 按 A ⇒ 回饋句 = 「%s」" % [String(case["name"]), said])
+		same.append(said)
+		if said.strip_edges() == "":
+			bad.append("%s：靜默（一個字都沒有）" % String(case["name"]))
+		elif said.contains(SPEC_FEEDBACK_TOKEN):
+			bad.append("%s：印的是「沒有綁」那一句（`%s`）" % [String(case["name"]), SPEC_FEEDBACK_TOKEN])
+		elif not said.contains(SPEC_NO_RESPONSE_MSG):
+			bad.append("%s：不是預期那一句（床持有的期望：`%s`）" % [
+				String(case["name"]), SPEC_NO_RESPONSE_MSG])
+		_check("★%s：fp 前後逐位元相同（它不准改世界）" % String(case["name"]),
+			StateFingerprint.compute(st) == fp_before)
+		_check("★%s：佇列長度不變（%d）" % [String(case["name"]), q_before],
+			st.pending_commands.size() == q_before)
+		_check("★%s：沒有關掉互動模式（三態之一）" % String(case["name"]),
+			bool(node.get("_interact_mode")))
+	_check("★★★兩個子情境都說了【綁了但沒有對象】那一句（違反的：%s）" % str(bad), bad.is_empty())
+	# ★★★★而「兩句一樣」是本格的第二個承重點：字母鍵的意義不得依賴有沒有聚焦目標
+	print("   ★兩句逐字比對：%s" % ("相同" if same.size() == 2 and same[0] == same[1] else "★不同"))
+	_check("★★★★兩個子情境的回饋句【逐字相同】（不同 ⇒ 有人又長了一個 `_interact_target` 分支）",
+		same.size() == 2 and same[0] == same[1])
+	await _free_ui(node)
+	_cell("_test_p9_bound_letter_without_object_says_a_different_thing")
+
+
 # ══ P8：early return 的母體普查 —— ★四數相加要等於總數 ═══════════════════════
 # ★★★systems 給的是【三桶】（有句子／具名例外／總數），而實測分類法要【四桶】：
 #   最大的那一桶是他三桶裡沒有的 ——「做完事就 return」（畫面已更新，不是拒絕）。
@@ -490,6 +566,16 @@ func _test_p8_early_return_census() -> void:
 				none_of_above.append("%s:%d" % [fn, j + 1])
 	print("   總 early return %d" % total)
 	print("     ①有句子（_set_feedback／_log_event／_refuse_unbound_key）＝ %d" % with_say)
+	# ★★★★★【本桶的誠實限與失效方向】（2026-10-01 實測，systems 已登 defer
+	#   `window-classifier-counts-sibling-sentences`）—— ★這一段是**常駐輸出**不是註解：
+	#   讀不到的限定等於不存在，而只有我讀過的那一次不算。
+	print("     ★①的誠實限：本桶用【文字窗口】判（那個 `return` 前 8 行）")
+	print("       ⇒ 句子在**兄弟分支**裡也會被算進來 ⇒ ★失效方向是【多算】")
+	print("       ⇒ ★★所以 ① 是【上界】不是實數：它答「窗口裡有人說話」，")
+	print("         **不答**「走到這個 return 的那條路上有人說話」。")
+	print("       ⇒ ★★★血證（2026-10-01）：互動模式字母鍵沒有回應時是**完全靜默**的 return，")
+	print("         而 `_set_feedback` 在兄弟分支裡 ⇒ 它被算進 ① ⇒ 一個分類器的假綠。")
+	print("         ★抓到它的不是本格，是 P9（按鍵讀畫面）—— **讀 code 的桶子讀不出它**。")
 	print("     ②具名例外（gate-ok:）                                  ＝ %d" % named_exempt)
 	print("     ③執行了一道令（結果句由消費點產生）                      ＝ %d" % with_cmd)
 	print("     ④★以上皆非（逐站列名）                                  ＝ %d" % none_of_above.size())

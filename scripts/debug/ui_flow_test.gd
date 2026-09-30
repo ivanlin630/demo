@@ -3,6 +3,12 @@ extends SceneTree
 
 var _errors: int = 0
 
+# ★★★這兩份字面是【外部期望】—— ★**刻意不讀** `TextUiMain.LETTER_NO_RESPONSE_MSG`：
+#   拿產品的常數來比自己＝同源恆真（產品那邊改成什麼字，這一格都綠）。
+#   ⇒ 它們要能各自獨立改變，改不動彼此就不是比較，是一句話講兩次。
+const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
+const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
+
 const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
@@ -2971,8 +2977,20 @@ func _test_p27_forced_takes_over_and_keys_speak() -> void:
 	node._feedback_line.text = ""
 	node._handle_interact_mode(KEY_A)
 	print("   聚焦目標時按 A ⇒ 回饋行：「%s」" % node._feedback_line.text)
+	# ★★★★★【這一格本身被改過】（2026-10-01，systems 要求它自己要有負對照）——
+	#   舊斷言：`contains("無作用")`。它綠是因為 handler 當時對聚焦目標的字母
+	#   呼 `_refuse_unbound_key` ⇒ 印「此鍵在此模式無作用」。
+	#   ★而那一句是**錯的話**：字母鍵在互動模式**是綁著的**（專屬強制回應）——
+	#     它只是【現在沒有對象】。⇒ 兩件事要分得出來，所以斷言升級成三條。
+	#   ★★而本格的負對照就是那個擾動的反面：handler 改回呼 `_refuse_unbound_key`
+	#     ⇒ 下面第二條必紅（它會印出那個 token）。
+	var p27_said: String = String(node._feedback_line.text)
 	_check("★★★②聚焦目標時按字母【有話說】（原本是靜默 return）",
-		node._feedback_line.text.contains("無作用"))
+		p27_said.strip_edges() != "")
+	_check("★★★②而它【不是】「沒有綁」那一句 —— 字母鍵在互動模式是綁著的（實測：「%s」）"
+		% p27_said, not p27_said.contains(UNBOUND_TOKEN))
+	_check("★★★②它是【綁了但現在沒有對象】那一句（床自己持有這份字面：`%s`）"
+		% LETTER_NO_RESPONSE_EXPECT, p27_said.contains(LETTER_NO_RESPONSE_EXPECT))
 	_check("★②而它沒有關掉模式（三態之一）", node._interact_mode == true)
 	_check("★②也沒有改掉聚焦目標（三態之二）", node._interact_target == tgt_id)
 

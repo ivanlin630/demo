@@ -49,8 +49,17 @@ var _cells_ran: Array = []
 #   ★★後四支的 `command_player` 呼叫點都是 0；`sim_bridge` 那 1 個是
 #     `refresh_interaction_targets()` 的內部自呼（R² 核過 route 進咽喉、不是繞過）
 #     ⇒ 玩家按得到的母體 ＝ 36 ＋ 5 ＝ 41。
+#   ★★★【基準更新 2026-10-01】加入 `text_ui_layout.gd`／`text_ui_view.gd` ——
+#     理由：版面 v2 把畫面收成一個合成 Label，`_render_screen()` 呼 `TextUiView.compose()`
+#     （它再呼 `TextUiLayout`）⇒ 這兩支**從休眠 code 變成主場景可達**。
+#     ★那不是誤報：這一格守的就是「活的 UI 面有沒有長大」⇒ 它做對了事，
+#       而基準要跟著那個改動【原子】落地（不是先放基準等世界追上）。
+#     ★★而它們的 `command_player` 呼叫點是 **0** ⇒ 三條呼叫點斷言一個都不動
+#       （合計仍 41）—— ★**「活的」與「有呼叫點」是兩個不同的活**：
+#       這兩支是被 `_render_screen` 餵進去的**資料流**，不是被按鍵呼叫的動作。
 const SPEC_LIVE_UI_FILES: Array = ["encounter_view.gd", "sim_bridge.gd", "team_ui_helper.gd",
-	"text_map_renderer.gd", "text_ui_main.gd", "ui_pages.gd"]
+	"text_map_renderer.gd", "text_ui_layout.gd", "text_ui_main.gd", "text_ui_view.gd",
+	"ui_pages.gd"]
 const SPEC_CALLSITES_BRIDGE_SELF: int = 1   # ★sim_bridge 內部自呼（不是玩家按得到的呼叫點）
 const SPEC_CALLSITES_TEXT_UI: int = 36      # spec §1① 逐字那一個
 const SPEC_CALLSITES_ENCOUNTER: int = 5     # ★text_ui_main:156 動態 load 的活 overlay
