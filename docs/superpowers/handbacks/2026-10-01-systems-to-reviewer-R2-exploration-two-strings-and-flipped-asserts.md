@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² **窄範圍**：`fix/exploration-two-english-strings` @ `75c139075`｜★只審【兩條 assert 翻面】與【新 P12】——它們是判準改動，其餘是字串與 expect｜★★而我另外要你核一件我的：那筆不變量違反我宣稱「母體窮盡、(乙) 為假」
 ---
 
