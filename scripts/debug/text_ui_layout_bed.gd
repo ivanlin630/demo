@@ -31,6 +31,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p4_every_false_row_has_a_reason",
 	"_test_p5_reason_comes_from_the_engine",
 	"_test_p6_feed_rows_each_carry_time",
+	"_test_p8b_letters_bind_action_id",
 ]
 
 
@@ -179,16 +180,17 @@ func _fixture_feed() -> Array:
 
 func _fixture_screen() -> String:
 	return TextUiView.compose({
-		"top": {"clock": "第3天 08:00", "team": "我隊 8 人", "home": "(0,20)",
-			"food": "4.2 天", "threat": "東邊有敵", "pending": "2 道"},
-		"map": "  . . . @ . . .\n  . ^ ^ . . . .",
-		"pages": "[生存] 糧 33.6｜水 12｜士氣 0.7",
+		"top": {"clock": "3 天 08:00", "team_name": "灰狼隊", "pop": "14",
+			"home": "(3,5)", "food": "6 天", "threat": "東邊有野豬群", "pending": "0 道"},
+		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
+		"tabs": "1]生存 [2]經濟 [3]威脅 [4]社交 [5]記憶 ",
+		"map": "   ?   ?   ?   ?   ?\n ?   f   f   p   ?\n   ?   P   @   P  3?",
+		"pages": "生存\n 糧撐幾天：6 天（庫存 84，日耗 14）\n 人的狀態：14 人，3 人飢餓",
 		"action": _fixture_rows(),
 		"feed": _fixture_feed(),
-		"result": "你選了「收留（叛徒）」，但隊伍已滿，無法收留 ⇒ 沒有生效",
-		"keymap": "[1-9]選動作 [Esc]返回 [,][.]切頁",
+		"result": "要貢金 → 對方拒絕（關係惡化）",
+		"keymap": "WASD 游標  Enter 選中  1-5 分頁  X 一小時  空白 一天  Esc 上一層  Q 離開",
 	})
-
 
 # 負對照：刪掉一區的錨 ⇒ 本格紅 ⇒ 待實測
 # 負對照 b：把一區複製一次 ⇒ 本格紅（★只數總數會讓 a、b 互相補償）⇒ 待實測
@@ -200,6 +202,8 @@ func _test_p1_six_regions_each_exactly_once() -> void:
 	var screen: String = _fixture_screen()
 	print("   母體 ＝ `TextUiView.REGION_ANCHORS`（%d 個，順序就是畫面上下順序）"
 		% TextUiView.REGION_ANCHORS.size())
+	print("   ★而其中兩個【不是標題列】：`｜ 待執行 ` 是頂列最後一欄、` 鍵：` 是底部那一行")
+	print("     —— 稿子的頂列與底部沒有標題列，而為了好寫而多加一條 ＝ 讓守衛去改被守的東西。")
 	_check("★母體地板：錨的清單不是空的（空 ⇒ 下面的迴圈一格都不跑 ⇒ 恆綠）",
 		not TextUiView.REGION_ANCHORS.is_empty())
 	_check("★★母體 ＝ spec 的六區（實測 %d）" % TextUiView.REGION_ANCHORS.size(),
@@ -215,20 +219,37 @@ func _test_p1_six_regions_each_exactly_once() -> void:
 # 負對照：拿掉頂列任一欄 ⇒ 本格紅並指名那一欄 ⇒ 待實測
 # ══ P2：★頂列六欄【指名】都在（spec §2②：不是「頂列非空」）═════════════════════
 func _test_p2_top_row_six_named_columns() -> void:
-	print("\n── P2 頂列六欄（指名）──")
+	print("\n── P2 頂列六欄（指名，而錨是稿子裡真的有的字面）──")
 	var screen: String = _fixture_screen()
+	var top: String = String(screen.split("\n")[0])
+	print("   頂列實際印出來：%s" % top)
 	var missing: Array = []
 	var names: Array = []
-	for c in TextUiView.TOP_COLUMNS:
-		names.append(String(c[1]))
-		if not screen.contains(String(c[1])):
-			missing.append(String(c[1]))
+	for c in TextUiView.TOP_FIELDS:
+		var key: String = String(c[0])
+		var kind: String = String(c[1])
+		var anchor: String = String(c[2])
+		names.append("%s(%s)" % [String(c[3]), anchor])
+		var hit: bool = false
+		if kind == "regex":
+			# ★★★第一欄用【日期的形狀】不用「第」這一個字：
+			#   事件流每一條都是 `第12天 …` ⇒ 一個字的錨會在別區命中 ⇒ **恆真**。
+			#   判準：**錨太短 ⇒ 它在別處命中，而命中的長相是綠。**
+			var re := RegEx.new()
+			re.compile(anchor)
+			hit = re.search(top) != null
+		else:
+			hit = top.contains(anchor)
+		if not hit:
+			missing.append("%s（錨 `%s`）" % [String(c[3]), anchor])
 	print("   母體（指名）＝ %s" % str(names))
-	_check("★母體地板：欄的清單不是空的", not TextUiView.TOP_COLUMNS.is_empty())
-	_check("★★六欄都在畫面上（缺的：%s）" % str(missing), missing.is_empty())
+	_check("★母體地板：欄的清單不是空的", not TextUiView.TOP_FIELDS.is_empty())
+	_check("★★六欄的錨都在【頂列那一行】上（缺的：%s）" % str(missing), missing.is_empty())
 	_check("★★★欄數 ＝ spec 點名的 6（實測 %d）" % names.size(), names.size() == 6)
+	print("   ★而這一格驗的是【六個具名字面】不是「頂列非空」（spec §3 明文禁後者）。")
+	print("   ★★前兩欄在稿子裡**沒有欄標** ⇒ 它們的錨是日期【形狀】與 `（人口 `，")
+	print("     而不是我自己加上去的欄標 —— 守衛要適應被守的東西，不是反過來。")
 	_cell("_test_p2_top_row_six_named_columns")
-
 
 # 負對照：把 COLS 改成 40 ⇒ 本格紅（證它真的在讀那個常數）⇒ 待實測
 # ══ P3c：★每一行的顯示寬度 ≤ COLS（spec §3 P3 後半）═══════════════════════════
@@ -354,6 +375,73 @@ func _test_p6_feed_rows_each_carry_time() -> void:
 	_cell("_test_p6_feed_rows_each_carry_time")
 
 
+
+# 負對照：把字母改成由【位置】決定 ⇒ 本格紅 ⇒ 待實測
+# ══ P8b：★★★字母綁 `action_id`，不綁【清單位置】（systems 裁 2026-10-01 的條件）════
+# ★不變量 #10 禁的不是字母，是「意義由位置／計數決定」
+#   ⇒ 位置式綁定（第 2 列 ⇒ `[B]`）正是那個病：`trade` 一旦不可做，`[B]` 就換了意思。
+# ★★而「動作全列」那張票把前提補上了（不可做的也在列上 ⇒ 清單長度不隨世界變動）
+#   ⇒ 靜態映射才**可能**；本格驗它**真的是靜態的**。
+func _test_p8b_letters_bind_action_id() -> void:
+	print("\n── P8b 字母綁 action_id 不綁位置 ──")
+	# 兩份 rows：世界狀態不同【而順序也不同】
+	var a: Array = _fixture_rows()
+	var b: Array = []
+	for r in a:
+		var c: Dictionary = (r as Dictionary).duplicate()
+		c["enabled"] = not bool(r.get("enabled", false))     # 可做／不可做全部翻面
+		if not bool(c["enabled"]) and String(c.get("disabled_reason", "")) == "":
+			c["disabled_reason"] = "（測試用：翻面之後的原因）"
+		b.append(c)
+	b.reverse()                                               # ★順序也倒過來
+	var order_a: Array = []
+	var order_b: Array = []
+	for x in a:
+		order_a.append(String(x.get("action_id", "")))
+	for y in b:
+		order_b.append(String(y.get("action_id", "")))
+	print("   第一份順序 ＝ %s" % str(order_a))
+	print("   第二份順序 ＝ %s" % str(order_b))
+	_check("★★母體地板：兩份的【順序真的不同】（相同 ⇒ 本格恆綠）", str(order_a) != str(order_b))
+	var blk_a: String = TextUiView.action_block(a)
+	var blk_b: String = TextUiView.action_block(b)
+	var bad: Array = []
+	for id in order_a:
+		var key: String = TextUiView.letter_for(String(id))
+		if key == "":
+			continue
+		var want: String = "[%s]" % key
+		# 同一個 id 在兩份畫面上都要拿到同一個字母，而那個字母要真的印在它那一列上
+		var ok_a: bool = false
+		var ok_b: bool = false
+		for line in blk_a.split("\n"):
+			if line.contains(want):
+				ok_a = true
+		for line2 in blk_b.split("\n"):
+			if line2.contains(want):
+				ok_b = true
+		if not (ok_a and ok_b):
+			bad.append("%s 應為 %s（第一份 %s／第二份 %s）" % [
+				String(id), want, str(ok_a), str(ok_b)])
+	print("   兩份畫面上字母不一致的 ＝ %d" % bad.size())
+	for bb in bad:
+		print("     · %s" % String(bb))
+	_check("★★★同一個 `action_id` 在兩種世界狀態下拿到同一個字母（不一致：%d）" % bad.size(),
+		bad.is_empty())
+	# ★「未綁鍵」的列數與具名清單要印出來（★它不是零就要看得見）
+	var unbound: Array = []
+	for r3 in a:
+		var aid: String = String(r3.get("action_id", ""))
+		if TextUiView.letter_for(aid) == "":
+			unbound.append(aid)
+	print("   ★未綁鍵的列 ＝ %d 個（具名：%s）" % [unbound.size(), str(unbound)])
+	print("     ★★沒有字母的列印「%s」而**不用位置補一個字母** ——" % TextUiView.UNBOUND_MARK)
+	print("       用位置補會把這一格變回不變量 #10 那個病，**而且是靜默的**。")
+	print("       判準：寧可印一個「沒有」並把它數出來，不要補一個看起來合理的值。")
+	_check("★母體地板：字母表不是空的（空 ⇒ 上面那個迴圈一格都不跑 ⇒ 恆綠）",
+		not TextUiView.ACTION_LETTERS.is_empty())
+	_cell("_test_p8b_letters_bind_action_id")
+
 func _initialize() -> void:
 	print("=== text_ui_layout bed ===")
 	_test_p3a_cols_has_one_source()
@@ -364,6 +452,7 @@ func _initialize() -> void:
 	_test_p4_every_false_row_has_a_reason()
 	_test_p5_reason_comes_from_the_engine()
 	_test_p6_feed_rows_each_carry_time()
+	_test_p8b_letters_bind_action_id()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -379,7 +468,17 @@ func _initialize() -> void:
 		+ " ⇒ 全綠**不等於**這一票可以交，可以交的判準是【用戶看過】。")
 	print("  ②★P1（六區各一次）**管不到**這一類：六個錨各剛好一次，"
 		+ "而區塊【內容】溢出／重複／位置錯位 —— 例如事件流的內容印了 16 行而標題只印一次。")
+	print("     ★★血證（2026-10-01，實作端自己第一版就寫出來的）：上框的分頁錨自帶 `┬`"
+		+ "而組框時又加了一個 ⇒ 印成 `┬┬─ [1]生存…`，★而 P1 **仍然綠**"
+		+ "（`┬─ [` 照樣剛好出現一次）。")
+	print("     ⇒ ★★★所以這一行不是免責聲明，它在描述一個【已經發生過】的錯。")
 	print("  ★★那一類落在【用戶看得出而床看不出】的那一邊，而它正是「排列合理」真正在守的東西。")
+	print("  ④★本輪的動作區只驗【團隊目標】那一類（`TEAM_TARGET_ACTIONS`，有全列版 API）；"
+		+ "★★自家隊動作與格動作**還沒有引擎原因** ⇒ 它們的灰掉理由【今天不存在】"
+		+ "（已登 defer：own-team-actions-no-source-constant／tile-actions-unreadable-boundary），"
+		+ "而藍圖 79410f7da 要求勢力那組平坦並灰掉寫引擎原因 ⇒ **那是另一張票**。")
+	print("     ★不寫這一行的話，#10 綠了會被讀成「動作區全部驗過」——而那是【假的涵蓋率】；")
+	print("       寫出來之後，那張新票的動機就在卷面上，不必靠人記得。")
 	print("  ③★而「120 欄是不是對的寬度」也判不了：本床只證「沒有超過那個常數」。")
 	print("\n=== text_ui_layout DONE === errors: %d｜到場點名 %d／%d" % [
 		_errors, _cells_ran.size(), EXPECTED_CELLS.size()])
