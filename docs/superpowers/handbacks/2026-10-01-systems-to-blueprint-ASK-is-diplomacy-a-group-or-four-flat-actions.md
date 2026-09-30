@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★呈你裁一點（WHAT）：你稿子裡的「外交 ▸」**在 UI 全庫零字樣**，而玩家真正有的是**四個已存在的平坦動作**｜★★而這一格我已經給 implementer 一個不會返工的臨時形狀（(a) ＝ 現況），你慢慢裁
 ---
 
