@@ -484,6 +484,20 @@ func _initialize() -> void:
 	print("       而寫成「那一類沒有引擎原因」也是錯的（我第一版就這樣寫）——")
 	print("       ★★過去式的紀錄與待辦在文字上同形，而【條件有】與【原因看得到】是兩件事。")
 	print("  ③★而「120 欄是不是對的寬度」也判不了：本床只證「沒有超過那個常數」。")
+	# ★★★【最重要的那一條，而它是我漏掉的】—— 2026-10-01 自查：
+	#   `TextUiView` 的 production 呼叫端 ＝ **0**（只有本床在用）
+	#   ⇒ 這個排版層**還沒有被接到玩家畫面上**（`text_ui_main._refresh()` 仍在用舊版面）
+	#   ⇒ ★所以本床全綠的意思是【排版層算得對】，**不是**【玩家看到新版面】。
+	#   ★★這就是「沒接電的閘」那一族的**產品版**：東西寫好了與東西被接上是兩個獨立動作，
+	#     而只做前一個的長相跟兩個都做完全一樣（床綠、卷面漂亮、玩家畫面沒變）。
+	var _view_callers: int = 0
+	for _f in ["res://scripts/ui/text_ui_main.gd", "res://scripts/ui/main.gd"]:
+		if FileAccess.get_file_as_string(String(_f)).contains("TextUiView"):
+			_view_callers += 1
+	print("  ⑤★★★接電狀態：`TextUiView` 在玩家畫面那幾個檔裡的呼叫端 ＝ %d" % _view_callers)
+	if _view_callers == 0:
+		print("     ⇒ **還沒接上** ⇒ 本床證的是【排版層算得對】不是【玩家看到新版面】。")
+		print("     ★★而這一行會在接上之後自己變成 1 ⇒ 它不需要有人記得回來改。")
 	print("\n=== text_ui_layout DONE === errors: %d｜到場點名 %d／%d" % [
 		_errors, _cells_ran.size(), EXPECTED_CELLS.size()])
 	quit(1 if _errors > 0 else 0)
