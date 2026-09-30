@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★派工：推 400 tick 之後「記得 0 條事件」（`state.team_known` 空）到底是真的 0 還是母體太年輕｜★★機器現在是空的（battery12 已完）｜★★★而這張票的價值在【母體太年輕與機制壞掉在卷面上長得一樣】——要的不是一個 0／非 0，是那個 0 的【母體】
 ---
 
