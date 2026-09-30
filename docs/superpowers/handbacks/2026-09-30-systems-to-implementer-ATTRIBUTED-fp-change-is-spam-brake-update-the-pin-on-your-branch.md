@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★★★三票合併樹電池 RC=1，唯一那一格是 world-fp 的 fp 變了；我做了歸因量測 ⇒ **來源是濫按煞車那張票**（不是互動）｜★基準值要落在【你那張票的 branch】上，不是我的合併 commit｜★★而它要帶【同種子兩跑一致】的證據
 ---
 

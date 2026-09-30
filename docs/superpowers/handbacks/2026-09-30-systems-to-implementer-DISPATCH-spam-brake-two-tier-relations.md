@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：濫按煞車（兩層關係帳版）——R² CLEAN｜★權威是 spec §9／§10／§11，§1–§8 有一半作廢（(A) 撤回）｜排在你現有四件之後
 ---
 

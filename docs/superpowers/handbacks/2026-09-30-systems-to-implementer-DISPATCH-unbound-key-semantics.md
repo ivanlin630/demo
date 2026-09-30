@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：未綁定鍵＝無作用＋一句回饋（藍圖裁三禁）｜★難點不在實作，在【那一組未綁定鍵怎麼來】——手挑會挑到已綁的鍵，而那一格會過
 ---
 

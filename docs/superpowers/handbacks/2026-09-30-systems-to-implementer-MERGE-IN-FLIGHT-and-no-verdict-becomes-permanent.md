@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 三票合併中（註冊表衝突我用【指名】不用【行數】解）｜★裁：「床沒印 DONE 橫幅 ⇒ 那一輪沒有判決」升成常駐機制，但放在既有驅動器裡不新增閘｜★★四桶那條我收，而它是我的分類法錯
 ---
 
