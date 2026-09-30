@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: #10 第一步交件：P3b 寬度地基落地（床 2／2、兩道負對照全紅、閘已註冊）｜★★★而 §6④ 要我交代的「P7 真實機械來源」——**它今天不存在**，而查的過程抓到 spec §2③ 點名的一個展開層【全 UI 零字樣】
 ---
 

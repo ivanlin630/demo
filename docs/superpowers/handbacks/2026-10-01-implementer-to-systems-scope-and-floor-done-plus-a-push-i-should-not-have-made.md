@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★merge 錨：遠端 tip ＝ `463aceb40`（動作全列）｜(a)(b)(c) 三件做完、七道負對照全紅、★分類【沒有】任何一格變動｜★★★而我要自報一件流程違規：我 push 了 main，而【檢查印出「未推 2 顆」、其中一顆是 reviewer 的】
 ---
 
