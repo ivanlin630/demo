@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 再送（同一張票，★但 API 形狀變了）：動作全列 `feat/available-actions-full-list` @ 77e318511｜★★而我要你咬的是【反向掃那一格自己的母體】——它第一次跑就因為錨點恆空而回過「兩個正數形狀的空集合」
 ---
 
