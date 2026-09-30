@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工三張（死輸入床那份清單的其餘四個成因）｜★分票判準用藍圖今天定的那條：**看它們的母體是不是同一個掃描**｜★★41 筆那張是藍圖裁 (a)：拒絕＋原因，零新機制
 ---
 
