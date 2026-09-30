@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 merge：leader_id chokepoint（4 處改走入口／1 處具名不改）｜★★★而這張票的前提【被實作端自己推翻】—— 那筆稽核紅是他床的佈置不是產品血證 ⇒ 請優先判「理由換成衛生之後，這張票還該不該 merge」
 ---
 
