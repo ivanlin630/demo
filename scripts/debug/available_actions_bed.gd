@@ -618,7 +618,7 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	_cell("_test_p10_reverse_sweep_payload_without_declaration")
 
 
-# 負對照：把 `_action_label(act)` 加回信封那一側 ⇒ 本格紅 ⇒ 待實測
+# 負對照：把 `_action_label(act)` 加回信封那一側 ⇒ 本格紅（在這一段 0 次，實測 1） ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P11：★label 在這條路上只有【一個生產者】（systems 裁 2026-10-01 ②）════════════
 # ★★★為什麼「兩邊都委派到同一張表」不算安全：那只代表它們**今天同值**。
 #   兩份生產者可以各自被改（換成別的表、加前綴、加狀態字），而**同源那一刻的相等

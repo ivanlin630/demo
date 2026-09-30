@@ -3,9 +3,10 @@
 用法（工作區要乾淨；★改動要先 commit 再跑，否則還原會把未 commit 的改動一起帶走）：
     python scripts/debug/available_actions_controls.py
 
-★★★五道控制分別打【五件不同的事】，而每一道都指名它會紅在哪一格：
+★★★六道控制分別打【六件不同的事】，而每一道都指名它會紅在哪一格：
   ①名字的來源（P1c）②條件的唯一持有者（P7）③原因非空（P2）
   ④【行為證】宣告過的入口寫一個欄位（P9）⑤【反向掃】把一個宣告拿掉（P10 必須指名它）
+  ⑥label 的生產搬回信封那一側（P11 唯一生產者）
 ★★而原本的④「具名排除拿掉」已【下架】：排除清單現在是空的（systems 裁 2026-10-01
   維持「機制接電＋清單暫空」）⇒ 它沒有母體可打 ⇒ 床裡那一行留著刪節線與理由，
   ★清單一有名字就把它加回來。
@@ -57,12 +58,18 @@ PURE_NEW = '''	pt.readiness = 0.123   # （負對照：入口寫了一個欄位�
 DECL_OLD = 'const SUBMENU_OPENERS: Array = ["recruit", "gather_intel"]'
 DECL_NEW = 'const SUBMENU_OPENERS: Array = ["recruit"]'
 
+# ⑥★把 label 的生產搬回信封那一側 ⇒ P11 必紅（systems 裁 ② 的附帶條件）
+#   ★兩邊都委派到同一張表 ⇒ 它們今天同值，而【同值】不是【一個生產者】。
+LABEL_OLD = '				act, String(row2.get("label", "")),'
+LABEL_NEW = '				act, _action_label(act),'
+
 CONTROLS = [
     ('①母體換成另一份手抄陣列', '逐字引用', (PCS, NAMES_OLD, NAMES_NEW)),
     ('②把 readiness 條件複製回查詢面', '在查詢面 0 次', (QRY, DUP_OLD, DUP_NEW)),
     ('③某一條的原因清空', 'disabled_reason` 都非空', (PCS, REASON_OLD, REASON_NEW)),
     ('★④宣告過的入口寫一個欄位', '呼它前後世界不變', (PCS, PURE_OLD, PURE_NEW)),
     ('★★⑤把一個宣告拿掉（反向掃要指名它）', '的漏網（指名：["gather_intel"]）', (PCS, DECL_OLD, DECL_NEW)),
+    ('★⑥label 的生產搬回信封那一側', '在這一段 0 次，實測 1）', (QRY, LABEL_OLD, LABEL_NEW)),
 ]
 
 
