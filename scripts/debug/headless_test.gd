@@ -4144,10 +4144,41 @@ func _run_sim_test() -> void:
 	var _actions := _cmd.get_available_actions(state, 1)
 	assert(_actions.has("ignore"), "ignore 永遠可選")
 	assert(_actions.has("attack"), "attack 永遠可選")
-	assert(_actions.has("recruit"), "recruit: coin 足夠時可選")
+	# ★★★【舊語意，2026-10-01 被裁定推翻】—— 兩行原文留著並劃掉，理由寫在這裡：
+	#   ~~assert(_actions.has("recruit"), "recruit: coin 足夠時可選")~~
+	#   ~~assert(not _actions_no_coin.has("recruit"), "recruit: coin 不足時不可選")~~
+	#   ★`recruit` 現在在 `PlayerCommandSystem.SUBMENU_OPENERS` 裡（systems 裁 2026-10-01）：
+	#     **子選單入口的 `enabled` 沒有意義** —— 按下去是【換一層畫面】不是【發生一件事】
+	#     ⇒ 它永遠可做，★★而那不是一個豁免，是它的語意。
+	#   ★★★而新語意是【更好的世界】：舊行為讓錢不夠的玩家**連招募選單都打不開**，
+	#     於是他**看不到價錢** —— 一個「因為買不起所以不給你看價目表」的介面。
+	#   ⇒ 所以：①入口不受 coin 影響（下面那一條，方向【反過來】）
+	#          ②而 coin 真正在守的地方是【選單裡買人的時候】⇒ 改驗 `recruit_anon`
+	#            （它是真的會因為錢不夠而消失的那一個，原因由引擎給）。
+	#   ★而第二行原本那條「coin 足夠時可選」在新語意下【恆真】⇒ 留著它就是一句廢話
+	#     ⇒ 換成 `recruit_anon` 的雙向斷言（★母體含【退化狀態】coin=0，見下面那一段註解）。
+	# ★佈置要走【真實入口】並印出它生效了：`recruit_anon` 除了錢還要對方有無名之人
+	#   （`_target_has_anon` ⇒ `AnonTierSystem.total_pop(tgt) > 0`）。
+	#   ★★而第一版我沒佈置它 ⇒ 正向那一半紅，而**紅的原因是沒有人可招不是沒錢**
+	#     ⇒ 一個紅在錯理由上的斷言會被讀成「錢那條守衛在工作」。
+	if AnonTierSystem.total_pop(state.teams[1]) == 0:
+		AnonTierSystem.add_anon(state.teams[1], AnonCohort.TIER_PLEB, 3)
+	print("  [佈置] 目標隊無名之人 = %d 人｜玩家 coin = %.0f（RECRUIT_COST_ANON = %.0f）" % [
+		AnonTierSystem.total_pop(state.teams[1]),
+		float(_pt_team0.resources.get("coin", 0)), PlayerCommandSystem.RECRUIT_COST_ANON])
+	var _actions2 := _cmd.get_available_actions(state, 1)
+	assert(_actions2.has("recruit"), "招募【入口】永遠列得出來（它是子選單入口不是動作）")
+	assert(_actions2.has("recruit_anon"), "coin 足夠時，匿名招募【這個動作】可選")
 	_pt_team0.resources["coin"] = 0.0
 	var _actions_no_coin := _cmd.get_available_actions(state, 1)
-	assert(not _actions_no_coin.has("recruit"), "recruit: coin 不足時不可選")
+	assert(_actions_no_coin.has("recruit"), "★招募【入口】不受 coin 影響（打開選單不用錢）")
+	assert(not _actions_no_coin.has("recruit_anon"),
+		"★★coin 不足時，匿名招募【這個動作】不可選 —— 錢是在選單裡買人的時候才檢查的")
+	# ★★★而這一段就是 systems 從這次紅學到的那條判準的實作：
+	#   「**兩個版本行為相同**」這種斷言，它的母體必須含【會讓兩者分岔的那些狀態】，
+	#   而那些狀態通常是**退化狀態**（沒錢／沒目標／空清單）。
+	#   ⇒ 本段的退化狀態就是 `coin = 0`，而它現在同時驗【入口不受影響】與【動作受影響】
+	#     —— ★舊版只驗前者的反面，所以它把「入口」與「動作」混成一件事。
 	_pt_team0.resources["coin"] = _orig_coin
 	print("  [OK] get_available_actions: %s" % str(_actions))
 
