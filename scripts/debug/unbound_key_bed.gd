@@ -172,6 +172,7 @@ func _initialize() -> void:
 # ══ P2：母體是【導出】的，而且測的那些真的沒綁 ═════════════════════════════
 # ★★★這一格是整支床的地基（spec §1）：它先跑，因為後面每一格都吃它的母體。
 # 負對照：把 faction 謂詞漏掉 4 個綁定（C／D／E／G）⇒ 異源比對 1 處不一致 ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
+# 負對照：讓 interact 謂詞與機械掃描漂開【一個鍵】（`KEY_Q` 回 false）⇒ 本格紅並指名 `_interact_mode/Q（謂詞=false／掃描=true）` ⇒ 已於 dad4ecf17（2026-10-01 這一輪） 實測紅
 func _test_p2_population_is_derived_not_handpicked() -> void:
 	print("\n── P2 母體導出（不手挑）──")
 	var modes: Array = _modes()
@@ -457,7 +458,7 @@ func _test_p7_not_allowed_says_why() -> void:
 #   專屬強制回應）⇒ 兩個子情境（沒有聚焦目標／聚焦著目標）**必須得到同一句話**。
 #   ★上一版真的有一個 `_interact_target >= 0` 的分支，而它會印「此鍵在此模式無作用」
 #     ⇒ 那一句是錯的話（鍵是綁著的，只是沒有對象）⇒ 本格就是為了它不要回來。
-# 負對照：把 handler 那一句改回呼 `_refuse_unbound_key` ⇒ 本格必紅並指名子情境與鍵 ⇒ 待實測
+# 負對照：把 handler 那一句改回呼 `_refuse_unbound_key` ⇒ 兩個子情境都印「此鍵在此模式無作用」而本格逐一指名（P4 也一起紅 1 個） ⇒ 已於 dad4ecf17（2026-10-01 這一輪） 實測紅
 func _test_p9_bound_letter_without_object_says_a_different_thing() -> void:
 	print("
 ── P9 綁了但現在沒有對象 ⇒ 另一句話 ──")

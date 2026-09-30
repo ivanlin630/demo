@@ -2370,6 +2370,12 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 # ★★★【本區常數一律取大】（棘輪地板；rebase 衝突一律取大）——
 #   往回調會讓守衛閉嘴，而卷面看起來像「衝突解完了」。
 #   ★而上面那一區（`SPEC_UI_STACK_PENDING`）方向【相反：只准變小】⇒ 兩區刻意分開。
+# ★★★【2026-10-01：這個數【沒有】動，而為什麼沒動要寫在卷面上】——
+#   本輪加了一條（P27② 的新擾動：handler 改回呼 `_refuse_unbound_key`），
+#   同時**劃掉**一條（`binds_key` 無條件 `return true` —— 那個擾動已成 production 的樣子
+#   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
+#   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
+#     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
 const CONTROL_FLOOR_UI: int = 28   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
@@ -2909,7 +2915,14 @@ func _test_p26_ui_stack_step1() -> void:
 	_cell("_test_p26_ui_stack_step1")
 
 # 負對照：把 `and not _interact_mode` 加回 auto-enter ⇒ 本格紅（清掉聚焦目標 實測 0／按 A 沒排進佇列） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
-# 負對照：`binds_key` 對 A..Z 無條件 `return true`（＝還原原本那個 bug）⇒ 那一段紅（聚焦目標時按字母【有話說】） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ~~負對照（過期，2026-10-01 同日作廢）：`binds_key` 對 A..Z 無條件 `return true` ⇒ 那一段紅~~
+#   ★★★劃掉的理由：**那個擾動現在【就是 production 的樣子】** —— 謂詞已經靜態化
+#     （`text_ui_main.gd` 的字母分支無條件 `return true`），而 ②那一句改由 handler
+#     自己說 ⇒ 謂詞回什麼都不影響它 ⇒ ★這個擾動已經是 no-op，**不可能紅**。
+#   ⇒ ★★這正是「紀錄行會因為世界改變而過期」那一族：它留在卷面上會讓人以為
+#     這一格還被那道對照守著，而它其實**從那一刻起什麼都沒守**。
+#   ⇒ 不刪、劃掉留理由（被推翻的判準要看得見它為什麼被推翻）。
+# 負對照：handler 那一句改回呼 `_refuse_unbound_key` ⇒ ②那三條紅並印出實測字串「此鍵在此模式無作用（互動）」 ⇒ 已於 dad4ecf17（2026-10-01 這一輪） 實測紅
 # 負對照：信封拿掉 `opens_submenu` 那一欄 ⇒ 那一段紅（沒帶的：["recruit", "gather_intel"]） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
 # ★★★而 ② 那一道第一版【打不到它自己那一格】：我把 `if _interact_target >= 0` 換成 `if false`，
 #   而那讓 `binds_key` 落到「有沒有強制事件」那一條 ⇒ 本段先清了 forced event ⇒ 它照樣回 false
