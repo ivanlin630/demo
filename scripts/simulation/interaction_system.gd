@@ -488,12 +488,24 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 	var atk: TeamData = state.teams[atk_id]
 	var def: TeamData = state.teams[def_id]
 	var gained: Dictionary = {}
+	var coin_before: float = float(def.resources.get("coin", 0))
 	for res in ["food", "material", "goods", "coin"]:
 		var tribute: float = float(def.resources.get(res, 0)) * TRIBUTE_RATE
 		if tribute > 0.0:
 			ResourceBank.add(atk, res, tribute, "extort_in")
 			ResourceBank.add(def, res, -tribute, "extort_out")
 			gained[res] = tribute
+	# ★★★同格勒索的那一半煞車（同一條路，玩家零特殊物理）：
+	#   這一支是 (乙) 玩家發起與 (丙) NPC↔NPC 的【共用】解算點 ⇒ 掛在這裡兩邊都有。
+	#   intensity＝coin 拿走幾成＝TRIBUTE_RATE 0.25 ⇒ 好感 -0.125；
+	#   記憶層 0.25 × 人格乘子要 ≥ 1.2 才過 FEUD_MIN ⇒ 幾乎只有義氣＋好戰都近 1.0 的領袖會結仇。
+	#   ★只看 coin 那一項：比例要有一個分母，而四資源各自的比例不是同一件事
+	#     （拿走糧與拿走錢的「幾成」混算會生出一個沒有意義的數）。
+	if coin_before > 0.0 and atk.leader_id != -1:
+		var def_leader_p: PersonData = state.persons.get(def.leader_id)
+		if def_leader_p != null:
+			_npc_ai.write_memory(def_leader_p, "tributed", atk.leader_id,
+				state.world.current_tick, float(gained.get("coin", 0.0)) / coin_before)
 	_msg.emit_message(state, "extortion",
 		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })

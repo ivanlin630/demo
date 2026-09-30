@@ -376,9 +376,21 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "demand_tribute")
 	state.player_pending_targets.erase(target_id)
 	if resp == "accept":
-		var amount: float = float(tgt.resources.get("coin", 0)) * 0.1  # TEST VALUE
+		var coin_before: float = float(tgt.resources.get("coin", 0))
+		var amount: float = coin_before * 0.1  # TEST VALUE
 		ResourceBank.add(tgt, "coin", -amount, "demand_tribute_out")
 		ResourceBank.add(pt, "coin", amount, "demand_tribute_in")
+		# ★★★濫按索貢的煞車（用戶裁的兩層關係帳）：被索方的領袖記一次 "tributed"
+		#   ⇒ 好感層 -intensity×0.5（煞車本體）；記憶層要過 FEUD_MIN 0.30 才寫 feud 邊，
+		#     而 intensity＝拿走幾成＝0.1 × 人格乘子（上界 1.3）⇒ **小索貢不寫邊是正確行為**。
+		#   ★寫入點放在【執行端】不放在秤裡：秤（`tribute_accept`）會被評估路徑多次呼叫，
+		#     而「真的被拿走了」只發生在這裡。
+		#   ★★`coin_before <= 0` 不寫：拿走 0 不是一件被記得住的事，而 0/0 也算不出比例。
+		if coin_before > 0.0 and pt.leader_id != -1:
+			var def_leader: PersonData = state.persons.get(tgt.leader_id)
+			if def_leader != null:
+				NpcAiSystem.new().write_memory(def_leader, "tributed", pt.leader_id,
+					state.world.current_tick, amount / coin_before)
 		print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
 		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
 	else:

@@ -27,6 +27,13 @@ const TRIBUTE_W_THREAT: float = 0.2     # 兵臨城下壓力（caller 輸入：�
 const TRIBUTE_W_FEUD: float = 0.3       # F-I5 接線：血仇不屈
 const TRIBUTE_W_GRATITUDE: float = 0.2  # F-I5 接線：恩義軟化
 const TRIBUTE_ACCEPT_THRESHOLD: float = 0.1
+# ★★★好感（`p.relations`，兩層關係帳的【好感層】）在決策裡的權重。
+#   它原本是 `_calc_diplomacy_score` 裡的一個 inline `0.15`（結盟那一項）——
+#   本票要在 `tribute_accept` 讀同一個帳，而**一份真相只存一份** ⇒ 提成常數兩處共用，
+#   不手抄第二個數（手抄的那一份會漂：下一次有人改只會改到一邊）。
+#   ★★而它**刻意不與 `TRIBUTE_W_FEUD` 共用**：藍圖裁「決策讀兩項，權重各自獨立可改」
+#     —— 好感層（小事、線性、會回中）與記憶層（大事、飽和、帶原因）是兩個帳。
+const RELATION_W_AFFINITY: float = 0.15
 const TRIBUTE_POWER_R_CAP: float = 3.0
 
 # T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
@@ -58,6 +65,17 @@ static func tribute_accept(state: WorldState, defender: TeamData, aggressor: Tea
 		+ survival * TRIBUTE_W_SURVIVAL + leader.fear * TRIBUTE_W_FEAR \
 		+ clampf(threat, 0.0, 1.0) * TRIBUTE_W_THREAT \
 		+ flee_desperation   # 閘5：逃跑絕境屈服傾向（義氣/膽識高可抵銷 → 邊逃邊拒）
+	# ★★★好感項（本票的煞車出口）：被反覆索貢的人對索貢者的好感會往下掉（`_update_relations`
+	#   的 "tributed" 那一列），而**在本票之前沒有人在這裡讀它** ——
+	#   `p.relations` 全庫只有一個讀者（`_calc_diplomacy_score` 的結盟項）
+	#   ⇒ 屈不屈服完全沒讀好感 ⇒ 煞車的載體【沒接電】。這一行就是接電。
+	#   ★負好感 ⇒ score 下降 ⇒ 濫按到某一次開始被拒；★而第幾次翻**不釘**（床印序列）。
+	var affinity: float = 0.0
+	if aggressor.leader_id != -1:
+		affinity = float(leader.relations.get(aggressor.leader_id, 0.0))
+	score += affinity * RELATION_W_AFFINITY
+	# ★★`score_no_edge` 的語意是【沒有 typed 邊時的分數】⇒ 好感【算在它裡面】：
+	#   好感不是邊，而下面那個 edge_flipped 探針要量的正是「邊翻不翻得動」這一件事。
 	var score_no_edge: float = score
 	var had_edge: bool = false
 	if aggressor.leader_id != -1:
@@ -68,6 +86,13 @@ static func tribute_accept(state: WorldState, defender: TeamData, aggressor: Tea
 		had_edge = feud_i > 0.0 or grat_i > 0.0
 	if Probe.enabled:
 		Probe.bump("rel.tribute_eval")
+		# ★★★score_no_edge 要能被床讀到（spec P2′ 的母體地板 (b)）：
+		#   「20 次裡至少一次拒絕」在一個 score 太高的世界裡永遠不會發生，
+		#   而那一格的卸面會長得跟「煞车沒接上」一模一樣。
+		#   ★用 add_amount（累計）＋rel.tribute_eval（次數）：床自己相減再除
+		#   ⇒ 印出來的是【每一次的值】不是累計（累計直接跟門檻比是已經犯過的誤判）。
+		Probe.add_amount("tribute.score_no_edge_sum", score_no_edge)
+		Probe.add_amount("tribute.affinity_sum", affinity)
 		if had_edge:
 			Probe.bump("rel.tribute_with_edge")
 			if (score > TRIBUTE_ACCEPT_THRESHOLD) != (score_no_edge > TRIBUTE_ACCEPT_THRESHOLD):
@@ -118,7 +143,7 @@ func _calc_diplomacy_score(state: WorldState,
 		resource_need * 0.3 +
 		power_gap     * 0.2 +
 		rep           * 0.2 +
-		relation      * 0.15 +
+		relation      * RELATION_W_AFFINITY +
 		self_peace    * 0.15 +
 		gift_term,
 		0.0, 1.0)

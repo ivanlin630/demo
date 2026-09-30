@@ -114,8 +114,14 @@ func _write_relation_edge(p: PersonData, type: String, subject_id: int,
 		tick: int, intensity: float) -> void:
 	# G2a additive：對齊 _trigger_goals 映射，填 typed 邊。reader 在 G2b/G2d。
 	match type:
-		"betrayal", "looted", "special_taxed", "rejected_aid":
+		"betrayal", "looted", "special_taxed", "rejected_aid", "tributed":
 			# A feud：改走 form_feud（severity×個性 gate）。bump 移進 form_feud（不雙計）。
+			# ★★★"tributed" 刻意【不在 FEUD_SEVERITY 表裡】——下面那個 `.get(type, intensity)`
+			#   在表裡找不到名字時會用【傳進來的 intensity】＝這一次真的拿走幾成
+			#   ⇒ 十次小索貢與一次大索貢的 severity 因此【不同】（進表就會被靜默換成固定值）。
+			#   ⇒ 索貢的嚴重度（遠程 0.1／同格 0.25）× 人格乘子（上界 1.3）幾乎一定不過
+			#     FEUD_MIN 0.30 ⇒ **不寫邊是正確行為**（小事不入記憶＝用戶裁的兩層關係帳）；
+			#     煞車的本體在 `_update_relations` 的好感那一列，不在這裡。
 			NpcAiSystem.form_feud(p, subject_id, FEUD_SEVERITY.get(type, intensity), tick)
 		"kindness", "aided_in_battle", "benefactor":
 			RelationGraph.add_edge(p.relation_edges, "gratitude", subject_id, intensity, tick)
@@ -141,9 +147,19 @@ func _update_relations(p: PersonData, type: String,
 		"rejected_aid":      delta = -intensity * 0.5   # ★同族：三個寫入點都落進 `_`
 		"benefactor":        delta =  intensity * 0.4   # ★受援＝善意，同 kindness 的係數
 		"aided_in_battle":   delta =  intensity * 0.5
+		"tributed":          delta = -intensity * 0.5   # ★煞車的本體（係數同 special_taxed，零新常數）
 		_:                   delta = 0.0
 	var cur: float = float(p.relations.get(subject_id, 0.0))
 	p.relations[subject_id] = clampf(cur + delta, -1.0, 1.0)
+	# ★★這一段是【好感層】：小事直接加減、不記原因、門檻之前無條件執行
+	#   ⇒ 用戶裁的兩層關係帳（「小恩小怨的直接在好感做加減 不入記憶 大恩大怨才入記憶」）。
+	#   ★而「好感會回中」（衰減）**本票不做** —— 藍圖裁成另一張票（先量各 type 的邊齡分佈）。
+	#   ★★累積法刻意與 typed 邊【不同】：這裡是線性 clamp，邊那邊是飽和疊加；
+	#     兩層的累積法本來就不該統一（飽和留給大事）。
+	# ★★★母體：好感一直有人在寫，而它【從來沒有任何 tap】⇒ 這一支是本票照到的盲點，
+	#   不是本票製造的（全量暫態可觀測性）。零值不 bump：否則母體會被 `_` 那一支灌滿。
+	if Probe.enabled and delta != 0.0:
+		Probe.bump("affinity.delta." + type)
 
 func _trigger_goals(p: PersonData, type: String, subject_id: int) -> void:
 	match type:
