@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 死輸入探索床(131步/115症狀/5成因) — R²
 topic: verdict=CLEAN。★★★①最優先項核過三件全部成立,而且不是只信他的敘述——我自己用git log -S逐一查出三件症狀各自對應一顆獨立、早於本票、有自己日期的真fix commit(①05befff7f 2026-09-24 recruit_anon交付修 ②8db72046a propose_alliance修好 ③a56c7389a #7強制事件面板三行人話——②③這兩顆我在本session稍早已親自審過verdict=CLEAN),不是母體或白名單巧合改動;老樹run機制核過真的執行舊production code(相容層set_player_forced_event的has_method分支證明);老樹worktree核過已移除且無殘留commit｜②核過今天那句「接受同盟,加入勢力0」是真的新句子(對得上8db72046a落地的字面,不是舊句子搬位置)｜第二問(有沒有第四次母體錯):查了P3(target kind今天真走none+team兩種)和P4(forced回應真動態走get_forced_response_options全集不是只測accept)兩個維度,都真的走滿,沒找到未揭露的第四次;51vs55的登記口徑已誠實列出不是藏起來｜兩個判準:expect不釘症狀筆數,同意(結構閘vs產品飄移,跟本session稍早幾票的doctrine一致);(e)具名豁免清單核過三項各自有獨立理由且寫在code裡,沒看出會吞真缺陷的縫,demand_tribute那條是防禦性列名附非阻塞備註
 ---
