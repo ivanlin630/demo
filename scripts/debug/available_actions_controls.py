@@ -81,7 +81,7 @@ CONTROLS = [
     ('★④宣告過的入口寫一個欄位', '呼它前後世界不變', (PCS, PURE_OLD, PURE_NEW)),
     ('★★⑤把一個宣告拿掉（反向掃要指名它）', '的漏網（指名：["gather_intel"]）', (PCS, DECL_OLD, DECL_NEW)),
     ('★⑥label 的生產搬回信封那一側', '在這一段 0 次，實測 1）', (QRY, LABEL_OLD, LABEL_NEW)),
-    ('★★⑦抽取式的範圍限定拿掉（多吞方向）', 'TODO-EXPECT', (BED_F, SCOPE_OLD, SCOPE_NEW)),
+    ('★★⑦抽取式的範圍限定拿掉（多吞方向）', '多吞的：["action → _fe_action", "response_label → _label_pre"]', (BED_F, SCOPE_OLD, SCOPE_NEW)),
 ]
 
 
