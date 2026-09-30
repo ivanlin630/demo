@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：那筆稽核紅的真因不是「那一步寫錯」，是它繞過一個已存在的唯一入口 —— 而全庫還有 4 處同類【沒人測過】｜★★本票真正的價值在 P3：去construct那四處的同樣情境｜★不准整批改成 set_leader 了事
 ---
 
