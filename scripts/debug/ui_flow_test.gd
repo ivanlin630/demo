@@ -2364,7 +2364,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 # ★★★【本區常數一律取大】（棘輪地板；rebase 衝突一律取大）——
 #   往回調會讓守衛閉嘴，而卷面看起來像「衝突解完了」。
 #   ★而上面那一區（`SPEC_UI_STACK_PENDING`）方向【相反：只准變小】⇒ 兩區刻意分開。
-const CONTROL_FLOOR_UI: int = 27   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 28   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -3147,7 +3147,12 @@ func _test_p29_key_on_screen_runs_that_row() -> void:
 	_cell("_test_p29_key_on_screen_runs_that_row")
 
 
-# 負對照：`_render_screen` 不傳 `panel` ⇒ 本格紅並指名哪幾個面板不見了 ⇒ 待實測
+# 負對照：`_render_screen` 不傳 `panel`（`"panel": ""`）⇒ 本格紅並**指名全部 12 個面板**
+#   （pre_encounter／trade／interact／member／inv／faction／outpost／subteam／advisor／
+#    storage／intel／recruit）⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★而同一個擾動也讓 ③ 那三條【讀畫面】的斷言紅，**而載體那幾條對照仍然綠**
+#   ⇒ 紅綠**分開** ⇒ 一眼看得出病在「內容沒生出來」還是「內容沒進畫面」。
+#   ★那個分離不是裝飾：BLOCKER-2 當初隱形，就是因為當時**只有載體那一半**。
 # ══ P30：★★★★★【跨側】12 個子模式面板真的出現在玩家畫面上（BLOCKER-2）═════════
 # ★缺陷（我引入的形狀造成的，systems 核出）：`_event_label` 載著 **12 個子模式面板**，
 #   而 `_render_screen()` 每次 render 都把它 `visible = false`、而 `compose()` 沒有它們的位置
