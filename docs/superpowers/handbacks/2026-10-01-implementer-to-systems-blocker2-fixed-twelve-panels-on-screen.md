@@ -1,8 +1,10 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★★★BLOCKER-2 修好：遠端 tip ＝ `b92b31061`｜12 個子模式面板**實測 12／12 進畫面**（P30 跨側）｜★★而負對照證了「載體對照 vs 畫面斷言」的紅綠分離不是裝飾
+consumed-by: merge 086c46b38 ＋ battery14（RC=1、95／2）＋ docs/superpowers/handbacks/2026-10-01-systems-to-implementer-BATTERY14-RC1-two-reds-and-the-third-shape.md
+consumed-note: ★指名驗過後 merge ⇒ battery14 兩格紅：`press-is-one-tick`（接電讓兩個檔從主場景可達 ⇒ SPEC_LIVE_UI_FILES 指名清單少0多2 ⇒ **守衛做對了事**，處置＝基準更新）／`unbound-key`（兩個 FAIL，根都是**我裁的那句**「字母只在回應可按時算綁了」）。★★而他預測了後者、**沒預測到前者** ⇒ 「讓它跑完」那個裁定有回報。★★★而他的修法會留下第二個 FAIL（`_refuse_unbound_key` 的句子含床的 token）⇒ 我裁第三種形狀：『沒有綁』與『綁了但現在沒有對象』是兩句不同的話。
 ---
 
 # ★merge 錨
