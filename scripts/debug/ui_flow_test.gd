@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -107,6 +107,7 @@ func _initialize() -> void:
 	await _test_p23_response_settles_on_press()
 	await _test_p24_number_keys_never_mean_response()
 	await _test_p25_letter_key_only_in_interact_mode()
+	await _test_p26_ui_stack_step1()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2334,6 +2335,9 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ★★★要知道「哪些格貢獻了這個數」⇒ 去 grep 那個形狀，不要讀這裡。
 #   ⇒ systems 裁 2026-09-30：不要把落後那份補上，是讓它【不必存在】
 #     （這一族當天第三次：一個事實有兩份記錄，而只有一份會被維護）。
+# ★★★【本區常數一律取大】（棘輪地板；rebase 衝突一律取大）——
+#   往回調會讓守衛閉嘴，而卷面看起來像「衝突解完了」。
+#   ★而上面那一區（`SPEC_UI_STACK_PENDING`）方向【相反：只准變小】⇒ 兩區刻意分開。
 const CONTROL_FLOOR_UI: int = 21
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
@@ -2346,7 +2350,16 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 # ★UI 的 mode 數（＝`_handle_*_mode(keycode` 這一族）。P25 的母體地板拿它比對。
 #   ★★它是【spec 側的數】：動工時我用 grep 數過 13 個；有人新增一個 mode 而沒有
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
+# ★★★【本區常數只准變小】（systems 裁 2026-10-01）—— 一條「按位置記住」的規矩，
+#   它的邊界要寫在那個位置上，否則下一個解衝突的人不會知道有兩種相反的方向。
+#   ★★而取錯邊的長相是「衝突解完了」（沒有紅）⇒ 這一行就是給那個人看的。
 const SPEC_UI_MODE_COUNT: int = 13
+# ★P26（版面 v2 步 1）：尚未收進 `_ui_stack` 的旗標支數 —— 2026-10-01 量到 11。
+#   ★★方向是【只准變少】：變多 ＝ 有人又加了一支平坦旗標而沒收進 stack。
+#   ★★★而它【靜止】也要看得見 ⇒ 卷面每次都印那個數與具名清單（systems 裁 2026-10-01）。
+#   ★而它刻意【不放在棘輪那幾個常數旁邊】：那一區是 rebase 的衝突熱點
+#     （棘輪衝突一律取大），把一個【只准變少】的常數放進去會讓兩種方向混在同一處。
+const SPEC_UI_STACK_PENDING: int = 11
 const CONTROL_FLOOR_DVO: int = 2  # decision_vs_outcome_bed（分開講／具名例外）
 const CONTROL_FLOOR_AVAIL: int = 8  # available_actions_bed（五道：母體換手抄／條件複製回查詢面／原因清空／★入口寫一個欄位(P9 行為證)／★★把一個宣告拿掉(P10 反向掃要指名它)／★★★label 加回信封側(P11 唯一生產者)／★★抽取式範圍限定拿掉(多吞方向的地板)／★★★入口那一格關掉(P12 退化狀態,battery10 血證)；★原本的「排除拿掉」那一道母體是空的＝systems 裁維持「機制接電＋清單暫空」，見床裡劃掉那一行）
 const CONTROL_FLOOR_STRINGS: int = 2  # scripted_exploration_bed 的字串兩格（P11 表覆蓋／P12 零英文）
@@ -2731,6 +2744,128 @@ func _test_p25_letter_key_only_in_interact_mode() -> void:
 		node.set(String(m3), false)
 	await _free_ui(node)
 	_cell("_test_p25_letter_key_only_in_interact_mode")
+
+# ══ P26：★★★展開層堆疊【步 1】（spec §2⑥；systems 裁 2026-10-01）═══════════════
+# ★母體 ＝ `PlayerCommandSystem.SUBMENU_OPENERS`（引擎側宣告）與
+#   `TextUiMain.UI_STACK_LAYERS`（UI 側宣告）—— ★★**兩份獨立宣告**，本格是那個【觀察者】：
+#   同源就不是比較（是一句話講兩次），異源而沒有人比較則差異沒有觀察者。
+# ★★而「零隱藏模式」在本票只【部分成立】：其餘旗標就地標記 `ui-stack-pending:`
+#   ⇒ 本格把它的**個數印在卷面上** —— ★★★它下降是進度，而它**靜止也要看得見**
+#     （否則步 2 會變成一件沒有人負責的事）。
+func _test_p26_ui_stack_step1() -> void:
+	_selftest_gate("_test_p26_ui_stack_step1").noop()
+	print("\n── P26 展開層堆疊（步 1：只收 SUBMENU_OPENERS 那兩個）──")
+	var node = await _make_ui()
+
+	# ①兩份獨立宣告的集合相等（★雙向差集都要指名）
+	var ui_side: Array = []
+	for x in node.UI_STACK_LAYERS:
+		ui_side.append(String(x))
+	var eng_side: Array = []
+	for y in PlayerCommandSystem.SUBMENU_OPENERS:
+		eng_side.append(String(y))
+	var only_ui: Array = []
+	for a in ui_side:
+		if not eng_side.has(a):
+			only_ui.append(a)
+	var only_eng: Array = []
+	for b in eng_side:
+		if not ui_side.has(b):
+			only_eng.append(b)
+	print("   UI 側宣告 ＝ %s｜引擎側宣告 ＝ %s" % [str(ui_side), str(eng_side)])
+	print("   ★雙向差集：只在 UI ＝ %s｜只在引擎 ＝ %s" % [str(only_ui), str(only_eng)])
+	_check("★母體地板：兩份宣告都不是空的（空 ⇒ 下面的相等恆真）",
+		not ui_side.is_empty() and not eng_side.is_empty())
+	_check("★★★兩份獨立宣告集合相等（只在 UI：%s／只在引擎：%s）" % [
+		str(only_ui), str(only_eng)], only_ui.is_empty() and only_eng.is_empty())
+
+	# ②★賦值真的生效 —— 防「只有 get 的計算屬性 ⇒ 靜默 no-op」
+	#   ★★血證（別票）：`TeamData.population` 是只有 get 的計算屬性，
+	#     對它賦值是靜默 no-op ⇒ 一支床的前提「從來沒有被佈置」卻照樣綠。
+	_check("★前提：起始深度是 0（%d）" % node._ui_depth(), node._ui_depth() == 0)
+	node._intel_mode = true
+	print("   `_intel_mode = true` 之後：深度 %d｜頂層 `%s`" % [
+		node._ui_depth(), node._ui_top()])
+	_check("★★★賦值真的做事了（深度 0 → 1；沒動 ⇒ setter 是靜默 no-op）",
+		node._ui_depth() == 1)
+	_check("★★頂層就是那一層（`%s`）" % node._ui_top(), node._ui_top() == "gather_intel")
+	_check("★getter 與堆疊同源（`_intel_mode` 讀回 true）", bool(node._intel_mode))
+	node._intel_mode = false
+	_check("★★設回 false 之後深度回 0（%d）" % node._ui_depth(), node._ui_depth() == 0)
+
+	# ③Esc 只回【一層】：先疊兩層，pop 一次 ⇒ 深度 −1（不是清空）
+	node._ui_push("recruit")
+	node._ui_push("gather_intel")
+	var d0: int = node._ui_depth()
+	var popped: String = node._ui_pop()
+	print("   疊兩層 ⇒ 深度 %d；pop 一次 ⇒ 彈掉 `%s`、深度 %d" % [
+		d0, popped, node._ui_depth()])
+	_check("★母體地板：真的疊到兩層（%d）" % d0, d0 == 2)
+	_check("★★★pop 一次 ＝ 深度 −1（不是清空；實測 %d）" % node._ui_depth(),
+		node._ui_depth() == d0 - 1)
+	_check("★彈掉的是【頂層】那一個（`%s`）" % popped, popped == "gather_intel")
+	while node._ui_depth() > 0:
+		node._ui_pop()
+
+	# ④★走【按鍵】進招募層再按 Esc（不是直接呼 API —— 那只測得到我自己那支函式）
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	_check("★母體地板：找到同格目標（-1 ⇒ 下面按不到招募那一列）", tgt_id != -1)
+	node._bridge.refresh_interaction_targets()
+	node._interact_mode = true
+	node._interact_page = 0
+	node._interact_target = tgt_id
+	node._refresh()
+	var team_acts: Array = node._interact_action_split()["team"]
+	var idx: int = -1
+	for i in range(team_acts.size()):
+		if String(team_acts[i].get("action_id", "")) == "recruit":
+			idx = i
+			break
+	print("   招募在 team 清單的第 %d 列（共 %d 列）" % [idx, team_acts.size()])
+	_check("★母體地板：招募那一列在清單上（-1 ⇒ 按不到 ⇒ 下面兩條沒有主詞）", idx >= 0)
+	if idx >= 0 and idx < 9:
+		node._handle_interact_mode(KEY_1 + idx)
+		print("   按 [%d] 之後：深度 %d｜頂層 `%s`｜`_recruit_mode`=%s" % [
+			idx + 1, node._ui_depth(), node._ui_top(), str(node._recruit_mode)])
+		_check("★★★按鍵進招募層 ⇒ 深度 ＝ 1（實測 %d）" % node._ui_depth(),
+			node._ui_depth() == 1)
+		var before: int = node._ui_depth()
+		node._handle_recruit_mode(KEY_ESCAPE)
+		print("   按 Esc 之後：深度 %d（按前 %d）" % [node._ui_depth(), before])
+		_check("★★★Esc 只回一層 ⇒ 深度 −1（%d → %d）" % [before, node._ui_depth()],
+			node._ui_depth() == before - 1)
+
+	# ⑤★`ui-stack-pending:` 的個數（母體印在卷面；★數【行首】不是「含有」）
+	#   ★★★血證 2026-10-01：`grep -c 'ui-stack-pending:'` 回 13 而真的標記只有 11 ——
+	#     多出來的兩處是**描述這個標記的註解**（同一族今天第四次）⇒ 判準要錨在行首。
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var pending: Array = []
+	var loose: int = 0
+	for l in src.split("\n"):
+		if l.begins_with("# ui-stack-pending:"):
+			pending.append(l.substr(20).strip_edges().split(" ")[0])
+		elif l.contains("ui-stack-pending:"):
+			loose += 1
+	print("   ★尚未收進 stack ＝ %d 支（具名）：%s" % [pending.size(), str(pending)])
+	print("     ★★而「含有這個字樣」的行有 %d 行不是標記（＝描述規則的註解）" % loose)
+	print("     ⇒ 判準錨在【行首】；今天這一族第四次（另三次：registry 對齊空格／")
+	print("       `: bool` 的空白／P5 對整份檔裸搜會命中描述規則的註解）。")
+	_check("★母體地板：真的數到標記（0 ⇒ 抽取壞了，而那會讓進度看起來已經做完）",
+		pending.size() > 0)
+	_check("★★★尚未收進 stack 的支數沒有變多（%d ≤ %d）—— ★下降是進度，靜止也要看得見"
+		% [pending.size(), SPEC_UI_STACK_PENDING], pending.size() <= SPEC_UI_STACK_PENDING)
+	await _free_ui(node)
+	_cell("_test_p26_ui_stack_step1")
 
 
 
