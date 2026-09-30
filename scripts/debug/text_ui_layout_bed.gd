@@ -48,6 +48,7 @@ func _code_only(src: String) -> String:
 	return out
 
 
+# 負對照：在別處再寫一次 120 ⇒ 本格紅（實測 2） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
 # ══ P3a：★`120` 在版面這條路上只有一份（spec §3 P3／§6② 保留的那一半）════════
 # ★母體地板：每一個檔都要真的讀到（讀不到 ⇒ 計數少算 ⇒ 這一格會假綠）。
 func _test_p3a_cols_has_one_source() -> void:
@@ -76,7 +77,7 @@ func _test_p3a_cols_has_one_source() -> void:
 	_cell("_test_p3a_cols_has_one_source")
 
 
-# 負對照：把 `display_width` 換成 `return s.length()` ⇒ 本格紅 ⇒ 待實測
+# 負對照：把 `display_width` 換成 `return s.length()` ⇒ 本格紅（純全形 期望 10 實得 5） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
 # ══ P3b：★★★寬度算法【定樁】—— 餵 N 全形 ＋ M 半形 ⇒ 精確等於 2N+M（§6②）════
 # ★★期望值來自【算術】不是來自任何 code ⇒ 它與被測物**不同源**
 #   （「比較的兩邊同源 ⇒ 恆真」那一族的正面版本）。
