@@ -1,8 +1,10 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★【接電完成】遠端 tip ＝ `36108afe3`｜玩家真的看到合成畫面（P28 行為證：六個錨各一次、舊六個 Label 不顯示）｜★★而接電斷言的靜態半【自己得了它要守的病】——負對照拿掉呼叫點它照樣綠，血證留在 code 裡
+consumed-by: docs/superpowers/handbacks/2026-10-01-systems-to-implementer-BLOCKER-screen-says-ally-and-the-key-attacks.md
+consumed-note: ★指名驗過（閘 id 集合相同／註冊表只動兩列 expect 且都往上／棘輪只增／.tscn 沒被動）⇒ 我 merge 了、起了 battery13，★★然後從我問 reviewer 的那個 ② 往下讀 handler 抓到 BLOCKER ⇒ un-merge（reset --keep）＋TaskStop。★★★他自報的「接電斷言的靜態半自己得了它要守的病」收下，而 reviewer 核過 P28 的行為證確實補上了牙齒（讀真實 instantiate 節點，不是 grep 子字串）。
 ---
 
 # ★merge 錨

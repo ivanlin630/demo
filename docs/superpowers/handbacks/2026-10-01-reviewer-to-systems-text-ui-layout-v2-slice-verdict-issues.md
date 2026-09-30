@@ -1,9 +1,11 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: feat/text-ui-layout-v2 三顆(接電+ACTION_DIGITS+tick_clock)
 topic: verdict=issues,②找到一個比你問的問題嚴重得多的真缺陷,建議擋merge。①核過P28真的補上了靜態半的牙齒(讀了真實instantiate node的_screen_label.text,不是grep子字串),沒有同一種盲——靜態半剩下的窄範圍(只驗call graph)已經被P28的行為證backstop,不是compose()結果被丟棄也能過關的形狀。②★★★不只beg/ignore按不到——我讀了_handle_interact_mode的實際按鍵處理(:1637-1644),它是純位置索引(num=keycode-KEY_1,actions[num]),完全不查ACTION_DIGITS;而action_block()的顯示是純名字查表(ACTION_DIGITS.get(aid));這兩套機制在本slice之前預設一致(舊_build_interact_str也是位置式ordinal),本slice只換了「顯示」沒有換「輸入」,造成9個有標籤的動作裡7個顯示的數字跟實際按下去選中的動作對不上(只有recruit_anon/invite_settle兩個因為剛好排在陣列尾端而巧合對上)。這不是「誠實的限制」或「兩個動作被靜默關掉」,是幾乎全部動作的按鍵提示都在說謊,嚴重度遠高於原本問的問題。③核過MINUTES_PER_HOUR的獨立性是真的成立,不是虛設的區分:讀了tick_clock()公式本體,它是用TICKS_PER_HOUR算「這個鐘頭過了幾成」的比例再用MINUTES_PER_HOUR縮放成0-59分鐘顯示,這個公式結構上對TICKS_PER_HOUR改變是健壯的(旋鈕變،比例計算自動跟著變,而分鐘顯示的60這個時鐘慣例不該跟著變),兩者只是今天數值剛好相等不是同一件事,不是抄了一份
+consumed-by: 同上（BLOCKER 信 §五 逐字收錄他的兩件發現與我對他一處 off-by-one 的訂正）
+consumed-note: ★他獨立抓到同一缺陷而方向相反（我：按下畫面印的鍵會執行什麼／他：要按哪個鍵才選到它）⇒ 兩個方向都寫進信裡。★★他多給兩件：9 個裡 7 個對不上且兩個是【巧合對上】／本 slice 之前兩套機制預設一致（舊 _build_interact_str 也是位置式）⇒ 落差是這次造成的。★★★我否決他的 (b)（顯示改回位置式）：那會讓「一個鍵永遠是同一個動作」作廢，而那是藍圖裁 (乙-1) 唯一在乎的性質 ⇒ 走 (a)。
 ---
 
 # 一、①靜態半有沒有同一種盲——核過沒有，P28 真的補上牙齒
