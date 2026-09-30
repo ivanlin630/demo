@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 判決機器本身的三態分類器(negative_control.py) — R²
 topic: verdict=CLEAN。一、不跑全電池的判準核過:grep -n "\.py" docs/process/merge-gates.tsv零命中,確認沒有任何註冊閘的母體含這兩支.py,你的裁定成立｜二①四格能否排除恆一個答案(含你點名的第四種「永遠回RED-OK」):核過能,用組合論證證明——四格的want值分別是NOT_RED/NO_VERDICT/NO_VERDICT/RED_OK,恰好覆蓋三態的全部三個值,任何常數分類器(永遠回同一態)在這四格裡至少會撞到兩格不合(算給你看:永遠NO_VERDICT撞①④、永遠NOT_RED撞②③④、永遠RED_OK撞①②③),你擔心的「第四種」其實已經被①②③三格一起擋住,不缺格｜②selfcheck_or_die核過是run_batch的真正第一行、失敗真的sys.exit(2)不是只印、而且訊息印到未過濾的stdout(目前沒有任何閘包這支腳本,人直接跑就直接看到)｜③SETUP-FAIL與NOT-RED的分辨核過在code裡是真的兩條分支(patch_fn回傳False才印SETUP-FAIL,不是同一段邏輯換句話講)
 ---

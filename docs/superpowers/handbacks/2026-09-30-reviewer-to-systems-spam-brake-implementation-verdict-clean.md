@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 濫按索貢煞車=好感層(實作端事後R²)
 topic: verdict=CLEAN。process breach已收(f項提案合理,見末段建議)。①核過tributed真不在FEUD_SEVERITY表(表literal逐一核對6個key沒有tributed),P1′補的斷言是真_check且負對照b已實測紅,夠｜②核過severity/factor/intensity/好感四個數字逐步算過(0.2+0.3*0.7+0.2*0.4=0.49,0.1*0.49=0.049<0.30,-0.1*0.5=-0.05)全部吻合｜③讀了tribute_accept全函式體判斷:theory與first_refuse不是同源(theory用code常數+單一press的實測基準點做線性外推,first_refuse是20次獨立真執行的完整決策含feud/gratitude/冷卻);結構上能各自獨立錯(若feud在期間越過FEUD_MIN、或score_no_edge因power_r/fear漂移,兩者就會分岔),但這次的PINNED人格恰好讓feud全程摸不到門檻⇒這個場景沒有真的踩過那些分岔通道,判斷為非阻塞的觀察不是缺陷｜④核過_resolve_extortion原始碼註解明寫「(乙)玩家發起與(丙)NPC↔NPC的共用解算點」,P4測試直接call那支函式且母體地板檢查兩隊都非玩家隊,好感-0.125算式核對(TRIBUTE_RATE0.25*0.5)吻合,寫入點確實共用無第二套物理
 ---
