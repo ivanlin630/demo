@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 第三類落地：宣告在一處 ＋ 行為證 ＋ 反向掃（三件都接電）｜床 9／9、五道負對照全紅｜★★★反向掃第一次跑就咬到【判準少一格】＋兩個母體錯，三件都留在卷面上
 ---
 
