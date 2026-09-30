@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審（spec）：動作全列＋原因 —— 把 `enabled`／`disabled_reason` 從【恆空】接起來｜★這**不是**版面票（版面在等用戶看稿），它是前置且自己就有價值
 ---
 
