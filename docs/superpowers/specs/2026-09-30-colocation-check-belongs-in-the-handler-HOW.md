@@ -84,7 +84,7 @@ P4 全電池 BATTERY_RC=0
 ```
 
 ~~**附：爆炸半徑收窄**：`execute_action_with_target` 吃 Dictionary ⇒ 本閘的爆炸半徑就是 `execute_action` 這一條。~~
-★★★**這句是錯的（R² 2026-09-30 抳倒）—— 見 §7。**
+★★★**這句是錯的（R² 2026-09-30 抓倒）—— 見 §7。**
 
 ## §6 attack 納入（量出來的數字決定）
 
@@ -102,7 +102,7 @@ P4 全電池 BATTERY_RC=0
 
 ---
 
-## ★★★§7 第三個管道：`recruit_named`（R² 抳倒我的負斷言，納入本票同一顆 commit）
+## ★★★§7 第三個管道：`recruit_named`（R² 抓倒我的負斷言，納入本票同一顆 commit）
 
 **我在 §5 寫「`execute_action_with_target` 不在爆炸半徑內」—— 那是錯的。我開檔重核了**：
 
