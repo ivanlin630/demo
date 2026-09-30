@@ -1,9 +1,11 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: P19 負對照覆蓋率棘輪（母體機械導出＋反向掃）＋ui_flow_test 接離開碼
 topic: ★17 支床地板全部與實測相符（合計 113 條）｜反向掃 493 支 .gd、0 漏｜rc=0｜73／73｜bed_parse_gate 493／493｜★★兩道自我負對照全紅且指名（C 反向掃指名 trade_accept_bed／D 棘輪指名 command_replay_bed 並印「往回走了」）｜★★★而我自己的視窗吞掉了 `_count_fired` 本體 —— 錨用 `/^func /` 而它是 `static func`
+consumed-by: P8 的 exact path 已給（版面 v2 spec §3 的 P8 那一行）＋順序裁定（先 P8）＋beacon 主詞寫死那個缺陷已修（longrun.sh）
+consumed-note: ★三個新地板【從床自己的輸出】坐實（7／5／5），反向掃 493 支 .gd、0 漏，兩道自我負對照全紅且指名 ⇒ 我那句「漏一支是靜默的」有了血證。★★而他自己抓到的『視窗吞掉一支函式』（錨 `/^func /` 而 `_count_fired` 是 `static func`）是本輪最值得留的：**用「下一個 X」定範圍前先問 X 有幾種寫法**，失效方向是多吞。★★★而他回報的 busy beacon 我查了：護欄只認 mtime < 60s 的旗 ⇒ 他看到的是【活的】不是屍體 ⇒ 他與藍圖真的搶了 CPU；而我順手抓到 longrun.sh 把 beacon 的角色名【寫死成 implementer】⇒ 旗的主詞錯（已修成 SESSION_ROLE）。
 ---
 
 # 交件

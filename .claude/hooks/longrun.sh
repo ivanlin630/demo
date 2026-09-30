@@ -17,7 +17,16 @@
 #   最壞情況是「這段期間警報被壓住」，不是「永久靜音」—— ★所以死線要給緊，別給 8h。
 set -u
 ROOT="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
-BEACON="$ROOT/.claude/hooks/.busy.implementer"
+# ★★★【主詞修正，systems 2026-10-01】beacon 的角色名原本【寫死成 implementer】——
+#   而 `bash-guard.sh` 的護欄逐字是「**別人的** beacon 還在」：它靠檔名 `.busy.<role>` 認主詞。
+#   ⇒ ★任何【不是 implementer】的角色用這支包裝跑長跑，蓋出來的章都會寫 implementer
+#     ⇒ ①那個角色自己**不會**被自己的旗擋（它以為那是別人的？不 —— 更糟：
+#       implementer 會被一面**不是他的**旗擋住，而真正在跑的人**不會**被任何人看見）
+#     ⇒ ②警報指向錯的人 ⇒ 去問 implementer「你在跑什麼」而他手上什麼都沒有。
+#   ⇒ ★★這是「旗裡的主詞錯」那一族（同 machine-busy 那次：旗裡是 bash $$ 不是 Windows pid）。
+#   ⇒ ★★★而它的失效是**靜默**的：兩邊都不報錯，只是警報指著一個沒有在跑的人。
+#   ★沒有 SESSION_ROLE 時退回 `unknown`（**不要**退回 implementer —— 那正是這個 bug 的形狀）。
+BEACON="$ROOT/.claude/hooks/.busy.${SESSION_ROLE:-unknown}"
 HOURS="${1:?用法: longrun.sh <小時數> <指令...>}"; shift
 DEADLINE=$(( $(date +%s) + $(awk -v h="$HOURS" 'BEGIN{printf "%d", h*3600}') ))
 echo "$DEADLINE" > "$BEACON"
