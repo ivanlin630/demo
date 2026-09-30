@@ -210,6 +210,14 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 	if response == "reject" or response == "refuse":
 		sender.diplomacy_reject_cooldown[target.team_id] = \
 			state.world.current_tick + REJECT_COOLDOWN
+	# ★★★談成 ⇒ 錢要真的動（spec 2026-09-30）：這一支原本**只有一句 print** ——
+	#   同一個分岔的兩側嚴重不對稱（拒絕那半做了三件事、接受那半什麼都沒有）
+	#   ⇒ 而那種不對稱通常是「有人只寫了他當時在想的那一半」。
+	#   ★走共用解算點 ⇒ 金額與玩家同一支算式、恩怨走同一段（NPC 之間也有煞車）。
+	if action == "demand_tribute" and response == "accept":
+		var amount: float = apply_tribute_accept(state, target, sender)
+		print("[Diplomacy] Team%d 向 Team%d 索貢談成：%.1f coin" % [
+			sender.team_id, target.team_id, amount])
 	# Tribute refusal consequence: write memory + reputation penalty
 	if action == "demand_tribute" and response == "refuse":
 		var sender_leader: PersonData = state.persons.get(sender.leader_id) if sender.leader_id >= 0 else null
@@ -220,6 +228,35 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		sender.update_reputation(target.team_id, -0.1)
 		target.update_reputation(sender.team_id, -0.05)
 		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
+
+# ★★★索貢談成的【全部】效果 —— 一個真相只存一份（spec 2026-09-30 §6，藍圖裁 (a)）。
+#   玩家那條路（`player_command_system._action_demand_tribute`）與 NPC↔NPC 那條路
+#   **都呼這一支** ⇒ 金額同一支算式、恩怨走同一段。
+#   ★藍圖逐字：同一動詞同一價；而缺恩怨那一段 ＝ **NPC 之間濫索無煞車（只有玩家有）**。
+#   ★★為什麼係數留在這裡：玩家端原本寫 `coin_before * 0.1  # TEST VALUE` 的字面
+#     ⇒ 兩條路各自一份會漂（改一邊）⇒ 提成常數並讓兩邊都引用它。
+#   ★★★而恩怨那一段就是濫按煞車那票的 `write_memory("tributed", …)` ——
+#     本支是它的**第三個**呼叫點（前兩個：player_command_system 的遠程索貢、
+#     interaction_system 的 `_resolve_extortion`）⇒ 呼同一支，不另外發明。
+#   回傳實際拿走的金額（玩家端的結果句要用它）。
+const TRIBUTE_TAKE_RATIO: float = 0.1   # TEST VALUE（藍圖明文留給平衡階段，本票不動它）
+
+static func apply_tribute_accept(state: WorldState, payer: TeamData, taker: TeamData) -> float:
+	if payer == null or taker == null:
+		return 0.0
+	var coin_before: float = float(payer.resources.get("coin", 0))
+	# ★`coin_before <= 0` ⇒ 什麼都不做：拿走 0 不是一件被記得住的事，而 0/0 算不出比例。
+	if coin_before <= 0.0:
+		return 0.0
+	var amount: float = coin_before * TRIBUTE_TAKE_RATIO
+	ResourceBank.add(payer, "coin", -amount, "demand_tribute_out")
+	ResourceBank.add(taker, "coin", amount, "demand_tribute_in")
+	if taker.leader_id != -1:
+		var payer_leader: PersonData = state.persons.get(payer.leader_id)
+		if payer_leader != null:
+			NpcAiSystem.new().write_memory(payer_leader, "tributed", taker.leader_id,
+				state.world.current_tick, amount / coin_before)
+	return amount
 
 # ★★★接受通商的【全部】效果 —— 一個真相只存一份（spec 2026-09-30 §2①）。
 #   NPC↔NPC 那一支與玩家 handler **都呼這一支**（呼叫點恰好 2 個，床 P2(a) 指名斷言）。

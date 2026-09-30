@@ -376,21 +376,20 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "demand_tribute")
 	state.player_pending_targets.erase(target_id)
 	if resp == "accept":
+		# ★★★改呼共用解算點（spec 2026-09-30 §6①）：金額與恩怨兩件事都在那一支裡，
+		#   而 NPC↔NPC 那條路呼的是**同一支** ⇒ 一個真相只存一份。
+		#   ★係數的字面從這裡消失（它現在是 `DiplomaticAiSystem.TRIBUTE_TAKE_RATIO`）
+		#     —— 床的靜態證就在驗這件事：這一行不得出現 0.1 的字面。
 		var coin_before: float = float(tgt.resources.get("coin", 0))
-		var amount: float = coin_before * 0.1  # TEST VALUE
-		ResourceBank.add(tgt, "coin", -amount, "demand_tribute_out")
-		ResourceBank.add(pt, "coin", amount, "demand_tribute_in")
+		var amount: float = DiplomaticAiSystem.apply_tribute_accept(state, tgt, pt)
 		# ★★★濫按索貢的煞車（用戶裁的兩層關係帳）：被索方的領袖記一次 "tributed"
 		#   ⇒ 好感層 -intensity×0.5（煞車本體）；記憶層要過 FEUD_MIN 0.30 才寫 feud 邊，
 		#     而 intensity＝拿走幾成＝0.1 × 人格乘子（上界 1.3）⇒ **小索貢不寫邊是正確行為**。
 		#   ★寫入點放在【執行端】不放在秤裡：秤（`tribute_accept`）會被評估路徑多次呼叫，
 		#     而「真的被拿走了」只發生在這裡。
 		#   ★★`coin_before <= 0` 不寫：拿走 0 不是一件被記得住的事，而 0/0 也算不出比例。
-		if coin_before > 0.0 and pt.leader_id != -1:
-			var def_leader: PersonData = state.persons.get(tgt.leader_id)
-			if def_leader != null:
-				NpcAiSystem.new().write_memory(def_leader, "tributed", pt.leader_id,
-					state.world.current_tick, amount / coin_before)
+		# ★恩怨那一段已經搬進共用解算點（`DiplomaticAiSystem.apply_tribute_accept`）
+		#   ⇒ 這裡不再有第二份；NPC↔NPC 那條路因此**自動**也有煞車（藍圖要的那一句）。
 		print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
 		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
 	else:
