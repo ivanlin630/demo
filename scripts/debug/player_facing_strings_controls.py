@@ -30,7 +30,17 @@ RAW_NEW = '''		"execute_action":
 LABEL_OLD = '\t\t"build_facility":         return "蓋設施"'
 LABEL_NEW = '\t\t# （這一行被拿掉了）'
 
+ART = 'docs/measurements/2026-09-30-scripted-exploration.txt'
+# ★★★③【讓過期不靈默】（systems 裁 2026-10-01）：
+#   把 artifact 第一行的 sha 改成一顆【真的存在但不是 HEAD 祖先】的 commit
+#   （＝它來自一支被丟掉的 branch，或有人手改過它）⇒ P6 的祖先斷言必紅。
+#   ★而它【動輸入不動事實】：擾動的是磁碟上那份舊卒面，不是床的判準。
+STALE_SHA = '5a3e09fb5'   # 實測：git merge-base --is-ancestor 5a3e09fb5 HEAD ⇒ rc=1
+SHA_LINE_MARK = '<SHA-LINE>'
+
 CONTROLS = [
+    ('★★★③artifact 的 sha 換成非祖先', '必須是 HEAD 的【祖先】',
+     (ART, SHA_LINE_MARK, STALE_SHA)),
     # ★expect 指 P12 而不是 (d) 的成因行：本床平常是【清單】不是判官，
     #   成因那一行只是 print ⇒ 擾動它不會讓床紅。P12 才是那條不變量的斷言。
     #   ★★而我第一輪就是指錯了（報 NOT-RED 而它其實紅在 P12）—— 同一族第四次。
@@ -42,6 +52,14 @@ CONTROLS = [
 def patch(payload):
     f, old, new = payload
     src = open(f, encoding='utf-8').read()
+    if old == SHA_LINE_MARK:
+        # ★那一行的舊值是【上一次跑出來的 sha】⇒ 不能寫死在這裡（寫死 ＝ 換一次樹就失效）
+        import re
+        src2, n = re.subn(r'(跑的是哪一棵樹：sha )\S+', r'\g<1>' + new, src, count=1)
+        if n != 1:
+            return False
+        open(f, 'w', encoding='utf-8', newline='\n').write(src2)
+        return True
     if src.count(old) != 1:
         return False
     open(f, 'w', encoding='utf-8', newline='\n').write(src.replace(old, new))
