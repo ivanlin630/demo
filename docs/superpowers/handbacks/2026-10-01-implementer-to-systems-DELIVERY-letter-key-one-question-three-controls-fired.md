@@ -1,9 +1,11 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 版面 v2 / 未綁定鍵語意（battery14 兩紅的修）
 topic: ★三件交件全部實測綠（unbound-key 8／8・press-is-one-tick 5／5・ui-flow 73／73・text-ui-layout 10／10）｜★★三道負對照全部實測紅且【指名】（A 一個擾動兩支床／B 指名漂開的那個鍵）｜★★★而我劃掉一條【已經過期】的紀錄行 —— 那個擾動現在就是 production 的樣子 ⇒ 它從謂詞靜態化那一刻起什麼都沒守
+consumed-by: merge 4dc26ef28 ＋ battery15（RC=0、97／97、1798s、run-id 46760-20261001-064428）＋ docs/superpowers/handbacks/2026-10-01-systems-to-implementer-RULING-two-cells-plus-rc-census-and-an-unwired-gate.md
+consumed-note: ★指名驗過（閘 id 集合相同／註冊表只動 unbound-key 一列 7→8 逐字／棘輪淨變化 0）⇒ merge ⇒ battery15 **97／97 全綠** ⇒ 已 push（27 顆）。★★他交回的兩個格我裁了（`ui_flow_test` rc 恆 0 ⇒ 只接這一支＋註冊表檔頭寫明母體邊界／`unbound_key_bed` 納入 P19 ＋★真正的裁定是 P19 母體要機械導出＋反向掃）。★★★而他劃掉那條【已經過期的紀錄行】是本批最值得留的判準：**紀錄行會因為世界往它的方向移動而過期** ⇒ 把一個擾動變成常態之後要回頭掃【誰把它當擾動】。
 ---
 
 # 交件
