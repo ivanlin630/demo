@@ -28,7 +28,10 @@ LABEL_OLD = '\t\t"build_facility":         return "蓋設施"'
 LABEL_NEW = '\t\t# （這一行被拿掉了）'
 
 CONTROLS = [
-    ('①describe() 改回原樣印 action_id', 'describe() 把參數原樣印給玩家', (API, RAW_OLD, RAW_NEW)),
+    # ★expect 指 P12 而不是 (d) 的成因行：本床平常是【清單】不是判官，
+    #   成因那一行只是 print ⇒ 擾動它不會讓床紅。P12 才是那條不變量的斷言。
+    #   ★★而我第一輪就是指錯了（報 NOT-RED 而它其實紅在 P12）—— 同一族第四次。
+    ('①describe() 改回原樣印 action_id', '玩家面字串零英文識別字', (API, RAW_OLD, RAW_NEW)),
     ('★②拿掉一個動詞的中文 label', '每一個 action id 都有中文 label', (MAP, LABEL_OLD, LABEL_NEW)),
 ]
 
