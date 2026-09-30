@@ -608,6 +608,17 @@ func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void
 # old_leader_action: "member"=舊 leader 留隊降 named（team_id 已本隊、補回 named + role="member"）；
 #   "none"(default)=舊 leader 已死/已他處理，不動（succession/建國 常態）。
 # pid=-1 允許（清空 leader，transient；不設 role/team_id）。idempotent。
+# ★★★現存例外（具名，2026-09-30）：這句「所有直寫改走此」曾經【被繞過 5 次】——
+#   而繞過的人不是不守規則，是**手抄了一份而各漏不同的一件**（那才是真的病灶形狀）：
+#     ·player_command_system 的 choose_heir 漏了 `p.team_id` 回指 ⇒ 稽核 P127 紅（死輸入床抓到）
+#     ·population_system／reaction_system／recruit_tutorial 三處各自手抄一到三件
+#   ⇒ 那四處今天已改走本支。★**剩下一個具名例外**：
+#     `subteam_system.gd` 的 `sub.leader_id = sub_leader_id`（理由就地寫在那一行上方：
+#      三件效果都已具備，而走本支會【多設 role="leader"】，子隊 leader 的 role 語意未裁）。
+#   ★★另有 8 處 `leader_id = -1`（清空）**不在此列**：本支明文允許 pid=-1，
+#     而清空不需要回指 team_id ⇒ 它們不是繞過。
+#   ⇒ ★★★寫下這一段的理由：一句「所有直寫改走此」在繞過者面前不是規則，是願望；
+#     而【現存例外具名】讓下一個人看得到真實狀態，也讓新增的第六個繞過者變得顯眼。
 func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") -> void:
 	var old_id: int = team.leader_id
 	if old_id != -1 and old_id != pid and old_leader_action == "member":

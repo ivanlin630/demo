@@ -64,6 +64,15 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.move_target      = move_target
 	sub.order_target_id  = order_target_id
 	sub.order_task       = order_task
+	# ★★★具名例外（spec 2026-09-30 §3①：不能走 chokepoint 的要就地寫理由）：
+	#   本處【刻意不走 `state.set_leader`】，而 chokepoint 要的三件事這條路都已經有：
+	#     ①leader_id ＝ 這一行 ②出母 roster ＝ `:79 remove_member(parent, …, false)`
+	#     ③team_id 回指 ＝ `:80 sub_leader.team_id = sub.team_id`
+	#   ⇒ 不走的理由是【走了會多做一件本票沒授權的事】：`set_leader` 會設 `role = "leader"`，
+	#     而子隊 leader 的 role 語意**沒有人裁過**（他同時是母隊的 advisor 人選）
+	#     ⇒ 那是語意改動不是一致性修補。★★「看起來一致」正是今天這個 bug 的來源。
+	#   ⇒ ★若日後要統一，先裁 role 語意，再改這一行；而那時 `remove_member(parent,…)` 仍要留
+	#     （chokepoint 只管目標隊的 named，不會把人從【母隊】的 roster 移出）。
 	sub.leader_id        = sub_leader_id
 	state.set_readiness(sub, parent.readiness, "subteam_init")
 	state.set_team_tags(sub, [TeamData.TAG_SUBTEAM], "subteam_init")
