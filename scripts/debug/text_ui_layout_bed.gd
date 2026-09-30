@@ -300,11 +300,16 @@ func _test_p5_reason_comes_from_the_engine() -> void:
 	_check("★母體地板：真的切到 `action_block` 的函式體（切不到 ⇒ 下面那條恆綠）",
 		i >= 0 and body.length() > 0)
 	var hardcoded: Array = []
+	# ★★★偏移要用【標記自己的長度】不要寫死一個數字：
+	#   `（不可：` 是 **4** 個字元，而我第一版寫 `k + 5` ⇒ 跳過了那個 `%`
+	#   ⇒ 本格報「違規 1 行」而那一行其實是對的 ＝ **假紅**（2026-10-01 實測）。
+	#   ★而假紅的成本與假綠不同但不小：它會讓人去「修」一個沒壞的地方。
+	var mark: String = "（不可："
 	for line in body.split("\n"):
-		var k: int = line.find("（不可：")
+		var k: int = line.find(mark)
 		if k < 0:
 			continue
-		var t: String = line.substr(k + 5).strip_edges()
+		var t: String = line.substr(k + mark.length()).strip_edges()
 		if not t.begins_with("%"):
 			hardcoded.append(line.strip_edges())
 	print("   `action_block` 裡「（不可：」後面不是變數的行 ＝ %d" % hardcoded.size())
