@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: ★★★事後 R²：濫按煞車的【實作端】那一輪我漏送，而它已經 merge 進主線 —— 這是我自己的硬閘被我自己破的，不是裁量｜請照常審，若要退回就開追加票
 ---
 
