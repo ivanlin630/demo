@@ -28,6 +28,10 @@ extends SceneTree
 #   4. 本床走 `SimBridge.command_player`（＝press-is-one-tick 釘的那個咽喉）
 #      ⇒ 每一道指令都真的推一顆 tick、真的經過消費點 ⇒ 結果句是世界產的不是我編的。
 #   5. 本床【不修】它抓到的任何東西（spec §3）。
+#   6. ★★★2026-09-30 訂正：前一版的 (c) 判準用【索引區間】讀結果句，而 `command_results`
+#      有 60 tick 的 TTL ⇒ 走過 60 步之後那個區間會變空 ⇒ 生出 41 筆【假的靜默】。
+#      ⇒ 現在用那一道指令自己的 `seq` 去找它的句子。★而那 41 筆要從清單裡消失，
+#        不是「改分類」—— 它們從來不是產品的症狀。
 
 var _errors: int = 0
 var _cells_ran: Array = []
@@ -245,6 +249,7 @@ func _step(bridge: SimBridge, st: WorldState, where: String,
 	#     不是產品的缺陷。★★記在這裡而不是默默加：下一個人會想知道為什麼有這一軸。
 	var my_treasury_before: float = pt0.anon_treasury if pt0 != null else 0.0
 	var r: Dictionary = bridge.command_player(name, args)
+	var my_seq: int = int(r.get("seq", -1))
 	_steps_walked += 1
 	# ★入列當下就被擋掉的（未知指令）不推 tick ⇒ 它的「句子」就是那個回傳
 	if not bool(r.get("queued", false)):
@@ -256,9 +261,18 @@ func _step(bridge: SimBridge, st: WorldState, where: String,
 		bridge.request_advance(1)
 	while bridge.is_advancing():
 		bridge.tick_step()
+	# ★★★【訂正 2026-09-30】原本用索引區間讀（`range(before_n, size)`）——而那是錯的：
+	#   `command_results` 有 TTL（`sim_runner.gd:517 RESULT_TTL_TICKS = TICKS_PER_HOUR = 60`），
+	#   而本床每走一步就推一顆 tick ⇒ 走超過 60 步之後舊紀錄開始被剪掉
+	#   ⇒ size 不再單調成長 ⇒ `range(before_n, size)` 變成【空區間】⇒ 我把它讀成「這一步沒有句子」。
+	#   ⇒ ★那就是前一版報的【41 筆靜默】的真因：**它們是床的假紅，不是產品按了沒反應**。
+	#     （而它們全部落在第二趟 kind=team，正是因為第一趟 14+51 步剛好跨過 60。）
+	#   ⇒ ★★改成用【那一道指令自己的 seq】去找它的結果句 —— seq 由 `command_player` 回傳，
+	#     它不會因為別人被剪掉而改變。
 	var sentence: String = ""
-	for k in range(before_n, st.command_results.size()):
-		sentence += String(st.command_results[k].get("text", ""))
+	for row_r in st.command_results:
+		if int(row_r.get("seq", -999)) == my_seq:
+			sentence += String(row_r.get("text", ""))
 	var bad: Array = []
 	var va: String = _rule_a(coin_before, CoinAudit.total(st), InvariantAudit.check(st))
 	var vb: String = _rule_b(response_for_b, sentence)
