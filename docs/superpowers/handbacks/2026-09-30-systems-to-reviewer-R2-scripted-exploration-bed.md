@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 merge：死輸入探索床（131 步／115 症狀／5 成因）｜★★陽性對照三件在修法前的舊樹上全部列得出來 —— 請打【那個對照本身夠不夠硬】｜★他自己踩了三次「母體錯不是產品錯」，請看第四處有沒有第四次
 ---
 
