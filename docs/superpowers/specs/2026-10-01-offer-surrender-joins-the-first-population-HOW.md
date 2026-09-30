@@ -387,3 +387,88 @@ P9 [孿生兄弟行為不變] `surrender_in_encounter` 在「非戰鬥中」時�
   —— 分類的單位是**誰擁有那個決定**，不是「它們長得像」。
 ```
 
+---
+
+## ★★★★★★★★★§6g 他五件我逐行核過，而 ③④ 讓 spec 多兩格、少一格（**恆真那一條要拿掉**）
+
+### ①(甲) 的**許可證**：`player_query_api.gd:300` —— 這一行要寫進 §2④ 的理由欄
+
+```
+:300  var rows: Array = cmd_sys.get_action_availability(state, focus_team_id)
+⇒ ② **已經吃 ① 的清單** ⇒ `offer_surrender` 進 `TEAM_TARGET_ACTIONS` 之後**自動**從這裡流出去
+⇒ 刪掉 `:462-476` **不會**讓它從 agent／API 面（`sim_bridge.gd:302`）消失
+★沒有這一行，(甲) 就是「把一個動作從玩家能碰到的唯一 API 面刪掉」
+⇒ ★★判準：**每一個「刪掉」的動作都要指出它的許可證**（誰接手了那件事），
+  而許可證是一行 code 不是一句推理。
+```
+
+### ★②刪除的權威是**我**，不是藍圖 —— 這個分別要寫清楚
+
+```
+藍圖那封逐字只說：「第一母體那張若已竣工，**補一列走同一條路**（不是新票，是漏列）」
+⇒ ★他**沒有裁「刪掉 ② 那一段」** ⇒ **刪除的權威是本 spec §2④（systems）**。
+⇒ ★★為什麼要分清：下游若以為那是藍圖裁的，**那條路就沒有人可以回頭問**
+  （而它是這張票唯一一個會讓某個東西從 API 面消失的動作）。
+```
+
+### ★★★③ 那條加法是**恆真**的 ⇒ **拿掉它**，而它的語意由三格接手
+
+```
+`colocation_gate_bed.gd:330-331`：
+   `(from_const.size() - exempt) + exempt == SPEC_TEAM_TARGET_TOTAL`
+   ★代數上 ≡ `from_const.size() == SPEC_TEAM_TARGET_TOTAL` ⇒ **`exempt` 被消掉**
+   ⇒ 不管豁免清單是空的、1 個還是 99 個，**它都不可能紅**
+   ⇒ ★★而它的標題寫著「否則分類法漏了一格」⇒ **宣稱驗分割，實際只驗總數**
+   ⇒ ★★★而「只驗總數」那件事 `available_actions_bed.gd:119` **已經在做** ⇒ 它同時是**重複的**
+★而 implementer 自報最毒的那一段（我複核，逐字成立）：他**劃掉了一個同源恆真**，
+  然後**在它正下方留了第二個同族的**，並寫了一句話解釋它可以不動
+  ⇒ 「**說服我它安全的那句話就是它恆真的證明**」逐字重演。
+```
+
+**⇒ 處置（★而這裡我否決他的「窄化」提案，理由在下面）**：
+```
+·**那條加法【拿掉】並就地劃掉留理由**（它的語意被別支床覆蓋 ＋ 對 exempt 恆真）
+  ★這不違反「窄化不是刪除」：那條規矩是給**方向反了的斷言**用的；
+    而這一條是**與另一支床重複＋對它宣稱的那一維恆真** ⇒ 窄化它只會得到一句
+    「`size == TOTAL`」，而那正是另一支床那一格。
+·★★而它宣稱的那件事（**分類法沒漏格**）由三格接手，而三格都不是算術：
+  P12a [成員檢查] `SPEC_EARLY_RETURN_EXEMPT` 的每個成員**必須真的在** `TEAM_TARGET_ACTIONS` 裡
+  P12b [★行為證] 對 exempt 的每個成員：`execute_action` 回的 msg **不是同格拒絕那句**，
+        且印出它實際回了什麼 ⇒ ★哪天它不再早返回（＝它其實走到閘了），這一格紅
+  P12c [★★★棘輪] `SPEC_EARLY_RETURN_EXEMPT.size()` **不得增加**
+        ⇒ 這一格才是**承重的**：見下面那段。
+```
+
+**★★★而 P12c 為什麼是承重的（我複核 `:249-258` 才看到）**：
+```
+P1 的迴圈逐字：`for act in TEAM_TARGET_ACTIONS: if SPEC_EARLY_RETURN_EXEMPT.has(a): continue`
+⇒ ★**exempt 是一份「跳過檢查」的清單** ——
+  把一個動作放進去，P1 就**不再測它**，而那是**靜默的**（卷面上只多一行「early-return 例外」）
+⇒ ★★所以真正的風險**不是分割加法算錯**，是**有人為了讓床綠而把一個真的需要同格的動作塞進豁免名單**
+⇒ ★★★而那個方向只有棘輪擋得住（成員檢查與行為證都會被「一個真的早返回的動作」滿足）。
+```
+
+### ★★★★④`offer_surrender` 落在哪一半：**「需同格」那一半，不進 exempt**（我裁）
+
+```
+·`execute_action` 在 dispatch 之前呼 `_colocation_gate`，而它的第一條件是
+  `TEAM_TARGET_ACTIONS.has(action)` ⇒ **進母體即被管到**（reviewer 已逐行核過這條路）
+·`_action_offer_surrender` **自己不呼** `refuse_if_not_colocated` ⇒ 它**不進** `MEASURED_SELF_CHECKING`
+·而它**不早返回** ⇒ **不進** `SPEC_EARLY_RETURN_EXEMPT`
+⇒ 分割的新口徑：**需同格 ＝ 12 − 1（`ignore`）＝ 11｜原本零檢查 ＝ 11 − 2 ＝ 9**
+★★而 implementer 明文擋掉的那個豁免理由我逐字同意並寫進來：
+  **「遭遇戰中對手必然同格」不可以當豁免理由** —— 那正是本 spec §1 已登記的那個錯：
+  **拿【查詢面的 if】當【handler 的前提】，而 handler 零檢查 ⇒ 遠程求和打得通。**
+```
+
+### ★⑤四個量的量綱（寫進 spec 免得下一個人拿錯）
+
+```
+`available_actions_bed.gd:26` SPEC_TEAM_TARGET_TOTAL ＝ **宣告數**      ⇒ 11 → 12
+`colocation_gate_bed.gd:36`   SPEC_TEAM_TARGET_TOTAL ＝ 同一個宣告數    ⇒ 11 → 12（★註解手抄的名字也要補）
+`available_actions_bed.gd:38` SPEC_PAYLOAD_SITES     ＝ **呼叫點數**    ⇒ ★**不動**（量綱不同、數字相同）
+第四個量：**列出的行數** —— `get_action_availability` 對 `STUB_NOT_IMPLEMENTED` 有 `continue`（`:82-83`）
+  ⇒ 它與宣告數**今天相等只因為 stub 清單是空的**
+  ⇒ ★★**兩個數相等是【現況】不是【恆等式】** ⇒ 要寫在旁邊，否則下一個人會把它當恆等式用。
+```
+
