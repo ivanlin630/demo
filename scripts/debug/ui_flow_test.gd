@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -108,6 +108,7 @@ func _initialize() -> void:
 	await _test_p24_number_keys_never_mean_response()
 	await _test_p25_letter_key_only_in_interact_mode()
 	await _test_p26_ui_stack_step1()
+	await _test_p27_forced_takes_over_and_keys_speak()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2871,6 +2872,111 @@ func _test_p26_ui_stack_step1() -> void:
 		% [pending.size(), SPEC_UI_STACK_PENDING], pending.size() <= SPEC_UI_STACK_PENDING)
 	await _free_ui(node)
 	_cell("_test_p26_ui_stack_step1")
+
+# 負對照：把 `and not _interact_mode` 加回 auto-enter ⇒ 本格紅 ⇒ 待實測
+# 負對照 b：`binds_key` 對 A..Z 無條件回 true ⇒ 那一段紅 ⇒ 待實測
+# 負對照 c：信封拿掉 `opens_submenu` ⇒ 那一段紅 ⇒ 待實測
+# ══ P27：★★★三個【玩家看得到】的缺口（systems 裁 2026-10-01，當 bug 修不當設計選擇）══
+# ①強制事件在玩家【已聚焦目標】時到達 ⇒ 原本 `_interact_target` 不被清
+#   ⇒ 回應那一支要求 `< 0` ⇒ **按 A 不回應，而且零提示**（要先 Esc）
+# ②`binds_key` 無條件宣告 A..Z 綁了 ⇒ 聚焦時按字母【靜默 return】
+#   ★三態剛好都滿足，而那是**意外不是設計**
+# ③信封沒有 `opens_submenu` ⇒ 稿子的 `招募 ▸／打聽 ▸` **永遠印不出來**
+# ★★而 ①② 是同一件事的兩半：①保證玩家按得到，②保證按不到的時候【有話說】。
+func _test_p27_forced_takes_over_and_keys_speak() -> void:
+	_selftest_gate("_test_p27_forced_takes_over_and_keys_speak").noop()
+	print("\n── P27 強制事件搶走互動模式／鍵位會說話／信封帶 opens_submenu ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	# ── 佈置：先讓玩家聚焦一個同格目標（這是【原本會出事】的前提）
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	_check("★母體地板：找到同格目標（-1 ⇒ 下面整格沒有主詞）", tgt_id != -1)
+	node._bridge.refresh_interaction_targets()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._refresh()
+	_check("★★母體地板：玩家【真的】聚焦著目標（%d）—— 不是 -1 的話這一格測的是舊情境"
+		% node._interact_target, node._interact_target == tgt_id)
+
+	# ── ①強制事件到達 ⇒ 無條件搶走並清聚焦
+	st.set_player_forced_event({"action": "diplomacy", "from_id": tgt_id,
+		"proposal": "propose_alliance"}, "fe_p27")
+	node._bridge.request_advance(1)
+	node._process(0.0)
+	print("   強制事件到達之後：_interact_mode=%s｜_interact_target=%d" % [
+		str(node._interact_mode), node._interact_target])
+	_check("★★★①強制事件【無條件】搶走互動模式（原本被 `and not _interact_mode` 擋住）",
+		node._interact_mode == true)
+	_check("★★★①它清掉了聚焦目標（-1）—— 否則字母鍵那一支不會處理回應（實測 %d）"
+		% node._interact_target, node._interact_target == -1)
+	# ★而「按得到」要真的按一次（不是只看旗標）
+	var opts: Array = node._cached_snapshot.get("forced_interaction", {}).get("responses", [])
+	print("   回應選項 %d 個（0 ⇒ 下面那一條沒有主詞）" % opts.size())
+	_check("★母體地板：真的有回應選項（%d）" % opts.size(), opts.size() > 0)
+	if opts.size() > 0:
+		_press_key(node, KEY_A)
+		var pend: String = "".join(PackedStringArray(node._bridge.pending_command_labels(3)))
+		print("   按 A 之後佇列：%s" % pend)
+		_check("★★★①按 A 真的把回應排進佇列（★不是只看旗標：這一條才是「按得到」）",
+			pend.contains("回應事件"))
+		node._bridge.cancel_advance()
+		st.pending_commands.clear()
+
+	# ── ②聚焦目標時按字母 ⇒ 未綁定鍵的統一出口【要說話】
+	st.player_forced_event = {}
+	st.player_forced_event_id = ""
+	node._refresh_snapshot()
+	node._interact_target = tgt_id
+	node._feedback_line.text = ""
+	node._handle_interact_mode(KEY_A)
+	print("   聚焦目標時按 A ⇒ 回饋行：「%s」" % node._feedback_line.text)
+	_check("★★★②聚焦目標時按字母【有話說】（原本是靜默 return）",
+		node._feedback_line.text.contains("無作用"))
+	_check("★②而它沒有關掉模式（三態之一）", node._interact_mode == true)
+	_check("★②也沒有改掉聚焦目標（三態之二）", node._interact_target == tgt_id)
+
+	# ── ③信封要帶 opens_submenu，而母體來自【那個宣告】不是手抄
+	# ★★★佈置要重建：上面 ② 那一段清了 forced event 也動過佇列
+	#   ⇒ 不重掃同格目標的話 `_interact_action_split()["team"]` 會是**空的**
+	#   ⇒ 而那時「沒帶的 ＝ []」會**通過**（迴圈一次都沒跑）＝ 正數形狀的空集合。
+	#   ★實測血證（2026-10-01 第一版）：`carried + missing = 0` 而宣告是 2
+	#     ⇒ **母體地板那一條紅了，而最後那條斷言是綠的** —— 地板就是為這個存在的。
+	node._bridge.refresh_interaction_targets()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._interact_page = 0
+	node._refresh()
+	var rows: Array = node._interact_action_split()["team"]
+	var declared: Array = []
+	for d in PlayerCommandSystem.SUBMENU_OPENERS:
+		declared.append(String(d))
+	var carried: Array = []
+	var missing: Array = []
+	for r in rows:
+		var aid: String = String(r.get("action_id", ""))
+		if declared.has(aid):
+			if bool(r.get("opens_submenu", false)):
+				carried.append(aid)
+			else:
+				missing.append(aid)
+	print("   宣告的入口 ＝ %s｜信封帶著 `opens_submenu=true` 的 ＝ %s｜沒帶的 ＝ %s" % [
+		str(declared), str(carried), str(missing)])
+	_check("★母體地板：宣告不是空的（空 ⇒ 下面兩條恆綠）", not declared.is_empty())
+	_check("★母體地板：那些入口真的在畫面的列裡（%d／%d）" % [
+		carried.size() + missing.size(), declared.size()],
+		carried.size() + missing.size() == declared.size())
+	_check("★★★③信封把 `opens_submenu` 帶到畫面（沒帶的：%s）—— 原本它被信封吃掉 ⇒ `▸` 永遠印不出來"
+		% str(missing), missing.is_empty())
+	await _free_ui(node)
+	_cell("_test_p27_forced_takes_over_and_keys_speak")
 
 
 

@@ -695,12 +695,20 @@ static func map_inventory_state(state: WorldState) -> Dictionary:
 
 # ── Available action builder ───────────────────────────────────────────────────
 
+# ★★★【缺口③，2026-10-01】：`opens_submenu` 原本**不在信封裡** ——
+#   全列版（`get_action_availability`）有算它，而信封把它吃掉
+#   ⇒ 排版層的 `▸`（稿子的「招募 ▸／打聽 ▸」）**永遠印不出來**。
+#   ★而它的失效長相是「那個符號沒出現」—— 沒有任何斷言在看，所以它是靜默的。
+#   ★★預設 `false`：既有 21 個呼叫點不用改（它們不是子選單入口），
+#     而團隊目標那一條路把全列版算出來的值傳進來。
 static func map_available_action(action_id: String, label: String, enabled: bool,
 		disabled_reason: String, target_requirements: Dictionary,
-		command_name: String, command_args: Dictionary) -> Dictionary:
+		command_name: String, command_args: Dictionary,
+		opens_submenu: bool = false) -> Dictionary:
 	return {
 		"action_id": action_id, "label": label, "enabled": enabled,
 		"disabled_reason": disabled_reason,
+		"opens_submenu": opens_submenu,
 		"target_requirements": target_requirements,
 		"command_name": command_name, "command_args": command_args
 	}

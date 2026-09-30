@@ -294,12 +294,21 @@ func _process(_delta: float) -> void:
 		_bridge.cancel_advance()
 		_enter_encounter()
 	elif not _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() \
-			and not _interact_mode and not _pre_encounter_mode:
+			and not _pre_encounter_mode:
 		# U19: 強制事件（乞食/繼承/勒索回應…）自動進互動模式顯選單，否則玩家無從回應 → 卡死
 		# （choose_heir 凍世界，更須自動進）。回應 handler/render 已在 interact mode 內。
+		# ★★★【缺口①，systems 裁 2026-10-01：當 bug 修不當設計選擇】——
+		#   原本這一條被 `and not _interact_mode` 守著 ⇒ 強制事件在玩家【已經聚焦某個目標】時到達，
+		#   `_interact_target` 不會被清；而回應那一支（:1523 附近）要求 `_interact_target < 0`
+		#   ⇒ ★玩家按 A **不會回應那個事件，而且什麼提示都沒有**（要先按 Esc 退回目標清單）。
+		#   ⇒ ★★所以「強制」這個詞本來就要求它**無條件搶走**互動模式並清掉聚焦目標：
+		#     `sim_runner` 連 `choose_heir` 的超時自動清除都**刻意排除**
+		#     ⇒ 設計本意是【玩家必須面對它】。
+		#   ⇒ ★★★而 `_refresh()` 是冪等的（同票已驗）⇒ 每 tick 重跑這一段不會累積副作用；
+		#     真正的不變量是「有強制事件在 ⇒ 玩家一定按得到它」。
 		_bridge.cancel_advance()
 		_interact_mode = true
-		_interact_target = -1
+		_interact_target = -1   # ★清掉聚焦目標：否則字母鍵那一支不會處理回應
 		_interact_page = 0
 		_refresh()
 
@@ -1488,8 +1497,20 @@ func _log_event(msg: String) -> void:
 func _interact_mode_binds_key(keycode: int) -> bool:
 	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD:
 		return true
+	# ★★★【缺口②，systems 裁 2026-10-01】：宣告要跟【真實行為】對齊。
+	#   原本這裡無條件對 A..Z 回 true，而 handler 那一支要求 `_interact_target < 0`
+	#   ⇒ 聚焦目標時按字母：`_refuse_unbound_key` **不會** fire（因為這裡說「綁了」），
+	#     而 handler 落到 `if keycode < KEY_1 …: return` ⇒ **靜默 return**。
+	#   ⇒ ★三態（不關模式／不落底層／不改狀態）**剛好都滿足，而那是意外不是設計**
+	#     —— 玩家得到的是「完全沒有回饋」，而那正是未綁定鍵那張票要消滅的東西。
+	#   ⇒ ★★所以字母只在【回應真的可按】的時候算「綁了」：沒聚焦目標 ＋ 真的有強制事件。
+	#     ★★★而缺口① 修好之後，「有強制事件而玩家聚焦著目標」這個狀態**不會再出現**
+	#       ⇒ 這兩條是同一件事的兩半：①保證玩家按得到，②保證按不到的時候【有話說】。
 	if keycode >= KEY_A and keycode <= KEY_Z:
-		return true
+		if _interact_target >= 0:
+			return false   # 聚焦目標時字母沒有意義 ⇒ 交給未綁定鍵的統一出口（會印一句話）
+		return not String(_cached_snapshot.get("forced_interaction", {})
+			.get("interaction_id", "")).is_empty()
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		return true
 	return false
