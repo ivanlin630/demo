@@ -2350,7 +2350,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 # ★★★【本區常數一律取大】（棘輪地板；rebase 衝突一律取大）——
 #   往回調會讓守衛閉嘴，而卷面看起來像「衝突解完了」。
 #   ★而上面那一區（`SPEC_UI_STACK_PENDING`）方向【相反：只准變小】⇒ 兩區刻意分開。
-const CONTROL_FLOOR_UI: int = 25   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 27   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -3036,8 +3036,13 @@ func _test_p28_screen_is_the_composed_one() -> void:
 	_cell("_test_p28_screen_is_the_composed_one")
 
 
-# 負對照 a：handler 改回位置索引（`actions[num]`）⇒ 本格紅並指名哪一列錯成哪一個 ⇒ 待實測
-# 負對照 b：`ACTION_DIGITS` 裡兩個 id 的數字對調 ⇒ 本格紅（守「兩側讀同一份表」）⇒ 待實測
+# 負對照：handler 改回位置索引（`actions[num]`）⇒ 本格紅並指名（按 [2] 說 propose_alliance 而實際是 attack） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：`action_for_key()` 改成【手抄第二份對照表】（＝ systems 明文禁的那件事）⇒ 本格紅（按 [1] 說 trade 而實際是 attack） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★而 systems 原本點的那一道（把 `ACTION_DIGITS` 裡兩個 id 的數字**對調**）**不會紅** ——
+#   而那不是守衛沒有鑑別力，是**修法結構性的證據**：兩側讀同一份表
+#   ⇒ 對調之後兩邊【一起變】⇒ 依然一致，只是換了哪個鍵做什麼。
+#   ⇒ ★所以能紅的擾動只有【讓某一側讀到不同的東西】 —— 也就是手抄第二份。
+#   ⇒ ★★判準：**一個「守兩邊一致」的斷言，它的負對照必須破壞【一致性】，不是破壞【內容】。**
 # ══ P29：★★★★★【把兩側接起來】按畫面印的鍵 ⇒ 執行的就是那一列═══════════════════
 # ★這一格存在的理由是一個【真的、玩家看得到的】缺陷（2026-10-01，我引入、reviewer 抓到）：
 #   ·畫面 `action_block`：鍵 ＝ `ACTION_DIGITS[action_id]`（**id 查表**）
