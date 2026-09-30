@@ -823,7 +823,7 @@ func _test_p11_label_has_one_producer() -> void:
 
 
 
-# 負對照：把入口那一格拿掉（讓 `recruit` 走一般 match 的條件）⇒ 本格紅 ⇒ 待實測
+# 負對照：把入口那一格關掉（`elif false and SUBMENU_OPENERS.has(act)`）⇒ 本格紅（在【沒錢】的世界裡仍然可做） ⇒ 已於 fix/exploration-two-english-strings（2026-10-01 這一輪） 實測紅
 # ══ P12：★★★【退化狀態】下入口仍在、而動作消失（battery10 的血證釘成一格）════════
 # ★★★為什麼要有這一格：battery10 的 `headless` 紅，而紅的那條是
 #   `assert(not _actions_no_coin.has("recruit"), "recruit: coin 不足時不可選")`
