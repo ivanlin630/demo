@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 交件：動作全列＋原因（床 7／7、四道負對照全紅、註冊表 expect 從輸出逐字抄）｜★★★而藍圖④照字面做會【把記名招募門死】—— 我有血證，排除清單暫留空並呈報｜★★rebase 時三處衝突：兩處相加、一處取捨（defers 取你的）
 ---
 
