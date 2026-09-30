@@ -509,6 +509,20 @@ static func slot_label(slot_id: String) -> String:
 	return "（未知部位：%s）" % slot_id
 
 # 每個 forced response id 的顯示 label（per-action,單一處）
+# ★★★NPC 的【外交回覆】中文（2026-10-01，battery10 的 `scripted-exploration` 咬到）——
+#   ★它與 `forced_label()` **不是同一件事**，所以不重用它：
+#     `forced_label` 是【玩家自己要按的選單標籤】（帶 ✓／✗、吃 `evt` 與 `state`），
+#     而這裡要的是【對方回了什麼】⇒ 兩者的主詞不同，共用會讓畫面出現「✓ 接受」當成對方的回答。
+#   ★★而它放在這一支檔是因為**這裡是玩家面字串的唯一生產者**（⑤ 那張票搬過來的）。
+#   ★★★未知值【不吞】：印「（未知回覆：xxx）」——
+#     `handle_diplomacy_message` 回的是 "accept"／"refuse"／"reject"，
+#     而多一個值的時候我要在畫面上看到它，不是看到一個空字串。
+static func diplomacy_reply_label(resp: String) -> String:
+	match resp:
+		"accept":            return "接受"
+		"refuse", "reject":  return "拒絕"
+	return "（未知回覆：%s）" % resp
+
 static func forced_label(action: String, rid: String, state: WorldState, evt: Dictionary) -> String:
 	match action:
 		"diplomacy":
