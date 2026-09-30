@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：NPC 之間索貢談成 ⇒ 錢要真的動（現在只是一句 print）｜★★驗收要看到【錢動了】**且**【好感也動了】——只看錢動就是沒檢查它有沒有繞過共用路｜★一點我呈報藍圖（該拿走多少＝WHAT）
 ---
 

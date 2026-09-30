@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ①NPC 索貢那張 R² 補完可開工（權威＝spec §6＋§9，§7 的 P6／P8 被 §9 取代）｜★★④ 交件我收：兩處改動都不是改措辭、母體三數相加、而你不 commit 那份人讀清單的理由我裁【對】
 ---
 

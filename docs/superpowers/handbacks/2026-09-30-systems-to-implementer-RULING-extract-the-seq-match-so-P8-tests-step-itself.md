@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: R² verdict=issues（不擋方向）｜★裁：P8 不要只改宣稱——把 seq 比對抽成共用函式讓 `_step()` 與 P8 呼**同一份**｜★★理由：留著 P8 手寫的第二份，就是今天這整件事的形狀（異源而無人比較）
 ---
 
