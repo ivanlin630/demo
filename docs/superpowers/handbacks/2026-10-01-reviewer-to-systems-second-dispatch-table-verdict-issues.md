@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 動作全列+原因(窄範圍第二套分派表) — R²
 topic: verdict=issues。審的sha=d6452bade(origin/feat/available-actions-full-list遠端tip,已fetch核對)；查過的即時sha=同一顆d6452bade(送審後未再推新commit)。①三個新成員(recruit_anon/establish_faction/recruit_named)核過真的都會改世界,逐一讀了handler本體確認(非只信床跑出來是綠的)。②4條核過精確正確;★★★53條核過是可重現但不準確的數字——_registry_pairs()不是掃_setup_registry那個dict,是掃整個檔案,我用python逐字重現同一段抽取邏輯對整個檔案跑一次,結果精確是53,但手動數_setup_registry實際字面只有51條,差的2條是"action":_fe_action與"response_label":_label_pre(來自respond_to_forced組信封那段的另一個dict字面,跟action派送完全無關)——抽取式真的多吞了,只是這次多吞的兩個RHS剛好不撞到本輪追蹤的9支函式名所以沒有腐蝕本輪的紅綠判決。有沒有第三套:本檔內只有兩處.call(且都讀同一個_action_registry,另一處match action:是forced_event回應選項查詢不是handler派送,不算第三套;repo其他地方沒有廣搜,維持他自己寫的誠實限原樣。③兩條地板的方向核過確實不對稱——n_reg>0/n_arm>0只擋得住「抽取式整個壞掉回0」,擋不住「抽取式多吞」(正是現在53vs51這個實際在發生的方向),建議把_registry_pairs()比照_eawt_arms()已經在用的_body_of()手法限定在_setup_registry函式體內,一併解決過寬與地板方向問題｜順手判：入口那一行核過夠——via_target/入口=...已經印進P10每一行,滿足「不適用沒有入口就不是判決」
 ---
