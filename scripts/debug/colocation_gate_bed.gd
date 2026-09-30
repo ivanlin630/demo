@@ -271,7 +271,17 @@ func _test_p1_remote_is_refused_with_human_words() -> void:
 
 
 # ══ P2：動詞集合的【異源比對】═════════════════════════════════════════════
-# ★★★閘讀的是 `TEAM_TARGET_ACTIONS`，而語意的單一來源是 `get_available_actions`
+# ★★★【2026-10-01 systems 改判：從「兩邊相等」改成「第二份不存在」】
+#   ★動作全列那張票把 `get_available_actions` 改成**衍生檢視**
+#     （`get_action_availability(...).filter(enabled).map(action_id)`）
+#     ⇒ 函式體裡**一個字面動詞名都沒有了** ⇒ 舊抽取式回**空集合**
+#     ⇒ 三道地板（非空／數相符 0／11／集合相等）當場全紅 —— ★★而它們**紅得對**：
+#       那一族地板寫的就是「抽取壞了會回空集合」，而這次壞掉的原因是【被重構抽空】。
+#   ★★★而修法**不是換一個抽取式**：重構之後兩邊**同源**了（常數是唯一來源、
+#     函式體只是它的衍生）⇒ 照原樣修好它，這一格會變成**一句話講兩次（恆真）**
+#     —— 那正是「同源比較恆真」，而這是它第一次在【重構之後】真實發生。
+#   ⇒ 斷言**翻面**：不問「兩邊相等嗎」，改問「**第二份還存不存在**」。
+# ~~舊：閘讀的是 `TEAM_TARGET_ACTIONS`，而語意的單一來源是 `get_available_actions`~~
 #   ⇒ 這一格斷言兩者【集合相等】：有人往那支函式加一個新團體動詞而忘了常數 ⇒ 紅。
 # ★★而它是真比較不是一句話講兩次：兩邊能各自獨立改變（一邊是常數、一邊是函式體的 append）。
 # ★母體地板：抽出來的 append 集合非空，且與 spec 的總數相符（抽取壞了會回空集合）。
@@ -283,7 +293,9 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 	var at: int = src.find("func get_available_actions")
 	_check("母體地板 A：找得到 `get_available_actions`", at != -1)
 	var body: String = src.substr(at, 1800) if at != -1 else ""
+	# ★★★2026-10-01 翻面：`from_func` 現在收的是【殘留的字面動詞名】—— 它應該是空的。
 	var from_func: Array = []
+	var cites_derived: bool = _code_only(body).contains("get_action_availability")
 	for l in _code_only(body).split("\n"):
 		var t: String = _strip_trailing_comment(l).strip_edges()
 		if t.begins_with("func ") and not t.begins_with("func get_available_actions"):
@@ -304,10 +316,13 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 	from_const.sort()
 	print("   函式體導出 = %s" % str(from_func))
 	print("   常數       = %s" % str(from_const))
-	_check("★母體地板 B：函式體導出非空（抽取壞了會回空集合）", not from_func.is_empty())
-	_check("★★母體地板 C：導出數與 spec 的總數相符（%d／%d）" % [
-		from_func.size(), SPEC_TEAM_TARGET_TOTAL], from_func.size() == SPEC_TEAM_TARGET_TOTAL)
-	_check("★★★兩邊集合相等（閘讀的常數 ≡ 語意的單一來源）", from_func == from_const)
+	# ★母體地板（翻面版）：抽取式自己要先證明它抽得到東西 ——
+	#   否則「沒有殘留字面」會在一個【什麼都抽不到】的世界裡恆真。
+	_check("★母體地板 B：函式體真的抽到了內容（非空）", not _code_only(body).strip_edges().is_empty())
+	_check("★★母體地板 C：函式體【逐字引用】`get_action_availability`（＝它真的是衍生檢視）", cites_derived)
+	_check("★★★函式體裡沒有殘留的字面動詞名（有 ⇒ 有人又長了第二份）%s" % str(from_func), from_func.is_empty())
+	# ~~舊斷言：導出數與 spec 總數相符／兩邊集合相等~~ ⇒ 重構後兩邊同源 ⇒ 會恆真 ⇒ 劃掉留理由（見檔頭）。
+	#   ★而 `from_const` 仍被下面那條加法用到（需同格 ＋ 例外 ＝ 總數）⇒ 不動它。
 	# ★spec §3 的那條加法：需同格的 ＋ 例外的 ＝ 總數
 	var exempt: int = SPEC_EARLY_RETURN_EXEMPT.size()
 	print("   需同格 %d ＋ early-return 例外 %d ＝ %d（總數 %d）" % [
