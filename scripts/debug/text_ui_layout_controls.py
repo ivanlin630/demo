@@ -3,7 +3,7 @@
 用法（工作區要乾淨；★改動要先 commit 再跑，否則還原會把未 commit 的改動一起帶走）：
     python scripts/debug/text_ui_layout_controls.py
 
-★★★目前兩道，各打一件不同的事（spec §3 P3／§6②）：
+★★★目前三道，各打一件不同的事（spec §3 P3／§6②／藍圖④′ 的字母鍵條件）：
   ①寬度算法本身（P3b 的 2N+M 定樁）②`120` 只有一份（P3a）
 ★★而 ① 是 §6② 換掉 P3 的全部理由：一個永遠回 `length()` 的實作
   **會通過原本那道 COLS 擾動測試** ⇒ 只有定樁那一格咬得到它。
@@ -22,6 +22,7 @@ import negative_control as nc   # noqa: E402
 BED = 'scripts/debug/text_ui_layout_bed.gd'
 BANNER = 'text_ui_layout DONE ==='
 LAY = 'scripts/ui/text_ui_layout.gd'
+VIEW = 'scripts/ui/text_ui_view.gd'
 
 # ①★把 display_width 換成 `length()` ⇒ P3b 的 2N+M 定樁必紅
 #   ★這一道就是 reviewer 推演出來的那個洞：它【通得過】COLS 擾動測試。
@@ -35,9 +36,16 @@ WIDTH_NEW = '''	return s.length()'''
 DUP_OLD = 'const COLS: int = 120'
 DUP_NEW = 'const COLS: int = 120\nconst _DUP_WIDTH: int = 120'
 
+# ★★★③把字母改成【由位置決定】⇒ P8b 必紅
+#   ★那正是不變量 #10 的病：意義由位置／計數決定
+#   （`trade` 一旦不可做，`[B]` 就換了意思）。
+POS_OLD = '''		var key: String = String(ACTION_LETTERS.get(aid, ""))'''
+POS_NEW = '''		var key: String = char(65 + lines.size() - 1)'''
+
 CONTROLS = [
     ('★①display_width 換成 length()', '每一個案例都精確等於 2N+M（不符的：["純全形（期望 10 實得 5）"',
      (LAY, WIDTH_OLD, WIDTH_NEW)),
+    ('★★★③字母改成由位置決定', 'TODO-EXPECT', (VIEW, POS_OLD, POS_NEW)),
     ('②別處再寫一次 120', '恰好 1 次（在 `TextUiLayout.COLS` 宣告處，實測 2）',
      (LAY, DUP_OLD, DUP_NEW)),
 ]

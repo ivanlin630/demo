@@ -473,12 +473,16 @@ func _initialize() -> void:
 		+ "（`┬─ [` 照樣剛好出現一次）。")
 	print("     ⇒ ★★★所以這一行不是免責聲明，它在描述一個【已經發生過】的錯。")
 	print("  ★★那一類落在【用戶看得出而床看不出】的那一邊，而它正是「排列合理」真正在守的東西。")
-	print("  ④★本輪的動作區只驗【團隊目標】那一類（`TEAM_TARGET_ACTIONS`，有全列版 API）；"
-		+ "★★自家隊動作與格動作**還沒有引擎原因** ⇒ 它們的灰掉理由【今天不存在】"
-		+ "（已登 defer：own-team-actions-no-source-constant／tile-actions-unreadable-boundary），"
-		+ "而藍圖 79410f7da 要求勢力那組平坦並灰掉寫引擎原因 ⇒ **那是另一張票**。")
-	print("     ★不寫這一行的話，#10 綠了會被讀成「動作區全部驗過」——而那是【假的涵蓋率】；")
-	print("       寫出來之後，那張新票的動機就在卷面上，不必靠人記得。")
+	print("  ④★本輪的動作區只驗【團隊目標】那一類（`TEAM_TARGET_ACTIONS`，有全列版 API）。")
+	print("     ★★自家隊動作與格動作**不是沒有條件** —— 它們的條件【有，而且有兩份】")
+	print("       （`player_query_api` 與 handler 各一份；指紋：`TRAIN_COST_COIN` 在查詢面 2 次）；")
+	print("       ★★★真正缺的是【列出來】：條件沒過 ⇒ 那一列**整個消失** ⇒ 玩家看到的不是")
+	print("         「不可做＋原因」而是**什麼都沒有** ⇒ 他不知道有這個動作、也不知道為什麼沒有。")
+	print("       ⇒ 那是另一張票（自家隊動作全列＋原因；已登 defer：")
+	print("         own-team-actions-no-source-constant／tile-actions-unreadable-boundary）。")
+	print("     ★不寫這幾行的話，#10 綠了會被讀成「動作區全部驗過」——而那是【假的涵蓋率】；")
+	print("       而寫成「那一類沒有引擎原因」也是錯的（我第一版就這樣寫）——")
+	print("       ★★過去式的紀錄與待辦在文字上同形，而【條件有】與【原因看得到】是兩件事。")
 	print("  ③★而「120 欄是不是對的寬度」也判不了：本床只證「沒有超過那個常數」。")
 	print("\n=== text_ui_layout DONE === errors: %d｜到場點名 %d／%d" % [
 		_errors, _cells_ran.size(), EXPECTED_CELLS.size()])
