@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 交件：leader_id chokepoint（4 處改走入口／1 處具名不改）｜★★★訂正：那一筆稽核紅【不是產品血證，是我自己床的佈置】——audit 對 is_dead 豁免，而我合成的事件沒把舊 leader 標死｜★★而那個 timeout 的病因今天找到了（env 同名不同大小寫 ⇒ Godot 一次都沒被啟動）｜★fp 量了沒變
 ---
 
