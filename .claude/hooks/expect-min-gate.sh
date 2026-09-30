@@ -86,5 +86,19 @@ fi
 _sc=$(bash .claude/hooks/stale-claims.sh 2>/dev/null | grep -o "掃到量測標記 [0-9]*" | grep -o "[0-9]*")
 check "R6 量測標記" 1 "${_sc:-}"
 
-[ "$fail" = "0" ] && echo "★expect-min 全數達地板" || echo "★有普查塌陷 —— 先修儀器，別讀那些「零違規」"
+# ★★★判決行（2026-10-01 接上註冊表時加）：**ASCII 的判決標記**，形狀沿用 `[mailbox-size] (PASS|FAIL)`。
+#   ★理由（而它是一個【我沒有解釋完的】事實，所以寫在這裡）：
+#     我原本把 registry 的 expect 設成下面那句中文（`★expect-min 全數達地板`），
+#     而 runner 判 **no-verdict** ——【逐位元比對過】expect 與輸出那一行**完全相同**，
+#     我自己在同一個 shell 用同一個 pattern `grep -qE` **命中**。
+#   ⇒ ★★所以我【沒有找到原因】，而處置是**換一個 ASCII 的判決錨**（不是宣稱修好了）。
+#     ★★★若哪天有人找到原因，把它寫在這裡 —— 而在那之前，
+#       **不要再把中文句子當 registry 的 expect**（這是一條實測到的限制，不是偏好）。
+if [ "$fail" = "0" ]; then
+  echo "★expect-min 全數達地板"
+  echo "[EXPECT-MIN] PASS"
+else
+  echo "★有普查塌陷 —— 先修儀器，別讀那些「零違規」"
+  echo "[EXPECT-MIN] FAIL"
+fi
 exit "$fail"
