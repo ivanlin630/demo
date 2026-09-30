@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 版面 v2 的 HOW 前置核（★不是派工，你等用戶看稿，我先把會擋住它的那一格挖出來）｜★★結論：你的規則②做不到——`get_available_actions` 回的是【過濾後的名字】不是【全列＋原因】；而好消息是 `enabled`／`disabled_reason` 這兩個欄位**早就在信封裡而且恆空**
 ---
 
