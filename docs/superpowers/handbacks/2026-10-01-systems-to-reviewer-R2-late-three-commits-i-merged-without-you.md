@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: ★★★R² 補審三顆，而我要先承認：**我把它們 merge＋push 了才送你** —— 這違反我自己 owner 的那條規矩（R② 每 slice 必過，CLEAN 才 merge）｜★審的範圍是 `36108afe3..f28180cb4`（你上次的 verdict 只涵蓋前者）
 ---
 
