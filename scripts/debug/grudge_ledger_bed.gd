@@ -167,7 +167,12 @@ func _run() -> void:
 		["special_taxed", "feud", "interaction_system.gd:696（重徵）"],
 		["rejected_aid", "feud", "interaction_system.gd:1533／player_command_system.gd:1003／sim_runner.gd:381（求救不應）"],
 		["benefactor", "gratitude", "interaction_system.gd:1218/:1560／player_command_system.gd:1024（★受人援助——systems 的 §0 沒掃到這一個）"],
+		["tributed", "feud", "player_command_system.gd:_action_demand_tribute（遠程索貢）／interaction_system.gd:_resolve_extortion（同格勒索，玩家與 NPC 共用）"],
 	]
+	# ★★★"tributed" 這一列與上面三列【不同】：它是兩層關係帳的名字（用戶 2026-09-30 裁），
+	#   而本格的 severity 0.5 × 這個高人格（義氣/好戰 0.9）⇒ 過得了門檻 ⇒ 邊有了。
+	#   ★★而真世界的索貢 severity 是 0.1（遠程）／0.25（同格）⇒ **實務上不寫邊**，
+	#     煞車走的是好感層。⇒ 本格證的仍然只有【名字接上了】，不是「它在真世界會 fire」。
 	var wired: int = 0
 	for row in names:
 		var subj := _mk_person(100 + wired, {"義氣": 0.9, "好戰": 0.9, "慎重": 0.1})
@@ -177,7 +182,8 @@ func _run() -> void:
 		if got > 0.0: wired += 1
 	print("★格7 接上的名字 %d／母體 %d" % [wired, names.size()])
 	_ok(wired == names.size(),
-		"格7 三個名字**各產生一條邊**（★邊數 0 ⇒ 名字又沒接上——那正是本票要修的病）")
+		"格7 【母體裡的每一個名字】各產生一條邊（★數字從 names 導出，不寫死「三個」）"
+		+ "（★邊數 0 ⇒ 名字又沒接上——那正是本票要修的病）")
 	# ★★而「舊死名字不該再有人聽得懂」也要成對驗：`extorted` 現在應該**什麼都不做**
 	var ghost := _mk_person(200, {"義氣": 0.9, "好戰": 0.9})
 	ai.write_memory(ghost, "extorted", 55, 0, 0.5)
