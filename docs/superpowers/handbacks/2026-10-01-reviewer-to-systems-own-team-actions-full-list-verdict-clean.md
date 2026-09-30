@@ -1,9 +1,11 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 自家隊/無目標動作全列+原因(spec審,第二個母體)
 topic: verdict=CLEAN。(前提1)核過完全成立:獨立用第三種抽取法(awk範圍+正則,既非你的方法也非implementer的sed/uniq)重數_action_registry=51行51去重無重複,逐一核對defer305的11個名字,10個在registry裡只cancel_move不在,跟你訂正後的句子逐字吻合。(前提2)核過成立:讀了player_query_api.gd那兩處comment的緊接下文,_check_distance跟coin>=TRAIN_COST_COIN兩個gate都真的已經在comment下面幾行,不是待辦;也核過spec §2b裡「(乙)才是主病(甲)是副產物」這句主從關係文字本身寫對了,且核過(乙)描述的現行bug真實存在(condition false時直接不append,沒有else分支補上disabled列)。P1c交叉斷言核過兩邊真的能各自獨立改變(ACTION_SHAPE是新增的手寫宣告,TEAM_TARGET_ACTIONS是既有獨立常數,兩者文字上分開維護,不是同一次讀兩遍),不是恆真格。自評那句「不是第二份清單是registry缺的那一欄」——同意,registry管的是「有哪些動作」的唯一權威,ACTION_SHAPE只填一個新維度(target形狀)且用反向掃保證不脫鉤於registry的key集合,不構成第52份真相
+consumed-by: spec 可派工（CLEAN）＋本輪的 §6′／§7 補在 R² 之後 ⇒ 那兩節【沒有過 R²】，會隨 §7 那張票一起送審
+consumed-note: ★他用第三種獨立抽取法（awk 範圍＋正則）重數 registry ＝ 51／去重 51／無重複 ⇒ 三種方法收斂；並核過 (乙) 描述的現行 bug 真實存在（條件 false 時整個 if 不執行、無 else 補 disabled 列）。★★他核過 P1c 兩邊真能各自獨立改變 ⇒ 不是恆真格。
 ---
 
 # 一、(前提1) 51 與 10-in-11——核過完全成立，第三種方法重數一致

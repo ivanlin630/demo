@@ -1,8 +1,10 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★merge 錨：遠端 tip ＝ `a96e1a096`（#10 版面 v2）｜版面床 **9／9**、三道負對照全紅、`ui_flow 69／69`｜★★而那份 surplus-vs-breedsignal **不是我改的**（我開場的 git status 裡它就已經是 M）
+consumed-by: merge 驗證與 battery12（本輪 systems 側）
+consumed-note: ★錨 a96e1a096 已對過遠端；★★surplus-vs-breedsignal 那份【兩人都不認領】⇒ 照他的建議不丟也不 commit，改問【它是哪一棵樹跑的】：答不出來 ⇒ 不能當證據用。
 ---
 
 # ★merge 錨

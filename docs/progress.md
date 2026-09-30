@@ -3212,3 +3212,100 @@ RESULT_TTL_TICKS = TICKS_PER_HOUR ＝ 60），而清除在 `_consume_player_comm
     ★★而我這一側的義務是**把未推 commit 攜帶的判決義務寫在信裡**（新閘／改判準／merge），
     因為那個義務只活在我腦袋裡，push 的人看不到。
 ```
+
+---
+
+## 2026-10-01｜三支 merge 進主線 ＋ battery11 97／97 ＋ 必讀區超限清掉 ＋ 一張新 spec（★而今天的判準層收穫全部來自 implementer 攔我）
+
+### (甲) 進 origin/main 的（依序）
+
+```
+2650b0531 merge feat/text-ui-layout-v2            (tip 5a3e09fb5)  版面 v2 第一步
+af7f41e0c merge docs/set-leader-transient-named   (tip 2c6c66df9)  set_leader 檔頭分類＋排序依賴具名
+65bf795e2 merge feat/artifact-staleness-not-silent(tip 8fff988a3)  產物過期不再靜默
+  ⇒ ★merge 後【指名】核過：97 個閘 id、八支關鍵閘各一次、12 條棘輪地板全在
+     （UI 21／REPLAY 2／FEED 7／FEP 10／DVO 2／AVAIL 8／STRINGS 3／NPCTRIB 3／LEADER 3／SPAM 6／UNBOUND 6／COLOC 6）
+4e3482b12 信箱衛生：16 封信補標 consumed（回信早就寄了，缺的是這一半）
+daa67f6bd 必讀區瘦身：invariants.md 191 → 173
+6b5bd8a70 known_issues：A-1／Q7-3 結案＋指名守它的那一格
+91d7c4e6a ★我自己寫進 hook 的兩個簡體字（診断／截断 ⇒ 診斷／截斷；★括號裡那兩個是【正當的提及】，不要「修」它）
+0f969b1d8 spec own-team-actions ＋ defers 兩列 ＋ 兩封信
+```
+
+### (乙) battery11：`BATTERY_RC=0`
+
+```
+run-id 33170-20261001-032338｜註冊表 97 支｜實跑 97 支｜✓97 ✗0｜1606s
+[TREE] HEAD-start=65bf795e2 HEAD-end=65bf795e2｜registry=clean runner=clean code-dirty=0
+★檔內只有【一個】run-id（不是兩輪疊在一起）；摘要檔在 docs/measurements/.battery/
+★★world-fp 255s 過 ⇒ 三支 merge 沒有動世界指紋
+★★★merge 判準四條逐一滿足：①釘死樹全綠＋run-id ②delta 逐檔指名
+   ③讀到改動檔的三支床跑的就是要推的那份（釘死樹＝main tip）
+   ④未推範圍【沒有動任何 .claude/hooks/*】⇒ 沒有「改過的守衛」要單獨重跑
+```
+
+### (丙) 必讀區超限清掉（doc-cap 兩項 warn → ✅）
+
+```
+invariants.md 191 → 173（搬 18 行進 process/detail/invariants-cases.md）
+systems 開場合計 616 → 598
+★搬走的是【進度與細則】不是規則：憲法閘那節的 arc 溶入進度／coverage 誠實限／
+  arc 期間 pre-commit 硬掛／後勤應用例（四行併一行指標，留下契約本身）；
+  執行失敗反饋鐵律的 systems HOW 裁定＋落地順序（14 行併一行指標，留下憲法級的規則本文）
+★★逐條 grep 核過每一條都在 detail 檔裡（不是數行數）
+```
+
+### (丁) known_issues 兩條【早就修好】的條目結案
+
+```
+A-1 記名招募 TextUI 死路  ⇒ 守它的是 ui_flow_test::_test_recruit_named_reachable
+Q7-3 文字 UI 無 take_loot ⇒ 守它的是 ui_flow_test::_test_q7_3_take_loot_flow
+★★而 A-1 的過期差點造成一次真損害：動作全列那票的藍圖裁定④原文是「STUB 的泛用 recruit 不列」，
+  照字面做會【門死記名招募】（實測那一格立刻紅）⇒ 改裁為「recruit 是子選單入口，enabled 沒有意義」。
+  ⇒ ★★★一條過期的 known_issue 會讓人以為那條路本來就是死的。
+```
+
+### (戊) 新 spec：自家隊／無目標動作的全列＋原因（待 R²）
+
+```
+`docs/superpowers/specs/2026-10-01-own-team-actions-full-list-HOW.md`（230 行）
+母體【不是】一份新清單：ACTION_SHAPE（key ⊆ _action_registry，宣告每個動作的 target），
+母體＝target=="none" 的那些 ⇒ 機械導出；完整性靠反向掃（漏一個紅並指名）
+★不收斂 TEAM_TARGET_ACTIONS（兩支床＋同格閘在逐字引用那個符號名 ⇒ 會讓三支守衛同時失去主詞）
+  ⇒ 過渡＝異源交叉斷言 ＋ 新 defer `team-target-actions-not-yet-derived`（極性驗過）
+兩個 WHAT 已呈藍圖：情境動作不可做時列不列／offer_surrender 算哪一類
+```
+
+### ★★★(己) 今天的判準層收穫 —— **五條，全部是 implementer 攔下我的**
+
+```
+①【merge 掉的東西沒被劃掉 ⇒ 它會以「欠的」身分回來】我要他補的兩筆註解，
+  都已經在我半小時前親手 merge 的那棵樹裡。他用三行 git show 打回，我獨立核過。
+  ⇒ merge／consume 的同一個動作裡要把待辦欄那一行劃掉；
+  ⇒ ★「某個檔裡要有某句話」是機器可查的，而我用記憶回答了一個可查的問題。
+②【分類的單位是【進入路徑】不是【呼叫點】】我兩次寫「10 ＋ 1」，而同一個呼叫點可以落在不同的桶。
+  ⇒ ★分桶總數等於母體總數時最危險（兩個 11 對得上而數的不是同一種東西）。
+③【判準的粒度，不是算術】母體 13 vs 14 的分歧在 `forced_%s`：
+  「以引號開頭」vs「是一個完整的字面量（不含插值）」⇒ spec 要把判準逐字寫出來。
+④【過去式的紀錄與待辦在文字上同形】「# N-3: 補 X 真 gate」的 gate 已經在那裡。
+  ⇒ ★★一句方向相反的血證，比沒有血證更貴（照它做完【卷面會綠】而主病沒動）。
+  ⇒ ★★★而他在攔下我之後不到一小時，自己在床裡寫了一句同形的並自報 ——
+    判準：**「我剛剛才核過這件事」正是最容易把它寫錯的時刻**（核完之後寫的總結是用記憶寫的）。
+⑤【同一句話裡兩個時刻】我寫「9 檔命中清單」而貼了 8 個名字（9 是修之前、名單是修之後），
+  ★而我加的那句括號「（＋我剛修掉的那支已不在）」讓一個不一致的數字看起來已經被解釋過了。
+  ⇒ 當我發現自己在寫一句解釋差異的括號時，那就是停下來重跑一次的訊號。
+★另外兩條清單類的判準（一人一個方向）：
+  **被截斷的清單不能用來否證「我不在裡面」**（它只能證明「有人在裡面」）／
+  **檔名層級的清單不能用來證明「我那一行乾淨」**（它只能定位到檔）。
+```
+
+### (庚) 還沒做完的
+
+```
+·own-team-actions：等 R² ＋ 藍圖那兩個 WHAT ⇒ 兩者回來後補 expect 列數再派工
+·implementer 下一批：版面床 8 → 9 格（expect 逐字抄）＋三道負對照（本機 e7a68c980／887749333）
+·`docs/measurements/2026-09-01-surplus-vs-breedsignal.txt` 工作區有【不是我改的】改動
+  （breed.born 累計 0 → 1，整表數字換了）⇒ 我沒 commit，已問 implementer／量測員
+·第三個母體（格動作）仍卡在 defers `tile-actions-unreadable-boundary`（解除條件＝宣告與行為對齊）
+```
+
