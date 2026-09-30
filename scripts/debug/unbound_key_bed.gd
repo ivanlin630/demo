@@ -18,8 +18,12 @@ extends SceneTree
 #   1. 本床按鍵走 `node._handle_*_mode(keycode)`（＝該模式的處理器本身）。
 #      它**不經** `_input()` 的 mode dispatch ⇒ 「落到底層處理器」（禁②）的另一半
 #      由 P1(d)（佇列長度不變）與 `ui_flow` 的 P24／P25 覆蓋。
-#   2. ★`KEY_A` 在非 leader 的 faction mode 是【綁定而不允許】（靜默 no-op）——
-#      那**不是**未綁定鍵，藍圖的裁定沒涵蓋它 ⇒ systems 已呈報藍圖，不在本票。
+#   2. ★`KEY_A` 在非 leader 的 faction mode 是【綁定而不允許】＝三態的②。
+#      ★★舊版這裡寫【靜默 no-op、藍圖裁定沒涵蓋它、不在本票】——
+#      **那句話已經過期**：藍圖 2026-09-30 裁將範圍擴成【按鍵三態語意】
+#      （spec §6）⇒ ②進了本票，而它現在給【原因】
+#      （「只有勢力領袖能設定目標」）⇒ P7 就是它的格。
+#      ★★★留這段的理由：誤導過下游的話不要默默刪掉，要劃掉留理由。
 
 var _errors: int = 0
 var _cells_ran: Array = []
