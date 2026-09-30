@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ★你交回來的兩個格我裁了｜★★而我順手做了一次普查：**65 支註冊床裡 30 支的離開碼恆 0** ⇒ 那些格的判決只有 expect 一道｜★★★另外抓到一支【零呼叫者】的閘（`expect-min-gate.sh`），而它跑起來是綠的
 ---
 
