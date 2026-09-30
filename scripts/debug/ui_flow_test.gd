@@ -3351,6 +3351,34 @@ func _test_p19_control_coverage_ratchet() -> void:
 	_cell("_test_p19_control_coverage_ratchet")
 
 
+# ★★★★★【2026-10-01：這兩塊是被我自己的視窗吞掉之後補回來的】——
+#   我重寫 P19 時用 `/^func /` 找「下一支函式」來定範圍，而 `_count_fired` 是
+#   **`static func`** ⇒ 那個錨**沒有涵蓋這個變體** ⇒ 視窗一路吃到下一支
+#   `func`，把 `_count_fired` 本體與下面 P2 的整段註解（**含一條已實測紅的紀錄行**）
+#   一起刪掉。★接住它的是 parse error（`_count_fired()` not found）；
+#   ★★而如果只刪了註解那一塊，接住它的會是 P19 自己的棘輪（28 → 27）。
+#   ⇒ ★★★判準：**用「下一個 X」定範圍之前，先問 X 有幾種寫法**
+#     （`func` / `static func` / `@warning_ignore` 之後的 func …）。
+
+# 數【固定格式】那一行：`# 負對照：<怎麼點火> ⇒ 已於 <分支> 實測紅`
+static func _count_fired(path: String) -> int:
+	var src: String = FileAccess.get_file_as_string(path)
+	var n: int = 0
+	for l in src.split("\n"):
+		var t: String = l.strip_edges()
+		if t.begins_with("# 負對照：") and t.contains(" ⇒ 已於 ") and t.ends_with("實測紅"):
+			n += 1
+	return n
+
+# P2［整天不漏］：推進【一天】＝24 次 step，而佇列壽命只有【一小時】
+#   ⇒ ★讀者必須【每一次 step 之後都讀】，漏一次就漏掉整整一小時的事件。
+# ★★★這一格守的是【讀點的位置】，不是「事件有沒有被 emit」（spec §4 P2 逐字）。
+#   ⇒ 所以它逐小時各塞一件事件，然後數畫面上收到幾件：
+#     ·讀點在迴圈裡 ⇒ 24 件全到
+#     ·讀點搬到整天結束後才讀一次 ⇒ 只剩最後一小時那件（其餘被 TTL 清掉）⇒ 紅
+# ★母體地板：先斷言【真的塞進去了 24 件】—— 沒塞進去的話「收到 0 件」也會等於「沒漏」。
+# 負對照：把 `_process()` 裡那段撈取搬到迴圈之外（只在最後讀一次）⇒ 必須紅
+# 負對照：把 `_process()` 裡那段撈取改成永遠讀空（＝只在整天之後才讀一次）⇒ 畫面收到 0 件 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p2_whole_day_not_dropped() -> void:
 	_selftest_gate("_test_p2_whole_day_not_dropped").noop()
 	print("\n── P2 推進一天不漏事件 ──")
