@@ -304,8 +304,12 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				team_actions.append(String(row.get("action_id", "")))
 		for row2 in rows:
 			var act: String = String(row2.get("action_id", ""))
+			# ★★★`label` 從【列裡拿】，這一側不再自己生產（systems 裁 2026-10-01 ②）：
+			#   兩邊都委派到 `PlayerApiMapper.action_label` 只代表它們**今天同值**，
+			#   ★不代表只有一個生產者 —— 齊了兩份就是兩份。
+			#   ⇒ 這條路上的生產者只准有一個（全列版那一處）；P11 守它。
 			actions.append(PlayerApiMapper.map_available_action(
-				act, _action_label(act),
+				act, String(row2.get("label", "")),
 				bool(row2.get("enabled", false)), String(row2.get("disabled_reason", "")),
 				{
 					"allowed_kinds": PackedStringArray(["team"]),

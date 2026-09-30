@@ -49,6 +49,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p8_envelope_boundary",
 	"_test_p9_declared_openers_are_pure",
 	"_test_p10_reverse_sweep_payload_without_declaration",
+	"_test_p11_label_has_one_producer",
 ]
 
 
@@ -617,6 +618,41 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	_cell("_test_p10_reverse_sweep_payload_without_declaration")
 
 
+# 負對照：把 `_action_label(act)` 加回信封那一側 ⇒ 本格紅 ⇒ 待實測
+# ══ P11：★label 在這條路上只有【一個生產者】（systems 裁 2026-10-01 ②）════════════
+# ★★★為什麼「兩邊都委派到同一張表」不算安全：那只代表它們**今天同值**。
+#   兩份生產者可以各自被改（換成別的表、加前綴、加狀態字），而**同源那一刻的相等
+#   不是不變量** —— 這正是「比較的兩邊同源 ⇒ 恆真」那一族的鏡像：
+#   ★不是判準同源，是【被守的東西】同源，而同源會被人拆開。
+# ★★母體邊界：本格只管【團隊目標動作那一條路】（`# Layer 4` 到「具名登記」那一段）。
+#   同檔其他幾處 `_action_label` 是自家隊／格動作那幾條路 —— 它們沒有全列版可以拿 label，
+#   ★那一側 `_action_label` 就是它們唯一的生產者 ⇒ 不在本格母體（已就地登 defer）。
+func _test_p11_label_has_one_producer() -> void:
+	print("
+── P11 label 只有一個生產者 ──")
+	var q_raw: String = FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_query_api.gd")
+	var a: int = q_raw.find("# Layer 4: team-level actions against focused team")
+	var b: int = q_raw.find("unreadable-boundary: tile-actions")
+	_check("★母體地板：真的切到那一段（切不到 ⇒ 下面幾條恆綠）", a >= 0 and b > a)
+	var block: String = _code_only(q_raw.substr(a, b - a)) if (a >= 0 and b > a) else ""
+	var in_block: int = block.count("action_label")
+	var from_row: int = block.count("row2.get(\"label\"")
+	var pcs: String = FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd")
+	var body: String = _code_only(_func_body(pcs,
+		"func get_action_availability(state: WorldState, target_id: int) -> Array:"))
+	var in_rows: int = body.count("PlayerApiMapper.action_label(")
+	print("   這條路上：信封側 `action_label` %d 次｜從列裡拿 label %d 次｜全列版生產 %d 次" % [
+		in_block, from_row, in_rows])
+	_check("★★★信封那一側【不再生產】label（`action_label` 在這一段 0 次，實測 %d）" % in_block,
+		in_block == 0)
+	_check("★★信封那一側是【從列裡拿】的（%d 處）" % from_row, from_row >= 1)
+	_check("★★★生產者恰好一個：全列版裡 `PlayerApiMapper.action_label(` ＝ 1 次（實測 %d）"
+		% in_rows, in_rows == 1)
+	_cell("_test_p11_label_has_one_producer")
+
+
 func _initialize() -> void:
 	print("=== available_actions bed ===")
 	_test_p1_full_list_both_directions()
@@ -628,6 +664,7 @@ func _initialize() -> void:
 	_test_p8_envelope_boundary()
 	_test_p9_declared_openers_are_pure()
 	_test_p10_reverse_sweep_payload_without_declaration()
+	_test_p11_label_has_one_producer()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):

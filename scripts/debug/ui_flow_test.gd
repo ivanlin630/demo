@@ -2348,7 +2348,7 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
 const SPEC_UI_MODE_COUNT: int = 13
 const CONTROL_FLOOR_DVO: int = 2  # decision_vs_outcome_bed（分開講／具名例外）
-const CONTROL_FLOOR_AVAIL: int = 5  # available_actions_bed（五道：母體換手抄／條件複製回查詢面／原因清空／★入口寫一個欄位(P9 行為證)／★★把一個宣告拿掉(P10 反向掃要指名它)；★原本的「排除拿掉」那一道母體是空的＝systems 裁維持「機制接電＋清單暫空」，見床裡劃掉那一行）
+const CONTROL_FLOOR_AVAIL: int = 6  # available_actions_bed（五道：母體換手抄／條件複製回查詢面／原因清空／★入口寫一個欄位(P9 行為證)／★★把一個宣告拿掉(P10 反向掃要指名它)／★★★label 加回信封側(P11 唯一生產者)；★原本的「排除拿掉」那一道母體是空的＝systems 裁維持「機制接電＋清單暫空」，見床裡劃掉那一行）
 const CONTROL_FLOOR_STRINGS: int = 2  # scripted_exploration_bed 的字串兩格（P11 表覆蓋／P12 零英文）
 const CONTROL_FLOOR_NPCTRIB: int = 3  # npc_tribute_transfer_bed（三道：自己寫一份／拿掉恩怨／塞進表）
 const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
