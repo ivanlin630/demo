@@ -767,6 +767,21 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	if Probe.enabled: Probe.bump("death.combat_named")
 	print("[Death] Person%d (%s) 死亡 (Team%d)" % [p.id, p.person_name, team_id])
 	if team.leader_id == p.id:
+		# ★★★【具名：這一行會產生一個 roster 暫態，而它安全的理由是執行順序】
+		#   （systems 裁 2026-10-01；reviewer 逐處核過進入條件、我自己也核過）
+		#   ·此刻 `team.leader_id` 還指著 `p`，而 **`p` 還在 `state.persons` 裡**
+		#     （本函式最後一行才 `state.persons.erase(p.id)`）。
+		#   ·`on_leader_death` 的 NPC 分支會 `state.set_leader(team, best_successor.id)`
+		#     （`event_system.gd:53`／`:61`，用**預設** `old_leader_action = "none"`）
+		#     ⇒ 舊 leader `p` 進入「`team_id` 指本隊、**既不是 leader 也不在 named_members**」
+		#       的**暫態** ⇒ 那正是 `InvariantAudit` 的「roster 反向破」會報的形狀。
+		#   ★★它安全的【唯一】理由 ＝ `p` 在本函式結束前被 `state.persons.erase()`，
+		#     而中間**沒有 yield／await／任何觸發一致性檢查的操作**。
+		#   ★★★所以：**若有人把死亡處理拆成兩步、或在中間插入一個會跑稽核的操作
+		#     ⇒ 這個暫態會變成可觀察的，而那時壞掉的地方【不在這一行】**
+		#     —— 它會顯示成 `set_leader` 或稽核的錯，而真正的改動在別處。
+		#   ★而 `is_dead` 在本檔**零出現**（我 grep 過）⇒ 不要以為「已死所以稽核會跳過」
+		#     在保護這條路：保護它的是**順序**，不是旗標。
 		var event_system = load("res://scripts/simulation/event_system.gd").new()
 		var succeeded: bool = event_system.on_leader_death(state, team)
 		if not succeeded and team.faction_id != -1 and state.factions.has(team.faction_id):

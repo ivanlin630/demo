@@ -619,6 +619,33 @@ func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void
 #     而清空不需要回指 team_id ⇒ 它們不是繞過。
 #   ⇒ ★★★寫下這一段的理由：一句「所有直寫改走此」在繞過者面前不是規則，是願望；
 #     而【現存例外具名】讓下一個人看得到真實狀態，也讓新增的第六個繞過者變得顯眼。
+# ══ ★★★呼叫端母體與分類（systems 裁 2026-10-01 的【訂正版】）═══════════════════
+#   ★★而分類的【單位】是【進入路徑】不是【呼叫點】—— 這一點要先講，否則數字會對而桶會錯：
+#     production 呼叫點 ＝ **11** 個（event_unrest_replace／event_unrest_split／
+#     event_system ×2／game_setup ×3／player_command_system／population_system／
+#     reaction_system／recruit_tutorial）
+#     而**同一個呼叫點可以落在不同的桶**：`event_system.gd:53`／`:61` 從
+#     `faction_ai_system:1548`（被 `if team.leader_id == -1:` 守著）或
+#     `subteam_system:293`（`absorbed.leader_id = -1` 在 :271 就地清掉）進來時是 no-op，
+#     而從 `npc_combat_system:771` 進來時**舊 leader 還活著**。
+#   ⇒ 分兩類：
+#     ①【結構性 no-op】`old_id == -1` 或 `old_id == pid`（或明寫 `"member"` ⇒ 舊 leader 降 named）
+#        ⇒ 這一類**不會**產生暫態。
+#     ②【靠執行順序】只有一條路：`npc_combat_system:771` → `on_leader_death` → `set_leader(…, "none")`
+#        ⇒ 舊 leader 保留 `team_id` 而**不在 roster** 的暫態，
+#        ★而它安全的唯一理由是 `state.persons.erase()` 在同一個同步呼叫內跟著發生
+#        （理由就地寫在 `npc_combat_system.gd:771` 那一行上方，**不是**寫在這裡就算）。
+#   ★★★而這一段的**前一版是錯的**，錯法值得留著：它寫「fresh 7 ＋ 舊 leader 已死 3 ＋ 明寫 member 1」，
+#     而那個「已死 3」是**編出來的理由** —— `is_dead` 的 skip（`invariant_audit.gd:94`）
+#     **從來沒有被觸發過**，那三處靠的是 `leader_id == -1` 的守衛，與 fresh 那一桶**同構**。
+#     ⇒ 判準：**「母體窮盡」要窮盡的是【理由】不只是【成員】** ——
+#       三數相加只證明沒有漏人，**不證明每個人被放對桶**，而放錯桶的成本是
+#       「你以為某個機制在保護你」。
+#     ⇒ ★而推翻它只需要**一個 grep**（那個旗標在該檔零出現）⇒ 把「某個守衛在保護這條路」
+#       寫進分類之前，先去確認那個旗標**真的會被設**。
+#   ★【第十二個呼叫者的義務】：說出你屬於哪一類；
+#     若是 ②（`old_id` 非 -1 且那個人還活著）⇒ **必須說出誰保護那個暫態**。
+#     ★★（今天沒有會紅的斷言擋這件事 —— 沒有獵物就不加閘；而這一段是給下一個人的施工圖。）
 func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") -> void:
 	var old_id: int = team.leader_id
 	if old_id != -1 and old_id != pid and old_leader_action == "member":
