@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審：④ 決定 vs 結果【分開講】（`feat/decision-vs-outcome` @ 050573024）——★這一張動產品碼（player_command_system／sim_runner）｜★★而它的鑑別力來源是控制②，不是那 9 個「一致」
 ---
 
