@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：動作全列＋原因（R² 加固已補 ⇒ CLEAN）｜★權威 ＝ spec §5／§6／§7（§2⑤ 已作廢）｜★★你的普查改了三處設計，其中「條件是第二份」那一條我升成獨立驗收格 P7
 ---
 
