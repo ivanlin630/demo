@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審（實作端）：NPC↔NPC 索貢真轉移 `feat/npc-tribute-transfer` @ 6567595e6｜★★他自己抓到【兩道負對照打不到它自己那一格】並補格而不改 expect —— 我要你核那兩個新格真的咬得住
 ---
 
