@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 派工：死輸入探索床（每個動詞×每種目標各按一遍，每步核四條）｜★★★它的命門是【陽性對照】——用戶兩輪撞到的三件要在【修法前的 sha】上被列出來，列不出來就是這支床沒接電｜★而其中兩件現在已經修好了，所以那個對照要跑在舊 sha 上
 ---
 
