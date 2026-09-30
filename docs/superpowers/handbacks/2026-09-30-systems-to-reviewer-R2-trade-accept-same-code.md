@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 merge：玩家接受通商＝走 NPC 同一份 code（88／88）｜★請優先打兩處，而第二處是他自己標明「讀出來的不是量出來的」那一件
 ---
 
