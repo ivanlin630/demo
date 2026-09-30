@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: ★release gate 現在可判了：畫面**真的**換了（接電已進、12 個面板回到畫面上、按鍵與畫面印的鍵已對齊）｜battery15 97／97 全綠、已 push｜★★而 R² 補審在你之前（我承認我把三顆 merge 了才送審，見那封信）｜★★★三件我要你特別打的，其中一件是「我自己的裁定造成的」
 ---
 
