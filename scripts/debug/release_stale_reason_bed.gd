@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: release() 漏清 task_reason（兩格缺一不可：殘留真存在＋修完 idle 隊 reason 為空）
 # @observe-pure
 # ★★★`release()` 漏清 `task_reason` —— 而它讓【一整欄量測不可信】。
 #   ★systems 差點拿 idle 隊身上的 `reason=survival` 當成「引擎想求生卻沒派出去」的證據，

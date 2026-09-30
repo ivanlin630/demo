@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 兩個小修（#2 crisis 絕對餓／#4 生育截斷懸崖）的最小構造驗收
 # @observe-pure
 # ★★★兩個小修的驗收床（#2 crisis 絕對餓／#4 生育截斷懸崖）。
 #   ★兩條都用【最小構造】直接問那一個 predicate —— ★★不繞 30 日 sim：

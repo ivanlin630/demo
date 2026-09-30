@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: F0 指紋儀器自身驗收（spec §4：不擾世界／零 global RNG／deterministic／純讀不寫）
 
 # ★F0 自身驗收（spec §4）：儀器不擾世界。★零 global RNG（R² 觀察①=直接 RNG 斷言為主、更快失敗好 debug；
 # 第三度 RNG 警戒 feedback_observer_no_global_rng LOD→RNG 犯過 2 次）+ deterministic + 純讀不寫 state。

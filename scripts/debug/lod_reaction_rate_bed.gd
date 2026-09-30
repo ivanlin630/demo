@@ -1,4 +1,20 @@
 extends SceneTree
+# @bed-kind: invariant —— 紅＝LOD 的 near/far 節奏不再等價（rate／work_morale／unrest 三條補償任一斷了）
+#   ⇒ 破的是「遠近只是【多久算一次】、不是【算出不同的世界】」這條 LOD 等價律（不是某一票的驗收）。
+#
+# ★★★2026-09-30 systems 復活這支床（它自己就是 defers 那列『床會紅而沒人跑它』的第二個血證）：
+#   ·它【沒有註冊成閘】⇒ 從 2026-08-20 之後沒有人跑過它
+#   ·而期間生育被改寫成 team-level 連續累積器（`reaction_system.gd:290 _tick_breed`，
+#     daily ≈ 3 人 × BREED_BASE_RATE × f ≈ 0.007／日）
+#   ⇒ ★舊的預設窗長 20（＝20 小時）在新機制下【永遠生不出一個 minor】
+#     ⇒ 實測 20 窗 FAILS=2、1200 窗（50 日）仍 FAILS=2、★6000 窗（250 日）ALL PASS、ratio=1.00、8 秒
+#   ⇒ ★★所以它的紅【不是產品壞】，是【它量的機制被換掉而沒有人回來看這支床】。
+#
+# ★★誠實限（不寫在信裡寫在這裡）：**breed 的 far/near 兩格在累積器改寫之後變成結構上恆等**——
+#   `elapsed_days` 由真實 tick 差算出，trials 只改【多久呼一次】不改累積量 ⇒ 兩邊必然相同。
+#   ⇒ ★那兩格現在守的是「有人把 elapsed 換回 cadence 常數」（床裡 :287 明文禁的那件事），
+#     ★★真正還在分辨 near/far 差異的是 work_morale（w_eff=1-(1-0.1)^trials）與 unrest（±1×trials）兩格。
+#   ⇒ ★★★而【兩側都真的 fire】那一格是本床的母體地板：0/0 的 ratio 會被它擋成紅，而它今天就是這樣紅的。
 # ★gate①（靈魂）：rate-equivalence——同條件下 far 隊長窗累積 breed 次數 ≈ near 隊。
 #   near 隊（每 NEAR_CADENCE 跑一次、trials=1）vs far 隊（每 FAR_ZONE_INTERVAL 跑一次、trials=10）。
 # ★gate②：無玩家 headless → reaction.breed > 0、minor_population 不再全 0。
@@ -48,7 +64,7 @@ func _mk(seed_v: int) -> Array:
 func _run() -> void:
 	print("=== LOD rate-equivalence bed ===")
 	# ★窗長要落在【未飽和】區間才是真 rate 證據（撞 cap 兩側都會等於 cap＝ratio 假 1.00）。
-	var windows: int = int(OS.get_environment("ADHOC_TICKS")) if OS.get_environment("ADHOC_TICKS") != "" else 20
+	var windows: int = int(OS.get_environment("ADHOC_TICKS")) if OS.get_environment("ADHOC_TICKS") != "" else 6000
 	# A：near 節奏（每窗呼一次、trials=1）
 	var wa := _mk(1337); var sa: WorldState = wa[0]; var ta: TeamData = wa[1]
 	var rs := ReactionSystem.new()

@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: ⑨ 貨幣創世的世界讀數（驗收 ①③④⑤；月週轉＝k 的唯一合法證據）
 
 # ★★★⑨ 貨幣創世的世界讀數（驗收 ①③④⑤）——★一跑收齊。
 #

@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: addendum-1 大村擴點剎車機制正確性（blueprint 裁 (乙)+(丙)）
 # ★addendum-1（blueprint 裁 (乙)+(丙)）：大村 config 床——直接合成「高統領 leader + pop 接近 cap」的大村，
 # 單測擴點【剎車機制正確性】，不等世界自然長出大村（標準場景到不了飽和＝大考該記錄的事實，非 §4b 失敗）。
 # 驗：①擴點真 fire（有家+候選+pop 足）②飽和區（pop 接近 cap、邊際遞減）擴張 util 自然降

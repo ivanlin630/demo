@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: stock_seen tap 的陽性對照（分辨『接線壞』與『世界真的走不到礦』；instrument-lies ①）
 
 # ★★★陽性對照（`feedback_instrument_lies_three_forms` ①「儀器沒開，0 被當成沒發生」）：
 #   接線後世界層仍量到 `means_end.stock_seen.* = 0`。★那有兩種完全不同的意思：

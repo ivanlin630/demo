@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: B-v0 驗收（spec §5 六格：紅線／到期款貨分開／守恆／鑑別力／五個 tap）
 
 # ★★★B-v0 驗收（spec §5）——★一跑收齊 ①紅線 ②到期 3b款/貨分開 ④守恆 ⑤鑑別力 ⑥五個 tap
 #

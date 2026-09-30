@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: A#14 combat 死還接不接得到 SpecimenTracer（判準是跑不是讀：先證病在不在）
 # @observe-pure
 # ★★★A#14 驗證床：**combat 死【現在】還接不接得到 SpecimenTracer**。
 #

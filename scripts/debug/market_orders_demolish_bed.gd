@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 族④#6 outpost 拆除 ⇒ tile.market_orders 跟著消失（真曝露＝重建後鬼單復活）
 # @observe-pure
 # ★★★族④#6：outpost 拆除 ⇒ `tile.market_orders` 必須跟著消失（dangling state）。
 #

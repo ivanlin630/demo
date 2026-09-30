@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 外觀層欄位非零寫入證據（systems 2026-09-02 裁兩條：ACT_IDLE 非零寫入＋write_unknown_BUG 恆 0）
 # @observe-pure
 # ★★★外觀層【寫入證據】床（驗收條款：每個新欄位必須有非零寫入證據）。
 #   ★理由（既有條款）：欄位存在而恆空 ⇒ 決策永遠篩不到人，★★而它看起來像「沒人符合條件」。

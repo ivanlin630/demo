@@ -212,7 +212,48 @@ attendance-mark-written-in-the-caller-survives-the-callee-dying	★**假點名�
 bash-hook-partial-execution-unchecked	★**28 支 bash hook 沒有被查過**（reviewer 2026-09-17 逐字：「是否有類比的『某個 shell 函式中途死掉、外層腳本吃掉繼續』的洞，是另一個問題，需要另一輪查，**本封不宣稱查過**」）｜★★**寫下來的理由**：godot 床那一輪已經證明「沒有失敗」與「沒有執行」在畫面上一模一樣 ⇒ **同型問題在另一個語言上【沒被查過】不等於【沒有】**；★★★**而「不宣稱查過」這五個字就是這一行存在的價值** —— 不讓它以「應該沒事」活著｜★要查的話問法是：shell 函式內的錯誤（`set -e` 未開／子 shell／pipe 中段失敗）會不會讓外層腳本照樣走到結尾並印出通過	有人要處理 hook 可信度時；★★或 godot 那 26 支修完、樣板定型後順手問一次同樣的問題	grep -q "set -euo pipefail" .claude/hooks/merge-gates.sh
 trade-partner-finder-has-no-production-caller	★**`strategic_ai_system._find_trade_partner` 全庫只有測試與量測床呼叫，production 0 處**（`strategic_ai_system.gd:297-298` 的註解自述：「純查詢 scaffolding（無 TaskArbiter 呼叫，非違憲），仍供 `headless_test` 覆蓋」）｜★★**而它是一個陷阱**：它看起來是「商隊怎麼找交易對象」，**而真管線是 `_merchant_trade_target` → `team_market_known`（三源含 relay）** ⇒ **下一個人會像我一樣量它、然後以為量到了世界**（★血證 2026-09-18：我拿它的 −87.2% 去要 WHAT 裁，而 WHAT 據此裁了一次）｜★★★**處置（systems 裁）：標死＋留樁，不刪** —— 刪掉會丟掉 `headless` 覆蓋，而它是未來「交易決策真的去讀交易對象」時的現成座位；★**但【標死必須是機器看得見的】**：函式檔頭加 `@production-callers: 0（刻意：測試專用 scaffolding；真管線見 _merchant_trade_target）`｜★★**本行的解除條件＝有人真的把它接上 production** —— 那一天 `defer-open` 會亮，而那正好也是「市集廣告」那條線該重新被議的時候	有人把 `_find_trade_partner` 接進 production 時（★那一天 defer-open 會亮；★★而它同時是 `market-ads` 重議的觸發點）	grep -rlE "_find_trade_partner" scripts/simulation/ | grep -qv "^scripts/simulation/strategic_ai_system.gd$"
 bed-kind-has-no-slot-for-shared-helpers	★**`bed-kind` 的四格（`invariant`／`acceptance`／`diagnostic`／`pending`）沒有【共用 helper】的位置**（2026-09-18 揭：`measure_bed_helper.gd` 被觸及 ⇒ 閘要它宣告，而**它不是床** —— 它自己不判決、不印判決橫幅、沒有 `_ok`）｜★★**暫時處置**：標 `pending`（★**而這不是填格子**：`pending` 的語意就是「還沒判」，**而這裡確實還沒判**）｜★★★**真正的問題是【種類集合不完整】**：閘問的是「這支床紅了代表什麼」，而 helper **根本不會自己紅** ⇒ 要嘛加第五格（例如 `helper`：共用工具、本身不判決，**判準可機械化：無 `_ok`／無判決橫幅**），要嘛把 helper 排除在觸及母體外｜★**不要用「放寬宣告要求」來解** —— 那會讓真正該宣告的床也溜過去	有人要動 `bed-kind` 的種類集合時；★★或再出現第二個「不是床卻被要求宣告」的檔案時（★那時它就不是個案）	grep -qE "@bed-kind: helper|helper⇒" .claude/hooks/bed-kind-gate.sh 2>/dev/null || grep -qE "@bed-kind: helper" scripts/debug/measure_bed_helper.gd
-beds-that-can-red-but-nobody-runs-them	★**「床會紅」與「有人在跑它」是兩件事**（implementer 揭 2026-09-18）：兩支相位床**紅了一段時間而沒有人看到** —— 成因是**它們沒有註冊成閘** ⇒ ★**沒註冊 ＝ 沒人跑 ＝ 它的紅不存在於任何人的畫面上**｜★★**現有的強制只在【被觸及】時才發動**：`bed-kind` 會要求 `invariant` 類的床**必須進 `merge-gates.tsv`**，★而它只問**這一輪被改到的床** ⇒ **存量的未註冊床不會被問到**（★同一種「涵蓋率」誠實限，跟 `zero-caller` 的名字白名單同族）｜★★★**母體未知，而 raw 數字是錯的軸**：`scripts/debug/*.gd` 共 **458** 支、註冊表點名 **32** 支 —— ★**而大多數 458 是一次性診斷工具，本來就不該註冊**；★★更接近的代理是「定義了 `_ok`（可以紅）卻沒註冊」（reviewer 早先數過 190 支定義 `_ok`），**而其中很多是已 merge 票的驗收床，任務已完成** ⇒ **這一格要先找到對的軸，再談工作量**｜★**明文不加閘**：先分類，別先做	有人要處理「床的可見度」時；★★或再出現第二支「紅了很久沒人看到」的床（★那時它就不是個案）	test "$(grep -v '^#' docs/process/merge-gates.tsv | cut -f2 | grep -oE "scripts/debug/[a-z0-9_]+\.gd" | sort -u | wc -l)" -ge 60
+# ── ★CLOSED 2026-09-30：`beds-that-can-red-but-nobody-runs-them`（解除條件真的達成了——而變綠的路徑是【做它】不是【改錢】）──
+#   ★★★先謝一件事：它的舊 met_check 錐錯了。舊錯＝「註冊表點名的 debug 床 ≥ 60 支」
+#     —— ★而那是一個【會因為別人做事而單調成長】的計數：2026-09-30 它被推過 60，
+#     而推它的是 leader-chokepoint 那張票把【它自己的驗收床】註冊進表（59→60）——
+#     ★★與「有人要處理床的可見度」零關係。★★★教訓：回訪條件不得錐在單調成長的計數上——
+#     它必然會響，而它響的那一天跟真實條件沒有關係（同族：`feedback_revisit_condition_describes_today`）。
+#   ★而它錯錯得好：單調錐把一件實際上該做的事推到桌上，而真的有獲物。
+#   ── 做了什麼（它自己要的「先分類、別先做」）──
+#   ①找對的軸（舊行寫「母體未知、raw 數字是錯的軸」）：
+#     ・scripts/debug/*.gd 共 488 支；寬軸「含 _ok 字樣」236 支——★寬軸計進了 print 字串裡的 join.to_task_ok 之類
+#     ・★窄軸（本次針用）＝【自己定了 `func _ok(`】＝真的有判決函式＝199 支
+#     ・跟得到的：merge-gates 註冊表 59 支 ∪ tier2 母體（`*_test.gd`）143 支 ＝ 184 支
+#     ・★★缺口＝199 − 那兩集的聯集 ＝ **53 支**
+#   ②那 53 支逐支分類（不是數數，是逐支開檔看）：38 支已經標 `@bed-kind: acceptance`（票已經做完——
+#     ★「沒人跑它】對這一類是正確行為）；剩下 15 支未標，我逐支讀檔頭判完：14 支是票綁的驗收床
+#     （已補 `@bed-kind: acceptance` + `slice:`）、**1 支是真的常駐守衛**。
+#   ③★★★而那 1 支就是它等的第二個血証：`lod_reaction_rate_bed.gd`（LOD 等價律的唯一數值守衛）
+#     ・它沒註冊 ⇒ 自 2026-08-20 之後沒有人跑過它
+#     ・而期間生育被改寫成 team-level 連續累積器（`reaction_system.gd:290 _tick_breed`）
+#     ・⇒ 舊預設窗長 20（＝20 小時）在新機制下永遠生不出一個 minor：
+#       實測 20 窗 FAILS=2、1200 窗（50 日）仍 FAILS=2、★6000 窗（250 日）ALL PASS、ratio=1.00、8 秒
+#     ・★★所以它的紅【不是產品壞】，是【它量的機制被換掉而沒有人回來看這支床】
+#       ⇒ ★★★而那正是本列講的那件事的最完整形狀：不是「床紅了沒人看」，是「床已經不再量任何東西了而沒人知道」。
+#     ・已處置：預設窗長 20→6000、標 `@bed-kind: invariant`、進註冊表（`lod-rate-equivalence`）、
+#       並把【breed 兩格在累積器改寫後結構上恆等】這條誠實限寫進床裡（真在分辨 near/far 的是 morale 與 unrest 兩格）。
+#   ④★把洞擠進【既有的那一支閘】而不是新開一支（用戶立法「不要一直加閘」）：
+#     `bed-kind-gate.sh` 加了【存量掃描】——全部宣告 `invariant` 的床逐支問它在不在註冊表，
+#     不受 diff 限制（舊行為只看本次觸及的床 ⇒ ★兩個方向漏得靜默：存量未接電、
+#     以及★★有人删註冊表那一列而不碰床）；配成對對照 2 格（未接電必紅／已接電不得紅）＋母體地板 ≥1。
+#   ── ★★★成立謂詞（結案書必寫；被推翻 ⇒ 結案自動失效）──
+#   【每一支在前 8 行宣告 `@bed-kind: invariant` 的 scripts/debug/*.gd，它的 basename 都出現在
+#     docs/process/merge-gates.tsv 裡】—— 2026-09-30 實測 27/27。
+#   ★而這條謂詞現在有人在看：它就是上面 ④ 那段存量掃描本體 ⇒ 被推翻的那一天閘會紅，
+#     不靠人記得回來讀這份結案書。
+#   ── 誠實限（寫出來，因為它不在謂詞裡）──
+#   ・★存量 488 支中仍有 311 支沒有任何 `@bed-kind`（bed-kind-gate 自己每輪印那個數）。
+#     本次只把【窄軸缺口】那 15 支標完；其餘未標的不在窄軸上（沒有 `func _ok(` ⇒ 它沒有判決通道⇒紅不起來）。
+#   ・★★tier2 的母體是【檔名】（`*_test.gd`）而不是【是不是床】：註冊表 59 支裡有 41 支不合那個命名
+#     ⇒ tier2 看不到它们。★今天不有害（那 41 支每次 merge 電池都跑），但【tier2 的母體判準不跟蹤「是不是床」】
+#     這件事本身沒有人在看——★★而我刻意不為它新開一列（沒有獲物就登一列＝把表門門長大）。
+#   ── 被取代的舊列全文（不删，留給下一個人看判準怎麼變的）──
+#   beds-that-can-red-but-nobody-runs-them │ ★**「床會紅」與「有人在跑它」是兩件事**（implementer 揭 2026-09-18）：兩支相位床**紅了一段時間而沒有人看到** —— 成因是**它們沒有註冊成閘** ⇒ ★**沒註冊 ＝ 沒人跑 ＝ 它的紅不存在於任何人的畫面上**｜★★**現有的強制只在【被觸及】時才發動**：`bed-kind` 會要求 `invariant` 類的床**必須進 `merge-gates.tsv`**，★而它只問**這一輪被改到的床** ⇒ **存量的未註冊床不會被問到**（★同一種「涵蓋率」誠實限，跟 `zero-caller` 的名字白名單同族）｜★★★**母體未知，而 raw 數字是錯的軸**：`scripts/debug/*.gd` 共 **458** 支、註冊表點名 **32** 支 —— ★**而大多數 458 是一次性診斷工具，本來就不該註冊**；★★更接近的代理是「定義了 `_ok`（可以紅）卻沒註冊」（reviewer 早先數過 190 支定義 `_ok`），**而其中很多是已 merge 票的驗收床，任務已完成** ⇒ **這一格要先找到對的軸，再談工作量**｜★**明文不加閘**：先分類，別先做 │ 有人要處理「床的可見度」時；★★或再出現第二支「紅了很久沒人看到」的床（★那時它就不是個案） │ test "$(grep -v '^#' docs/process/merge-gates.tsv | cut -f2 | grep -oE "scripts/debug/[a-z0-9_]+\.gd" | sort -u | wc -l)" -ge 60
 gather-cross-tick-cache-needs-a-data-structure	★**真正的錢在跨 tick，而它需要資料結構，所以它不是本票**（implementer 量 2026-09-18，systems 裁開新票）：決策 tick 的 `gather` 會跑 O(隊數) 的掃描，單 tick 最多 **150 次** ⇒ 這一段是 `*multi` 區塊的大宗｜★★**難點是誠實的**：斥候陳舊度 ＝ `(tick − last_tick)/norm` ⇒ **它每一 tick 都在變** ⇒ **不能快取「值」，要快取的是【argmax 不會變】這件事** ⇒ 需要堆／分桶，那是一張比原票大的票｜★★★**而它有一個前置**：`gather(advance=false)` 至今仍寫 cache／cadence（`known_issues` 有 file:line 清單）⇒ **任何讓 gather 少跑的修法都會改變排程** ⇒ 前置沒做之前這一票在構造上達不到「語意零改變」｜★**同批已裁**：本票走 (丙-2)＝每欄一支純函式、`gather` 自己也呼它（延伸 `pick_recon_target` 既有形狀）	①`*multi` 區塊在兩輪 profile 上仍然是第一名，而 (丙-2) 做完之後**還是**第一名；★★或②純讀路徑的寫已經被移出（前置解除）而有人要接著往下打	! awk '/^static func pick_recon_target/,/^static func gather/' scripts/simulation/decision/decision_context.gd | grep -q "for _rid in state.teams"
 subfield-exclude-list-is-handcopied-while-toplevel-is-derived	★**同一個檔裡，兩個粒度用了兩種血統**（systems 立 2026-09-18，implementer 撞到）：`state_fingerprint.gd:27-32 derived_excludes()` 的**頂層**排除清單是【算出來的】（掃本檔原始碼有沒有 `state.<欄位>`），而註解自己寫著理由「新增一個頂層欄位而兩邊都沒提到它這種靜默缺席，在這個粒度上不會發生」；★★**而 `:20 EXCLUDES_SUBFIELD` 是一個【手抄的散文字串】**（`:225` 自己標「子層級・手抄補述（只涵蓋列出的那些）」）⇒ **新增一個子欄位而沒人補這串，兩把尺的聯集就不再是全體，而不會有東西紅**｜★★★**血證**：implementer 量「`gather(advance=false)` 有沒有寫世界」時指紋回 0，而**陽性對照（四個 cadence 欄各 +1）顯示指紋逐字不動** ⇒ 那個 0 的真範圍是「0 次【指紋看得見的】寫入」⇒ 他差一點把它當成「沒有寫入」｜★**修法方向**：子層級照頂層的做法**導出**（列舉 `TeamData`／`HexTileData` 的 `var` 宣告，減去指紋原始碼讀到的那些）⇒ 聯集恆為全體、手抄字串退休	①有人要動 `StateFingerprint`／`EphemeralStateHash` 的涵蓋範圍時；★★或②再出現一次「某把尺回 0 而其實它看不到那一格」（那時它就不是個案）	! grep -q 'const EXCLUDES_SUBFIELD: String' scripts/simulation/state_fingerprint.gd
 tile-has-resident-needs-the-transitive-dead-mark	★`_tile_has_resident`（`strategic_ai_system.gd`）**唯一的呼叫者是 `_find_trade_partner`**，而那支已經標了 `@production-callers: 0` ⇒ **它傳遞性地也是 0**，但**它自己沒有標**｜★★**為什麼要標**：今天的血證就是「看起來像商隊怎麼找交易對象 ⇒ 下一個人會量它、以為量到了世界」（我拿 `_find_trade_partner` 量出「可見度掉到 1／8」並差點呈上去要裁）｜★★★**而這個標記要寫明它是【傳遞的】**：「@production-callers: 0（傳遞自 `_find_trade_partner`；★那支一旦被接進 production，本標記【同時失效】）」—— 否則有人接上上游時，這一行會**靜默腐爛**｜★systems 裁：**不出 spec**（一行註解，沒有設計選擇），下次 implementer 動到那個檔時順手做	下次有人動 `strategic_ai_system.gd` 時順手；★★或 `trade-partner-finder-has-no-production-caller` 那格解除時（兩行要一起改）	grep -A2 'func _tile_has_resident' scripts/simulation/strategic_ai_system.gd | grep -q 'production-callers' || grep -B12 'func _tile_has_resident' scripts/simulation/strategic_ai_system.gd | grep -q '傳遞自'

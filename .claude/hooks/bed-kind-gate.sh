@@ -58,6 +58,28 @@ check_one() {
   echo "OK"
 }
 
+# ── ★★★存量掃描（2026-09-30 systems 加，★不是新開一支閘：擠在既有這支裡面）──
+#   為什麼需要它：上面的真檢查【只看本次 diff 觸及的床】⇒ 兩個方向漏得靜默：
+#     ①存量裡已經宣告 invariant 卻沒接電的床，不會被問到
+#     ②★有人把某一列從 merge-gates.tsv 刪掉、而【不碰那支床】⇒ 宣告還在、電斷了，沒有任何訊號
+#   ⇒ 本段掃【全部】宣告 invariant 的床，逐支問它在不在註冊表。
+#   ★血證來歷：lod_reaction_rate_bed 自 2026-08-20 沒註冊、沒人跑，而期間生育換成累積器
+#     ⇒ 它一直是紅的（breed=0/0）而沒有人看到。
+_stock_invariant_sweep() {   # $1=床目錄；rc 0=綠 1=有未接電 2=母體壞
+  local dir="$1" f b pop=0 bad=0
+  for f in "$dir"/*.gd; do
+    [ -f "$f" ] || continue
+    sed -n '1,8p' "$f" | grep -qE '^#[[:space:]]*@bed-kind:[[:space:]]*invariant' || continue
+    pop=$((pop+1)); b="$(basename "$f")"
+    grep -qF "$b" "$TSV" || { echo "[BED-KIND] ★存量紅 $b —— 宣告 invariant（＝常駐守衛）卻不在 $TSV ⇒ 它的紅不在任何人的畫面上"; bad=1; }
+  done
+  echo "[BED-KIND] 存量掃描 $dir：宣告 invariant 的床 $pop 支｜未接電 $bad 類"
+  # ★母體地板：一支都抽不到 ⇒ 是抽取式壞了（8 行窗／格式漂掉），不是「都合規」
+  [ "$pop" -ge 1 ] || { echo "[BED-KIND] ★母體為 0 ⇒ 判【不可判】不是判綠"; return 2; }
+  [ "$bad" = "0" ] || return 1
+  return 0
+}
+
 # ── 陽性對照（★每次都跑；★★四種紅各一格 + 一格反向綠）───────────────
 selftest() {
   bad=0
@@ -84,6 +106,21 @@ selftest() {
       echo "[BED-KIND] ★對照失準：$n 期望 $want 實得 $got（$r）"; bad=1
     fi
   done
+  # ★存量掃描的成對對照（★它自己也要能紅，否則它是一句恆綠的話）
+  _stock_invariant_sweep "$FIX" >/dev/null 2>&1; _sw=$?
+  [ "$_sw" = "1" ] || { echo "[BED-KIND] ★對照失準：存量掃描對 fixtures（含一支未接電的 invariant）期望 rc=1 實得 $_sw"; bad=1; }
+  _nd="$(mktemp -d 2>/dev/null)"
+  if [ -n "$_nd" ]; then
+    # ★反向綠：同樣宣告 invariant，但 basename 真的在註冊表裡 ⇒ 不得紅
+    printf 'extends SceneTree
+# @bed-kind: invariant
+' > "$_nd/constitution_gate.gd"
+    _stock_invariant_sweep "$_nd" >/dev/null 2>&1; _sw2=$?
+    [ "$_sw2" = "0" ] || { echo "[BED-KIND] ★對照失準：存量掃描對【已接電】的 invariant 期望 rc=0 實得 $_sw2"; bad=1; }
+    rm -rf "$_nd"
+  else
+    echo "[BED-KIND] ★反向綠對照跳過（mktemp 不可用）⇒ 本格不可判,不是綠"; bad=1
+  fi
   DEFERS="${BEDKIND_DEFERS:-docs/process/defers.tsv}"   # ★還原：真檢查仍讀 live registry
   [ "$bad" = "0" ]
 }
@@ -92,12 +129,18 @@ if ! selftest; then
   echo "[BED-KIND] ★ABORT：陽性對照沒過 ⇒ 本輪作廢（不得讀成任何結果）"
   exit 3
 fi
-echo "[BED-KIND] 陽性對照通過（6 格紅 + 3 格反向綠，涵蓋 §3b 全部四條；含【真實床原句】的 diagnostic 紅）"
+echo "[BED-KIND] 陽性對照通過（6 格紅 + 3 格反向綠，涵蓋 §3b 全部四條；含【真實床原句】的 diagnostic 紅）＋存量掃描成對 2 格（未接電必紅／已接電不得紅）"
 
 # ── 存量規模（★只是讓它可見；★★不宣稱它會因此下降）────────────────
 TOTAL="$(git ls-files 'scripts/debug/*.gd' | wc -l | tr -d ' ')"
 MARKED="$(git ls-files 'scripts/debug/*.gd' | xargs grep -l '@bed-kind:' 2>/dev/null | wc -l | tr -d ' ')"
 echo "[BED-KIND] 已標記 $MARKED / $TOTAL（★存量規模可見；★★要它下降得靠別的機制,不是靠印）"
+
+# ── ★存量掃描（不受 diff 限制）──
+_stock_invariant_sweep "scripts/debug"; _STOCK_RC=$?
+if [ "$_STOCK_RC" = "2" ]; then
+  echo "[BED-KIND] ★ABORT：存量掃描母體壞了 ⇒ 本輪作廢"; exit 3
+fi
 
 # ── 真檢查：只看本次 diff 觸及的床 ─────────────────────────────
 if [ "$#" -gt 0 ]; then
@@ -123,6 +166,11 @@ if [ -n "${FILES//[[:space:]]/}" ]; then
 fi
 if [ -z "${FILES//[[:space:]]/}" ]; then
   echo "[BED-KIND] 本次 diff 沒有觸及 scripts/debug/*.gd（母體為空 ⇒ 沒有可判的東西）"
+  # ★★母體為空【不豁免存量掃描】：它不看 diff，所以「這一輪沒碰到床」不是它沉默的理由
+  if [ "${_STOCK_RC:-0}" != "0" ]; then
+    echo "[BED-KIND] ★存量掃描有未接電的 invariant 床 ⇒ 紅（處置：補一列進 $TSV，或把宣告改成它真正的 kind）"
+    exit 1
+  fi
   echo "[BED-KIND] PASS"
   exit 0
 fi
@@ -139,6 +187,10 @@ echo "[BED-KIND] 本次觸及 $n 支｜紅 $fails 支"
 if [ "$fails" -gt 0 ]; then
   echo "[BED-KIND] ★處置：在床檔開頭加一行 @bed-kind: invariant|acceptance|diagnostic|pending"
   echo "[BED-KIND]   invariant⇒必須進 $TSV｜acceptance⇒必須寫 slice:｜pending⇒blocker: 必須是 $DEFERS 的 token"
+  exit 1
+fi
+if [ "${_STOCK_RC:-0}" != "0" ]; then
+  echo "[BED-KIND] ★存量掃描有未接電的 invariant 床 ⇒ 紅（處置：補一列進 $TSV，或把宣告改成它真正的 kind）"
   exit 1
 fi
 echo "[BED-KIND] PASS"

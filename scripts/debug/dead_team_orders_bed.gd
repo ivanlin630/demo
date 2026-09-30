@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 族④#6 改票後：死隊的看板單隨它一起走（order_system.gd:88 訂單生命週期是 owner 驅動）
 # @observe-pure
 # ★★★族④#6【改票後】：死隊的看板單必須隨它一起走。
 #

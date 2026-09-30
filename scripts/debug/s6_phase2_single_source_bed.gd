@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: S6 phase2 工期單一真值（錨在 tile.construction_ticks_left 的真寫入點，不綁八項）
 # @observe-pure
 # ★★★S6 phase2 驗收：工期單一真值 —— ★驗收綁【引擎決定的窄口】不綁「八項」。
 #

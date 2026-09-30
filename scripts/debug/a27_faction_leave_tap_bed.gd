@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: A#27 faction-leave 的 tap（互斥且窮盡＋分母；systems 2026-09-02 裁掛點在 set_team_faction 早退之後）
 # @observe-pure
 # ★★★A#27 驗收床：faction-leave 的 tap —— 互斥且窮盡 ＋ 分母 ＋ 0 分得出「掛錯」還是「不可達」。
 #

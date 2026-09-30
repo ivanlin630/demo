@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 後勤 SLICE B 領主分配政策 dev-verify（HOW spec 2026-08-01 §3）
 
 # 後勤 SLICE B 領主分配政策 dev-verify（HOW spec 2026-08-01 §3）。
 # 統一光譜:給免費(義氣)←賣公道→賣高價(貪)→拋棄。★三人格同一機制 seed 出 + 連續非 gate + coin 守恆。
