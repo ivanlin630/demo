@@ -41,7 +41,7 @@ DUP_NEW = 'const COLS: int = 120\nconst _DUP_WIDTH: int = 120'
 #   ★那正是不變量 #10 的病：意義由位置／計數決定
 #   （`trade` 一旦不可做，`[B]` 就換了意思）。
 POS_OLD = '''		var key: String = String(ACTION_DIGITS.get(aid, ""))'''
-POS_NEW = '''		var key: String = char(65 + lines.size() - 1)'''
+POS_NEW = '''		var key: String = str(lines.size())'''
 
 # ★④P9：把 `float(MINUTES_PER_HOUR)` 換回裸 `60.0` ⇒ 手抄物理那一條必紅
 #   ★而它咬對了一半：`1440`／`24` 可以從旋鈕導出来，
@@ -52,7 +52,7 @@ PHYS_NEW = '''60.0)'''
 CONTROLS = [
     ('★①display_width 換成 length()', '每一個案例都精確等於 2N+M（不符的：["純全形（期望 10 實得 5）"',
      (LAY, WIDTH_OLD, WIDTH_NEW)),
-    ('★★★③動作鍵改成由位置決定', '拿到同一個字母（不一致：3）', (VIEW, POS_OLD, POS_NEW)),
+    ('★★★③動作鍵改成由位置決定', '拿到同一個鍵（不一致：2）', (VIEW, POS_OLD, POS_NEW)),
     ('★④P9：MINUTES_PER_HOUR 換回裸 60', '沒有手抄的物理常數（60／1440／24；實測 ["60"]）',
      (MAPPER, PHYS_OLD, PHYS_NEW)),
     ('②別處再寫一次 120', '恰好 1 次（在 `TextUiLayout.COLS` 宣告處，實測 2）',
