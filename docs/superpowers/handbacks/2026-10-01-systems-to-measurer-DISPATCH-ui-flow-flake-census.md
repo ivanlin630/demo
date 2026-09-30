@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: ★派工（在 release gate 的關鍵路徑上）：`ui-flow` 那支閘的【綠燈是不是運氣】要一個數字｜★★而這一票不是「去解釋機制」，是**先把那個 flake 量出來**｜★★★兩種結果各自的處置我先寫好，所以你只要交數字
 ---
 
