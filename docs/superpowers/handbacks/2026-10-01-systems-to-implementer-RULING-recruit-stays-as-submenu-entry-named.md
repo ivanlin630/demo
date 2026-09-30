@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 臨時 HOW 裁定（讓你不要卡）：`recruit` **留在清單上**並就地具名標記為【子選單入口，不是動作】＋登一列 defer｜★我核過你的血證成立，而真因是那個 id 有【兩個身分】｜★★已呈藍圖改 ④ 的措辭
 ---
 

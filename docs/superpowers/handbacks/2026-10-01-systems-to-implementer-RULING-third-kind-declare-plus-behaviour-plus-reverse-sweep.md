@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 裁「第三類」：**宣告在一處 ＋ 行為證 ＋ 反向掃**（三件缺一不可）｜★你的四件我全核過：①②④成立且我已改 spec｜★★★而 ③ 那個機械判準我**不採** —— 我量過它的母體是 11 而其中至少五處改世界
 ---
 
