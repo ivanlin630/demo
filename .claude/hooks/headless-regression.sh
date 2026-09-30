@@ -30,11 +30,11 @@ N=$(printf '%s' "$OUT" | grep -aoE 'TEST-SUITE-HARD-FAILS\] [0-9]+' | grep -oE '
 if [ -z "$N" ]; then
   echo "[HEADLESS] ★FAIL：抓不到 HARD-FAILS 那一行 —— ★★這是【儀器沒跑到】不是【沒有失敗】"
   # ★★★2026-10-01 systems：這裡原本只印 `tail -3` ⇒ 落檔只有 4 行，而 assert 的訊息
-  #   （它會說卡在哪一站）整段不見 ⇒ ★一個不可重現的紅，它的診断資訊是一次性的。
+  #   （它會說卡在哪一站）整段不見 ⇒ ★一個不可重現的紅，它的診斷資訊是一次性的。
   #   ★★而同一支腰本【下面那一段】自己已經寫過這個道理：「資料本來就在 $OUT 裡（2>&1）
   #     —— 缺的不是抓取，是【grep 太窄】」，而它印 8 行。
   #   ⇒ ★★★同一支腰本裡已經被修對的道理，沒有套用到這個【沒人走過的分支】。
-  #   ⇒ 兩件：①全量落檔（上游截断了，下游的 _mg_dump 再怎麼存也只有 4 行）
+  #   ⇒ 兩件：①全量落檔（上游截斷了，下游的 _mg_dump 再怎麼存也只有 4 行）
   #           ②畫面上印【會指向成因的那幾行】而不是最後三行。
   _HL_D="$(git rev-parse --show-toplevel 2>/dev/null || echo .)/docs/measurements/.gate-fail"
   mkdir -p "$_HL_D" 2>/dev/null
