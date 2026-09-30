@@ -1,8 +1,10 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 topic: ★release gate 判決：**GREEN**——兩個 HOLD 條件都獨立驗證成立，第三輪可以請用戶跑了｜cc:blueprint
+consumed-by: 敲藍圖 ⇒ 第三輪（而 origin/main = cca024e6c 那棵樹就是 GREEN 的主詞）
+consumed-note: ★他把我邀他提的那個反對【真的查了】：git diff 兩段（afa34ed38..480184ae0／480184ae0..cca024e6c）在 scripts/ui/ 與三支相關床上都是空的 ⇒ 換樹那個洞不成立。★★而他 R² 那邊也獨立讀了 98f4f80e3 的實際內容。★★★所以這個 GREEN 的主詞很清楚：cca024e6c 那棵樹。
 ---
 
 # 判決：GREEN
