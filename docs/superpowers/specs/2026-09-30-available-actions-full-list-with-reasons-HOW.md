@@ -201,3 +201,65 @@ P6 全電池 BATTERY_RC=0；★fp：**先量再換基準**（本票改的是查�
   它涵蓋 22 裡的哪幾個**，否則「全列」這個詞沒有母體。
 ```
 
+---
+
+## ★★★§8【第三類】子選單入口 —— 裁定（2026-10-01；★★本節取代「STUB 不列」那條，含藍圖 ④′）
+
+### ①前提訂正（implementer 揭，我**在他那棵樹上**核過 file:line）
+
+```
+·`player_command_system.gd:487 _action_recruit`（`origin/feat/available-actions-full-list` @ f41057cd9）
+  檔頭逐字：「**Always return a menu — never auto-execute. Player must call recruit_anon or recruit_named.**」
+  ⇒ ★它**不是 STUB**：它回一份真菜單。那個「STUB」字眼講的是
+    【**這一列按下去不改世界**】，不是【沒實裝】。
+·★★而它有孿生兄弟：`:923 _action_gather_intel`（`InquirySystem.get_options`）形狀完全一樣。
+  ⇒ **第三類的母體是【兩個】不是一個**：`recruit`、`gather_intel`。
+  ⇒ ★★★我前一版的裁定（「就地具名標記 `recruit`」）只覆蓋了一半 ——
+    而具名標記本質上是**一份長度 1 的手抄名單** ⇒ `gather_intel` 那一半會沒有人管。
+·藍圖 ④′（`13ad7eda2`）已改：STUB handler 不進「可執行動作」；`recruit` 留清單、按下＝開展開層。
+```
+
+### ★★★②而他提的機械判準我**不採**，理由是我逐字量過它的母體
+
+```
+他提：「**handler 回 `payload` 且不改世界** ⇒ 它是入口，不是動作」。
+★我在他那棵樹上數 `"payload"` ⇒ **11 處**，而其中至少五處**明顯改世界**：
+  `{"promoted": …}`／`{"joined": …, "food_cost": …}`／`{… "moved": …}`／
+  `{"action_id": "establish_faction", …}`／`{"refresh_required": true}` ×3
+⇒ ★★「回 payload」**過寬**：它會把【改世界的動作】誤標成入口。
+⇒ ★★★而**誤標的方向是危險的**：玩家會以為按下去只是開一層選單。
+   （同族：母體太寬壞得比太窄更安靜 —— 它生出一個看起來像分類的東西。）
+★而他那一半是對的：**判準不能是一份會漂的名單**。所以要的不是放棄機械化，是換一個軸。
+```
+
+### ★★③裁：**宣告在一處 ＋ 行為證 ＋ 反向掃**（三件缺一不可）
+
+```
+(a) 宣告在一處：`SUBMENU_OPENERS`（與 `TEAM_TARGET_ACTIONS` 同層、同一個檔）；
+    全列版多回一欄 `opens_submenu: bool`，**從它導出**（★不是第二份表）。
+    ⇒ 而那一欄的語意要就地寫明：**入口的 `enabled` 沒有意義**（按下去是換一層畫面，
+      不是發生一件事）⇒ 它永遠「可做」，★而那不是豁免，是它的語意。
+(b) ★**行為證**（這是把宣告變成事實的那一半）：床對**每一個**宣告的入口斷言
+    **「呼它前後世界不變」** —— ★★專案已有前例可抄：`gather-purity` 那支閘守的就是純讀路徑。
+    ｜負對照：讓某一個入口寫一個欄位 ⇒ 必紅
+(c) ★★★**反向掃**（這是最重要的一格）：對**沒有**宣告而回 `payload` 的列，
+    逐列問「它改世界嗎」——
+      ·改 ⇒ 正確（它是動作，payload 只是回執）
+      ·★不改 ⇒ **它其實是入口而漏宣告** ⇒ **紅**，並指名是哪一個
+    ⇒ 母體 ＝ 那 11 處（★而 11 這個數要從 code 數出來、印在卷面上，不是抄 spec）
+    ｜負對照：把一個宣告過的入口從 `SUBMENU_OPENERS` 拿掉 ⇒ (c) 必須指名它
+★★而 `STUB_NOT_IMPLEMENTED` 維持機制接電、清單 `[]`（目前沒有成員）
+  —— ★implementer 那條「措辭要求只在清單非空時適用」的訂正是對的：
+    **清單空還要求排除理由 ＝ 守一件不存在的事**。
+```
+
+### ★④列裡要補 `label`（他揭的第四處對不上）
+
+```
+#10 spec `:30` 要「逐列印 `label` ＋（不可：`disabled_reason`）」，
+而現在每一列是 `{action_id, enabled, disabled_reason}` ⇒ **沒有 `label`**。
+⇒ 補 `label`，來源 ＝ **`PlayerApiMapper.action_label`**（⑤ 那張票**搬**過來的唯一一份）
+  ⇒ ★★**不得新建第二份中文表**（⑤ 已經把 `PlayerQueryApi._action_label` 收成薄委派，
+    reviewer 核過 —— 那份單一來源要繼續是單一來源）。
+```
+
