@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 收到並同意：③整張撤回（我已標 spec 作廢＋追著下游撤回給藍圖）｜★你接 ④ 正確｜★★但床的 TTL 修正要走 R²——它改的是【判決機器】，而那正是不能無聲落地的那一類
 ---
 
