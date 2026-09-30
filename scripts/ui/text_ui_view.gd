@@ -182,6 +182,23 @@ static func action_block(rows: Array) -> String:
 static func key_for(action_id: String) -> String:
 	return String(ACTION_DIGITS.get(action_id, ""))
 
+# ★★★【反查】那個鍵是哪個 action_id（""＝這個鍵沒有綁任何動作）——
+#   ★它存在的理由是一個實測缺陷（2026-10-01，reviewer 抓到、我引入的）：
+#     畫面用 `ACTION_DIGITS[action_id]` 印鍵，而 handler 用**位置索引** `actions[num]` 執行
+#     ⇒ 9 個有鍵的動作裡 **7 個對不上** ——
+#       按「提議結盟」那個鍵會【攻擊】、按「打聽」會【索貢】（真的動錢動名聲）。
+#   ⇒ ★★而三支床全綠：P8b／`key_for()` 驗**畫面那一側**、`ui_flow` 的按鍵格驗**handler 那一側**
+#     ⇒ **沒有任何一格把兩側接起來** ⇒ 缺陷剛好落在兩支床**之間**
+#     （「檢查管道與失效管道不同軸」最乾淨的一個實例：兩邊各自都對，
+#      而**它們對的不是同一件事**）。
+#   ⇒ ★★★所以 handler **必須讀這一支**而不是自己手抄第二份對照表：
+#     一份表、兩個方向、同一個權威。
+static func action_for_key(key: String) -> String:
+	for aid in ACTION_DIGITS:
+		if String(ACTION_DIGITS[aid]) == key:
+			return String(aid)
+	return ""
+
 
 # ══ ⑤事件流：最近 FEED_ROWS 條，每條「第N天 HH:MM｜來源｜內容」（spec §2④）═════
 # ★★逐條帶時間是 P6 的斷言 ⇒ ★本函式**不補時間**（自己補一個假時間 ＝ 讓 P6 恆綠）。

@@ -1641,8 +1641,30 @@ func _handle_interact_mode(keycode: int) -> void:
 	# ── 已選目標：顯示行動清單（只 team-target 動作）──
 	if _interact_target >= 0:
 		var actions: Array = _interact_action_split()["team"]
-		if num < actions.size():
-			var act: Dictionary = actions[num]
+		# ★★★【一份表、兩個方向】（systems 裁 2026-10-01 (a)(b)）——
+		#   ★缺陷（我引入的，reviewer 抓到）：畫面用 `ACTION_DIGITS[action_id]` 印鍵，
+		#     而這裡原本用**位置索引** `actions[num]` ⇒ 9 個有鍵的動作裡 **7 個對不上**
+		#     ⇒ 按「提議結盟」那個鍵會【攻擊】、按「打聽」會【索貢】。
+		#   ⇒ ★★最嚴重的不是排版歪掉，是**玩家做了一件他沒有選的事**，
+		#     而「印 `[2]` 按下去做了另一件事」比「印 `[A]` 按下去沒反應」更糟：
+		#     後者他會再按一次，前者**他不會知道**。
+		#   ⇒ ★★★所以這裡**讀同一份表的反查**，不手抄第二份對照。
+		#   ★而【動作清單不分頁】（裁定 (b)）：靜態鍵與分頁概念互斥 ——
+		#     `num + page*9` 會讓同一個鍵在第 2 頁換意思，而那正是不變量 #10 禁的事。
+		#     ★★目標清單那一層的分頁**不動**（那裡的鍵本來就是位置語意）。
+		var want_id: String = TextUiView.action_for_key(str(keycode - KEY_1 + 1))
+		var act_idx: int = -1
+		for _i in range(actions.size()):
+			if String(actions[_i].get("action_id", "")) == want_id:
+				act_idx = _i
+				break
+		if want_id == "" or act_idx < 0:
+			# ★這個鍵沒有綁動作（或那個動作這一輪不在清單上）⇒ 走未綁定鍵的統一出口：
+			#   吃掉它、印一句話、什麼都不改（而不是靜默 return 或執行「剛好在那個位置」的那一列）
+			_refuse_unbound_key("互動", keycode)
+			return
+		if act_idx >= 0:   # ★到這裡它一定成立（上面已 early-return）—— 保留縮排結構
+			var act: Dictionary = actions[act_idx]
 			var action_id: String = act.get("action_id", "")
 			if action_id == "gather_intel":
 				# 進入 gather_intel 子模式

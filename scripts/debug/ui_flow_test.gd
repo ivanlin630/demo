@@ -3,7 +3,7 @@ extends SceneTree
 
 var _errors: int = 0
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -110,6 +110,7 @@ func _initialize() -> void:
 	await _test_p26_ui_stack_step1()
 	await _test_p27_forced_takes_over_and_keys_speak()
 	await _test_p28_screen_is_the_composed_one()
+	await _test_p29_key_on_screen_runs_that_row()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -341,9 +342,18 @@ func _test_recruit_named_reachable() -> void:
 		if team_acts[i].get("action_id", "") == "recruit":
 			recruit_idx = i; break
 	_check("team 行動清單含 recruit", recruit_idx >= 0)
-	if recruit_idx < 0 or recruit_idx >= 9:
+	# ★★★語意升級（不是弱化）：原本按 `KEY_1 + recruit_idx`（＝**第 N 列**），
+	#   而現在按**畫面真的印給玩家的那個鍵**（`ACTION_DIGITS["recruit"]`）。
+	#   ⇒ 舊斷言驗的是「第 N 列被按到」，新斷言驗的是「**那個 id 的鍵被按到**」
+	#     —— 後者才是不變量 #10 要的（鍵綁 id 不綁位置）。
+	#   ★而這一改是被一個真缺陷逼出來的（2026-10-01）：畫面用表印鍵、handler 用位置索引
+	#     ⇒ 9 個有鍵的動作 7 個對不上（按「提議結盟」會攻擊）。
+	var rkey: String = TextUiView.key_for("recruit")
+	_check("★母體地板：`recruit` 在鍵表裡有鍵（沒有 ⇒ 下面按不到，而那不是本格要測的事）",
+		rkey != "")
+	if recruit_idx < 0 or rkey == "":
 		await _free_ui(node); return
-	node._handle_interact_mode(KEY_1 + recruit_idx)   # 選 recruit → 進招募子模式
+	node._handle_interact_mode(KEY_1 + int(rkey) - 1)   # 按【畫面印的那個鍵】→ 進招募子模式
 	# 斷言：進入招募子選單（顯記名候選 + 匿名選項）
 	var rs: String = node._event_label.text
 	print("  recruit 子選單文字: %s" % rs.replace("\n", " | "))
@@ -2838,12 +2848,16 @@ func _test_p26_ui_stack_step1() -> void:
 		if String(team_acts[i].get("action_id", "")) == "recruit":
 			idx = i
 			break
-	print("   招募在 team 清單的第 %d 列（共 %d 列）" % [idx, team_acts.size()])
+	var rkey2: String = TextUiView.key_for("recruit")
+	print("   招募在 team 清單的第 %d 列（共 %d 列）｜而它的【鍵】是 `%s`（★兩者不必相同）"
+		% [idx, team_acts.size(), rkey2])
 	_check("★母體地板：招募那一列在清單上（-1 ⇒ 按不到 ⇒ 下面兩條沒有主詞）", idx >= 0)
-	if idx >= 0 and idx < 9:
-		node._handle_interact_mode(KEY_1 + idx)
-		print("   按 [%d] 之後：深度 %d｜頂層 `%s`｜`_recruit_mode`=%s" % [
-			idx + 1, node._ui_depth(), node._ui_top(), str(node._recruit_mode)])
+	_check("★母體地板：`recruit` 在鍵表裡有鍵（`%s`）" % rkey2, rkey2 != "")
+	if idx >= 0 and rkey2 != "":
+		# ★按【畫面印的那個鍵】不是【第 N 列】（見本檔上面那一段的理由）
+		node._handle_interact_mode(KEY_1 + int(rkey2) - 1)
+		print("   按 [%s] 之後：深度 %d｜頂層 `%s`｜`_recruit_mode`=%s" % [
+			rkey2, node._ui_depth(), node._ui_top(), str(node._recruit_mode)])
 		_check("★★★按鍵進招募層 ⇒ 深度 ＝ 1（實測 %d）" % node._ui_depth(),
 			node._ui_depth() == 1)
 		var before: int = node._ui_depth()
@@ -3020,6 +3034,98 @@ func _test_p28_screen_is_the_composed_one() -> void:
 		String(node._state_label.text).length() > 0)
 	await _free_ui(node)
 	_cell("_test_p28_screen_is_the_composed_one")
+
+
+# 負對照 a：handler 改回位置索引（`actions[num]`）⇒ 本格紅並指名哪一列錯成哪一個 ⇒ 待實測
+# 負對照 b：`ACTION_DIGITS` 裡兩個 id 的數字對調 ⇒ 本格紅（守「兩側讀同一份表」）⇒ 待實測
+# ══ P29：★★★★★【把兩側接起來】按畫面印的鍵 ⇒ 執行的就是那一列═══════════════════
+# ★這一格存在的理由是一個【真的、玩家看得到的】缺陷（2026-10-01，我引入、reviewer 抓到）：
+#   ·畫面 `action_block`：鍵 ＝ `ACTION_DIGITS[action_id]`（**id 查表**）
+#   ·handler 原本：`num = keycode - KEY_1`；`actions[num]`（**位置索引**）
+#   ⇒ 9 個有鍵的動作裡 **7 個對不上**：按「提議結盟」會【攻擊】、按「打聽」會【索貢】。
+# ★★而當時**三支床全綠**：P8b／`key_for()` 驗**畫面那一側**、`ui_flow` 的按鍵格驗
+#   **handler 那一側** ⇒ **沒有任何一格把兩側接起來** ⇒ 缺陷落在兩支床**之間**。
+#   ⇒ 「檢查管道與失效管道不同軸」最乾淨的一個實例：兩邊各自都對，
+#     而**它們對的不是同一件事**。
+# ★★★而它比「印 `[A]` 按下去沒反應」更糟：後者玩家會再按一次；
+#   印 `[2]` 按下去**做了另一件事** ⇒ **他不會知道**。
+func _test_p29_key_on_screen_runs_that_row() -> void:
+	_selftest_gate("_test_p29_key_on_screen_runs_that_row").noop()
+	print("\n── P29 按畫面印的鍵 ⇒ 執行的就是那一列 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	_check("★母體地板：找到同格目標", tgt_id != -1)
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	node._bridge.refresh_interaction_targets()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._interact_page = 0
+	node._refresh()
+	var rows: Array = node._interact_action_split()["team"]
+	var keyed: Array = []
+	for r in rows:
+		if TextUiView.key_for(String(r.get("action_id", ""))) != "":
+			keyed.append(String(r.get("action_id", "")))
+	print("   這一輪 %d 列，其中【有鍵】的 %d 列：%s" % [rows.size(), keyed.size(), str(keyed)])
+	_check("★★母體地板：有鍵的列 > 0（0 ⇒ 下面的迴圈一次都不跑 ⇒ 本格不可判不是綠）",
+		keyed.size() > 0)
+	var wrong: Array = []
+	for aid in keyed:
+		var key: String = TextUiView.key_for(String(aid))
+		# 每一列都重新佈置（上一次按鍵可能開了子模式／排了指令）
+		node._bridge.cancel_advance()
+		st.pending_commands.clear()
+		node._close_all_modes()
+		while node._ui_depth() > 0:
+			node._ui_pop()
+		node._bridge.refresh_interaction_targets()
+		node._interact_mode = true
+		node._interact_target = tgt_id
+		node._interact_page = 0
+		node._refresh()
+		node._handle_interact_mode(KEY_1 + int(key) - 1)
+		# ★證據有兩種形狀，而兩種都要看：
+		#   ·會改世界的動作 ⇒ 進佇列（讀 `pending_commands` 的 `action_id`）
+		#   ·子選單入口 ⇒ 不進佇列而 push 一層（讀 `_ui_top()`，那一層的 id ＝ action_id）
+		var got: String = ""
+		for pc in st.pending_commands:
+			var a: Dictionary = pc.get("args", {})
+			if a.has("action_id"):
+				got = String(a.get("action_id", ""))
+		if got == "" and node._ui_depth() > 0:
+			got = String(node._ui_top())
+		print("   按 [%s]（畫面說「%s」）⇒ 實際 action_id ＝ 「%s」%s" % [
+			key, String(aid), got, "" if got == String(aid) else "★不符"])
+		if got != String(aid):
+			wrong.append("按 [%s] 畫面說「%s」而實際是「%s」" % [key, String(aid), got])
+	_check("★★★★★按下畫面印的鍵 ⇒ 執行的就是那一列（不符的：%s）" % str(wrong),
+		wrong.is_empty())
+	# ★(d) 沒有鍵的那些要【真的按不到】—— 而現在它們不在反查表裡 ⇒ 按任何鍵都不會選到它們
+	var unkeyed: Array = []
+	for r2 in rows:
+		var aid2: String = String(r2.get("action_id", ""))
+		if TextUiView.key_for(aid2) == "":
+			unkeyed.append(aid2)
+	print("   沒有鍵的列 ＝ %s（畫面印「%s」）" % [str(unkeyed), TextUiView.UNBOUND_MARK])
+	var reachable: Array = []
+	for d in range(1, 10):
+		var back: String = TextUiView.action_for_key(str(d))
+		if unkeyed.has(back):
+			reachable.append("鍵 %d 反查到 %s" % [d, back])
+	_check("★★(d) 沒有鍵的那些【真的按不到】（反查表裡找不到它們；實測 %s）" % str(reachable),
+		reachable.is_empty())
+	print("   ★★★而「未綁鍵」那個字原本也是謊：改之前 `ignore` 排在位置 1 ⇒ 按 [1] 真的按得到它。")
+	await _free_ui(node)
+	_cell("_test_p29_key_on_screen_runs_that_row")
 
 
 
