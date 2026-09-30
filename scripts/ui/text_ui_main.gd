@@ -43,41 +43,64 @@ var _events: Array = []
 #   ★它不進 fp、不進 state —— 誰讀到第幾筆是觀眾的事。
 var _last_world_event_seq: int = 0
 
+# ui-stack-pending: _input_mode —— ★它不是一層，是**輸入捕獲**（`_close_all_modes` 也刻意不碰它）⇒ 步 2 要單獨裁
 var _input_mode: bool   = false
 var _input_buffer: String = ""
 var _input_mode_type: String = "numeric"   # "numeric" | "string"
 var _input_mode_callback: Callable         # (buffer: String) -> void
 var _input_mode_prompt: String = ""
+# ui-stack-pending: _member_mode —— 用 toggle 開（同鍵開關）
 var _member_mode: bool  = false
+# ui-stack-pending: _inv_mode —— 用 toggle 開（同鍵開關）
 var _inv_mode: bool     = false
 var _inv_selection: int = -1
 
+# ui-stack-pending: _interact_mode —— 用 toggle 開（同鍵開關）
 var _interact_mode:   bool = false
 var _interact_target: int  = -1
 var _interact_page:   int  = 0   # 互動選單分頁（>9 項翻頁）
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
 
 # ── 新 Panel Modes（互斥）────────────────────────────────────────────────────
+# ui-stack-pending: _faction_mode —— 用 toggle 開（同鍵開關）
 var _faction_mode:  bool = false
+# ui-stack-pending: _outpost_mode —— 用 toggle 開（同鍵開關）
 var _outpost_mode:  bool = false
+# ui-stack-pending: _subteam_mode —— 用 toggle 開（同鍵開關）
 var _subteam_mode:  bool = false
+# ui-stack-pending: _advisor_mode —— 用 toggle 開（同鍵開關）
 var _advisor_mode:  bool = false
 var _subteam_selection: int = -1   # 當前選中的子隊 team_id
 var _advisor_selection: int = -1   # 當前選中的顧問 person_id
 
 # ── 公庫面板 + 破壞性二次確認暫存 ────────────────────────────────────────────
+# ui-stack-pending: _storage_mode —— 用 toggle 開（同鍵開關）
 var _storage_mode: bool = false
 var _storage_page: int = 0
 var _outpost_pending_abandon: bool = false   # abandon_outpost 二次確認 armed
 var _faction_extract_pending: float = -1.0   # 高比例 extract_treasury 二次確認暫存比例
 
 # ── gather_intel submode ─────────────────────────────────────────────────────
-var _intel_mode: bool = false
+# ★★★由 `_ui_stack` 撐的 property（systems 裁 2026-10-01 步 1）——
+#   ★11 個既有呼叫點【一個都不用改】，而真相只有一份（堆疊）。
+#   ★★而這個形狀踩過地雷：`TeamData.population` 是**只有 get** 的計算屬性
+#     ⇒ 對它賦值是**靜默 no-op**，而那讓一支床的前提「從來沒有被佈置」卻照樣綠。
+#     ⇒ 所以這裡 **set 一定要真的做事**，而床有一格專門驗「賦值真的改了深度」。
+var _intel_mode: bool:
+	get:
+		return _ui_stack.has(LAYER_INTEL)
+	set(v):
+		_ui_set_layer(LAYER_INTEL, v)
 var _intel_target_id: int = -1
 var _intel_options: Array = []     # Array[Dictionary] 每項 {"label": String}
 
 # ── 招募子模式（recruit menu payload 消費；A-1）───────────────────────────────
-var _recruit_mode: bool = false
+# ★同上：由 `_ui_stack` 撐（見 `_intel_mode` 那一段的理由）
+var _recruit_mode: bool:
+	get:
+		return _ui_stack.has(LAYER_RECRUIT)
+	set(v):
+		_ui_set_layer(LAYER_RECRUIT, v)
 var _recruit_target_id: int = -1
 var _recruit_members: Array = []        # willing_members DTO（記名候選）
 var _recruit_anon_available: bool = false
@@ -100,9 +123,11 @@ var _res_baseline_day: int = -1
 var _last_shown_result_seq: int = 0
 
 # ── Pre-encounter submode ────────────────────────────────────────────────────
+# ui-stack-pending: _pre_encounter_mode —— 由遭遇戰流程開
 var _pre_encounter_mode: bool = false
 
 # ── Trade submode ────────────────────────────────────────────────────────────
+# ui-stack-pending: _trade_mode —— 由 trade 那一列開，尚無引擎入口宣告
 var _trade_mode: bool = false
 var _trade_target_id: int = -1
 var _trade_page: int = 0   # offer-builder 清單分頁（>9 項翻頁）
@@ -786,6 +811,47 @@ static func _log_strip_text(events: Array, n: int) -> String:
 	return " | ".join(out)
 
 # 當前模式字串（依各 mode flag，順序對齊 _input dispatch）
+# ══ 展開層堆疊（spec §2⑥：★用【一個】 `_ui_stack`，禁用一堆 `_mode_xxx` 布林）══════
+# ★★★systems 裁 2026-10-01【步 1】：本票只讓 `SUBMENU_OPENERS` 那兩個展開層走它
+#   ⇒ P7 的母體 ＝ `PlayerCommandSystem.SUBMENU_OPENERS`（**code 裡的宣告，不是一句話**），
+#   而其餘 11 支旗標**原樣不動**並就地標記 `ui-stack-pending:`（步 2 是另一張票）。
+#   ★為什麼不一次做完：13 支旗標有 81 個寫點（含 8 個 `= not` 的 toggle），
+#     而 toggle 的語意（同鍵開關）與 push/pop **不等價** ⇒ 一起做會把兩張票混在一起。
+#   ★★而「零隱藏模式」因此在卷面上是【部分成立而說得出剩下幾個】，不是一句願望：
+#     床把 `ui-stack-pending:` 的個數印出來 —— ★★★它下降是進度，而它**靜止也看得見**。
+#
+# ★UI 這一側的具名層清單（★與引擎那一側 `SUBMENU_OPENERS` 是**兩份獨立宣告**，
+#   而床有一格要求兩邊**集合相等** —— ★★兩邊同源就不是比較，是一句話講兩次；
+#   兩邊獨立而沒有人比較，差異就沒有觀察者。這一格就是那個觀察者。）
+const LAYER_RECRUIT: String = "recruit"
+const LAYER_INTEL: String   = "gather_intel"
+const UI_STACK_LAYERS: Array = [LAYER_RECRUIT, LAYER_INTEL]
+
+var _ui_stack: Array = []
+
+func _ui_push(layer: String) -> void:
+	if not _ui_stack.has(layer):
+		_ui_stack.append(layer)
+
+# ★回被彈掉的那一層（回 "" ＝ 本來就在最外層）—— Esc 只回**一層**（spec §2⑥）
+func _ui_pop() -> String:
+	if _ui_stack.is_empty():
+		return ""
+	return String(_ui_stack.pop_back())
+
+func _ui_depth() -> int:
+	return _ui_stack.size()
+
+func _ui_top() -> String:
+	return "" if _ui_stack.is_empty() else String(_ui_stack[_ui_stack.size() - 1])
+
+# 那兩支 property 的 setter 走這裡（true ＝ push、false ＝ 把它拿掉）
+func _ui_set_layer(layer: String, on: bool) -> void:
+	if on:
+		_ui_push(layer)
+	elif _ui_stack.has(layer):
+		_ui_stack.erase(layer)
+
 func _current_mode_name() -> String:
 	if _input_mode:         return _current_mode_name_under_input()
 	if _pre_encounter_mode: return "pre_encounter"
