@@ -515,9 +515,18 @@ func ")
 	return rest if j < 0 else rest.substr(0, j)
 
 # registry 的 (動作名 → handler 函式名) 對
+# ★★★範圍要切（reviewer 2026-10-01 抓到）：第一版**裸掃整個檔案** ⇒ 多吞兩條
+#   `"action": _fe_action`／`"response_label": _label_pre`（它們在 `respond_to_forced`
+#   組信封那一段的字面 dict 裡，跟分派表完全無關）⇒ 印 53 而 `_setup_registry` 實際只有 51。
+#   ★這一次僥倖沒撞上本輪追蹤的 9 支函式名 ⇒ **沒有腐蝕分類**，而它下一次會。
+#   ⇒ 比照同床已經在用的 `_eawt_arms()` 手法：用 `_body_of` 切到那支函式體再掃。
+# ★★而「多吞」要有自己的守衛（見 P10 那兩條地板下面新增的那一條）：
+#   舊的兩條地板只擋【少吞】（回 0），而**多吞正是實際發生的方向** ——
+#   ★★★一個偵測器會往兩個方向錯，而只擋一個方向的地板在另一個方向上是沉默的。
 func _registry_pairs(src: String) -> Array:
+	var body: String = _body_of(src, "_setup_registry")
 	var pairs: Array = []
-	for l in src.split("
+	for l in body.split("
 "):
 		var t: String = l.strip_edges()
 		if t.begins_with("#") or not t.begins_with("\"") or not t.ends_with(","):
@@ -672,6 +681,16 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	_check("★母體地板：第一套分派表非空（%d 條；0 ⇒ 抽取式壞了）" % n_reg, n_reg > 0)
 	_check("★母體地板：第二套分派表非空（%d 條；0 ⇒ 抽取式壞了，而那會讓這一堆多吞成員）"
 		% n_arm, n_arm > 0)
+	# ★★★另一個方向的地板（reviewer 2026-10-01：舊的兩條只擋【少吞】，
+	#   而多吞正是實際發生的方向）—— 抽到的每一個 handler 名字都要真的是本檔的一支函式。
+	#   ★`"response_label": _label_pre` 那一類（區域變數／無關字面 dict）會被這一條咬住。
+	var not_a_func: Array = []
+	for pr3 in _registry_pairs(src):
+		if not src.contains("func " + String(pr3[1]) + "("):
+			not_a_func.append("%s → %s" % [String(pr3[0]), String(pr3[1])])
+	print("     ★多吞方向：抽到的 handler 名字裡【不是本檔函式】的 ＝ %s" % str(not_a_func))
+	_check("★★★抽取式沒有多吞（每一個抽到的 handler 都是本檔的一支函式；多吞的：%s）"
+		% str(not_a_func), not_a_func.is_empty())
 	# ★分母是【函式數】：declared／not_reachable 各存一支函式一列，
 	#   而 must_change 存的是【動作名】（去重）⇒ 相加要用「被分過堆的函式數」。
 	var classified: int = declared.size() + not_reachable.size() + must_change_fns.size()
