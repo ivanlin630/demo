@@ -38,22 +38,40 @@ var _action_registry: Dictionary = {}
 #     `player_query_api.gd:296` 那條啟用路徑與原本 :319／:336／:355 三處停用路徑）。
 #     格動作／自家隊動作／庫存那四處【不在本支】—— 它們沒有來源常數或界線不可機械讀，
 #     已就地具名登 defer（見那兩個標記）。
-#   ★具名排除：`recruit`（泛用招募）**不列** —— 它不是「現在不能做」而是
-#     **尚未實裝此機制**（藍圖④）⇒ 列出來設 false 會讓玩家等一個不存在的東西。
-# ★★★【待裁：清單目前刻意是空的】—— 機制在，內容等上游回答（2026-10-01，implementer）
-#   藍圖④要求「STUB 的泛用 `recruit` 不列」，而我照字面做完之後 `ui_flow` 立刻紅一格：
+#   ★具名排除的語意：清單裡的名字是「**尚未實裝此機制**」（藍圖④）——
+#     不是「現在不能做」⇒ 列出來設 false 會讓玩家等一個不存在的東西。
+# ★★★【`recruit` 為什麼在列上】—— systems 裁 2026-10-01（血證由 implementer 提，systems 逐處核過）：
+#   藍圖④原本要求「STUB 的泛用 `recruit` 不列」，而照字面做完之後 `ui_flow` 立刻紅一格：
 #     `scripts/debug/ui_flow_test.gd:340`「team 行動清單含 recruit」
-#   ⇒ 開檔追下去：`text_ui_main.gd` 的 `elif action_id == "recruit":`（:1497 附近）
-#     是**招募子選單的唯一開啟點**，而那個子選單是 `recruit_named`（記名招募，走
-#     `execute_action_with_target`）在玩家面的**唯一入口**。
-#   ⇒ ★所以「不列 recruit」照字面做 ＝ **把記名招募整條路門死** ——
-#     而那正是我在按鍵三態那張票抓到過的同一族（漏一個名字＝關掉一個功能）。
-#   ⇒ ★★處置：**機制留著、清單留空**（`recruit` 仍然列出來），並把這件事呈報上游：
-#     要麼 (a) `recruit` 留在列上（它不是動作，是子選單的入口）、而它的 handler 誠實回「選一種招募方式」，
-#     要麼 (b) 把 `recruit_named` 用別的方式送進玩家面，那時 `recruit` 才可以不列。
+#   ⇒ 開檔追下去：`text_ui_main.gd:1497` 的 `elif action_id == "recruit":` 只呼
+#     `query_recruit_menu()` ⇒ 它是**招募子選單的開啟點**，而那個子選單是
+#     `recruit_named`（記名招募）在**活的文字介面**裡的唯一入口（`:2670`）。
+#     ★另外兩處（`main.gd:124`／`popup_layer.gd`）在那棵**死的圖形樹**上。
+#   ⇒ ★★★真因不是 (a)／(b) 哪個好，是**前提只講了一半**：這個 id 有【兩個身分】
+#     —— 引擎側是沒實裝的動詞（`:158 "recruit": _action_recruit` 只回菜單），
+#     UI 側是子選單入口。「不列」殺掉後者，「列成可執行動作」讓玩家打到前者。
+#   ⇒ ★裁：`recruit` **留在清單上**，而它的身分宣告在下面的 `SUBMENU_OPENERS`（第三類）
+#     —— ★不是就地標記：一個就地標記本質上是一份長度 1 的手抄名單。
+#   ⇒ ★★`STUB_NOT_IMPLEMENTED` 維持【機制接電 ＋ 清單暫空】：內容等「展開層有自己的
+#     機械來源」之後才會有成員（systems 已登 defer，錨在那行標記上）。
 #   ⇒ ★★★而我**沒有**為了讓床綠而去改 `ui_flow` 那一格的斷言：那一格是對的，
 #     它抓到的是一個真實後果。改它才是弱化。
-const STUB_NOT_IMPLEMENTED: Array = []   # ★待裁（見上）；機制已接電：清單一有名字就會生效
+const STUB_NOT_IMPLEMENTED: Array = []   # ★清單暫空是【裁定】不是忘了（見上）；機制已接電：一有名字就會生效
+
+# ★★★【第三類：子選單入口】—— submenu-entry-not-an-action（systems 裁 2026-10-01）
+#   一個 `action_id` 可以有【兩個身分】：引擎側是一個動詞，UI 側是**開啟下一層畫面的那一格**。
+#   ★這一類的 `enabled` **沒有意義**：按下去是【換一層畫面】不是【發生一件事】
+#     ⇒ 它永遠「可做」、原因永遠是空的 —— ★★而那不是一個豁免，**是它的語意**。
+#     真正的可不可做在【下一層】：記名候選各自帶價（`recruit_named`）、
+#     打聽選項各自有條件（`InquirySystem.get_options`）。
+#   ★★★為什麼是【宣告在一處】而不是就地標記：就地標記本質上是一份長度 1 的手抄名單
+#     ⇒ 同族的第二個成員會沒有人管（2026-10-01 的實例：`gather_intel` 與 `recruit`
+#     形狀完全一樣，而只有後者被討論過）。`opens_submenu` 這一欄**從這個常數導出**。
+#   ★★而「回 payload」**不能**當判準（systems 量過：本檔 `"payload"` 有 11 處，
+#     其中至少五處明顯改世界）⇒ 那個字面只編碼了判準的前半句，漏掉了「且不改世界」。
+#     ⇒ 所以守衛不是靜態 grep，是**行為**：床對每一個宣告過的入口斷言【呼它前後世界不變】，
+#       並**反向掃**所有回 payload 而沒有宣告的 handler（不改世界 ⇒ 漏宣告 ⇒ 紅並指名）。
+const SUBMENU_OPENERS: Array = ["recruit", "gather_intel"]
 
 func get_action_availability(state: WorldState, target_id: int) -> Array:
 	var out: Array = []
@@ -68,9 +86,11 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 		if pt == null or tgt == null:
 			ok = false
 			why = "沒有可操作的隊伍或目標"
+		elif SUBMENU_OPENERS.has(act):
+			pass   # ★第三類：入口的 `enabled` 沒有意義（語意寫在 `SUBMENU_OPENERS` 那裡）
 		else:
 			match act:
-				"ignore", "attack", "gather_intel", "beg":
+				"ignore", "attack", "beg":
 					pass   # 無條件（beg 的需求由 `_resolve_aid_request` 自決）
 				"trade":
 					if not _can_trade(state, pt, tgt):
@@ -104,7 +124,13 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 				_:
 					ok = false
 					why = "（未知動作：%s）" % act
-		out.append({"action_id": act, "enabled": ok, "disabled_reason": why})
+		out.append({
+			"action_id": act,
+			"label": PlayerApiMapper.action_label(act),   # ★唯一一份中文表（systems 裁④）
+			"enabled": ok,
+			"disabled_reason": why,
+			"opens_submenu": SUBMENU_OPENERS.has(act),    # ★從宣告導出，不是第二份名單
+		})
 	return out
 
 # 查詢對 target_id 可用的行動 —— ★**衍生檢視**（spec §2②）：

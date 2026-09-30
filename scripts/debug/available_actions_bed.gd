@@ -32,6 +32,12 @@ const SPEC_CONDITION_LITERALS: Array = ["1.5", "0.7", "RECRUIT_COST_ANON"]
 # ★§7：兩份同形信封的呼叫點總數（普查的數字，寫進 spec）
 const SPEC_ENVELOPE_SITES_QUERY: int = 15   # 本票刪掉三處停用列之後（原 18）
 const SPEC_ENVELOPE_SITES_ITEM: int = 4     # `_make_item_action`（庫存，不在本票）
+# ★P9／P10（systems 裁 2026-10-01「第三類」）：`"payload"` 的呼叫點數 ——
+#   ★這個數字是【從 code 數出來印在卷面】的（不是從信裡抄的）；這一行只記「今天量到多少」
+#   ⇒ 對不上 ⇒ 有人加了一處回 payload 的路 ⇒ 回來看它該不該宣告成入口，不是改這個數。
+const SPEC_PAYLOAD_SITES: int = 11
+# ★P10 的佈置：打聽要有東西可答 ⇒ 被問方必須先知道一些事（tick 0 的世界沒有人知道任何事）
+const ARM_TICKS_FOR_KNOWLEDGE: int = 400
 
 const EXPECTED_CELLS: Array = [
 	"_test_p1_full_list_both_directions",
@@ -41,6 +47,8 @@ const EXPECTED_CELLS: Array = [
 	"_test_p5_stub_not_listed",
 	"_test_p7_conditions_have_a_single_holder",
 	"_test_p8_envelope_boundary",
+	"_test_p9_declared_openers_are_pure",
+	"_test_p10_reverse_sweep_payload_without_declaration",
 ]
 
 
@@ -130,6 +138,36 @@ func _test_p1_full_list_both_directions() -> void:
 	_check("★★★雙向一致：列裡沒有多的（%s）" % str(extra), extra.is_empty())
 	_check("★★★雙向一致：常數裡沒有缺的（%s）" % str(missing), missing.is_empty())
 	_check("★每個名字剛好出現一次（%s）" % str(dup), dup.is_empty())
+	# ★★★敘述訂正（systems 裁 2026-10-01）：母體不再是「11 − 0 排除」而是
+	#   「11 − 0 排除，其中 N 個是【第三類：子選單入口】」——★那 N 個的 `enabled` 沒有意義。
+	var openers: Array = []
+	var no_label: Array = []
+	for r3 in rows:
+		var id3: String = String(r3.get("action_id", ""))
+		if String(r3.get("label", "")).strip_edges() == "":
+			no_label.append(id3)
+		if bool(r3.get("opens_submenu", false)):
+			openers.append(id3)
+	print("   ★母體敘述：常數 %d − 具名排除 %d，其中【子選單入口】%d 個 ＝ %s" % [
+		PlayerCommandSystem.TEAM_TARGET_ACTIONS.size(),
+		PlayerCommandSystem.STUB_NOT_IMPLEMENTED.size(), openers.size(), str(openers)])
+	_check("★`opens_submenu` 這一欄逐字等於宣告（%s／%s）" % [
+		str(openers), str(PlayerCommandSystem.SUBMENU_OPENERS)],
+		str(openers) == str(PlayerCommandSystem.SUBMENU_OPENERS))
+	# ★④（systems 裁）：每一列都要有 `label`，而來源只能是 `PlayerApiMapper.action_label`
+	_check("★★每一列都有非空的 `label`（沒有的：%s）" % str(no_label), no_label.is_empty())
+	var pcs_src: String = _code_only(FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd"))
+	var body2: String = _func_body(pcs_src,
+		"func get_action_availability(state: WorldState, target_id: int) -> Array:")
+	_check("★★★`label` 的來源是 `PlayerApiMapper.action_label`（不是第二份中文表）",
+		body2.contains("PlayerApiMapper.action_label("))
+	# ★入口那幾列的語意：永遠可做、原因永遠空（★而 P9 用行為證它真的不改世界）
+	for r4 in rows:
+		if bool(r4.get("opens_submenu", false)):
+			_check("★入口 `%s` 的 enabled ＝ true、原因是空的（它的語意，不是豁免）" % String(
+				r4.get("action_id", "")),
+				bool(r4.get("enabled", false)) and String(r4.get("disabled_reason", "")) == "")
 	_cell("_test_p1_full_list_both_directions")
 
 
@@ -363,6 +401,222 @@ func _test_p8_envelope_boundary() -> void:
 	_cell("_test_p8_envelope_boundary")
 
 
+# ★把「這一輪前提不成立」那一堆盡量拉回母體 —— ★★佈置要走【真實入口】並【印出它生效了】，
+#   否則「世界沒變」可能只是因為它一開頭就被擋掉（那是運氣不是佈置）。
+# ★★★而有些動作有一個【選擇維度】（打聽要選問哪一題）⇒ 同一個動作的不同選擇會走到不同結果
+#   ⇒ `variant` 就是那個維度；回 false ＝ 這個變體不存在（呼叫端的迴圈到此為止）。
+func _arm_for(action: String, st: WorldState, pt: TeamData, tid: int, variant: int) -> bool:
+	match action:
+		"confirm_gather_intel":
+			var tgt: TeamData = st.teams.get(tid if tid != -1 else _target(st, pt))
+			if tgt == null:
+				return false
+			# ★★★母體：tick 0 的世界【沒有人知道任何事】（`BeliefSystem.known_targets`
+			#   與 `state.team_known` 都是空的）⇒ 每一題都會回「他也不知道」、寫入 0
+			#   ⇒ ★那會讓 P10 把它報成「漏宣告」，而真相是**我的世界太年輕**。
+			#   ⇒ 所以先把世界推到有人知道事情為止，並【印出佈置生效了】。
+			if int(st.world.current_tick) < 1:
+				var runner := SimRunner.new()
+				for _i in range(ARM_TICKS_FOR_KNOWLEDGE):
+					runner.advance_tick(st, pt.tile_pos)
+				var kn: int = BeliefSystem.known_targets(st, tgt.team_id).size()
+				var ev: int = (st.team_known.get(tgt.team_id, []) as Array).size()
+				print("     [佈置] 推 %d tick 之後：被問方知道 %d 支隊、記得 %d 條事件"
+					% [ARM_TICKS_FOR_KNOWLEDGE, kn, ev])
+			var opts: Array = InquirySystem.new().get_options(st, pt, tgt)
+			if variant >= opts.size():
+				return false
+			st.player_state["gather_intel_npc_id"] = tgt.team_id
+			st.player_state["gather_intel_choice"] = String(opts[variant].get("id", ""))
+			return true
+		"take_loot":
+			if variant > 0:
+				return false
+			var other: int = _target(st, pt)
+			if other == -1:
+				return false
+			st.last_encounter_result = {
+				"winner_id": pt.team_id, "loser_id": other,
+				"loot_pool": {"coin": 10.0},
+			}
+			return true
+		_:
+			return variant == 0
+
+# ── P9／P10 共用：呼一個動作，回 [結果, 世界有沒有變] ─────────────────────────
+#   ★「世界有沒有變」用 `StateFingerprint.compute`（專案的正規世界摘要）。
+#   ★★誠實限：fp 只涵蓋它涵蓋的欄位（teams／persons／factions／belief／tiles／world／player_*）
+#     ⇒ 陰性**不等於**「絕對什麼都沒動」；所以再加一個獨立軸：coin 總額（`CoinAudit.total`）。
+#     兩個軸都沒動才算「不改世界」——★而這一點就是負對照要打的地方（讓入口寫一個欄位 ⇒ 必紅）。
+func _call_once(action: String, variant: int = 0) -> Array:
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cs: PlayerCommandSystem = arr[1]
+	var pt: TeamData = st.teams.get(st.get_player_team_id())
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	pt.readiness = 1.0
+	var tid: int = -1
+	if PlayerCommandSystem.TEAM_TARGET_ACTIONS.has(action):
+		tid = _target(st, pt)
+	if not _arm_for(action, st, pt, tid, variant):
+		return [{}, false, false, false, false]
+	var fp0: String = StateFingerprint.compute(st)
+	var coin0: float = CoinAudit.total(st)
+	var r: Dictionary = cs.execute_action(st, tid, action)
+	var fp1: String = StateFingerprint.compute(st)
+	var coin1: float = CoinAudit.total(st)
+	var changed: bool = (fp0 != fp1) or (absf(coin1 - coin0) > 0.000001)
+	return [r, changed, fp0 != fp1, absf(coin1 - coin0) > 0.000001, true]
+
+# 本檔裡【回 payload 的函式】→ 它在 registry 裡的動作名（回不在 registry 的就是空）
+func _payload_functions(src: String) -> Dictionary:
+	var out: Dictionary = {}
+	var cur: String = ""
+	for l in src.split("
+"):
+		var t: String = l.strip_edges()
+		if t.begins_with("#"):
+			continue
+		if l.begins_with("func ") or l.begins_with("static func "):
+			var head: String = l.replace("static func ", "").replace("func ", "")
+			cur = head.split("(")[0]
+		if t.contains("\"payload\"") and cur != "":
+			out[cur] = int(out.get(cur, 0)) + 1
+	return out
+
+func _registry_names_for(src: String, fn: String) -> Array:
+	var names: Array = []
+	for l in src.split("
+"):
+		var t: String = l.strip_edges()
+		if t.begins_with("#"):
+			continue
+		# ★★★錨點的身分：registry 那一行是 `"recruit":                _action_recruit,`
+		#   —— `:` 與函式名之間是**一串空格**（對齊用）⇒ 錨成 `": fn,"` 會恆空。
+		#   ★第一版就是這樣寫的，而【母體地板那一格把它抓出來了】（2026-10-01 實測）：
+		#     三堆相加照樣是 9／9、漏網照樣是空的 —— ★兩條都是「正數形狀的空集合」。
+		if t.contains(fn + ",") and t.begins_with("\""):
+			names.append(t.split("\"")[1])
+	return names
+
+
+# 負對照：讓一個宣告過的入口寫一個欄位 ⇒ 本格紅 ⇒ 待實測
+# ══ P9：★行為證 —— 每一個【宣告過的入口】呼它前後世界不變（systems 裁 (b)）══════
+# ★母體 ＝ `SUBMENU_OPENERS`（宣告在一處）；地板：它不得是空的（空 ⇒ 本格恆綠）。
+func _test_p9_declared_openers_are_pure() -> void:
+	print("
+── P9 宣告過的入口呼它前後世界不變 ──")
+	print("   宣告 ＝ %s（母體 %d）" % [
+		str(PlayerCommandSystem.SUBMENU_OPENERS), PlayerCommandSystem.SUBMENU_OPENERS.size()])
+	_check("★母體地板：宣告不是空的（空 ⇒ 本格恆綠）",
+		not PlayerCommandSystem.SUBMENU_OPENERS.is_empty())
+	for op in PlayerCommandSystem.SUBMENU_OPENERS:
+		var act: String = String(op)
+		var got: Array = _call_once(act)
+		var r: Dictionary = got[0]
+		print("   %-16s ok=%-5s｜世界變了=%-5s（fp 變=%s／coin 變=%s）｜%s" % [
+			act, str(r.get("ok", "?")), str(got[1]), str(got[2]), str(got[3]),
+			String(r.get("msg", "")).substr(0, 40)])
+		# ★★★前提要自己證明：入口必須【真的被呼到而且成功回菜單】——
+		#   ok=false 的話「世界沒變」可能只是因為它一開頭就被擋掉（那是運氣不是佈置）。
+		_check("★%s 真的回了菜單（ok=true；false ⇒ 下一條的陰性沒有主詞）" % act,
+			bool(r.get("ok", false)))
+		_check("★★★%s 呼它前後世界不變（fp ＋ coin 兩個軸）" % act, not bool(got[1]))
+		_check("★%s 真的回了 payload（它是入口 ⇒ 下一層的內容要在回傳裡）" % act,
+			r.has("payload"))
+	_cell("_test_p9_declared_openers_are_pure")
+
+
+# 負對照：把一個宣告過的入口從 `SUBMENU_OPENERS` 拿掉 ⇒ 本格必須【指名】它 ⇒ 待實測
+# ══ P10：★★★反向掃 —— 沒有宣告而回 payload 的，逐列問「它改世界嗎」（systems 裁 (c)）══
+# ★這一格才是「漏宣告不再是靜默的」那一半：(a)+(b) 只能守住已經宣告的那些，
+#   而 2026-10-01 漏掉的那一個（`gather_intel`）正是**沒有被宣告**的那一個。
+# ★★母體從 code 數出來印在卷面（不是從信裡抄）。
+func _test_p10_reverse_sweep_payload_without_declaration() -> void:
+	print("
+── P10 反向掃：回 payload 而沒有宣告的 ──")
+	var src: String = FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd")
+	var fns: Dictionary = _payload_functions(src)
+	var sites: int = 0
+	for k in fns.keys():
+		sites += int(fns[k])
+	print("   回 `payload` 的函式 %d 支／呼叫點 %d 處：%s" % [fns.size(), sites, str(fns.keys())])
+	_check("★母體地板：真的數到回 payload 的路（0 ⇒ 掃描器壞了，不是沒有）", sites > 0)
+	_check("★呼叫點數 ＝ 今天量到的 %d（對不上 ⇒ 有人加了一條路 ⇒ 回來看它該不該宣告）"
+		% SPEC_PAYLOAD_SITES, sites == SPEC_PAYLOAD_SITES)
+	var declared: Array = []
+	var must_change: Array = []
+	var not_reachable: Array = []
+	for fn in fns.keys():
+		var names: Array = _registry_names_for(src, String(fn))
+		if names.is_empty():
+			not_reachable.append("%s（不在 registry ⇒ 不是一個玩家可以按的 action id）" % String(fn))
+			continue
+		for n in names:
+			if PlayerCommandSystem.SUBMENU_OPENERS.has(String(n)):
+				declared.append(String(n))
+			else:
+				must_change.append(String(n))
+	print("   ── 分三堆（相加 ＝ 函式數）──")
+	print("   ①已宣告成入口 ＝ %s" % str(declared))
+	print("   ②沒宣告 ⇒ 必須改世界 ＝ %s" % str(must_change))
+	print("   ③不可經由 action id 抵達 ＝ %d 支" % not_reachable.size())
+	for nr in not_reachable:
+		print("     · %s" % String(nr))
+	_check("★★三堆相加 ＝ 回 payload 的函式數（%d ＋ %d ＋ %d ＝ %d／%d）" % [
+		declared.size(), must_change.size(), not_reachable.size(),
+		declared.size() + must_change.size() + not_reachable.size(), fns.size()],
+		declared.size() + must_change.size() + not_reachable.size() == fns.size())
+	# ★★★逐列問：沒宣告的那些，呼它【成功】的時候世界必須真的變。
+	#   不變 ⇒ 它其實是一個入口而沒有人宣告 ⇒ 紅並**指名**。
+	var leaked: Array = []
+	var na: Array = []
+	# ★★★判準的第三格（2026-10-01 實測抓出來的）：`confirm_gather_intel` 的第一個變體
+	#   回 ok=true、訊息「他也不知道」、**寫入 0 ⇒ 世界沒變** —— ★那不是漏宣告，
+	#   是**成功執行而結果為空**（同「決定 vs 結果要分開講」那一族）。
+	#   ⇒ ★所以正確的謂詞不是「這一次改了世界嗎」，是【**存在一個可達結果使它改世界**】。
+	#   ⇒ ★★而它不是「試到綠為止」：變體數會印在卷面上，而**全部變體都不改世界**才算漏宣告
+	#     —— 那時它就真的是一個沒有人宣告的入口。
+	for m in must_change:
+		var act: String = String(m)
+		var tried: int = 0
+		var changed_any: bool = false
+		var last_msg: String = ""
+		var last_ok: bool = false
+		while true:
+			var got: Array = _call_once(act, tried)
+			if not bool(got[4]):
+				break
+			tried += 1
+			var r: Dictionary = got[0]
+			last_ok = bool(r.get("ok", false))
+			last_msg = String(r.get("msg", ""))
+			if last_ok and bool(got[1]):
+				changed_any = true
+				break
+			if tried >= 12:
+				break
+		print("   %-22s 試了 %d 個變體｜曾改世界=%-5s｜最後一次 ok=%-5s｜%s" % [
+			act, tried, str(changed_any), str(last_ok), last_msg.substr(0, 40)])
+		if tried == 0:
+			na.append("%s（一個變體都佈置不起來 ⇒ 沒有主詞）" % act)
+			continue
+		if not last_ok and not changed_any:
+			na.append("%s（%s）" % [act, last_msg.substr(0, 30)])
+			continue
+		if not changed_any:
+			leaked.append(act)
+	print("   ★不適用（這一輪前提不成立 ⇒ 沒有主詞，具名）＝ %s" % str(na))
+	_check("★母體地板：至少有一支【沒宣告的】真的跑成功了（0 ⇒ 下一條恆綠）",
+		must_change.size() - na.size() > 0)
+	_check("★★★沒有【回 payload、不改世界、卻沒有宣告】的漏網（指名：%s）" % str(leaked),
+		leaked.is_empty())
+	print("   ★★而這一格的方向很重要：誤標成入口 ⇒ 玩家以為按下去只是開一層選單，")
+	print("     所以判準不是「回 payload」（那只編碼了前半句），是【回 payload 且不改世界】。")
+	_cell("_test_p10_reverse_sweep_payload_without_declaration")
+
+
 func _initialize() -> void:
 	print("=== available_actions bed ===")
 	_test_p1_full_list_both_directions()
@@ -372,6 +626,8 @@ func _initialize() -> void:
 	_test_p5_stub_not_listed()
 	_test_p7_conditions_have_a_single_holder()
 	_test_p8_envelope_boundary()
+	_test_p9_declared_openers_are_pure()
+	_test_p10_reverse_sweep_payload_without_declaration()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
