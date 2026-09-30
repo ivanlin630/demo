@@ -175,6 +175,9 @@ func _test_p7_conservation_with_tags() -> void:
 	_cell("_test_p7_conservation_with_tags")
 
 
+# 負對照：把 NPC 分支改成自己寫一份轉移（不呼共用解算點）⇒ P10 的好感那一格紅 ⇒ 已於 feat/npc-tribute-transfer（2026-09-30 這一輪） 實測紅
+# 負對照：把共用解算點裡的恩怨那一段拿掉 ⇒ 錢動而好感不動 ⇒ 已於 feat/npc-tribute-transfer（2026-09-30 這一輪） 實測紅
+# 負對照：把 "tributed" 塞進 FEUD_SEVERITY ⇒ 比例被換成固定值 ⇒ 已於 feat/npc-tribute-transfer（2026-09-30 這一輪） 實測紅
 # ══ P8a：小額 ⇒ 好感動、feud 邊仍然 0（§9③ 拆開的那一半）═══════════════════════
 # ★★★逐欄印 aff_before／aff_after ＋ 斷言降幅 ≥ 由 severity 算出的預期下限
 #   （§9②：好感可能已經很負而降幅趨近 0，只斷言「有降」會誤判通過）。
