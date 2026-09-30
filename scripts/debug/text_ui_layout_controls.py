@@ -45,7 +45,7 @@ POS_NEW = '''		var key: String = char(65 + lines.size() - 1)'''
 CONTROLS = [
     ('★①display_width 換成 length()', '每一個案例都精確等於 2N+M（不符的：["純全形（期望 10 實得 5）"',
      (LAY, WIDTH_OLD, WIDTH_NEW)),
-    ('★★★③字母改成由位置決定', 'TODO-EXPECT', (VIEW, POS_OLD, POS_NEW)),
+    ('★★★③字母改成由位置決定', '拿到同一個字母（不一致：3）', (VIEW, POS_OLD, POS_NEW)),
     ('②別處再寫一次 120', '恰好 1 次（在 `TextUiLayout.COLS` 宣告處，實測 2）',
      (LAY, DUP_OLD, DUP_NEW)),
 ]
