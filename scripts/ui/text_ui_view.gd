@@ -75,6 +75,8 @@ const ACTION_LETTERS: Dictionary = {
 const FEED_ROWS: int = 8          # 事件流固定筆數（spec §2④）
 const SUBMENU_MARK: String = "▸"  # 有下一層（spec §2③）
 const UNBOUND_MARK: String = "（未綁鍵）"
+# ★底部結果句的前綴（★它的寬度由 `display_width` 量，不寫死 —— 見 `foot_block`）
+const _RESULT_PREFIX: String = " 結果："
 
 
 # ── 補到某個顯示寬度：★用【補】不要用【換】 ─────────────────────────────────
@@ -190,7 +192,13 @@ static func feed_block(events: Array) -> String:
 static func foot_block(result_line: String, keymap: String) -> String:
 	return "\n".join([
 		"─".repeat(TextUiLayout.COLS),
-		" 結果：" + TextUiLayout.clip_to(result_line, TextUiLayout.COLS - 4),
+		# ★★★前綴的寬度要從【前綴自己】量，不要寫死一個數：
+		#   `" 結果："` 的顯示寬度是 **7**（空白 1 ＋ 結 2 ＋ 果 2 ＋ ： 2），而我第一版寫 `COLS - 4`
+		#   ⇒ 前綴 7 ＋ 內容 116 ＝ **123 > COLS** ⇒ **P3c 會紅，而紅的是我的減法不是版面**。
+		#   ★同一族（今天第三次）：`（不可：` 我寫死 5 而它是 4；`k + 5` 那個偏移；這次是 `- 4`。
+		#   ⇒ 判準：**寬度／偏移一律從那個字串自己量（`display_width`／`length`），不要寫死數字。**
+		_RESULT_PREFIX + TextUiLayout.clip_to(result_line,
+			TextUiLayout.COLS - TextUiLayout.display_width(_RESULT_PREFIX)),
 		A_FOOT + keymap,
 	])
 
