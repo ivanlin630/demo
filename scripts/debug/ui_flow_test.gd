@@ -2348,6 +2348,7 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
 const SPEC_UI_MODE_COUNT: int = 13
 const CONTROL_FLOOR_DVO: int = 2  # decision_vs_outcome_bed（分開講／具名例外）
+const CONTROL_FLOOR_NPCTRIB: int = 3  # npc_tribute_transfer_bed（三道：自己寫一份／拿掉恩怨／塞進表）
 const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
 const CONTROL_FLOOR_SPAM: int = 6  # spam_brake_bed（濫按煞車／兩層關係帳）
 const CONTROL_FLOOR_UNBOUND: int = 6  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）
@@ -2752,6 +2753,10 @@ func _test_p19_control_coverage_ratchet() -> void:
 	print("   decision_vs_outcome_bed %d（地板 %d）" % [n_dv, CONTROL_FLOOR_DVO])
 	_check("★★decision_vs_outcome_bed 的紀錄數沒有往回走（%d >= %d）" % [n_dv, CONTROL_FLOOR_DVO],
 		n_dv >= CONTROL_FLOOR_DVO)
+	var n_nt: int = _count_fired("res://scripts/debug/npc_tribute_transfer_bed.gd")
+	print("   npc_tribute_transfer_bed %d（地板 %d）" % [n_nt, CONTROL_FLOOR_NPCTRIB])
+	_check("★★npc_tribute_transfer_bed 的紀錄數沒有往回走（%d >= %d）" % [n_nt, CONTROL_FLOOR_NPCTRIB],
+		n_nt >= CONTROL_FLOOR_NPCTRIB)
 	var n_lc: int = _count_fired("res://scripts/debug/leader_chokepoint_bed.gd")
 	print("   leader_chokepoint_bed %d（地板 %d）" % [n_lc, CONTROL_FLOOR_LEADER])
 	_check("★★leader_chokepoint_bed 的紀錄數沒有往回走（%d >= %d）" % [n_lc, CONTROL_FLOOR_LEADER],
