@@ -449,7 +449,11 @@ func _arm_for(action: String, st: WorldState, pt: TeamData, tid: int, variant: i
 #   ★★誠實限：fp 只涵蓋它涵蓋的欄位（teams／persons／factions／belief／tiles／world／player_*）
 #     ⇒ 陰性**不等於**「絕對什麼都沒動」；所以再加一個獨立軸：coin 總額（`CoinAudit.total`）。
 #     兩個軸都沒動才算「不改世界」——★而這一點就是負對照要打的地方（讓入口寫一個欄位 ⇒ 必紅）。
-func _call_once(action: String, variant: int = 0) -> Array:
+# ★★★`via_target` ＝ 這個名字來自【第二套分派表】⇒ 要走 `execute_action_with_target`。
+#   ★第一版沒有這一半 ⇒ `recruit_named` 回「未知行動」被我記成「不適用」，
+#     而那個理由是【我用錯入口】不是【它的性質】—— 正是我自己在 P10 分開過的那兩件事，
+#     同一輪我在另一行又混了一次。
+func _call_once(action: String, variant: int = 0, via_target: bool = false) -> Array:
 	var arr: Array = _fresh()
 	var st: WorldState = arr[0]
 	var cs: PlayerCommandSystem = arr[1]
@@ -457,13 +461,28 @@ func _call_once(action: String, variant: int = 0) -> Array:
 	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
 	pt.readiness = 1.0
 	var tid: int = -1
-	if PlayerCommandSystem.TEAM_TARGET_ACTIONS.has(action):
+	if via_target or PlayerCommandSystem.TEAM_TARGET_ACTIONS.has(action):
 		tid = _target(st, pt)
 	if not _arm_for(action, st, pt, tid, variant):
 		return [{}, false, false, false, false]
 	var fp0: String = StateFingerprint.compute(st)
 	var coin0: float = CoinAudit.total(st)
-	var r: Dictionary = cs.execute_action(st, tid, action)
+	var r: Dictionary = {}
+	if via_target:
+		# 第二套分派表吃完整 target dict（member kind）
+		var tgt2: TeamData = st.teams.get(tid)
+		var mid: int = -1
+		if tgt2 != null:
+			for pid in tgt2.named_members:
+				if int(pid) != tgt2.leader_id:
+					mid = int(pid)
+					break
+		r = cs.execute_action_with_target(st, action, {
+			"kind": "member", "team_id": tid, "member_id": mid,
+			"tile_q": -1, "tile_r": -1,
+		})
+	else:
+		r = cs.execute_action(st, tid, action)
 	var fp1: String = StateFingerprint.compute(st)
 	var coin1: float = CoinAudit.total(st)
 	var changed: bool = (fp0 != fp1) or (absf(coin1 - coin0) > 0.000001)
@@ -485,20 +504,80 @@ func _payload_functions(src: String) -> Dictionary:
 			out[cur] = int(out.get(cur, 0)) + 1
 	return out
 
-func _registry_names_for(src: String, fn: String) -> Array:
-	var names: Array = []
+# 取某一支【具名函式】的函式體（不用寫完整簽章）
+func _body_of(src: String, fname: String) -> String:
+	var i: int = src.find("func " + fname + "(")
+	if i < 0:
+		return ""
+	var rest: String = src.substr(i)
+	var j: int = rest.find("
+func ")
+	return rest if j < 0 else rest.substr(0, j)
+
+# registry 的 (動作名 → handler 函式名) 對
+func _registry_pairs(src: String) -> Array:
+	var pairs: Array = []
 	for l in src.split("
 "):
 		var t: String = l.strip_edges()
-		if t.begins_with("#"):
+		if t.begins_with("#") or not t.begins_with("\"") or not t.ends_with(","):
 			continue
-		# ★★★錨點的身分：registry 那一行是 `"recruit":                _action_recruit,`
-		#   —— `:` 與函式名之間是**一串空格**（對齊用）⇒ 錨成 `": fn,"` 會恆空。
-		#   ★第一版就是這樣寫的，而【母體地板那一格把它抓出來了】（2026-10-01 實測）：
-		#     三堆相加照樣是 9／9、漏網照樣是空的 —— ★兩條都是「正數形狀的空集合」。
-		if t.contains(fn + ",") and t.begins_with("\""):
-			names.append(t.split("\"")[1])
-	return names
+		var parts: Array = t.split("\"")
+		if parts.size() < 3:
+			continue
+		var rhs: String = String(parts[2]).replace(":", "").replace(",", "").strip_edges()
+		if rhs.begins_with("_"):
+			pairs.append([String(parts[1]), rhs])
+	return pairs
+
+# ★★★【可達性要追到底】—— reviewer 2026-10-01 抓到的：`establish_faction` 被我分進
+#   「不可經由 action id 抵達」那一堆，而**那個理由是假的**：registry 指到
+#   `_action_establish_faction_cmd`（:188），而它下一行就 `return establish_faction(state)`
+#   ⇒ 玩家真的按得到。★我只追了一層（registry 的右手邊），沒追委派。
+#   ⇒ 本支回【直接 ∪ 一層委派】；★★而一個假的具名理由比沒有理由更糟：
+#     那一堆是我自己寫的「不適用」桶，而它會把東西吞掉而卷面上看起來已經解釋過了。
+func _reachable_names(src: String, fn: String) -> Array:
+	var direct: Array = []
+	for pr in _registry_pairs(src):
+		if String(pr[1]) == fn:
+			direct.append(String(pr[0]))
+	if not direct.is_empty():
+		return direct
+	var via: Array = []
+	for pr2 in _registry_pairs(src):
+		var body: String = _code_only(_body_of(src, String(pr2[1])))
+		if body != "" and body.contains(fn + "("):
+			via.append(String(pr2[0]))
+	# ★★★【第二套分派表】—— 2026-10-01 我自己核 reviewer 那一族的剩餘成員時抓到的：
+	#   `_recruit_named_internal` 也按得到，而它走的是 `execute_action_with_target` 的
+	#   `match action:`（`player_command_system.gd:1560` 附近），**不是** `_setup_registry`。
+	#   ⇒ ★所以「動作名 → handler」有【兩套】機制，而我第一版只查了一套
+	#     ⇒ 桶裡那一行的診斷對它也是假的（與 reviewer 抓到的 `establish_faction` 同族、不同機制）。
+	for arm in _eawt_arms(src):
+		if String(arm[1]).contains(fn + "("):
+			via.append(String(arm[0]))
+	return via
+
+# 第二套分派表的 (動作名 → 那一臂的原文)
+func _eawt_arms(src: String) -> Array:
+	var body: String = _code_only(_body_of(src, "execute_action_with_target"))
+	var arms: Array = []
+	var cur_name: String = ""
+	var cur_text: String = ""
+	for l in body.split("
+"):
+		var t: String = l.strip_edges()
+		if t.begins_with("\"") and t.ends_with("\":"):
+			if cur_name != "":
+				arms.append([cur_name, cur_text])
+			cur_name = t.substr(1, t.length() - 3)
+			cur_text = ""
+		elif cur_name != "":
+			cur_text += l + "
+"
+	if cur_name != "":
+		arms.append([cur_name, cur_text])
+	return arms
 
 
 # 負對照：讓一個宣告過的入口寫一個欄位（`pt.readiness = 0.123`）⇒ 本格紅 ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
@@ -548,27 +627,57 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 		% SPEC_PAYLOAD_SITES, sites == SPEC_PAYLOAD_SITES)
 	var declared: Array = []
 	var must_change: Array = []
+	var must_change_fns: Array = []
 	var not_reachable: Array = []
+	# ★★★分堆的單位是【函式】不是【名字】：一支函式可以對到多個動作名
+	#   ⇒ 拿名字數去跟函式數相加會紅，而那個紅跟缺陷無關（reviewer 2026-10-01 之後改）。
 	for fn in fns.keys():
-		var names: Array = _registry_names_for(src, String(fn))
+		var names: Array = _reachable_names(src, String(fn))
 		if names.is_empty():
-			not_reachable.append("%s（不在 registry ⇒ 不是一個玩家可以按的 action id）" % String(fn))
+			# ★★★桶名只講【判準看到了什麼】，不講【世界是什麼】（systems 裁 2026-10-01）：
+			#   「不是一個玩家可以按的 action id」是對世界的斷言，而它**曾經是假的**
+			#   ⇒ ★一句假的診斷比一個紅更毒：沒有人會來推翻它，而下一個人會拿它當前提。
+			not_reachable.append("%s（判準看到的：兩套分派表的字面裡都沒有它，兩套裡的 handler 函式體也沒有呼它）"
+				% String(fn))
 			continue
+		var is_decl: bool = false
 		for n in names:
 			if PlayerCommandSystem.SUBMENU_OPENERS.has(String(n)):
-				declared.append(String(n))
-			else:
-				must_change.append(String(n))
+				is_decl = true
+		if is_decl:
+			declared.append("%s → %s" % [String(fn), str(names)])
+		else:
+			must_change_fns.append(String(fn))
+			for n2 in names:
+				if not must_change.has(String(n2)):
+					must_change.append(String(n2))
 	print("   ── 分三堆（相加 ＝ 函式數）──")
 	print("   ①已宣告成入口 ＝ %s" % str(declared))
 	print("   ②沒宣告 ⇒ 必須改世界 ＝ %s" % str(must_change))
 	print("   ③不可經由 action id 抵達 ＝ %d 支" % not_reachable.size())
 	for nr in not_reachable:
 		print("     · %s" % String(nr))
-	_check("★★三堆相加 ＝ 回 payload 的函式數（%d ＋ %d ＋ %d ＝ %d／%d）" % [
-		declared.size(), must_change.size(), not_reachable.size(),
-		declared.size() + must_change.size() + not_reachable.size(), fns.size()],
-		declared.size() + must_change.size() + not_reachable.size() == fns.size())
+	# ★★★就地誠實限（systems 裁 2026-10-01：把已知盲點寫在產出它的那一行旁邊，
+	#   比一個沉默的正確更有用）——
+	var n_reg: int = _registry_pairs(src).size()
+	var n_arm: int = _eawt_arms(src).size()
+	print("     ★這一堆的意思【不等於】玩家按不到它：抽取式只認得【字面】分派，")
+	print("       而它認得的是兩套 —— `_setup_registry` 的 dict（%d 條）" % n_reg)
+	print("       ＋ `execute_action_with_target` 的 match 臂（%d 條），各加一層委派。" % n_arm)
+	print("       ★★兩個血證：`establish_faction` 經一行委派按得到（reviewer 2026-10-01 抓到，")
+	print("         我第一版把它分進這一堆而理由是假的）；`_recruit_named_internal` 走第二套")
+	print("         分派表（我核剩餘成員時抓到）⇒ **同一族、兩個不同機制**。")
+	print("     ★★★仍然看不到的：執行期組出來的字串分派、或第三套分派表 ——")
+	print("       那時這一堆會多一個成員而理由**看起來還是對的**（它只說判準沒看到）。")
+	_check("★母體地板：第一套分派表非空（%d 條；0 ⇒ 抽取式壞了）" % n_reg, n_reg > 0)
+	_check("★母體地板：第二套分派表非空（%d 條；0 ⇒ 抽取式壞了，而那會讓這一堆多吞成員）"
+		% n_arm, n_arm > 0)
+	# ★分母是【函式數】：declared／not_reachable 各存一支函式一列，
+	#   而 must_change 存的是【動作名】（去重）⇒ 相加要用「被分過堆的函式數」。
+	var classified: int = declared.size() + not_reachable.size() + must_change_fns.size()
+	_check("★★逐函式分三堆相加 ＝ 回 payload 的函式數（%d ＋ %d ＋ %d ＝ %d／%d）" % [
+		declared.size(), must_change_fns.size(), not_reachable.size(),
+		classified, fns.size()], classified == fns.size())
 	# ★★★逐列問：沒宣告的那些，呼它【成功】的時候世界必須真的變。
 	#   不變 ⇒ 它其實是一個入口而沒有人宣告 ⇒ 紅並**指名**。
 	var leaked: Array = []
@@ -579,14 +688,18 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	#   ⇒ ★所以正確的謂詞不是「這一次改了世界嗎」，是【**存在一個可達結果使它改世界**】。
 	#   ⇒ ★★而它不是「試到綠為止」：變體數會印在卷面上，而**全部變體都不改世界**才算漏宣告
 	#     —— 那時它就真的是一個沒有人宣告的入口。
+	var eawt: Array = []
+	for arm2 in _eawt_arms(src):
+		eawt.append(String(arm2[0]))
 	for m in must_change:
 		var act: String = String(m)
+		var via_t: bool = eawt.has(act)
 		var tried: int = 0
 		var changed_any: bool = false
 		var last_msg: String = ""
 		var last_ok: bool = false
 		while true:
-			var got: Array = _call_once(act, tried)
+			var got: Array = _call_once(act, tried, via_t)
 			if not bool(got[4]):
 				break
 			tried += 1
@@ -598,8 +711,9 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 				break
 			if tried >= 12:
 				break
-		print("   %-22s 試了 %d 個變體｜曾改世界=%-5s｜最後一次 ok=%-5s｜%s" % [
-			act, tried, str(changed_any), str(last_ok), last_msg.substr(0, 40)])
+		print("   %-22s 入口=%-22s 試了 %d 個變體｜曾改世界=%-5s｜ok=%-5s｜%s" % [
+			act, "execute_action_with_target" if via_t else "execute_action",
+			tried, str(changed_any), str(last_ok), last_msg.substr(0, 36)])
 		if tried == 0:
 			na.append("%s（一個變體都佈置不起來 ⇒ 沒有主詞）" % act)
 			continue
