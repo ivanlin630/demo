@@ -111,6 +111,43 @@ func _read_sha() -> String:
 		return ""
 	return String(out[0]).strip_edges()
 
+# ★★★【讓過期不靜默】（systems 裁 2026-10-01）——
+#   ·不把 artifacts 的【內容】進閘（釘「症狀 N 筆」會讓這一格變成「世界不許改」的閘）
+#   ·要做的是：讀【磁碟上那份舊 artifact】的第一行 sha，印出它落後現在 HEAD 幾顆，
+#     並斷言**它是 HEAD 的祖先**。
+#   ★為什麼主詞是【舊那份】而不是現在的 HEAD：床跑完會把 artifact 覆寫掉
+#     ⇒ 拿現在的 sha 去算距離**永遠是 0** ⇒ 那是一個恆真的數字。
+#     ⇒ 所以要在覆寫**之前**先讀它，而那個數的意思是
+#       「你剛才差一點要相信的那份卷面，是 N 顆 commit 前產生的」。
+#   ★★而【落後幾顆】不設門檻、只印出來（門檻會漂：今天 5 顆合理、下週 50 顆也合理）；
+#     ★★★真的會紅的是**祖先**那一條 —— artifacts 來自一棵不在歷史上的樹
+#     ＝ 有人手改過它（或它來自一支被丟掉的 branch）。
+func _read_prev_artifact_sha(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return ""
+	var fh := FileAccess.open(path, FileAccess.READ)
+	if fh == null:
+		return ""
+	var txt: String = fh.get_as_text()
+	fh.close()
+	for line in txt.split("\n"):
+		var t: String = String(line).strip_edges()
+		if t.begins_with("跑的是哪一棵樹：sha "):
+			return t.trim_prefix("跑的是哪一棵樹：sha ").strip_edges()
+	return ""
+
+# 回 [落後幾顆, 是不是 HEAD 的祖先, 說明]　★取不到就說出取不到（不要回 0 假裝新鮮）
+func _sha_distance_to_head(sha: String) -> Array:
+	if sha == "" or sha == "（取不到）":
+		return [-1, false, "沒有前一份 artifact 的 sha（第一次跑，或上一次就取不到）"]
+	var anc: Array = []
+	var rc_anc: int = OS.execute("git", ["merge-base", "--is-ancestor", sha, "HEAD"], anc, true)
+	var cnt: Array = []
+	var rc_cnt: int = OS.execute("git", ["rev-list", "--count", sha + "..HEAD"], cnt, true)
+	if rc_cnt != 0 or cnt.is_empty():
+		return [-1, rc_anc == 0, "`git rev-list` 取不到（rc=%d）" % rc_cnt]
+	return [int(String(cnt[0]).strip_edges()), rc_anc == 0, ""]
+
 func _fresh() -> Array:
 	seed(20260930)
 	var st: WorldState = MeasureBedHelper.arm_and_new()
@@ -629,6 +666,24 @@ func _test_p5_four_rules_have_teeth() -> void:
 func _test_p6_artifacts() -> void:
 	print("\n── P6 產物：tsv ＋ txt ──")
 	var stamp: String = "docs/measurements/2026-09-30-scripted-exploration"
+	# ★★★先讀【舊那份】再覆寫（順序是這一段的全部）——systems 裁 2026-10-01
+	var _prev_sha: String = _read_prev_artifact_sha("res://" + stamp + ".txt")
+	var _d: Array = _sha_distance_to_head(_prev_sha)
+	var _behind: int = int(_d[0])
+	var _is_anc: bool = bool(_d[1])
+	var _why: String = String(_d[2])
+	print("   ★磁碟上那份 artifact 的 sha ＝ %s" % (_prev_sha if _prev_sha != "" else "（沒有）"))
+	if _behind < 0:
+		print("     ⇒ 距離取不到：%s（★這不是「新鮮」，是【沒有主詞】）" % _why)
+	else:
+		print("     ⇒ 它落後現在的 HEAD **%d 顆 commit**｜是 HEAD 的祖先 ＝ %s" % [
+			_behind, str(_is_anc)])
+		print("     ★這個數【不設門檻】（門檻會漂）—— 它的用途是讓")
+		print("       「那 114 列來自 20 顆 commit 前」這件事不再是靜默的。")
+	_check("★★★磁碟上那份 artifact 的 sha 必須是 HEAD 的【祖先】"
+		+ "（不是 ⇒ 有人手改過它，或它來自一支被丟掉的 branch）%s" % (
+			"" if _prev_sha != "" else "｜★本輪不適用：沒有前一份（具名，不是靜默略過）"),
+		_is_anc or _prev_sha == "")
 	var tsv: String = "rule\twhere\tcause\tdetail\n"
 	for c in _contradictions:
 		tsv += "%s\t%s\t%s\t%s\n" % [String(c["rule"]), String(c["where"]),
