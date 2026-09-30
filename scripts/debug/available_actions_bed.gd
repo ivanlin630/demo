@@ -50,6 +50,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p9_declared_openers_are_pure",
 	"_test_p10_reverse_sweep_payload_without_declaration",
 	"_test_p11_label_has_one_producer",
+	"_test_p12_degenerate_state_keeps_openers",
 ]
 
 
@@ -821,6 +822,78 @@ func _test_p11_label_has_one_producer() -> void:
 	_cell("_test_p11_label_has_one_producer")
 
 
+
+# 負對照：把入口那一格拿掉（讓 `recruit` 走一般 match 的條件）⇒ 本格紅 ⇒ 待實測
+# ══ P12：★★★【退化狀態】下入口仍在、而動作消失（battery10 的血證釘成一格）════════
+# ★★★為什麼要有這一格：battery10 的 `headless` 紅，而紅的那條是
+#   `assert(not _actions_no_coin.has("recruit"), "recruit: coin 不足時不可選")`
+#   —— 它編碼了**舊語意**，而今天的裁定（子選單入口的 `enabled` 沒有意義）推翻了它。
+#   ⇒ ★而**本票的 P4 沒有抓到這件事**，因為 P4 的母體**只有一個狀態**（有錢、有目標）。
+#   ⇒ ★★systems 的判準：「**兩個版本行為相同**」這種斷言，它的母體必須含
+#     【會讓兩者分岔的那些狀態】，而那些狀態通常是**退化狀態**（沒錢／沒目標／空清單）。
+#   ⇒ ★★★所以這一格把那個退化狀態（`coin = 0`）釘進本票自己的床 ——
+#     **接住它的是跨切面的 `headless`，而票內的守衛沒接住** ⇒ 把它補在票內。
+# ★而它守的不變量有兩半，缺一半都不算：
+#   ①入口在退化狀態下**仍然列得出來**（打開選單不用錢）
+#   ②而**真的要花錢的那個動作**（`recruit_anon`）在退化狀態下**消失並說出原因**
+#   ⇒ 只驗 ① 會讓「全部都永遠可做」也綠；只驗 ② 抓不到入口被錢擋掉。
+func _test_p12_degenerate_state_keeps_openers() -> void:
+	print("\n── P12 退化狀態：入口仍在、動作消失 ──")
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cs: PlayerCommandSystem = arr[1]
+	var pt: TeamData = st.teams.get(st.get_player_team_id())
+	var tid: int = _target(st, pt)
+	_check("★母體地板：找到同格目標", tid != -1)
+	var tgt: TeamData = st.teams.get(tid)
+	if tgt != null and AnonTierSystem.total_pop(tgt) == 0:
+		AnonTierSystem.add_anon(tgt, AnonCohort.TIER_PLEB, 3)
+	# ★退化狀態：錢歸零（★而對方【有】無名之人 ⇒ 擋住 `recruit_anon` 的只剩錢）
+	ResourceBank.set_amt(pt, "coin", 0.0, "bed_fixture")
+	print("   [佈置] 玩家 coin = %.0f（RECRUIT_COST_ANON = %.0f）｜對方無名之人 = %d 人" % [
+		float(pt.resources.get("coin", 0)), PlayerCommandSystem.RECRUIT_COST_ANON,
+		AnonTierSystem.total_pop(tgt) if tgt != null else -1])
+	_check("★★母體地板：錢真的是 0（不是 0 ⇒ 下面那半沒有主詞）",
+		float(pt.resources.get("coin", 0)) == 0.0)
+	_check("★★母體地板：對方真的有無名之人（沒有 ⇒ `recruit_anon` 消失的原因會是【沒人可招】"
+		+ "而不是【沒錢】—— 一個紅在錯理由上的斷言會被讀成「錢那條守衛在工作」）",
+		tgt != null and AnonTierSystem.total_pop(tgt) > 0)
+	var rows: Array = cs.get_action_availability(st, tid)
+	var by_id: Dictionary = {}
+	for r in rows:
+		by_id[String(r.get("action_id", ""))] = r
+	# ①每一個【宣告過的入口】在退化狀態下仍然可做、原因仍然空
+	for op in PlayerCommandSystem.SUBMENU_OPENERS:
+		var id: String = String(op)
+		var row: Dictionary = by_id.get(id, {})
+		print("   入口 %-14s enabled=%-5s｜原因「%s」" % [
+			id, str(row.get("enabled", "?")), String(row.get("disabled_reason", ""))])
+		_check("★母體地板：入口 `%s` 真的在列上" % id, by_id.has(id))
+		_check("★★★入口 `%s` 在【沒錢】的世界裡仍然可做（打開選單不用錢）" % id,
+			bool(row.get("enabled", false)))
+		_check("★入口 `%s` 的原因仍然是空的（它的 `enabled` 沒有意義）" % id,
+			String(row.get("disabled_reason", "")) == "")
+	# ②而真的要花錢的那個動作要消失並說出原因
+	var anon_row: Dictionary = by_id.get("recruit_anon", {})
+	print("   動作 recruit_anon  enabled=%-5s｜原因「%s」" % [
+		str(anon_row.get("enabled", "?")), String(anon_row.get("disabled_reason", ""))])
+	_check("★母體地板：`recruit_anon` 在列上", by_id.has("recruit_anon"))
+	_check("★★★`recruit_anon` 在【沒錢】的世界裡不可做（★錢真正在守的地方）",
+		not bool(anon_row.get("enabled", true)))
+	_check("★★而它說得出原因（空的 ⇒ 玩家只看到它灰掉而不知道為什麼）",
+		String(anon_row.get("disabled_reason", "")).strip_edges() != "")
+	# ★衍生檢視要跟著少一個名字（★兩半合起來：入口留著、動作走掉）
+	var derived: Array = cs.get_available_actions(st, tid)
+	print("   衍生檢視（沒錢）＝ %s" % str(derived))
+	for op2 in PlayerCommandSystem.SUBMENU_OPENERS:
+		_check("★入口 `%s` 也在衍生檢視裡（它 enabled ⇒ 一定在）" % String(op2),
+			derived.has(String(op2)))
+	_check("★★`recruit_anon` 不在衍生檢視裡", not derived.has("recruit_anon"))
+	print("   ★★★而這一格的血證是 battery10 的 `headless`：那一條舊 assert 寫的是")
+	print("     「coin 不足時 recruit 不可選」—— 接住裁定與 code 分岔的是【跨切面的網】，")
+	print("     而票內的 P4 沒接住（它的母體只有一個狀態）⇒ 這一格把退化狀態補進票內。")
+	_cell("_test_p12_degenerate_state_keeps_openers")
+
 func _initialize() -> void:
 	print("=== available_actions bed ===")
 	_test_p1_full_list_both_directions()
@@ -833,6 +906,7 @@ func _initialize() -> void:
 	_test_p9_declared_openers_are_pure()
 	_test_p10_reverse_sweep_payload_without_declaration()
 	_test_p11_label_has_one_producer()
+	_test_p12_degenerate_state_keeps_openers()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
