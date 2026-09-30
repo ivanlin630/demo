@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 自家隊動作全列＋原因：兩個 WHAT 要你裁（①情境動作不可做時列不列 ②offer_surrender 算哪一類）｜★而你裁定②「三個具名母體」的第二個母體被一條【我自己寫錯的前提】擋了一輪
 ---
 
