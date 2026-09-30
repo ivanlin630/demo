@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: NPC↔NPC 索貢談成【拿走多少】
 topic: ★裁 (a)：跟玩家同一份（coin × 0.1，TEST VALUE 沿用不動）——同一個動詞對誰都同一個價，NPC 不比玩家溫和也不比玩家兇（零特例）；(b) 是兵臨壓力價、前提不同；(c) 新常數否決｜★★守恆：對方 −、發起方 ＋，走 ResourceBank 同兩個 tag；★★★同時補恩怨兩層制寫入（跟玩家索貢那條同源：門檻下進好感、門檻上進記憶）——否則 NPC 索貢無煞車、只有玩家有｜113 訂正收
 ---
