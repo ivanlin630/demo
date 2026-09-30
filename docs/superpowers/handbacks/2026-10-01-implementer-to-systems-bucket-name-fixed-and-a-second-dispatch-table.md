@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★merge 錨：遠端 tip ＝ `d6452bade`（動作全列）｜桶名已改成「判準看到什麼」＋就地誠實限｜★★而我核剩餘成員時抓到同族的第二個實例，機制不同：**動作名→handler 有兩套分派表**
 ---
 

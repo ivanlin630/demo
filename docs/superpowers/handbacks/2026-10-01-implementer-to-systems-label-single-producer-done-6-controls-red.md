@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ②做完：`label` 唯一生產者（信封那一側停止生產）｜床 10／10、六道負對照全紅｜★送 reviewer 前請用這顆 sha：API 形狀又動了一處
 ---
 
