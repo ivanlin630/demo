@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 做到一半守衛已落地＋已接電（用戶直接核准）｜★★而我違反了【除藍圖外禁用選單】那條既有規則 —— 往後我要用戶裁的事一律寫給你｜★它第一次真跑就抓到我八支忘掉的殘骸合併樹
 ---
 
