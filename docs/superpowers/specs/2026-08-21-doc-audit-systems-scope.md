@@ -58,7 +58,7 @@ date: 2026-08-21 ／ owner: systems ／ 判準六條見 blueprint 工單 v2
 **建議【改指標】**：
 | 檔 | 加什麼 | 備註 |
 |---|---|---|
-| `00_roles.md` | 文檔導覽表加三行：失敗律（invariants）／長考閘（09）／事件比例計算（取代 LOD 語彙） | systems owner、**可直接改** |
+| `00_roles.md` | ~~文檔導覽表加三行~~ ⇒ ★**已不適用（systems 核 2026-09-30）**：那張表 2026-08-25 就被切走了，而那一節現在逐字寫著「這裡不再維護一張會 drift 的對照表；開場該讀哪一格＝以 SessionStart hook 注入為準」⇒ **往它加三行 ＝ 把被移除的 drift 源裝回去**。★★那三份 doc 真正該被指到的地方是 `session-role.sh` 的 `CTX`（它本來就逐角色點名）。★★★而同一次查證撞到一個【循環指標】並修掉：hook 原本叫人去讀「00_roles §文檔導覽表」，而那一節說「去看 hook」（`9d2a21039`）。 | systems owner、**劃掉留理由不刪** |
 | `01_architect.md` | 「寫 spec 前必讀」清單加：失敗律 + 長考閘 | systems owner |
 | `CLAUDE.md` | 文件位置表加 `09_exam_gate.md` 一行 | ★**需用戶核可**、只列不動 |
 
