@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² **窄範圍**一輪（動作全列，遠端 tip ＝ `d6452bade`）｜★只審一件：**抽取式多讀了第二套分派表 ⇒ 母體變了**（4→1／3→6），而那三個新進來的成員現在被一條斷言咬著｜★★其餘都是卷面文字與你已核過的修法
 ---
 
