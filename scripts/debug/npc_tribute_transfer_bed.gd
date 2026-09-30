@@ -39,6 +39,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p8a_small_moves_affinity_not_memory",
 	"_test_p8b_large_moves_both_layers",
 	"_test_p9_sequence_starts_refusing",
+	"_test_p10_npc_branch_end_to_end",
 ]
 
 
@@ -204,6 +205,13 @@ func _test_p8a_small_moves_affinity_not_memory() -> void:
 		aff_after < aff_before and (aff_before - aff_after) >= expect_drop - 0.000001)
 	_check("★★★feud 邊仍然是 0（小事不入記憶；這條路的 %.4f < FEUD_MIN %.2f）" % [
 		severity * 1.3, NpcAiSystem.FEUD_MIN], feud_after == 0.0)
+	# ★★★這一格是【負對照教我加的】（同 spam-brake 那次）：把 "tributed" 塞進 FEUD_SEVERITY
+	#   之後，上面那一條【照舊綠】——因為這個被索方的人格不夠極端（0.30 × factor 仍 < 0.30）。
+	#   ⇒ 而「拿走幾成到不到得了記憶層」是本格的主題 ⇒ 直接斷言那個名字不在表裡。
+	print("   FEUD_SEVERITY 裡有沒有 tributed ＝ %s（在表裡 ⇒ `.get(type, intensity)` 把比例換成固定值）"
+		% str(NpcAiSystem.FEUD_SEVERITY.has("tributed")))
+	_check("★★★`tributed` 不在 FEUD_SEVERITY 表裡 ⇒ 進 form_feud 的 severity 是【這一次拿走幾成】",
+		not NpcAiSystem.FEUD_SEVERITY.has("tributed"))
 	_cell("_test_p8a_small_moves_affinity_not_memory")
 
 
@@ -274,6 +282,44 @@ func _test_p9_sequence_starts_refusing() -> void:
 	_cell("_test_p9_sequence_starts_refusing")
 
 
+# ══ P10：★真的走【NPC↔NPC 那條分支】端到端 ═════════════════════════════════
+# ★★★這一格是【負對照教我加的】：控制①（讓 NPC 分支自己寫一份轉移）只紅在 P6b 的**靜態證**上
+#   —— 因為 P6a/P7/P8a/P9 全都**直呼共用解算點**，它們看不到那條分支怎麼接。
+#   ⇒ 而「靜態證看得到、行為證看不到」就是那條分支沒有行為母體 ⇒ 本格補上它：
+#     呼 `_send_diplomacy_message`（NPC 對 NPC），斷言錢動了【且】好感動了。
+# ★母體地板：同格（NPC 側外交的不變量）＋被索方領袖人格釘死（否則他直接拒絕 ⇒ 什麼都沒發生）。
+func _test_p10_npc_branch_end_to_end() -> void:
+	print("
+── P10 走 NPC 那條分支端到端 ──")
+	var st: WorldState = _fresh()
+	var ids: Array = _two_npcs(st)
+	var taker: TeamData = st.teams[ids[0]]
+	var payer: TeamData = st.teams[ids[1]]
+	taker.tile_pos = payer.tile_pos
+	ResourceBank.set_amt(payer, "coin", 800.0, "bed_fixture")
+	var payer_leader: PersonData = st.persons.get(payer.leader_id)
+	for k3 in PINNED_LEADER.keys():
+		payer_leader.values[k3] = float(PINNED_LEADER[k3])
+	payer_leader.fear = PINNED_FEAR
+	var coin_before: float = float(payer.resources.get("coin", 0))
+	var taker_before: float = float(taker.resources.get("coin", 0))
+	var aff_before: float = _affinity(payer_leader, taker.leader_id)
+	print("   母體地板：同格 %s｜payer coin %.1f｜人格釘死 %s" % [
+		str(payer.tile_pos == taker.tile_pos), coin_before, str(PINNED_LEADER)])
+	_check("★母體地板：兩隊同格（NPC 側外交嚴禁非同格）", payer.tile_pos == taker.tile_pos)
+	var dip := DiplomaticAiSystem.new()
+	dip.call("_send_diplomacy_message", st, taker, payer, "demand_tribute")
+	var coin_after: float = float(payer.resources.get("coin", 0))
+	var aff_after: float = _affinity(payer_leader, taker.leader_id)
+	print("   payer coin %.1f → %.1f｜taker %.1f → %.1f｜好感 %+.4f → %+.4f" % [
+		coin_before, coin_after, taker_before, float(taker.resources.get("coin", 0)),
+		aff_before, aff_after])
+	_check("★★★那條分支真的搬了錢（不是只有一句 print）", coin_after < coin_before)
+	_check("★★★而它也走了恩怨那一段（好感動了）—— 只看錢動就是沒檢查它有沒有繞過共用路",
+		aff_after < aff_before)
+	_cell("_test_p10_npc_branch_end_to_end")
+
+
 func _initialize() -> void:
 	print("=== npc_tribute_transfer bed ===")
 	_test_p6a_amount_is_the_shared_formula()
@@ -282,6 +328,7 @@ func _initialize() -> void:
 	_test_p8a_small_moves_affinity_not_memory()
 	_test_p8b_large_moves_both_layers()
 	_test_p9_sequence_starts_refusing()
+	_test_p10_npc_branch_end_to_end()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):

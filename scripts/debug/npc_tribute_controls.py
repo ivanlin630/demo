@@ -33,10 +33,17 @@ MEM_NEW = '''			pass'''
 SEV_OLD = '\t"special_taxed": 0.30,'
 SEV_NEW = '\t"special_taxed": 0.30,\n\t"tributed": 0.30,'
 
+# ★★★expect 要指名【它會紅在哪一格】，而第一輪我三道都指錯了兩道：
+#   ①原本指 P8a 的「好感下降」⇒ 但 P8a 直呼共用解算點，看不到那條分支怎麼接
+#     ⇒ 它其實紅在 P6b 的靜態證，而且那暴露了一個真缺口：那條分支**沒有行為母體**
+#     ⇒ 我因此補了 P10（走 NPC 分支端到端）⇒ 現在它會紅在【行為】那一格。
+#   ③原本指 P8a 的「feud 邊仍然是 0」⇒ 但那個被索方人格不夠極端（0.30×factor 仍 < 0.30）
+#     ⇒ 邊還是 0、那一條照舊綠 ⇒ 我補了「名字不在表裡」那一格，它才是這道控制打得到的。
+#   ⇒ ★兩次都是同一個形狀：**負對照打不到它自己那一格 ⇒ 那一格對這個擾動沒有鑑別力**。
 CONTROLS = [
-    ('①NPC 路自己寫一份轉移', '好感下降【且】降幅', (DIP, OWN_OLD, OWN_NEW)),
+    ('①NPC 路自己寫一份轉移', '而它也走了恩怨那一段', (DIP, OWN_OLD, OWN_NEW)),
     ('②共用點的恩怨那一段拿掉', '好感下降【且】降幅', (DIP, MEM_OLD, MEM_NEW)),
-    ('★③tributed 塞進 FEUD_SEVERITY', 'feud 邊仍然是 0', (NPC, SEV_OLD, SEV_NEW)),
+    ('★③tributed 塞進 FEUD_SEVERITY', '不在 FEUD_SEVERITY 表裡', (NPC, SEV_OLD, SEV_NEW)),
 ]
 
 
