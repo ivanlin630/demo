@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: leader-chokepoint 已 merge（R² CLEAN）→ 請 rebase｜★另外報一件跟你那批票同一個檔的事：lod_reaction_rate_bed 兩個多月沒人跑，而它是紅的
 ---
 
