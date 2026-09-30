@@ -124,7 +124,7 @@ func _test_p1_heir_replay() -> void:
 # ══ P1b：★第三件事（team_id 回指）真的有差別的那個形狀 ═══════════════════════
 # 繼承人的 `team_id` 本來就 stale（指向別隊）⇒ 走 chokepoint 會被強制回指；
 # 直寫版不會 ⇒ 稽核紅。★這一格才是「漏掉第三件」的可判形狀。
-# 負對照：把 `set_leader(team, heir_id)` 換回原本那三行直寫 ⇒ 本格必紅（實測記錄在交件信）
+# 負對照：把 `set_leader(team, heir_id)` 換回原本那三行直寫 ⇒ 第三件事不發生 ⇒ 已於 feat/leader-id-chokepoint（2026-09-30 這一輪） 實測紅
 func _test_p1b_stale_heir_team_id() -> void:
 	print("
 ── P1b 繼承人的 team_id 本來就 stale ──")
@@ -164,7 +164,9 @@ func _test_p1b_stale_heir_team_id() -> void:
 
 # ══ P2：五處的對帳（已改 ＋ 具名不改 ＝ 5）══════════════════════════════════
 # ★數字不是我手抄的：從原始碼機械抽 —— 已改的那四檔要出現 `set_leader(`，
-#   而具名不改的那一檔要【同時】有直寫與具名理由。
+#   而具名不改的那一檔要【同時】有直寫與那個機器可讀的標記。
+# 負對照：把 population 那一處的 `set_leader` 拿掉 ⇒ 已改 3／4 ⇒ 已於 feat/leader-id-chokepoint（2026-09-30 這一輪） 實測紅
+# 負對照：把 subteam 的具名標記那一行拿掉 ⇒ 標記 0 次 ⇒ 已於 feat/leader-id-chokepoint（2026-09-30 這一輪） 實測紅
 func _test_p2_site_accounting() -> void:
 	print("\n── P2 五處對帳 ──")
 	var routed: int = 0
