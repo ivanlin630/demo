@@ -143,6 +143,12 @@ beacon_started_s() {   # $1 = beacon 檔路徑；回 epoch（0 = 問不出來）
   echo "$se"
 }
 
+# ★抽成函式的理由：自檢要能測到**同一份**邏輯。
+#   若自檢裡再寫一份同樣的 sed ⇒ 兩邊同源 ⇒ 恆真，抓不到今天這個錯。
+_beacon_role_of() {  # $1=旗檔 ⇒ 印角色名（抽不到就印空）
+  sed -n "s/.*role=\([^ \r]*\).*/\1/p" "${1:-}" 2>/dev/null | head -1 | tr -d "\r"
+}
+
 _selfcheck() {
   # ★成對對照：會回真值的一組 ＋ ★★【不得生出假工期】的一組。
   local d fail=0 got
@@ -165,6 +171,14 @@ _selfcheck() {
   _c zero "pid=1 started=99999-99-99T99:99:99 args=x"          "荒謬日期 ⇒ 0"
   got=$(beacon_started_s "$d/does-not-exist"); \
     { [ "$got" = "0" ] && echo "  ✓ 檔不存在 ⇒ 0"; } || { echo "  ✗ 檔不存在卻回 $got"; fail=1; }
+  # ★★★2026-09-30：beacon 角色抽取的陰陽對照，陽性用的是**真旗原文**（blueprint 08:15 引的那一行）
+  d=$(mktemp -d) || { echo "[watchdog --selfcheck] ⚠ 無暫存目錄 ⇒ ABORT"; return 1; }
+  _r() { printf '%s' "$2" > "$d/f"; got=$(_beacon_role_of "$d/f"); if [ "$got" = "$1" ]; then echo "  ✓ $3"; else echo "  ✗ $3（期望 [$1] 實得 [$got]）"; fail=1; fi; }
+  _r implementer "3008 tree=/a/GDS/demo/.worktrees/qhome role=implementer since=2026-09-30T07:55:30" "★真旗原文（blueprint 08:15）⇒ 抽到 implementer"
+  _r implementer "3008 tree=/x role=implementer since=1$(printf '\r')" "★★CRLF 旗 ⇒ 不得帶回 CR"
+  _r "" "3008 tree=/x since=1" "★★★沒有 role= ⇒ 印空（走主人未知，不假裝知道）"
+  _r "?" "3008 tree=/x role=? since=1" "role=? ⇒ 原樣回 ?（呼叫端自己排除）"
+  rm -rf "$d"
   rm -rf "$d"
   # ★★★2026-09-30 新增一格：UNRESPONSIVE 必須【讀過產出齡】且【用同一個窗口】
   #   獲物：同一份報告兩行自相矛盾（判 implementer UNRESPONSIVE，而下方印他 0m 前有產出）
@@ -216,7 +230,14 @@ long_running() {
       #     ⇒ **直接走既有的豁免路徑**，不新增一條分支（新分支＝新的沒人驗的路）。
       #   ★★★而沒有 `role=` 時【不假裝知道主人】：回 battery(…主人未知)
       #     ⇒ 它仍然壓住 RUNAWAY，但不會替任何人担保【有回應】。
-      local _brole=$(sed -n "s/.*role=\([^ ]*\).*//p" "$_bf" 2>/dev/null | head -1)
+      # ★★★2026-09-30 08:15 血証（blueprint 抳）：上一版這行的 sed **取代段是空的**
+      #   （結尾是 `.*//p`——回寫用的 \1 在我寫檔時被跳脈吃掉）
+      #   ⇒ 抽不到角色 ⇒ 報告印「長工作：beacon:」（角色是空的）
+      #   ⇒ 而豁免要求 beacon:<角色> 對得上收件人 ⇒ 空字串對不上任何人
+      #   ⇒ ★**看得到但不算數**，而那與看不到同一個結果（誤判 implementer 停工）。
+      #   ★★而它的失效是静默的：sed 沒报錯、`_brole` 不是未設而是一個空字串。
+      #   ⇒ 處置：補回回寫、排除 CR（beacon 檔可能是 CRLF），並用【真旗原文】做陰陽對照。
+      local _brole=$(_beacon_role_of "$_bf")
       if [ -n "${_brole:-}" ] && [ "$_brole" != "?" ]; then
         echo "beacon:${_brole}"; return
       fi
