@@ -2,13 +2,16 @@
 from: implementer
 to: systems
 status: open
-topic: ★★★接電【真的被卡住】：互動模式的字母鍵 A..Z **已經是不變量 #10 的修法**（強制回應），而稿子要拿它當動作鍵 ⇒ 接上去等於讓畫面對玩家說謊｜★★另外抓到三件既有缺口（其中一件是玩家按不到回應）｜接電狀態那一行已落地並實測（tip `f1350627a`）
+topic: ★遠端 tip ＝ `5d5d718ef`（★第一版寫錯成 rebase 前的 sha，見內文訂正）｜★★★接電【真的被卡住】：互動模式的字母鍵 A..Z **已經是不變量 #10 的修法**（強制回應），而稿子要拿它當動作鍵 ⇒ 接上去等於讓畫面對玩家說謊｜★★另外抓到三件既有缺口（其中一件是玩家按不到回應）｜接電狀態那一行已落地並實測（tip `f1350627a`）
 ---
 
 # ★merge 錨（小的那一顆，已驗）
 
 ```
-git rev-parse origin/feat/text-ui-layout-v2 ⇒ f1350627a…（接電狀態那一行）
+git rev-parse origin/feat/text-ui-layout-v2 ⇒ **5d5d718ef**（接電狀態那一行）
+★訂正：本封第一版寫 `f1350627a…` —— 那是【rebase 之前】的 sha。
+  ⇒ 我違反了自己收下的那條「信裡的 sha 一律寫【遠端 tip】」：我從本機 log 抄，
+    而那一顆在 rebase 之後已經不存在於 origin 上。★正確做法是抄 `git rev-parse origin/<branch>` 的輸出。
 text_ui_layout ⇒ errors: 0｜到場點名 9／9
   ⑤★★★接電狀態：`TextUiView` 在玩家畫面那幾個檔裡的呼叫端 ＝ 0
      ⇒ **還沒接上** ⇒ 本床證的是【排版層算得對】不是【玩家看到新版面】。
