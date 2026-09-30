@@ -42,6 +42,20 @@ var _events: Array = []
 # ★★★「我印到世界事件的第幾筆」＝【UI 本地游標】，不是世界狀態（spec §2③）。
 #   ★它不進 fp、不進 state —— 誰讀到第幾筆是觀眾的事。
 var _last_world_event_seq: int = 0
+# ══ ★★★【接電】版面 v2 的唯一顯示面（systems 裁 2026-10-01：一個 Label）═══════════
+#   ★理由不是改動小，是**欄寬的權威只能有一份**：`TextUiView.compose()` 已經把
+#     左右分欄畫進文字（那一豎 `│`）⇒ 留著 `HBox(Map,State)` 就是**第二份欄寬權威**，
+#     而兩份會在視窗寬度變化時互相打，★★而打起來的長相是
+#     「有時對齊有時不對齊」而**沒有任何一格會紅**。
+#   ★★★而舊的六個 Label **不刪**：它們變成【內容載體】並 `visible = false`
+#     ⇒ 顯示只有合成那一個（單一權威成立），而**既有 49 處讀 Label 的斷言零遷移**
+#     —— 它們讀的是【內容】而不是【版面】。
+#     ★而我原本想的「把斷言機械替換成讀合成畫面」是**錯的**：框會把分頁 clip 到 rw≈59
+#       ⇒ 讀長行的斷言（`_kv_int(..., "武裝: ")`）會壞 ⇒ 那不是遷移，
+#       那是把斷言的主詞從【內容】換成【裁切後的版面】。
+var _screen_label: Label = null
+# 事件流（帶時間與來源）★與 `_events` 平行維護：`_events` 沒有 tick ⇒ 它給不出「第N天 HH:MM」
+var _feed_rows: Array = []
 
 # ui-stack-pending: _input_mode —— ★它不是一層，是**輸入捕獲**（`_close_all_modes` 也刻意不碰它）⇒ 步 2 要單獨裁
 var _input_mode: bool   = false
@@ -163,6 +177,11 @@ func _ready() -> void:
 	vbox.add_child(_alert_bar)
 	vbox.move_child(_alert_bar, _input_bar.get_index())
 	# 動態建立常駐 chrome 區（順序 …LogStrip → FeedbackLine → HintLine → AlertBar → InputBar）
+	# ★★★【接電】唯一顯示面：放在 VBox 最前面（六區的順序由 `compose()` 自己決定）
+	_screen_label = Label.new()
+	_screen_label.name = "ScreenLabel"
+	vbox.add_child(_screen_label)
+	vbox.move_child(_screen_label, 0)
 	_log_strip = Label.new()
 	_log_strip.name = "LogStrip"
 	_log_strip.modulate = Color(0.7, 0.7, 0.7)   # 灰：背景事件
@@ -243,6 +262,14 @@ func _process(_delta: float) -> void:
 			continue
 		_last_world_event_seq = sq
 		_events.append({"type": "world", "msg": String(we.get("text", ""))})
+		# ★★帶時間與來源的那一份（spec §2④ 要求逐條帶「第N天 HH:MM」）——
+		#   ★時間來自事件自己的 `tick`，**不是「現在」**：補一個現在的時間會讓 P6 恆綠
+		#   而畫面在說謊（一件三小時前的事印成剛剛）。
+		_feed_rows.append({
+			"when": "第 " + PlayerApiMapper.tick_clock(int(we.get("tick", 0))),
+			"source": String(we.get("kind", "世界")),
+			"text": String(we.get("text", "")),
+		})
 	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
 	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
 	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為
@@ -744,7 +771,50 @@ func _refresh() -> void:
 			"、".join(_labels), "…" if _pend_n > _labels.size() else ""]
 	_hint_line.text = "%s｜%s" % [_mode_keymap(_current_mode_name()), _pend_txt]
 	_log_strip.text = _log_strip_text(_events, 3)
+	_render_screen(_pend_txt)
 	_check_alerts()
+
+# ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
+#   ★上面那些 Label 已經被填好 ⇒ 它們是【內容載體】，這裡把內容組成版面。
+#   ★★而 `visible = false` 在這裡設而不是在 `_ready()`：`_ready()` 設了之後
+#     任何一處 `add_child`／重建都可能把它打開，而**每次 render 都設**是冪等的
+#     ⇒ 「顯示只有一個」變成**結構保證**而不是初始化時的一次宣告。
+func _render_screen(pend_txt: String) -> void:
+	if _screen_label == null:
+		return
+	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
+	var hp: Dictionary = ct.get("home_pos", {}) if ct.get("home_pos", null) != null else {}
+	var rows: Array = []
+	if _interact_mode and _interact_target >= 0:
+		rows = _interact_action_split()["team"]
+	var threat: String = String(_cached_snapshot.get("threat_line", ""))
+	if threat == "":
+		threat = "（無）"
+	_screen_label.text = TextUiView.compose({
+		"top": {
+			"clock": PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
+			"team_name": String(ct.get("name", "—")),
+			"pop": str(ct.get("population", "—")),
+			"home": ("(%d,%d)" % [int(hp.get("q", 0)), int(hp.get("r", 0))]) if not hp.is_empty() else "（無）",
+			"food": "%.1f 天" % float(ct.get("food_days", 0.0)),
+			"threat": threat,
+			"pending": pend_txt.trim_prefix("待執行 "),
+		},
+		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
+		"tabs": String(UiPages.header(_page_idx)).trim_prefix("["),
+		"map": _map_label.text,
+		"pages": _state_label.text,
+		"action": rows,
+		"feed": _feed_rows,
+		"result": _feedback_line.text,
+		"keymap": _hint_line.text,
+	})
+	# ★★★舊的六個 Label ＝【內容載體】，不顯示（見檔頭 `_screen_label` 那一段的理由）
+	for _carrier in [_map_label, _state_label, _event_label, _hint_line,
+			_log_strip, _feedback_line, _debug_bar]:
+		if _carrier != null:
+			_carrier.visible = false
 
 func _get_hp_status(person: PersonData) -> String:
 	var has_severe: bool = false
@@ -1488,6 +1558,13 @@ func _build_inv_str() -> String:
 
 func _log_event(msg: String) -> void:
 	_events.append({ "type": "ui", "msg": msg })
+	# ★介面自己講的話：來源具名為「介面」而不是假裝它是世界事件
+	_feed_rows.append({
+		"when": "第 " + PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
+		"source": "介面", "text": msg,
+	})
+	if _feed_rows.size() > 100:
+		_feed_rows = _feed_rows.slice(_feed_rows.size() - 100)
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 

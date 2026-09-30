@@ -32,6 +32,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p5_reason_comes_from_the_engine",
 	"_test_p6_feed_rows_each_carry_time",
 	"_test_p8b_letters_bind_action_id",
+	"_test_p9_tick_clock_derives_from_constants",
 ]
 
 
@@ -45,6 +46,19 @@ func _check(msg: String, cond: bool) -> void:
 	else:
 		_errors += 1
 		push_error("[FAIL] " + msg)
+
+# 取某一支函式的【函式體】原始碼（到下一個頂層 `func ` 為止）
+# ★這一支與 `available_actions_bed` 的同名 helper 同形 —— 而它們**各自一份**：
+#   兩支床在不同的 slice 上，共用會讓其中一支的改動靜默影響另一支。
+#   ★★（若之後第三支也要，那才是抽共用的時機 —— 兩份還不是重複，是獨立。）
+func _func_body(src: String, sig: String) -> String:
+	var i: int = src.find(sig)
+	if i < 0:
+		return ""
+	var rest: String = src.substr(i + sig.length())
+	var j: int = rest.find("
+func ")
+	return rest if j < 0 else rest.substr(0, j)
 
 func _code_only(src: String) -> String:
 	var out: String = ""
@@ -377,13 +391,13 @@ func _test_p6_feed_rows_each_carry_time() -> void:
 
 
 # 負對照：把字母改成由【位置】決定（`char(65 + lines.size() - 1)`）⇒ 本格紅（不一致：3） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
-# ══ P8b：★★★字母綁 `action_id`，不綁【清單位置】（systems 裁 2026-10-01 的條件）════
+# ══ P8b：★★★動作鍵綁 `action_id`，不綁【清單位置】（systems 裁 2026-10-01／藍圖 (乙-1)）══
 # ★不變量 #10 禁的不是字母，是「意義由位置／計數決定」
 #   ⇒ 位置式綁定（第 2 列 ⇒ `[B]`）正是那個病：`trade` 一旦不可做，`[B]` 就換了意思。
 # ★★而「動作全列」那張票把前提補上了（不可做的也在列上 ⇒ 清單長度不隨世界變動）
 #   ⇒ 靜態映射才**可能**；本格驗它**真的是靜態的**。
 func _test_p8b_letters_bind_action_id() -> void:
-	print("\n── P8b 字母綁 action_id 不綁位置 ──")
+	print("\n── P8b 動作鍵綁 action_id 不綁位置 ──")
 	# 兩份 rows：世界狀態不同【而順序也不同】
 	var a: Array = _fixture_rows()
 	var b: Array = []
@@ -407,7 +421,7 @@ func _test_p8b_letters_bind_action_id() -> void:
 	var blk_b: String = TextUiView.action_block(b)
 	var bad: Array = []
 	for id in order_a:
-		var key: String = TextUiView.letter_for(String(id))
+		var key: String = TextUiView.key_for(String(id))
 		if key == "":
 			continue
 		var want: String = "[%s]" % key
@@ -423,24 +437,79 @@ func _test_p8b_letters_bind_action_id() -> void:
 		if not (ok_a and ok_b):
 			bad.append("%s 應為 %s（第一份 %s／第二份 %s）" % [
 				String(id), want, str(ok_a), str(ok_b)])
-	print("   兩份畫面上字母不一致的 ＝ %d" % bad.size())
+	print("   兩份畫面上鍵不一致的 ＝ %d" % bad.size())
 	for bb in bad:
 		print("     · %s" % String(bb))
-	_check("★★★同一個 `action_id` 在兩種世界狀態下拿到同一個字母（不一致：%d）" % bad.size(),
+	_check("★★★同一個 `action_id` 在兩種世界狀態下拿到同一個鍵（不一致：%d）" % bad.size(),
 		bad.is_empty())
 	# ★「未綁鍵」的列數與具名清單要印出來（★它不是零就要看得見）
 	var unbound: Array = []
 	for r3 in a:
 		var aid: String = String(r3.get("action_id", ""))
-		if TextUiView.letter_for(aid) == "":
+		if TextUiView.key_for(aid) == "":
 			unbound.append(aid)
-	print("   ★未綁鍵的列 ＝ %d 個（具名：%s）" % [unbound.size(), str(unbound)])
-	print("     ★★沒有字母的列印「%s」而**不用位置補一個字母** ——" % TextUiView.UNBOUND_MARK)
+	print("   ★未綁鍵的列 ＝ %d 個（具名：%s）★上限 9 ⇒ 母體 11 已經有 2 個沒鍵" % [unbound.size(), str(unbound)])
+	print("     ★★沒有鍵的列印「%s」而**不用位置補一個鍵** ——" % TextUiView.UNBOUND_MARK)
 	print("       用位置補會把這一格變回不變量 #10 那個病，**而且是靜默的**。")
 	print("       判準：寧可印一個「沒有」並把它數出來，不要補一個看起來合理的值。")
-	_check("★母體地板：字母表不是空的（空 ⇒ 上面那個迴圈一格都不跑 ⇒ 恆綠）",
-		not TextUiView.ACTION_LETTERS.is_empty())
+	_check("★母體地板：鍵表不是空的（空 ⇒ 上面那個迴圈一格都不跑 ⇒ 恆綠）",
+		not TextUiView.ACTION_DIGITS.is_empty())
 	_cell("_test_p8b_letters_bind_action_id")
+
+
+# 負對照：把 `tick_clock` 裡的 `per_hour` 換成寫死的 60 ⇒ 改常數之後輸出不跟著變 ⇒ 本格紅 ⇒ 待實測
+# ══ P9：★★★`tick_clock` 從 `WorldState` 的常數導，不手抄物理════════════════════
+# ★期望值來自【常數的意義】不是來自那支函式：
+#   ·`tick = 0`                                 ⇒ 第 1 天 00:00（天從 1 起算）
+#   ·`tick = TICKS_PER_DAY`                     ⇒ 第 2 天 00:00（剛好過一天）
+#   ·`tick = TICKS_PER_DAY + 9*TICKS_PER_HOUR`  ⇒ 第 2 天 09:00
+#   ·`tick = TICKS_PER_DAY - 1`                 ⇒ 第 1 天的最後一分鐘
+#   ⇒ ★★這四個期望**不依賴** `TICKS_PER_HOUR` 的值是多少 —— 它們只依賴那個常數的**語意**
+#     ⇒ 與被測物不同源（同 P3b 的 2N+M 定樁）。
+# ★★★而它為什麼不能手抄 60：`TICKS_PER_HOUR` 是本專案的**唯一自由參數**
+#   （`world_state.gd:12` 逐字）⇒ 手抄一個 60 ＝ 把那個旋鈕的第二份放進玩家面字串，
+#   而它漂開的長相是「畫面上的時間跟世界的時間不一樣」—— 沒有任何一格會紅。
+func _test_p9_tick_clock_derives_from_constants() -> void:
+	print("\n── P9 tick → 「第 N 天 HH:MM」從常數導 ──")
+	var per_h: int = WorldState.TICKS_PER_HOUR
+	var per_d: int = WorldState.TICKS_PER_DAY
+	print("   TICKS_PER_HOUR ＝ %d｜TICKS_PER_DAY ＝ %d（★唯一自由參數是前者）" % [per_h, per_d])
+	_check("★母體地板：常數讀得到且 > 0（0 ⇒ 下面全部除以零或恆真）", per_h > 0 and per_d > 0)
+	var cases: Array = [
+		[0,                 "1 天 00:00", "tick 0 ＝ 第一天的零點（天從 1 起算）"],
+		[per_d,             "2 天 00:00", "剛好過一天"],
+		[per_d + 9 * per_h, "2 天 09:00", "過一天又九小時"],
+		[per_d - 1,         "1 天 23:59", "差一 tick 滿一天 ⇒ 還在第一天的最後一分鐘"],
+	]
+	var wrong: Array = []
+	for c in cases:
+		var got: String = PlayerApiMapper.tick_clock(int(c[0]))
+		print("   tick %-6d ⇒ 期望「%s」實得「%s」%s（%s）" % [
+			int(c[0]), String(c[1]), got, "" if got == String(c[1]) else "★不符", String(c[2])])
+		if got != String(c[1]):
+			wrong.append("tick %d：期望「%s」實得「%s」" % [int(c[0]), String(c[1]), got])
+	_check("★母體地板：真的有案例（0 ⇒ 恆綠）", cases.size() > 0)
+	_check("★★★每一個案例都符合常數的語意（不符的：%s）" % str(wrong), wrong.is_empty())
+	# ★靜態半：那支函式必須逐字引用那兩個常數，且不得出現手抄的物理字面
+	var src: String = _code_only(FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_api_mapper.gd"))
+	var body: String = _func_body(src, "static func tick_clock(tick: int) -> String:")
+	_check("★母體地板：抓到 `tick_clock` 的函式體（抓不到 ⇒ 下面三條恆綠）", body.length() > 0)
+	_check("★★它逐字引用 `WorldState.TICKS_PER_DAY`", body.contains("WorldState.TICKS_PER_DAY"))
+	_check("★★它逐字引用 `WorldState.TICKS_PER_HOUR`", body.contains("WorldState.TICKS_PER_HOUR"))
+	# ★★★而這個守衛咬對了一半（2026-10-01 實測）：它第一次跑就抓到我寫的 `* 60.0`。
+	#   ·`1440`／`24` 是**可以從旋鈕導出來的** ⇒ 手抄它們＝旋鈕的第二份 ⇒ 該咬
+	#   ·而「一小時 60 分」是**真實世界**的事實、不是專案的自由參數 ⇒ 它導不出來，只能**具名**
+	#   ⇒ ★所以修法不是把守衛放寬，是把那個常數具名（`PlayerApiMapper.MINUTES_PER_HOUR`）
+	#     ⇒ ★★守衛繼續咬**裸字面**，而「哪一個是旋鈕、哪一個是世界」在 code 裡看得見。
+	var hardcoded: Array = []
+	for lit in ["60", "1440", "24"]:
+		if body.contains(String(lit)):
+			hardcoded.append(String(lit))
+	print("   函式體裡出現的可疑字面（手抄物理的指紋）＝ %s" % str(hardcoded))
+	_check("★★★沒有手抄的物理常數（60／1440／24；實測 %s）" % str(hardcoded),
+		hardcoded.is_empty())
+	_cell("_test_p9_tick_clock_derives_from_constants")
 
 func _initialize() -> void:
 	print("=== text_ui_layout bed ===")
@@ -453,6 +522,7 @@ func _initialize() -> void:
 	_test_p5_reason_comes_from_the_engine()
 	_test_p6_feed_rows_each_carry_time()
 	_test_p8b_letters_bind_action_id()
+	_test_p9_tick_clock_derives_from_constants()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
@@ -495,9 +565,13 @@ func _initialize() -> void:
 		if FileAccess.get_file_as_string(String(_f)).contains("TextUiView"):
 			_view_callers += 1
 	print("  ⑤★★★接電狀態：`TextUiView` 在玩家畫面那幾個檔裡的呼叫端 ＝ %d" % _view_callers)
-	if _view_callers == 0:
-		print("     ⇒ **還沒接上** ⇒ 本床證的是【排版層算得對】不是【玩家看到新版面】。")
-		print("     ★★而這一行會在接上之後自己變成 1 ⇒ 它不需要有人記得回來改。")
+	print("     ★這一行【原本只是印出來】（那時是 0 ⇒ 排版層是休眠 code）——")
+	print("       而 systems 裁：接電那一顆要【同時】把斷言加上，否則接完電它就從")
+	print("       「宣告一個已知缺口」變成**一個沒有人看的數字**，而下一次有人把接電拆掉")
+	print("       （例如改 `_refresh()` 繞回舊路）★★它會安靜回到 0 而沒有人會紅。")
+	print("     ⇒ ★★★形狀與「基準不要先放主線」相同而**方向相反**：**斷言不要晚於那個事實**。")
+	_check("★★★接電了：`TextUiView` 真的被玩家畫面那一側呼（%d ≥ 1）" % _view_callers,
+		_view_callers >= 1)
 	print("\n=== text_ui_layout DONE === errors: %d｜到場點名 %d／%d" % [
 		_errors, _cells_ran.size(), EXPECTED_CELLS.size()])
 	quit(1 if _errors > 0 else 0)
