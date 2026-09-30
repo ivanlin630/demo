@@ -31,7 +31,13 @@ const EXPECT_CELLS: Array = [
 ]
 
 # ★來自 spec 的常數（★動工前我在 origin/main 8c77f542a 上【重量過】，三個都一致）
-const SPEC_SUCCESS_RETURNS: int = 67
+# ★★★67 → 68（2026-09-30 通商票）：玩家接受通商那一支 arm 新增了一條 `ok: true` 回傳
+#   （`_accept_diplomacy` 的 `"propose_trade"`：`{ ok: true, msg: "與 TeamN 談成通商…" }`）
+#   ⇒ 這一格【紅得對】：它的工作就是在成功回傳的母體變動時叫一聲。
+#   ★而處置是【重量】不是【放寬】：我把數字改成實測的 68，而不是把斷言拿掉。
+#   ★★這一族今天第四次（一張票改的就是閘）—— 而抓到它的是
+#     「改完之後要重跑那支床本身」那條紀律，不是我想起來。
+const SPEC_SUCCESS_RETURNS: int = 68
 const SPEC_REGISTRY_ACTIONS: int = 51
 const SPEC_NON_REGISTRY_DIFF: int = 3
 

@@ -1271,11 +1271,18 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
 		"tribute", "demand_tribute":   # _send_diplomacy_message 寫 "demand_tribute"（原只認 "tribute" → 未知提案類型 bug）
 			return _pay_extortion(state, from_id)
-		# ★★★`propose_trade`（`diplomatic_ai_system.gd:149`）：**沒有 handler 是刻意的** ——
-		#   「接受通商提案之後發生什麼」是 WHAT（systems 2026-09-30 裁，已呈報 blueprint）
-		#   ⇒ 本票只把拒絕句改成人話：玩家要看得懂【不是他按錯，是這個功能還沒有】。
+		# ★★★`propose_trade`：**走 NPC↔NPC 那一段【同一份 code】**（藍圖裁 (b)，spec 2026-09-30）。
+		#   ★為什麼不呼 `handle_diplomacy_message`：那一支會重跑 `score > 0.4`
+		#     ⇒ 而玩家的決定是【玩家按的】⇒ 重跑那把秤＝把玩家的決定交還給 AI。
+		#   ★★為什麼不在這裡複製那兩行：一個真相只存一份，複製的那份會漂
+		#     ⇒ 係數（0.05）留在 `DiplomaticAiSystem` 裡，**本檔不得出現它的字面**，
+		#       也不得出現 `update_reputation(`（床 P2(b) 用 grep 斷言這兩件）。
+		#   ★★★而它【只寫 team 名聲，一個字都不多】：裁定寫「名聲／好感」而
+		#     NPC 那一支 code 只做 `known_reputations`（team 名聲）⇒ 玩家多拿一個
+		#     person 好感就是【NPC 得不到的效果】＝特例，違反這條裁定自己的原則。
 		"propose_trade":
-			return { "ok": false, "msg": "對方提議通商，而你目前還沒有回應通商的方式" }
+			DiplomaticAiSystem.apply_trade_accept(pt, from_team)
+			return { "ok": true, "msg": "與 Team%d 談成通商（名聲互有加分）" % from_id }
 	# ★★★注意這裡【沒有】`tribute_offer`，而那是刻意的：
 	#   它的語意是【對方要給你進貢】（`TeamData.TASK_TRIBUTE_OFFER`，由 `interaction_system`
 	#   經 `npc.order_task` 寫進 proposal）⇒ 若把它併進上面那支 `"tribute"` arm，
