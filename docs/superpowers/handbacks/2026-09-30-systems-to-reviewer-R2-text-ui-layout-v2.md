@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審（spec）：文字介面版面 v2 六區固定（#10，用戶已核「版面先這樣」）｜★★我要你咬的是【六區各出現剛好一次】那個雙向斷言，以及 §5 那條「全綠 ≠ 可以交」
 ---
 
