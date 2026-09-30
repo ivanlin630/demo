@@ -66,6 +66,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p6_artifacts",
 	"_test_p7_positive_control_fixtures",
 	"_test_p8_two_readers_on_the_same_input",
+	"_test_p11_every_action_has_a_label",
 ]
 
 var _contradictions: Array = []      # 每筆 {rule, where, cause, detail}
@@ -187,10 +188,22 @@ func _rule_c(sentence: String) -> String:
 
 # (d) 玩家面字串零英文識別字（白名單之外）
 func _rule_d(sentence: String) -> String:
+	# ★★★具名例外：「（未知動作：xxx）」「（未知部位：xxx）」「（未知設施：xxx）」這種形狀
+	#   **是 spec 要求的**（不認得的 id 不准吞掉，要印出來讓人看得到少了哪一個）
+	#   ⇒ 若本條把它算成症狀，判準就會跟 spec 打對台，而下一個人會為了讓床綠而去吞掉 id。
+	#   ★★而例外只放在【那個括號形狀】裡：句子其他地方的英文照樣算症狀。
+	var probe: String = sentence
+	for marker in ["（未知動作：", "（未知部位：", "（未知設施：", "（未知事件：", "（未知：'"]:
+		while probe.contains(marker):
+			var i: int = probe.find(marker)
+			var j: int = probe.find("）", i)
+			if j < 0:
+				break
+			probe = probe.substr(0, i) + probe.substr(j + 1)
 	var re := RegEx.new()
 	re.compile(ID_PATTERN)
 	var bad: Array = []
-	for m in re.search_all(sentence):
+	for m in re.search_all(probe):
 		var w: String = m.get_string()
 		var listed: bool = false
 		for ok in ID_WHITELIST:
@@ -423,8 +436,8 @@ func _test_p2_walk_layer1_verbs() -> void:
 		# ★這一步【按設計】沒有句子：世界上沒有那個 forced event ⇒ 消費點帶 silent 旗子
 		#   （#7 那張票裁的：已結案／不存在的事件不再回音，否則玩家收到第二次回音）
 		["respond_to_forced", {"interaction_id": "none", "response_id": "accept"}, true],
-		["equip_item", {"slot_id": "weapon", "item_grade": "粗製"}, false],
-		["unequip_item", {"slot_id": "weapon"}, false],
+		["equip_item", {"slot_id": "hand_1", "item_grade": "粗製"}, false],
+		["unequip_item", {"slot_id": "hand_1"}, false],
 		["deposit_item", {"item_grade": "粗製", "qty": 1}, false],
 		["take_team_item", {"item_grade": "粗製", "qty": 1}, false],
 		["post_buy_order", {"res": "food", "qty": 1}, false],
@@ -849,6 +862,29 @@ func _test_p8_two_readers_on_the_same_input() -> void:
 		by_index, steps], by_index < steps)
 	print("   ★而本格【沒有】改 `RESULT_TTL_TICKS`：動的是輸入（步數），不是事實。")
 	_cell("_test_p8_two_readers_on_the_same_input")
+# ══ P11：★每個 action id 都要有中文 label（母體 ＝ registry 的鍵）══════════════
+# ★★★這一格就是找出那 12 個漏網的那一格：舊表只收了【選單會列的】那些，
+#   而 registry 有 51 個鍵 ⇒ 其餘 12 個玩家按得到卻只看得到原樣 id。
+#   ⇒ 而它是常駐的：以後新增動詞沒寫中文 ⇒ 這一格紅並把名字印出來。
+# ★母體不是我手抄的清單：它是 `_action_registry` 的鍵（動詞從哪來就從那裡數）。
+func _test_p11_every_action_has_a_label() -> void:
+	print("
+── P11 每個 action id 都有中文 label ──")
+	var cs := PlayerCommandSystem.new()
+	cs.call("_setup_registry")
+	var keys: Array = cs.get("_action_registry").keys()
+	keys.sort()
+	var missing: Array = []
+	for k in keys:
+		if PlayerApiMapper.action_label(String(k)).begins_with("（未知動作"):
+			missing.append(String(k))
+	print("   registry 鍵 %d 個｜沒有中文 label 的 %d 個：%s" % [
+		keys.size(), missing.size(), str(missing)])
+	_check("★母體地板：registry 鍵 > 0（0 的話本格恆綠）", keys.size() > 0)
+	_check("★★★每一個 action id 都有中文 label（缺 %d 個）" % missing.size(), missing.is_empty())
+	print("   ★而「（未知動作：xxx）」那個 fallback 要留著：它是【不吞掉】那條規矩的執法，")
+	print("     而本格保證正常路徑不會走到它。")
+	_cell("_test_p11_every_action_has_a_label")
 
 
 func _initialize() -> void:
@@ -864,6 +900,7 @@ func _initialize() -> void:
 	_test_p5_four_rules_have_teeth()
 	_test_p7_positive_control_fixtures()
 	_test_p8_two_readers_on_the_same_input()
+	_test_p11_every_action_has_a_label()
 	_test_p6_artifacts()   # ★產物最後跑：它要收 P7 的那幾筆
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
