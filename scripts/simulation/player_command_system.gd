@@ -316,14 +316,14 @@ func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int)
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
 	if ratio <= 0.0 or ratio > 1.0:
-		return { "ok": false, "msg": "extract_ratio 必須 (0, 1]" }
+		return { "ok": false, "msg": "徵用比例必須在 0 與 1 之間" }
 	CoinTreasury.extract_treasury(state, pt, ratio, "玩家主動")
 	return { "ok": true, "msg": "徵用 %.0f%%" % (ratio * 100) }
 
 func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var res: String = state.player_state.get("storage_res", "")
 	var amount: float = float(state.player_state.get("storage_amount", 0.0))
-	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定資源或數量" }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
 	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
 	var stored: float = float(tile.public_storage.get(res, 0))
@@ -335,7 +335,7 @@ func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData
 func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var res: String = state.player_state.get("storage_res", "")
 	var amount: float = float(state.player_state.get("storage_amount", 0.0))
-	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定資源或數量" }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
 	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
 	var have: float = float(pt.resources.get(res, 0))
@@ -556,14 +556,14 @@ func _action_upgrade_outpost(state: WorldState, _target_id: int, pt: TeamData, _
 	var _os2 := OutpostSystem.new()
 	var ok2: bool = _os2.start_upgrade_level(state, pt)
 	if not ok2:
-		return { "ok": false, "msg": "無法升級（非 owner 或已滿級）" }
+		return { "ok": false, "msg": "無法升級（不是你的據點或已滿級）" }
 	return { "ok": true, "msg": "開始升級據點" }
 
 func _action_upgrade_farming(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var _os3 := OutpostSystem.new()
 	var ok3: bool = _os3.start_upgrade_farming(state, pt)
 	if not ok3:
-		return { "ok": false, "msg": "無法升級農業（非 civilian 或已滿）" }
+		return { "ok": false, "msg": "無法升級農地（不是民用據點或已滿級）" }
 	return { "ok": true, "msg": "開始升級農業" }
 
 func _action_upgrade_manufacturing(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
@@ -583,8 +583,8 @@ func _action_build_facility(state: WorldState, _target_id: int, pt: TeamData, _p
 	var _os := OutpostSystem.new()
 	var ok: bool = _os.start_upgrade_facility(state, pt, facility)
 	if not ok:
-		return { "ok": false, "msg": "無法擴建 %s（條件不符）" % facility }
-	return { "ok": true, "msg": "開始擴建 %s" % facility }
+		return { "ok": false, "msg": "無法擴建%s（條件不符）" % PlayerApiMapper.facility_label(facility) }
+	return { "ok": true, "msg": "開始擴建%s" % PlayerApiMapper.facility_label(facility) }
 
 func _action_demolish_outpost(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var _os5 := OutpostSystem.new()
@@ -609,7 +609,7 @@ func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: TeamData, 
 	var pos_arr: Array = state.player_state.get("abandon_pos", [-1, -1])
 	var pos := Vector2i(int(pos_arr[0]), int(pos_arr[1]))
 	if pos.x < 0:
-		return { "ok": false, "msg": "未指定 outpost 位置" }
+		return { "ok": false, "msg": "未指定據點位置" }
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null or tile.outpost_level == 0:
 		return { "ok": false, "msg": "目標無 outpost" }
@@ -626,7 +626,7 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 	var tr: int = int(state.player_state.get("sub_move_r", -1))
 	var move_tgt: Vector2i = Vector2i(tq, tr)
 	if sub_leader_id == -1 or not state.persons.has(sub_leader_id):
-		return { "ok": false, "msg": "未指定子隊 leader" }
+		return { "ok": false, "msg": "未指定子隊統領" }
 	if pop_count < 1 or pop_count >= pt.population:
 		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
 	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
@@ -692,7 +692,7 @@ func _action_leave_faction(state: WorldState, _target_id: int, pt: TeamData, pt_
 	if f3 == null:
 		return { "ok": false, "msg": "勢力不存在" }
 	if f3.leader_team_id == pt_id:
-		return { "ok": false, "msg": "請使用 disband_faction（leader 不能普通離開）" }
+		return { "ok": false, "msg": "請改用「解散勢力」（領袖不能普通離開）" }
 	state.clear_team_faction(pt, WorldState.LEAVE_PLAYER)   # 玩家離開 faction（雙向同步）
 	var leader_team3: TeamData = state.teams.get(f3.leader_team_id)
 	if leader_team3 != null:
@@ -830,7 +830,7 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 	if f9.leader_team_id != pt_id:
 		return { "ok": false, "msg": "只有 leader 可設定勢力目標" }
 	f9.player_goal_override = goal9
-	var msg9: String = "清除 override" if goal9.is_empty() else "勢力目標設為 %s" % goal9
+	var msg9: String = "清除指定目標" if goal9.is_empty() else "勢力目標設為 %s" % goal9
 	print("[PlayerCmd] set_faction_goal → %s" % goal9)
 	return { "ok": true, "msg": msg9 }
 
@@ -1154,7 +1154,7 @@ func refresh_colocation_targets(state: WorldState) -> void:
 func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var fe: Dictionary = state.player_forced_event
 	if fe.is_empty() or fe.get("action", "") != "aid_request":
-		return { "ok": false, "msg": "無待回應 aid event" }
+		return { "ok": false, "msg": "沒有待回應的乞食" }
 	var beggar_id: int = int(fe.get("from_id", -1))
 	var beggar: TeamData = state.teams.get(beggar_id)
 	if beggar == null:

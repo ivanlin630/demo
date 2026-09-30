@@ -173,7 +173,7 @@ func cancel_order(state: WorldState, order_id: int) -> Dictionary:
 	var ok: bool = OrderSystem.new().cancel_order(state, team, order_id)
 	if not ok:
 		return PlayerApiMapper.map_command_result(false, "not_found",
-			"no such active order: %d" % order_id, { "order_id": order_id })
+			"沒有第 %d 號掛單" % order_id, { "order_id": order_id })
 	return PlayerApiMapper.map_command_result(true, "ok", "", { "order_id": order_id })
 
 # ── 附身／離身（C1 票①）：★語意 = state.player_id 是唯一開關（world_state.gd:101/752）──
@@ -239,12 +239,20 @@ static func describe(name: String, args: Dictionary) -> String:
 	match name:
 		"move_to":
 			return "%s到 (%d,%d)" % [verb, int(args.get("tile_q", 0)), int(args.get("tile_r", 0))]
+		# ★★★玩家面字串零英文識別字（spec 2026-09-30）——這三支原本把【參數原樣印出來】，
+		#   而那正是死輸入床 (d) 那一族 108 筆症狀的【同一個成因】（一處修法）。
+		#   ★中文都走 `PlayerApiMapper` 那兩份唯一的表（不另開第二張）。
 		"execute_action":
-			return "%s：%s" % [verb, String(args.get("action_id", ""))]
+			return "%s：%s" % [verb, PlayerApiMapper.action_label(
+				String(args.get("action_id", "")))]
+		# ★`respond_to_forced` 不再印 response_id：那一句的【我的決定】那一半
+		#   由 `respond_to_forced` 自己用選項 label 組好（④ 那張票做的）
+		#   ⇒ 這裡再印一次原樣 id 只是把英文塞回去。
 		"respond_to_forced":
-			return "%s：%s" % [verb, String(args.get("response_id", ""))]
+			return verb
 		"equip_item", "unequip_item":
-			return "%s：%s" % [verb, String(args.get("slot_id", ""))]
+			return "%s：%s" % [verb, PlayerApiMapper.slot_label(
+				String(args.get("slot_id", "")))]
 		"deposit_item", "take_team_item":
 			return "%s %s×%d" % [verb, String(args.get("item_grade", "")), int(args.get("qty", 0))]
 		"post_buy_order", "post_sell_order":

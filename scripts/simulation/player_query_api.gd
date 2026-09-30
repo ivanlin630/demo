@@ -679,47 +679,9 @@ func get_decision_snapshot(state: WorldState) -> Dictionary:
 		"fields": t.ctx_snapshot.duplicate(true),
 	})
 
+# ★★★這張中文表已【搬】到 `PlayerApiMapper.action_label()`（spec 2026-09-30 玩家面字串）——
+#   理由：`PlayerCommandApi.describe()` 也要用它，而**一個真相只存一份**
+#   ⇒ 本支留成薄委派（呼叫端不用改），而表本體只有一處。
+#   ★不是抄一份過去：搬完這裡就沒有表了。
 func _action_label(action_id: String) -> String:
-	match action_id:
-		"ignore":           return "忽略"
-		"attack":           return "攻擊"
-		"trade":            return "貿易"
-		"propose_alliance": return "提議同盟"
-		"demand_tribute":        return "要求納貢"
-		"extort":                return "勒索"
-		"recruit":               return "招募"
-		"establish_faction":     return "建立勢力"
-		"hunt":                  return "狩獵"
-		"hunt_beast":            return "獵猛獸"
-		"train":                 return "訓練（-%d coin）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
-		"promote_anon":          return "拔擢匿名→記名"
-		"camp":                  return "紮營"
-		"take_loot":             return "收割戰利品"
-		"leave_loot":            return "放棄戰利品"
-		"recruit_anon":          return "招募匿名"
-		"invite_settle":         return "邀請定居"
-		"recruit_named":         return "招募成員"
-		"confirm_trade":         return "確認貿易"
-		"cancel_trade":          return "取消貿易"
-		"gather_intel":           return "打聽情報"
-		"beg":                    return "乞討"
-		"confirm_gather_intel":   return "確認打聽"
-		"subjugate_enemy":        return "收編敗者"
-		"offer_surrender":        return "投降請和"
-		"surrender_in_encounter": return "戰中投降"
-		"leave_faction":          return "退出勢力"
-		"betray_faction":         return "背叛勢力"
-		"disband_faction":        return "解散勢力"
-		"set_faction_goal":       return "設定勢力目標"
-		"order_faction_member":   return "下令成員"
-		"clear_member_order":     return "清除指令"
-		"set_tribute_rate":       return "調整徵收率"
-		"build_outpost":          return "建設前哨站"
-		"upgrade_outpost":        return "升級等級"
-		"upgrade_farming":        return "升級農作"
-		"upgrade_manufacturing":  return "升級製造"
-		"demolish_outpost":       return "拆除前哨站"
-		"dispatch_subteam":       return "派遣子隊"
-		"order_subteam":          return "下令子隊"
-		"recall_subteam":         return "召回子隊"
-	return action_id
+	return PlayerApiMapper.action_label(action_id)
