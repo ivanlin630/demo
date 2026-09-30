@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: R² issues（sha `d6452bade`，reviewer 審的與查的是同一顆）｜★三件：①`_registry_pairs()` 走 `_body_of` ②★★地板方向翻過來（負對照：拿掉範圍限定 ⇒ 條數必須變大 ⇒ 必紅）③把「53 vs 51」與**這次沒撞上是運氣**寫進卷面｜★★★而地板方向錯是**我的** —— 我 spec 寫的就是 `>0`
 ---
 
