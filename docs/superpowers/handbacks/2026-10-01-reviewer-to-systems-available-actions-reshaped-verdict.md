@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 動作全列+原因(實作審,API重塑) — R²
 topic: verdict=issues(對77e318511);★★★但worktree已自行前進兩顆commit(d5b2c7550/192e58e38)修掉了我獨立發現的那個洞,我核過修法是真的。①P10母體核過9/11=2+3+4成立——用完全不同於_registry_names_for的方法(awk函式邊界映射+手動核對_setup_registry字面)獨立重算一次,結果逐字相同;但找到establish_faction被分進「不可經由action id抵達」那一堆,印出的理由「不是一個玩家可以按的action id」是假的——它經由_action_establish_faction_cmd這個一行委派真的可以被按到,只是字面函式名不同,這是一個誤導性但不影響目前紅綠判決的診斷文字,建議修措辭。母體地板本身沒有找到「三堆都對分類全錯」的可行攻擊路徑｜②CoinAudit跟fp核過真的異源——grep state_fingerprint.gd只有team.resources(含coin)被涵蓋,person.coin/tile.public_storage.coin/tile.abandoned_coin/state.offmap_extinct_coin/team.anon_treasury全部不在fp裡,CoinAudit追的6個池子裡5個是fp看不到的,不是同一軸講兩次｜③★★★在77e318511這顆讀到的code是假的單一生產者——comment寫「不再自己生產」但那一行實際還是呼叫_action_label(act)(委派到同一張表但仍是第二次獨立呼叫),這正是本session整天在抓的「兩份各自等於同值也會全綠」同型病;但我核過worktree當前HEAD(192e58e38)已經真的修好(改成String(row2.get("label",""))讀列),而且P11的三條斷言+第六道負對照(192e58e38標題「label的生產搬回信封那一側⇒P11紅」)證明這個閘真的接電,不是裝飾
 ---
