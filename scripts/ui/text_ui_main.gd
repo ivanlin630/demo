@@ -483,7 +483,24 @@ func _input(event: InputEvent) -> void:
 				_pending_alerts.pop_front()
 			_check_alerts()
 
+# `_handle_input_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _input_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_ENTER or keycode == KEY_BACKSPACE:
+		return true
+	# ★輸入模式綁的是【任何可列印字元】—— 它們進緩衝區，不是一份 KEY_* 清單
+	if (keycode >= KEY_A and keycode <= KEY_Z) or (keycode >= KEY_0 and keycode <= KEY_9):
+		return true
+	return false
+
 func _handle_input_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _input_mode_binds_key(keycode):
+		_refuse_unbound_key("輸入", keycode)
+		return
 	if _input_mode_type == "string":
 		# 接受 A-Z 字元
 		if keycode >= KEY_A and keycode <= KEY_Z:
@@ -566,7 +583,25 @@ func _inv_equipped_slots() -> Array:
 			out.append({ "slot": slot, "grade": bg })
 	return out
 
+# `_handle_inv_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _inv_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_I:
+		return true
+	if keycode == KEY_E or keycode == KEY_S or keycode == KEY_U or keycode == KEY_G:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_inv_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _inv_mode_binds_key(keycode):
+		_refuse_unbound_key("物品", keycode)
+		return
 	var eq: Array          = _inv_equipped_slots()
 	var inv: Array         = _cached_snapshot.get("inventory_state", {}).get("inventory_items", [])
 	var team_items: Array  = _get_team_takeable_items(null)
@@ -772,6 +807,19 @@ func _current_mode_name_under_input() -> String:
 	return "main"
 
 # 指令成敗 feedback（持續到下個指令，不清）
+# ★★★未綁定鍵的【統一出口】（spec 2026-09-30 §2①，藍圖裁三禁）：
+#   ①不關模式 ②不落到底層處理器 ③不改任何狀態
+#   ★★「吃掉那個鍵」與「無作用」是兩件事：呼叫端一律緊接著 `return`
+#     —— 不吃掉的話底層可能把它當別的意思，而那正是不變量 #10 的病根。
+#   ★★★它刻意【不呼 `_refresh()`】：refresh 會重建整個畫面 ⇒ 那是
+#     「狀態沒動但畫面動了」的灰區，而禁③要的是【什麼都不改】。
+#     `_set_feedback` 自己只寫那一行文字（`:776` 起），不動世界也不重建畫面。
+#   ★回饋句沿用既有結果句的措辭形狀（`_set_feedback(false, …)`），不自創第四種語氣。
+#   ★★而它【不包含 Esc】：Esc 有語意（回上一層）⇒ 走各 handler 自己的分支，
+#     見那些分支的註解（最外層按 Esc ＝ 離開該模式回主畫面）。
+func _refuse_unbound_key(mode_label: String, _keycode: int) -> void:
+	_set_feedback(false, "此鍵在此模式無作用（%s）" % mode_label)
+
 func _set_feedback(ok: bool, msg: String) -> void:
 	if _feedback_line == null: return
 	if str(msg).is_empty(): return
@@ -1177,7 +1225,25 @@ func _build_debug_str() -> String:
 
 	return "\n".join(lines)
 
+# `_handle_member_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _member_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_P:
+		return true
+	if keycode == KEY_E or keycode == KEY_S or keycode == KEY_U or keycode == KEY_W or keycode == KEY_Y:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_4:
+		return true
+	return false
+
 func _handle_member_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _member_mode_binds_key(keycode):
+		_refuse_unbound_key("成員", keycode)
+		return
 	var members: Array = _cached_snapshot.get("members_detail", [])
 	match keycode:
 		KEY_W:
@@ -1350,7 +1416,25 @@ func _log_event(msg: String) -> void:
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 
+# `_handle_interact_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _interact_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD:
+		return true
+	if keycode >= KEY_A and keycode <= KEY_Z:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_interact_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _interact_mode_binds_key(keycode):
+		_refuse_unbound_key("互動", keycode)
+		return
 	# ESC 處理
 	if keycode == KEY_ESCAPE:
 		if _interact_target >= 0:
@@ -1600,13 +1684,51 @@ func _build_interact_str() -> String:
 	lines.append("── [T/Esc]關閉 ──")
 	return "\n".join(lines)
 
+# `_handle_faction_mode` 綁了哪些鍵。★★★它與那些分支【緊鄰】而不是放在檔頭：
+#   放遠的話兩邊會漂，而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★而床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份，
+#     再與這一支的答案逐鍵比對 ⇒ 兩邊【異源】，漂開就紅。
+func _faction_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_F or keycode == KEY_ESCAPE:
+		return true
+	# ★★★第一版漏了 C／D／E／G 四個 —— 而它們是真功能：
+	#   C 離開勢力／D 背叛勢力／E 解散勢力／G 徵用國庫
+	#   ⇒ 漏掉的後果是【把四個功能門死】（按下去只印「此鍵在此模式無作用」）
+	#   ⇒ ★抓到它的是床的【異源比對】（謂詞 vs 從 handler 機械抽的集合）——
+	#     在電池之前，而且它指名了是哪四個鍵。
+	#   ⇒ ★★這就是為什麼那一格不能寫成「謂詞說了算」：那會是同源恆真。
+	if keycode == KEY_A or keycode == KEY_B or keycode == KEY_C 			or keycode == KEY_D or keycode == KEY_E or keycode == KEY_G:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_faction_mode(keycode: int) -> void:
+	# ★★★裁 (b)：未綁定鍵【先走出口】，前提檢查排在它之後 ——
+	#   否則 `in_faction` 為 false 時，任何未綁定鍵都會把面板關掉（違反禁①）。
+	#   ★這一段的已綁鍵集合就是下面那些分支：F／Esc／A／B／數字（成員下令）。
+	#   ★★而它【不是】一份手抄清單的第二份記錄：床的母體是從這個 handler 的
+	#     `KEY_*` 逐一抽出來的（`unbound_key_bed` 的 P2），兩邊會被比對。
+	if not _faction_mode_binds_key(keycode):
+		_refuse_unbound_key("勢力", keycode)
+		return
 	if keycode == KEY_F or keycode == KEY_ESCAPE:
 		_faction_mode = false
 		_refresh()
 		return
+	# ★★★裁 (b)（systems 2026-09-30）：這個前提檢查【排在未綁定出口之後】——
+	#   舊寫法把它擺在任何 key 比對之前 ⇒ 按【任何】未綁定鍵都會關掉面板
+	#   ⇒ 從玩家那一側看，它與「我按了一個沒用的鍵把面板關掉」一模一樣（違反禁①）。
+	#   ★而我原本量到的「按 A 讓 faction mode 自己關掉」真因就在這裡：
+	#     不是那個鍵（`KEY_A` 在本模式【有綁】＝設定目標），是 `in_faction` 為 false。
+	#   ⇒ ★★否決 (a)（改成進入模式時才檢查）的理由：那會留下一個
+	#     【前提已經消失的面板】＝「讀者還在寫者沒了」的形狀。
 	var fp: Dictionary = _bridge.query_faction_panel().get("data", {}).get("faction_panel", {})
 	if not fp.get("in_faction", false):
+		# ★★★關閉【必帶一句話】（systems 裁）：舊寫法是靜默關閉 ⇒ 在畫面上與
+		#   「未綁定鍵把它關掉」無法分辨。⇒ 那不是新設計，是藍圖已裁的【禁靜默】
+		#   在這一點的適用（同「按接受什麼都沒發生＝拒絕禁靜默的鏡像」）。
+		_set_feedback(false, "你已不在任何勢力，面板關閉")
 		_faction_mode = false
 		_refresh()
 		return
@@ -1617,6 +1739,11 @@ func _handle_faction_mode(keycode: int) -> void:
 	match keycode:
 		KEY_A:   # 設定目標（Q7-6：僅 leader；非 leader no-op,顯示亦不列）
 			if not is_faction_leader:
+				# ★★★三態的②（綁定但當下不允許）：它【有綁】而你現在不能用
+				#   ⇒ 必須給【原因】，而且那句話**不得與①（未綁定）相同** ——
+				#   玩家分不出「這鍵沒用」與「這鍵有用但你不能用」時，那兩件事的處置完全相反
+				#   （前者是別按了，後者是去當上領袖）。★P7 的第二道負對照就守這件事。
+				_set_feedback(false, "只有勢力領袖能設定目標")
 				_refresh()
 				return
 			_input_mode = true
@@ -1743,7 +1870,12 @@ func _build_faction_str() -> String:
 	var member_orders: Array = fp.get("member_orders", [])
 	for i in range(member_orders.size()):
 		var mo: Dictionary = member_orders[i]
-		var pos: Dictionary = mo.get("tile_pos", {})
+		# ★★★死變數已刪（2026-09-30）：`var pos: Dictionary = mo.get("tile_pos", {})`
+		#   `tile_pos` 的真值是 `Vector2i` ⇒ 賦值給 `Dictionary` 在 runtime 丟錯
+		#   ⇒ **`_build_faction_str` 從那一行起被靜默截斷**（勢力面板的成員指令與行動列都不印）。
+		#   ★而沒人讀它：下面用的是正確型別的 `pos_v`（`as Vector2i`）⇒ 它是重構的殘骸。
+		#   ★★它一直沒被發現，是因為它只在【勢力有成員】時才跑到 ——
+		#     而那個佈置直到本票的 P7（把玩家放進一個有成員的勢力）才第一次出現。
 		var task_str: String
 		if mo.get("pending_task", "") != "":
 			task_str = "傳達中（%s）" % mo.get("pending_task", "")
@@ -1767,7 +1899,23 @@ func _build_faction_str() -> String:
 	lines.append("[F/Esc]關閉")
 	return "\n".join(lines)
 
+# `_handle_outpost_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _outpost_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_O:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_outpost_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _outpost_mode_binds_key(keycode):
+		_refuse_unbound_key("前哨", keycode)
+		return
 	if keycode == KEY_O or keycode == KEY_ESCAPE:
 		_outpost_mode = false
 		_outpost_pending_abandon = false
@@ -1942,7 +2090,25 @@ func _build_storage_str() -> String:
 	lines.append("[數字]選項 [K/Esc]離開")
 	return "\n".join(lines)
 
+# `_handle_storage_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _storage_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_K:
+		return true
+	if keycode == KEY_COMMA or keycode == KEY_PERIOD:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_storage_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _storage_mode_binds_key(keycode):
+		_refuse_unbound_key("公庫", keycode)
+		return
 	if keycode == KEY_K or keycode == KEY_ESCAPE:
 		_storage_mode = false; _storage_page = 0; _refresh(); return
 	if keycode == KEY_COMMA:
@@ -1950,6 +2116,12 @@ func _handle_storage_mode(keycode: int) -> void:
 	if keycode == KEY_PERIOD:
 		_storage_page += 1; _refresh(); return
 	if keycode < KEY_1 or keycode > KEY_9:
+		# gate-ok: unreachable-after-bind-predicate —— ★這一支在 `_storage_mode_binds_key`
+		#   落地之後【不可達】：非 1–9 且非 K／Esc／逗號／句號的鍵在函式最前面就被出口吃掉了。
+		#   ★★留著它而不是刪掉：它是這支 handler 的最後一道防線（若哪天有人放寬謂詞，
+		#     這一行會讓越界的索引不至於算下去）⇒ 而【不可達】正是它該有的狀態。
+		#   ★★★具名例外的理由：給一個玩家碰不到的分支一句話是【雜訊】，
+		#     而雜訊會讓真正的那三種句子貶值（systems 裁 2026-09-30）。
 		return
 	var idx: int = (keycode - KEY_1) + _storage_page * 9
 	var rows: Array = _storage_rows()
@@ -1972,7 +2144,25 @@ func _handle_storage_mode(keycode: int) -> void:
 		_refresh()
 	_input_bar.text = "%s_" % _input_mode_prompt
 
+# `_handle_subteam_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _subteam_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_U:
+		return true
+	if keycode == KEY_A or keycode == KEY_B or keycode == KEY_N:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_subteam_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _subteam_mode_binds_key(keycode):
+		_refuse_unbound_key("子隊", keycode)
+		return
 	if keycode == KEY_U or keycode == KEY_ESCAPE:
 		_subteam_mode = false
 		_subteam_selection = -1
@@ -2137,7 +2327,23 @@ func _build_subteam_str() -> String:
 	lines.append("[U/Esc]關閉")
 	return "\n".join(lines)
 
+# `_handle_advisor_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _advisor_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_V:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_advisor_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _advisor_mode_binds_key(keycode):
+		_refuse_unbound_key("顧問", keycode)
+		return
 	if keycode == KEY_V or keycode == KEY_ESCAPE:
 		_advisor_mode = false
 		_advisor_selection = -1
@@ -2178,7 +2384,24 @@ func _build_advisor_str() -> String:
 	lines.append("[V/Esc]關閉")
 	return "\n".join(lines)
 
+# `_handle_pre_encounter_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _pre_encounter_mode_binds_key(keycode: int) -> bool:
+	# ★Esc 在本模式原本【沒有】分支 ⇒ 依 spec §2③ 它有語意（回上一層）⇒ 補進綁定集合
+	if keycode == KEY_ESCAPE:
+		return true
+	if keycode == KEY_1 or keycode == KEY_2:
+		return true
+	return false
+
 func _handle_pre_encounter_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _pre_encounter_mode_binds_key(keycode):
+		_refuse_unbound_key("遭遇前", keycode)
+		return
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
 	var atk_id: int = ps.get("pre_encounter_attacker_id", -1)
 	var target: Dictionary = {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
@@ -2217,7 +2440,25 @@ func _build_pre_encounter_str() -> String:
 	lines.append("[2] 投降（嘗試免戰，對方可能拒絕）")
 	return "\n".join(lines)
 
+# `_handle_trade_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _trade_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
+		return true
+	if keycode == KEY_C or keycode == KEY_COMMA or keycode == KEY_PERIOD:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_trade_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _trade_mode_binds_key(keycode):
+		_refuse_unbound_key("交易", keycode)
+		return
 	# 翻頁（清單 >9 項）
 	if keycode == KEY_COMMA:
 		_trade_page = maxi(0, _trade_page - 1); _refresh(); return
@@ -2258,6 +2499,9 @@ func _handle_trade_mode(keycode: int) -> void:
 	var idx: int = (keycode - KEY_1) + _trade_page * 9
 	var rows: Array = _trade_session_rows()
 	if idx >= rows.size():
+		# ★類C（玩家碰得到的無效選擇）：他按了第 N 項而清單只有 M 項 ⇒ 靜默會讓他以為卡住
+		#   ⇒ 一句話，而它與①②都不同：這不是「沒綁」也不是「你不能用」，是「沒有那一項」。
+		_set_feedback(false, "沒有第 %d 項（目前 %d 項）" % [idx + 1, rows.size()])
 		return
 	var row: Dictionary = rows[idx]
 	_input_mode = true
@@ -2341,7 +2585,23 @@ func _build_trade_str() -> String:
 	lines.append("[數字]選項 [Enter]送出 [C]清 [Esc]離開")
 	return "\n".join(lines)
 
+# `_handle_intel_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _intel_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE:
+		return true
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_intel_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _intel_mode_binds_key(keycode):
+		_refuse_unbound_key("打聽", keycode)
+		return
 	if keycode == KEY_ESCAPE:
 		_intel_mode = false
 		_intel_options = []
@@ -2373,7 +2633,23 @@ func _build_intel_str() -> String:
 	return "\n".join(lines)
 
 # 招募子模式：列記名候選（[1..N]）+ 匿名選項（[0/A]）。reuse 既有 command 路徑,勿複製招募邏輯。
+# `_handle_recruit_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
+#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
+#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
+func _recruit_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_A:
+		return true
+	if keycode >= KEY_0 and keycode <= KEY_9:
+		return true
+	return false
+
 func _handle_recruit_mode(keycode: int) -> void:
+	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
+	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
+	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
+	if not _recruit_mode_binds_key(keycode):
+		_refuse_unbound_key("招募", keycode)
+		return
 	if keycode == KEY_ESCAPE:
 		_exit_recruit_mode()
 		return
