@@ -122,7 +122,13 @@ func _initialize() -> void:
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
-	quit()
+	# ★★★離開碼（systems 裁 2026-10-01，形狀逐字沿用 `unbound_key_bed.gd:169`）——
+	#   ★本檔原本是**裸 `quit()`** ⇒ rc 恆 0 ⇒ 這支閘的判決**只有 expect 一道**：
+	#     實測血證（2026-10-01 負對照那一跑）`errors: 2` 而 `rc=0`。
+	#   ★★而 systems 的普查：註冊表 65 支床裡約 30 支 rc 恆 0（他的偵測器失效方向是多算
+	#     ⇒ 30 是上界、35 是下界）⇒ 裁「不改那 30 支，只接這一支」（爆炸半徑）。
+	#   ⇒ ★★★所以那個母體邊界要留在卷面上：**其餘那些格的紅完全依賴 expect 不被寫寬**。
+	quit(1 if _errors > 0 else 0)
 
 # P4-2:self/原地動作(hunt)應在 self-actions(目標選擇階段直接可選),不混進 team-target 行動清單。
 func _test_interact_self_team_split() -> void:
@@ -2404,7 +2410,7 @@ const CONTROL_FLOOR_STRINGS: int = 3  # scripted_exploration_bed（P11 表覆蓋
 const CONTROL_FLOOR_NPCTRIB: int = 3  # npc_tribute_transfer_bed（三道：自己寫一份／拿掉恩怨／塞進表）
 const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
 const CONTROL_FLOOR_SPAM: int = 6  # spam_brake_bed（濫按煞車／兩層關係帳）
-const CONTROL_FLOOR_UNBOUND: int = 6  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）
+const CONTROL_FLOOR_UNBOUND: int = 8  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）★6 → 8（2026-10-01：P9 那一道＋異源漂一個鍵那一道）
 const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 # ★text_ui_layout_bed（版面 v2）：①display_width 換成 length()（P3b）②別處再寫一次 120（P3a）
@@ -2412,6 +2418,39 @@ const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一�
 #   ★登進【這一格】而不是新開一支閘：棘輪機制已經存在，我的床原本【不在它的母體裡】
 #     ⇒ 那三筆紀錄被拿掉會是靜默的（同「沒有人在讀那份產出」那一族）。
 const CONTROL_FLOOR_LAYOUT: int = 4  # text_ui_layout_bed（★＋P9 手抄物理那一道）
+# ★★★【反向掃第一次跑就抓到的三支】（2026-10-01）——它們有已實測紅的紀錄行，
+#   而**從來不在地板表裡** ⇒ 那些紀錄行可以一條一條被拿掉而沒有任何一格會紅。
+#   ★而這不是「有人忘了登記」，是**手抄名單的必然**：寫新床的人沒有理由知道
+#     有一張表在別的檔裡等他登記 ⇒ 所以修法是**反向掃**，不是「以後記得登記」。
+const CONTROL_FLOOR_INQUIRY: int = 7       # inquiry_v1_bed
+const CONTROL_FLOOR_TRADE_ACCEPT: int = 5  # trade_accept_bed
+const CONTROL_FLOOR_SUCCESS_SENT: int = 5  # success_sentence_bed
+
+# ★★★★★【地板表 ＝ 唯一一份】（systems 裁 2026-10-01）——
+#   ★舊版 P19 是**一串手抄呼叫**：每支床三行（count／print／check）＋一個地板常數
+#     ⇒ 漏一支是**靜默的**。現在母體是這張表，而 P19 逐支跑它 ＋ **反向掃**。
+#   ★★值**引用既有的具名常數**（不是把數字抄第二份）⇒ 每支床的理由留在它自己那一行上。
+#   ★★★而 key 是**檔名字串**（不是常數名）—— 反向掃要拿它跟檔案系統比，
+#     而檔案系統只認檔名。
+const CONTROL_FLOORS: Dictionary = {
+	"available_actions_bed.gd":    CONTROL_FLOOR_AVAIL,
+	"colocation_gate_bed.gd":      CONTROL_FLOOR_COLOC,
+	"command_replay_bed.gd":       CONTROL_FLOOR_REPLAY,
+	"decision_vs_outcome_bed.gd":  CONTROL_FLOOR_DVO,
+	"forced_event_panel_bed.gd":   CONTROL_FLOOR_FEP,
+	"inquiry_v1_bed.gd":           CONTROL_FLOOR_INQUIRY,
+	"leader_chokepoint_bed.gd":    CONTROL_FLOOR_LEADER,
+	"npc_tribute_transfer_bed.gd": CONTROL_FLOOR_NPCTRIB,
+	"player_event_feed_bed.gd":    CONTROL_FLOOR_FEED,
+	"press_is_one_tick_bed.gd":    CONTROL_FLOOR_P8,
+	"scripted_exploration_bed.gd": CONTROL_FLOOR_STRINGS,
+	"spam_brake_bed.gd":           CONTROL_FLOOR_SPAM,
+	"success_sentence_bed.gd":     CONTROL_FLOOR_SUCCESS_SENT,
+	"text_ui_layout_bed.gd":       CONTROL_FLOOR_LAYOUT,
+	"trade_accept_bed.gd":         CONTROL_FLOOR_TRADE_ACCEPT,
+	"ui_flow_test.gd":             CONTROL_FLOOR_UI,
+	"unbound_key_bed.gd":          CONTROL_FLOOR_UNBOUND,
+}
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
@@ -3254,92 +3293,64 @@ func _test_p30_submode_panels_reach_the_screen() -> void:
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
 	print("\n── P19 負對照覆蓋率棘輪 ──")
-	var n_ui: int = _count_fired("res://scripts/debug/ui_flow_test.gd")
-	var n_cr: int = _count_fired("res://scripts/debug/command_replay_bed.gd")
-	print("   已實測紅紀錄：ui_flow_test %d（地板 %d）／command_replay_bed %d（地板 %d）" % [
-		n_ui, CONTROL_FLOOR_UI, n_cr, CONTROL_FLOOR_REPLAY])
-	_check("★母體地板：兩個檔都數得到非零（%d／%d）" % [n_ui, n_cr], n_ui > 0 and n_cr > 0)
-	_check("★★ui_flow_test 的紀錄數沒有往回走（%d >= %d）" % [n_ui, CONTROL_FLOOR_UI],
-		n_ui >= CONTROL_FLOOR_UI)
-	_check("★★command_replay_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cr, CONTROL_FLOOR_REPLAY],
-		n_cr >= CONTROL_FLOOR_REPLAY)
-	var n_fp: int = _count_fired("res://scripts/debug/forced_event_panel_bed.gd")
-	print("   forced_event_panel_bed %d（地板 %d）" % [n_fp, CONTROL_FLOOR_FEP])
-	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
-	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
-		n_fp >= CONTROL_FLOOR_FEP)
-	var n_dv: int = _count_fired("res://scripts/debug/decision_vs_outcome_bed.gd")
-	print("   decision_vs_outcome_bed %d（地板 %d）" % [n_dv, CONTROL_FLOOR_DVO])
-	_check("★★decision_vs_outcome_bed 的紀錄數沒有往回走（%d >= %d）" % [n_dv, CONTROL_FLOOR_DVO],
-		n_dv >= CONTROL_FLOOR_DVO)
-	var n_av: int = _count_fired("res://scripts/debug/available_actions_bed.gd")
-	print("   available_actions_bed %d（地板 %d）" % [n_av, CONTROL_FLOOR_AVAIL])
-	_check("★★available_actions_bed 的紀錄數沒有往回走（%d >= %d）" % [n_av, CONTROL_FLOOR_AVAIL],
-		n_av >= CONTROL_FLOOR_AVAIL)
-	var n_st: int = _count_fired("res://scripts/debug/scripted_exploration_bed.gd")
-	print("   scripted_exploration_bed %d（地板 %d）" % [n_st, CONTROL_FLOOR_STRINGS])
-	_check("★★scripted_exploration_bed 的紀錄數沒有往回走（%d >= %d）" % [n_st, CONTROL_FLOOR_STRINGS],
-		n_st >= CONTROL_FLOOR_STRINGS)
-	var n_nt: int = _count_fired("res://scripts/debug/npc_tribute_transfer_bed.gd")
-	print("   npc_tribute_transfer_bed %d（地板 %d）" % [n_nt, CONTROL_FLOOR_NPCTRIB])
-	_check("★★npc_tribute_transfer_bed 的紀錄數沒有往回走（%d >= %d）" % [n_nt, CONTROL_FLOOR_NPCTRIB],
-		n_nt >= CONTROL_FLOOR_NPCTRIB)
-	var n_lc: int = _count_fired("res://scripts/debug/leader_chokepoint_bed.gd")
-	print("   leader_chokepoint_bed %d（地板 %d）" % [n_lc, CONTROL_FLOOR_LEADER])
-	_check("★★leader_chokepoint_bed 的紀錄數沒有往回走（%d >= %d）" % [n_lc, CONTROL_FLOOR_LEADER],
-		n_lc >= CONTROL_FLOOR_LEADER)
-	var n_sb: int = _count_fired("res://scripts/debug/spam_brake_bed.gd")
-	print("   spam_brake_bed %d（地板 %d）" % [n_sb, CONTROL_FLOOR_SPAM])
-	_check("★★母體地板：濫按煞車那支床也數得到非零（%d）" % n_sb, n_sb > 0)
-	_check("★★spam_brake_bed 的紀錄數沒有往回走（%d >= %d）" % [n_sb, CONTROL_FLOOR_SPAM],
-		n_sb >= CONTROL_FLOOR_SPAM)
-	var n_ub: int = _count_fired("res://scripts/debug/unbound_key_bed.gd")
-	print("   unbound_key_bed %d（地板 %d）" % [n_ub, CONTROL_FLOOR_UNBOUND])
-	_check("★★母體地板：按鍵三態那支床也數得到非零（%d）" % n_ub, n_ub > 0)
-	_check("★★unbound_key_bed 的紀錄數沒有往回走（%d >= %d）" % [n_ub, CONTROL_FLOOR_UNBOUND],
-		n_ub >= CONTROL_FLOOR_UNBOUND)
-	var n_cg: int = _count_fired("res://scripts/debug/colocation_gate_bed.gd")
-	print("   colocation_gate_bed %d（地板 %d）" % [n_cg, CONTROL_FLOOR_COLOC])
-	_check("★★母體地板：同格那支床也數得到非零（%d）" % n_cg, n_cg > 0)
-	_check("★★colocation_gate_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cg, CONTROL_FLOOR_COLOC],
-		n_cg >= CONTROL_FLOOR_COLOC)
-	var n_p8: int = _count_fired("res://scripts/debug/press_is_one_tick_bed.gd")
-	print("   press_is_one_tick_bed %d（地板 %d）" % [n_p8, CONTROL_FLOOR_P8])
-	_check("★★母體地板：#8 那支床也數得到非零（%d）" % n_p8, n_p8 > 0)
-	_check("★★press_is_one_tick_bed 的紀錄數沒有往回走（%d >= %d）" % [n_p8, CONTROL_FLOOR_P8],
-		n_p8 >= CONTROL_FLOOR_P8)
-	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
-	var n_tl: int = _count_fired("res://scripts/debug/text_ui_layout_bed.gd")
-	print("   text_ui_layout_bed %d（地板 %d）" % [n_tl, CONTROL_FLOOR_LAYOUT])
-	_check("★★text_ui_layout_bed 的紀錄數沒有往回走（%d >= %d）" % [n_tl, CONTROL_FLOOR_LAYOUT],
-		n_tl >= CONTROL_FLOOR_LAYOUT)
-	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
-	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
-	_check("★★player_event_feed_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fe, CONTROL_FLOOR_FEED],
-		n_fe >= CONTROL_FLOOR_FEED)
-	if n_ui > CONTROL_FLOOR_UI or n_cr > CONTROL_FLOOR_REPLAY or n_fe > CONTROL_FLOOR_FEED:
-		print("   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（%d／%d／%d）" % [n_ui, n_cr, n_fe])
+	# ★★★【母體機械導出 ＋ 反向掃】（systems 裁 2026-10-01）——
+	#   ★舊版是**一串手抄呼叫**（每支床三行 ＋ 一個地板常數）⇒ 漏一支是**靜默的**：
+	#     那支床的紀錄行可以一條一條被拿掉而沒有任何一格會紅。
+	#   ★★而它當場被抓到：反向掃第一次跑就找出 **3 支**有已實測紅紀錄行
+	#     而不在地板表裡的床（`inquiry_v1_bed`／`trade_accept_bed`／`success_sentence_bed`）
+	#     ⇒ ★**「具名標記 ＝ 一份手抄名單」那條的第 N 次**：指名解決「數字對而東西不在」，
+	#       不解決「我沒看到的那些」⇒ 所以正解是三件：①地板表在一處
+	#       ②逐支比對 ③**反向掃**（有紀錄行而不在表裡 ⇒ 紅並指名）。
+	#   ★★★而反向掃的母體要**從檔案系統數出來印在卷面**，不是從表裡數
+	#     —— 從表裡數的反向掃恆空（它拿表跟表自己比）。
+	var names: Array = CONTROL_FLOORS.keys()
+	names.sort()
+	var below: Array = []
+	var seen: Dictionary = {}
+	var total_fired: int = 0
+	for nm in names:
+		var fname: String = String(nm)
+		var floor_v: int = int(CONTROL_FLOORS[fname])
+		var got: int = _count_fired("res://scripts/debug/" + fname)
+		seen[fname] = true
+		total_fired += got
+		print("   %-32s %d（地板 %d）%s" % [fname, got, floor_v,
+			"" if got >= floor_v else "★往回走了"])
+		if got < floor_v:
+			below.append("%s（%d < %d）" % [fname, got, floor_v])
+	print("   ── 表裡 %d 支床，已實測紅紀錄合計 %d 條 ──" % [names.size(), total_fired])
+	_check("★母體地板：表不是空的（空 ⇒ 下面整格沒有主詞）", names.size() > 0)
+	_check("★★母體地板：合計數得到非零（0 ⇒ 每一條 `>=` 都恆真）", total_fired > 0)
+	_check("★★★沒有任何一支床的紀錄數往回走（往回走的：%s）" % str(below), below.is_empty())
+	# ── ★★★反向掃：有紀錄行【而不在表裡】的床 ⇒ 紅並指名 ────────────────────
+	#   ★形狀逐字沿用已核過 CLEAN 的 `SUBMENU_OPENERS`／`ACTION_SHAPE`：
+	#     宣告在一處 ＋ 逐支比對 ＋ **反向掃**（缺一不可）。
+	var scanned: int = 0
+	var orphans: Array = []
+	var d := DirAccess.open("res://scripts/debug")
+	if d == null:
+		_check("★母體地板：開得了 res://scripts/debug（開不了 ⇒ 反向掃恆空 ⇒ 不是綠是不可判)", false)
+	else:
+		d.list_dir_begin()
+		var f: String = d.get_next()
+		while f != "":
+			if f.ends_with(".gd"):
+				scanned += 1
+				if not seen.has(f):
+					var n_orphan: int = _count_fired("res://scripts/debug/" + f)
+					if n_orphan > 0:
+						orphans.append("%s（%d 條）" % [f, n_orphan])
+			f = d.get_next()
+		d.list_dir_end()
+	print("   ★反向掃：掃了 %d 支 .gd（母體從檔案系統數，不是從表裡數）" % scanned)
+	_check("★★母體地板：反向掃真的掃到東西（%d 支；0 ⇒ 下面那條恆綠）" % scanned, scanned > 0)
+	_check("★★★★反向掃：沒有【有紀錄行而不在地板表裡】的床（漏掉的：%s）" % str(orphans),
+		orphans.is_empty())
+	print("   ★★而這一條抓到的東西不是「有人寫錯」——是**手抄名單的必然**：")
+	print("     寫新床的人沒有理由知道有一張表在別的檔裡等他登記。")
 	_cell("_test_p19_control_coverage_ratchet")
 
-# 數【固定格式】那一行：`# 負對照：<怎麼點火> ⇒ 已於 <分支> 實測紅`
-static func _count_fired(path: String) -> int:
-	var src: String = FileAccess.get_file_as_string(path)
-	var n: int = 0
-	for l in src.split("\n"):
-		var t: String = l.strip_edges()
-		if t.begins_with("# 負對照：") and t.contains(" ⇒ 已於 ") and t.ends_with("實測紅"):
-			n += 1
-	return n
 
-# P2［整天不漏］：推進【一天】＝24 次 step，而佇列壽命只有【一小時】
-#   ⇒ ★讀者必須【每一次 step 之後都讀】，漏一次就漏掉整整一小時的事件。
-# ★★★這一格守的是【讀點的位置】，不是「事件有沒有被 emit」（spec §4 P2 逐字）。
-#   ⇒ 所以它逐小時各塞一件事件，然後數畫面上收到幾件：
-#     ·讀點在迴圈裡 ⇒ 24 件全到
-#     ·讀點搬到整天結束後才讀一次 ⇒ 只剩最後一小時那件（其餘被 TTL 清掉）⇒ 紅
-# ★母體地板：先斷言【真的塞進去了 24 件】—— 沒塞進去的話「收到 0 件」也會等於「沒漏」。
-# 負對照：把 `_process()` 裡那段撈取搬到迴圈之外（只在最後讀一次）⇒ 必須紅
-# 負對照：把 `_process()` 裡那段撈取改成永遠讀空（＝只在整天之後才讀一次）⇒ 畫面收到 0 件 ⇒ 已於 feat/player-event-feed（2026-09-24 這一輪） 實測紅
 func _test_p2_whole_day_not_dropped() -> void:
 	_selftest_gate("_test_p2_whole_day_not_dropped").noop()
 	print("\n── P2 推進一天不漏事件 ──")
