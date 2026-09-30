@@ -69,10 +69,10 @@ LABEL_NEW = '				act, _action_label(act),'
 #   ★它紅在「多吞」那條地板上（多吞的兩對 RHS 是區域變數，不是本檔的函式）。
 #   ★★而它【不是】釘「＝51」：釘死條數會腐爛（`_setup_registry` 每加一條動作就要改），
 #     而「拿掉限定會變大」永遠為真且不腐爛。
-SCOPE_OLD = '	var body: String = _body_of(src, "_setup_registry")
-	var pairs: Array = []'
-SCOPE_NEW = '	var body: String = src
-	var pairs: Array = []'
+SCOPE_OLD = '''	var body: String = _body_of(src, "_setup_registry")
+	var pairs: Array = []'''
+SCOPE_NEW = '''	var body: String = src
+	var pairs: Array = []'''
 
 CONTROLS = [
     ('①母體換成另一份手抄陣列', '逐字引用', (PCS, NAMES_OLD, NAMES_NEW)),
