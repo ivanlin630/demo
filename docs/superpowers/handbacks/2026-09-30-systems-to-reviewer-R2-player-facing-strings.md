@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審：⑤玩家面字串（(d) 108 → 0）`feat/player-facing-strings` @ 5baa089bb｜★★他把一條不變量從【清單的一欄】升成【會紅的斷言】，而那一格是我要你重點咬的
 ---
 
