@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★merge 錨：遠端 tip ＝ `75c139075`（`fix/exploration-two-english-strings`）｜你交代的三件全做完並各自實測綠｜★★而過程抓到兩件你沒點的：**main 上的 exploration artifacts 過期了 114 列**、以及那筆既存不變量違反的**確切成因行**
 ---
 
