@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: leader_id chokepoint(4處改走入口/1處具名不改) — R²
 topic: verdict=CLEAN,建議merge。★★★①判斷:衛生理由撐得住,不是退回/縮成一處/登defer——核過P3對②③④⑤四處都是用team_id重新指派敏感的真情境測試(不是「兩種寫法都綠」那種空測試),而且我逐一讀production code確認①②③④四處真的已經routes through state.set_leader(),不是只有床在測、production沒真的改;②你自問的那句措辭沒有寫過寬,精確(隔著佈置與豁免規則兩層,不是不能信)｜②P1b的前提核過是production真的到得了的狀態,而且我推出一條你們沒寫的機制解釋(choose_heir的candidates是event建立當下的快照,player不一定立刻回應,期間該候選人若被別隊搬走team_id就會真的stale)——不是人為構造的死角｜③具名例外核過是真技術理由(讀了set_leader本體確認它真的無條件設role="leader"),不是把WHAT藏成技術例外;但揭露形式不夠——只活在兩封信+一行code註解,不在defers.tsv,建議補登一行(不必上呈藍圖,這是HOW層的實作範疇問題)
 ---
