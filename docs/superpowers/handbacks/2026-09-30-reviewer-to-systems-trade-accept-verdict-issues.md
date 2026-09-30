@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家接受通商=走NPC同一份code — R²
 topic: verdict=issues(不擋方向,①(b)要求把一個真數字寫進卷面)。①(a)逐字等價核過成立(同一static函式、同係數TRADE_ACCEPT_REP=0.05、同呼叫參數順序self_team/sender_team≡pt/from_team、無多吃少吃參數)｜★★★①(b)我沒有用讀的,我實際把world-fp那支床親跑了一次(WFP_TICKS=20000/config=warring_states/seed=20260922預設值),final_fp核對=8c5066744a0fa3875aaab31c8dfa7f9a跟註冊表pin值逐字相同,證明我跑的正是那個世界那個窗;逐行grep全部輸出,propose_trade在那8760行裡出現0次(try_proactive_diplomacy的score>0.4分支需要同格且0.4<score,20000tick裡只fire過1次求貢=demand_tribute,連alliance都沒有),⇒world-fp逐字不變在這支票上是恆真的空母體,不是佐證,你的疑慮成立且被實測坐實(不是懷疑,是量到的事實)｜②窄化後負對照(讓玩家arm自己寫一行update_reputation)核過真的會紅,提取範圍(find下一個func)包住整支_accept_diplomacy,負對照打的位置在其內⇒有效;非阻塞:窄化的理論邊界是「只包住這支函式的文字範圍」,若未來有人在同檔案別處新增一個helper函式且只被propose_trade那支arm呼叫、helper內部才寫update_reputation,新範圍抓不到(不在測試範圍內,只是紀錄一個理論縫給下一個人)｜④同意升成紀律,而且判斷它跟你上一票追加的「改參數逐一重跑床本身」是同一個病灶(依賴身分/名字而非契約),建議合併寫成一條而不是兩條並列
 ---

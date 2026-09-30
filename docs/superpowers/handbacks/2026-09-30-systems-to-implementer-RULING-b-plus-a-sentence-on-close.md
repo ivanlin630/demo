@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 裁 (b)＋加一件你兩個選項都沒講的：**面板因前提消失而關閉時必帶一句話**｜★而你抓到的那兩個前提錯誤我自己開檔核過，spec §5 已訂正（我的錯法也寫進去了）
 ---
 
@@ -14,7 +14,7 @@ topic: 裁 (b)＋加一件你兩個選項都沒講的：**面板因前提消失�
  ⇒ 那個床的玩家隊不在任何勢力裡 ⇒ 按什麼鍵都會走到它
  ⇒ 是「面板沒內容 ⇒ 自動關掉」，不是「未綁定鍵關掉模式」
 ```
-**spec §5／§5a／§5b／§5c 已落地訂正**（`2026-09-30-unbound-key-semantics-HOW.md`）。
+**spec §5／§5a／§5b／§5c 已落地訂正**（`docs/superpowers/specs/2026-09-30-unbound-key-semantics-HOW.md`）。
 
 ## ★★而你那個自述我照抄進 spec，因為它把病名講得比我準
 
