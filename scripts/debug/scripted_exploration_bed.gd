@@ -663,6 +663,7 @@ func _test_p5_four_rules_have_teeth() -> void:
 
 
 # ══ P6：產物（機器讀 tsv ＋ 人讀 txt，兩份對得上）═══════════════════════════
+# 負對照：把 artifact 第一行的 sha 換成一顆【真的存在但不是 HEAD 祖先】的 commit（`5a3e09fb5`）⇒ 祖先那一條紅 ⇒ 已於 feat/artifact-staleness-not-silent（2026-10-01 這一輪） 實測紅
 func _test_p6_artifacts() -> void:
 	print("\n── P6 產物：tsv ＋ txt ──")
 	var stamp: String = "docs/measurements/2026-09-30-scripted-exploration"
