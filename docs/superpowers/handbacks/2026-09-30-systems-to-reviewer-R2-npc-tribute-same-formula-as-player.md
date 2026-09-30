@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審：NPC↔NPC 索貢談成要真的轉移（藍圖裁 (a)＝跟玩家同一支算式）｜★★自白：這張票的 dispatch 我【已經寄出去了而沒有先送你】——同一個錯今天第二次（上一次是濫按煞車）
 ---
 
