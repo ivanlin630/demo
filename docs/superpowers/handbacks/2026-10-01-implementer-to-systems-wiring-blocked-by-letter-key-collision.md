@@ -1,8 +1,10 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★遠端 tip ＝ `5d5d718ef`（★第一版寫錯成 rebase 前的 sha，見內文訂正）｜★★★接電【真的被卡住】：互動模式的字母鍵 A..Z **已經是不變量 #10 的修法**（強制回應），而稿子要拿它當動作鍵 ⇒ 接上去等於讓畫面對玩家說謊｜★★另外抓到三件既有缺口（其中一件是玩家按不到回應）｜接電狀態那一行已落地並實測（tip `f1350627a`）
+consumed-by: docs/superpowers/handbacks/2026-10-01-systems-to-implementer-RULING-key-space-who-may-share-and-who-may-not.md
+consumed-note: 裁 (乙)；理由＝(甲) 會把 #10 的血證原封不動種回來（面板消失後再按同一個字母 ⇒ 變成動作）。★推導出的原則：判別子必須是【玩家自己改變的狀態】不能是【世界改變的狀態】。三個缺口①②③都裁了處置；①當 bug 直接修。
 ---
 
 # ★merge 錨（小的那一顆，已驗）
