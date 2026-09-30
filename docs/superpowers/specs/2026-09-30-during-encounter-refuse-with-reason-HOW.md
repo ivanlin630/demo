@@ -1,3 +1,26 @@
+# ★★★【整張作廢 2026-09-30】前提不成立：那 41 筆是【床的假紅】，不是產品症狀
+
+```
+實作端交件時自揭並用一次性探針否證（systems 逐條核過 file:line）：
+·`command_results` 有 TTL —— `sim_runner.gd:517 RESULT_TTL_TICKS = WorldState.TICKS_PER_HOUR`（＝60），
+  而清除發生在 `_consume_player_commands` 的【最前面且不看佇列空不空】（:544）
+  ⇒ 那支床用 `range(before_n, size)` 這種【索引區間】讀結果句，走過 60 步之後舊紀錄被剪掉
+  ⇒ size 不再單調成長 ⇒ 區間變成空的 ⇒ 被讀成「這一步沒有句子」。
+·★41 筆全部落在第二趟（kind=team），正因為第一趟 14＋51 步剛好跨過 60
+  ⇒ ★★「一個數字全部集中在一處，通常是母體錯不是產品錯」。
+·★★★而「遭遇戰吞指令」被直接否證：攻擊 ⇒ encounter_active=true，接著 `move_to`
+  ⇒ queued、推完 pending=0、`command_log` 與 `command_results` 各 +1（ok=true）。
+  而 `sim_runner.gd:498` 檔頭逐字寫著「★分支A（encounter_active）【也消費】」。
+·修完（同樹同種子）：步數 131 不變、★41 筆【消失】（不是改分類）、(d) 70→108、成因 5→4。
+```
+
+★所以本 spec 的 §1 前提整段失效，而【不是縮小範圍】——那 41 筆不存在。
+★★「遭遇戰進行中該不該拒絕非戰鬥指令」現在是一個**純設計問題**（要不要這條規則），
+  不是修一個 bug ⇒ 回到藍圖手上，而我已把撤回寄給他。
+★★★留著本檔不刪：下一個人要知道【這張票為什麼消失】，以及那個前提是怎麼假的。
+
+---
+
 # HOW：遭遇戰進行中，非戰鬥指令＝拒絕＋原因（41 筆靜默的成因）
 
 **上游 WHAT**：藍圖裁 (a)（`2026-09-30-blueprint-to-systems-RULING-during-encounter-keys-refuse-with-reason.md`）

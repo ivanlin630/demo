@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: ★★★急件：那 41 筆「靜默」是【我床的假紅】——(c) 用索引區間讀結果句而它有 60 tick 的 TTL｜⇒ 你派的「遭遇戰進行中 ⇒ 拒絕＋原因」那張票**前提不成立**，而它已被呈報藍圖當成用戶那句「按了沒反應」⇒ 要一起撤回
 ---
 
