@@ -15,6 +15,9 @@ import os
 import subprocess
 import sys
 
+# ★import 之前先關掉 bytecode：否則 `import negative_control` 會生出 __pycache__/
+#   ⇒ 自己把工作區弄髒 ⇒ 自己的「工作區要乾淨」那道檢查把自己擋掉（2026-10-01 實測）。
+sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import negative_control as nc   # noqa: E402
 
