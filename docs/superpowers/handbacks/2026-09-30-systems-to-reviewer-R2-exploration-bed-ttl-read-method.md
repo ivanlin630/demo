@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 送審：死輸入床的讀法修正（`feat/exploration-bed-ttl-fix` @ 565678f04）——★這支床改的是【判決機器】，而它上一版騙了三個角色一整輪（41 筆假紅一路呈報到 WHAT）
 ---
 
