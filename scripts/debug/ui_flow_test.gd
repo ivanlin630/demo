@@ -2369,6 +2369,11 @@ const CONTROL_FLOOR_SPAM: int = 6  # spam_brake_bed（濫按煞車／兩層關�
 const CONTROL_FLOOR_UNBOUND: int = 6  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）
 const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
+# ★text_ui_layout_bed（版面 v2）：①display_width 換成 length()（P3b）②別處再寫一次 120（P3a）
+#   ★★★③字母改成由位置決定（P8b）—— 而 ③ 打的是不變量 #10 的病：意義由位置／計數決定。
+#   ★登進【這一格】而不是新開一支閘：棘輪機制已經存在，我的床原本【不在它的母體裡】
+#     ⇒ 那三筆紀錄被拿掉會是靜默的（同「沒有人在讀那份產出」那一族）。
+const CONTROL_FLOOR_LAYOUT: int = 3  # text_ui_layout_bed
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
@@ -2927,6 +2932,10 @@ func _test_p19_control_coverage_ratchet() -> void:
 	_check("★★press_is_one_tick_bed 的紀錄數沒有往回走（%d >= %d）" % [n_p8, CONTROL_FLOOR_P8],
 		n_p8 >= CONTROL_FLOOR_P8)
 	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
+	var n_tl: int = _count_fired("res://scripts/debug/text_ui_layout_bed.gd")
+	print("   text_ui_layout_bed %d（地板 %d）" % [n_tl, CONTROL_FLOOR_LAYOUT])
+	_check("★★text_ui_layout_bed 的紀錄數沒有往回走（%d >= %d）" % [n_tl, CONTROL_FLOOR_LAYOUT],
+		n_tl >= CONTROL_FLOOR_LAYOUT)
 	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
 	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
 	_check("★★player_event_feed_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fe, CONTROL_FLOOR_FEED],
