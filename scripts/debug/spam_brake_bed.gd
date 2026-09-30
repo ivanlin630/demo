@@ -59,9 +59,15 @@ func _check(msg: String, cond: bool) -> void:
 		_errors += 1
 		push_error("[FAIL] " + msg)
 
+# ★★★世界一律走 `MeasureBedHelper.arm_and_new()`（bed-arm 閘）：
+#   ★閘的母體就是【`WorldState.new()` 的呼叫檔】⇒ 自己 new 會讓「未涵蓋」+1，
+#     而我第一版就是這樣寫的 ⇒ 電池那一格 ✗，且它指名了是我這支床。
+#   ★★白名單不是出路（那份檔的檔頭逐字寫「新增床不得加進來」）。
+#   ★★★而 arm 必須在 setup 【之前】—— 它就是這支閘在守的事：
+#     setup 之後才 arm ⇒ 那段世界的 tap 是盲的（而卷面上看不出來）。
 func _fresh() -> Array:
 	seed(20260930)
-	var st := WorldState.new()
+	var st: WorldState = MeasureBedHelper.arm_and_new()
 	GameSetup.setup(st, GameSetup.load_config("res://config/warring_states.json"))
 	return [st, PlayerCommandSystem.new()]
 
@@ -402,6 +408,8 @@ func _test_p7_affinity_has_its_own_population() -> void:
 
 
 func _initialize() -> void:
+	# ★這一支 arm 是給【不建世界】的那幾格用的（P5′／P7′ 直接呼 write_memory）——
+	#   建世界的格走 `_fresh()` ⇒ `MeasureBedHelper.arm_and_new()`（arm 在 setup 之前）。
 	Probe.arm()
 	print("=== spam_brake bed ===")
 	_test_p0_affinity_is_already_in_the_ruler()
