@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: NPC↔NPC索貢談成真轉移(spec審,dispatch已送但implementer未開工)
 topic: verdict=issues(不擋implementer先做手上④,但這票dispatch給他前建議先補兩處到spec裡)。流程違規已收,實害零不需額外處置。①P6驗法方向對(behavioral coupling test,跟本session已驗證過的trade-accept/spam-brake同一手法),但建議兩處加固:(a)斷言要從「amount有變」加強成「amount變成新常數算出來的精確值」,否則巧合的無關擾動也能騙過;(b)加一道靜態互證(grep那一行是不是真的引用同一個常數/呼叫同一個函式,不是只看行為)——這是本session反覆驗證過異源雙證比單一行為證更硬｜②P8負對照a核過方向對,正確識別出這是第三個寫入點要呼同一支write_memory("tributed",...),跟我在濫按煞車票核過的兩個既有寫入點同構｜③P8母體地板建議補兩處:(a)明講印aff_before/aff_after不是只斷言「下降」;(b)§6④「好感下降或feud邊出現」那句OR要拆成兩個獨立情境各自測(小額只動好感/大額兩層都動),跟spam-brake的P1′/P5′同形狀,不要用單一OR斷言,否則其中一支永遠不會被真的驗到
 ---
