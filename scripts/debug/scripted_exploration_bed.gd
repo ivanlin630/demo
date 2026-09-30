@@ -67,6 +67,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p7_positive_control_fixtures",
 	"_test_p8_two_readers_on_the_same_input",
 	"_test_p11_every_action_has_a_label",
+	"_test_p12_no_raw_identifiers_this_round",
 ]
 
 var _contradictions: Array = []      # 每筆 {rule, where, cause, detail}
@@ -862,6 +863,29 @@ func _test_p8_two_readers_on_the_same_input() -> void:
 		by_index, steps], by_index < steps)
 	print("   ★而本格【沒有】改 `RESULT_TTL_TICKS`：動的是輸入（步數），不是事實。")
 	_cell("_test_p8_two_readers_on_the_same_input")
+# ══ P12：★(d) 這一族本輪必須【0 筆】—— 這是本張票立起來的那條不變量 ══════════
+# ★★★本床平常是【清單】不是判官（它列症狀而不紅）⇒ 那對「玩家面零英文識別字」不夠：
+#   沒有一格會因為 describe() 退回原樣印 id 而紅 ⇒ 那條不變量沒有守衛。
+#   ⇒ 本格把它變成斷言：(d) ＝ 0，而非 0 時把每一筆印出來（不是只印數字）。
+# ★★它與 P11 分工：P11 守【表有沒有缺】，本格守【句子有沒有漏英文】——
+#   兩者都可能單獨壞（表全了而 describe 改回原樣印／describe 對了而新動詞沒 label）。
+# 負對照：把 describe() 的 action_id 改回原樣印 ⇒ 本格必紅（那一族整批回來）
+func _test_p12_no_raw_identifiers_this_round() -> void:
+	print("
+── P12 (d) 這一族本輪必須 0 筆 ──")
+	var d_rows: Array = []
+	for c in _contradictions:
+		if String(c["rule"]) == "d":
+			d_rows.append(c)
+	print("   本輪 (d) ＝ %d 筆（走過 %d 步）" % [d_rows.size(), _steps_walked])
+	for c2 in d_rows:
+		print("     · %s ⇒ %s" % [String(c2["where"]), String(c2["detail"]).substr(0, 96)])
+	_check("★母體地板：本輪真的走了步數（0 步的話「0 筆」恆真）", _steps_walked > 0)
+	_check("★★★玩家面字串零英文識別字：(d) ＝ 0 筆（實得 %d）" % d_rows.size(),
+		d_rows.is_empty())
+	_cell("_test_p12_no_raw_identifiers_this_round")
+
+
 # ══ P11：★每個 action id 都要有中文 label（母體 ＝ registry 的鍵）══════════════
 # ★★★這一格就是找出那 12 個漏網的那一格：舊表只收了【選單會列的】那些，
 #   而 registry 有 51 個鍵 ⇒ 其餘 12 個玩家按得到卻只看得到原樣 id。
@@ -901,6 +925,7 @@ func _initialize() -> void:
 	_test_p7_positive_control_fixtures()
 	_test_p8_two_readers_on_the_same_input()
 	_test_p11_every_action_has_a_label()
+	_test_p12_no_raw_identifiers_this_round()   # ★走訪都跑完才問（它讀 _contradictions）
 	_test_p6_artifacts()   # ★產物最後跑：它要收 P7 的那幾筆
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
