@@ -27,41 +27,126 @@ var _action_registry: Dictionary = {}
 
 # ── 主動互動 ────────────────────────────────────────────────
 
-# 查詢對 target_id 可用的行動（已過濾條件）
-# 返回 Array[String]，子集合自：
-#   "ignore"           → 永遠可選
-#   "attack"           → 永遠可選
-#   "trade"            → target 有 coin OR 玩家有 coin
-#   "propose_alliance" → target 非同勢力
-#   "demand_tribute"   → 玩家 population > target.population × 1.5
-#   "extort"           → 玩家 readiness >= 0.7
-#   "recruit"          → 永遠可選（STUB — 招募邏輯尚未實裝）
-func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
-	var actions: Array[String] = ["ignore", "attack"]
+# ★★★全列版（spec 2026-09-30「動作全列＋原因」）：對 `TEAM_TARGET_ACTIONS` 的每一個名字
+#   回一列 `{action_id, enabled, disabled_reason}` —— ★**原因與判斷在同一個回傳裡**
+#   （沿用 `_colocation_gate` 已在用的形狀：不回 bool，回那句人話）。
+#   ★★而它是【那些條件的唯一持有者】：`get_available_actions` 變成衍生檢視，
+#     而 `player_query_api` 的三處停用列（pop 1.5 倍／readiness 0.7／coin）已整段刪掉
+#     —— 那三處是同一組條件的第二份，而兩邊各改一次就會出現
+#     「選單說可以、handler 說不行」。★P7 就是那一格的守衛。
+#   ★★★母體邊界：本支只涵蓋【團隊目標動作】那一類（22 個信封呼叫點裡的 4 個：
+#     `player_query_api.gd:296` 那條啟用路徑與原本 :319／:336／:355 三處停用路徑）。
+#     格動作／自家隊動作／庫存那四處【不在本支】—— 它們沒有來源常數或界線不可機械讀，
+#     已就地具名登 defer（見那兩個標記）。
+#   ★具名排除的語意：清單裡的名字是「**尚未實裝此機制**」（藍圖④）——
+#     不是「現在不能做」⇒ 列出來設 false 會讓玩家等一個不存在的東西。
+# ★★★【`recruit` 為什麼在列上】—— systems 裁 2026-10-01（血證由 implementer 提，systems 逐處核過）：
+#   藍圖④原本要求「STUB 的泛用 `recruit` 不列」，而照字面做完之後 `ui_flow` 立刻紅一格：
+#     `scripts/debug/ui_flow_test.gd:340`「team 行動清單含 recruit」
+#   ⇒ 開檔追下去：`text_ui_main.gd:1497` 的 `elif action_id == "recruit":` 只呼
+#     `query_recruit_menu()` ⇒ 它是**招募子選單的開啟點**，而那個子選單是
+#     `recruit_named`（記名招募）在**活的文字介面**裡的唯一入口（`:2670`）。
+#     ★另外兩處（`main.gd:124`／`popup_layer.gd`）在那棵**死的圖形樹**上。
+#   ⇒ ★★★真因不是 (a)／(b) 哪個好，是**前提只講了一半**：這個 id 有【兩個身分】
+#     —— 引擎側是沒實裝的動詞（`:158 "recruit": _action_recruit` 只回菜單），
+#     UI 側是子選單入口。「不列」殺掉後者，「列成可執行動作」讓玩家打到前者。
+#   ⇒ ★裁：`recruit` **留在清單上**，而它的身分宣告在下面的 `SUBMENU_OPENERS`（第三類）
+#     —— ★不是就地標記：一個就地標記本質上是一份長度 1 的手抄名單。
+#   ⇒ ★★`STUB_NOT_IMPLEMENTED` 維持【機制接電 ＋ 清單暫空】：內容等「展開層有自己的
+#     機械來源」之後才會有成員（systems 已登 defer，錨在那行標記上）。
+#   ⇒ ★★★而我**沒有**為了讓床綠而去改 `ui_flow` 那一格的斷言：那一格是對的，
+#     它抓到的是一個真實後果。改它才是弱化。
+const STUB_NOT_IMPLEMENTED: Array = []   # ★清單暫空是【裁定】不是忘了（見上）；機制已接電：一有名字就會生效
+
+# ★★★【第三類：子選單入口】—— submenu-entry-not-an-action（systems 裁 2026-10-01）
+#   一個 `action_id` 可以有【兩個身分】：引擎側是一個動詞，UI 側是**開啟下一層畫面的那一格**。
+#   ★這一類的 `enabled` **沒有意義**：按下去是【換一層畫面】不是【發生一件事】
+#     ⇒ 它永遠「可做」、原因永遠是空的 —— ★★而那不是一個豁免，**是它的語意**。
+#     真正的可不可做在【下一層】：記名候選各自帶價（`recruit_named`）、
+#     打聽選項各自有條件（`InquirySystem.get_options`）。
+#   ★★★為什麼是【宣告在一處】而不是就地標記：就地標記本質上是一份長度 1 的手抄名單
+#     ⇒ 同族的第二個成員會沒有人管（2026-10-01 的實例：`gather_intel` 與 `recruit`
+#     形狀完全一樣，而只有後者被討論過）。`opens_submenu` 這一欄**從這個常數導出**。
+#   ★★而「回 payload」**不能**當判準（systems 量過：本檔 `"payload"` 有 11 處，
+#     其中至少五處明顯改世界）⇒ 那個字面只編碼了判準的前半句，漏掉了「且不改世界」。
+#     ⇒ 所以守衛不是靜態 grep，是**行為**：床對每一個宣告過的入口斷言【呼它前後世界不變】，
+#       並**反向掃**所有回 payload 而沒有宣告的 handler（不改世界 ⇒ 漏宣告 ⇒ 紅並指名）。
+const SUBMENU_OPENERS: Array = ["recruit", "gather_intel"]
+
+func get_action_availability(state: WorldState, target_id: int) -> Array:
+	var out: Array = []
 	var pt: TeamData  = _get_player_team(state)
 	var tgt: TeamData = state.teams.get(target_id)
-	if pt == null or tgt == null:
-		return actions
-	if _can_trade(state, pt, tgt):
-		actions.append("trade")
-	if tgt.faction_id != pt.faction_id:
-		actions.append("propose_alliance")
-	if pt.population > int(tgt.population * 1.5):
-		actions.append("demand_tribute")
-	if pt.readiness >= 0.7:
-		actions.append("extort")
-	var coin: float = float(pt.resources.get("coin", 0))
-	if coin >= RECRUIT_COST_ANON:
-		actions.append("recruit")
-	# recruit_anon：有 coin 且目標有匿名人口可招（與 recruit 並列，直接執行版）
-	if coin >= RECRUIT_COST_ANON and _target_has_anon(tgt):
-		actions.append("recruit_anon")
-	# invite_settle：玩家站在自家 outpost → 可邀目標前來定居
-	if _can_invite_settle(state, pt, tgt):
-		actions.append("invite_settle")
-	actions.append("gather_intel")
-	# beg：玩家主動乞討（對稱性——NPC 會乞食,玩家亦可）。需求/接受由 _resolve_aid_request 自決,非需時自然被拒
-	actions.append("beg")
+	for name in TEAM_TARGET_ACTIONS:
+		var act: String = String(name)
+		if STUB_NOT_IMPLEMENTED.has(act):
+			continue   # ★尚未實裝此機制（不是停用）⇒ 不列；母體 11 → 10
+		var ok: bool = true
+		var why: String = ""
+		if pt == null or tgt == null:
+			ok = false
+			why = "沒有可操作的隊伍或目標"
+		elif SUBMENU_OPENERS.has(act):
+			pass   # ★第三類：入口的 `enabled` 沒有意義（語意寫在 `SUBMENU_OPENERS` 那裡）
+		else:
+			match act:
+				"ignore", "attack", "beg":
+					pass   # 無條件（beg 的需求由 `_resolve_aid_request` 自決）
+				"trade":
+					if not _can_trade(state, pt, tgt):
+						ok = false
+						why = "雙方都沒有可交易的錢"
+				"propose_alliance":
+					if tgt.faction_id == pt.faction_id:
+						ok = false
+						why = "對方已經和你同一個勢力"
+				"demand_tribute":
+					if pt.population <= int(tgt.population * 1.5):
+						ok = false
+						why = "人口不足（需超過對方 1.5 倍；你 %d、對方 %d）" % [
+							pt.population, tgt.population]
+				"extort":
+					if pt.readiness < 0.7:
+						ok = false
+						why = "準備值不足（需 ≥ 0.7，現為 %.1f）" % pt.readiness
+				"recruit_anon":
+					var coin_a: float = float(pt.resources.get("coin", 0))
+					if coin_a < RECRUIT_COST_ANON:
+						ok = false
+						why = "金幣不足（需 %d，現 %d）" % [int(RECRUIT_COST_ANON), int(coin_a)]
+					elif not _target_has_anon(tgt):
+						ok = false
+						why = "對方沒有可招募的無名之人"
+				"invite_settle":
+					if not _can_invite_settle(state, pt, tgt):
+						ok = false
+						why = "你不在自家據點上，無法邀請對方定居"
+				_:
+					ok = false
+					why = "（未知動作：%s）" % act
+		out.append({
+			"action_id": act,
+			"label": PlayerApiMapper.action_label(act),   # ★唯一一份中文表（systems 裁④）
+			"enabled": ok,
+			"disabled_reason": why,
+			"opens_submenu": SUBMENU_OPENERS.has(act),    # ★從宣告導出，不是第二份名單
+		})
+	return out
+
+# 查詢對 target_id 可用的行動 —— ★**衍生檢視**（spec §2②）：
+#   它現在是「全列版裡 enabled 的那些名字」，而順序沿用 `TEAM_TARGET_ACTIONS` 的宣告順序。
+#   ★★5 個既有呼叫端一個都不用改 ⇒ 「一個真相一份」是結構性的，不是紀律性的。
+#   ★★★而檔頭原本那段手寫註解表（「attack → 永遠可選／demand_tribute → pop > 1.5×…」）
+#     **已刪掉**（spec §2④）：留著它就是同一組規則的第二份，
+#     而第二份表會在下一次改條件時安靜地說謊。真判斷在全列版的 match 裡。
+#   ★誠實限（與 spec P4 的字面有一處衝突，我照藍圖④做並回報）：
+#     舊版會在 coin 足夠時列出泛用 `recruit`，而全列版把它具名排除
+#     ⇒ 本支的回傳與舊版**只差那一個名字**，不是逐字相同。
+func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
+	var actions: Array[String] = []
+	for row in get_action_availability(state, target_id):
+		if bool(row.get("enabled", false)):
+			actions.append(String(row.get("action_id", "")))
 	return actions
 
 # UI 覆蓋審計用：回傳全 registry action id（_test_action_ui_coverage 驗每個都有 UI 路徑）
@@ -316,14 +401,14 @@ func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int)
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
 	if ratio <= 0.0 or ratio > 1.0:
-		return { "ok": false, "msg": "extract_ratio 必須 (0, 1]" }
+		return { "ok": false, "msg": "徵用比例必須在 0 與 1 之間" }
 	CoinTreasury.extract_treasury(state, pt, ratio, "玩家主動")
 	return { "ok": true, "msg": "徵用 %.0f%%" % (ratio * 100) }
 
 func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var res: String = state.player_state.get("storage_res", "")
 	var amount: float = float(state.player_state.get("storage_amount", 0.0))
-	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定資源或數量" }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
 	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
 	var stored: float = float(tile.public_storage.get(res, 0))
@@ -335,7 +420,7 @@ func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData
 func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var res: String = state.player_state.get("storage_res", "")
 	var amount: float = float(state.player_state.get("storage_amount", 0.0))
-	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定資源或數量" }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
 	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
 	var have: float = float(pt.resources.get(res, 0))
@@ -556,14 +641,14 @@ func _action_upgrade_outpost(state: WorldState, _target_id: int, pt: TeamData, _
 	var _os2 := OutpostSystem.new()
 	var ok2: bool = _os2.start_upgrade_level(state, pt)
 	if not ok2:
-		return { "ok": false, "msg": "無法升級（非 owner 或已滿級）" }
+		return { "ok": false, "msg": "無法升級（不是你的據點或已滿級）" }
 	return { "ok": true, "msg": "開始升級據點" }
 
 func _action_upgrade_farming(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var _os3 := OutpostSystem.new()
 	var ok3: bool = _os3.start_upgrade_farming(state, pt)
 	if not ok3:
-		return { "ok": false, "msg": "無法升級農業（非 civilian 或已滿）" }
+		return { "ok": false, "msg": "無法升級農地（不是民用據點或已滿級）" }
 	return { "ok": true, "msg": "開始升級農業" }
 
 func _action_upgrade_manufacturing(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
@@ -583,8 +668,8 @@ func _action_build_facility(state: WorldState, _target_id: int, pt: TeamData, _p
 	var _os := OutpostSystem.new()
 	var ok: bool = _os.start_upgrade_facility(state, pt, facility)
 	if not ok:
-		return { "ok": false, "msg": "無法擴建 %s（條件不符）" % facility }
-	return { "ok": true, "msg": "開始擴建 %s" % facility }
+		return { "ok": false, "msg": "無法擴建%s（條件不符）" % PlayerApiMapper.facility_label(facility) }
+	return { "ok": true, "msg": "開始擴建%s" % PlayerApiMapper.facility_label(facility) }
 
 func _action_demolish_outpost(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var _os5 := OutpostSystem.new()
@@ -609,7 +694,7 @@ func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: TeamData, 
 	var pos_arr: Array = state.player_state.get("abandon_pos", [-1, -1])
 	var pos := Vector2i(int(pos_arr[0]), int(pos_arr[1]))
 	if pos.x < 0:
-		return { "ok": false, "msg": "未指定 outpost 位置" }
+		return { "ok": false, "msg": "未指定據點位置" }
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null or tile.outpost_level == 0:
 		return { "ok": false, "msg": "目標無 outpost" }
@@ -626,7 +711,7 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 	var tr: int = int(state.player_state.get("sub_move_r", -1))
 	var move_tgt: Vector2i = Vector2i(tq, tr)
 	if sub_leader_id == -1 or not state.persons.has(sub_leader_id):
-		return { "ok": false, "msg": "未指定子隊 leader" }
+		return { "ok": false, "msg": "未指定子隊統領" }
 	if pop_count < 1 or pop_count >= pt.population:
 		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
 	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
@@ -692,7 +777,7 @@ func _action_leave_faction(state: WorldState, _target_id: int, pt: TeamData, pt_
 	if f3 == null:
 		return { "ok": false, "msg": "勢力不存在" }
 	if f3.leader_team_id == pt_id:
-		return { "ok": false, "msg": "請使用 disband_faction（leader 不能普通離開）" }
+		return { "ok": false, "msg": "請改用「解散勢力」（領袖不能普通離開）" }
 	state.clear_team_faction(pt, WorldState.LEAVE_PLAYER)   # 玩家離開 faction（雙向同步）
 	var leader_team3: TeamData = state.teams.get(f3.leader_team_id)
 	if leader_team3 != null:
@@ -830,7 +915,7 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 	if f9.leader_team_id != pt_id:
 		return { "ok": false, "msg": "只有 leader 可設定勢力目標" }
 	f9.player_goal_override = goal9
-	var msg9: String = "清除 override" if goal9.is_empty() else "勢力目標設為 %s" % goal9
+	var msg9: String = "清除指定目標" if goal9.is_empty() else "勢力目標設為 %s" % goal9
 	print("[PlayerCmd] set_faction_goal → %s" % goal9)
 	return { "ok": true, "msg": msg9 }
 
@@ -1154,7 +1239,7 @@ func refresh_colocation_targets(state: WorldState) -> void:
 func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var fe: Dictionary = state.player_forced_event
 	if fe.is_empty() or fe.get("action", "") != "aid_request":
-		return { "ok": false, "msg": "無待回應 aid event" }
+		return { "ok": false, "msg": "沒有待回應的乞食" }
 	var beggar_id: int = int(fe.get("from_id", -1))
 	var beggar: TeamData = state.teams.get(beggar_id)
 	if beggar == null:

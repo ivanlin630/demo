@@ -416,6 +416,98 @@ static func relation_summary(v: float) -> String:
 	if v >= 0.25: return "冷淡"
 	return "敵視"
 
+# ★★★動作 id → 中文（★本表是【搬】過來的唯一一份：原本住在
+#   `PlayerQueryApi._action_label`，而 `PlayerCommandApi.describe()` 也要用它
+#   ⇒ 搬到這裡並讓那邊變薄委派，**不是抄第二份**）。
+#   ★★不認得的 id **不吞掉**：印「（未知動作：xxx）」——
+#     吞掉的話玩家看到的是一句沒有主詞的話，而下一個人也不知道少了哪一個。
+static func action_label(action_id: String) -> String:
+	match action_id:
+		"ignore":           return "忽略"
+		"attack":           return "攻擊"
+		"trade":            return "貿易"
+		"propose_alliance": return "提議同盟"
+		"demand_tribute":        return "要求納貢"
+		"extort":                return "勒索"
+		"recruit":               return "招募"
+		"establish_faction":     return "建立勢力"
+		"hunt":                  return "狩獵"
+		"hunt_beast":            return "獵猛獸"
+		"train":                 return "訓練（-%d coin）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
+		"promote_anon":          return "拔擢匿名→記名"
+		"camp":                  return "紮營"
+		"take_loot":             return "收割戰利品"
+		"leave_loot":            return "放棄戰利品"
+		"recruit_anon":          return "招募匿名"
+		"invite_settle":         return "邀請定居"
+		"recruit_named":         return "招募成員"
+		"confirm_trade":         return "確認貿易"
+		"cancel_trade":          return "取消貿易"
+		"gather_intel":           return "打聽情報"
+		"beg":                    return "乞討"
+		"confirm_gather_intel":   return "確認打聽"
+		"subjugate_enemy":        return "收編敗者"
+		"offer_surrender":        return "投降請和"
+		"surrender_in_encounter": return "戰中投降"
+		"leave_faction":          return "退出勢力"
+		"betray_faction":         return "背叛勢力"
+		"disband_faction":        return "解散勢力"
+		"set_faction_goal":       return "設定勢力目標"
+		"order_faction_member":   return "下令成員"
+		"clear_member_order":     return "清除指令"
+		"set_tribute_rate":       return "調整徵收率"
+		"build_outpost":          return "建設前哨站"
+		"upgrade_outpost":        return "升級等級"
+		"upgrade_farming":        return "升級農作"
+		"upgrade_manufacturing":  return "升級製造"
+		"demolish_outpost":       return "拆除前哨站"
+		"dispatch_subteam":       return "派遣子隊"
+		"order_subteam":          return "下令子隊"
+		"recall_subteam":         return "召回子隊"
+		# ★★★這 12 個是【母體補完】補上的（spec 2026-09-30）：它們在 `_action_registry` 裡，
+		#   而舊表只收了選單會列的那些 ⇒ 其餘 12 個玩家按得到卻只能看到原樣 id。
+		#   ⇒ 抓到它們的不是我讀表，是床把 registry 的 51 個鍵逐一問過一遍
+		#     （★那一格現在是常駐的：新增動詞沒有中文 label ⇒ 紅）。
+		"abandon_outpost":        return "棄置據點"
+		"accept_encounter":       return "接戰"
+		"build_facility":         return "蓋設施"
+		"choose_heir":            return "擇繼承人"
+		"deposit_to_storage":     return "存入公庫"
+		"extract_treasury":       return "徵用國庫"
+		"refresh_targets":        return "重掃同格對象"
+		"respond_aid_request":    return "回應乞食"
+		"set_armed_anon_ratio":   return "調整武裝比例"
+		"submit_trade_offer":     return "送出出價"
+		"surrender_pre_encounter": return "戰前投降"
+		"withdraw_from_storage":  return "取出公庫"
+	return "（未知動作：%s）" % action_id
+
+# ★設施 id → 中文（唯一一份；同樣不吞掉不認得的）。
+#   ★★它被 handler 的 msg 用（「無法擴建<設施>（條件不符）」）——
+#     而那一句原本印的是 `farming` 這種原樣 id。
+static func facility_label(facility: String) -> String:
+	match facility:
+		"farming":       return "農地"
+		"workshop":      return "工坊"
+		"apothecary":    return "藥舖"
+		"mint":          return "鑄幣坊"
+		"stable":        return "馬廄"
+		"smeltery":      return "冶煉坊"
+		"weaponsmith":   return "兵器鋪"
+		"armorsmith":    return "甲冶鋪"
+	return "（未知設施：%s）" % facility
+
+# ★裝備部位 id → 中文。★這一份是【新的】，而它是唯一一份：
+#   原本連選單都印原樣 id（`"裝備 %s → %s"`）⇒ 玩家面本來就漏著英文。
+#   ⇒ 同樣不吞掉不認得的部位。
+static func slot_label(slot_id: String) -> String:
+	match slot_id:
+		"head":   return "頭部"
+		"torso":  return "身體"
+		"hand_1": return "主手"
+		"hand_2": return "副手"
+	return "（未知部位：%s）" % slot_id
+
 # 每個 forced response id 的顯示 label（per-action,單一處）
 static func forced_label(action: String, rid: String, state: WorldState, evt: Dictionary) -> String:
 	match action:
@@ -541,7 +633,7 @@ static func map_inventory_state(state: WorldState) -> Dictionary:
 		for slot in slots:
 			row_actions.append(_make_item_action(
 				"equip_%s_%s" % [grade, slot],
-				"裝備 %s → %s" % [grade, slot],
+				"裝備 %s → %s" % [grade, slot_label(slot)],
 				true, "",
 				"equip_item", {"slot_id": slot, "item_grade": grade}
 			))
