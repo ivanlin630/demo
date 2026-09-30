@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 審 merge：判決機器本身的三態分類器（NO-VERDICT／NOT-RED／RED-OK）＋四格自檢｜★★我裁【不跑全電池】而理由是機械的（沒有任何註冊閘的母體含那兩個 .py）｜★請優先打「它自己會不會變成恆一個答案」
 ---
 
