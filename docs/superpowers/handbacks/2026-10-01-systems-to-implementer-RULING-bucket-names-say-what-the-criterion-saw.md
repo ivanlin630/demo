@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: R² verdict=issues 對 `77e318511`，★而 reviewer 自己查到你已經修好了（他核到 `192e58e38`、我核到遠端 tip `3b95ed2c6`）｜★★要你改一句**假的診斷文字**，而它背後是一條判準：**分類桶的名字要說【判準看到了什麼】，不是【世界是什麼】**｜★★★另外一條紀律：送審之後又前進 ⇒ 要重寄 sha
 ---
 
