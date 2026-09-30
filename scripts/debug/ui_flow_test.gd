@@ -2347,6 +2347,7 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 #   ★★它是【spec 側的數】：動工時我用 grep 數過 13 個；有人新增一個 mode 而沒有
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
 const SPEC_UI_MODE_COUNT: int = 13
+const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
 const CONTROL_FLOOR_SPAM: int = 6  # spam_brake_bed（濫按煞車／兩層關係帳）
 const CONTROL_FLOOR_UNBOUND: int = 6  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）
 const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
@@ -2746,6 +2747,10 @@ func _test_p19_control_coverage_ratchet() -> void:
 	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
 	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
 		n_fp >= CONTROL_FLOOR_FEP)
+	var n_lc: int = _count_fired("res://scripts/debug/leader_chokepoint_bed.gd")
+	print("   leader_chokepoint_bed %d（地板 %d）" % [n_lc, CONTROL_FLOOR_LEADER])
+	_check("★★leader_chokepoint_bed 的紀錄數沒有往回走（%d >= %d）" % [n_lc, CONTROL_FLOOR_LEADER],
+		n_lc >= CONTROL_FLOOR_LEADER)
 	var n_sb: int = _count_fired("res://scripts/debug/spam_brake_bed.gd")
 	print("   spam_brake_bed %d（地板 %d）" % [n_sb, CONTROL_FLOOR_SPAM])
 	_check("★★母體地板：濫按煞車那支床也數得到非零（%d）" % n_sb, n_sb > 0)

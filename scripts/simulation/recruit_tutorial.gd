@@ -18,7 +18,10 @@ func check(state: WorldState) -> void:
 	nl.team_id = tid; nl.person_name = "投奔者"; nl.role = "leader"
 	nl.skills = {"狩獵": 0.5, "求生": 0.5, "戰鬥": 0.4}   # 略偏堪用
 	LoyaltyBank.set_baseline(nl, 0.9, "init")             # 忠誠偏高
-	state.persons[nl.id] = nl; team.leader_id = nl.id
+	state.persons[nl.id] = nl
+	# ★改走 chokepoint（spec 2026-09-30）：這支隊與這個人都是現造的、team_id 本來就對，
+	#   走入口是為了【不留第五份手抄】—— 手抄的那些各漏不同的一件。
+	state.set_leader(team, nl.id)
 	AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, 3)  # 3 白丁(tier0)；population getter = leader1+anon3 = 4
 	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init（原漏 init known/discovered = desync 病例）
 	state.set_player_forced_event({ "action": "join_request", "from_id": tid }, str(randi()))

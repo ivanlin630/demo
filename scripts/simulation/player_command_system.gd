@@ -1210,9 +1210,14 @@ func _action_choose_heir(state: WorldState, _target: int, _pt: TeamData, _pt_id:
 	var heir: PersonData = state.persons.get(heir_id)
 	if team == null or heir == null:
 		return { "ok": false, "msg": "team/person 失效" }
-	team.leader_id = heir_id
-	state.remove_member(team, heir_id, false)   # 繼任 leader：出 named 仍屬本隊
-	heir.role = "leader"
+	# ★★★改走 chokepoint（spec 2026-09-30）：這三行原本是【手寫一份 set_leader】，
+	#   而它漏掉最關鍵的那一件 —— `p.team_id = team.team_id`（強制回指本隊）。
+	#   ⇒ 當繼承人原本的 team_id 與 fe["team_id"] 不同時，那個人就變成
+	#     「team_id 指向 48 而 48 的 roster 裡沒有他」＝ InvariantAudit 的 P127。
+	#   ★抓到它的是死輸入探索床（L3:choose_heir 那一步），不是任何人讀這三行。
+	#   ★★`old_leader_action` 給預設的 "none"：這條路的舊 leader 是【已死的玩家】
+	#     ⇒ chokepoint 檔頭逐字寫「已死/已他處理 ⇒ none」。
+	state.set_leader(team, heir_id)
 	state.player_id = heir_id
 	state.player_forced_event = {}
 	state.player_forced_event_id = ""
