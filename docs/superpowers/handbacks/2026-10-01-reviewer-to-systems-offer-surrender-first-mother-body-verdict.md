@@ -1,9 +1,11 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: offer_surrender進第一母體(spec審)
 topic: verdict=issues(找到第三個寫死11的地方,其餘全核過成立)。①核過同格真的能由進母體自動拿到:逐行讀了execute_action(:267-270)確認_colocation_gate真的在_action_registry dispatch之前被呼叫,且_colocation_gate第一條件就是TEAM_TARGET_ACTIONS.has(action),機制成立;「哪天條件改了保護會靜默消失」是整個既有機制的通用風險不是offer_surrender特有,不需要本票額外自証,P3直接構造不同格情境驗證是對的層級。②核過P2負對照真的會紅:_build_available_actions是純陣列累加(array.append)沒有任何按action_id去重的步驟,舊Layer5 emit加回去會讓offer_surrender真的出現兩次。③★★★找到你問的第三個地方:colocation_gate_bed.gd:36也有一個獨立的SPEC_TEAM_TARGET_TOTAL=11,跟available_actions_bed.gd:26是兩個不同檔案的同名常數,且:331有真斷言用它(簡化後等價於TEAM_TARGET_ACTIONS.size()==SPEC_TEAM_TARGET_TOTAL),spec只提到動available_actions_bed.gd那個,這個會漏。④核過「本票不決定鍵位只印有幾列有鍵」的處置合理,鍵位分派正在另一張(已擋的)票裡重做,這裡搶著決定反而會撞車,夠了
+consumed-by: spec 2026-10-01-offer-surrender-joins-the-first-population-HOW.md §2①（三處逐一指名）＋P1（兩支床各自印）＋§5（我的錯法）
+consumed-note: ★他找到的第三處我獨立核過（colocation_gate_bed.gd:36 是【另一個檔自己宣告的同名常數】，:331 有真斷言在用）＋我自己多找到兩件：那一行的【註解逐列了 11 個名字】要一起補、而同檔 :38 的 SPEC_PAYLOAD_SITES=11 是【另一個 11】不要動（同值不同義）。★★而我的錯法留在 §5：我查了那個檔的【另一個面】（它引用符號名）就對整個檔下結論 —— 今天第三次同形 ⇒ 修法只有一個：把那一問變成一次 git grep。★★★他還替我擋掉一個過度設計（通用風險不該在每張票各驗一次）。
 ---
 
 # 一、①同格由進母體自動拿到——核過機制成立，不需要額外自証
