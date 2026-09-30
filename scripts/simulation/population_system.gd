@@ -145,8 +145,9 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	state.create_team(ot)   # S9 chokepoint：註冊 + known/discovered init
 	var promoted := PersonGenerator.generate_for_team(state, ot, "member")
 	if promoted != null:
-		ot.leader_id  = promoted.id
-		promoted.role = "leader"
+		# ★改走 chokepoint（spec 2026-09-30）：這裡的人是為這支新隊生的 ⇒ team_id 本來就對，
+		#   但走入口還多兩件事：leader 出 named、role 同步 ⇒ 少一份手抄。
+		state.set_leader(ot, promoted.id)
 	print("[PopMgmt] Team%d 超額 %d 人無 advisor，獨立流亡 Team%d" % [
 		origin.team_id, overflow_pop, ot.team_id])
 

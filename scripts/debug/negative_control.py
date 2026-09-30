@@ -16,6 +16,7 @@
 ★病因未定：為什麼那六次在那個 shell 裡會停住，我沒有查到底 ⇒ **不為了關掉症狀去改 timeout 值**。
   判準已經把「不可判」與「沒紅」分開，症狀可見即可；病因另登 defer。
 """
+import os
 import sys
 
 # ★stdout 強制 UTF-8：Windows 的預設是 CP950，而本檔的輸出全是中文＋「⇒」
@@ -29,6 +30,25 @@ except AttributeError:   # 舊 python 沒有 reconfigure：讓它照舊，訊息
 RED_OK = 'RED-OK'
 NOT_RED = 'NOT-RED'
 NO_VERDICT = 'NO-VERDICT'
+
+
+# ★★★【病因找到了】(2026-09-30)：早先一輪六道負對照【每一次 Godot 都被 wrapper 的 deadline 砍掉】
+#   而輸出裡零個 FAIL ⇒ 當時我只能把它登成 defer `godot-wrapper-batch-timeout-unexplained`。
+#   真因在這裡：shell 已經 `export PSExecutionPolicyPreference=Bypass`，而驅動器又把
+#   **同名但不同大小寫**的鍵塞進 env dict ⇒ PowerShell 的 `Start-Process` 直接丟：
+#     「已經加入項目。字典中的索引鍵: 'PSExecutionPolicyPreference' 加入的索引鍵: 'PSEXECUTIONPOLICYPREFERENCE'」
+#   ⇒ ★**Godot 一次都沒被啟動**，而 wrapper 仍然等到 deadline ⇒ 記成 timeout。
+#   ⇒ Windows 的環境變數不分大小寫，而 python 的 dict 分 ⇒ 兩個拼法同時存在。
+# ★處置：組 env 之前把【所有大小寫變體】清掉，再設一次。
+#   ★★而這一段留在 code 裡不是為了紀念：下一支驅動器照抄 `child_env()` 就不會再踩。
+def child_env(**extra):
+    env = {k: v for k, v in os.environ.items()}
+    for key in list(extra.keys()) + ['PSExecutionPolicyPreference']:
+        for existing in [k for k in list(env.keys()) if k.lower() == key.lower()]:
+            del env[existing]
+    env['PSExecutionPolicyPreference'] = 'Bypass'
+    env.update(extra)
+    return env
 
 
 def classify(out, expect, banner):
