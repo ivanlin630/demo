@@ -1739,6 +1739,11 @@ func _handle_faction_mode(keycode: int) -> void:
 	match keycode:
 		KEY_A:   # 設定目標（Q7-6：僅 leader；非 leader no-op,顯示亦不列）
 			if not is_faction_leader:
+				# ★★★三態的②（綁定但當下不允許）：它【有綁】而你現在不能用
+				#   ⇒ 必須給【原因】，而且那句話**不得與①（未綁定）相同** ——
+				#   玩家分不出「這鍵沒用」與「這鍵有用但你不能用」時，那兩件事的處置完全相反
+				#   （前者是別按了，後者是去當上領袖）。★P7 的第二道負對照就守這件事。
+				_set_feedback(false, "只有勢力領袖能設定目標")
 				_refresh()
 				return
 			_input_mode = true
@@ -1865,7 +1870,12 @@ func _build_faction_str() -> String:
 	var member_orders: Array = fp.get("member_orders", [])
 	for i in range(member_orders.size()):
 		var mo: Dictionary = member_orders[i]
-		var pos: Dictionary = mo.get("tile_pos", {})
+		# ★★★死變數已刪（2026-09-30）：`var pos: Dictionary = mo.get("tile_pos", {})`
+		#   `tile_pos` 的真值是 `Vector2i` ⇒ 賦值給 `Dictionary` 在 runtime 丟錯
+		#   ⇒ **`_build_faction_str` 從那一行起被靜默截斷**（勢力面板的成員指令與行動列都不印）。
+		#   ★而沒人讀它：下面用的是正確型別的 `pos_v`（`as Vector2i`）⇒ 它是重構的殘骸。
+		#   ★★它一直沒被發現，是因為它只在【勢力有成員】時才跑到 ——
+		#     而那個佈置直到本票的 P7（把玩家放進一個有成員的勢力）才第一次出現。
 		var task_str: String
 		if mo.get("pending_task", "") != "":
 			task_str = "傳達中（%s）" % mo.get("pending_task", "")
@@ -2106,6 +2116,12 @@ func _handle_storage_mode(keycode: int) -> void:
 	if keycode == KEY_PERIOD:
 		_storage_page += 1; _refresh(); return
 	if keycode < KEY_1 or keycode > KEY_9:
+		# gate-ok: unreachable-after-bind-predicate —— ★這一支在 `_storage_mode_binds_key`
+		#   落地之後【不可達】：非 1–9 且非 K／Esc／逗號／句號的鍵在函式最前面就被出口吃掉了。
+		#   ★★留著它而不是刪掉：它是這支 handler 的最後一道防線（若哪天有人放寬謂詞，
+		#     這一行會讓越界的索引不至於算下去）⇒ 而【不可達】正是它該有的狀態。
+		#   ★★★具名例外的理由：給一個玩家碰不到的分支一句話是【雜訊】，
+		#     而雜訊會讓真正的那三種句子貶值（systems 裁 2026-09-30）。
 		return
 	var idx: int = (keycode - KEY_1) + _storage_page * 9
 	var rows: Array = _storage_rows()
@@ -2483,6 +2499,9 @@ func _handle_trade_mode(keycode: int) -> void:
 	var idx: int = (keycode - KEY_1) + _trade_page * 9
 	var rows: Array = _trade_session_rows()
 	if idx >= rows.size():
+		# ★類C（玩家碰得到的無效選擇）：他按了第 N 項而清單只有 M 項 ⇒ 靜默會讓他以為卡住
+		#   ⇒ 一句話，而它與①②都不同：這不是「沒綁」也不是「你不能用」，是「沒有那一項」。
+		_set_feedback(false, "沒有第 %d 項（目前 %d 項）" % [idx + 1, rows.size()])
 		return
 	var row: Dictionary = rows[idx]
 	_input_mode = true

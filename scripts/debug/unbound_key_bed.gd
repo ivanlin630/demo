@@ -44,6 +44,8 @@ const EXPECTED_CELLS: Array = [
 	"_test_p3_escape_is_not_unbound",
 	"_test_p4_bound_keys_still_work",
 	"_test_p6_faction_precondition_does_not_close_on_unbound",
+	"_test_p7_not_allowed_says_why",
+	"_test_p8_early_return_census",
 ]
 
 
@@ -144,6 +146,8 @@ func _initialize() -> void:
 	await _test_p3_escape_is_not_unbound()
 	await _test_p4_bound_keys_still_work()
 	await _test_p6_faction_precondition_does_not_close_on_unbound()
+	await _test_p7_not_allowed_says_why()
+	_test_p8_early_return_census()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c): miss.append(c)
@@ -380,6 +384,122 @@ func _test_p6_faction_precondition_does_not_close_on_unbound() -> void:
 	await _free_ui(node)
 	_cell("_test_p6_faction_precondition_does_not_close_on_unbound")
 
+
+
+# ══ P7：②（綁定但當下不允許）必須給【原因】，而那句話不得與①相同 ═══════════
+# ★★★systems 逐字：它守的是**兩種無作用要分得出來**，不是「有話就行」——
+#   玩家分不出「這鍵沒用」與「這鍵有用但你不能用」時，**那兩件事的處置完全相反**
+#   （前者是別按了，後者是去當上領袖）。
+# ★母體地板兩道：①那個鍵真的【有綁】（不然這一格測的是①不是②）
+#   ②玩家真的【不是領袖】（是領袖的話那一支走不到）
+# 負對照①：把那句原因拿掉 ⇒ 靜默 ⇒ 必紅
+# 負對照②：★把②的句子改成與①相同 ⇒ **也必須紅**（這一道是 systems 指定的）
+func _test_p7_not_allowed_says_why() -> void:
+	print("\n── P7 綁定但當下不允許 ⇒ 給原因（且與①不同句）──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var pt: TeamData = st.teams.get(st.get_player_team_id())
+	# 佈置：在勢力裡（否則走的是「不在勢力」那條）、而【不是領袖】
+	st.create_faction(pt.team_id)
+	var fid: int = pt.faction_id
+	var other := TeamData.new()
+	other.team_id = 7911
+	other.tile_pos = pt.tile_pos
+	AnonTierSystem.add_anon(other, AnonCohort.TIER_PLEB, 3)
+	st.teams[7911] = other
+	st.factions[fid].leader_team_id = 7911      # ★把領袖換成別人 ⇒ 玩家不是領袖
+	other.faction_id = fid
+	if not st.factions[fid].member_team_ids.has(pt.team_id):
+		st.factions[fid].member_team_ids.append(pt.team_id)
+	print("   佈置：玩家隊 %d 在勢力 %d｜領袖＝Team%d" % [
+		pt.team_id, fid, int(st.factions[fid].leader_team_id)])
+	_check("★母體地板 A：玩家真的在勢力裡", pt.faction_id != -1)
+	_check("★母體地板 B：玩家真的【不是】領袖（是領袖的話那一支走不到）",
+		int(st.factions[fid].leader_team_id) != pt.team_id)
+	# ★母體地板 C：KEY_A 真的【有綁】—— 不然這一格測的是①不是②
+	_check("★★母體地板 C：`KEY_A` 在 faction mode 真的有綁（否則這格測的是①）",
+		bool(node.call("_faction_mode_binds_key", KEY_A)))
+	node.set("_faction_mode", true)
+	node._feedback_line.text = ""
+	var fp_before: String = StateFingerprint.compute(st)
+	node.call("_handle_faction_mode", KEY_A)
+	var said: String = String(node._feedback_line.text)
+	print("   按 A（非領袖）⇒ 回饋句 = 「%s」" % said)
+	_check("★★★②有話說（不是靜默）", said.strip_edges() != "")
+	_check("★★★②的句子【不是】①那一句（兩種無作用要分得出來）",
+		not said.contains(SPEC_FEEDBACK_TOKEN))
+	_check("★②也不改狀態：fp 前後逐位元相同",
+		StateFingerprint.compute(st) == fp_before)
+	_check("★②也不關模式", bool(node.get("_faction_mode")))
+	await _free_ui(node)
+	_cell("_test_p7_not_allowed_says_why")
+
+
+# ══ P8：early return 的母體普查 —— ★四數相加要等於總數 ═══════════════════════
+# ★★★systems 給的是【三桶】（有句子／具名例外／總數），而實測分類法要【四桶】：
+#   最大的那一桶是他三桶裡沒有的 ——「做完事就 return」（畫面已更新，不是拒絕）。
+#   ⇒ ★而我照自己那條處置：**最後一格永遠是「以上皆非」且要去數它多大；它最大就是分類法錯**。
+#   ⇒ 所以本格印四欄並斷言四數相加 ＝ 總數，而不是硬把 9 個「做完事」塞進另兩桶。
+# ★判準（機械，不靠我逐站讀）：以那個 `return` 之前 8 行的視窗為據 ——
+#   ·有 `_set_feedback`／`_log_event`／`_refuse_unbound_key` ⇒ 有句子
+#   ·有 `gate-ok:` 標記 ⇒ 具名例外
+#   ·有 `command_player` ⇒ 執行了一道令（結果句由消費點產生）
+#   ·以上皆非 ⇒ ★「以上皆非」那一桶，而它【必須逐站列名】
+# 負對照：拿掉那個 `gate-ok:` 標記 ⇒ 具名例外少一 ⇒ 四數相加不等於總數 ⇒ 必紅
+func _test_p8_early_return_census() -> void:
+	print("\n── P8 early return 母體普查（四桶）──")
+	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
+	var lines: PackedStringArray = src.split("\n")
+	var total: int = 0
+	var with_say: int = 0
+	var named_exempt: int = 0
+	var with_cmd: int = 0
+	var none_of_above: Array = []
+	for i in range(lines.size()):
+		var t: String = lines[i].strip_edges()
+		if not (t.begins_with("func _handle_") and t.contains("_mode(keycode")):
+			continue
+		var fn: String = t.substr(5, t.find("(") - 5)
+		var en: int = i + 1
+		while en < lines.size() and not lines[en].begins_with("func "):
+			en += 1
+		for j in range(i, en):
+			var u: String = lines[j].strip_edges()
+			if u.begins_with("#"):
+				continue
+			if not (u == "return" or u.begins_with("return ")):
+				continue
+			total += 1
+			var win: String = ""
+			for k in range(maxi(i, j - 8), j):
+				win += lines[k] + "\n"
+			if win.contains("gate-ok:"):
+				named_exempt += 1
+			elif win.contains("_set_feedback") or win.contains("_log_event") \
+					or win.contains("_refuse_unbound_key"):
+				with_say += 1
+			elif win.contains("command_player"):
+				with_cmd += 1
+			else:
+				none_of_above.append("%s:%d" % [fn, j + 1])
+	print("   總 early return %d" % total)
+	print("     ①有句子（_set_feedback／_log_event／_refuse_unbound_key）＝ %d" % with_say)
+	print("     ②具名例外（gate-ok:）                                  ＝ %d" % named_exempt)
+	print("     ③執行了一道令（結果句由消費點產生）                      ＝ %d" % with_cmd)
+	print("     ④★以上皆非（逐站列名）                                  ＝ %d" % none_of_above.size())
+	for x in none_of_above:
+		print("        · %s" % String(x))
+	_check("★母體地板：總數 > 0（0 的話本格什麼都沒驗）", total > 0)
+	_check("★★★四數相加 ＝ 總數（%d ＋ %d ＋ %d ＋ %d ＝ %d／%d）" % [
+		with_say, named_exempt, with_cmd, none_of_above.size(), total,
+		with_say + named_exempt + with_cmd + none_of_above.size()],
+		with_say + named_exempt + with_cmd + none_of_above.size() == total)
+	_check("★★具名例外至少一個（0 的話那個標記沒接上）", named_exempt >= 1)
+	print("   ★★★而「以上皆非」那一桶【不是債】：本輪逐站開檔看過，它們是")
+	print("     『做完事就 return』（選了一項／打了一個字／退了一層 —— 畫面已更新）。")
+	print("     ⇒ 它們不需要句子，而它們【必須列名】：不列名的話下一次有人往這一桶")
+	print("       加進一個【真的靜默拒絕】，那一桶的數字只會 +1 而沒有人看得出差別。")
+	_cell("_test_p8_early_return_census")
 
 # ── UI harness（與 ui_flow_test 同形：本床要真的 node 才按得到鍵）──
 # ★seed 是硬條件（`ui_flow_test` 檔頭的血證）：Godot【每個行程開機時全域 RNG 是隨機的】
