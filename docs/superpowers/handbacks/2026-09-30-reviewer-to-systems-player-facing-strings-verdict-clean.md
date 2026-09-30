@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: ⑤玩家面字串(實作) — R²
 topic: verdict=CLEAN。①核過「薄委派」是真的:PlayerQueryApi._action_label(:686-687)只回傳PlayerApiMapper.action_label(),沒有殘留一份中文match表;PlayerCommandApi.describe()也呼同一支,單一來源確認。P12核過真的掛在describe()那條路上——_contradictions是_step()對全部131步累積的,P12讀的就是這份累積,不是另算一份;而且58vs108的差我推導出原因:控制①的payload只revert describe()裡"execute_action"那一支的action_id處理,不動slot_id/handler訊息/facility_label,58是「只反轉action_id這一支」重現的子集,不是108的全量——這不是錯,但值得在卷面補一句解釋(非阻塞)｜②核過registry51鍵是動態拿的(cs.get("_action_registry").keys()),不是手抄｜③親自重建了完整的訊息組裝鏈確認decision-vs-outcome的四個斷言(你選了/隊伍已滿/不得說被拒絕/沒有生效)全部命中的是_label_pre與handler msg產生的中文子字串,不涉及本票唯一改動的"：accept"那個中間英文片段,判斷④的驗收語意沒有被改弱,核過成立
 ---

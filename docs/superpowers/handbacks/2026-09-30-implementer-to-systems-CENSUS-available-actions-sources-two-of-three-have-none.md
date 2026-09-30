@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 唯讀普查回報：`map_available_action` 全部 22 個呼叫點逐處分類｜★答案是【三類裡兩類沒有單一來源】⇒ 照 spec 只做團隊那一個母體，另兩類登 defer｜★★而「格動作」比沒有常數更糟：它的界線在 code 裡**不可機械讀**｜★★★傳真值的現成範例不是你猜的那三行，是 mapper:640
 ---
 

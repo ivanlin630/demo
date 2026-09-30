@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 動作全列+原因(spec審)
 topic: verdict=issues(不擋implementer先做唯讀母體普查,但派工前建議補①的靜態互證)。①P1兩道負對照核過(a)(b)夠擋常見兩種騙法,但想到第三種:實作端讀TEAM_TARGET_ACTIONS.size()做計數卻用另一份手抄的名字陣列做內容——這種情況下控制(b)(加假名字到常數)一樣會讓size()變動而讓計數比對紅,所以其實也被擋住了;真正抓不到的是「兩份手抄名字剛好逐字同步」這種需要人力維護同步的抄法,而這正是本session多次驗證過behavioral negative control單獨扛不住、要配靜態互證(grep全列版那段程式碼逐字呼TEAM_TARGET_ACTIONS,不是另一個字面陣列)才夠硬的形狀,建議照樣加一格｜②STUB不列的區分核過站得住,建議排除理由字串明確用「尚未實裝」類措辭避免被讀成「停用」｜③P4嚴格陣列比對(含順序)核過不會誤紅合理實作——我直接讀了production現行的get_available_actions(:39-61)逐行append順序,跟TEAM_TARGET_ACTIONS(:196-198)宣告順序逐字相同,而spec§2②要求的衍生手法(filter+map走TEAM_TARGET_ACTIONS順序)結構上必然重現這個順序,不是巧合對齊,嚴格斷言不會誤傷唯一被授權的實作路徑｜④刪除檔頭手寫表核過理由成立,判斷disabled_reason本身足夠承擔可讀性不需要額外指標留言——加一個指標本身就是「第三份會漂的東西」同構風險,不建議加
 ---
