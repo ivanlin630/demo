@@ -2340,6 +2340,7 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 #   ★★它是【spec 側的數】：動工時我用 grep 數過 13 個；有人新增一個 mode 而沒有
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
 const SPEC_UI_MODE_COUNT: int = 13
+const CONTROL_FLOOR_UNBOUND: int = 5  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）
 const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 
@@ -2737,6 +2738,11 @@ func _test_p19_control_coverage_ratchet() -> void:
 	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
 	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
 		n_fp >= CONTROL_FLOOR_FEP)
+	var n_ub: int = _count_fired("res://scripts/debug/unbound_key_bed.gd")
+	print("   unbound_key_bed %d（地板 %d）" % [n_ub, CONTROL_FLOOR_UNBOUND])
+	_check("★★母體地板：按鍵三態那支床也數得到非零（%d）" % n_ub, n_ub > 0)
+	_check("★★unbound_key_bed 的紀錄數沒有往回走（%d >= %d）" % [n_ub, CONTROL_FLOOR_UNBOUND],
+		n_ub >= CONTROL_FLOOR_UNBOUND)
 	var n_cg: int = _count_fired("res://scripts/debug/colocation_gate_bed.gd")
 	print("   colocation_gate_bed %d（地板 %d）" % [n_cg, CONTROL_FLOOR_COLOC])
 	_check("★★母體地板：同格那支床也數得到非零（%d）" % n_cg, n_cg > 0)

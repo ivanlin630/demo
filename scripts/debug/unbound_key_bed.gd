@@ -161,7 +161,7 @@ func _initialize() -> void:
 
 # ══ P2：母體是【導出】的，而且測的那些真的沒綁 ═════════════════════════════
 # ★★★這一格是整支床的地基（spec §1）：它先跑，因為後面每一格都吃它的母體。
-# 負對照：把 `_bound_keys_of` 的範圍展開拿掉 ⇒ 1..9 被當成未綁 ⇒ 必紅
+# 負對照：把 faction 謂詞漏掉 4 個綁定（C／D／E／G）⇒ 異源比對 1 處不一致 ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
 func _test_p2_population_is_derived_not_handpicked() -> void:
 	print("\n── P2 母體導出（不手挑）──")
 	var modes: Array = _modes()
@@ -219,8 +219,7 @@ func _test_p2_population_is_derived_not_handpicked() -> void:
 # ══ P1：三禁逐一（旗標／fingerprint／回饋句／佇列）═══════════════════════════
 # ★★禁③用【既有的尺】：fp 前後逐位元相同 —— 一個斷言蓋兩件事，而且不會漏欄位。
 # ★母體地板：先斷言 fp 產得出來（空字串的話「前後相同」恆真）。
-# 負對照①：拿掉統一出口 ⇒ 至少一個模式的旗標變了或 fp 變了 ⇒ 必紅
-# 負對照②：把回饋句拿掉 ⇒ 靜默 ⇒ 必紅（★「無作用」不等於「沒反應」）
+# 負對照：把統一出口改成靜默（`pass`）⇒ 354 次都沒有回饋句（★「無作用」不等於「沒反應」） ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
 func _test_p1_three_prohibitions() -> void:
 	print("\n── P1 三禁逐一 ──")
 	var node = await _make_ui()
@@ -273,7 +272,7 @@ func _test_p1_three_prohibitions() -> void:
 # ══ P3：Esc 不得被當未綁定鍵 ════════════════════════════════════════════════
 # ★Esc 有語意（回上一層）⇒ 它走各 handler 自己的分支，不得印那句回饋。
 # ★母體地板：先斷言每個模式的旗標真的被設起來（否則「Esc 關掉它」恆真）。
-# 負對照：把 Esc 併進未綁定出口 ⇒ 它印那句話 ⇒ 必紅
+# 負對照：把 `_pre_encounter_mode` 的 Esc 從綁定集合拿掉 ⇒ 1 個模式誤印 ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
 func _test_p3_escape_is_not_unbound() -> void:
 	print("\n── P3 Esc 不是未綁定鍵 ──")
 	var node = await _make_ui()
@@ -307,7 +306,7 @@ func _test_p3_escape_is_not_unbound() -> void:
 #   ★為什麼挑開關鍵：它是每個模式都一定有的那一個（`KEY_F`／`KEY_K`／`KEY_U`…），
 #     而它的效果可觀測（旗標變 false）⇒ 一條斷言可以對 13 個模式成立。
 # ★母體地板：那個開關鍵真的在該模式的已綁集合裡（不在就不是這一格該測的東西）。
-# 負對照：把統一出口擺在【已綁分支之前】⇒ 開關鍵也被吃掉 ⇒ 必紅
+# 負對照：★尚未點火（P1 那支「出口改靜默」已經覆蓋了它的反面；本格的真正風險是出口擺錯位置，而那一版已被 P4 拓到並修掉）
 func _test_p4_bound_keys_still_work() -> void:
 	print("\n── P4 已綁鍵沒被門死 ──")
 	var node = await _make_ui()
@@ -392,8 +391,7 @@ func _test_p6_faction_precondition_does_not_close_on_unbound() -> void:
 #   （前者是別按了，後者是去當上領袖）。
 # ★母體地板兩道：①那個鍵真的【有綁】（不然這一格測的是①不是②）
 #   ②玩家真的【不是領袖】（是領袖的話那一支走不到）
-# 負對照①：把那句原因拿掉 ⇒ 靜默 ⇒ 必紅
-# 負對照②：★把②的句子改成與①相同 ⇒ **也必須紅**（這一道是 systems 指定的）
+# 負對照：①那句原因改成靜默 ⇒ 紅；★★②把那句改成與①相同 ⇒ 也紅（systems 指定的那一道） ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
 func _test_p7_not_allowed_says_why() -> void:
 	print("\n── P7 綁定但當下不允許 ⇒ 給原因（且與①不同句）──")
 	var node = await _make_ui()
@@ -445,7 +443,7 @@ func _test_p7_not_allowed_says_why() -> void:
 #   ·有 `gate-ok:` 標記 ⇒ 具名例外
 #   ·有 `command_player` ⇒ 執行了一道令（結果句由消費點產生）
 #   ·以上皆非 ⇒ ★「以上皆非」那一桶，而它【必須逐站列名】
-# 負對照：拿掉那個 `gate-ok:` 標記 ⇒ 具名例外少一 ⇒ 四數相加不等於總數 ⇒ 必紅
+# 負對照：拿掉那個 `gate-ok:` 標記 ⇒ 具名例外 0 個 ⇒ 已於 feat/unbound-key-semantics（2026-09-30 這一輪） 實測紅
 func _test_p8_early_return_census() -> void:
 	print("\n── P8 early return 母體普查（四桶）──")
 	var src: String = FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd")
