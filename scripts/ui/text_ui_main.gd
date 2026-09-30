@@ -42,6 +42,20 @@ var _events: Array = []
 # ★★★「我印到世界事件的第幾筆」＝【UI 本地游標】，不是世界狀態（spec §2③）。
 #   ★它不進 fp、不進 state —— 誰讀到第幾筆是觀眾的事。
 var _last_world_event_seq: int = 0
+# ══ ★★★【接電】版面 v2 的唯一顯示面（systems 裁 2026-10-01：一個 Label）═══════════
+#   ★理由不是改動小，是**欄寬的權威只能有一份**：`TextUiView.compose()` 已經把
+#     左右分欄畫進文字（那一豎 `│`）⇒ 留著 `HBox(Map,State)` 就是**第二份欄寬權威**，
+#     而兩份會在視窗寬度變化時互相打，★★而打起來的長相是
+#     「有時對齊有時不對齊」而**沒有任何一格會紅**。
+#   ★★★而舊的六個 Label **不刪**：它們變成【內容載體】並 `visible = false`
+#     ⇒ 顯示只有合成那一個（單一權威成立），而**既有 49 處讀 Label 的斷言零遷移**
+#     —— 它們讀的是【內容】而不是【版面】。
+#     ★而我原本想的「把斷言機械替換成讀合成畫面」是**錯的**：框會把分頁 clip 到 rw≈59
+#       ⇒ 讀長行的斷言（`_kv_int(..., "武裝: ")`）會壞 ⇒ 那不是遷移，
+#       那是把斷言的主詞從【內容】換成【裁切後的版面】。
+var _screen_label: Label = null
+# 事件流（帶時間與來源）★與 `_events` 平行維護：`_events` 沒有 tick ⇒ 它給不出「第N天 HH:MM」
+var _feed_rows: Array = []
 
 # ui-stack-pending: _input_mode —— ★它不是一層，是**輸入捕獲**（`_close_all_modes` 也刻意不碰它）⇒ 步 2 要單獨裁
 var _input_mode: bool   = false
@@ -163,6 +177,11 @@ func _ready() -> void:
 	vbox.add_child(_alert_bar)
 	vbox.move_child(_alert_bar, _input_bar.get_index())
 	# 動態建立常駐 chrome 區（順序 …LogStrip → FeedbackLine → HintLine → AlertBar → InputBar）
+	# ★★★【接電】唯一顯示面：放在 VBox 最前面（六區的順序由 `compose()` 自己決定）
+	_screen_label = Label.new()
+	_screen_label.name = "ScreenLabel"
+	vbox.add_child(_screen_label)
+	vbox.move_child(_screen_label, 0)
 	_log_strip = Label.new()
 	_log_strip.name = "LogStrip"
 	_log_strip.modulate = Color(0.7, 0.7, 0.7)   # 灰：背景事件
@@ -243,6 +262,14 @@ func _process(_delta: float) -> void:
 			continue
 		_last_world_event_seq = sq
 		_events.append({"type": "world", "msg": String(we.get("text", ""))})
+		# ★★帶時間與來源的那一份（spec §2④ 要求逐條帶「第N天 HH:MM」）——
+		#   ★時間來自事件自己的 `tick`，**不是「現在」**：補一個現在的時間會讓 P6 恆綠
+		#   而畫面在說謊（一件三小時前的事印成剛剛）。
+		_feed_rows.append({
+			"when": "第 " + PlayerApiMapper.tick_clock(int(we.get("tick", 0))),
+			"source": String(we.get("kind", "世界")),
+			"text": String(we.get("text", "")),
+		})
 	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
 	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
 	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為
@@ -294,12 +321,21 @@ func _process(_delta: float) -> void:
 		_bridge.cancel_advance()
 		_enter_encounter()
 	elif not _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() \
-			and not _interact_mode and not _pre_encounter_mode:
+			and not _pre_encounter_mode:
 		# U19: 強制事件（乞食/繼承/勒索回應…）自動進互動模式顯選單，否則玩家無從回應 → 卡死
 		# （choose_heir 凍世界，更須自動進）。回應 handler/render 已在 interact mode 內。
+		# ★★★【缺口①，systems 裁 2026-10-01：當 bug 修不當設計選擇】——
+		#   原本這一條被 `and not _interact_mode` 守著 ⇒ 強制事件在玩家【已經聚焦某個目標】時到達，
+		#   `_interact_target` 不會被清；而回應那一支（:1523 附近）要求 `_interact_target < 0`
+		#   ⇒ ★玩家按 A **不會回應那個事件，而且什麼提示都沒有**（要先按 Esc 退回目標清單）。
+		#   ⇒ ★★所以「強制」這個詞本來就要求它**無條件搶走**互動模式並清掉聚焦目標：
+		#     `sim_runner` 連 `choose_heir` 的超時自動清除都**刻意排除**
+		#     ⇒ 設計本意是【玩家必須面對它】。
+		#   ⇒ ★★★而 `_refresh()` 是冪等的（同票已驗）⇒ 每 tick 重跑這一段不會累積副作用；
+		#     真正的不變量是「有強制事件在 ⇒ 玩家一定按得到它」。
 		_bridge.cancel_advance()
 		_interact_mode = true
-		_interact_target = -1
+		_interact_target = -1   # ★清掉聚焦目標：否則字母鍵那一支不會處理回應
 		_interact_page = 0
 		_refresh()
 
@@ -735,7 +771,56 @@ func _refresh() -> void:
 			"、".join(_labels), "…" if _pend_n > _labels.size() else ""]
 	_hint_line.text = "%s｜%s" % [_mode_keymap(_current_mode_name()), _pend_txt]
 	_log_strip.text = _log_strip_text(_events, 3)
+	_render_screen(_pend_txt)
 	_check_alerts()
+
+# ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
+#   ★上面那些 Label 已經被填好 ⇒ 它們是【內容載體】，這裡把內容組成版面。
+#   ★★而 `visible = false` 在這裡設而不是在 `_ready()`：`_ready()` 設了之後
+#     任何一處 `add_child`／重建都可能把它打開，而**每次 render 都設**是冪等的
+#     ⇒ 「顯示只有一個」變成**結構保證**而不是初始化時的一次宣告。
+func _render_screen(pend_txt: String) -> void:
+	if _screen_label == null:
+		return
+	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
+	var hp: Dictionary = ct.get("home_pos", {}) if ct.get("home_pos", null) != null else {}
+	var rows: Array = []
+	if _interact_mode and _interact_target >= 0:
+		rows = _interact_action_split()["team"]
+	var threat: String = String(_cached_snapshot.get("threat_line", ""))
+	if threat == "":
+		threat = "（無）"
+	_screen_label.text = TextUiView.compose({
+		"top": {
+			"clock": PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
+			"team_name": String(ct.get("name", "—")),
+			"pop": str(ct.get("population", "—")),
+			"home": ("(%d,%d)" % [int(hp.get("q", 0)), int(hp.get("r", 0))]) if not hp.is_empty() else "（無）",
+			"food": "%.1f 天" % float(ct.get("food_days", 0.0)),
+			"threat": threat,
+			"pending": pend_txt.trim_prefix("待執行 "),
+		},
+		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
+		"tabs": String(UiPages.header(_page_idx)).trim_prefix("["),
+		"map": _map_label.text,
+		"pages": _state_label.text,
+		# ★★★子模式面板（BLOCKER-2）：`_event_label` 載著 12 個子模式面板，
+		#   而它 `visible = false` ⇒ 不傳進來的話那 12 個面板【玩家一個都看不到】
+		#   —— 而「選目標」也在裡面 ⇒ 新版面的整條入口會是黑的。
+		#   ★而它只在【子模式中】非空：主畫面時 `_event_label` 載的是事件 log，
+		#     而那一份已經有替代品（`feed` 區吃 `_feed_rows`）⇒ 主畫面不傳（否則印兩份）。
+		"panel": _event_label.text if _current_mode_name() != "main" else "",
+		"action": rows,
+		"feed": _feed_rows,
+		"result": _feedback_line.text,
+		"keymap": _hint_line.text,
+	})
+	# ★★★舊的六個 Label ＝【內容載體】，不顯示（見檔頭 `_screen_label` 那一段的理由）
+	for _carrier in [_map_label, _state_label, _event_label, _hint_line,
+			_log_strip, _feedback_line, _debug_bar]:
+		if _carrier != null:
+			_carrier.visible = false
 
 func _get_hp_status(person: PersonData) -> String:
 	var has_severe: bool = false
@@ -1479,6 +1564,13 @@ func _build_inv_str() -> String:
 
 func _log_event(msg: String) -> void:
 	_events.append({ "type": "ui", "msg": msg })
+	# ★介面自己講的話：來源具名為「介面」而不是假裝它是世界事件
+	_feed_rows.append({
+		"when": "第 " + PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
+		"source": "介面", "text": msg,
+	})
+	if _feed_rows.size() > 100:
+		_feed_rows = _feed_rows.slice(_feed_rows.size() - 100)
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 
@@ -1488,8 +1580,20 @@ func _log_event(msg: String) -> void:
 func _interact_mode_binds_key(keycode: int) -> bool:
 	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD:
 		return true
+	# ★★★【缺口②，systems 裁 2026-10-01】：宣告要跟【真實行為】對齊。
+	#   原本這裡無條件對 A..Z 回 true，而 handler 那一支要求 `_interact_target < 0`
+	#   ⇒ 聚焦目標時按字母：`_refuse_unbound_key` **不會** fire（因為這裡說「綁了」），
+	#     而 handler 落到 `if keycode < KEY_1 …: return` ⇒ **靜默 return**。
+	#   ⇒ ★三態（不關模式／不落底層／不改狀態）**剛好都滿足，而那是意外不是設計**
+	#     —— 玩家得到的是「完全沒有回饋」，而那正是未綁定鍵那張票要消滅的東西。
+	#   ⇒ ★★所以字母只在【回應真的可按】的時候算「綁了」：沒聚焦目標 ＋ 真的有強制事件。
+	#     ★★★而缺口① 修好之後，「有強制事件而玩家聚焦著目標」這個狀態**不會再出現**
+	#       ⇒ 這兩條是同一件事的兩半：①保證玩家按得到，②保證按不到的時候【有話說】。
 	if keycode >= KEY_A and keycode <= KEY_Z:
-		return true
+		if _interact_target >= 0:
+			return false   # 聚焦目標時字母沒有意義 ⇒ 交給未綁定鍵的統一出口（會印一句話）
+		return not String(_cached_snapshot.get("forced_interaction", {})
+			.get("interaction_id", "")).is_empty()
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		return true
 	return false
@@ -1512,10 +1616,20 @@ func _handle_interact_mode(keycode: int) -> void:
 		return
 
 	# 翻頁（選單 >9 項時）：[,] 上一頁 / [.] 下一頁
-	if keycode == KEY_COMMA:
-		_interact_page = maxi(0, _interact_page - 1); _refresh(); return
-	if keycode == KEY_PERIOD:
-		_interact_page += 1; _refresh(); return
+	# ★★★【動作層不分頁 ⇒ 那兩個鍵在動作層是「已綁而無作用」】（systems 裁 BLOCKER-2 ④）
+	#   ⇒ 與缺口② 同一族：`binds_key` 說綁了、而 handler 什麼都不做 ⇒ 玩家零回饋。
+	#   ⇒ ★聚焦目標時走**未綁定鍵的統一出口**（吃掉、印一句話、什麼都不改）；
+	#     ★★目標清單那一層的分頁**不動**（那裡的鍵本來就是位置語意）。
+	if keycode == KEY_COMMA or keycode == KEY_PERIOD:
+		if _interact_target >= 0:
+			_refuse_unbound_key("互動", keycode)
+			return
+		if keycode == KEY_COMMA:
+			_interact_page = maxi(0, _interact_page - 1)
+		else:
+			_interact_page += 1
+		_refresh()
+		return
 	# ★★★不變量 #10（systems 2026-09-30）：【強制事件回應】與【自家隊動作】
 	#   不得共用同一段數字區間 —— 一個按鍵的意義不得由一個會在同一顆 tick 內改變的計數決定。
 	#   ★血證：面板消失（fe_count 2 → 0）之後再按同一個 KEY_1，實測執行了
@@ -1543,8 +1657,30 @@ func _handle_interact_mode(keycode: int) -> void:
 	# ── 已選目標：顯示行動清單（只 team-target 動作）──
 	if _interact_target >= 0:
 		var actions: Array = _interact_action_split()["team"]
-		if num < actions.size():
-			var act: Dictionary = actions[num]
+		# ★★★【一份表、兩個方向】（systems 裁 2026-10-01 (a)(b)）——
+		#   ★缺陷（我引入的，reviewer 抓到）：畫面用 `ACTION_DIGITS[action_id]` 印鍵，
+		#     而這裡原本用**位置索引** `actions[num]` ⇒ 9 個有鍵的動作裡 **7 個對不上**
+		#     ⇒ 按「提議結盟」那個鍵會【攻擊】、按「打聽」會【索貢】。
+		#   ⇒ ★★最嚴重的不是排版歪掉，是**玩家做了一件他沒有選的事**，
+		#     而「印 `[2]` 按下去做了另一件事」比「印 `[A]` 按下去沒反應」更糟：
+		#     後者他會再按一次，前者**他不會知道**。
+		#   ⇒ ★★★所以這裡**讀同一份表的反查**，不手抄第二份對照。
+		#   ★而【動作清單不分頁】（裁定 (b)）：靜態鍵與分頁概念互斥 ——
+		#     `num + page*9` 會讓同一個鍵在第 2 頁換意思，而那正是不變量 #10 禁的事。
+		#     ★★目標清單那一層的分頁**不動**（那裡的鍵本來就是位置語意）。
+		var want_id: String = TextUiView.action_for_key(str(keycode - KEY_1 + 1))
+		var act_idx: int = -1
+		for _i in range(actions.size()):
+			if String(actions[_i].get("action_id", "")) == want_id:
+				act_idx = _i
+				break
+		if want_id == "" or act_idx < 0:
+			# ★這個鍵沒有綁動作（或那個動作這一輪不在清單上）⇒ 走未綁定鍵的統一出口：
+			#   吃掉它、印一句話、什麼都不改（而不是靜默 return 或執行「剛好在那個位置」的那一列）
+			_refuse_unbound_key("互動", keycode)
+			return
+		if act_idx >= 0:   # ★到這裡它一定成立（上面已 early-return）—— 保留縮排結構
+			var act: Dictionary = actions[act_idx]
 			var action_id: String = act.get("action_id", "")
 			if action_id == "gather_intel":
 				# 進入 gather_intel 子模式

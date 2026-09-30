@@ -38,6 +38,10 @@ const A_PAGES: String  = "┬─ ["          # ★自帶 `┬` ⇒ 組框時**�
 const A_ACTION: String = "─ 動作（"
 const A_FEED: String   = "─ 事件（"
 const A_FOOT: String   = " 鍵："          # 底部鍵位那一行
+# ★★子模式面板的錨 —— ★**刻意不進 `REGION_ANCHORS`**：它與 map+pages **互斥**
+#   （非空時取代那個框）⇒ 它不是第七區，而 P1「六個錨各剛好一次」在有面板時
+#   本來就不該要求 `┌─ 地圖（`／`┬─ [` 出現。★★而那一點要由床證：見 P30。
+const A_PANEL: String  = "─ 面板（"
 const REGION_ANCHORS: Array = [A_TOP, A_MAP, A_PAGES, A_ACTION, A_FEED, A_FOOT]
 
 # ══ 頂列六欄（spec §2②：★指名六欄，不是「頂列非空」）═══════════════════════════
@@ -55,21 +59,32 @@ const TOP_FIELDS: Array = [
 	["pending", "literal", "待執行 ",   "待執行幾道"],
 ]
 
-# ══ ★★★字母鍵 → action_id 的【靜態】映射（systems 裁 2026-10-01 的條件）══════════
-#   ·不變量 #10 禁的**不是字母**，是「意義由**位置／計數**決定」
-#     （血證：索引式選單 `num < fe_count` 後接 self-actions）
-#   ·⇒ 條件：**字母綁 `action_id`，不綁清單位置**
-#   ★★而「動作全列」那張票剛好把前提補上了：**不可做的也在列上**
-#     ⇒ 清單長度不再隨世界變動 ⇒ 靜態映射才**可能**。
-#     （兩張票各自的理由完全不同，而後一張把前一張的前提補上了。）
-#   ★★★沒有字母的列印「（未綁鍵）」並**由床數出來** —— **不用位置補一個字母**：
-#     那會把這一格變回不變量 #10 那個病，**而且是靜默的**。
-#     判準：**寧可印一個「沒有」並把它數出來，不要補一個看起來合理的值。**
-const ACTION_LETTERS: Dictionary = {
-	"trade": "A", "propose_alliance": "B", "demand_tribute": "C",
-	"recruit": "D", "gather_intel": "E", "attack": "F",
-	"extort": "G", "recruit_anon": "H", "invite_settle": "I",
-	"beg": "J", "ignore": "K",
+# ══ ★★★動作鍵 → `action_id` 的【靜態】映射（systems 裁 2026-10-01｜藍圖裁 (乙-1) `c3e13a016`）══
+#   ·不變量 #10 禁的**不是字母也不是數字**，是「意義由**位置／計數**決定」
+#     （血證逐字在 `text_ui_main.gd:1521`：面板消失 fe_count 2 → 0 之後再按同一個 KEY_1，
+#      實測執行了 `establish_faction` ＋ `train`）
+#   ·⇒ 條件：**鍵綁 `action_id`，不綁清單位置**。★而那個性質**與字母／數字無關**。
+#   ★★★為什麼不是字母（我提過 (甲)，systems 用一條原則否掉它，而理由比「違反字面」硬）：
+#     **判別子必須是【玩家自己改變的狀態】，不能是【世界改變的狀態】。**
+#     ·目標聚焦 ＝ 玩家按的 ⇒ 可以當判別子
+#     ·面板在不在 ＝ **世界改的** ⇒ 不可以（鍵在玩家手指下換意思，而他什麼都沒做）
+#     ⇒ 字母若也給動作，(甲) 會把 #10 的血證原封不動種回來（玩家按 A 回應 → 面板消失
+#       → 再按一次 A ⇒ 變成交易／建國／扣錢）⇒ **強制回應的鍵空間必須被它獨佔**。
+#   ⇒ ★稿子的外觀 `[A] 交易` 改成 `[1] 交易`（藍圖裁 (乙-1)：字母只是外觀，
+#     而「一個鍵永遠是同一個動作」這個**性質**由這張靜態表保住）。
+#
+# ★★【上限 ＝ 9，而這是一個真的限制，寫在這裡不假裝不存在】（照 #10 註解那句的做法）：
+#   數字鍵只有 1..9 ⇒ 母體超過 9 的那一天，第 10 個**按不到**。
+#   ·今天 `TEAM_TARGET_ACTIONS` 是 11 個 ⇒ ★**已經有 2 個沒有鍵**（見下面那兩個沒列進來的）
+#   ·⇒ 它們在畫面上印「（未綁鍵）」而**不是被隱藏**，而床把「現在幾個沒鍵」印在卷面上
+#   ·★★★**不現在做分頁**（systems 裁）—— 分頁要等它真的痛；而「現在幾個」看得見，
+#     所以它痛的那一天不需要有人記得回來看。
+const ACTION_DIGITS: Dictionary = {
+	"trade": "1", "propose_alliance": "2", "demand_tribute": "3",
+	"recruit": "4", "gather_intel": "5", "attack": "6",
+	"extort": "7", "recruit_anon": "8", "invite_settle": "9",
+	# ★沒有鍵的（母體 11 − 鍵 9 ＝ 2）：`beg`／`ignore`
+	#   ⇒ 它們照樣**列出來**（全列版的語意）而鍵位印「（未綁鍵）」。
 }
 
 const FEED_ROWS: int = 8          # 事件流固定筆數（spec §2④）
@@ -152,13 +167,13 @@ static func action_block(rows: Array) -> String:
 	for r in rows:
 		if bool(r.get("enabled", false)):
 			n_ok += 1
-		if not ACTION_LETTERS.has(String(r.get("action_id", ""))):
+		if not ACTION_DIGITS.has(String(r.get("action_id", ""))):
 			n_unbound += 1
 	lines.append(region_title(A_ACTION, "%d／%d 可做，未綁鍵 %d" % [
 		n_ok, rows.size(), n_unbound]))
 	for r2 in rows:
 		var aid: String = String(r2.get("action_id", ""))
-		var key: String = String(ACTION_LETTERS.get(aid, ""))
+		var key: String = String(ACTION_DIGITS.get(aid, ""))
 		var head: String = ("[%s]" % key) if key != "" else UNBOUND_MARK
 		var mark: String = SUBMENU_MARK if bool(r2.get("opens_submenu", false)) else ""
 		var line: String = " %s %s %s" % [head, String(r2.get("label", "")), mark]
@@ -167,9 +182,26 @@ static func action_block(rows: Array) -> String:
 		lines.append(TextUiLayout.clip_to(line, TextUiLayout.COLS))
 	return "\n".join(lines)
 
-# 某個 action_id 拿到哪個字母（""＝沒綁）★給床做 P8b 的比對用
-static func letter_for(action_id: String) -> String:
-	return String(ACTION_LETTERS.get(action_id, ""))
+# 某個 action_id 拿到哪個鍵（""＝沒綁）★給床做 P8b 的比對用
+static func key_for(action_id: String) -> String:
+	return String(ACTION_DIGITS.get(action_id, ""))
+
+# ★★★【反查】那個鍵是哪個 action_id（""＝這個鍵沒有綁任何動作）——
+#   ★它存在的理由是一個實測缺陷（2026-10-01，reviewer 抓到、我引入的）：
+#     畫面用 `ACTION_DIGITS[action_id]` 印鍵，而 handler 用**位置索引** `actions[num]` 執行
+#     ⇒ 9 個有鍵的動作裡 **7 個對不上** ——
+#       按「提議結盟」那個鍵會【攻擊】、按「打聽」會【索貢】（真的動錢動名聲）。
+#   ⇒ ★★而三支床全綠：P8b／`key_for()` 驗**畫面那一側**、`ui_flow` 的按鍵格驗**handler 那一側**
+#     ⇒ **沒有任何一格把兩側接起來** ⇒ 缺陷剛好落在兩支床**之間**
+#     （「檢查管道與失效管道不同軸」最乾淨的一個實例：兩邊各自都對，
+#      而**它們對的不是同一件事**）。
+#   ⇒ ★★★所以 handler **必須讀這一支**而不是自己手抄第二份對照表：
+#     一份表、兩個方向、同一個權威。
+static func action_for_key(key: String) -> String:
+	for aid in ACTION_DIGITS:
+		if String(ACTION_DIGITS[aid]) == key:
+			return String(aid)
+	return ""
 
 
 # ══ ⑤事件流：最近 FEED_ROWS 條，每條「第N天 HH:MM｜來源｜內容」（spec §2④）═════
@@ -203,14 +235,39 @@ static func foot_block(result_line: String, keymap: String) -> String:
 	])
 
 
+# ══ ★★★【子模式面板】—— 非空時**取代** map+pages 那個框（systems 裁 2026-10-01 BLOCKER-2）
+#   ★缺陷（我引入的形狀造成的）：舊的 `_event_label` 載著 **12 個子模式面板**
+#     （戰前／交易／**目標清單**／成員／背包／勢力／據點／子隊／顧問／倉庫／打聽／招募），
+#     而 `_render_screen()` 每次 render 都把它 `visible = false`、
+#     而 `compose()` **沒有它們的位置** ⇒ 那 12 個面板【從來沒有進畫面】。
+#   ⇒ ★★「選目標」最致命：玩家看不到目標清單，而動作清單要先選到目標才會出現
+#     ⇒ **新版面的整條入口是黑的**。
+#   ⇒ ★★★而三支床全綠，因為它們讀的是 `node._event_label.text`（**載體**）不是畫面
+#     —— 而那正是「49 處斷言零遷移」那個性質的另一面：
+#     **那 49 格從此不看畫面**。判準寫在床的 P30 旁邊。
+#   ★放在 map+pages 的位置：子模式本來就是「接管畫面」的語意，
+#     而放那裡保住「顯示只有一個」（不是再加一區）。
+static func panel_block(panel_body: String) -> String:
+	var w: Array = box_widths()
+	var lines: Array = []
+	lines.append(_fill_to(A_PANEL + "接管畫面）", TextUiLayout.COLS, "─"))
+	for l in panel_body.split("\n"):
+		lines.append(TextUiLayout.clip_to(String(l), TextUiLayout.COLS))
+	return "\n".join(lines)
+
+
 # ══ 六區組成整個畫面（★順序固定：任何模式都不搬，模式只改【動作區】的內容）═════
 # regions：top(Dictionary)／map(String)／pages(String)／map_note／tabs／
 #          action(Array)／feed(Array)／result(String)／keymap(String)
 static func compose(regions: Dictionary) -> String:
+	var panel: String = String(regions.get("panel", ""))
+	# ★★★子模式面板非空 ⇒ **取代** map+pages 那個框（見 `panel_block` 上方的理由）
+	var mid: String = panel_block(panel) if panel.strip_edges() != "" else map_pages_box(
+		String(regions.get("map", "")), String(regions.get("pages", "")),
+		String(regions.get("map_note", "")), String(regions.get("tabs", "")))
 	return "\n".join([
 		top_row(regions.get("top", {}) as Dictionary),
-		map_pages_box(String(regions.get("map", "")), String(regions.get("pages", "")),
-			String(regions.get("map_note", "")), String(regions.get("tabs", ""))),
+		mid,
 		action_block(regions.get("action", []) as Array),
 		feed_block(regions.get("feed", []) as Array),
 		foot_block(String(regions.get("result", "")), String(regions.get("keymap", ""))),

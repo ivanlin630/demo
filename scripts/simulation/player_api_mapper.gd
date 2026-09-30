@@ -509,6 +509,33 @@ static func slot_label(slot_id: String) -> String:
 	return "（未知部位：%s）" % slot_id
 
 # 每個 forced response id 的顯示 label（per-action,單一處）
+# ══ ★★★tick → 玩家看得到的「第 N 天 HH:MM」（2026-10-01，版面 v2 §2②）═══════════
+#   ★全庫原本**沒有**這支（我 grep 過）⇒ 稿子的頂列第一欄沒有來源。
+#   ★★而它**必須從 `WorldState` 的常數導**，不准手抄數字（用戶立法「估算器禁手抄物理」）：
+#     `TICKS_PER_HOUR` 是唯一自由參數，`TICKS_PER_DAY` 由它推導
+#     ⇒ 改那個常數，這支的輸出**必須跟著變**（床有一格用它當負對照：動輸入不動事實）。
+#   ★★★天從 1 起算（玩家讀的是「第 1 天」不是「第 0 天」）；時分用 24 小時制補零。
+# ★★★【真實世界的常數 vs 專案的旋鈕】—— 這一行是 P9 那一格咬出來的：
+#   我第一版寫 `* 60.0`，而那一格報「手抄物理」⇒ ★而它**咬對了一半**：
+#   ·`1440`／`24` 是**可以從旋鈕導出來的**（`TICKS_PER_DAY = TICKS_PER_HOUR * 24`）
+#     ⇒ 手抄它們＝把旋鈕的第二份放進玩家面字串
+#   ·而「一小時有 60 分」是**真實世界**的事實，**不是**這個專案的自由參數
+#     ⇒ 它不可能被「導出來」，它只能被**具名**。
+#   ⇒ ★★所以修法不是把守衛放寬，是**把它具名**：讓「哪一個是旋鈕、哪一個是世界」
+#     在 code 裡看得見，而守衛繼續咬裸字面。
+#   ★★★（而 `TICKS_PER_HOUR = 60` 讓「1 tick ＝ 1 分鐘」在今天成立；
+#     旋鈕若改成 30，一個 tick 就是 2 分鐘 —— 而下面那個算式**自己會跟著變**。）
+const MINUTES_PER_HOUR: int = 60
+
+static func tick_clock(tick: int) -> String:
+	var per_day: int = WorldState.TICKS_PER_DAY
+	var per_hour: int = WorldState.TICKS_PER_HOUR
+	var day: int = int(tick / per_day) + 1
+	var rem: int = tick % per_day
+	var hour: int = int(rem / per_hour)
+	var minute: int = int(float(rem % per_hour) / float(per_hour) * float(MINUTES_PER_HOUR))
+	return "%d 天 %02d:%02d" % [day, hour, minute]
+
 # ★★★NPC 的【外交回覆】中文（2026-10-01，battery10 的 `scripted-exploration` 咬到）——
 #   ★它與 `forced_label()` **不是同一件事**，所以不重用它：
 #     `forced_label` 是【玩家自己要按的選單標籤】（帶 ✓／✗、吃 `evt` 與 `state`），
@@ -695,12 +722,20 @@ static func map_inventory_state(state: WorldState) -> Dictionary:
 
 # ── Available action builder ───────────────────────────────────────────────────
 
+# ★★★【缺口③，2026-10-01】：`opens_submenu` 原本**不在信封裡** ——
+#   全列版（`get_action_availability`）有算它，而信封把它吃掉
+#   ⇒ 排版層的 `▸`（稿子的「招募 ▸／打聽 ▸」）**永遠印不出來**。
+#   ★而它的失效長相是「那個符號沒出現」—— 沒有任何斷言在看，所以它是靜默的。
+#   ★★預設 `false`：既有 21 個呼叫點不用改（它們不是子選單入口），
+#     而團隊目標那一條路把全列版算出來的值傳進來。
 static func map_available_action(action_id: String, label: String, enabled: bool,
 		disabled_reason: String, target_requirements: Dictionary,
-		command_name: String, command_args: Dictionary) -> Dictionary:
+		command_name: String, command_args: Dictionary,
+		opens_submenu: bool = false) -> Dictionary:
 	return {
 		"action_id": action_id, "label": label, "enabled": enabled,
 		"disabled_reason": disabled_reason,
+		"opens_submenu": opens_submenu,
 		"target_requirements": target_requirements,
 		"command_name": command_name, "command_args": command_args
 	}
