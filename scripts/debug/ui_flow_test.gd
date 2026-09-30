@@ -2339,7 +2339,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 # ★★★【本區常數一律取大】（棘輪地板；rebase 衝突一律取大）——
 #   往回調會讓守衛閉嘴，而卷面看起來像「衝突解完了」。
 #   ★而上面那一區（`SPEC_UI_STACK_PENDING`）方向【相反：只准變小】⇒ 兩區刻意分開。
-const CONTROL_FLOOR_UI: int = 21
+const CONTROL_FLOOR_UI: int = 24   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -2873,9 +2873,13 @@ func _test_p26_ui_stack_step1() -> void:
 	await _free_ui(node)
 	_cell("_test_p26_ui_stack_step1")
 
-# 負對照：把 `and not _interact_mode` 加回 auto-enter ⇒ 本格紅 ⇒ 待實測
-# 負對照 b：`binds_key` 對 A..Z 無條件回 true ⇒ 那一段紅 ⇒ 待實測
-# 負對照 c：信封拿掉 `opens_submenu` ⇒ 那一段紅 ⇒ 待實測
+# 負對照：把 `and not _interact_mode` 加回 auto-enter ⇒ 本格紅（清掉聚焦目標 實測 0／按 A 沒排進佇列） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：`binds_key` 對 A..Z 無條件 `return true`（＝還原原本那個 bug）⇒ 那一段紅（聚焦目標時按字母【有話說】） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：信封拿掉 `opens_submenu` 那一欄 ⇒ 那一段紅（沒帶的：["recruit", "gather_intel"]） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★而 ② 那一道第一版【打不到它自己那一格】：我把 `if _interact_target >= 0` 換成 `if false`，
+#   而那讓 `binds_key` 落到「有沒有強制事件」那一條 ⇒ 本段先清了 forced event ⇒ 它照樣回 false
+#   ⇒ `_refuse_unbound_key` 照樣 fire ⇒ **本段綠** ⇒ 那個擾動沒有鑑別力。
+#   ⇒ ★判準：**負對照要還原【原本那個 bug】，不是換一個別的錯** —— 原本是無條件 `return true`。
 # ══ P27：★★★三個【玩家看得到】的缺口（systems 裁 2026-10-01，當 bug 修不當設計選擇）══
 # ①強制事件在玩家【已聚焦目標】時到達 ⇒ 原本 `_interact_target` 不被清
 #   ⇒ 回應那一支要求 `< 0` ⇒ **按 A 不回應，而且零提示**（要先 Esc）
