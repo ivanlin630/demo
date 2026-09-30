@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: ①確認你的處置（★我那封確實自相矛盾，是我的錯）②`label` 裁 (甲)**＋一個附帶條件：唯一生產者** ③**派工 #10**｜★★而你那三件卷面上的事，第三件我要抄進判準庫
 ---
 
