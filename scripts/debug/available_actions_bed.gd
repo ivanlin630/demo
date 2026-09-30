@@ -213,16 +213,41 @@ func _test_p4_old_view_differs_only_by_the_named_exclusion() -> void:
 	print("   全列版 enabled ＝ %s" % str(enabled_from_rows))
 	_check("★★衍生檢視逐字等於全列版的 enabled 那些（含順序）",
 		str(derived) == str(enabled_from_rows))
+	# ★★★差集的判準（第一版寫錯了，紀錄留著）：我原本斷言「差集 ＝ 具名排除」，
+	#   而那要求**每一條條件都過** —— 我的佈置只給了 coin 與 readiness，
+	#   沒有給人口 1.5 倍與自家據點 ⇒ 差集實測是
+	#   `["demand_tribute", "recruit", "invite_settle"]` ⇒ 紅。
+	#   ★而那個紅【不是產品的錯，是我的判準把「條件沒過」與「被排除」混成一件事】。
+	#   ⇒ 正確的不變量：**差集 ＝ 具名排除 ∪ 這一輪 enabled=false 的那些**，
+	#     而且兩者不重疊、聯集剛好等於差集（三數相加的形狀）。
+	#   ⇒ ★★它比原版強：它把差集的每一個成員都要求【說得出理由】——
+	#     一個名字憑空從衍生檢視裡消失（既不是 stub、也沒有 reason）就會紅。
+	var rows_all: Array = cs.get_action_availability(st, tid)
+	var disabled_ids: Array = []
+	for r2 in rows_all:
+		if not bool(r2.get("enabled", false)):
+			disabled_ids.append(String(r2.get("action_id", "")))
 	var missing_vs_const: Array = []
 	for n in PlayerCommandSystem.TEAM_TARGET_ACTIONS:
 		if not derived.has(String(n)):
 			missing_vs_const.append(String(n))
-	print("   ★與常數的差集 ＝ %s（★這一輪的條件都過了 ⇒ 差集應該只有具名排除）" % str(missing_vs_const))
-	_check("★★★差集只有具名排除（%s vs %s）" % [
-		str(missing_vs_const), str(PlayerCommandSystem.STUB_NOT_IMPLEMENTED)],
-		str(missing_vs_const) == str(PlayerCommandSystem.STUB_NOT_IMPLEMENTED))
-	print("   ★★而 spec P4 的字面是「逐字相同」⇒ 本格把它講準成【只差具名排除】並印差集，")
-	print("     不是把 P4 放寬：差集多一個名字就紅。")
+	var unexplained: Array = []
+	for m in missing_vs_const:
+		if PlayerCommandSystem.STUB_NOT_IMPLEMENTED.has(String(m)):
+			continue
+		if disabled_ids.has(String(m)):
+			continue
+		unexplained.append(String(m))
+	print("   ★與常數的差集 ＝ %s" % str(missing_vs_const))
+	print("     其中【具名排除】＝ %s｜【這一輪條件沒過】＝ %s" % [
+		str(PlayerCommandSystem.STUB_NOT_IMPLEMENTED), str(disabled_ids)])
+	print("     ⇒ 無法解釋的（既不是排除、也沒有 reason）＝ %s" % str(unexplained))
+	_check("★★★差集的每一個成員都說得出理由（無法解釋的：%s）" % str(unexplained),
+		unexplained.is_empty())
+	_check("★具名排除真的在差集裡（否則這一格測不到 STUB 那一半）",
+		PlayerCommandSystem.STUB_NOT_IMPLEMENTED.all(func(x): return missing_vs_const.has(String(x))))
+	print("   ★★而 spec P4 的字面是「逐字相同」⇒ 本格把它講準成【差集的每個成員都有理由】，")
+	print("     不是把 P4 放寬：一個名字憑空消失（無排除、無 reason）就紅。")
 	_cell("_test_p4_old_view_differs_only_by_the_named_exclusion")
 
 
