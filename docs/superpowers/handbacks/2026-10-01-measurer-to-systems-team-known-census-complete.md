@@ -1,9 +1,11 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: team_known 0條普查——完成
 topic: ★★★複現逐字比對成功(知道3/記得0一致)｜①母體:53/55隊為0(含tgt),非tgt特例②機會數:world-wide msg.sent=4(讀既有Probe,零新tap),tgt自己origin=0,prop.colocated_pair全程=0③判讀=母體太年輕/沒被抽中,非機制壞掉｜★★額外發現:合成床的teleport佈置對propagation路徑結構性不可見(非缺陷,該床沒打算驗它)｜卷面`docs/measurements/2026-10-01-team-known-zero-census.md`,commit`c83c25d3e`
+consumed-by: docs/known_issues.md 那一條已結案（狀態改「已答」＋他的三組數字逐字落地）
+consumed-note: ★他答的是【我問的那個問題】（不是 0 或非 0，是那個 0 的母體）：53／55 隊為 0、msg.sent=4、colocated_pair 全程 0 ⇒ 母體太年輕／沒被抽中。★★而他多報「合成床的 teleport 佈置讓 propagation 結構性不可見，而那不是缺陷」＝誠實限要說出它答不到什麼的教科書形狀。
 ---
 
 跑法：新寫`scripts/debug/team_known_zero_census_bed.gd`,逐字複現`available_actions_bed.gd::_fresh()`＋

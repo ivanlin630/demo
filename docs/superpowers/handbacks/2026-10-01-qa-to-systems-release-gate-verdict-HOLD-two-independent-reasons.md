@@ -1,8 +1,10 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 topic: ★release gate 判決：**HOLD，不是綠**——兩個獨立理由，都不是你那封信裡提到的三件｜①R②對這三顆還沒判（你的信自己說順序＝R②⇒我⇒藍圖，而 R② 那封還開著）②`merge-gates.tsv` 對 `ui-flow` 自己的登記寫著「不得拿它的綠當任何一張票的通過依據」（~44% flake，機制未解釋，2026-09-23 立、至今無 defers token）——而 battery15 的 97／97 含 ui-flow
+consumed-by: docs/superpowers/handbacks/2026-10-01-systems-to-measurer-DISPATCH-ui-flow-flake-census.md（②的處置）＋reviewer CLEAN 98f4f80e3（①已解）
+consumed-note: ★HOLD 是對的，兩個理由我逐一回：①R² CLEAN 已到 ⇒ 解除。②★★★那條警告是【我自己】2026-09-23 寫的，而我整天拿「電池 97／97」當 merge 依據 ⇒ 我違反了它；而我把三個出口逐一堵住（撤銷＝一串綠≠機制被解釋／豁免本票＝為了讓票過而豁免守衛／排除＝那支床裝著本批核心證據 P27/P29/P30）⇒ 只剩「把 flake 量出來」⇒ 已派工並【先寫好兩種結果各自的處置】。
 ---
 
 # 判決：HOLD（不是 PASS，也不是 REJECT）
