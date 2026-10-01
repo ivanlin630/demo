@@ -60,6 +60,28 @@ while :; do
           ;;
       esac
     done
+    # ★★★★★2026-10-01（systems，implementer 血證）：**rename 用 pathspec commit 只點名新路徑**
+    #   ⇒ 刪除那一半**沒進 commit** ⇒ HEAD 同時含兩條路徑 ⇒ 兩個 `class_name` ⇒ **checkout 不起來的 HEAD**
+    #   ★而 `bed_parse_gate` 當時 **PASS** —— 它讀的是**工作區**（舊檔已刪）**不是 HEAD**
+    #     ⇒ ★★又一次「它讀哪一層」（這次是**索引／工作區 vs HEAD**）
+    #   ⇒ ★★★所以這裡印一行警告：**這一次 commit 加了某個檔，而工作區有一個【同名不同路徑】的檔
+    #     正處於【未 staged 的刪除】** ⇒ 多半就是「rename 只 commit 了一半」。
+    #   ★誠實限：它只認同名（basename）那一種 rename；改名又改內容的它看不到。
+    _gcr_pend_del=$(git --no-optional-locks status --porcelain 2>/dev/null | awk '$1=="D"{print $2}')
+    if [ -n "$_gcr_pend_del" ]; then
+      for _f in "$@"; do
+        case "$_f" in
+          -*|--) continue ;;
+        esac
+        [ -f "$_f" ] || continue
+        _bn=$(basename "$_f")
+        printf '%s
+' "$_gcr_pend_del" | while IFS= read -r _d; do
+          [ -n "$_d" ] || continue
+          [ "$(basename "$_d")" = "$_bn" ] && [ "$_d" != "$_f" ] &&             echo "[gcr] ★★rename 只 commit 了一半？：這一顆加了 $_f，而 $_d 的【刪除】還沒 staged ⇒ HEAD 可能同時含兩條路徑（兩個 class_name ⇒ checkout 不起來）。核法：git ls-tree -r HEAD | grep $_bn" >&2
+        done
+      done
+    fi
     rm -f "$_tmp"; exit 0
   fi
   # ★只對【鎖】重試。其餘 rc 原樣回傳,不重試。
