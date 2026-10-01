@@ -1,6 +1,7 @@
 # HOW：「不配對、照預覽價直接成交」那條路線退場
 
-- **WHAT 權威**：blueprint 裁 (乙) 退場
+- **WHAT 權威**：`docs/mechanism-intents.md:74`「交易成交唯一路」那一列（★機制意圖帳 ＝ 權威，
+  code 服從表；本票的 spec 也服從它）｜裁定來源 ＝ blueprint 裁 (乙) 退場
   （`docs/superpowers/handbacks/2026-10-01-blueprint-to-systems-RULING-confirm-trade-direct-path-retires.md`）
 - **上游**：第二母體那張票的三桶掃出的唯一 WHAT 殘餘物
   （`docs/superpowers/handbacks/2026-10-01-systems-to-blueprint-one-what-remnant-confirm-trade.md`）
@@ -55,7 +56,10 @@ A6  顯示名那一列               player_api_mapper.gd:444 `"confirm_trade": 
 母體少 1 ＝ `confirm_trade` 離開 registry；若留成別名鍵，第三桶**還是 1**，裁定自相矛盾。
 ⇒ ★★★**我按他自己的床那一行裁：A1＋A2 一起走。**「保留出價那半」保的是**能力**
 （`submit_trade_offer` 一行不動），不是那個鍵。
-★在回信裡我會把這個讀法逐字寫給藍圖（他若要留別名鍵，那就是把第三桶留成 1，要他自己說）。
+★在回信裡我把這個讀法逐字寫給藍圖（他若要留別名鍵，那就是把第三桶留成 1，要他自己說）。
+★★★**而他回了，逐字同意**（`9381f77f5`）：「confirm_trade 整支含別名鍵一起刪，
+衝突時採可被機器檢查的那句（三桶＝30−1），能力由 `submit_trade_offer` 保住；
+連帶三支（含 `preview_trade`）收。」⇒ **A1＋A2 一起走這件事不再是我的讀法，是裁定本身。**
 
 ### (B) 活樹 UI（刪）
 
@@ -145,6 +149,7 @@ P7  電池全綠（★跑在釘死 HEAD 的 worktree；★★本票改了床與 
 ·「接受對方當前報價」那個一鍵 —— 藍圖明寫是**日後**、且形狀走配對路 ⇒ 不在本票。
 ·`popup_layer` ／ `main.gd` 的其餘死樹整理 ⇒ 不在本票。
 ·`teams-has-callsites.tsv` 全表行號過期 ⇒ 不在本票（E1 只動那兩列）。
-·這條裁定要不要進 `docs/mechanism-intents.md`（我查過：那份表目前**沒有**貿易那一格的
-  「不配對直接成交」條目）⇒ ★**WHAT 權威是藍圖**，我在回信裡問他一句，不自己加。
+·★**已結案**：這條裁定已進 `docs/mechanism-intents.md:74`「交易成交唯一路」那一列
+  （藍圖自己寫的，`9381f77f5`；我 `grep` 核過那一行真的在那棵樹上）
+  ⇒ ★★**那一列才是本票的 WHAT 權威**，spec 服從它；改機制先查那一列。
 ```
