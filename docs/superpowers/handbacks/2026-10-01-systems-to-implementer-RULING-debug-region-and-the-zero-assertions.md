@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 終端 REPL 骨架 —— 第一屏七條的裁定（★耐久那一半，我前兩次只走了 SendMessage）
 topic: ★⑤**已裁**（玩家走法不印那一區／debug 走法要從卷面看得出來／自驗加一條＋反向走法）—— 落在 `424e0a98a`｜★★而「＝ 0 的斷言要有反向走法」已升格成**本票所有那種格**的形狀（`c305b0c63`，spec §16）｜★★★而這一封存在的理由是：**我那兩次裁定只敲了門、沒寫檔** —— 藍圖的偵測器（沒有 open `to: implementer` 信）抓到的就是這件事
 ---
