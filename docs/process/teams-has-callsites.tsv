@@ -69,12 +69,10 @@ scripts/simulation/player_api_mapper.gd::map_player_snapshot	568	L	守完之後�
 scripts/simulation/player_command_api.gd::_check_controlled_team	20	?	★守衛與使用【跨函式】：本函式只回狀態，真正對那支隊做事的是呼叫端 ⇒ 本工具（只看同一函式內）判不了
 scripts/simulation/player_command_api.gd::execute_action	55	L	守完之後把它【當參數派出去】 @57 result = _cmd_sys.execute_action(state, target_team_id, action_id)
 scripts/simulation/player_command_api.gd::execute_action	64	?	★守衛與使用【跨函式】：本函式只回狀態，真正對那支隊做事的是呼叫端 ⇒ 本工具（只看同一函式內）判不了
-scripts/simulation/player_command_system.gd::_action_confirm_trade	415	L	守完之後把它【當參數派出去】 @417 var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
 scripts/simulation/player_command_system.gd::_action_submit_trade_offer	427	L	守完之後把它【當參數派出去】 @429 var result := PlayerTradeSystem.new().execute_offer(state, pt_id, tid,
 scripts/simulation/player_query_api.gd::get_team_details	30	L	守完之後【取出那支隊】做事 @36 var t: TeamData = state.teams[team_id]
 scripts/simulation/player_query_api.gd::get_member_details	61	L	守完之後把它【當參數派出去】 @64 var discovered: Array = state.team_discovered.get(p.team_id, [])
 scripts/simulation/player_query_api.gd::get_trade_preview	97	L	守完之後把它【當參數派出去】 @100 if target_team_id != pt_id and not discovered.has(target_team_id):
-scripts/simulation/player_query_api.gd::get_trade_direct_preview	121	L	守完之後把它【當參數派出去】 @124 if target_team_id != pt_id and not discovered.has(target_team_id):
 scripts/simulation/player_query_api.gd::get_available_actions	157	L	守完之後把它【當參數派出去】 @165 var actions := _build_available_actions(state, cmd_sys, team_id, membe
 scripts/simulation/player_query_api.gd::_check_player_with_team	180	?	★守衛與使用【跨函式】：本函式只回狀態，真正對那支隊做事的是呼叫端 ⇒ 本工具（只看同一函式內）判不了
 scripts/simulation/player_query_api.gd::_build_available_actions	208	L	守完之後【取出那支隊】做事 @227 var tgt_team: TeamData = state.teams.get(focus_team_id)

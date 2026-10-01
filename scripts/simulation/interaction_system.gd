@@ -1438,54 +1438,10 @@ func execute_prisoner(state: WorldState, team_id: int) -> void:
 		LoyaltyBank.adjust(p, -yi_qi * 0.08, "atrocity")
 	print("[Atrocity] Team%d 處決俘虜，目擊者 loyalty 懲罰" % team_id)
 
-# ──────── 玩家直接呼叫接口（繞過 current_task 檢查）────────
+# ★已退場（2026-10-01）：直接成交那一路的**預覽計算**（它是 systems 漏掉的【第三支】——
+#   唯一呼叫點在第二支的函式體裡 ⇒ 刪那一支之後它變零呼叫點）。
+#   ★名字刻意不寫（P1／P2 的地板是 grep ＝ 0）⇒ 見退場票 spec §3。
 
-# 供 PlayerCommandSystem 呼叫：不需要 seller 有 TASK_TRADE
-# 先嘗試 target 賣 player 買；若無成交再試 player 賣 target 買
-# 返回 { "ok": bool, "msg": String }
-func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) -> Dictionary:
-	var pt: TeamData  = state.teams.get(initiator_id)
-	var tgt: TeamData = state.teams.get(target_id)
-	if pt == null or tgt == null:
-		return { "ok": false, "msg": "隊伍不存在" }
-	# 雙向結算（target 賣 initiator 買 + initiator 賣 target 買）
-	var tgt_coin_before: float = float(tgt.resources.get("coin", 0.0))
-	var pt_coin_before: float  = float(pt.resources.get("coin", 0.0))
-	_attempt_trade_direction(state, tgt, pt)
-	_attempt_trade_direction(state, pt, tgt)
-	if float(tgt.resources.get("coin", 0.0)) != tgt_coin_before \
-			or float(pt.resources.get("coin", 0.0)) != pt_coin_before:
-		return { "ok": true, "msg": "貿易成功" }
-	return { "ok": false, "msg": "無可交易資源" }
-
-func preview_trade(state: WorldState, from_id: int, to_id: int) -> Dictionary:
-	var from_t: TeamData = state.teams.get(from_id)
-	var to_t:   TeamData = state.teams.get(to_id)
-	if from_t == null or to_t == null:
-		return { "feasible": false, "player_gives": {}, "player_gets": {} }
-
-	var gives: Dictionary = {}
-	var gets:  Dictionary = {}
-
-	var from_food: float  = float(from_t.resources.get("food", 0))
-	var to_food: float    = float(to_t.resources.get("food", 0))
-	var from_coin: float  = float(from_t.resources.get("coin", 0))
-	var to_coin: float    = float(to_t.resources.get("coin", 0))
-
-	# 玩家付出：若對方 food 更少，付出部分食物
-	if to_food < from_food * 0.5 and from_food > 10:
-		gives["food"] = minf(from_food * 0.2, from_food)
-
-	# 玩家獲得：若對方 coin 更多，取一部分
-	if to_coin > from_coin * 1.5 and to_coin > 10:
-		gets["coin"] = minf(to_coin * 0.2, to_coin)
-
-	var feasible: bool = not (gives.is_empty() and gets.is_empty())
-	return { "feasible": feasible, "player_gives": gives, "player_gets": gets }
-
-# 供 PlayerCommandSystem 呼叫：不需要 aggressor 有 TASK_LOOT
-# 直接執行勒索資源轉移（food/material/goods/coin × TRIBUTE_RATE）
-# 返回 { "ok": bool, "accepted": bool, "msg": String }
 func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: int) -> Dictionary:
 	var from_t: TeamData = state.teams.get(aggressor_id)
 	var to_t:   TeamData = state.teams.get(target_id)

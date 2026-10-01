@@ -195,23 +195,8 @@ func get_trade_preview(state: WorldState, target_team_id: int) -> Dictionary:
 		"offer_preview": preview,
 	})
 
-# U12: 直接互動交易（resolve_trade_direct）的預覽 — 回 {feasible, player_gives, player_gets}
-# text UI confirm_trade 流程走此 auto-trade，非 offer-based get_trade_preview
-func get_trade_direct_preview(state: WorldState, target_team_id: int) -> Dictionary:
-	var check := _check_player_with_team(state)
-	if check["code"] != "ok":
-		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
-	var p: PersonData = state.persons[state.player_id]
-	var pt_id: int    = p.team_id
-	if not state.teams.has(target_team_id):
-		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
-	var discovered: Array = state.team_discovered.get(pt_id, [])
-	if target_team_id != pt_id and not discovered.has(target_team_id):
-		return PlayerApiMapper.map_query_envelope(false, "not_visible", "team not visible", {})
-	var preview: Dictionary = InteractionSystem.new().preview_trade(state, pt_id, target_team_id)
-	return PlayerApiMapper.map_query_envelope(true, "ok", "", { "preview": preview })
+# ★已退場（2026-10-01）：直接成交那一路的**預覽查詢** —— 理由見 `player_command_system.gd` 那一段。
 
-# 互動 offer-builder：雙方清單+估值+公平度 DTO（reuse evaluate_offer / TradeValuation.local_value）
 func get_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var check := _check_player_with_team(state)
 	if check["code"] != "ok":
@@ -355,176 +340,50 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			"move_to", {"tile_q": cursor_q, "tile_r": cursor_r}
 		))
 
-	# cancel_move (team has a move target)
+	# ══ ★★★★★【自家隊／無目標動作 ＝ 一個迴圈】（spec §3③，2026-10-01）═══════════
+	# ★本處原本是 **11 段各自的 `if`**，每一段：自己判條件、自己寫 label、
+	#   而**條件沒過就不 append** ⇒ 那一列**整列消失**（＝本票的主病 (乙)）。
+	# ★★現在：母體從 `ACTION_SHAPE` 導出（`target=="none" and listed`）、
+	#   `enabled`／`disabled_reason` 來自**共用前置檢查**、`allowed_kinds` 從宣告導出、
+	#   label 來自**唯一的生產者** ⇒ 四件東西都不在這裡重寫。
+	#   ⇒ ★★★而最重要的後果：**不可做的那一列仍然在**（P2b 守它）。
+	# ★★★★而這裡**不准**再出現任何條件字面（`TRAIN_COST_COIN`／`_check_distance`／
+	#   `outpost_level`…）或任何動詞名的字面 —— P3b／P4 就是在驗這件事。
 	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
-	if pt != null and pt.move_target != Vector2i(-1, -1):
+	var none_ids: Array = []
+	for k in PlayerCommandSystem.ACTION_SHAPE.keys():
+		var sh: Dictionary = PlayerCommandSystem.ACTION_SHAPE[k] as Dictionary
+		if String(sh.get("target", "")) == "none" and bool(sh.get("listed", false)):
+			none_ids.append(String(k))
+	none_ids.sort()   # ★順序穩定（卷面與床都靠它）
+	for aid_n in none_ids:
+		var aid: String = String(aid_n)
+		var pc: Callable = cmd_sys._precheck_for(aid)
+		if not pc.is_valid():
+			# ★沒有前置檢查 ⇒ **不在這裡靜默補一個**（那會讓它永遠 enabled）
+			#   ⇒ 床的第四條反向掃會紅並指名。本處跳過並讓那一格說話。
+			continue
+		var pr: Dictionary = pc.call(state, pt)
+		var kind: String = String((PlayerCommandSystem.ACTION_SHAPE[aid] as Dictionary).get("target", "none"))
+		var args: Dictionary = {
+			"action_id": aid,
+			"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
+		}
+		if aid == "take_loot":
+			# ★唯一一個帶額外欄位的（戰利品預覽）—— ★而它要在這裡明文，
+			#   否則合併迴圈會**靜默丟掉**一個欄位（那種丟法不會紅）。
+			args["loot_preview"] = (state.last_encounter_result as Dictionary).get("loot_pool", {})
 		actions.append(PlayerApiMapper.map_available_action(
-			"cancel_move", "取消移動", true, "",
+			aid, _action_label(aid),
+			bool(pr.get("ok", false)), String(pr.get("reason", "")),
 			{
-				"allowed_kinds": PackedStringArray(["none"]),
+				"allowed_kinds": PackedStringArray([kind]),
 				"requires_visible_target": false,
 				"requires_forced_interaction": false,
 				"allows_self_target": false
 			},
-			"cancel_move", {}
-		))
+			"execute_action", args))
 
-	# ★★★【具名登記：這一類沒有來源常數】（spec 2026-09-30 §7，defer 錨在下面這行標記）
-	#   no-source-constant: own-team-actions
-	#   ⇒ 下面這一整段（cancel_move／establish_faction／take_loot／leave_loot／
-	#     subjugate_enemy／confirm_gather_intel／hunt／hunt_beast／camp／train／promote_anon
-	#     ＝ 11 個）的名字**全部是字面**，沒有任何 `const` 可以當母體
-	#   ⇒ 所以本票**不做**這一類的母體（做了就是手抄第二份清單）。
-	#   ★解除條件＝有人為這一類立一個來源常數（那時把這行標記刪掉，延後閘會提醒）。
-	# Layer 5: player-team global actions (no target required)
-	var pt_data: TeamData = state.teams.get(ptid) if ptid != -1 else null
-	if pt_data != null and pt_data.faction_id == -1:
-		actions.append(PlayerApiMapper.map_available_action(
-			"establish_faction", "建立勢力", true, "",
-			{
-				"allowed_kinds": PackedStringArray(["none"]),
-				"requires_visible_target": false,
-				"requires_forced_interaction": false,
-				"allows_self_target": false
-			},
-			"execute_action",
-			{
-				"action_id": "establish_faction",
-				"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
-			}
-		))
-
-	# take_loot / leave_loot when player won last encounter
-	if not state.last_encounter_result.is_empty():
-		var ler: Dictionary = state.last_encounter_result
-		if ler.get("winner_id", -1) == ptid:
-			var loot_preview: Dictionary = ler.get("loot_pool", {})
-			actions.append(PlayerApiMapper.map_available_action(
-				"take_loot", "收取戰利品", true, "",
-				{
-					"allowed_kinds": PackedStringArray(["none"]),
-					"requires_visible_target": false,
-					"requires_forced_interaction": false,
-					"allows_self_target": false
-				},
-				"execute_action",
-				{
-					"action_id": "take_loot",
-					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1},
-					"loot_preview": loot_preview
-				}
-			))
-			actions.append(PlayerApiMapper.map_available_action(
-				"leave_loot", "放棄戰利品", true, "",
-				{
-					"allowed_kinds": PackedStringArray(["none"]),
-					"requires_visible_target": false,
-					"requires_forced_interaction": false,
-					"allows_self_target": false
-				},
-				"execute_action",
-				{
-					"action_id": "leave_loot",
-					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
-				}
-			))
-
-	# subjugate_enemy（戰後可收編）
-	if state.last_encounter_result.get("can_subjugate", false):
-		actions.append(PlayerApiMapper.map_available_action(
-			"subjugate_enemy", "收編敗者", true, "",
-			{
-				"allowed_kinds": PackedStringArray(["none"]),
-				"requires_visible_target": false,
-				"requires_forced_interaction": false,
-				"allows_self_target": false
-			},
-			"execute_action",
-			{"action_id": "subjugate_enemy",
-			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
-		))
-
-	# confirm_gather_intel（等待選題）
-	if state.player_state.has("pending_intel_target"):
-		actions.append(PlayerApiMapper.map_available_action(
-			"confirm_gather_intel", "確認打聽", true, "",
-			{
-				"allowed_kinds": PackedStringArray(["none"]),
-				"requires_visible_target": false,
-				"requires_forced_interaction": false,
-				"allows_self_target": false
-			},
-			"execute_action",
-			{"action_id": "confirm_gather_intel",
-			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
-		))
-
-	# ★★★`offer_surrender` 那一段 Layer 5 的 emit **已刪掉**（本票 §2④，2026-10-01）——
-	#   ★它進了 `TEAM_TARGET_ACTIONS` ⇒ 由 `cmd_sys.get_action_availability()` 那一條路產出
-	#     （本檔 :300）⇒ 留著這一段的話**同一個名字兩條路各產一列**，畫面上出現兩次。
-	#   ★★而刪掉它同時解掉兩份字面：這裡原本手抄了「投降請和」，
-	#     而 `PlayerApiMapper.action_label()` 已經有同一句 ⇒ 刪掉就少一份（不是改成呼它）。
-	#   ★★★還有一件被它一起帶走：這裡的 `enabled` 硬寫 `true`、原因硬寫 `""`
-	#     ⇒ 那是**第二個決定者**（它與全列版對「能不能做」給不同答案）。
-	#     ⇒ 處置不是「加一格守兩邊一致」，是**移除對那一格的需求**。
-
-	# Layer 6: 玩家隊 self/tile 動作（hunt/hunt_beast，依腳下 tile）
-	var self_tile: HexTileData = pt_tile_self(state, ptid)
-	if self_tile != null:
-		if int(self_tile.resources.get("wild_game", 0)) > 0:
-			actions.append(PlayerApiMapper.map_available_action(
-				"hunt", _action_label("hunt"), true, "",
-				{ "allowed_kinds": PackedStringArray(["none"]),
-				  "requires_visible_target": false, "requires_forced_interaction": false,
-				  "allows_self_target": false },
-				"execute_action",
-				{ "action_id": "hunt", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
-		if int(self_tile.resources.get("predator_density", 0)) > 0:
-			actions.append(PlayerApiMapper.map_available_action(
-				"hunt_beast", _action_label("hunt_beast"), true, "",
-				{ "allowed_kinds": PackedStringArray(["none"]),
-				  "requires_visible_target": false, "requires_forced_interaction": false,
-				  "allows_self_target": false },
-				"execute_action",
-				{ "action_id": "hunt_beast", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
-
-	# camp（self-action,紮營）：腳下無主 + 非山地 + 未開發 + 距離 spacing 通過才列（免材料落腳 lvl1 outpost）。
-	# N-3: 補 _action_camp 的 _check_distance 真 gate（否則距離太近恆列→選後才拒）。
-	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
-	if camp_type not in ["civilian", "military"]: camp_type = "civilian"
-	if self_tile != null and self_tile.outpost_level == 0 and self_tile.outpost_owner == -1 \
-			and self_tile.terrain != "mountain" \
-			and OutpostSystem.new()._check_distance(state, self_tile.tile_pos, camp_type):
-		actions.append(PlayerApiMapper.map_available_action(
-			"camp", _action_label("camp"), true, "",
-			{ "allowed_kinds": PackedStringArray(["none"]),
-			  "requires_visible_target": false, "requires_forced_interaction": false,
-			  "allows_self_target": false },
-			"execute_action",
-			{ "action_id": "camp", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
-
-	# train（self-action）：有匿名人口 + coin >= TRAIN_COST_COIN 才列。一次性 coin→add_exp+try_promote。
-	# N-3: 補 _action_train 的 coin 真 gate（否則 coin 不足恆列→選後才拒）。
-	var pt_train: TeamData = state.teams.get(ptid) if ptid != -1 else null
-	if pt_train != null and AnonTierSystem.total_pop(pt_train) > 0 \
-			and float(pt_train.resources.get("coin", 0)) >= PlayerCommandSystem.TRAIN_COST_COIN:
-		actions.append(PlayerApiMapper.map_available_action(
-			"train", _action_label("train"), true, "",
-			{ "allowed_kinds": PackedStringArray(["none"]),
-			  "requires_visible_target": false, "requires_forced_interaction": false,
-			  "allows_self_target": false },
-			"execute_action",
-			{ "action_id": "train", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
-
-	# promote_anon（self-action）：有匿名人口才列。拔擢 1 anon→named（對稱性,解全 anon 隊無法派子隊）。
-	if pt_train != null and AnonTierSystem.total_pop(pt_train) > 0:
-		actions.append(PlayerApiMapper.map_available_action(
-			"promote_anon", _action_label("promote_anon"), true, "",
-			{ "allowed_kinds": PackedStringArray(["none"]),
-			  "requires_visible_target": false, "requires_forced_interaction": false,
-			  "allows_self_target": false },
-			"execute_action",
-			{ "action_id": "promote_anon", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
 
 	return actions
 

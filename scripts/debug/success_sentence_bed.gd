@@ -38,7 +38,25 @@ const EXPECT_CELLS: Array = [
 #   ★★這一族今天第四次（一張票改的就是閘）—— 而抓到它的是
 #     「改完之後要重跑那支床本身」那條紀律，不是我想起來。
 const SPEC_SUCCESS_RETURNS: int = 68
-const SPEC_REGISTRY_ACTIONS: int = 51
+# ★★★★★【母體排除「純查詢前置檢查」】（systems 裁 (乙) 2026-10-01）——
+#   本格問的是「**成功結果句**用 handler 自己的話」，而 `precheck_*` 的
+#   `{"ok": true, "reason": ""}` **沒有句子** ⇒ 把它算進來是**稀釋母體**
+#   （一個真的「少了句子」的 handler 會更容易躲過去）。
+#   ★★而處置是**排除母體**不是**把 68 調大**：
+#     把常數調大 ＝ 讓守衛閉嘴；排除母體 ＝ 改它在問什麼。
+#   ★★★排除三件缺一不可：①宣告在一處（下面這個前綴）②判準錨在**函式體**
+#     （不裸掃整檔）③**反向掃**（長得像前置檢查而不在那個前綴下的 ⇒ 紅並指名）。
+const SPEC_PRECHECK_PREFIX: String = "precheck_"
+const SPEC_REGISTRY_ACTIONS: int = 50
+# ★★★★★51 → 50（2026-10-01，「直接成交」那條路線退場 ⇒ registry 少一列）——
+#   ★這個數是從**床自己的輸出**抄的（它紅在「50／51」那一行），不是推算的。
+#   ★★而本處值得記：退場票的 spec 用的是【指名清單】（§3 逐一列出要改哪幾處），
+#     而**那份清單沒有點到這一支床** —— 接住它的是「跑一遍然後看它紅在哪」。
+#     ⇒ 判準：**指名清單會漏，而跑出來的紅不會**
+#       ⇒ 指名是為了「不要誤改」，不是為了「不會漏」；兩者要各自有機制。
+#   ★★★而它的負對照（本檔 :126 那一行）逐字寫著「從 registry 拿掉一個 action（51→50）」
+#     ⇒ 那一道對照**今天真的發生了**（而且是正式改動不是擾動）
+#     ⇒ 那一行的 51→50 不動：它記的是**那一天**那道對照的數，不是現況。
 const SPEC_NON_REGISTRY_DIFF: int = 3
 
 
@@ -185,7 +203,7 @@ func _test_p2_population_is_visible() -> void:
 		defs.size(), vals.size(), diff.size(), str(diff)])
 	print("      ＋早返／inline：choose_heir、ignore")
 	print("      ＋第二條分派邊 execute_action_with_target 的 4 個 case")
-	print("      ＋轉出別系統 dict：_action_confirm_trade、_action_submit_trade_offer")
+	print("      ＋轉出別系統 dict：_action_submit_trade_offer（★另一支已退場 2026-10-01）")
 	print("        （★列【函式名】不列行號 —— 行號逐樹會飄）")
 	_check("★★★欄②差集與【spec 的常數】相符（%d／%d）" % [diff.size(), SPEC_NON_REGISTRY_DIFF],
 		diff.size() == SPEC_NON_REGISTRY_DIFF)
@@ -193,11 +211,25 @@ func _test_p2_population_is_visible() -> void:
 	# ══ 欄③ 成功回傳逐條列名（寬視窗：ok:true 那一行往後看 3 行找話）★不以 return { 為錨
 	var rows: Array = []
 	var no_literal: Array = []
+	# ★★★★★【先把每一行歸到它所屬的函式】—— 判準錨在**函式體**不是裸掃整檔
+	#   （★血證：同一支床裡兩個抽取式而只有一個做對 —— 2026-10-01）
+	var owner: Array = []          # 每一行屬於哪一支函式
+	var cur_fn: String = ""
+	for i0 in range(lines.size()):
+		var l0: String = String(lines[i0])
+		if l0.begins_with("func "):
+			cur_fn = l0.substr(5, maxi(0, l0.find("(") - 5))
+		owner.append(cur_fn)
+	var excluded: Array = []       # ★逐名（不是只報一個數）
 	for i in range(lines.size()):
 		var t: String = String(lines[i]).strip_edges()
 		if t.begins_with("#"):
 			continue
 		if not t.contains("\"ok\": true"):
+			continue
+		# ★排除「純查詢前置檢查」：它的 `ok:true` 不帶句子 ⇒ 不是結果句
+		if String(owner[i]).begins_with(SPEC_PRECHECK_PREFIX):
+			excluded.append("%d: %s()" % [i + 1, String(owner[i])])
 			continue
 		var win: String = ""
 		for j in range(i, mini(i + 4, lines.size())):
@@ -227,6 +259,57 @@ func _test_p2_population_is_visible() -> void:
 		else:
 			rows.append("%d: %s" % [i + 1, txt])
 	var total: int = rows.size() + no_literal.size()
+	# ★★★★★【三個數都印出來給人看】（systems 裁 2026-10-01）——
+	#   ★不是「斷言 78−10＝68 成立」而是**把那個減法印在卷面上**：
+	#     兩個數字相等而量綱不同是今天栽過的形狀 ⇒ 要讓讀的人看見它怎麼來的。
+	print("   欄③母體：掃到 `\"ok\": true` 共 %d 條 ＝ 排除 %d 條（純查詢前置檢查）＋ 剩餘 %d 條" % [
+		total + excluded.size(), excluded.size(), total])
+	print("   ── 被排除的（逐名；★它們的 `ok:true` 不帶句子 ⇒ 不是結果句）──")
+	for e in excluded:
+		print("     " + String(e))
+	print("   ★★而 `precheck_*` 有 11 支而這裡只排除到 %d 條 —— 那個差是**真的**：" % excluded.size())
+	print("     `precheck_leave_loot` 的成功路徑是 `return precheck_take_loot(state, pt)`")
+	print("     （條件共用、不抄第二份）⇒ 它**沒有自己的 `\"ok\": true` 字面** ⇒ 掃不到它。")
+	print("     ⇒ ★「11 支」與「10 個字面」量綱不同：前者數函式、後者數字面。")
+	# ★★★反向掃：長得像前置檢查而**不在**那個前綴下的 ⇒ 紅並指名
+	#   （防命名慣例的例外，也防有人把 `precheck_*` 改名）
+	# ★★★★★【反向掃要印出它自己的母體】（systems 裁 2026-10-01 §2）——
+	#   ★回 `[]` 有兩種成因而**卷面上長得一樣**：
+	#     (a) 真的沒有違規（我們要的）  (b) **母體為空**（抽取式一個成員都沒抓到）
+	#   ⇒ 所以把三個數印在**同一段**：掃到幾行 `ok:true`／其中「有 `reason` 無 `msg`/`message`」
+	#     幾行（＝反向掃**真正的母體**）／其中不在 `precheck_*` 內幾行（＝那個 `[]` 的**分子**）
+	#   ⇒ ★★判準（systems 自己寫過的）：**任何回 0／回空的量，要在印出那個 0 的同一行問
+	#     「有沒有可能是我沒看到，而不是它不存在」**。
+	var looks_like: Array = []
+	var n_ok_lines: int = 0          # 掃到幾行 `ok: true`（含被排除的）
+	var n_reason_shape: int = 0      # 其中「有 reason 無 msg/message」＝ 反向掃真正的母體
+	for i2 in range(lines.size()):
+		var t2: String = String(lines[i2]).strip_edges()
+		if t2.begins_with("#") or not t2.contains("\"ok\": true"):
+			continue
+		n_ok_lines += 1
+		var w2: String = ""
+		for j2 in range(i2, mini(i2 + 3, lines.size())):
+			w2 += String(lines[j2]) + " "
+		var is_reason_shape: bool = w2.contains("\"reason\"") and not (
+			w2.contains("\"msg\"") or w2.contains("\"message\""))
+		if not is_reason_shape:
+			continue
+		n_reason_shape += 1
+		if String(owner[i2]).begins_with(SPEC_PRECHECK_PREFIX):
+			continue
+		looks_like.append("%d: %s()" % [i2 + 1, String(owner[i2])])
+	print("   ★反向掃的母體：掃到 `\"ok\": true` %d 行 ⇒ 其中「有 `reason` 無 `msg`/`message`」%d 行（＝母體）⇒ 其中不在 `%s*` 內 %d 行（＝那個清單）" % [
+		n_ok_lines, n_reason_shape, SPEC_PRECHECK_PREFIX, looks_like.size()])
+	print("     ⇒ ★`[]` 的意思要看中間那個數：母體 %d > 0 ⇒ 它是「沒有違規」；母體 0 ⇒ 它是「母體為空」。" % n_reason_shape)
+	_check("★★母體地板：反向掃的母體不是空的（%d；0 ⇒ 下面那個 `[]` 什麼都沒說）" % n_reason_shape,
+		n_reason_shape > 0)
+	print("   ★反向掃：帶 `reason` 而不帶 `msg`/`message`、又不在 `%s*` 下的 ＝ %s" % [
+		SPEC_PRECHECK_PREFIX, str(looks_like)])
+	_check("★★★★反向掃：沒有「長得像前置檢查而不在那個前綴下」的（有 ⇒ 命名慣例有例外或有人改名：%s）"
+		% str(looks_like), looks_like.is_empty())
+	_check("★母體地板：真的排除到東西（0 ⇒ 這個排除沒有生效而下面那條會拿舊母體去比）",
+		excluded.size() > 0)
 	print("   欄③成功回傳共 %d 條（spec 說 %d）｜其中【沒有字面文案】%d 條" % [
 		total, SPEC_SUCCESS_RETURNS, no_literal.size()])
 	# ★★★全印、不分類 —— 由讀的人判哪幾條不像結果句

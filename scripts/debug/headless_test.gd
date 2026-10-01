@@ -162,7 +162,7 @@ func _initialize() -> void:
 	_test_extraction()
 	_test_player_extract_treasury()
 	_test_encounter_treasury_loot()
-	_test_u12_trade_direct_preview()
+	# ★【已退場 2026-10-01】`_test_u12_trade_direct_preview` 整格退場 ——它守的那條路線不存在了（退場票）。
 	_test_on_team_extinct_to_storage()
 	_test_mint_cap_no_ore_burn()
 	_test_extinct_offmap_coin_ledger()
@@ -8971,26 +8971,10 @@ func _test_player_extract_treasury() -> void:
 	assert(float(team.resources["coin"]) == 50.0, "coin 應 50")
 	print("CoinStorage Task9 OK")
 
-func _test_u12_trade_direct_preview() -> void:
-	# U12 重現：互補資源時 auto-trade 預覽應 feasible，不誤判「無資源」
-	print("--- U12 trade direct preview ---")
-	var st := WorldState.new(); st.world = WorldData.new()
-	var pa := PersonData.new(); pa.id = 1; pa.team_id = 0
-	st.persons[1] = pa; st.player_id = 1
-	var t0 := TeamData.new(); t0.team_id = 0
-	t0.resources = { "food": 100.0, "coin": 5.0 }
-	var t1 := TeamData.new(); t1.team_id = 1
-	t1.resources = { "food": 5.0, "coin": 100.0 }
-	st.teams[0] = t0; st.teams[1] = t1
-	st.team_discovered[0] = [1]
-	var qa := PlayerQueryApi.new()
-	var res := qa.get_trade_direct_preview(st, 1)
-	assert(res.get("ok", false), "preview 應 ok")
-	var prev: Dictionary = res.get("data", {}).get("preview", {})
-	assert(prev.has("feasible"), "preview shape 須含 feasible（U12 根因：原讀錯 API shape）")
-	assert(prev.get("feasible", false),
-		"雙方互補資源 → feasible，不應誤判『無可交換資源』")
-	print("U12 trade preview OK: %s" % str(prev))
+# ★★【已退場 2026-10-01】這一格原本驗「直接成交的預覽」那條路線的查詢面回傳，
+#   而整條路線已退場（藍圖裁 (乙)：世界裡沒這個機制，只有一條玩家專用捷徑）。
+#   ★刪整格而不是改它：它問的那個問題不存在了（「守衛量的機制被換掉了」那一族，
+#     而正確處置是讓它消失，不是讓它改問另一件事）。
 
 func _test_encounter_treasury_loot() -> void:
 	print("--- CoinStorage Task10: encounter loot 比例 ---")
@@ -14323,7 +14307,7 @@ func _test_action_ui_coverage() -> void:
 		"choose_heir": "forced-mode", "respond_aid_request": "forced-mode",
 		"surrender_pre_encounter": "pre-encounter", "accept_encounter": "pre-encounter",
 		"surrender_in_encounter": "encounter-view",
-		"refresh_targets": "internal(dead)", "confirm_trade": "internal(legacy)",
+		"refresh_targets": "internal(dead)",   # ★那一項已退場（2026-10-01）
 	}
 	var cs := PlayerCommandSystem.new()
 	var missing: Array = []

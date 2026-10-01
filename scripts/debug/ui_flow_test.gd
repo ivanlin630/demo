@@ -9,7 +9,7 @@ var _errors: int = 0
 const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
 const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -120,6 +120,8 @@ func _initialize() -> void:
 	await _test_p30_submode_panels_reach_the_screen()
 	await _test_p31_esc_pops_exactly_one_layer()
 	await _test_p32_unbound_keys_leave_the_action_region_intact()
+	await _test_p33_listed_matches_the_screen()
+	await _test_p34_trade_enter_submits_the_offer()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -214,9 +216,25 @@ func _test_camp_action_reachable() -> void:
 		near = HexTileData.new(); near.tile_pos = near_pos; st.world.tiles[near_pos.x*1000+near_pos.y] = near
 	near.outpost_level = 1; near.outpost_owner = 999; near.outpost_type = "civilian"
 	node._refresh()
+	# ★★★★★【這條斷言翻面了，而舊標題寫的是一個【病】】（2026-10-01，systems 授權）——
+	#   舊斷言：「距離太近時 camp **不列**（N-3 gate）」
+	#   ⇒ ★它把 (乙)【不可做的那一列整列消失】**當成預期行為**寫進守衛裡，
+	#     而藍圖裁的是「情境動作不可做時【列出＋引擎給的原因】」。
+	#   ⇒ ★★新斷言：camp **仍然在列上**、`enabled==false`、而**原因非空**。
+	#     ⇒ 三條分開，因為它們是三件事（在不在／能不能／說不說）。
+	var self_rows2: Array = node._interact_action_split()["self"]
 	var self_ids2: Array = []
-	for a in node._interact_action_split()["self"]: self_ids2.append(a.get("action_id",""))
-	_check("距離太近時 camp 不列（N-3 gate）", not ("camp" in self_ids2))
+	var camp_row: Dictionary = {}
+	for a in self_rows2:
+		self_ids2.append(a.get("action_id", ""))
+		if String(a.get("action_id", "")) == "camp":
+			camp_row = a as Dictionary
+	print("   自家隊那一側 %d 列：%s" % [self_rows2.size(), str(self_ids2)])
+	_check("★★★距離太近時 camp **仍然列出**（舊斷言寫的是它消失 ＝ 把 (乙) 的病當預期）",
+		"camp" in self_ids2)
+	_check("★★而它 `enabled==false`", not bool(camp_row.get("enabled", true)))
+	_check("★★★★而它的原因**非空**（實測「%s」）" % String(camp_row.get("disabled_reason", "")),
+		String(camp_row.get("disabled_reason", "")).strip_edges() != "")
 	await _free_ui(node)
 	_cell("_test_camp_action_reachable")
 
@@ -851,16 +869,43 @@ func _test_u21_interact_paging() -> void:
 	node._refresh()
 	var pending_n: int = node._cached_snapshot.get("pending_targets", []).size()
 	_check("pending_targets >9（造同格隊成功）", pending_n > 9)
-	# 翻到第 2 頁，按 KEY_1 → 全域 idx 9（第 10 項）
-	node._handle_interact_mode(KEY_PERIOD)   # 下一頁
-	node._handle_interact_mode(KEY_1)        # 該頁第 1 = 全域第 10
+	# ★★★★★【兩側各自獨佔鍵空間與頁計數之後，這一格要先【切到目標那一側】】
+	#   （2026-10-01，systems 裁：刪掉偏移、兩個母體各自獨佔 1..9 與各自的頁計數）
+	#   ⇒ 舊版靠 `num - self_acts.size()` 的偏移落到目標清單上 ——
+	#     而那個偏移正是不變量 #10 的血證（目標鍵的意義由自家隊清單的長度決定）。
+	#   ⇒ ★所以現在要按【切換鍵】（玩家按的鍵 ⇒ #10 允許它當判別子），再翻頁。
+	_check("★母體地板：預設在自家隊那一側（否則下面那一按不是『切過去』）",
+		node._interact_pane == TextUiMain.PANE_SELF)
+	node._handle_interact_mode(TextUiMain.PANE_TOGGLE_KEY)
+	_check("★★切換鍵真的把數字鍵換到目標那一側", node._interact_pane == TextUiMain.PANE_TARGETS)
+	# 翻到第 2 頁，按 KEY_1 → 該側全域 idx 9（第 10 項）
+	node._handle_interact_mode(KEY_PERIOD)   # 下一頁（★翻的是目標那一側自己的頁）
+	_check("★★★目標那一側的頁變了，而自家隊那一側的頁【沒有被連動】（%d／%d）" % [
+		node._target_page, node._self_page],
+		node._target_page == 1 and node._self_page == 0)
+	node._handle_interact_mode(KEY_1)        # 該頁第 1 = 該側全域第 10
 	_check("分頁後可選第 10+ 項（_interact_target 已設）", node._interact_target != -1)
 	await _free_ui(node)
 
-# U12：交易確認顯示真有資源（解過去顯「無資源」的 GUI 路徑 bug）。
-# 真路徑：_build_trade_str → query_trade_direct_preview → InteractionSystem.preview_trade。
-# preview API 需 target 在玩家 team_discovered 內，否則回 not_visible（無 preview）。
 	_cell("_test_u21_interact_paging")
+# U12：交易確認顯示真有資源（解過去顯「無資源」的 GUI 路徑 bug）。
+# ★★★★★【這段註解今天之前是假的，而它怎麼過期的值得留著】（2026-10-01，systems 抓到）：
+#   舊註解寫的「真路徑」指向**直接成交那條路線的預覽 API**
+#   （★那兩個函式名已於 2026-10-01 整支退場 ⇒ ★★這裡**刻意不寫它們的字面**：
+#     退場票的 P2 要求那幾個名字在 `scripts/` 下各 0 命中，而一段**描述它們**的註解
+#     與一處**使用它們**的 code 在文字上同形 ⇒ 會把那條地板咬紅。
+#     ⇒ 判準：寫「某個名字已經不該存在」的註解時，不要把那個名字寫進去。）
+#   ★而 `_build_trade_str`
+#   （`scripts/ui/text_ui_main.gd:2777`）讀的是 **`query_trade_session`**（`:2782`），
+#   而 `text_ui_main.gd` 全檔 `trade_direct` 命中數 ＝ **0**。
+# ★★而它為什麼沒有人發現：**本格的斷言對路徑不可知** ——
+#   它呼 production 的 `_build_trade_str()` 然後只看回傳字串，
+#   所以路徑換了它照樣綠 ⇒ **唯一宣稱路徑的東西就是這段註解**，而註解不會紅。
+#   ⇒ ★★★判準：**一個「路徑不可知」的斷言配一段「宣稱路徑」的註解 ＝ 那段註解沒有守衛**
+#     ⇒ 要嘛讓斷言去驗路徑，要嘛就地寫明「本註解不承重」。本格選後者（見下一行）。
+# ★今天真的走的路徑：`_build_trade_str` → `SimBridge.query_trade_session`
+#   ⇒ ★而本格**驗的是回傳字串**不是那條路徑 ⇒ 這一行是**背景說明，不是斷言**。
+# preview API 需 target 在玩家 team_discovered 內，否則回 not_visible（無 preview）。
 func _test_u12_trade_str() -> void:
 	_selftest_gate("_test_u12_trade_str").noop()
 	print("\n── U12 交易顯示有資源 ──")
@@ -2384,7 +2429,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 33   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 34   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -2747,7 +2792,39 @@ func _test_p24_number_keys_never_mean_response() -> void:
 	for i in range(res0, st.command_results.size()):
 		said += String(st.command_results[i].get("text", "")) + " "
 	print("   結果句 = %s" % said)
-	_check("★KEY_1 做的是自家隊動作（結果句有「行動：」前綴）", said.contains("行動："))
+	# ★★★★★【這一格的按法要改，而理由不是斷言錯了】（2026-10-01）——
+	#   自家隊那一側現在是**常駐 11 列且排序固定**（第二母體那張票的 (乙) 治好之後）
+	#   ⇒ 第 1 列不再保證**可做**（實測排序後第一個是 `camp`，而它常常不可做）
+	#   ⇒ ★按位置 1 會打到一列 disabled ⇒ 得到的是「原因」不是「行動：」
+	#   ⇒ ★★所以改成：找出**第一個可做的**那一列，按它的鍵（而鍵 ＝ 該頁位置）。
+	#     ★★★而這不是弱化：它驗的仍然是「數字鍵打在自家隊那一側」，
+	#       只是不再假設「位置 1 一定可做」—— 那個假設本來就不該在。
+	print("   結果句（按位置 1）＝ %s" % said)
+	var self_rows_k: Array = node._interact_action_split()["self"]
+	var first_ok: int = -1
+	for ii in range(mini(9, self_rows_k.size())):
+		if bool((self_rows_k[ii] as Dictionary).get("enabled", false)):
+			first_ok = ii
+			break
+	var names_k: Array = []
+	for r_k in self_rows_k:
+		names_k.append("%s%s" % [String((r_k as Dictionary).get("action_id", "")),
+			"" if bool((r_k as Dictionary).get("enabled", false)) else "(不可)"])
+	print("   自家隊那一側第一頁：%s ⇒ 第一個可做的在位置 %d" % [str(names_k), first_ok + 1])
+	_check("★母體地板：第一頁裡至少有一列可做（0 ⇒ 本格測不到「做了一個動作」）", first_ok >= 0)
+	if first_ok >= 0:
+		var res_k: int = st.command_results.size()
+		node._handle_interact_mode(KEY_1 + first_ok)
+		var frames_k: int = 0
+		while node._bridge.is_advancing() and frames_k < 8:
+			node._process(0.1)
+			frames_k += 1
+		var said_k: String = ""
+		for i_k in range(res_k, st.command_results.size()):
+			said_k += String(st.command_results[i_k].get("text", "")) + " "
+		print("   結果句（按第一個可做的 [%d]）＝ %s" % [first_ok + 1, said_k])
+		_check("★KEY_%d 做的是自家隊動作（結果句有「行動：」前綴）" % (first_ok + 1),
+			said_k.contains("行動："))
 	await _free_ui(node)
 	_cell("_test_p24_number_keys_never_mean_response")
 # ★★★不變量 #10 的執法面要【擴到全部 mode】（systems 裁 2026-09-30）：
@@ -3531,6 +3608,132 @@ static func _action_region(screen: String) -> String:
 	if a < 0 or b < 0 or b <= a:
 		return "★切不出動作區（a=%d b=%d）" % [a, b]   # ★回一個【會讓比較失敗】的字串，不回空
 	return screen.substr(a, b - a)
+
+
+# == P33：★★★★★【宣告 vs 畫面】`listed` 那一欄要說實話 ========================
+# ★缺口（systems 2026-10-01 指出）：`ACTION_SHAPE` 的 `listed` 與**畫面上真的有幾列**
+#   這兩個數，**今天沒有任何一格在比** ⇒ 它們可以漂開而沒有人知道
+#   （血證：`cancel_move` 宣告 `listed: true` 而 `text_ui_main.gd:1841` 把它濾掉 ⇒ 11 vs 10）。
+# ★★而兩邊必須**異源**：這裡的「畫面側」是**從 `_screen_label.text` 數 `[n]` 那些列**
+#   —— ★**不用** `_interact_action_split()` 的回傳：那是同一條路上的中間值
+#   ⇒ 拿它比宣告是**同源比較**（恆真），而我們今天已經栽過一次。
+# ★★★而「數字鍵按得到幾列」才是玩家那一側的真問題 ⇒ 所以要**翻完所有頁**再數。
+# 負對照：把 `cancel_move` 的 `listed` 改回 `true` ⇒ 本格紅「宣告 11／畫面 10」而全檔只這 1 個 FAIL ⇒ 已於 74c4ccd8d（2026-10-01 這一輪） 實測紅
+func _test_p33_listed_matches_the_screen() -> void:
+	_selftest_gate("_test_p33_listed_matches_the_screen").noop()
+	print("\n── P33 宣告 vs 畫面（`listed` 要說實話）──")
+	# 宣告側
+	var declared: Array = []
+	for k in PlayerCommandSystem.ACTION_SHAPE.keys():
+		var sh: Dictionary = PlayerCommandSystem.ACTION_SHAPE[k] as Dictionary
+		if String(sh.get("target", "")) == "none" and bool(sh.get("listed", false)):
+			declared.append(String(k))
+	declared.sort()
+	print("   宣告側（`target==\"none\" and listed`）＝ %d 個：%s" % [declared.size(), str(declared)])
+	_check("★母體地板 A：宣告側不是空的", declared.size() > 0)
+	# 畫面側：進互動模式（不聚焦目標）⇒ 自家隊那一屏 ⇒ 翻完所有頁，數 `[n]` 那些列
+	var node = await _make_ui()
+	node._close_all_modes()
+	node._interact_mode = true
+	node._interact_target = -1
+	node._interact_pane = TextUiMain.PANE_SELF
+	node._self_page = 0
+	node._refresh()
+	var seen_rows: Array = []
+	var guard: int = 0
+	while guard < 8:
+		guard += 1
+		var screen: String = String(node._screen_label.text)
+		var a: int = screen.find("── 自家隊動作")
+		_check("★★母體地板 B：畫面上找得到自家隊那一屏的標題（找不到 ⇒ 下面數到 0 而那是假的）",
+			a >= 0)
+		if a < 0:
+			break
+		var b: int = screen.find("── 可互動目標", a)
+		var block: String = screen.substr(a, (b - a) if b > a else 400)
+		for line in block.split("\n"):
+			var l: String = String(line)
+			# 一行可能有多個 `[n]xxx` ⇒ 逐個切
+			var parts: PackedStringArray = l.split("[")
+			for p in parts:
+				var ps: String = String(p)
+				if ps.length() < 3 or not ps[1] == "]":
+					continue
+				if not ps[0].is_valid_int():
+					continue
+				var lbl: String = ps.substr(2).strip_edges()
+				if lbl == "":
+					continue
+				if not seen_rows.has(lbl):
+					seen_rows.append(lbl)
+		var pages_done: bool = not block.contains("[.]下") or node._self_page >= 7
+		if pages_done:
+			break
+		var before: int = node._self_page
+		node._handle_interact_mode(KEY_PERIOD)
+		if node._self_page == before:
+			break
+	print("   畫面側（翻完所有頁、從 `_screen_label` 數 `[n]` 那些列）＝ %d 列" % seen_rows.size())
+	for r in seen_rows:
+		print("     · %s" % String(r))
+	_check("★★★母體地板 C：畫面側數到東西（0 ⇒ 下面那條會拿 0 跟宣告比而紅得沒有意義）",
+		seen_rows.size() > 0)
+	_check("★★★★★宣告的列數 ＝ 畫面上按得到的列數（宣告 %d／畫面 %d）" % [
+		declared.size(), seen_rows.size()],
+		declared.size() == seen_rows.size())
+	print("   ★誠實限：畫面側比的是**列數**不是**逐名**（畫面印 label、宣告存 id）")
+	print("     ⇒ 失效方向：**數字相同而成員不同**時本格綠（那是「數字對而東西不在」那一族）")
+	print("     ⇒ ★而指名那一半由 P16／P18 的反向掃守（它們比的是 id 集合）。")
+	await _free_ui(node)
+	_cell("_test_p33_listed_matches_the_screen")
+
+
+# == P34：★★★★★【貿易正路沒壞】trade 子模式 [Enter] 真的送出出價 ================
+# ★這一格是「不配對直接成交退場」那張票的 P5，而它**原本不存在** ——
+#   我照 spec 去指名「那一格」的時候發現：**全庫沒有任何床按過 `KEY_ENTER`**
+#   （`grep -rn KEY_ENTER scripts/debug/` ＝ 0 命中）⇒ 送出那條路**零行為覆蓋**。
+#   ⇒ ★★而那張票的真風險**正是**把正路一起弄壞（不是刪得乾不乾淨）
+#     ⇒ 一張票的真風險沒有守衛，而那件事是**照著 spec 去找那一格**才發現的。
+#   ⇒ ★★★判準：**spec 說「那一格要綠」的時候，先確認那一格存在** ——
+#     「指名一格」與「那一格存在」是兩件事，而前者讀起來像後者。
+# ★而本格**不驗成交結果**（對方可以拒絕／資源可能不足）：它驗的是
+#   **[Enter] 真的把 `submit_trade_offer` 這道令送出去**（送出 ≠ 成功）。
+# 負對照：把送出那一支的 `KEY_ENTER` 分支拿掉 ⇒ 佇列裡沒有那道令 ⇒ 必紅 ⇒ 待實測
+func _test_p34_trade_enter_submits_the_offer() -> void:
+	_selftest_gate("_test_p34_trade_enter_submits_the_offer").noop()
+	print("
+── P34 trade 子模式 [Enter] 送出出價 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	st.teams[ptid].resources["food"] = 50.0
+	var npc := TeamData.new(); npc.team_id = 7778; npc.tile_pos = ppos
+	AnonTierSystem.add_anon(npc, "平民", 5)
+	npc.resources = {"coin": 100}
+	st.teams[7778] = npc
+	node._trade_mode = true
+	node._trade_target_id = 7778
+	st.player_state["pending_trade_target"] = 7778
+	st.player_state["trade_offer"] = {"player_gives": {"food": 10}, "player_wants": {"coin": 10}}
+	node._refresh()
+	_check("★母體地板 A：真的在 trade 子模式（否則按 Enter 走的是別的 handler）",
+		bool(node._trade_mode))
+	_check("★★母體地板 B：出價真的在 state 裡（空出價時那一支可能早退 ⇒ 本格沒有主詞）",
+		not (st.player_state.get("trade_offer", {}) as Dictionary).is_empty())
+	var before: int = st.pending_commands.size()
+	node._handle_trade_mode(KEY_ENTER)
+	var sent: Array = []
+	for i in range(before, st.pending_commands.size()):
+		var a: Dictionary = (st.pending_commands[i] as Dictionary).get("args", {})
+		if a.has("action_id"):
+			sent.append(String(a.get("action_id", "")))
+	print("   按 [Enter] ⇒ 佇列新增 %d 道令：%s" % [st.pending_commands.size() - before, str(sent)])
+	_check("★★★★★[Enter] 真的把 `submit_trade_offer` 送出去（送出 ≠ 成功；實測 %s）" % str(sent),
+		sent.has("submit_trade_offer"))
+	print("   ★本格不驗成交結果（對方可以拒絕、資源可能不足）—— 它驗的是那道令有沒有被送出。")
+	await _free_ui(node)
+	_cell("_test_p34_trade_enter_submits_the_offer")
 
 
 # ══ P19：負對照覆蓋率棘輪 —— ★這一格【自己被改過】（2026-10-01）═══════════════

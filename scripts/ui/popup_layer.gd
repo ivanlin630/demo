@@ -259,7 +259,7 @@ func show_loot_panel(loot_preview: Dictionary, take_fn: Callable, leave_fn: Call
 	_current_popup = popup; add_child(popup)
 
 # preview: { feasible: bool, player_gives: {}, player_gets: {} }
-# confirm_fn: Callable() — execute confirm_trade
+# confirm_fn: Callable() —— ★原本這裡寫的那個動作已退場（2026-10-01，直接成交那一路）
 # cancel_fn: Callable() — execute cancel_trade
 func show_trade_preview(preview: Dictionary, confirm_fn: Callable, cancel_fn: Callable) -> void:
 	_close_current()
