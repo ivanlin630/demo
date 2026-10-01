@@ -33,6 +33,15 @@ var _cells_ran: Array = []
 # ★spec §3 的母體地板：需要同格的動詞有幾個／例外有幾個，相加要等於【團體目標動詞總數】。
 #   ★★而這三個數【不是我手抄的】：P2 從 `get_available_actions` 的 append 字面機械導出，
 #     再與 `TEAM_TARGET_ACTIONS` 做集合比對。這裡的常數只是「spec 說幾個」那一半。
+#   ★★★★★【2026-10-01 本支床的錨換了來源，而名字沒換】：`TEAM_TARGET_ACTIONS`
+#     已收成 `PlayerCommandSystem.ACTION_SHAPE` 裡 `target == "team"` 的**衍生檢視**
+#     ⇒ ①本支床的每一個 `for act in PlayerCommandSystem.TEAM_TARGET_ACTIONS` 現在
+#       迭代的是**那張表導出來的集合**（而行為斷言照舊：它們問的是閘擋不擋，不是成員身分）
+#     ⇒ ②`SPEC_TEAM_TARGET_TOTAL`（本檔持有）**仍然是外部期望** —— 它是這支床唯一
+#       能在「有人把一支的 `target` 從 `"team"` 改掉」時說話的地方。
+#     ⇒ ③而下面那三行 12 個名字**是給人讀的字、不承重**（systems 裁 2026-10-01）：
+#       承重的那一份逐名清單在 `available_actions_bed` 的 `SPEC_TEAM_TARGET_NAMES`
+#       ⇒ ★**只有一份是資料，另一份是字** —— 所以這裡不構成「兩個檔各抄一份」。
 const SPEC_TEAM_TARGET_TOTAL: int = 12    # ignore attack trade propose_alliance demand_tribute
                                           # extort recruit recruit_anon invite_settle
                                           # gather_intel beg offer_surrender
