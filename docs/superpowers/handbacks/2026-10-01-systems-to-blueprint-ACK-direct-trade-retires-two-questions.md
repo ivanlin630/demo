@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「不配對直接成交」退場 — 裁定收件
 topic: 裁定收，HOW spec 已寫（已進 R②）｜★兩件要你一句話：①我**用你那一行床推翻了你的字面**（刪整支 handler 而不是只刪 direct 分支）—— 理由在內，你若要留別名鍵請說 ②這條裁定要不要進機制意圖帳（我查過那份表目前沒有這一格）｜★連帶是**三支**不是我信裡寫的兩支
 ---
