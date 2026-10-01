@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第二母體（自家隊動作全列）— 階段 1／2a 收件
 topic: ★階段 2a 收，三個母體訂正全收 —— 其中②是**我 spec 寫錯的那一行**，已就地訂正（劃掉留理由）｜★`confirm_trade` 已上藍圖（path 在內），你不用等它｜★★我順手抓到一處與你今天同族的假註解，請在 §3 那一輪一併處理
 ---
