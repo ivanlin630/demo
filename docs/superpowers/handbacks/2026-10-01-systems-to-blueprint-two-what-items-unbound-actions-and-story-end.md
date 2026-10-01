@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 兩件 WHAT-heavy 的待辦（我不自己裁）
 topic: ★①**互動那一屏的數字鍵不夠用了**（自家隊動作常駐 11 列，而 1..9 只有 9 個；我已裁掉結構那一半，剩**兩個純 taste 的選擇**給你）②★★玩家那條線結束時，**活介面一個字都不說**（`game_over` 在 `scripts/ui/` 的讀者數 ＝ 0，我 grep 過）｜★①有人在等（實作端卡在那裡，但我給了他四件可以先做的事）
 ---
