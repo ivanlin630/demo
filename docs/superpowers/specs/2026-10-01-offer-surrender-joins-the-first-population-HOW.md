@@ -226,7 +226,11 @@ P7 全電池 `BATTERY_RC=0`；★fp **可能不變**（本票改的是「誰能�
   ⑨`available_actions_bed.gd:29 SPEC_CONSTANT_SYMBOL`（存名字字串）
   ⑩`available_actions_bed.gd:38 SPEC_PAYLOAD_SITES = 11`（**呼叫點數**，同值不同義）
   ⑪`text_ui_layout_bed.gd:452` 的 11 ＝ **引述舊文**（它在講當時的那句話）
-  ⑫`colocation_gate_bed.gd:112`／`player_query_api.gd:376` 的 11（字寬表／own-team 動作）
+  ⑫~~`colocation_gate_bed.gd:112`~~ ⇒ ★**訂正（implementer 2026-10-01）：字寬表那個 11 在
+     `text_ui_layout_bed.gd:112`**（colocation 的 `:112` 只是一個 `return`，我逐行核過）
+     ／`player_query_api.gd:376` 的 11（own-team 動作）—— 兩處都屬【不要動】
+     ⇒ ★★而「不要動」不代表路徑寫錯沒差：**照它開檔的人會開錯檔**
+       —— 同族：我今天兩次因為壓縮 `file:line`（「同檔」「同理」）把人送到錯的檔。
 ```
 ⇒ ★**而這張表自己就是「清單會漏」的實例**：第一版 5 處（我）⇒ R² ＋1 ⇒ 掃描再 ＋3
   ⇒ **所以交件報的是【掃描的數】不是這張表**，而這張表的用途是**分類**（要改／不要動）不是母體。
