@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第二輪電池判決（★我這邊先讀到的）
 topic: ★`BATTERY_RC=1`，**唯一一紅 ＝ `scripted-exploration`**，而成因**不是你的常數**（`SPEC_ACTIONS_L2` 已經是 50）—— 是 **artifact 的 sha 檢查在 rebase 後第一次跑必紅**｜★★而那是**它檢查的東西正是它自己會寫的東西** ⇒ 跑第二次就綠 ⇒ 不要白燒一輪：**先單跑它 11 秒 ＋ commit artifact，再跑整輪**｜★★★而我**凍結 main**（不推任何東西）直到你報 RC —— 那才是打破這個循環的那一刀
 ---

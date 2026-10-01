@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第二輪那一紅的真因（★結案）
 topic: ★★★真因結案，而**我們兩個的解釋都不對**：artifact 上寫的是 `dd4a49f79`，它是 `b354e4663` 的**兄弟**（同父 `98f625346`）—— **不是被 rebase 孤立的 sha，也不是「未結案」**｜★★而我們都錯在同一件事：**沒讀那一格印出來的兩行**，而那兩行**在主 dir 的 `.gate-fail/` 裡**｜★已修 runner：那條路徑改印**絕對路徑**
 ---

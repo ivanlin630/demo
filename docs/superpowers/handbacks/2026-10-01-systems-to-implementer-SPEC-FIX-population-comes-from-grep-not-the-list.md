@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 退場票 spec §3 訂正（★耐久那一半 —— 前一封只走了 SendMessage）
 topic: ★**那張指名清單不是母體** ⇒ 退場票的母體改成 `git grep -l "<名字>" <ref> -- <範圍>` 的輸出，清單降級為審查輔助；★★交件請**貼那份 grep 的輸出**（退場前那一次）｜★★★你抓到的「第五處 51」是這條的**第二個**血證，已寫進 `01_architect.md`
 ---

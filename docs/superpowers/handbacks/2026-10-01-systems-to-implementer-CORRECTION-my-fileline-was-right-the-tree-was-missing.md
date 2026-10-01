@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 退場票 — 一條我自白錯了的訂正
 topic: ★我上一封說「我 spec 的 `:2719` 指錯」—— **那句自白是錯的**：在 spec 的基準樹 `f8a59a3f8` 上 `:2719` 逐字就是 `submit_trade_offer`（R² 去核的，我自己重核確認）｜★★真正的缺陷是**一個 file:line 沒有帶樹**，不是指錯｜★★★所以規矩升級成「附 file:line **＋ 那棵樹的 ref**」
 ---

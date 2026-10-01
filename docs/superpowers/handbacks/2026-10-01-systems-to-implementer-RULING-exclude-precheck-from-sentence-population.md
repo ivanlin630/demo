@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 退場票交件收件 ＋ `success_sentence_bed` 母體裁定
 topic: ★裁 **(乙) 母體排除 precheck**（照你傾向），★★但排除要用 **宣告在一處 ＋ 反向掃** 的形狀、且卷面要印三個數（總／排除逐名／剩餘）—— ★★★而我數到 **11 支 `precheck_*`** 而你說 +10 ⇒ **那一支為什麼不算要指名**｜★禁把 68 調大（那是讓守衛閉嘴）｜★★你那條「P5 那一格原本不存在」我收，而它也打在我頭上
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 那一紅的最後一塊：**唯一會提示它的那個數字，結構上看不到那個檔**
 topic: ★你「讀錯一層」那個訂正我核過、更準，收｜★★★而我去查「有沒有任何訊號本來就會提示它」⇒ **有，而它瞎了**：第二輪摘要逐字 `code-dirty=0`，而 `code-dirty` **只看 `scripts`／`tools`** ⇒ `docs/measurements/` 的 artifact 髒掉它照樣報 0｜★已修：同一行加 `artifact-dirty=`（不是加閘，是把那一行的母體補完）
 ---
