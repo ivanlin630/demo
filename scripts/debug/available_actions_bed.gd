@@ -1407,7 +1407,11 @@ func _test_p19_single_definition_and_no_same_source_cross() -> void:
 	#     ★★**那句話必須有執法點，否則它會靜默腐爛**（白名單是一句話，不是一個守衛）
 	#   ⇒ **本條就是那個執法點**，而它擋的方向與 P1a **相反**：
 	#     P1a 擋「把它改回一份手抄清單」、P1b 擋「把它當成一個可以改的陣列」。
-	# 負對照：在任何一支 `.gd` 裡寫一行 `TEAM_TARGET_ACTIONS.append("x")` ⇒ 本條紅並指名 file:line
+	# 負對照：在 `colocation_gate_bed.gd` 寫一行對它的 `append` ⇒ P1b 紅並指名 `colocation_gate_bed.gd:78` ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★而這一道**第一次沒跑成**而我差一步把它當成跑過了：插入點的 assert 先失敗 ⇒ **什麼都沒寫** ⇒
+#   接下來那一跑量到的是**沒有擾動的樹**，卷面印 `[]`。★那個 `[]` 與「對照紅完之後還原乾淨」
+#   在畫面上**一模一樣** ⇒ 判準：**負對照要先確認擾動真的落在檔案裡**（這次是 assert 擋住了它，
+#   而 assert 擋住的理由是「安全的失敗長相」—— 它沒有寫半套）。
 	# ★陽性對照（**sanity check 不是對照組**：它只驗「剝字串之後抽取式還認得真的寫入」，
 	#   不分辨任何兩個假設）—— 真正有鑑別力的是負對照（在某支 .gd 裡真的寫一行）。
 	var sym_probe: String = SPEC_CONSTANT_SYMBOL
