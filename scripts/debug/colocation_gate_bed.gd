@@ -165,10 +165,21 @@ func _test_p7_offer_surrender_is_gated_by_name() -> void:
 	var r: Dictionary = cmd.execute_action(st, far_id, "offer_surrender")
 	var m: String = String(r.get("msg", r.get("message", "")))
 	print("   `execute_action` ⇒ ok=%s｜msg「%s」" % [str(r.get("ok", false)), m])
-	_check("★★★★★遠程求和【被拒絕】（它曾經打得通，而 accept 會轉移資產＋收編玩家隊）",
-		not bool(r.get("ok", false)))
-	_check("★原因就是同格閘那句人話（實測「%s」）" % m, m == String(gate_r.get("msg", "")))
-	_check("★★對方的錢沒有被動（%.0f ⇒ %.0f）" % [coin_before, float(far.resources.get("coin", 0))],
+	# ★★★★★★【`ok=false` 自己不是訊號】（2026-10-01，負對照 C 第二次逼出來的）——
+	#   ★第一版把「被拒絕（`ok=false`）」與「原因是同格閘那句話」拆成**兩條**斷言，
+	#     而拿掉名字之後**第一條照樣 PASS** —— 因為那個 `ok=false` 是
+	#     **對方拒絕投降**給的（實測 msg ＝「對方拒絕接受投降」）。
+	#   ⇒ ★★那一條看起來承重（「遠程求和被拒絕」）而它被**另一個機制**滿足了
+	#     ⇒ **它綠的時候什麼都沒說**。
+	#   ⇒ ★★★所以合成一條：它只能因為【同格閘擋了】而通過 ——
+	#     `ok=false` **且** 那句話逐字等於同格閘自己回的那句。
+	#   ★誠實限：「對方的錢沒有被動」也有同一個弱點（對方拒絕投降時錢也不會動）
+	#     ⇒ 它留著當**佐證**，而承重的是下面這一條。
+	_check("★★★★★★遠程求和被【同格閘】擋下來（`ok=false` 且原因逐字 ＝ 閘回的那句；實測 ok=%s／「%s」vs 閘「%s」）"
+		% [str(r.get("ok", false)), m, String(gate_r.get("msg", ""))],
+		(not bool(r.get("ok", false))) and m == String(gate_r.get("msg", "")))
+	_check("★佐證（不承重）：對方的錢沒有被動（%.0f ⇒ %.0f）" % [
+		coin_before, float(far.resources.get("coin", 0))],
 		is_equal_approx(coin_before, float(far.resources.get("coin", 0))))
 	_cell("_test_p7_offer_surrender_is_gated_by_name")
 
