@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: ★R²【實作審】：offer_surrender 進第一母體（遠端 tip `1d5a0a3d3`，已 merge 並在 `origin/main` 上）｜★★你明文要優先打的三件我把【床產出的證據】對應給你｜★★★而四節＋就地訂正照你的決定併進這一次
 ---
 
