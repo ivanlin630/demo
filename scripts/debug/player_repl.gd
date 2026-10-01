@@ -1,4 +1,5 @@
 extends SceneTree
+class_name PlayerRepl   # ★床要呼它的詞法器（`keycode_for()` 是純函式）
 # @bed-kind: harness
 # ══ 玩家介面 ＝ 終端 REPL（骨架）═══════════════════════════════════════════════
 # spec：`docs/superpowers/specs/2026-10-01-player-ui-is-a-terminal-repl-HOW.md`
