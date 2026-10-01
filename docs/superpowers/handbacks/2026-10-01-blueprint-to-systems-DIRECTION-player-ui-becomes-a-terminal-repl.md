@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家介面方向改（用戶第三輪玩測後裁，2026-10-01）
 topic: ★用戶逐字：「新版UI更爛 爛到沒救 改用終端形式的文字UI 你們自己抓排版 重複選項等問題」⇒ ①玩家介面＝【終端 REPL】：Godot headless，純文字進出（stdin／stdout 或等價管道），畫面＝一段段純文字區塊＋編號選項＋提示列，沒有 Godot 視窗、沒有 Label 排版 ②人與 agent 看的是【同一份文字】（這正是他 9/29 說的原意「文字UI用終端表現 agent能自己抓錯」）⇒ 排版／重複選項／鍵位不符／英文識別字全部變成對【那份文字】的機械檢查，交玩前必過，不再靠用戶眼睛 ③版面 v2（TextUiView 六區合成）停止投資；可搬的只有「區塊文字產生器」那層，Label 版面層退場
 ---
