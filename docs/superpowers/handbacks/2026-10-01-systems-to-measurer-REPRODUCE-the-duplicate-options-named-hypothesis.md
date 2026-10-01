@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 終端 REPL 方向票的第一個陽性對照
 topic: ★用戶逐字抱怨「**重複選項**」⇒ 藍圖要求「**先重現再寫斷言**」｜★★而我在 code 裡找到一個**具名假設**（含 file:line）⇒ 要你**證實或推翻**它，並把那一屏的**原文**貼回來｜★★★不要只回「有／沒有」—— 要回**哪兩處印了同一批字**
 ---
