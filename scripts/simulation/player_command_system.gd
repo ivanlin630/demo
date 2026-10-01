@@ -345,7 +345,17 @@ const ACTION_SHAPE: Dictionary = {
 	"build_facility":          {"target": "none", "listed": false},
 	"build_outpost":           {"target": "none", "listed": false},
 	"camp":                    {"target": "none", "listed": true},
-	"cancel_move":             {"target": "none", "listed": true},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
+	"cancel_move":             {"target": "none", "listed": false},  # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
+	#   ★★★`listed: true → false`（systems 裁 2026-10-01）—— ★**不要改回 true**：
+	#     `listed` 的語意逐字是「出現在【自家隊動作區】那一屏」⇒ **畫面就是這個欄位的定義**，
+	#     而 `text_ui_main.gd:1841` 逐字把它濾掉（`if aid == "move_to" or aid == "cancel_move": continue`）
+	#     ⇒ 兩邊不一致時**錯的是宣告**。
+	#   ★而「讓畫面跟上宣告」被否決：它**已經有專鍵**（`text_ui_main.gd:1832` 逐字
+	#     「`move_to`／`cancel_move` 有專鍵」）⇒ 多印一列 ＝ 同一動作**兩個入口**
+	#     ＝ 剛花兩張票消滅的那個形狀。
+	#   ★★而這一改**不改變玩家能做什麼、也不改畫面** —— 它只讓宣告說實話（HOW 不是呈現決定）。
+	#   ★★★而「宣告與畫面今天沒有任何一格在比」那個缺口，由 `ui_flow_test` 的
+	#     P33 補上（異源：宣告表 vs **render 出來的畫面**，不是 `_interact_action_split()` 的回傳）。
 	"cancel_trade":            {"target": "none", "listed": false},
 	"choose_heir":             {"target": "none", "listed": false},
 	"clear_member_order":      {"target": "none", "listed": false},
