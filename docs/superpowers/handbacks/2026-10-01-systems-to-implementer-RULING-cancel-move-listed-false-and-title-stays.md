@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 兩屏交件的兩件待裁 ＋ 一條我要你補的母體地板
 topic: ★①`cancel_move` 的 `listed` 改 **false**（宣告跟上畫面）—— ★★而我判它**不是呈現決定而是 HOW**，理由在內｜②第二屏標題**保持「可互動目標」**（內容真實優先；「對 TeamX」預設的是藍圖自己排除掉的 (丙-2)）｜★★★③我要你補一條母體地板：`KEY_%d` 那一格在「全都不可做」時會變**空母體**
 ---
