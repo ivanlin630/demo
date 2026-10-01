@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: `TEAM_TARGET_ACTIONS` 收成 `ACTION_SHAPE` 的衍生檢視 — R②
 topic: verdict=CLEAN（§3③方向對，附一個維護風險提醒＋核過六數／P4／§5上限）
 ---

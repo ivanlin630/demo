@@ -44,6 +44,22 @@
      留著就是本專案最常見的那個病：**比較的兩邊同源 ⇒ 恆真，而卷面長相是綠**。
 ③換掉它的形狀：把 `ACTION_SHAPE` 的 team 集合拿去跟**外部期望**比
    —— ★`SPEC_TEAM_TARGET_TOTAL`（spec 的常數）＋**逐名清單**（不是只比數目）。
+★★★【R② 補的維護風險，已採納為硬約束】**逐名清單只准有一份** ——
+   放 `available_actions_bed.gd`（★理由：P17 在那裡）；
+   而 `colocation_gate_bed.gd` 的 `SPEC_TEAM_TARGET_TOTAL` 旁邊**已經有一份手打的 12 個名字（註解形式）**
+   ⇒ ★**不得**在 `available_actions_bed.gd` 另開一個真的 `const Array` 逐字列同一份名單
+     （那會變成**兩個檔各自手抄同一份清單** ＝ 這張票正在消滅的那個病）
+   ⇒ ★★colocation 那一邊**維持純註解、不承重**（它不是被斷言的對象）。
+```
+
+### ★R② 已查過、所以不要重查的一件（`c74113684`）
+
+```
+我 spec 的註解提過「`get_available_actions` 的 `actions.append` 字面」可能是另一個外部錨
+⇒ ★**它已經不存在了**：`23679126e:player_command_system.gd` 的 `get_available_actions`
+  現在只是對 `get_action_availability` 做 `enabled` 過濾（★我自己開檔重核過，確認無字面陣列）
+⇒ ★★所以「spec 常數 ＋ 逐名清單」**已經是能找到最乾淨的外部錨**，沒有更好的選項
+  （★★★這一句寫下來的目的：免得下一個人再去找一次那個已經不存在的錨）。
 ```
 
 ## §4 地板（P）
@@ -66,3 +82,21 @@ P5 [電池] 全電池；★本票改的就是床與守衛 ⇒ 那幾格的綠**�
 ✘ `listed` 的語意（已裁，見 `own-team-actions-full-list-HOW.md`）
 ✘ 任何「順手把別的手抄名單也收掉」—— ★一次只搬一組錨（三支守衛已經是這張票的上限）
 ```
+
+
+## §6 R② 紀錄（reviewer，`c74113684`，verdict ＝ **CLEAN**）
+
+```
+·§3③ 方向對：他讀了 `23679126e` 的 P17（`_test_p17_shape_team_equals_team_target_actions`），
+  確認今天 `from_shape` 與 `from_const` **各自獨立字面**，改完後 `from_const` 會變成
+  **重算一次 `from_shape`** ⇒ 同一算式 ⇒ 差集恆空 ＝ 恆真 ⇒ 與我的診斷一致。
+·★他找過有沒有更好的外部錨 ⇒ 沒有（見上）。
+·★★他補的維護風險 ⇒ 已採納為硬約束（逐名清單只一份，見 §3③）。
+·六個命中數他用 `git grep -c <符號> 23679126e -- <檔>` **獨立重數全部吻合**
+  （bed 3／coloc 9｜bed 4｜bed 20／coloc 13／production 11）。
+·§5 上限：他 grep 全庫確認 `TEAM_TARGET_ACTIONS` 這個符號名**只在那三個檔出現**
+  ⇒ **母體窮盡**，「三支守衛已是上限」成立。
+·P4 沿用上票做法（指舊 ref 驗紅）無異議。
+```
+
+★**放行**：可 dispatch，**排在退場票 merge 之後**。
