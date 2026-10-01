@@ -1288,9 +1288,10 @@ func _test_p16_action_shape_reverse_sweep() -> void:
 #   ·**成員** ＝ `SPEC_TEAM_TARGET_NAMES`（★那一份刻意手抄的清單，理由寫在它旁邊）
 #   ⇒ 只比數目會漏掉「換了一個名字而數目不變」；只比成員會漏掉…其實不會，
 #     但兩個都比會讓**差在哪一維**直接印在卷面上（而那是給讀的人的）。
-# 負對照 a：把某一支的 `target` 從 `"team"` 改成 `"none"` ⇒ 衍生集合少一個 ⇒ 必紅並指名
-# 負對照 b：★把 `SPEC_TEAM_TARGET_NAMES` 改成從 `ACTION_SHAPE` 導出（＝有人「順手去重」）
-#          ⇒ 本格從那一刻起恆真 ⇒ 而 a 那一道就**再也紅不起來** ⇒ 兩道一起看才看得見這件事
+# 負對照：把 `extort` 的 `target` 從 `"team"` 改成 `"none"` ⇒ 本格紅 3 條並指名（差集 ["extort"]、兩個大小對照） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★而另一道**刻意不跑**（跑它要先把本格弄壞）：把 `SPEC_TEAM_TARGET_NAMES` 改成從
+#   `ACTION_SHAPE` 導出（＝有人「順手去重」）⇒ 本格從那一刻起**恆真**，而上面那一道
+#   就**再也紅不起來** ⇒ 接住它的是 **P19**（它數本格的承重斷言）—— P19 的負對照已實測。
 func _test_p17_shape_team_equals_team_target_actions() -> void:
 	print("\n── P17 衍生集合 vs 外部期望 ──")
 	var shape: Dictionary = PlayerCommandSystem.ACTION_SHAPE
@@ -1349,9 +1350,13 @@ func _test_p17_shape_team_equals_team_target_actions() -> void:
 # ★★★母體地板（本格自己）：掃到的 `.gd` 檔數 > 0、P17 的 `_check(` 條數 > 0，
 #   且**陽性對照**：那個衍生宣告（`static var … = _derive_team_target_actions()`）
 #   必須被掃到剛好 1 次 —— ⇒ 掃不到它 ⇒ 抽取式壞了，而壞的方向是「什麼都沒找到」。
-# 負對照 a：把 `static var TEAM_TARGET_ACTIONS` 改回手抄字面 ⇒ P1 那條紅並指名 file:line
-# 負對照 b：把 P17 裡拿 `SPEC_TEAM_TARGET_NAMES` 比的那條刪掉 ⇒ P2 第一條紅
-# 負對照 c：在 P17 再加一條拿 `TEAM_TARGET_ACTIONS` 當期望的 `_check` ⇒ P2 第二條紅並指名
+# 負對照：把 `static var TEAM_TARGET_ACTIONS` 改回手抄字面 ⇒ P1 紅並指名 `player_command_system.gd:434`，而陽性對照同時紅（1 → 0） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：把 P17 裡那條比【成員】的 `_check`（兩個差集）刪掉 ⇒ P2b 紅（0 個） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：在 P17 再加一條拿 `TEAM_TARGET_ACTIONS` 當外部期望的 `_check` ⇒ P2 紅並指名（實得 2） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★★★而**第一版的 P2b 對它自己的負對照沒有鑑別力**（實測：刪掉那一條，一格都沒紅）——
+#   因為它只讀 `_check(` 的**第一行**，而「成對」那一條的訊息字串裡也有 `expect`
+#   ⇒ 修法是**按括號配對切出整個呼叫**（`_check_calls()`），不是把判準的字眼換一個
+#   ⇒ ★判準的【粒度】要對上它要抓的那個擾動發生在哪一行。
 func _test_p19_single_definition_and_no_same_source_cross() -> void:
 	print("\n── P19（spec P1／P2）單一定義 ＋ 交叉斷言不准還在 ──")
 	var files: Array = []
@@ -1395,37 +1400,76 @@ func _test_p19_single_definition_and_no_same_source_cross() -> void:
 		"res://scripts/debug/available_actions_bed.gd")
 	var p17: String = _func_body(self_src, "func _test_p17_shape_team_equals_team_target_actions")
 	_check("★母體地板 C：切得出 P17 的函式體（空 ⇒ 下面兩條恆綠）", p17.strip_edges() != "")
-	var checks_named: Array = []
-	var checks_ttag: Array = []
-	var n_checks: int = 0
-	for l2 in p17.split("\n"):
-		var t2: String = String(l2).strip_edges()
-		if t2.begins_with("#") or not t2.begins_with("_check("):
-			continue
-		n_checks += 1
-		if t2.contains("expect"):
-			checks_named.append(t2.substr(0, mini(60, t2.length())))
-		if t2.contains("TEAM_TARGET_ACTIONS") and not t2.contains("SPEC_TEAM_TARGET_"):
-			checks_ttag.append(t2.substr(0, mini(60, t2.length())))
-	print("   P17 的 `_check(` 共 %d 條｜其中提到 `SPEC_TEAM_TARGET_NAMES` %d 條｜提到 `TEAM_TARGET_ACTIONS` %d 條" % [
-		n_checks, checks_named.size(), checks_ttag.size()])
-	_check("★母體地板 D：P17 真的有 `_check(`（%d；0 ⇒ 下面兩條都在空集合上成立）" % n_checks,
-		n_checks > 0)
-	# ★★★★★【判準的粒度】第一版問「`_check(` 那一行裡有沒有 `SPEC_TEAM_TARGET_NAMES`」
-	#   ⇒ **0 條**，而 P17 明明在用它 —— 因為那個名字出現在 `var expect: Array = …` 那一行，
-	#   `_check` 看到的是變數 `expect`。⇒ 所以拆成**兩條**，而兩條都印出來：
-	#   ·①函式體**引用**了那個外部期望（引用不到 ⇒ 它根本沒在比）
-	#   ·②而且**有 `_check` 拿它（經 `expect`）去比**（引用到卻沒人斷言 ⇒ 它只是被印出來）
+	# ★★★★★【判準的粒度，第二次】NEG-b 的血證：第一版只讀 `_check(` 的**第一行**，
+	#   而「成對」那一條的**訊息字串**裡也有 `expect` ⇒ 把真正比成員的那一條刪掉
+	#   **一格都沒有紅**。⇒ 所以這裡按**括號配對**切出整個 `_check(…)` 呼叫再看它的全文。
+	#   ★而「比成員」要認的不是某個變數名碰巧出現，是**那兩個差集同時出現在同一個呼叫裡**。
+	var calls: Array = _check_calls(p17)
+	var n_check_lines: int = 0
+	for l3 in p17.split("
+"):
+		if String(l3).strip_edges().begins_with("_check("):
+			n_check_lines += 1
+	print("   P17 的 `_check(` 起始行 %d 行｜括號配對切出 %d 個完整呼叫" % [
+		n_check_lines, calls.size()])
+	_check("★母體地板 D：切得出 `_check(` 呼叫（%d；0 ⇒ 下面每一條都在空集合上成立）"
+		% calls.size(), calls.size() > 0)
+	_check("★★母體地板 E：配對切出的呼叫數 ＝ 起始行數（%d／%d；對不上 ⇒ 配對器吞掉或切斷了呼叫）"
+		% [calls.size(), n_check_lines], calls.size() == n_check_lines)
+	var checks_member: Array = []     # 真的在比【成員】的（兩個差集同時出現）
+	var checks_ttag: Array = []       # 拿 `TEAM_TARGET_ACTIONS` 當期望的
+	for c in calls:
+		var txt: String = String(c)
+		if txt.contains("only_derived") and txt.contains("only_expect"):
+			checks_member.append(txt.strip_edges().substr(0, 60))
+		if txt.contains("TEAM_TARGET_ACTIONS") and not txt.contains("SPEC_TEAM_TARGET_"):
+			checks_ttag.append(txt.strip_edges().substr(0, 60))
 	var body_refs_named: int = p17.count("SPEC_TEAM_TARGET_NAMES")
-	print("   P17 函式體引用 `SPEC_TEAM_TARGET_NAMES` %d 次｜`_check(` 裡經 `expect` 比的 %d 條" % [
-		body_refs_named, checks_named.size()])
+	print("   P17 函式體引用 `SPEC_TEAM_TARGET_NAMES` %d 次｜比【成員】的呼叫 %d 個｜拿 `TEAM_TARGET_ACTIONS` 當期望的 %d 個" % [
+		body_refs_named, checks_member.size(), checks_ttag.size()])
 	_check("★★★★P2①a：P17 的函式體引用了外部期望 `SPEC_TEAM_TARGET_NAMES`（%d 次）"
 		% body_refs_named, body_refs_named > 0)
-	_check("★★★★P2①b：而且真的有 `_check` 拿它去比（經 `expect`；%d 條）"
-		% checks_named.size(), checks_named.size() > 0)
+	_check("★★★★★P2①b：而且真的有一條在比【成員】（兩個差集同時進同一個 `_check`；%d 個：%s）"
+		% [checks_member.size(), str(checks_member)], checks_member.size() > 0)
 	_check("★★★★★P2②：P17 裡拿 `TEAM_TARGET_ACTIONS` 比的**只准一條**（那條刻意同源的；實得 %d：%s）"
 		% [checks_ttag.size(), str(checks_ttag)], checks_ttag.size() == 1)
 	_cell("_test_p19_single_definition_and_no_same_source_cross")
+
+
+# 按括號配對切出一段 code 裡的每一個 `_check(…)` 呼叫**全文**（含跨行的續行）。
+# ★為什麼不逐行看：一個 `_check(` 的**條件**常在第二、三行，而訊息字串裡的字會冒充條件
+#   ⇒ 逐行判準會對「把條件刪掉」這個擾動沒有鑑別力（NEG-b 實測，2026-10-01）。
+func _check_calls(src: String) -> Array:
+	var out: Array = []
+	var ls: Array = src.split("
+")
+	var i: int = 0
+	while i < ls.size():
+		var t: String = String(ls[i]).strip_edges()
+		if not t.begins_with("_check("):
+			i += 1
+			continue
+		var buf: String = ""
+		var depth: int = 0
+		var started: bool = false
+		while i < ls.size():
+			var line: String = String(ls[i])
+			buf += line + "
+"
+			var in_str: bool = false
+			for ch in line:
+				if ch == "\"":
+					in_str = not in_str
+				elif not in_str and ch == "(":
+					depth += 1
+					started = true
+				elif not in_str and ch == ")":
+					depth -= 1
+			i += 1
+			if started and depth <= 0:
+				break
+		out.append(buf)
+	return out
 
 
 # 一行 code 是不是【手抄的 `TEAM_TARGET_ACTIONS` 宣告】——
