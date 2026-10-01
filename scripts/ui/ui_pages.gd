@@ -21,8 +21,17 @@ static func header(idx: int) -> String:
 
 # 天窗：`<欄位名>：未接出（票B）`
 # ★不得靜默略過 —— 沉默的空白會被讀成「這個世界沒有這個東西」。
+# ★★★★★【天窗的字：玩家看到的那一半不帶票號】（自驗 (h) 實測，2026-10-01）
+#   ·天窗這個機制**留著**（「不許先把天窗拿掉再說」—— 它守的是「畫面不得宣稱一個
+#     還沒發生的完成度」）
+#   ·★而「票B」是**我們內部的票號**：玩家讀到它只會困惑，而它對他沒有任何意義
+#   ⇒ 玩家看到「尚未提供」；而**票號那一半移進 debug 走法**（`TextUiMain.truth_pane_enabled()`）
+#     ⇒ ★★票B 的進度儀器**沒有被刪掉**，它只是不在玩家那條路上
+#     （而床有反向斷言：debug 走法下它**必須**還在 —— 否則儀器被靜默刪掉而沒人知道）
 static func skylight(field: String) -> String:
-	return "%s：未接出（票B）" % field
+	if TextUiMain.truth_pane_enabled():
+		return "%s：未接出（票B）" % field
+	return "%s：尚未提供" % field
 
 # 循環切頁。★分頁是【常駐】的內容選擇，永遠有一個選中 ⇒ 不會有「沒有頁」的狀態。
 static func next_idx(idx: int, delta: int) -> int:

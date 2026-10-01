@@ -178,6 +178,12 @@ static func action_block(rows: Array) -> String:
 			n_unbound += 1
 	lines.append(region_title(A_ACTION, "%d／%d 可做，未綁鍵 %d" % [
 		n_ok, rows.size(), n_unbound]))
+	# ★★★★★【空的時候印一行佔位，而不是把區塊藏起來】（自驗 (e-2) 實測：六支走法全空）
+	#   ★理由是既有的那一條：**只在非零時才出現的東西，玩家學不會它的意思**
+	#     —— 而「區塊消失」與「這個功能不存在」在畫面上長得一樣。
+	#   ★★而這一行**說出為什麼空**（不是一句「（無）」）：動作區只在**聚焦一支隊伍**之後有列。
+	if rows.is_empty():
+		lines.append(" （沒有可做的動作 —— 先按 [T] 進互動、再選一支同格的隊伍）")
 	for r2 in rows:
 		var aid: String = String(r2.get("action_id", ""))
 		var key: String = String(ACTION_DIGITS.get(aid, ""))
@@ -216,6 +222,13 @@ static func action_for_key(key: String) -> String:
 static func feed_block(events: Array) -> String:
 	var lines: Array = []
 	lines.append(region_title(A_FEED, "最近 %d 條" % FEED_ROWS))
+	# ★★★★★【空的時候印一行佔位】（自驗 (e-2) 實測：事件區六支走法全空）
+	#   ★理由同動作區：只在非零時才出現的東西，玩家學不會它的意思；
+	#     而「區塊消失／只剩一條標題」與「這個功能不存在」在畫面上長得一樣。
+	#   ★★而這一條**上一版被我自己的判準漏掉**：底部那條滿寬分隔線不屬於任何錨
+	#     ⇒ `結果：` 那兩行被算成事件區的內容 ⇒ **假綠**（而我是看畫面才發現的）。
+	if events.is_empty():
+		lines.append(" （還沒有事件 —— 推進時間之後這裡會有紀錄）")
 	var start: int = maxi(0, events.size() - FEED_ROWS)
 	for i in range(start, events.size()):
 		var e: Dictionary = events[i]
@@ -238,8 +251,35 @@ static func foot_block(result_line: String, keymap: String) -> String:
 		#   ⇒ 判準：**寬度／偏移一律從那個字串自己量（`display_width`／`length`），不要寫死數字。**
 		_RESULT_PREFIX + TextUiLayout.clip_to(result_line,
 			TextUiLayout.COLS - TextUiLayout.display_width(_RESULT_PREFIX)),
-		A_FOOT + keymap,
-	])
+		# ★★★★★【鍵位那一行要換行，不要截斷】（自驗 (e-1) 實測寬 167 而上限 120）
+		#   ★判準：**有宣告寬度的東西可以截、沒有宣告寬度的不可以** ——
+		#     而這一行的內容是**玩家需要的鍵**：截掉它 ＝ 把一半的鍵藏起來，
+		#     而玩家不會知道後面還有（★「沒看到」與「沒有這個功能」在畫面上長得一樣）。
+		#   ⇒ 所以**折行**：第一行帶 `A_FOOT`（`" 鍵："`），續行用等寬縮排
+		#     ⇒ ★★`A_FOOT` 仍然**剛好出現一次**（區塊錨那一格在數它）。
+	] + _keymap_lines(keymap))
+
+
+# 把鍵位字串折成多行（第一行帶 `A_FOOT`，續行縮排對齊）
+# ★在**空白處**折（不在一個 `[X]鍵名` 中間切開 —— 切開的鍵名玩家讀不出來）
+static func _keymap_lines(keymap: String) -> Array:
+	var indent: String = " ".repeat(TextUiLayout.display_width(A_FOOT))
+	var out: Array = []
+	var cur: String = A_FOOT
+	var budget: int = TextUiLayout.COLS
+	for tok in keymap.split(" "):
+		var t: String = String(tok)
+		if t == "":
+			continue
+		var cand: String = cur + ("" if cur.ends_with("：") else " ") + t
+		if TextUiLayout.display_width(cand) > budget and cur.strip_edges() != "":
+			out.append(cur)
+			cur = indent + t
+		else:
+			cur = cand
+	if cur.strip_edges() != "":
+		out.append(cur)
+	return out
 
 
 # ══ ★★★【子模式面板】—— 非空時**取代** map+pages 那個框（systems 裁 2026-10-01 BLOCKER-2）

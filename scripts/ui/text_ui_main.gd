@@ -645,7 +645,7 @@ func _handle_input_mode(keycode: int) -> void:
 			_input_mode_callback = Callable()
 			_refresh()
 
-# U13: inv 選取版面 — 已裝備槽在前（[數字] 1..eq_n），背包次之，Team 取出最後
+# U13: inv 選取版面 — 已裝備槽在前（[1-9] 1..eq_n），背包次之，Team 取出最後
 #   [E]裝備背包物  [U]卸下已裝備槽  [S]存背包物  [G]取 Team 物
 func _inv_equipped_slots() -> Array:
 	var inv_state: Dictionary = _cached_snapshot.get("inventory_state", {})
@@ -792,14 +792,37 @@ func _refresh() -> void:
 	_render_screen(_pend_txt)
 	_check_alerts()
 
-# ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
-#   ★上面那些 Label 已經被填好 ⇒ 它們是【內容載體】，這裡把內容組成版面。
-#   ★★而 `visible = false` 在這裡設而不是在 `_ready()`：`_ready()` 設了之後
-#     任何一處 `add_child`／重建都可能把它打開，而**每次 render 都設**是冪等的
-#     ⇒ 「顯示只有一個」變成**結構保證**而不是初始化時的一次宣告。
-func _render_screen(pend_txt: String) -> void:
-	if _screen_label == null:
-		return
+# ══ ★★★★★【`regions` 只准有一處組裝】（spec `…player-ui-is-a-terminal-repl-HOW.md` §2②）═══
+# ★為什麼要抽出來：這張票要讓**終端 REPL 與 UI 節點看到同一個畫面**，
+#   而「兩個畫面」最常見的成因就是**兩處各自組裝那個字典**（它們會漂開，而漂了沒有東西會紅）。
+#   ⇒ 所以組裝只在這裡；`_render_screen()` 與 REPL 都**呼叫它**，不各自湊。
+# ★★而本函式**刻意仍然讀那幾個 Label 的 `.text`** —— 它不是漏抽，是裁定：
+#   ·spec §2② 提過另一條路（繞過 Label、`regions` 直接吃 builder 的回傳）
+#   ·★而我量過：五個來源裡**四個**可以隨時重算
+#     （`map` ← `render_text_map()`／`pages` ← `_build_state_str()`／
+#      `panel` ← 12 支 `_build_*_str()` 的模式分派／`keymap` ← `_mode_keymap()` ＋ 待執行）
+#     ★★**而 `result` 不行**：`_feedback_line` 是**把狀態存在 Label 裡**
+#       （`:312`／`:1002` 事件驅動寫入，不是每次 render 重算）
+#     ⇒ 繞過 Label 就得**新開一個儲存**＋**重寫那 12 分支的分派**
+#     ⇒ ★★★那會變成**第二條組裝路徑** —— 正是這張票要治的病。
+#   ⇒ 所以 REPL 走**真的節點**（`TextUI.tscn`，與 `ui_flow_test._make_ui()` 同一條路，
+#     79 格在用 ⇒ 已驗證），而畫面只有一份、組裝只有一處。
+# 把 `pages` 內容的第一行抬頭剝掉（★只在它逐字等於那一頁的抬頭時）
+func _pages_without_header(body: String) -> String:
+	var head: String = UiPages.header(_page_idx)
+	var ls: Array = body.split("\n")
+	# ★★★★★【抬頭不在第一行】（實測訂正，2026-10-01）：`_build_state_str()` 先印
+	#   隊名／狀態／糧 幾行，抬頭在第 3~5 行 ⇒ 第一版只看 `ls[0]` ⇒ **一次都沒剝到**
+	#   （而症狀是自驗 (b-2) 照舊紅 1 條 —— ★**它救了我**，否則我會以為剝好了）。
+	#   ⇒ 改成找**逐字等於那個抬頭的那一行**，而**只剝第一個命中**（多剝會吃掉內容）。
+	for i in range(ls.size()):
+		if String(ls[i]) == head:
+			ls.remove_at(i)
+			return "\n".join(ls)
+	return body
+
+
+func build_regions(pend_txt: String) -> Dictionary:
 	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
 	var hp: Dictionary = ct.get("home_pos", {}) if ct.get("home_pos", null) != null else {}
@@ -809,7 +832,7 @@ func _render_screen(pend_txt: String) -> void:
 	var threat: String = String(_cached_snapshot.get("threat_line", ""))
 	if threat == "":
 		threat = "（無）"
-	_screen_label.text = TextUiView.compose({
+	return {
 		"top": {
 			"clock": PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
 			"team_name": String(ct.get("name", "—")),
@@ -822,7 +845,13 @@ func _render_screen(pend_txt: String) -> void:
 		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
 		"tabs": String(UiPages.header(_page_idx)).trim_prefix("["),
 		"map": _map_label.text,
-		"pages": _state_label.text,
+		# ★★★★★【剝掉 `pages` 的第一行抬頭 —— 因為框標題已經印了同一份】
+		#   ★★而**只在它逐字等於 `UiPages.header(_page_idx)` 時才剝**：
+		#     若有人改了其中一邊，這裡**什麼都不剝** ⇒ 畫面上又出現兩次 ⇒ **自驗 (b-2) 會紅**
+		#     ⇒ ★那是刻意的：**它寧可紅，也不要悄悄吃掉一行它不認識的字**。
+		#   ★★★而抬頭的**產生者仍然只有一個**（`UiPages.header()`）——
+		#     這裡不是第二份字，是**同一份字的去重**。
+		"pages": _pages_without_header(_state_label.text),
 		# ★★★子模式面板（BLOCKER-2）：`_event_label` 載著 12 個子模式面板，
 		#   而它 `visible = false` ⇒ 不傳進來的話那 12 個面板【玩家一個都看不到】
 		#   —— 而「選目標」也在裡面 ⇒ 新版面的整條入口會是黑的。
@@ -833,7 +862,18 @@ func _render_screen(pend_txt: String) -> void:
 		"feed": _feed_rows,
 		"result": _feedback_line.text,
 		"keymap": _hint_line.text,
-	})
+	}
+
+
+# ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
+#   ★上面那些 Label 已經被填好 ⇒ 它們是【內容載體】，這裡把內容組成版面。
+#   ★★而 `visible = false` 在這裡設而不是在 `_ready()`：`_ready()` 設了之後
+#     任何一處 `add_child`／重建都可能把它打開，而**每次 render 都設**是冪等的
+#     ⇒ 「顯示只有一個」變成**結構保證**而不是初始化時的一次宣告。
+func _render_screen(pend_txt: String) -> void:
+	if _screen_label == null:
+		return
+	_screen_label.text = TextUiView.compose(build_regions(pend_txt))
 	# ★★★舊的六個 Label ＝【內容載體】，不顯示（見檔頭 `_screen_label` 那一段的理由）
 	for _carrier in [_map_label, _state_label, _event_label, _hint_line,
 			_log_strip, _feedback_line, _debug_bar]:
@@ -891,9 +931,9 @@ const MODE_KEYMAP: Dictionary = {
 	"outpost":       "[1-9]行動 [O/Esc]關閉",
 	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
 	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
-	"storage":       "[數字]存/取 [,.]翻頁 [Esc]離開",
+	"storage":       "[1-9]存/取 [,.]翻頁 [Esc]離開",
 	"intel":         "[1-5]選題 [Esc]取消",
-	"trade":         "[數字]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
+	"trade":         "[1-9]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
 	"pre_encounter": "[1]迎擊 [2]投降",
 }
 static func _mode_keymap(mode: String) -> String:
@@ -1014,11 +1054,26 @@ func _build_state_str() -> String:
 		ct.get("id", _player_tid),
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
-	lines.append("狀態: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
+	lines.append("狀態: %s  疲勞: %d%%" % [
+		human(TASK_DISPLAY, ct.get("task_summary", "")), ct.get("fatigue_pct", 0)])
 
 	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
 	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。
 	#   ★為什麼不順手分類：那是票B。混進來的話，紅燈就分不出是【框沒做好】還是【分類錯了】。
+	# ══ ★★★★★★【這一行還原了，而重複改在【合成那一側】解】（2026-10-01，我自己踩的）═══
+	# ★我為了修自驗 (b-2)「抬頭印兩次」把這一行拿掉 ⇒ **電池的 `ui-flow` 紅 20 條**：
+	#   「第 N 頁的頁首出現」「找得到頁首行」「分頁區非空（0 行）」×5 頁 ＋ 零損失 ＋ 天窗 0。
+	#   ⇒ 真因：那 20 條讀的是**載體**（`_state_label.text`），★**而它們靠這一行當分頁區的
+	#     分隔符** ⇒ 拿掉它 ⇒ 區抽不出來 ⇒ 區內一切歸零（天窗 0、零損失紅都是**下游**）。
+	# ★★而這是「兩側」那一族的**鏡像版**（同一天第二次，方向相反）：
+	#   上午那次我改了**顯示**而沒改**輸入**；這一次我改了**載體**而**斷言讀的就是載體**
+	#   ⇒ ★我問的是「玩家看得到嗎」，**沒問「那些斷言在看什麼」**。
+	# ★★★而**最尖的一點**：我修的那個病與我造的這個病**是同一個病** ——
+	#   「同一句話有兩個來源」。我拿掉其中一個來源，**而那個來源是某些斷言的唯一入口**。
+	# ★★★★而「把斷言遷到合成畫面」**是已經被判過錯的選項**，理由就在本檔檔頭：
+	#   **框會把分頁 clip 到 rw≈59** ⇒ 遷移等於把斷言的主詞從【內容】換成【裁切後的版面】。
+	# ⇒ 所以：**載體照印**（斷言零遷移），而**重複在 `build_regions()` 那一側解**
+	#   —— 它把 `pages` 的這一行頭剝掉，因為框標題已經印了同一份（見那裡的理由）。
 	lines.append(UiPages.header(_page_idx))
 	if _page_idx == 0:
 		lines.append_array(_build_survival_lines(ct, ps))
@@ -1034,8 +1089,18 @@ func _build_state_str() -> String:
 		if not _unclassified.is_empty():
 			# ★★★完成條件②（systems 裁）：剩下的若全是【已具名的跨頁混合行】，就把名單印出來
 			#   ⇒ ★沒有名單的話，「還剩 3 行」跟「還有 3 行沒人處理」在畫面上長得一樣。
-			var _mixed: String = _unclassified_mixed_note(_unclassified)
-			lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [_unclassified.size(), _mixed])
+			# ★★★★★【標題分成兩半：玩家讀的那一半，與儀器那一半】（自驗 (h)，2026-10-01）
+			#   ·`未分類` 這個**分類事實**要留（不標示等於在畫面上說謊 —— 原裁定）
+			#     ⇒ 但玩家讀的字改成「其他（尚未分頁）」：它說了同一件事而不帶票號。
+			#   ·★而「票B 將搬走 N 行＋跨頁混合名單」是**儀器**（那個 N 就是票B 的母體）
+			#     ⇒ 它移進 **debug 走法**，★★而床有反向斷言（debug 走法下必須還在）
+			#     ⇒ 儀器不會被靜默刪掉，而玩家畫面上沒有我們寫給自己的話。
+			if truth_pane_enabled():
+				var _mixed: String = _unclassified_mixed_note(_unclassified)
+				lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [
+					_unclassified.size(), _mixed])
+			else:
+				lines.append("── 其他（尚未分頁） ──")
 			lines.append_array(_unclassified)
 		# ★沒接出的生存欄位【仍然印天窗】（不先拿掉再說）
 		for _f in _page_skylight_fields(0):
@@ -1047,7 +1112,16 @@ func _build_state_str() -> String:
 		for _f in _page_skylight_fields(_page_idx):
 			lines.append(UiPages.skylight(_f))
 
-	lines.append_array(_build_hover_truth_lines())
+	# ══ ★★★★★★【debug 區只活在明確的 debug 走法下】（systems 裁 2026-10-01 §15）═══
+	#   ★玩家走法**不印**那一區（不是縮小、不是改字，是不印）——
+	#     實測它印 `tile_id`／格上**真實**資源／格上隊伍數 ⇒ **god-view 落在玩家面上**，
+	#     而那一區的標題逐字自稱「**非附身者所知**」⇒ 它自己說它不該被玩家看到。
+	#   ★★而**不是一個會悄悄預設錯的旗標**：開關在**環境變數**，而**走法印在卷面上**
+	#     （`player_repl.gd` 開場那一行、以及床的走法名）⇒ 讀卷面的人分得出這一輪是哪一條。
+	#   ★★★而「玩家看不到」與「它根本不存在」在卷面上長得一樣
+	#     ⇒ 所以床有**反向走法**：debug 走法下那幾個識別字**必須出現**。
+	if truth_pane_enabled():
+		lines.append_array(_build_hover_truth_lines())
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
 		_bridge.get_current_tick(),
@@ -1170,7 +1244,7 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 		lines.append("家：(%d,%d) %s  離家 %d%s" % [
 			int(_hp.get("q", 0)), int(_hp.get("r", 0)), str(_hk),
 			int(_hd),
-			"  （共 %d 處）【暫代】" % _hc if _hc > 1 else ""])
+			("  （共 %d 處）%s" % [_hc, "【暫代】" if truth_pane_enabled() else ""]) if _hc > 1 else ""])
 	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
 	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
 	if not fm.is_empty():
@@ -1179,7 +1253,21 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 		#     而它【把整個函式從中間砍斷】⇒ 回傳 null ⇒ 型別化成空 Array ⇒ ★★呼叫端看到 0 行。
 		#   ⇒ ★★★而那一輪的卷面是「errors: 1｜到場點名 31／31」—— 一個執行期錯誤
 		#     靜靜吃掉半個函式，而點名照樣滿分。
-		lines.append("聚焦: %s  %s" % [str(fm.get("name", "?")), str(fm.get("status", ""))])
+		# ★★★★★【兩個缺陷，而第二個是「哨兵不是空的」】（自驗 (d) 實測，2026-10-01）
+		#   ①`fm.get("status")` 是一個 **Dictionary**（`{health, stress, loyalty}`）
+		#     ⇒ `str()` 把它整個倒在玩家畫面上，連鍵名（英文）一起
+		#   ②`if not fm.is_empty()` **永遠成立** —— `map_focused_member()` 的哨兵
+		#     （`player_api_mapper.gd:229-233`）是一個**有鍵的字典**（`id: -1`）而不是 `{}`
+		#     ⇒ 沒有聚焦任何人時照樣印一行「聚焦:   {…}」
+		#   ⇒ ★判準：**哨兵值要用它自己的欄位判（`id == -1`），不要用 `is_empty()`**
+		#     —— 「空的字典」與「表示空的字典」是兩件事，而它們在 `is_empty()` 下同形。
+		if int(fm.get("id", -1)) != -1:
+			var fs: Dictionary = fm.get("status", {}) as Dictionary
+			lines.append("聚焦: %s  %s  壓力 %.0f%%  忠誠 %.0f%%" % [
+				str(fm.get("name", "?")),
+				str(fs.get("health", "")) if str(fs.get("health", "")) != "" else "狀態不明",
+				float(fs.get("stress", 0.0)) * 100.0,
+				float(fs.get("loyalty", 0.0)) * 100.0])
 	return lines
 
 # ══════════ 游標懸停印整格真值（debug）══════════
@@ -1200,7 +1288,41 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 # ★★誠實限：勢力印的是 `faction_id` 而不是名字 —— `get_teams_at_tile()` 給的是 id，
 #   而畫面上那個好看的 `faction_display` 是【belief 推導的】⇒ 把它混進真值區塊
 #   會讓這一段變成「一半真值一半信念」，那比少一個名字糟。
+# ══ ★★★★★【給玩家看的字一律人話 —— 這兩張表是那件事的唯一宣告】═══════════════
+# 自驗 (d)「無英文識別字」實測抓到的（2026-10-01）：`idle`／道具 id 八個／
+#   `聚焦:` 把一個原始 Dictionary 印出來（`{ "health": …, "stress": …, "loyalty": … }`）。
+# ★★而**修法刻意不是去改資料層的常數**：`TeamData.TASK_IDLE` 若改成中文，
+#   全庫 10+ 處**字面** `"idle"` 的比較會靜默壞掉，★而其中 `encounter_system` 的 `"idle"`
+#   是**另一個命名空間**（單位的 `pending_action.type`）⇒ **同字不同義**
+#   ⇒ 動它會讓兩件不同的事一起變，而那是最難查的那種。
+# ⇒ ★★★所以映射發生在**顯示層**，而「資料層那三個英文值」逐一指名在這裡。
+const TASK_DISPLAY: Dictionary = {
+	"idle": "閒置",          # TeamData.TASK_IDLE
+	"return_home": "返家",   # TeamData.TASK_RETURN_HOME
+	"rest": "休息",          # TeamData.TASK_REST
+}
+# ★道具 id → 人話（母體 ＝ `_get_team_takeable_items()` 回的那八個）
+#   ★★而它與 `:1127` 那一行的「低武／高武」措辭刻意一致（同一個東西在兩處不要兩種叫法）
+const ITEM_DISPLAY: Dictionary = {
+	"weapon_melee_low": "低階近戰武器", "weapon_melee_high": "高階近戰武器",
+	"weapon_ranged_low": "低階遠程武器", "weapon_ranged_high": "高階遠程武器",
+	"armor_low": "低階護具", "armor_high": "高階護具",
+	"medicine": "藥品", "tools": "工具",
+}
+
+# 把一個可能是英文識別字的值換成人話（查不到就原樣回 —— ★而「查不到」會被自驗 (d) 咬到，
+# 那正是我們要的：**新增一個 id 的人會被床擋下來**，而不是靜默印一個英文字給玩家）
+static func human(table: Dictionary, raw) -> String:
+	var k: String = str(raw)
+	return String(table.get(k, k))
+
 const HOVER_TRUTH_TITLE: String = "真值·debug（非附身者所知）"
+# ★debug 走法的開關（spec §15②）—— ★★**每次問環境變數，不存成 `static var`**：
+#   `static` 的生命週期跨整個進程 ⇒ 它會變成跨 run 可變狀態（電池的 `cross-run-static`
+#   那支閘在抓這個，而我今天已經為另一個符號付過一次那筆錢）。
+const TRUTH_PANE_ENV: String = "TEXTUI_DEBUG_PANE"
+static func truth_pane_enabled() -> bool:
+	return OS.get_environment(TRUTH_PANE_ENV) == "1"
 
 func _build_hover_truth_lines() -> Array:
 	var lines: Array = []
@@ -1351,7 +1473,19 @@ func _page_skylight_fields(idx: int) -> Array:
 			var _ct0: Dictionary = _cached_snapshot.get("controlled_team", {})
 			if not _ct0.has("home_pos"):
 				_base.append("位置與家（查詢面無此欄）")
-			if _cached_snapshot.get("focused_member", {}).is_empty():
+			# ★★★★★★【這個 guard 恆假，而它一次都沒執行過】（2026-10-01，systems 的偵測法抓到）
+			#   `map_focused_member()` 的哨兵（`player_api_mapper.gd:229-233`）是一個
+			#   **有欄位的字典**（`id: -1`）而**不是** `{}` ⇒ `is_empty()` **永遠為假**
+			#   ⇒ ★「被聚焦的人」那個天窗**從來沒有出現過**，而天窗的職責逐字是
+			#     「**畫面不得宣稱一個還沒發生的完成度**」⇒ 它在這一欄上從沒履行過。
+			#   ⇒ ★★而它的方向與同族的另一個實例**相反**：`:1220` 那個 guard **恆真**
+			#     ⇒ 印了不該印的；這一個**恆假** ⇒ **該印的從來沒印**。
+			#   ⇒ ★★★判準（systems 升格進判準庫）：**哨兵值要用它自己的欄位判**
+			#     （`id == -1`），**不要用 `is_empty()`／`== null`／長度** ——
+			#     「空的字典」與「表示空的字典」在 `is_empty()` 下**同形**。
+			#   ★而同檔 `:341`／`:1100` 用的是 `.get("interaction_id", "").is_empty()`
+			#     ＝ **判哨兵自己的欄位** ⇒ **那兩處是對的** ⇒ 不是「`is_empty()` 一律有罪」。
+			if int(_cached_snapshot.get("focused_member", {}).get("id", -1)) == -1:
 				_base.append("被聚焦的人")
 			return _base
 		1:
@@ -1573,7 +1707,8 @@ func _build_inv_str() -> String:
 		var item = inv[i]
 		var sel_idx: int = eq.size() + i
 		var prefix: String = "[%d]*" % (sel_idx + 1) if _inv_selection == sel_idx else "[%d]" % (sel_idx + 1)
-		lines.append("  %s %s × %d" % [prefix, item.get("grade", "?"), item.get("qty", 0)])
+		lines.append("  %s %s × %d" % [prefix, human(ITEM_DISPLAY, item.get("grade", "?")),
+			item.get("qty", 0)])
 
 	# ── 從 Team 取出（[G]） ──
 	var team_items: Array = _get_team_takeable_items(null)
@@ -1582,9 +1717,10 @@ func _build_inv_str() -> String:
 		var sel_idx2: int = eq.size() + inv.size() + i
 		var prefix: String = "[%d]*" % (sel_idx2 + 1) if _inv_selection == sel_idx2 else "[%d]" % (sel_idx2 + 1)
 		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
-		lines.append("  %s %s: %d%s" % [prefix, team_items[i], qty, "" if qty > 0 else "（灰）"])
+		lines.append("  %s %s: %d%s" % [prefix, human(ITEM_DISPLAY, team_items[i]),
+			qty, "" if qty > 0 else "（灰）"])
 
-	lines.append("── [數字]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
+	lines.append("── [1-9]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
 	return "\n".join(lines)
 
 func _log_event(msg: String) -> void:
@@ -2395,7 +2531,7 @@ func _build_storage_str() -> String:
 		lines.append("（公庫與我方皆無可存取資源）")
 	if rows.size() > 9:
 		lines.append("第 %d/%d 頁 [,]上 [.]下" % [_storage_page + 1, int(ceil(rows.size()/9.0))])
-	lines.append("[數字]選項 [K/Esc]離開")
+	lines.append("[1-9]選項 [K/Esc]離開")
 	return "\n".join(lines)
 
 # `_handle_storage_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
@@ -2890,7 +3026,7 @@ func _build_trade_str() -> String:
 		acc = "  NPC:%s" % ("✓接受" if d.get("npc_would_accept", false) else "✗拒絕")
 	lines.append("給值 %.1f ⇄ 要值 %.1f%s" % [
 		float(d.get("give_value", 0.0)), float(d.get("want_value", 0.0)), acc])
-	lines.append("[數字]選項 [Enter]送出 [C]清 [Esc]離開")
+	lines.append("[1-9]選項 [Enter]送出 [C]清 [Esc]離開")
 	return "\n".join(lines)
 
 # `_handle_intel_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
