@@ -57,7 +57,14 @@ const SPEC_ENC_GATE: String = "refuse_if_not_in_encounter"
 const SPEC_ENC_CONSUMERS: Array = ["_action_offer_surrender",
 	"_action_surrender_in_encounter", "get_action_availability"]
 # ★§7：兩份同形信封的呼叫點總數（普查的數字，寫進 spec）
-const SPEC_ENVELOPE_SITES_QUERY: int = 15   # 本票刪掉三處停用列之後（原 18）
+const SPEC_ENVELOPE_SITES_QUERY: int = 14   # 本票刪掉三處停用列之後（原 18 → 15）
+# ★★★15 → 14（2026-10-01，`offer_surrender` 那張票）—— ★這是【基準更新】不是弱化：
+#   那張票把查詢面 Layer 5 的 `offer_surrender` emit **整段刪掉**（它是第二個決定者）
+#   ⇒ `map_available_action` 的呼叫點真的少了一處（實測 14，床自己印在 P8 那一格）。
+#   ★★而它**原子**地跟那個刪除同一顆 commit：基準先放主線 ＝ 讓守衛先要求一件
+#     世界還沒做到的事；基準晚放 ＝ 讓守衛先接受一件世界已經不成立的事。
+#   ★★★這個數字是從床的輸出抄的，不是推算的 —— 而「它會變」是我預測到的，
+#     ⇒ 照規矩：**先量；變了才換；沒變就不要動**。這一次是「變了」。
 const SPEC_ENVELOPE_SITES_ITEM: int = 4     # `_make_item_action`（庫存，不在本票）
 # ★P9／P10（systems 裁 2026-10-01「第三類」）：`"payload"` 的呼叫點數 ——
 #   ★這個數字是【從 code 數出來印在卷面】的（不是從信裡抄的）；這一行只記「今天量到多少」
