@@ -53,6 +53,12 @@ const SPEC_ONE_COPY_PHRASES: Array = ["非戰鬥中", "投降請和"]
 #   ★宣告在一處，而「有沒有第四個該呼而沒呼的」由**反向掃**回答（見 P7 那一段）。
 #   ★★而斷言要逐一打在【那一支的函式體】上，不是檔案層級 ——
 #     「守衛宣稱保護某支函式而它從來沒呼那支函式」那一族就是檔案層級斷言養出來的。
+# ★★★★`ACTION_SHAPE` 的三個【具名豁免】（不在 `_action_registry` 裡）——
+#   ★床自己持有這份字面：讀 production 那邊的清單＝同源恆真（它寫什麼這一格都綠）。
+#   ★★而 spec §3① 只點名了兩個（`cancel_move`／`move_to`）；第三個 `ignore` 是
+#     **P1c 逼出來的**（`target=="team"` 要等於 `TEAM_TARGET_ACTIONS` 的 12 個，含它）
+#     ⇒ 少了它那一格必紅。這一條差異已回報 systems。
+const SPEC_SHAPE_EXEMPT: Array = ["ignore", "cancel_move", "move_to"]
 const SPEC_ENC_GATE: String = "refuse_if_not_in_encounter"
 const SPEC_ENC_CONSUMERS: Array = ["_action_offer_surrender",
 	"_action_surrender_in_encounter", "get_action_availability"]
@@ -88,6 +94,8 @@ const EXPECTED_CELLS: Array = [
 	"_test_p13_listed_exactly_once",
 	"_test_p14_requires_being_in_an_encounter",
 	"_test_p15_neighbours_unchanged",
+	"_test_p16_action_shape_reverse_sweep",
+	"_test_p17_shape_team_equals_team_target_actions",
 ]
 
 
@@ -992,6 +1000,108 @@ func _test_p11_label_has_one_producer() -> void:
 
 
 
+
+# == P16 ＝ spec P1 [母體機械導出 ＋ 反向掃] =====================================
+# ★母體【不是一份新清單】：`_action_registry` 是權威，`ACTION_SHAPE` 只多一個維度。
+#   ⇒ 完整性靠**反向掃**不靠紀律：registry 的每一個 key 都要有人宣告過，
+#     **漏一個紅並指名** ⇒ 新增 handler 的人會被擋下來。
+# ★★斷言用【指名】不用【數數】（血證：merge 判準「行數≥兩邊」被 77 滿足而少一支閘
+#   —— 三個集合可以大小相同而成員不同）。
+# ★★★而兩個方向要分開問：
+#   ·registry ∖ ACTION_SHAPE ＝ ∅        （有 handler 而沒宣告 ⇒ 下一個人漏登記）
+#   ·ACTION_SHAPE ∖ registry ⊆ 具名豁免  （宣告了而沒 handler ⇒ 要嘛打錯字要嘛是豁免）
+# 負對照 a：從 `ACTION_SHAPE` 刪掉一列 ⇒ 第一個方向紅並指名那個字 ⇒ 待實測
+# 負對照 b：在 registry 加一個假 handler 而不宣告 ⇒ 同一條紅（守的是「下一個人」）⇒ 待實測
+func _test_p16_action_shape_reverse_sweep() -> void:
+	print("\n── P16（spec P1）ACTION_SHAPE 的母體與反向掃 ──")
+	var arr: Array = _fresh()
+	var cs: PlayerCommandSystem = arr[1]
+	var reg: Array = cs.get_registered_actions()
+	var shape: Dictionary = PlayerCommandSystem.ACTION_SHAPE
+	var none_ids: Array = []
+	var team_ids: Array = []
+	var other_ids: Array = []
+	for k in shape.keys():
+		var t: String = String((shape[k] as Dictionary).get("target", ""))
+		if t == "none":
+			none_ids.append(String(k))
+		elif t == "team":
+			team_ids.append(String(k))
+		else:
+			other_ids.append("%s（%s）" % [String(k), t])
+	none_ids.sort(); team_ids.sort(); other_ids.sort()
+	print("   `_action_registry` 的 key ＝ %d｜`ACTION_SHAPE` 的列 ＝ %d" % [reg.size(), shape.size()])
+	print("   target==\"none\" 共 %d 個（逐名）：%s" % [none_ids.size(), str(none_ids)])
+	print("   target==\"team\" 共 %d 個｜其他 %d 個：%s" % [
+		team_ids.size(), other_ids.size(), str(other_ids)])
+	_check("★母體地板 A：registry 不是空的（空 ⇒ 下面兩個方向都恆綠）", reg.size() > 0)
+	_check("★母體地板 B：`ACTION_SHAPE` 不是空的", shape.size() > 0)
+	_check("★★母體地板 C：`target==\"none\"` 那一類不是空的（本票的消費者就是它）",
+		none_ids.size() > 0)
+	# ── 方向一：registry ∖ ACTION_SHAPE（有 handler 而沒宣告）──
+	var undeclared: Array = []
+	for r in reg:
+		if not shape.has(String(r)):
+			undeclared.append(String(r))
+	undeclared.sort()
+	_check("★★★★反向掃①：每一個 registry key 都有人宣告過（沒宣告的：%s）" % str(undeclared),
+		undeclared.is_empty())
+	# ── 方向二：ACTION_SHAPE ∖ registry（宣告了而沒 handler）──
+	var orphan: Array = []
+	for k2 in shape.keys():
+		if not reg.has(String(k2)) and not SPEC_SHAPE_EXEMPT.has(String(k2)):
+			orphan.append(String(k2))
+	orphan.sort()
+	print("   ★具名豁免（床持有）＝ %s" % str(SPEC_SHAPE_EXEMPT))
+	_check("★★★★反向掃②：宣告了而沒 handler 的，只剩具名豁免（多出來的：%s）" % str(orphan),
+		orphan.is_empty())
+	# ★★★而豁免自己要真的【不在】registry —— 否則那份豁免是一句沒有主詞的話
+	var fake_exempt: Array = []
+	for e in SPEC_SHAPE_EXEMPT:
+		if reg.has(String(e)):
+			fake_exempt.append(String(e))
+	_check("★★★豁免清單裡的每一個都【真的不在】registry（在的話那個豁免沒有主詞：%s）"
+		% str(fake_exempt), fake_exempt.is_empty())
+	_cell("_test_p16_action_shape_reverse_sweep")
+
+
+# == P17 ＝ spec P1c [★異源交叉：兩個母體不准漂開] ===============================
+# ★`ACTION_SHAPE` 裡 `target=="team"` 的集合**必須等於** `TEAM_TARGET_ACTIONS`。
+# ★★而這一格【合法】的理由要寫出來：兩邊是**兩份各自獨立的字面**
+#   （`ACTION_SHAPE` 是新宣告、`TEAM_TARGET_ACTIONS` 是既有常數，文字上分開維護）
+#   ⇒ 任何一邊被改動都會讓差集非空 ⇒ **不是同一個常數讀兩次**，不是恆真格。
+#   ★★★（本表的初版文字是從 `TEAM_TARGET_ACTIONS` 產生的，而產完之後它們就分家了
+#     —— 「產生過」不等於「同源」：同源指的是**現在**讀同一個東西。）
+# 負對照：把某一支的 `target` 從 `"team"` 改成 `"none"` ⇒ 差集非空 ⇒ 必紅並指名 ⇒ 待實測
+func _test_p17_shape_team_equals_team_target_actions() -> void:
+	print("\n── P17（spec P1c）兩個母體不准漂開 ──")
+	var shape: Dictionary = PlayerCommandSystem.ACTION_SHAPE
+	var from_shape: Array = []
+	for k in shape.keys():
+		if String((shape[k] as Dictionary).get("target", "")) == "team":
+			from_shape.append(String(k))
+	from_shape.sort()
+	var from_const: Array = PlayerCommandSystem.TEAM_TARGET_ACTIONS.duplicate()
+	from_const.sort()
+	print("   ACTION_SHAPE 的 team（%d）：%s" % [from_shape.size(), str(from_shape)])
+	print("   TEAM_TARGET_ACTIONS（%d）：%s" % [from_const.size(), str(from_const)])
+	_check("★母體地板：兩邊都不是空的（空 ⇒ 兩個差集恆空 ⇒ 本格恆綠）",
+		from_shape.size() > 0 and from_const.size() > 0)
+	var only_shape: Array = []
+	var only_const: Array = []
+	for a in from_shape:
+		if not from_const.has(String(a)):
+			only_shape.append(String(a))
+	for b in from_const:
+		if not from_shape.has(String(b)):
+			only_const.append(String(b))
+	_check("★★★★★兩個差集都空（只在 ACTION_SHAPE：%s｜只在 TEAM_TARGET_ACTIONS：%s）"
+		% [str(only_shape), str(only_const)],
+		only_shape.is_empty() and only_const.is_empty())
+	print("   ★而本格合法的理由：兩邊是兩份各自獨立的字面 ⇒ 都能單獨被改壞 ⇒ 不是恆真格。")
+	_cell("_test_p17_shape_team_equals_team_target_actions")
+
+
 # 負對照：把入口那一格關掉（`elif false and SUBMENU_OPENERS.has(act)`）⇒ 本格紅（在【沒錢】的世界裡仍然可做） ⇒ 已於 fix/exploration-two-english-strings（2026-10-01 這一輪） 實測紅
 # ══ P12：★★★【退化狀態】下入口仍在、而動作消失（battery10 的血證釘成一格）════════
 # ★★★為什麼要有這一格：battery10 的 `headless` 紅，而紅的那條是
@@ -1216,6 +1326,8 @@ func _initialize() -> void:
 	_test_p13_listed_exactly_once()
 	_test_p14_requires_being_in_an_encounter()
 	_test_p15_neighbours_unchanged()
+	_test_p16_action_shape_reverse_sweep()
+	_test_p17_shape_team_equals_team_target_actions()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
