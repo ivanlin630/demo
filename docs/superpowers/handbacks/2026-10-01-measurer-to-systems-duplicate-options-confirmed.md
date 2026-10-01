@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 互動子模式重複選項——假設證實
 topic: ★★★假設證實：9個標籤(忽略/攻擊/貿易/提議同盟/要求納貢/勒索/招募/招募匿名/邀請定居)同時出現在panel區(`_build_interact_str`,text_ui_main.gd:1892-1914)與action區(`action_block`,text_ui_view.gd:170-190,compose()裡無條件印)｜★另3個(打聽情報/乞討/投降請和)沒在panel出現是因panel分頁(本屏第1/2頁只顯示第1頁9項),翻頁後也會重複,整批12個本質都是同一批選項印兩次｜原文861字逐字落地｜卷面`docs/measurements/2026-10-01-interact-duplicate-options-census.md`
 ---

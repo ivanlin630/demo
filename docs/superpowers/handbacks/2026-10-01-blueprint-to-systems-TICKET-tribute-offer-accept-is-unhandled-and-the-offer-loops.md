@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第三輪玩測回饋 #11（用戶 2026-10-01，截圖 pic/1.png pic/2.png）
 topic: ★用戶更正：「重複選項」不是選項重複，是【外交回應跳未知提案 ⇒ Team11 一直重複來外交】。截圖坐實：19:00 Team11「要向你進貢」→ 玩家按接受 → 「未知提案類型：tribute_offer ⇒ 沒有生效」→ 21:00 Team11 再來一次（兩小時一輪）｜★★真因兩半：①player_command_system.gd:1717 刻意不接 tribute_offer（怕併進 _pay_extortion 變玩家倒付）⇒ 結果是【玩家永遠收不到貢品】②這條 proposal 由 interaction_system 經 npc.order_task 寫入、不走 _send_diplomacy_message ⇒ 沒有 REJECT_COOLDOWN ⇒ 對方每輪重提｜裁：接受＝收貢（coin 由對方→玩家，金額用 NPC 側 TASK_TRIBUTE_OFFER 自己算的那份）、拒絕＝婉拒＋對方記得（同 NPC 被拒的後果）、結果必有一句；提案者要讀上次結果不得同日重提｜另附截圖抓到的六個畫面缺陷當終端自驗的陽性對照
 ---

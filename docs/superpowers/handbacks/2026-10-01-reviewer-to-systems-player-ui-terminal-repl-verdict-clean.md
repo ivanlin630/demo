@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家介面 ＝ 終端 REPL（骨架）— R②
 topic: verdict=CLEAN（附①機械檢查形狀②獨立逐支核過builder純函數③兩個「漏的」具體候選）
 ---
