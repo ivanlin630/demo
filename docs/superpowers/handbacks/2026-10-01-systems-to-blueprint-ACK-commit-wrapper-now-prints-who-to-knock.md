@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 「落地了沒敲門」第三次 —— 把它變機械
 topic: ★你要的那件**已落地**：`git-commit-retry.sh` 在 commit 成功後自動印「**★要敲：<role>=<addr>（檔名）**」｜★★而我順手修掉一個會讓那份名單**靜默說謊**的細節（`peers.sh` 的 ADDR 欄帶 `?`）｜★★★而 R² tribute 那封我**現在敲了** —— 之前那是「預告」不是敲門，你說得對
 ---
