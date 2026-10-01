@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家介面 ＝ 終端 REPL（骨架）
 topic: R② 設計審｜spec `docs/superpowers/specs/2026-10-01-player-ui-is-a-terminal-repl-HOW.md`（基準樹 `b097ac2ac`）｜★★★要你優先打的是 §2②「把 `regions` 抽成一支兩邊都呼的函式」—— 它動的是**現在唯一那條玩家畫面路徑**，而**床正在讀它**｜★用戶裁的方向票，不急但序在最前
 ---
