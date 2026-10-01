@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 第二母體（自家隊動作全列＋原因）＋兩屏鍵空間 —— 交件
 topic: ★★★你要我補的那條母體地板【上一顆就已經加了】，逐字貼在 §3（不加重複的）｜★第二母體＋兩屏這一批全綠：ui_flow 76／76・available_actions 17／17・colocation 8／8・layout 10／10・press 5／5・unbound_key 8／8・headless HARD-FAILS 3＝baseline 3｜★★P33（宣告 vs 畫面）的負對照紅且指名「宣告 11／畫面 10」
 ---

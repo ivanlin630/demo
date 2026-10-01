@@ -90,7 +90,11 @@ D3  query_returns_body_census_bed.gd:199 `player.get_trade_direct_preview` 那�
     ★★★連帶它的母體常數 —— ★**不要憑預測改**：先跑、看它印出來的數、**逐字抄**
 D4  success_sentence_bed.gd:188 print 文字裡的 `_action_confirm_trade`
 D5  ui_flow_test.gd:860-861 那句假註解（★已另信交你，本票順手收尾）
-D6  ACTION_SHAPE 掉 `confirm_trade` ⇒ 54→53｜registry 51→50｜母體 30→29｜第三桶 1→0
+D6  ACTION_SHAPE 掉 `confirm_trade` ⇒ 列數 −1｜registry key −1｜**母體 −1**｜第三桶 1→0
+    ★★★**不要照這一行的數字改** —— ★原文寫的是「54→53｜51→50｜母體 30→29」，
+      而 **母體在本票開票之後已經從 30 變成 31**（`cancel_move` 的 `listed` 由
+      true 改成 false ⇒ 它加進了 `target=="none" and not listed` 那一側，2026-10-01 systems 裁）
+      ⇒ ★**先跑、看它印出來的數、逐字抄**；判準是「**少 1**」不是「等於某個數」。
     ★★**空名單也要印**（第三桶變空是本票的成功條件，而一個不印出來的空集合沒有主詞）
 D7  `available-actions` 等註冊表 expect 若含上列任何數字 ⇒ **跑完從輸出逐字抄**，不要往上改
 ```
@@ -118,7 +122,9 @@ P1  `grep -rn "confirm_trade" scripts/` ＝ **0 命中**
     ★它不釘數字、不會腐爛：任何人把它加回來都會紅並指名那一行。
 P2  `resolve_trade_direct`／`get_trade_direct_preview`／`query_trade_direct_preview`／
     `preview_trade` 四個名字在 `scripts/` 下各 0 命中
-P3  三桶床：第三桶 ＝ **空名單（且印出來）**｜三數相加 ＝ 母體 29
+P3  三桶床：第三桶 ＝ **空名單（且印出來）**｜三數相加 ＝ 母體，
+    ★而母體 ＝ **退場前那一輪跑出來的值 − 1**（★★不釘字面數字：那個值會因為**別的票**而動，
+    本票開票後它就被另一張票從 30 動到 31 ⇒ 釘字面會讓這一格在一件無關的事上紅）
 P4  ★負對照（★R² 給了更好的做法，採用）：**不建 worktree、不碰工作樹**，
     指到退場前那棵樹驗紅：
       `git grep -n "confirm_trade" f8a59a3f8 -- scripts/`   ⇒ **必須有命中**
@@ -141,7 +147,8 @@ P7  電池全綠（★跑在釘死 HEAD 的 worktree；★★本票改了床與 
 ```
 ·`scripts/` 下 `confirm_trade` 命中數（必須逐字是 0）
 ·四個名字各自的命中數
-·三桶：27／2／**0**，相加 ＝ 29（★空名單那一行的**原文**貼上來）
+·三桶：三個數逐一報 ＋ 相加 ＝ 母體（★第三桶必須是 **0**，且**空名單那一行的原文貼上來**）
+  ★★而「母體 ＝ 退場前 − 1」要用**兩輪的輸出**對照（退場前那一輪的數也貼上來）
 ·registry key 數｜ACTION_SHAPE 列數（跑出來的數，不是預測的數）
 ·P5 那一格的**格名**
 ·★★哪幾支床的 expect 被改、各改成什麼（從輸出逐字抄的那個值）
