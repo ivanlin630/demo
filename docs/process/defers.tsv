@@ -84,6 +84,7 @@
 #     ★★★否則「做完了所以移除」跟「等不下去所以移除」會長成同一個動作。
 #   ★批 2 規矩（我立）:這三張【不得一起 merge】—— 動的是不同子系統,
 #     合著進會讓下一條 baseline 讀不出是誰造成的。
+team-target-actions-could-be-a-func-not-a-static-var	★`TEAM_TARGET_ACTIONS` 現在是 `static var`（因為 `const` 不能用迴圈從 `ACTION_SHAPE` 導出）⇒ 生命週期變成**整個進程**，任何寫入都會洩到下一次 run（汙染的長相是「上一輪的殘留讓這一輪剛好過」）。本票處置＝**白名單一列 ＋ P19 的 P1b（全庫寫入 ＝ 0；兩個方向都有執法點）**。★更乾淨的形狀是 `static func team_target_actions() -> Array` 每次回新陣列 ⇒ **沒有跨 run 狀態、不需白名單、不需寫入禁令**；成本＝11 處呼叫端改成呼叫式（12 筆、非熱路徑）。★★現在不做的理由是**時機不是優劣**：那張票的電池已在跑，再動結構＝又一輪 1800 秒。	下一次有人要碰 `TEAM_TARGET_ACTIONS` 這個符號（改導出方式／加減成員／動呼叫端）時一併改成 `static func`（那時成本已付了一半）	! git grep -q "static var TEAM_TARGET_ACTIONS" -- scripts/simulation/player_command_system.gd
 token	summary	defer_until	met_check
 belief-perfield-rest	resource_scale／combat_target_est 的逐欄位時戳——未修理由是【目前無讀取端消費它們的新鮮度】	有任何讀取端開始檢查這兩個欄位的新鮮度	git grep -nE 'BELIEF_STALE_TICKS' -- scripts/simulation | grep -qE 'resource_scale|combat_target_est'
 belief-pos-tristate	belief_pos 把【從未有情報】與【情報過期】回成同一個 (-1,-1)——修法抄 appearance() 三態	墓碑(①票)落地(production 出現 live_teams/all_teams 縫)	git grep -q 'func live_teams' -- scripts/data
