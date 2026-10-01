@@ -10,7 +10,7 @@ const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
 const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
 
 const NL_CHR: String = "\n"   # ★具名換行：切畫面文字用（避免轉義在工具鏈裡被摺）
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer", "_test_p35_panel_must_not_print_its_own_action_list", "_test_p36_no_duplicate_option_labels", "_test_p37_focus_skylight_both_directions"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer", "_test_p35_panel_must_not_print_its_own_action_list", "_test_p36_no_duplicate_option_labels", "_test_p37_focus_skylight_both_directions", "_test_p38_pages_strip_removes_exactly_the_header"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -126,6 +126,7 @@ func _initialize() -> void:
 	await _test_p35_panel_must_not_print_its_own_action_list()
 	await _test_p36_no_duplicate_option_labels()
 	await _test_p37_focus_skylight_both_directions()
+	await _test_p38_pages_strip_removes_exactly_the_header()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2447,7 +2448,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 36   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 37   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -4017,6 +4018,52 @@ func _test_p37_focus_skylight_both_directions() -> void:
 		not ({"id": -1, "name": "", "status": {}} as Dictionary).is_empty())
 	await _free_ui(node)
 	_cell("_test_p37_focus_skylight_both_directions")
+
+# ══ P38：★★★★★★【剝頭要【剛好剝掉那一行】—— 跨側，而這一格是負對照逼出來的】═════
+# ★背景：抬頭原本印兩次（框標題 ＋ 載體第一段）。修法是**載體照印**（斷言零遷移）
+#   而 `build_regions()` 用 `_pages_without_header()` 把 `pages` 裡那一行剝掉。
+# ★★而我**聲稱**的負對照是「把比對弄鬆 ⇒ `ui_flow` 會紅」—— ★**實測它不紅**：
+#   `ui_flow` 讀的是**載體**，而剝頭只動**合成畫面** ⇒ 它對那個擾動**沒有鑑別力**。
+#   ⇒ ★★★也就是說：`_pages_without_header()` **吃掉一行真內容也不會有任何一格紅**
+#     —— 而那正是我同一天警告過別人的那件事（「遷到一個不存在的主詞」）落在我自己頭上。
+# ★★★所以這一格**跨側**：它同時拿**載體**與**合成畫面**，斷言
+#   「合成的 `pages` ＝ 載體 **減去且僅減去** 那一行抬頭」。
+#   ⇒ 它是 systems 那條通則的實例：**凡是有「不准多」與「至少一個」兩條守衛的東西，
+#     要有一條守【剛好一次】** —— 這裡「不准多」是自驗 (b-2)、「至少一個」是本床的頁首格，
+#     而**中間那條接縫**（剝對了還是剝錯了）在此之前**沒有觀察者**。
+# 負對照：把 `_pages_without_header()` 的比對弄鬆（`if true`）⇒ 本格紅並指名它剝掉了什麼（實測：`["Team15 @ (9,2) [獨立]"]` ＝ 一行真內容，五頁各兩條紅） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+func _test_p38_pages_strip_removes_exactly_the_header() -> void:
+	_selftest_gate("_test_p38_pages_strip_removes_exactly_the_header").noop()
+	print("\n── P38 剝頭要剛好剝掉那一行（跨側）──")
+	var node = await _make_ui()
+	for pidx in range(UiPages.PAGE_ORDER.size()):
+		node._page_idx = pidx
+		node._refresh()
+		var carrier: String = String(node._state_label.text)
+		var composed: String = String(node.build_regions("0 道").get("pages", ""))
+		var head: String = UiPages.header(pidx)
+		var c_lines: Array = carrier.split("\n")
+		var p_lines: Array = composed.split("\n")
+		_check("★母體地板（第 %d 頁）：載體不是空的（%d 行）" % [pidx + 1, c_lines.size()],
+			c_lines.size() > 0)
+		_check("★★第 %d 頁：載體裡**有**那一行抬頭" % (pidx + 1), carrier.contains(head))
+		_check("★★★第 %d 頁：合成的 `pages` 裡**沒有**那一行抬頭（它在框標題上）" % (pidx + 1),
+			not composed.contains(head))
+		# ★★★★而「剛好少一行」＋「少掉的就是它」兩條一起 —— 只驗行數會讓它剝錯一行也綠
+		_check("★★★★第 %d 頁：合成剛好少一行（載體 %d → 合成 %d）" % [
+			pidx + 1, c_lines.size(), p_lines.size()], p_lines.size() == c_lines.size() - 1)
+		var removed: Array = []
+		var j: int = 0
+		for i in range(c_lines.size()):
+			if j < p_lines.size() and String(c_lines[i]) == String(p_lines[j]):
+				j += 1
+			else:
+				removed.append(String(c_lines[i]))
+		_check("★★★★★★第 %d 頁：被拿掉的**剛好是那一行抬頭**（實際拿掉：%s）" % [
+			pidx + 1, str(removed)], removed == [head])
+	await _free_ui(node)
+	_cell("_test_p38_pages_strip_removes_exactly_the_header")
+
 
 
 
