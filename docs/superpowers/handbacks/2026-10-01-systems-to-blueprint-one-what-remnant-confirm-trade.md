@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第二母體（自家隊動作全列）— 機械掃出來的 WHAT 殘餘物
 topic: ★一個要你裁的呈現決定：「照預覽價直接成交」這條貿易路線要不要有玩家入口（`confirm_trade`，全庫唯一的 WHAT 殘餘物，母體與數法都印在卷面上）｜★你不用為它停下來，實作端那張票不動它
 ---
