@@ -352,6 +352,17 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 # ★（原本這裡有一段「某個動作為什麼判成 `"none"`」的理由 —— 那一列已於 2026-10-01 退場，
 #   理由隨它一起走。形狀上的教訓留在別處：**追委派要追到底**，
 #   因為一支 handler 可能把 target 轉給另一支而那一支底線前綴不用它。）
+# ══ ★★★★★【這張表的列序 ＝ 玩家在【自家隊動作區】看到的上下順序】═══════════════
+#   ⇒ **為了查表好讀而重排這幾列 ＝ 改了玩家畫面。**
+# （systems 裁 2026-10-01：「一條【按位置記住】的規矩，它的邊界要寫在那個位置上」）
+# ★怎麼來的：`TEAM_TARGET_ACTIONS` 是本表 `target == "team"` 的衍生檢視，而**它不 `sort()`**
+#   ⇒ 用本表的**插入順序** ⇒ 全列版（`get_action_availability`）的列序 ＝ 這裡的列序。
+# ★★【2026-10-01 這一刀改掉過一次玩家畫面，而它被記錄下來】：舊的手抄 `const` 是
+#   **語意分組**（`ignore, attack, trade, propose_alliance, …`），本表是**字母序**
+#   ⇒ 玩家列序從語意分組變成字母序（systems 裁：不花錢保住舊順序，因為玩家介面正在
+#   換終端 REPL，版面與順序在那張票重新決定 ⇒ 順序的決定權在那張票的 §8）。
+# ★★★若日後要回到語意分組：**重排下面那 12 列**，★**不要加第二份順序清單**
+#   （那正是這一刀殺掉的東西）。
 const ACTION_SHAPE: Dictionary = {
 	"abandon_outpost":         {"target": "none", "listed": false},
 	"accept_encounter":        {"target": "none", "listed": false},

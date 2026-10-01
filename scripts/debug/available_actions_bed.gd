@@ -1366,6 +1366,7 @@ func _test_p19_single_definition_and_no_same_source_cross() -> void:
 		files.size() > 0)
 	var handwritten: Array = []
 	var derived_decl: Array = []
+	var mutations: Array = []       # ★對它的【寫入】—— 見下面那一條地板
 	for f in files:
 		var raw: String = FileAccess.get_file_as_string(String(f))
 		var ls: Array = raw.split("\n")
@@ -1382,6 +1383,8 @@ func _test_p19_single_definition_and_no_same_source_cross() -> void:
 				continue
 			if code.contains("_derive_team_target_actions()"):
 				derived_decl.append("%s:%d" % [String(f), i + 1])
+			elif _is_mutation(_strip_strings(code)):   # ★剝字串 ＝ 保險（別的檔可能在字串裡印它）
+				mutations.append("%s:%d ⇒ %s" % [String(f), i + 1, t])
 			# ★★★★★【判準的描述與判準的違反在文字上同形】——
 			#   第一版寫「含 `TEAM_TARGET_ACTIONS` 且含 `= [`」⇒ **它命中了自己這一行**
 			#   （掃描器的條件式逐字長得像它要抓的東西）。
@@ -1393,8 +1396,28 @@ func _test_p19_single_definition_and_no_same_source_cross() -> void:
 	_check("★★母體地板 B【陽性對照】：抽取式掃得到那個衍生宣告，且剛好 1 處（%d）"
 		% derived_decl.size(), derived_decl.size() == 1)
 	print("   ★P1 手抄字面（要 0 處）＝ %s" % str(handwritten))
-	_check("★★★★★P1：全庫沒有 `TEAM_TARGET_ACTIONS` 的手抄字面（有的話逐條指名：%s）"
+	_check("★★★★★P1a：全庫沒有 `TEAM_TARGET_ACTIONS` 的手抄字面（有的話逐條指名：%s）"
 		% str(handwritten), handwritten.is_empty())
+	# ★★★★★【P1b ＝ 另一個方向，而它是 2026-10-01 電池的 `cross-run-static` 紅逼出來的】
+	#   `const` → `static var` 換來了「可以用迴圈導出」，★代價是**它變成跨 run 可變狀態**：
+	#   `static` 的生命週期跨越整個進程 ⇒ 任何人對它 `append`／`erase`／`sort`
+	#   都會**洩到下一次 run**，而那種汙染的長相是「上一輪的殘留讓這一輪剛好過」。
+	#   ⇒ 電池那支閘（`cross-run-static`）抓到它沒有清除點也不在白名單 ⇒ 我走白名單，
+	#     ★而白名單那一列的理由裡寫著「grep 寫入形式命中 0」——
+	#     ★★**那句話必須有執法點，否則它會靜默腐爛**（白名單是一句話，不是一個守衛）
+	#   ⇒ **本條就是那個執法點**，而它擋的方向與 P1a **相反**：
+	#     P1a 擋「把它改回一份手抄清單」、P1b 擋「把它當成一個可以改的陣列」。
+	# 負對照：在任何一支 `.gd` 裡寫一行 `TEAM_TARGET_ACTIONS.append("x")` ⇒ 本條紅並指名 file:line
+	# ★陽性對照（**sanity check 不是對照組**：它只驗「剝字串之後抽取式還認得真的寫入」，
+	#   不分辨任何兩個假設）—— 真正有鑑別力的是負對照（在某支 .gd 裡真的寫一行）。
+	var sym_probe: String = SPEC_CONSTANT_SYMBOL
+	_check("★陽性對照：抽取式認得真的寫入（認不得 ⇒ P1b 恆綠）",
+		_is_mutation(sym_probe + ".append(\"x\")"))
+	_check("★陽性對照（反面）：只是**讀**它不算（算 ⇒ 本床到處在讀它 ⇒ P1b 會恆紅）",
+		not _is_mutation("var a = " + sym_probe + ".duplicate()"))
+	print("   ★P1b 對它的寫入（要 0 處）＝ %s" % str(mutations))
+	_check("★★★★★P1b：全庫沒有人寫 `TEAM_TARGET_ACTIONS`（它是 `static var` ⇒ 寫它會洩到下一次 run；有的話逐條指名：%s）"
+		% str(mutations), mutations.is_empty())
 	# ── P2：數 P17 的承重斷言 ──
 	var self_src: String = FileAccess.get_file_as_string(
 		"res://scripts/debug/available_actions_bed.gd")
@@ -1472,10 +1495,60 @@ func _check_calls(src: String) -> Array:
 	return out
 
 
+# 把一行 code 裡的【雙引號字串字面】挖掉（★長度保留成空白，行號與欄位不漂）。
+# ★★★★★為什麼需要它（2026-10-01 實測，今天同族第五次）：
+#   `_is_mutation()` 自己那份 pattern 目錄**被 P1b 命中 8 行** ——
+#   **規則的描述與規則的違反在文字上同形**，而這不是判準寫得不好，是它結構上必然遇到的
+#   ⇒ 所以「以後小心」無效，要機械處置。
+# ★★而處置是**提高精度**不是**排除自己那支函式**：
+#   真的寫入那個符號時，它出現在引號**外**；目錄項出現在引號**內**
+#   ⇒ 剝掉字串字面之後，兩者就不再同形了。
+#   （對照：P1a 當時走的是「錨在宣告關鍵字」—— 同樣是提高精度，不是縮小母體。）
+func _strip_strings(code: String) -> String:
+	var out: String = ""
+	var in_str: bool = false
+	for i in range(code.length()):
+		var ch: String = code[i]
+		if ch == "\"":
+			in_str = not in_str
+			out += " "
+		elif in_str:
+			out += " "
+		else:
+			out += ch
+	return out
+
+
+# 一行 code 是不是【對 `TEAM_TARGET_ACTIONS` 的寫入】——
+# ★母體是「會改到那個陣列的形式」：方法呼叫與下標指派。
+#   ★★`.duplicate()` 不算（它回一份新的，床裡到處在用）；讀取不算。
+func _is_mutation(code: String) -> bool:
+	# ★★★★★★【第六次同族之後改成這個形狀】：掃描器裡**不再出現那個符號的字面** ——
+	#   它從 `SPEC_CONSTANT_SYMBOL`（本床既有的單一來源）**組出來**。
+	#   ⇒ 前五次我都在補洞（剝註解／錨宣告關鍵字／剝字串字面），而每一次
+	#     「把規則寫下來」都會與規則本身再碰撞一次（最後一次命中的是我剛寫的陽性對照，
+	#     因為它含轉義引號而我的引號切換器解析錯）。
+	#   ⇒ ★★處置不是再補一個洞，是**把碰撞的源頭拿掉**：沒有字面就不會自我命中，
+	#     而母體**不縮小**（比「排除自己那支函式／那個檔」嚴格好：那是縮小母體）。
+	#   ⇒ ★★★附帶好處：掃描器因此**錨在那個宣告過的符號名上** —— 有人改名時，
+	#     `SPEC_CONSTANT_SYMBOL` 那一處改掉，本掃描器跟著走，不會變成一個掃不到東西的綠。
+	var sym: String = SPEC_CONSTANT_SYMBOL
+	for m in ["append", "erase", "clear", "sort", "sort_custom", "insert", "resize",
+			"remove_at", "push_back", "push_front", "pop_back", "pop_front",
+			"reverse", "assign", "fill", "shuffle"]:
+		if code.contains(sym + "." + String(m) + "("):
+			return true
+	# 下標指派：`<SYM>[...] = `
+	var at: int = code.find(sym + "[")
+	if at != -1 and code.substr(at).contains("] ="):
+		return true
+	return false
+
+
 # 一行 code 是不是【手抄的 `TEAM_TARGET_ACTIONS` 宣告】——
 # ★錨在「宣告關鍵字 ＋ 那個名字 ＋ `= [`」三件同時成立，所以描述這條規則的 code／註解不會命中。
 func _is_handwritten_decl(code: String) -> bool:
-	if not code.contains("TEAM_TARGET_ACTIONS") or not code.contains("= ["):
+	if not code.contains(SPEC_CONSTANT_SYMBOL) or not code.contains("= ["):
 		return false
 	var t: String = code.strip_edges()
 	return t.begins_with("const ") or t.begins_with("var ") or t.begins_with("static var ")

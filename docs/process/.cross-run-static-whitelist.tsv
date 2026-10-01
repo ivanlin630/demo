@@ -8,3 +8,4 @@ scripts/simulation/fp_coverage.gd	_cache	唯讀衍生：輸入只有【類別原
 scripts/simulation/fp_coverage.gd	_src_cache	同上：:34-40 把 class 原始碼讀成字串快取；★零世界狀態進入（grep 該檔 state./world. 命中 0）
 scripts/simulation/state_fingerprint.gd	_derived_cache	唯讀衍生：:33-44 由 ws_script 的原始碼導出欄位清單；★與世界無關 ⇒ 清它只是讓每個 run 重算一次同樣的答案
 scripts/simulation/state_fingerprint.gd	_subfield_cache	同上（子層級版）；★★而它們【必須】跨 run 保留的理由不是效能：清空會讓「尺的定義」在同一個 process 內看起來可變，反而更難歸因
+scripts/simulation/player_command_system.gd	TEAM_TARGET_ACTIONS	唯讀衍生檢視：從 const ACTION_SHAPE 導出 target=="team" 的那些 id（來源是 const ⇒ 兩次 run 之間不可能不同）；grep 寫入形式（.append／.erase／.clear／.sort／.insert／.resize／TEAM_TARGET_ACTIONS[…]=）在 scripts 命中 0；★【它為什麼不能是 const】GDScript 的 const 不能用迴圈從另一個 const 導出 ⇒ ★★後果要寫出來（systems 補 2026-10-01）：把它改回 const **必然**是再抄一份字面 ⇒ 那時 available_actions_bed 的 P1a 會紅，而改的人會以為自己【改錯方向】（真相是他破壞了衍生性）⇒ 要回到 const 的唯一正解是先讓那份清單不再需要導出；★★而「命中 0」這件事有執法點（不是這一列自己說的）＝ available_actions_bed 的 P19：它同時擋兩個方向 —— 手抄回一份字面（0 處）與對它的寫入（0 處）
