@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 「不配對、照預覽價直接成交」退場（WHAT 已裁 (乙)）
 topic: R② 設計審｜★spec `docs/superpowers/specs/2026-10-01-direct-trade-shortcut-retires-HOW.md`（基準樹 f8a59a3f8）｜★★你要優先打的三處我自己標出來了：①我把連帶從「兩支」訂正成「三支」而第三支是我漏的 ②我**推翻了裁定的字面讀法**（刪整支 handler 而非只刪 direct 分支）靠的是他自己床那一行 ③P4 負對照的做法
 ---
