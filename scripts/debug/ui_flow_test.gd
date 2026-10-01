@@ -9,7 +9,8 @@ var _errors: int = 0
 const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
 const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer"]
+const NL_CHR: String = "\n"   # ★具名換行：切畫面文字用（避免轉義在工具鏈裡被摺）
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer", "_test_p35_panel_must_not_print_its_own_action_list", "_test_p36_no_duplicate_option_labels"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -122,6 +123,8 @@ func _initialize() -> void:
 	await _test_p32_unbound_keys_leave_the_action_region_intact()
 	await _test_p33_listed_matches_the_screen()
 	await _test_p34_trade_enter_submits_the_offer()
+	await _test_p35_panel_must_not_print_its_own_action_list()
+	await _test_p36_no_duplicate_option_labels()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -2429,7 +2432,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 34   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 36   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -3734,6 +3737,222 @@ func _test_p34_trade_enter_submits_the_offer() -> void:
 	print("   ★本格不驗成交結果（對方可以拒絕、資源可能不足）—— 它驗的是那道令有沒有被送出。")
 	await _free_ui(node)
 	_cell("_test_p34_trade_enter_submits_the_offer")
+
+# 切出【子模式面板區】那一段（`─ 面板（` 那一行起，到 `─ 動作（` 之前）
+# ★與 `_action_region()` 同形：切不出來時回一個**會讓比較失敗**的字串，不回空
+#   （回空 ⇒ 下面那些「數到 0」會變成恆綠，而那是正數形狀的空集合）。
+static func _panel_region(screen: String) -> String:
+	var a: int = screen.find(TextUiView.A_PANEL)
+	var b: int = screen.find(TextUiView.A_ACTION)
+	if a < 0 or b < 0 or b <= a:
+		return "★切不出面板區（a=%d b=%d）" % [a, b]
+	return screen.substr(a, b - a)
+
+
+# 從一段畫面文字裡抓出所有 `[n]標籤` 的【標籤】（n ＝ 1..9 的數字鍵）
+# ★★★為什麼要回**標籤**而不是回「有幾個」：一個「有幾列」的數字說不出**是哪一列**，
+#   而要修的人要的是那一列的名字；而指名也讓負對照的紅**自己說出它抓到什麼**。
+# ★★而這裡**刻意不**處理 `[A]`-`[Z]`（字母鍵專屬強制事件回應，不變量 #10）。
+static func _numbered_labels(block: String) -> Array:
+	var out: Array = []
+	for line in block.split(NL_CHR):
+		var l: String = String(line)
+		var parts: PackedStringArray = l.split("[")
+		for p in parts:
+			var ps: String = String(p)
+			if ps.length() < 3 or ps[1] != "]":
+				continue
+			if not ps[0].is_valid_int():
+				continue
+			var rest: String = ps.substr(2).strip_edges()
+			if rest == "":
+				continue
+			out.append({"key": ps[0], "label": _label_head(rest)})
+	return out
+
+
+# 把一列的「標籤」從後面黏著的裝飾裡切出來。
+# ★★★★★【這個 helper 是負對照逼出來的】（2026-10-01 實測）：第一版只切【兩個空白】，
+#   而 `action_block` 的行格式是 `" %s %s %s"`（單空白）＋可能再接
+#   `▸`（子選單）或 `（不可：原因）` ⇒ 那兩種列的「標籤」被切成
+#   `打聽情報 ▸`／`邀請定居 （不可：…）` ⇒ 與面板那份的 `打聽情報` **文字不相等**
+#   ⇒ ★負對照時 P36 只報 **6** 個重複而面板明明印了 **9** 列。
+# ★★而這個方向特別危險：對「沒有重複」這種斷言，少抓 ＝ **誤綠**
+#   （而它誤綠的時候卷面上是一個漂亮的 `[]`）。
+# ⇒ 所以切點是【三者取最前】：`  `（面板的分欄）／`▸`／`（不可`。
+static func _label_head(rest: String) -> String:
+	var cuts: Array = [rest.find("  "), rest.find(TextUiView.SUBMENU_MARK),
+		rest.find("（不可")]
+	var at: int = -1
+	for c in cuts:
+		var ci: int = int(c)
+		if ci > 0 and (at < 0 or ci < at):
+			at = ci
+	var lbl: String = rest.substr(0, at) if at > 0 else rest
+	return lbl.strip_edges()
+
+
+# ══ P35：★★★★★★【第三條邊】子模式面板**不得自己印一份動作清單**═══════════════
+# （spec `2026-10-01-player-ui-is-a-terminal-repl-HOW.md` §7／§9，systems 裁 (甲)）
+# ★★★這一格治的是一個**活的**缺陷，而它的形狀是「A 顯示、B 執行」那一族**第三條邊**：
+#   ·`action_block`（畫面）  ＝ `ACTION_DIGITS[action_id]`（**id 查表**）
+#   ·handler（輸入）         ＝ `TextUiView.action_for_key()`（**同一張表的反查**）
+#   ·`_build_interact_str`（**另一個顯示**）＝ `"[%d]" % a_shown`（**位置索引**）←★就是它
+#   ⇒ 實測（量測員 861 字原文）**9 個裡 7 個對不上、2 個是巧合對上**：
+#     面板印 `[1]忽略` 而按 `1` 實際做**貿易**、印 `[2]攻擊` 而按 `2` 實際做**提議同盟**。
+# ★★★★而**上一張票沒有接住它**，理由值得寫下來：那張票數了**兩條邊**（顯示／輸入）
+#   並把兩條都遷成靜態綁 id，而真實是**三條**。
+#   ⇒ ★`P29` 已經在接「畫面↔handler」，但它的畫面側讀的是 `TextUiView.key_for()`
+#     ＝ **`action_block` 那一邊** ⇒ **panel 這條邊沒有任何一格看得到**
+#     （我開檔核過 P29 的函式體，不是從它的名字推的）。
+#   ⇒ ★★所以修法不是「再遷一次」，而是**讓這條邊不存在**：面板不印第二份。
+# ★★★★★而本格**不能**寫成「面板每一列都要與 handler 一致」——
+#   砍掉之後面板**零列** ⇒ 那種斷言會變成**恆空母體**（正數形狀的空集合）
+#   ⇒ 所以本格的主張是**結構的**：面板區裡 `[n]標籤` 的數量必須是 **0**，
+#     ★而它配一個**陽性對照**：同一次抽取在**動作區**必須抓到 > 0 列
+#     ⇒ 「面板 0 列」才可能是「真的沒有」而不是「抽取器壞了」。
+# 負對照：把面板那段動作清單加回去 ⇒ 本格紅並指名 9 列（`[1]攻擊`…`[9]提議同盟`） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+func _test_p35_panel_must_not_print_its_own_action_list() -> void:
+	_selftest_gate("_test_p35_panel_must_not_print_its_own_action_list").noop()
+	print("\n── P35 面板不得自己印一份動作清單（第三條邊）──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	_check("★母體地板 A：找到同格目標（-1 ⇒ 聚焦分支根本不會跑 ⇒ 本格不可判不是綠）",
+		tgt_id != -1)
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	node._bridge.refresh_interaction_targets()
+	node._close_all_modes()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._refresh()
+	var screen: String = String(node._screen_label.text)
+	var panel: String = _panel_region(screen)
+	var action: String = _action_region(screen)
+	_check("★★母體地板 B：真的切得出面板區（切不出 ⇒ 下面那個 0 是假的）",
+		not panel.begins_with("★切不出"))
+	_check("★★母體地板 C：真的切得出動作區", not action.begins_with("★切不出"))
+	var in_panel: Array = _numbered_labels(panel)
+	var in_action: Array = _numbered_labels(action)
+	print("   面板區的 `[n]標籤` ＝ %d 個｜動作區的 ＝ %d 個" % [
+		in_panel.size(), in_action.size()])
+	# ★陽性對照（**它只證明抽取器有在動**，不分辨任何兩個假設 ⇒ 不是對照組）
+	_check("★★★【陽性對照】同一個抽取器在動作區抓到 > 0 列（0 ⇒ 下面那個「面板 0 列」沒有意義）",
+		in_action.size() > 0)
+	var named: Array = []
+	for r in in_panel:
+		named.append("[%s]%s" % [String((r as Dictionary).get("key", "")),
+			String((r as Dictionary).get("label", ""))])
+	_check("★★★★★★面板區沒有自己印動作列（有的話逐個指名：%s）" % str(named),
+		in_panel.is_empty())
+	# ★而「面板還在、只是不印清單」也要有主詞 —— 否則把整個面板刪掉本格也會綠
+	_check("★★★★面板區仍然存在且仍有出口（`[Esc]返回`）—— 本格守的是【不印第二份】，不是【把面板刪掉】",
+		panel.contains("[Esc]"))
+	await _free_ui(node)
+	_cell("_test_p35_panel_must_not_print_its_own_action_list")
+
+
+# ══ P36：★★★★★【同一屏同一標籤只准出現一次】（用戶那句「重複選項」的機械形式）═════
+# ★用戶逐字：「新版UI更爛 爛到沒救 改用終端形式的文字UI 你們自己抓排版 重複選項等問題」
+#   ⇒ 本格把那句話變成一個**會紅的格**，而樣本是量測員那 861 字原文那一屏
+#   （`docs/measurements/2026-10-01-interact-duplicate-options-census.md`）。
+# ★★【整列相等，不用子字串】—— 這一條是量測員**自報的誠實限**換來的：
+#   他的床用子字串比對，而「招募」是「招募匿名」的子字串
+#   ⇒ 搜「招募」時連「招募匿名」那一行也命中，log 印 panel=2/action=2（真值 1/1）。
+#   ⇒ ★所以這裡比的是**抓出來的標籤整體相等**（`==`），不是 `contains`。
+# ★★★母體 ＝ 面板區 ＋ 動作區的 `[n]標籤`（★**刻意不含**事件區與底部：
+#   那裡出現「攻擊」是一句事件敘述，不是一個選項 ⇒ 把它算進來會製造誤報）。
+# 負對照：把面板那段動作清單加回去 ⇒ 本格紅並指名 9 個重複標籤（攻擊／要求納貢／勒索／打聽情報／邀請定居／提議同盟／乞討／忽略／投降請和） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★★★而**這一道第一次只報 6 個**（面板明明印了 9 列）⇒ 抽取式少抓 3 個：
+#   `▸`（子選單）與 `（不可：原因）` 把標籤黏長 ⇒ `打聽情報 ▸` ≠ `打聽情報`。
+#   ⇒ ★少抓對「沒有重複」這種斷言是**誤綠**方向，而它誤綠時卷面上是一個漂亮的 `[]`
+#   ⇒ 修法是 `_label_head()`（三個切點取最前）＋一道**異源**地板
+#     （動作區抬頭自己印的總列數 ＝ 我從行裡抽到的標籤數，實測 12／12）
+#   ⇒ ★★判準：**負對照的數字要跟它應該抓到的母體對一次** —— 紅了不等於紅對了。
+func _test_p36_no_duplicate_option_labels() -> void:
+	_selftest_gate("_test_p36_no_duplicate_option_labels").noop()
+	print("\n── P36 同一屏同一標籤只准出現一次（整列相等）──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt: TeamData = st.teams[ptid]
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	_check("★母體地板 A：找到同格目標", tgt_id != -1)
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	node._bridge.refresh_interaction_targets()
+	node._close_all_modes()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._refresh()
+	var screen: String = String(node._screen_label.text)
+	var panel: String = _panel_region(screen)
+	var action: String = _action_region(screen)
+	_check("★★母體地板 B：兩區都切得出來（切不出 ⇒ 下面的重複數會是 0 而那是假的）",
+		not panel.begins_with("★切不出") and not action.begins_with("★切不出"))
+	# ★動作區的標籤：它用 `[key] 標籤` 與 `（未綁鍵） 標籤` 兩種前綴 ⇒ 兩種都要算
+	var labels: Array = []
+	for r in _numbered_labels(panel):
+		labels.append(String((r as Dictionary).get("label", "")))
+	for r2 in _numbered_labels(action):
+		labels.append(String((r2 as Dictionary).get("label", "")))
+	for line in action.split(NL_CHR):
+		var l: String = String(line)
+		if not l.contains(TextUiView.UNBOUND_MARK):
+			continue
+		var rest: String = l.substr(l.find(TextUiView.UNBOUND_MARK)
+			+ TextUiView.UNBOUND_MARK.length()).strip_edges()
+		var cut: int = rest.find("（不可")
+		var lbl: String = (rest.substr(0, cut) if cut > 0 else rest).strip_edges()
+		if lbl != "":
+			labels.append(lbl)
+	print("   這一屏（面板＋動作）抓到 %d 個選項標籤" % labels.size())
+	_check("★★★母體地板 C：抓到 > 0 個標籤（0 ⇒ 下面「沒有重複」什麼都沒說）",
+		labels.size() > 0)
+	# ★★★★★【異源母體地板】動作區的**抬頭自己印了總列數**（`─ 動作（N／M 可做…`）
+	#   ⇒ 我從行裡抽到的標籤數必須等於那個 M。
+	#   ★為什麼要這一條：抽取式壞掉的方向是**少抓**，而少抓讓「沒有重複」變成**誤綠**
+	#     （實測過一次：`▸` 與 `（不可：…）` 把標籤黏長 ⇒ 9 列只對上 6 個）。
+	#   ★★而兩邊**異源**：M 是 production 自己從 `rows.size()` 印出來的，
+	#     我這邊是**解析畫面文字** ⇒ 它們可以各自獨立壞掉。
+	var declared_total: int = -1
+	var t0: int = action.find("／")
+	if t0 > 0:
+		var t1: int = action.find(" 可做", t0)
+		if t1 > t0:
+			declared_total = int(action.substr(t0 + 1, t1 - t0 - 1).strip_edges())
+	var from_lines: int = labels.size() - _numbered_labels(panel).size()
+	print("   動作區抬頭宣告 %d 列｜我從動作區的行裡抽到 %d 個標籤" % [
+		declared_total, from_lines])
+	_check("★★母體地板 D：抬頭那個數讀得出來（-1 ⇒ 下面那條沒有主詞）", declared_total > 0)
+	_check("★★★★★★抽取式沒有少抓：動作區抬頭宣告的列數 ＝ 我抽到的標籤數（%d／%d）"
+		% [from_lines, declared_total], from_lines == declared_total)
+	var seen: Dictionary = {}
+	var dup: Array = []
+	for lb in labels:
+		var key: String = String(lb)
+		seen[key] = int(seen.get(key, 0)) + 1
+		if int(seen[key]) == 2:
+			dup.append(key)
+	print("   ★重複的標籤（整列相等，不用子字串）＝ %s" % str(dup))
+	_check("★★★★★★同一屏沒有任何標籤出現兩次（重複的逐個指名：%s）" % str(dup),
+		dup.is_empty())
+	await _free_ui(node)
+	_cell("_test_p36_no_duplicate_option_labels")
+
 
 
 # ══ P19：負對照覆蓋率棘輪 —— ★這一格【自己被改過】（2026-10-01）═══════════════
