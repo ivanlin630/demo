@@ -792,14 +792,22 @@ func _refresh() -> void:
 	_render_screen(_pend_txt)
 	_check_alerts()
 
-# ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
-#   ★上面那些 Label 已經被填好 ⇒ 它們是【內容載體】，這裡把內容組成版面。
-#   ★★而 `visible = false` 在這裡設而不是在 `_ready()`：`_ready()` 設了之後
-#     任何一處 `add_child`／重建都可能把它打開，而**每次 render 都設**是冪等的
-#     ⇒ 「顯示只有一個」變成**結構保證**而不是初始化時的一次宣告。
-func _render_screen(pend_txt: String) -> void:
-	if _screen_label == null:
-		return
+# ══ ★★★★★【`regions` 只准有一處組裝】（spec `…player-ui-is-a-terminal-repl-HOW.md` §2②）═══
+# ★為什麼要抽出來：這張票要讓**終端 REPL 與 UI 節點看到同一個畫面**，
+#   而「兩個畫面」最常見的成因就是**兩處各自組裝那個字典**（它們會漂開，而漂了沒有東西會紅）。
+#   ⇒ 所以組裝只在這裡；`_render_screen()` 與 REPL 都**呼叫它**，不各自湊。
+# ★★而本函式**刻意仍然讀那幾個 Label 的 `.text`** —— 它不是漏抽，是裁定：
+#   ·spec §2② 提過另一條路（繞過 Label、`regions` 直接吃 builder 的回傳）
+#   ·★而我量過：五個來源裡**四個**可以隨時重算
+#     （`map` ← `render_text_map()`／`pages` ← `_build_state_str()`／
+#      `panel` ← 12 支 `_build_*_str()` 的模式分派／`keymap` ← `_mode_keymap()` ＋ 待執行）
+#     ★★**而 `result` 不行**：`_feedback_line` 是**把狀態存在 Label 裡**
+#       （`:312`／`:1002` 事件驅動寫入，不是每次 render 重算）
+#     ⇒ 繞過 Label 就得**新開一個儲存**＋**重寫那 12 分支的分派**
+#     ⇒ ★★★那會變成**第二條組裝路徑** —— 正是這張票要治的病。
+#   ⇒ 所以 REPL 走**真的節點**（`TextUI.tscn`，與 `ui_flow_test._make_ui()` 同一條路，
+#     79 格在用 ⇒ 已驗證），而畫面只有一份、組裝只有一處。
+func build_regions(pend_txt: String) -> Dictionary:
 	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
 	var hp: Dictionary = ct.get("home_pos", {}) if ct.get("home_pos", null) != null else {}
@@ -809,7 +817,7 @@ func _render_screen(pend_txt: String) -> void:
 	var threat: String = String(_cached_snapshot.get("threat_line", ""))
 	if threat == "":
 		threat = "（無）"
-	_screen_label.text = TextUiView.compose({
+	return {
 		"top": {
 			"clock": PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
 			"team_name": String(ct.get("name", "—")),
@@ -833,7 +841,18 @@ func _render_screen(pend_txt: String) -> void:
 		"feed": _feed_rows,
 		"result": _feedback_line.text,
 		"keymap": _hint_line.text,
-	})
+	}
+
+
+# ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
+#   ★上面那些 Label 已經被填好 ⇒ 它們是【內容載體】，這裡把內容組成版面。
+#   ★★而 `visible = false` 在這裡設而不是在 `_ready()`：`_ready()` 設了之後
+#     任何一處 `add_child`／重建都可能把它打開，而**每次 render 都設**是冪等的
+#     ⇒ 「顯示只有一個」變成**結構保證**而不是初始化時的一次宣告。
+func _render_screen(pend_txt: String) -> void:
+	if _screen_label == null:
+		return
+	_screen_label.text = TextUiView.compose(build_regions(pend_txt))
 	# ★★★舊的六個 Label ＝【內容載體】，不顯示（見檔頭 `_screen_label` 那一段的理由）
 	for _carrier in [_map_label, _state_label, _event_label, _hint_line,
 			_log_strip, _feedback_line, _debug_bar]:
