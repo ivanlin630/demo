@@ -63,7 +63,10 @@ const SPEC_ENC_GATE: String = "refuse_if_not_in_encounter"
 const SPEC_ENC_CONSUMERS: Array = ["_action_offer_surrender",
 	"_action_surrender_in_encounter", "get_action_availability"]
 # ★§7：兩份同形信封的呼叫點總數（普查的數字，寫進 spec）
-const SPEC_ENVELOPE_SITES_QUERY: int = 14   # 本票刪掉三處停用列之後（原 18 → 15）
+const SPEC_ENVELOPE_SITES_QUERY: int = 4    # ★★★14 → 4（2026-10-01，第二母體 §3③）
+# 查詢面那 11 段各自 `map_available_action(` 的 `if` 收成**一個迴圈** ⇒ 呼叫點 14 − 11 ＋ 1 ＝ 4。
+# ★這是【基準更新】：那 11 個呼叫點真的不在了（實測 4，床自己印在 P8 那一格）。
+# ★★而它與「原 18 → 15 → 14」那條軌跡是同一個方向：每一次都是**少一個第二份**。
 # ★★★15 → 14（2026-10-01，`offer_surrender` 那張票）—— ★這是【基準更新】不是弱化：
 #   那張票把查詢面 Layer 5 的 `offer_surrender` emit **整段刪掉**（它是第二個決定者）
 #   ⇒ `map_available_action` 的呼叫點真的少了一處（實測 14，床自己印在 P8 那一格）。
@@ -526,11 +529,21 @@ func _test_p8_envelope_boundary() -> void:
 	_check("★★庫存那個信封的呼叫點數 ＝ %d（不在本票，但母體要數得到它）" % SPEC_ENVELOPE_SITES_ITEM,
 		m_sites == SPEC_ENVELOPE_SITES_ITEM)
 	var marks: int = 0
-	for mark in ["no-source-constant: own-team-actions", "unreadable-boundary: tile-actions"]:
+	# ★★★★★【2 → 1】（2026-10-01，本票 §3③／P6）——
+	#   `no-source-constant: own-team-actions` 那個錨**已經不該在**：
+	#   它錨的病是「這一類沒有來源常數」，而本票立了 `ACTION_SHAPE`
+	#   ⇒ 那行標記住在被收成迴圈的那 11 段裡 ⇒ 隨之消失 ⇒ 那條 defer 的 met_check 自己翻真
+	#   ⇒ 已移進 `docs/process/defers.tsv` 的「已解除」區（同一顆 commit）。
+	#   ★★而**先紅的是這一條**（1／2）—— 它比我先發現那個錨不見了，
+	#     所以這裡改成 1／1 是【基準更新】不是弱化。
+	#   ★★★`unreadable-boundary: tile-actions`（defer 306）**不動**：
+	#     它的解除條件是「宣告與**行為**對齊」，而本票不動行為（spec §3③ 逐字）。
+	for mark in ["unreadable-boundary: tile-actions"]:
 		if q_raw.contains(mark):
 			marks += 1
 	print("   兩個具名標記都在 ＝ %s（defer 的 met_check 錨在它們上面）" % str(marks == 2))
-	_check("★★★兩個 defer 的錨（就地具名標記）都在（%d／2）" % marks, marks == 2)
+	_check("★★★那一個還該在的 defer 錨在（%d／1；306 的解除條件是行為對齊，本票不動行為）" % marks,
+		marks == 1)
 	_cell("_test_p8_envelope_boundary")
 
 

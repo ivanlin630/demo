@@ -857,10 +857,21 @@ func _test_u21_interact_paging() -> void:
 	_check("分頁後可選第 10+ 項（_interact_target 已設）", node._interact_target != -1)
 	await _free_ui(node)
 
-# U12：交易確認顯示真有資源（解過去顯「無資源」的 GUI 路徑 bug）。
-# 真路徑：_build_trade_str → query_trade_direct_preview → InteractionSystem.preview_trade。
-# preview API 需 target 在玩家 team_discovered 內，否則回 not_visible（無 preview）。
 	_cell("_test_u21_interact_paging")
+# U12：交易確認顯示真有資源（解過去顯「無資源」的 GUI 路徑 bug）。
+# ★★★★★【這段註解今天之前是假的，而它怎麼過期的值得留著】（2026-10-01，systems 抓到）：
+#   舊註解逐字寫「真路徑：`_build_trade_str` → `query_trade_direct_preview`
+#   → `InteractionSystem.preview_trade`」—— ★而 `_build_trade_str`
+#   （`scripts/ui/text_ui_main.gd:2777`）讀的是 **`query_trade_session`**（`:2782`），
+#   而 `text_ui_main.gd` 全檔 `trade_direct` 命中數 ＝ **0**。
+# ★★而它為什麼沒有人發現：**本格的斷言對路徑不可知** ——
+#   它呼 production 的 `_build_trade_str()` 然後只看回傳字串，
+#   所以路徑換了它照樣綠 ⇒ **唯一宣稱路徑的東西就是這段註解**，而註解不會紅。
+#   ⇒ ★★★判準：**一個「路徑不可知」的斷言配一段「宣稱路徑」的註解 ＝ 那段註解沒有守衛**
+#     ⇒ 要嘛讓斷言去驗路徑，要嘛就地寫明「本註解不承重」。本格選後者（見下一行）。
+# ★今天真的走的路徑：`_build_trade_str` → `SimBridge.query_trade_session`
+#   ⇒ ★而本格**驗的是回傳字串**不是那條路徑 ⇒ 這一行是**背景說明，不是斷言**。
+# preview API 需 target 在玩家 team_discovered 內，否則回 not_visible（無 preview）。
 func _test_u12_trade_str() -> void:
 	_selftest_gate("_test_u12_trade_str").noop()
 	print("\n── U12 交易顯示有資源 ──")

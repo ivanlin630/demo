@@ -436,6 +436,10 @@ static func action_label(action_id: String) -> String:
 		"train":                 return "訓練（-%d coin）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
 		"promote_anon":          return "拔擢匿名→記名"
 		"camp":                  return "紮營"
+		# ★`cancel_move` 補進來（2026-10-01）：查詢面原本**手寫**「取消移動」
+		#   ⇒ 那是第二個 label 生產者，而本票把那 11 段收成一個迴圈之後
+		#     迴圈只呼這一支 ⇒ 手寫那一份隨之消失。
+		"cancel_move":           return "取消移動"
 		"take_loot":             return "收割戰利品"
 		"leave_loot":            return "放棄戰利品"
 		"recruit_anon":          return "招募匿名"

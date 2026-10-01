@@ -405,6 +405,142 @@ const TEAM_TARGET_ACTIONS: Array = [
 	"offer_surrender",
 ]
 
+# ══ ★★★★★【純查詢前置檢查】——「能不能做」只有一份（spec 2026-10-01 §3②）═══════
+# 每一個 `target=="none" and listed` 的動作各一支，回 `{"ok": bool, "reason": String}`。
+# ★★兩個消費者，而「同一份」是**結構性的**不是紀律性的：
+#   ·`_action_<x>` 的既有前置檢查**改呼它**（人話搬進來，原地只留呼叫）
+#   ·全列版的迴圈**也呼它** ⇒ `enabled`／`disabled_reason` 從這裡來
+# ★★★**禁止**在查詢面重寫任何條件字面（`TRAIN_COST_COIN`／`_check_distance`／
+#   `outpost_level`…）—— 那一條與第一張票的 P7 同形，而 P7 已經有血證會紅。
+#
+# ★★★★【三處 handler 與查詢面原本條件【不同】，而我照 spec 裁「handler 權威」，
+#   例外逐一寫出來】（2026-10-01 實測，三處都是 (甲) 那個病的本體）：
+#   ①`camp`：查詢面**複製了 4 個條件**（`outpost_level`／`outpost_owner`／`terrain`／
+#     `_check_distance`），而 handler 有**5 句人話**。⇒ 收成一份，人話全部來自 handler。
+#   ②`confirm_gather_intel`：handler 檢「參數遺漏」（npc 存在 ＋ choice 非空），
+#     查詢面檢 `pending_intel_target`。★**這兩個不是重複**：前者是「參數完整嗎」（執行時），
+#     後者是「有沒有待確認的事」（前置）⇒ 前置檢查用後者，而 handler 那一句**留著**
+#     （它守的是另一件事）。★★措辭用藍圖裁定給的那句（「沒有待確認的打聽」）。
+#   ③`leave_loot`：handler **完全沒有條件**（永遠成功），而查詢面把它 gate 在戰利品那一組
+#     ⇒ 照藍圖裁定（「情境四動作不可做時列出＋引擎給的原因」）它**需要一個條件**
+#     ⇒ 我用與 `take_loot` 同一個（有沒有剛結束的戰鬥），措辭用藍圖給的那句。
+#     ★而這是本票唯一**新增**一個條件的地方 —— 它是從裁定推出來的，不是我發明的。
+func precheck_cancel_move(_state: WorldState, pt: TeamData) -> Dictionary:
+	# ★`cancel_move` 沒有 `_action_*` handler（它是一格 dispatch 動詞）
+	#   ⇒ 本支的唯一消費者是全列版；措辭由 spec §3④ 給。
+	if pt == null or pt.move_target == Vector2i(-1, -1):
+		return { "ok": false, "reason": "目前沒有移動目標" }
+	return { "ok": true, "reason": "" }
+
+func precheck_establish_faction(_state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	if pt.faction_id != -1:
+		# ★措辭用 handler 既有那句（更具體：它帶勢力 id）
+		#   ⇒ 本票新造的措辭因此只剩【兩句】（`leave_loot`／`confirm_gather_intel`）。
+		return { "ok": false, "reason": "已屬勢力%d" % pt.faction_id }
+	return { "ok": true, "reason": "" }
+
+func precheck_take_loot(state: WorldState, _pt: TeamData) -> Dictionary:
+	var res: Dictionary = state.last_encounter_result
+	if res.is_empty() or int(res.get("winner_id", -1)) != _get_player_team_id(state):
+		# ★措辭用 handler 既有那句（spec §3②「handler 那句人話搬進去」）——
+		#   藍圖裁定裡的「你沒有剛結束的戰鬥」是**例**不是指定，而既有那句更具體。
+		return { "ok": false, "reason": "無可收取戰利品" }
+	return { "ok": true, "reason": "" }
+
+func precheck_leave_loot(state: WorldState, pt: TeamData) -> Dictionary:
+	# ★★【條件共用、措辭各自】：條件直接呼 `precheck_take_loot`（不抄第二份），
+	#   而原因是它自己的一句 —— ★那一句是**本票唯一新造的措辭之一**
+	#   （handler 原本完全沒有條件 ⇒ 沒有人話可搬；它是從藍圖裁定
+	#   「情境四動作不可做時列出＋原因」推出來的，不是我發明一個規則）。
+	var r: Dictionary = precheck_take_loot(state, pt)
+	if bool(r.get("ok", false)):
+		return r
+	return { "ok": false, "reason": "無可放棄的戰利品" }
+
+func precheck_subjugate_enemy(state: WorldState, _pt: TeamData) -> Dictionary:
+	var res: Dictionary = state.last_encounter_result
+	if res.is_empty() or not bool(res.get("can_subjugate", false)):
+		return { "ok": false, "reason": "無可收編的敗者" }
+	return { "ok": true, "reason": "" }
+
+func precheck_confirm_gather_intel(state: WorldState, _pt: TeamData) -> Dictionary:
+	if not state.player_state.has("pending_intel_target"):
+		# ★本票第二句新造的措辭 —— 而它是**藍圖裁定逐字給的那一句**
+		#   （handler 的「參數遺漏」答的是另一個問題：參數完整嗎）。
+		return { "ok": false, "reason": "沒有待確認的打聽" }
+	return { "ok": true, "reason": "" }
+
+func precheck_hunt(state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or int(tile.resources.get("wild_game", 0)) <= 0:
+		return { "ok": false, "reason": "此地無獵物" }
+	return { "ok": true, "reason": "" }
+
+func precheck_hunt_beast(state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or int(tile.resources.get("predator_density", 0)) <= 0:
+		return { "ok": false, "reason": "此地無猛獸可獵" }
+	return { "ok": true, "reason": "" }
+
+func precheck_camp(state: WorldState, pt: TeamData) -> Dictionary:
+	# ★五句人話全部**搬自 handler**（原地只留呼叫）⇒ 查詢面不再重寫那 4 個條件
+	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
+	if camp_type not in ["civilian", "military"]:
+		return { "ok": false, "reason": "無效紮營類型" }
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null:
+		return { "ok": false, "reason": "格子不存在" }
+	if tile.outpost_level != 0 or tile.outpost_owner != -1:
+		return { "ok": false, "reason": "此地已有據點" }
+	if tile.terrain == "mountain":
+		return { "ok": false, "reason": "山地無法紮營" }
+	if not OutpostSystem.new()._check_distance(state, tile.tile_pos, camp_type):
+		return { "ok": false, "reason": "離既有據點太近,無法紮營" }
+	return { "ok": true, "reason": "" }
+
+func precheck_train(state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	if AnonTierSystem.total_pop(pt) <= 0:
+		return { "ok": false, "reason": "無匿名人口可訓練" }
+	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
+		# ★★那個數字從常數來（查詢面不准再寫一次 `TRAIN_COST_COIN`）——
+		#   P3a 的行為證就是擾動這個常數之後**原因裡的數字要跟著變**。
+		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
+	return { "ok": true, "reason": "" }
+
+func precheck_promote_anon(_state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	if AnonTierSystem.total_pop(pt) <= 0:
+		return { "ok": false, "reason": "無匿名兵可拔擢" }
+	return { "ok": true, "reason": "" }
+
+# ★★★★★【前置檢查的派發表】—— 全列版的迴圈靠它，而**床用它做第四條反向掃**：
+#   每一個 `target=="none" and listed` 的動作都要在這裡有一支 ⇒ 漏一個紅並指名。
+func _precheck_for(action: String) -> Callable:
+	match action:
+		"cancel_move":           return precheck_cancel_move
+		"establish_faction":     return precheck_establish_faction
+		"take_loot":             return precheck_take_loot
+		"leave_loot":            return precheck_leave_loot
+		"subjugate_enemy":       return precheck_subjugate_enemy
+		"confirm_gather_intel":  return precheck_confirm_gather_intel
+		"hunt":                  return precheck_hunt
+		"hunt_beast":            return precheck_hunt_beast
+		"camp":                  return precheck_camp
+		"train":                 return precheck_train
+		"promote_anon":          return precheck_promote_anon
+	return Callable()
+
 # 同格閘的本體。★回空字典 ＝ 放行（★不回 bool：呼叫端要的是【那句人話】，
 #   而把訊息與判斷放在同一個回傳裡，下一個人就不會另寫一份措辭）。
 func _colocation_gate(state: WorldState, action: String, target_id: int, pt: TeamData) -> Dictionary:
@@ -454,16 +590,22 @@ func refuse_if_not_colocated(state: WorldState, target_id: int, pt: TeamData) ->
 # ── Action Handlers ───────────────────────────────────────────
 
 func _action_hunt(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_hunt()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	var pre_h: Dictionary = precheck_hunt(state, pt)
+	if not bool(pre_h.get("ok", false)):
+		return { "ok": false, "msg": String(pre_h.get("reason", "")) }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
-	if tile == null or int(tile.resources.get("wild_game", 0)) <= 0:
-		return { "ok": false, "msg": "此地無獵物" }
 	var r: Dictionary = HuntSystem.new().hunt_small_game(state, pt, tile, true)
 	return { "ok": true, "msg": r.get("msg", "") }
 
 func _action_hunt_beast(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_hunt_beast()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	var pre_hb: Dictionary = precheck_hunt_beast(state, pt)
+	if not bool(pre_hb.get("ok", false)):
+		return { "ok": false, "msg": String(pre_hb.get("reason", "")) }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
-	if tile == null or int(tile.resources.get("predator_density", 0)) <= 0:
-		return { "ok": false, "msg": "此地無猛獸可獵" }
 	# 依地形選獸級（簡版：山→bear、其餘→boar）。TEST VALUE，待 2b-2 量測調整。
 	var kind: String = "bear" if tile.terrain == "mountain" else "boar"
 	tile.resources["predator_density"] = int(tile.resources["predator_density"]) - 1   # 枯竭
@@ -474,10 +616,11 @@ func _action_hunt_beast(state: WorldState, _target: int, pt: TeamData, pt_id: in
 # 訓練/晉升：一次性花 coin → 給最低非菁英 tier 一批 exp → 立即嘗試升階（reuse AnonTierSystem,玩家版比 NPC 完整）
 # coin 守恆：訓練餉銀入自隊公庫(anon_treasury),不蒸發（對齊 try_promote「訓練餉銀入公庫」）。
 func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
-	if AnonTierSystem.total_pop(pt) <= 0:
-		return { "ok": false, "msg": "無匿名人口可訓練" }
-	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
-		return { "ok": false, "msg": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_train()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	var pre_t: Dictionary = precheck_train(state, pt)
+	if not bool(pre_t.get("ok", false)):
+		return { "ok": false, "msg": String(pre_t.get("reason", "")) }
 	ResourceBank.add(pt, "coin", -TRAIN_COST_COIN, "player_train")
 	AnonTreasuryBank.deposit(pt, TRAIN_COST_COIN, "train_salary")   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
 	var target_tier: String = ""
@@ -504,8 +647,11 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 # （已含「從 anon 桶移除 1 + treasury×3 bonus + 加 state.persons」）。command 只負責 append named_members。
 # population getter 自動守恆：anon-1 / named+1,總 pop 不變。NPC 缺 named 時自動拔擢,玩家無對應 → 全 anon 隊永遠卡(無法派子隊/任命),此 command 補上。
 func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
-	if AnonTierSystem.total_pop(pt) <= 0:
-		return { "ok": false, "msg": "無匿名兵可拔擢" }
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_promote_anon()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	var pre_pa: Dictionary = precheck_promote_anon(state, pt)
+	if not bool(pre_pa.get("ok", false)):
+		return { "ok": false, "msg": String(pre_pa.get("reason", "")) }
 	var p: PersonData = PersonGenerator.generate_for_team(state, pt, "member")
 	if p == null:
 		return { "ok": false, "msg": "拔擢失敗（無可拔擢 anon）" }
@@ -515,19 +661,17 @@ func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_
 # 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
 # 玩家發起的限時建造令（設玩家隊 task=建設,PRIO_PLAYER）→ construction 推進 → 完工釋放回 idle。
 func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_camp()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	#   ★★而本支是 (甲) 那個病最清楚的實例：查詢面原本**複製了 4 個條件**
+	#     （`outpost_level`／`outpost_owner`／`terrain`／`_check_distance`），
+	#     而這裡有**5 句人話** ⇒ 現在只有一份。
+	var pre_c: Dictionary = precheck_camp(state, pt)
+	if not bool(pre_c.get("ok", false)):
+		return { "ok": false, "msg": String(pre_c.get("reason", "")) }
 	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
-	if camp_type not in ["civilian", "military"]:
-		return { "ok": false, "msg": "無效紮營類型" }
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
-	if tile == null:
-		return { "ok": false, "msg": "格子不存在" }
-	if tile.outpost_level > 0 or tile.outpost_owner != -1:
-		return { "ok": false, "msg": "此地已有據點" }
-	if tile.terrain == "mountain":
-		return { "ok": false, "msg": "山地無法紮營" }
 	var os := OutpostSystem.new()
-	if not os._check_distance(state, tile.tile_pos, camp_type):
-		return { "ok": false, "msg": "離既有據點太近,無法紮營" }
 	# ★同 faction_ai 的紮根：記下實付工量，讓 construction_ticks_total 分得出兩種 crude_camp
 	tile.construction_target = { "action": "crude_camp", "type": camp_type, "level": 1, "owner": pt.team_id,
 		"person_hours": OutpostSystem.build_person_hours("camp") }
@@ -686,9 +830,12 @@ func _action_recruit_anon(state: WorldState, target_id: int, pt: TeamData, _pt_i
 	return _recruit_anon_internal(state, pt, tgt3, target_id)
 
 func _action_take_loot(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_take_loot()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	var pre_tl: Dictionary = precheck_take_loot(state, pt)
+	if not bool(pre_tl.get("ok", false)):
+		return { "ok": false, "msg": String(pre_tl.get("reason", "")) }
 	var res: Dictionary = state.last_encounter_result
-	if res.is_empty() or res.get("winner_id", -1) != pt_id:
-		return { "ok": false, "msg": "無可收取戰利品" }
 	var loot: Dictionary = res.get("loot_pool", {})
 	var loser_team: TeamData = state.teams.get(res.get("loser_id", -1))
 	for rk in loot:
@@ -701,7 +848,15 @@ func _action_take_loot(state: WorldState, _target_id: int, pt: TeamData, pt_id: 
 	return { "ok": true, "msg": "收取戰利品成功",
 			 "payload": {"refresh_required": true} }
 
-func _action_leave_loot(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+func _action_leave_loot(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_leave_loot()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	#   ★★而這一支原本【完全沒有條件】（永遠成功）⇒ 本票給了它一個
+	#     （理由在 `precheck_leave_loot` 旁邊：藍圖裁「不可做時列出＋原因」）
+	#     ⇒ 這是一個**行為改變**：在沒有剛結束的戰鬥時呼它，現在會被拒絕。
+	var pre_ll: Dictionary = precheck_leave_loot(state, pt)
+	if not bool(pre_ll.get("ok", false)):
+		return { "ok": false, "msg": String(pre_ll.get("reason", "")) }
 	state.last_encounter_result = {}
 	return { "ok": true, "msg": "放棄戰利品" }
 
@@ -899,9 +1054,12 @@ func _action_recall_subteam(state: WorldState, _target_id: int, pt: TeamData, pt
 	return { "ok": true, "msg": "信使已出發至 Team%d" % recall_sub_id }
 
 func _action_subjugate_enemy(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_subjugate_enemy()` 裡，
+	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
+	var pre_se: Dictionary = precheck_subjugate_enemy(state, _pt)
+	if not bool(pre_se.get("ok", false)):
+		return { "ok": false, "msg": String(pre_se.get("reason", "")) }
 	var result: Dictionary = state.last_encounter_result
-	if result.is_empty() or not result.get("can_subjugate", false):
-		return { "ok": false, "msg": "無可收編的敗者" }
 	var loser_id: int = int(result.get("loser_id", -1))
 	var loser: TeamData = state.teams.get(loser_id)
 	if loser == null:
@@ -1692,9 +1850,13 @@ func establish_faction(state: WorldState) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "code": "no_controlled_team",
 				 "message": "找不到玩家隊伍", "payload": {} }
-	if pt.faction_id != -1:
+	# ★前置檢查只有一份（spec §3②）：條件與人話在 `precheck_establish_faction()` 裡。
+	#   ★★本支的回傳是 `{ok, code, message, payload}` 形狀（不是 `msg`）⇒ `code` 留在這裡，
+	#     而 `message` 讀共用那支回的 `reason` ⇒ 一句話一份。
+	var pre_ef: Dictionary = precheck_establish_faction(state, pt)
+	if not bool(pre_ef.get("ok", false)):
 		return { "ok": false, "code": "action_unavailable",
-				 "message": "已屬勢力%d" % pt.faction_id, "payload": {} }
+				 "message": String(pre_ef.get("reason", "")), "payload": {} }
 	state.create_faction(pt_id)
 	print("[PlayerCmd] 玩家建立勢力%d" % pt.faction_id)
 	return { "ok": true, "code": "ok",
