@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: `TEAM_TARGET_ACTIONS` 收成 `ACTION_SHAPE` 的衍生檢視
 topic: R② 設計審｜spec `docs/superpowers/specs/2026-10-01-team-target-actions-becomes-a-derived-view-HOW.md`｜★★★要你優先打的是 §3③：**這張票會把一條異源交叉斷言變成同源** ⇒ 我要求換掉它而不是留著，而「換成什麼」是這張票唯一真的設計決定｜★不急：排在退場票 merge 之後
 ---
