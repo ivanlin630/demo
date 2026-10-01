@@ -2432,7 +2432,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 34   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 36   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -3764,14 +3764,32 @@ static func _numbered_labels(block: String) -> Array:
 				continue
 			if not ps[0].is_valid_int():
 				continue
-			# 標籤 ＝ `]` 之後到【兩個以上空白】或行尾（★動作區用兩空白分欄）
 			var rest: String = ps.substr(2).strip_edges()
 			if rest == "":
 				continue
-			var cut: int = rest.find("  ")
-			var lbl: String = rest.substr(0, cut) if cut > 0 else rest
-			out.append({"key": ps[0], "label": lbl.strip_edges()})
+			out.append({"key": ps[0], "label": _label_head(rest)})
 	return out
+
+
+# 把一列的「標籤」從後面黏著的裝飾裡切出來。
+# ★★★★★【這個 helper 是負對照逼出來的】（2026-10-01 實測）：第一版只切【兩個空白】，
+#   而 `action_block` 的行格式是 `" %s %s %s"`（單空白）＋可能再接
+#   `▸`（子選單）或 `（不可：原因）` ⇒ 那兩種列的「標籤」被切成
+#   `打聽情報 ▸`／`邀請定居 （不可：…）` ⇒ 與面板那份的 `打聽情報` **文字不相等**
+#   ⇒ ★負對照時 P36 只報 **6** 個重複而面板明明印了 **9** 列。
+# ★★而這個方向特別危險：對「沒有重複」這種斷言，少抓 ＝ **誤綠**
+#   （而它誤綠的時候卷面上是一個漂亮的 `[]`）。
+# ⇒ 所以切點是【三者取最前】：`  `（面板的分欄）／`▸`／`（不可`。
+static func _label_head(rest: String) -> String:
+	var cuts: Array = [rest.find("  "), rest.find(TextUiView.SUBMENU_MARK),
+		rest.find("（不可")]
+	var at: int = -1
+	for c in cuts:
+		var ci: int = int(c)
+		if ci > 0 and (at < 0 or ci < at):
+			at = ci
+	var lbl: String = rest.substr(0, at) if at > 0 else rest
+	return lbl.strip_edges()
 
 
 # ══ P35：★★★★★★【第三條邊】子模式面板**不得自己印一份動作清單**═══════════════
@@ -3793,7 +3811,7 @@ static func _numbered_labels(block: String) -> Array:
 #   ⇒ 所以本格的主張是**結構的**：面板區裡 `[n]標籤` 的數量必須是 **0**，
 #     ★而它配一個**陽性對照**：同一次抽取在**動作區**必須抓到 > 0 列
 #     ⇒ 「面板 0 列」才可能是「真的沒有」而不是「抽取器壞了」。
-# 負對照：把面板那段動作清單加回去（任何一行 `[n]label`）⇒ 本格紅並**指名那幾列**
+# 負對照：把面板那段動作清單加回去 ⇒ 本格紅並指名 9 列（`[1]攻擊`…`[9]提議同盟`） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
 func _test_p35_panel_must_not_print_its_own_action_list() -> void:
 	_selftest_gate("_test_p35_panel_must_not_print_its_own_action_list").noop()
 	print("\n── P35 面板不得自己印一份動作清單（第三條邊）──")
@@ -3852,7 +3870,13 @@ func _test_p35_panel_must_not_print_its_own_action_list() -> void:
 #   ⇒ ★所以這裡比的是**抓出來的標籤整體相等**（`==`），不是 `contains`。
 # ★★★母體 ＝ 面板區 ＋ 動作區的 `[n]標籤`（★**刻意不含**事件區與底部：
 #   那裡出現「攻擊」是一句事件敘述，不是一個選項 ⇒ 把它算進來會製造誤報）。
-# 負對照：把面板那段動作清單加回去 ⇒ 本格紅並指名重複的那幾個標籤（實測 9 個）
+# 負對照：把面板那段動作清單加回去 ⇒ 本格紅並指名 9 個重複標籤（攻擊／要求納貢／勒索／打聽情報／邀請定居／提議同盟／乞討／忽略／投降請和） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★★★而**這一道第一次只報 6 個**（面板明明印了 9 列）⇒ 抽取式少抓 3 個：
+#   `▸`（子選單）與 `（不可：原因）` 把標籤黏長 ⇒ `打聽情報 ▸` ≠ `打聽情報`。
+#   ⇒ ★少抓對「沒有重複」這種斷言是**誤綠**方向，而它誤綠時卷面上是一個漂亮的 `[]`
+#   ⇒ 修法是 `_label_head()`（三個切點取最前）＋一道**異源**地板
+#     （動作區抬頭自己印的總列數 ＝ 我從行裡抽到的標籤數，實測 12／12）
+#   ⇒ ★★判準：**負對照的數字要跟它應該抓到的母體對一次** —— 紅了不等於紅對了。
 func _test_p36_no_duplicate_option_labels() -> void:
 	_selftest_gate("_test_p36_no_duplicate_option_labels").noop()
 	print("\n── P36 同一屏同一標籤只准出現一次（整列相等）──")
@@ -3898,6 +3922,24 @@ func _test_p36_no_duplicate_option_labels() -> void:
 	print("   這一屏（面板＋動作）抓到 %d 個選項標籤" % labels.size())
 	_check("★★★母體地板 C：抓到 > 0 個標籤（0 ⇒ 下面「沒有重複」什麼都沒說）",
 		labels.size() > 0)
+	# ★★★★★【異源母體地板】動作區的**抬頭自己印了總列數**（`─ 動作（N／M 可做…`）
+	#   ⇒ 我從行裡抽到的標籤數必須等於那個 M。
+	#   ★為什麼要這一條：抽取式壞掉的方向是**少抓**，而少抓讓「沒有重複」變成**誤綠**
+	#     （實測過一次：`▸` 與 `（不可：…）` 把標籤黏長 ⇒ 9 列只對上 6 個）。
+	#   ★★而兩邊**異源**：M 是 production 自己從 `rows.size()` 印出來的，
+	#     我這邊是**解析畫面文字** ⇒ 它們可以各自獨立壞掉。
+	var declared_total: int = -1
+	var t0: int = action.find("／")
+	if t0 > 0:
+		var t1: int = action.find(" 可做", t0)
+		if t1 > t0:
+			declared_total = int(action.substr(t0 + 1, t1 - t0 - 1).strip_edges())
+	var from_lines: int = labels.size() - _numbered_labels(panel).size()
+	print("   動作區抬頭宣告 %d 列｜我從動作區的行裡抽到 %d 個標籤" % [
+		declared_total, from_lines])
+	_check("★★母體地板 D：抬頭那個數讀得出來（-1 ⇒ 下面那條沒有主詞）", declared_total > 0)
+	_check("★★★★★★抽取式沒有少抓：動作區抬頭宣告的列數 ＝ 我抽到的標籤數（%d／%d）"
+		% [from_lines, declared_total], from_lines == declared_total)
 	var seen: Dictionary = {}
 	var dup: Array = []
 	for lb in labels:
