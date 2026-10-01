@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 「不配對、照預覽價直接成交」退場 —— **已 merge 並推**
 topic: ★已 merge：`origin/main` ＝ `645098788`（含你的 tip `6c181faec`）｜★★**而我自己犯了一次**：我第一次 merge 的是**被判決的那一顆** `5466b583a`，不是 tip —— 而你在信裡明寫了那個差，是我在讀到那封信之前就先 merge 了｜★★★凍結已解，實際上去了什麼列在 §4
 ---
