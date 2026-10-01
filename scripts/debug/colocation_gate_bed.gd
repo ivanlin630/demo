@@ -483,8 +483,21 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 	# ★★★而「總數」那一半沒有不見：它由 P2 的集合比對與 available_actions_bed 的
 	#   `SPEC_TEAM_TARGET_TOTAL` 那一條守著（兩邊各自獨立改變 ⇒ 不是同源）。
 	var exempt: int = SPEC_EARLY_RETURN_EXEMPT.size()
-	print("   母體 %d｜early-return 例外 %d（上限 %d）⇒ 需同格的應該是 %d 個" % [
-		from_const.size(), exempt, SPEC_EXEMPT_MAX, from_const.size() - exempt])
+	print("   母體 %d（本床的 `SPEC_TEAM_TARGET_TOTAL` ＝ %d）｜early-return 例外 %d（上限 %d）⇒ 需同格的應該是 %d 個" % [
+		from_const.size(), SPEC_TEAM_TARGET_TOTAL, exempt, SPEC_EXEMPT_MAX,
+		from_const.size() - exempt])
+	# ★★★★★【P1：兩支床各自斷言自己那個常數】（spec §3 P1 逐字）——
+	#   ★而這一條是我**差點弄掉的**：我拿掉那個恆真加法時，
+	#     那個式子代數上**就是**這一條（`(n−e)+e == C` ⇒ `n == C`）
+	#     ⇒ 拿掉它 ＝ 把本床【唯一】比總數的地方一起拿掉了。
+	#   ★★而我當時在註解裡寫「總數那一半由 available_actions_bed 那一條守著」
+	#     —— 那是**把守衛推給另一支床**，而 spec 要的是**兩支床各自印、各自斷言**
+	#     （理由：兩支床不一定在同一輪跑，而「同一顆 commit」的證據是同一輪的兩份輸出）。
+	#   ⇒ ★★★判準：**把一個恆真式子拿掉的時候，要先問它【退化之後等於什麼】——
+	#     那個東西可能是唯一還有用的那一半。**
+	_check("★★★★★P1：母體大小 ＝ 本床的 `SPEC_TEAM_TARGET_TOTAL`（%d／%d；對不上 ⇒ 母體變了，要回報不是改這裡）"
+		% [from_const.size(), SPEC_TEAM_TARGET_TOTAL],
+		from_const.size() == SPEC_TEAM_TARGET_TOTAL)
 	# ── P12a：例外的每一個都真的在母體裡（成員檢查，不是算術）──
 	var exempt_orphan: Array = []
 	for ex in SPEC_EARLY_RETURN_EXEMPT:
