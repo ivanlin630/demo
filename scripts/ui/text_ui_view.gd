@@ -222,6 +222,13 @@ static func action_for_key(key: String) -> String:
 static func feed_block(events: Array) -> String:
 	var lines: Array = []
 	lines.append(region_title(A_FEED, "最近 %d 條" % FEED_ROWS))
+	# ★★★★★【空的時候印一行佔位】（自驗 (e-2) 實測：事件區六支走法全空）
+	#   ★理由同動作區：只在非零時才出現的東西，玩家學不會它的意思；
+	#     而「區塊消失／只剩一條標題」與「這個功能不存在」在畫面上長得一樣。
+	#   ★★而這一條**上一版被我自己的判準漏掉**：底部那條滿寬分隔線不屬於任何錨
+	#     ⇒ `結果：` 那兩行被算成事件區的內容 ⇒ **假綠**（而我是看畫面才發現的）。
+	if events.is_empty():
+		lines.append(" （還沒有事件 —— 推進時間之後這裡會有紀錄）")
 	var start: int = maxi(0, events.size() - FEED_ROWS)
 	for i in range(start, events.size()):
 		var e: Dictionary = events[i]

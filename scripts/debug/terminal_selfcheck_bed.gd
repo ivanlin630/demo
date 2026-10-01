@@ -32,6 +32,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_f_same_state_renders_identically",
 	"_test_g_player_walk_has_no_debug_tokens",
 	"_test_c_printed_keys_are_typeable",
+	"_test_h_no_dev_notes",
 ]
 
 # ══ 走法表（spec §3「六支走法」＋ R² 要的**退化版本**）════════════════════════════
@@ -70,6 +71,7 @@ func _run() -> void:
 	await _test_f_same_state_renders_identically()
 	await _test_g_player_walk_has_no_debug_tokens()
 	await _test_c_printed_keys_are_typeable()
+	await _test_h_no_dev_notes()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(String(c)):
@@ -282,6 +284,14 @@ static func _bad_empty_regions(screen: String) -> Array:
 				if nx.begins_with(String(a2)):
 					nx_is_any_title = true
 					break
+			# ★★★★★【第四次同族：區塊邊界不只有「錨」】（實測 2026-10-01）
+			#   底部那一區的開頭是一條**滿寬分隔線**（`foot_block()` 的第一行），
+			#   而 `A_FOOT` 是 `" 鍵："`（那一區的**最後**一行）
+			#   ⇒ 那條分隔線與 `" 結果："` 那一行**不屬於任何錨** ⇒ 它們被算成**事件區的內容**
+			#   ⇒ ★事件區明明是空的而 (e-2) 給了它綠（**假綠**，而我是看畫面才發現的）。
+			#   ⇒ 修法：**滿寬分隔線也是邊界**（它在畫面上就是「上一區結束了」的意思）。
+			if nx.strip_edges() == "─".repeat(TextUiLayout.COLS):
+				nx_is_any_title = true
 			if nx_is_any_title:
 				break
 			var t: String = nx.strip_edges()
@@ -532,6 +542,61 @@ static func _debug_hits(screen: String) -> int:
 		if screen.contains(String(t)):
 			n += 1
 	return n
+
+
+# ══ (h) ★★★★★【玩家畫面不得出現開發備註】════════════════════════════════════
+# ★實測（看畫面才看到的，六條一條都不管它）：
+#     `── 未分類（票B 將搬走：2 行，皆為跨頁混合（拆行是另一張票）`
+#     `糧食跑道（缺趨勢）：未接出（票B）`
+#     `（共 %d 處）【暫代】`
+#   ⇒ 它們是**我們寫給自己看的話**，而玩家正在讀它 —— 而且括號還不平衡（被框寬截斷）。
+# ★★為什麼六條抓不到：它是**中文**（(d) 只管英文識別字）、不重複（(b)）、不超寬（(e)）
+#   ⇒ **檢查管道與失效管道不同軸** ⇒ 只能新增一條**指名**的判準。
+# ★★★而判準是**指名**不是「看起來像開發話」：指名會漏（下一個人寫新的備註不在清單裡），
+#   而**漏掉的代價是一個沒抓到**；猜測會誤報，而**誤報的代價是有人把這一條關掉**。
+#   ⇒ 兩害取前者，而「會漏」這件事寫在這裡。
+const DEV_NOTE_TOKENS: Array = ["票B", "另一張票", "【暫代】", "未接出", "未分類"]
+
+func _test_h_no_dev_notes() -> void:
+	print("\n── (h) 玩家畫面不得出現開發備註 ──")
+	print("   指名的 token ＝ %s（★指名會漏，而漏的代價小於誤報 —— 理由在就地）" % str(DEV_NOTE_TOKENS))
+	var screens: Array = await _all_screens()
+	var hits: Array = []
+	for s in _player_only(screens):
+		var d: Dictionary = s as Dictionary
+		var sc: String = String(d.get("screen", ""))
+		for t in DEV_NOTE_TOKENS:
+			if sc.contains(String(t)):
+				hits.append("%s｜%s" % [String(d.get("name", "")), String(t)])
+	print("   命中 %d 處%s" % [hits.size(), ("：" + str(hits)) if not hits.is_empty() else ""])
+	_check("★★★★★★(h) 玩家走法的輸出裡開發備註 ＝ 0（命中：%s）" % str(hits), hits.is_empty())
+	# ★反向對照：乾淨合成字串 0 → 塞一個必須 > 0
+	var clean: String = "第 1 天 00:00｜一個乾淨的合成畫面"
+	var c0: int = 0
+	var c1: int = 0
+	for t2 in DEV_NOTE_TOKENS:
+		if clean.contains(String(t2)):
+			c0 += 1
+		if (clean + String(DEV_NOTE_TOKENS[0])).contains(String(t2)):
+			c1 += 1
+	print("   ★反向對照：乾淨 %d 命中 → 塞一個之後 %d 命中" % [c0, c1])
+	_check("★★【反向對照】乾淨輸入命中 0（%d）" % c0, c0 == 0)
+	_check("★★★【反向對照】塞一個開發備註之後必須命中（%d）" % c1, c1 > 0)
+	# ★★★★★★【反向走法：那些儀器在 debug 走法下**必須還在**】——
+	#   `票B 將搬走 N 行`／`【暫代】`／天窗的票號**不是雜訊，是儀器**
+	#   （那個 N 就是票B 的母體 —— `text_ui_main.gd` 那一段的原裁定逐字寫著這件事）
+	#   ⇒ 把它們移出玩家走法之後，**必須有一條確認它們沒有被順手刪掉** ——
+	#     否則「玩家看不到」會變成「它根本不存在」，而票B 的進度讀數靜靜歸零。
+	var dbg_notes: Array = []
+	for s4 in _debug_only(screens):
+		var sc4: String = String((s4 as Dictionary).get("screen", ""))
+		for t4 in DEV_NOTE_TOKENS:
+			if sc4.contains(String(t4)):
+				dbg_notes.append(String(t4))
+	print("   ★debug 走法裡那些儀器 ＝ %s（必須非空）" % str(dbg_notes))
+	_check("★★★★★★【反向走法】debug 走法下票B 的儀器**還在**（%d 個）⇒ 它只是不在玩家那條路上"
+		% dbg_notes.size(), not dbg_notes.is_empty())
+	_cell("_test_h_no_dev_notes")
 
 
 # (c) 印出的鍵 ＝ 打得出來的鍵（★終端引入的新缺陷類別）

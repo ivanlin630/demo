@@ -1033,7 +1033,8 @@ func _build_state_str() -> String:
 		ct.get("id", _player_tid),
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
-	lines.append("狀態: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
+	lines.append("狀態: %s  疲勞: %d%%" % [
+		human(TASK_DISPLAY, ct.get("task_summary", "")), ct.get("fatigue_pct", 0)])
 
 	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
 	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。
@@ -1058,8 +1059,18 @@ func _build_state_str() -> String:
 		if not _unclassified.is_empty():
 			# ★★★完成條件②（systems 裁）：剩下的若全是【已具名的跨頁混合行】，就把名單印出來
 			#   ⇒ ★沒有名單的話，「還剩 3 行」跟「還有 3 行沒人處理」在畫面上長得一樣。
-			var _mixed: String = _unclassified_mixed_note(_unclassified)
-			lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [_unclassified.size(), _mixed])
+			# ★★★★★【標題分成兩半：玩家讀的那一半，與儀器那一半】（自驗 (h)，2026-10-01）
+			#   ·`未分類` 這個**分類事實**要留（不標示等於在畫面上說謊 —— 原裁定）
+			#     ⇒ 但玩家讀的字改成「其他（尚未分頁）」：它說了同一件事而不帶票號。
+			#   ·★而「票B 將搬走 N 行＋跨頁混合名單」是**儀器**（那個 N 就是票B 的母體）
+			#     ⇒ 它移進 **debug 走法**，★★而床有反向斷言（debug 走法下必須還在）
+			#     ⇒ 儀器不會被靜默刪掉，而玩家畫面上沒有我們寫給自己的話。
+			if truth_pane_enabled():
+				var _mixed: String = _unclassified_mixed_note(_unclassified)
+				lines.append("── 未分類（票B 將搬走：%d 行%s）──" % [
+					_unclassified.size(), _mixed])
+			else:
+				lines.append("── 其他（尚未分頁） ──")
 			lines.append_array(_unclassified)
 		# ★沒接出的生存欄位【仍然印天窗】（不先拿掉再說）
 		for _f in _page_skylight_fields(0):
@@ -1203,7 +1214,7 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 		lines.append("家：(%d,%d) %s  離家 %d%s" % [
 			int(_hp.get("q", 0)), int(_hp.get("r", 0)), str(_hk),
 			int(_hd),
-			"  （共 %d 處）【暫代】" % _hc if _hc > 1 else ""])
+			("  （共 %d 處）%s" % [_hc, "【暫代】" if truth_pane_enabled() else ""]) if _hc > 1 else ""])
 	# ★②「含被聚焦的那個人」：focused_member 是【現成的查詢面 key】，畫面先前從來沒讀過
 	var fm: Dictionary = _cached_snapshot.get("focused_member", {})
 	if not fm.is_empty():
@@ -1212,7 +1223,21 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 		#     而它【把整個函式從中間砍斷】⇒ 回傳 null ⇒ 型別化成空 Array ⇒ ★★呼叫端看到 0 行。
 		#   ⇒ ★★★而那一輪的卷面是「errors: 1｜到場點名 31／31」—— 一個執行期錯誤
 		#     靜靜吃掉半個函式，而點名照樣滿分。
-		lines.append("聚焦: %s  %s" % [str(fm.get("name", "?")), str(fm.get("status", ""))])
+		# ★★★★★【兩個缺陷，而第二個是「哨兵不是空的」】（自驗 (d) 實測，2026-10-01）
+		#   ①`fm.get("status")` 是一個 **Dictionary**（`{health, stress, loyalty}`）
+		#     ⇒ `str()` 把它整個倒在玩家畫面上，連鍵名（英文）一起
+		#   ②`if not fm.is_empty()` **永遠成立** —— `map_focused_member()` 的哨兵
+		#     （`player_api_mapper.gd:229-233`）是一個**有鍵的字典**（`id: -1`）而不是 `{}`
+		#     ⇒ 沒有聚焦任何人時照樣印一行「聚焦:   {…}」
+		#   ⇒ ★判準：**哨兵值要用它自己的欄位判（`id == -1`），不要用 `is_empty()`**
+		#     —— 「空的字典」與「表示空的字典」是兩件事，而它們在 `is_empty()` 下同形。
+		if int(fm.get("id", -1)) != -1:
+			var fs: Dictionary = fm.get("status", {}) as Dictionary
+			lines.append("聚焦: %s  %s  壓力 %.0f%%  忠誠 %.0f%%" % [
+				str(fm.get("name", "?")),
+				str(fs.get("health", "")) if str(fs.get("health", "")) != "" else "狀態不明",
+				float(fs.get("stress", 0.0)) * 100.0,
+				float(fs.get("loyalty", 0.0)) * 100.0])
 	return lines
 
 # ══════════ 游標懸停印整格真值（debug）══════════
@@ -1233,6 +1258,34 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 # ★★誠實限：勢力印的是 `faction_id` 而不是名字 —— `get_teams_at_tile()` 給的是 id，
 #   而畫面上那個好看的 `faction_display` 是【belief 推導的】⇒ 把它混進真值區塊
 #   會讓這一段變成「一半真值一半信念」，那比少一個名字糟。
+# ══ ★★★★★【給玩家看的字一律人話 —— 這兩張表是那件事的唯一宣告】═══════════════
+# 自驗 (d)「無英文識別字」實測抓到的（2026-10-01）：`idle`／道具 id 八個／
+#   `聚焦:` 把一個原始 Dictionary 印出來（`{ "health": …, "stress": …, "loyalty": … }`）。
+# ★★而**修法刻意不是去改資料層的常數**：`TeamData.TASK_IDLE` 若改成中文，
+#   全庫 10+ 處**字面** `"idle"` 的比較會靜默壞掉，★而其中 `encounter_system` 的 `"idle"`
+#   是**另一個命名空間**（單位的 `pending_action.type`）⇒ **同字不同義**
+#   ⇒ 動它會讓兩件不同的事一起變，而那是最難查的那種。
+# ⇒ ★★★所以映射發生在**顯示層**，而「資料層那三個英文值」逐一指名在這裡。
+const TASK_DISPLAY: Dictionary = {
+	"idle": "閒置",          # TeamData.TASK_IDLE
+	"return_home": "返家",   # TeamData.TASK_RETURN_HOME
+	"rest": "休息",          # TeamData.TASK_REST
+}
+# ★道具 id → 人話（母體 ＝ `_get_team_takeable_items()` 回的那八個）
+#   ★★而它與 `:1127` 那一行的「低武／高武」措辭刻意一致（同一個東西在兩處不要兩種叫法）
+const ITEM_DISPLAY: Dictionary = {
+	"weapon_melee_low": "低階近戰武器", "weapon_melee_high": "高階近戰武器",
+	"weapon_ranged_low": "低階遠程武器", "weapon_ranged_high": "高階遠程武器",
+	"armor_low": "低階護具", "armor_high": "高階護具",
+	"medicine": "藥品", "tools": "工具",
+}
+
+# 把一個可能是英文識別字的值換成人話（查不到就原樣回 —— ★而「查不到」會被自驗 (d) 咬到，
+# 那正是我們要的：**新增一個 id 的人會被床擋下來**，而不是靜默印一個英文字給玩家）
+static func human(table: Dictionary, raw) -> String:
+	var k: String = str(raw)
+	return String(table.get(k, k))
+
 const HOVER_TRUTH_TITLE: String = "真值·debug（非附身者所知）"
 # ★debug 走法的開關（spec §15②）—— ★★**每次問環境變數，不存成 `static var`**：
 #   `static` 的生命週期跨整個進程 ⇒ 它會變成跨 run 可變狀態（電池的 `cross-run-static`
@@ -1612,7 +1665,8 @@ func _build_inv_str() -> String:
 		var item = inv[i]
 		var sel_idx: int = eq.size() + i
 		var prefix: String = "[%d]*" % (sel_idx + 1) if _inv_selection == sel_idx else "[%d]" % (sel_idx + 1)
-		lines.append("  %s %s × %d" % [prefix, item.get("grade", "?"), item.get("qty", 0)])
+		lines.append("  %s %s × %d" % [prefix, human(ITEM_DISPLAY, item.get("grade", "?")),
+			item.get("qty", 0)])
 
 	# ── 從 Team 取出（[G]） ──
 	var team_items: Array = _get_team_takeable_items(null)
@@ -1621,7 +1675,8 @@ func _build_inv_str() -> String:
 		var sel_idx2: int = eq.size() + inv.size() + i
 		var prefix: String = "[%d]*" % (sel_idx2 + 1) if _inv_selection == sel_idx2 else "[%d]" % (sel_idx2 + 1)
 		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
-		lines.append("  %s %s: %d%s" % [prefix, team_items[i], qty, "" if qty > 0 else "（灰）"])
+		lines.append("  %s %s: %d%s" % [prefix, human(ITEM_DISPLAY, team_items[i]),
+			qty, "" if qty > 0 else "（灰）"])
 
 	lines.append("── [1-9]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
 	return "\n".join(lines)
