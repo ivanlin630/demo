@@ -2,7 +2,7 @@
 date: 2026-10-01
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 面板不再印第二份動作清單（REPL 票 §7／§9，裁 (甲)）— 電池判決
 ---
 
