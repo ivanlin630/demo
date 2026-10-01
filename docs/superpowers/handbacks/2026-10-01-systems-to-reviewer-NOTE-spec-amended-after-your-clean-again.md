@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: ★告知（不是請你重審整張）：`offer_surrender` 那張 spec 在你 CLEAN 之後又被我改了兩處，而其中一處是**就地訂正一句你當時讀過的話**｜★★而實作端的 code 已經寫完（未跑未推）⇒ 若你認為這兩處要過 R² 才能驗收，現在說
 ---
 
