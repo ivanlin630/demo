@@ -273,18 +273,37 @@ func _test_p2_population_is_visible() -> void:
 	print("     ⇒ ★「11 支」與「10 個字面」量綱不同：前者數函式、後者數字面。")
 	# ★★★反向掃：長得像前置檢查而**不在**那個前綴下的 ⇒ 紅並指名
 	#   （防命名慣例的例外，也防有人把 `precheck_*` 改名）
+	# ★★★★★【反向掃要印出它自己的母體】（systems 裁 2026-10-01 §2）——
+	#   ★回 `[]` 有兩種成因而**卷面上長得一樣**：
+	#     (a) 真的沒有違規（我們要的）  (b) **母體為空**（抽取式一個成員都沒抓到）
+	#   ⇒ 所以把三個數印在**同一段**：掃到幾行 `ok:true`／其中「有 `reason` 無 `msg`/`message`」
+	#     幾行（＝反向掃**真正的母體**）／其中不在 `precheck_*` 內幾行（＝那個 `[]` 的**分子**）
+	#   ⇒ ★★判準（systems 自己寫過的）：**任何回 0／回空的量，要在印出那個 0 的同一行問
+	#     「有沒有可能是我沒看到，而不是它不存在」**。
 	var looks_like: Array = []
+	var n_ok_lines: int = 0          # 掃到幾行 `ok: true`（含被排除的）
+	var n_reason_shape: int = 0      # 其中「有 reason 無 msg/message」＝ 反向掃真正的母體
 	for i2 in range(lines.size()):
 		var t2: String = String(lines[i2]).strip_edges()
 		if t2.begins_with("#") or not t2.contains("\"ok\": true"):
 			continue
-		if String(owner[i2]).begins_with(SPEC_PRECHECK_PREFIX):
-			continue
+		n_ok_lines += 1
 		var w2: String = ""
 		for j2 in range(i2, mini(i2 + 3, lines.size())):
 			w2 += String(lines[j2]) + " "
-		if w2.contains("\"reason\"") and not (w2.contains("\"msg\"") or w2.contains("\"message\"")):
-			looks_like.append("%d: %s()" % [i2 + 1, String(owner[i2])])
+		var is_reason_shape: bool = w2.contains("\"reason\"") and not (
+			w2.contains("\"msg\"") or w2.contains("\"message\""))
+		if not is_reason_shape:
+			continue
+		n_reason_shape += 1
+		if String(owner[i2]).begins_with(SPEC_PRECHECK_PREFIX):
+			continue
+		looks_like.append("%d: %s()" % [i2 + 1, String(owner[i2])])
+	print("   ★反向掃的母體：掃到 `\"ok\": true` %d 行 ⇒ 其中「有 `reason` 無 `msg`/`message`」%d 行（＝母體）⇒ 其中不在 `%s*` 內 %d 行（＝那個清單）" % [
+		n_ok_lines, n_reason_shape, SPEC_PRECHECK_PREFIX, looks_like.size()])
+	print("     ⇒ ★`[]` 的意思要看中間那個數：母體 %d > 0 ⇒ 它是「沒有違規」；母體 0 ⇒ 它是「母體為空」。" % n_reason_shape)
+	_check("★★母體地板：反向掃的母體不是空的（%d；0 ⇒ 下面那個 `[]` 什麼都沒說）" % n_reason_shape,
+		n_reason_shape > 0)
 	print("   ★反向掃：帶 `reason` 而不帶 `msg`/`message`、又不在 `%s*` 下的 ＝ %s" % [
 		SPEC_PRECHECK_PREFIX, str(looks_like)])
 	_check("★★★★反向掃：沒有「長得像前置檢查而不在那個前綴下」的（有 ⇒ 命名慣例有例外或有人改名：%s）"
