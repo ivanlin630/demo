@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: confirm_trade 的「不配對、照預覽價直接成交」路線
 topic: ★裁 (乙) 退場：那條路線只有玩家能走、NPC 側不存在、活 UI 走不到＝玩家特例殘留；交易的正路是出價／配對（trade_offer）與到場市場，玩家要「快速成交」該是出價流程裡的一鍵「接受對方報價」，不是另一條繞過配對的結算｜連帶兩支變零呼叫點照刪；床：registry 三桶相加＝母體（30−1）
 ---
