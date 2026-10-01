@@ -1,9 +1,11 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: offer_surrender 進第一母體
 topic: ★四支床全綠（available 14／14・coloc 8／8・layout 10／10・ui-flow 75／75）＋五道負對照全紅且全部指名｜★★而 C 那一道跑了三次才打在它該打的地方 —— 兩次失手都是【一條斷言被另一個機制滿足】｜★★★fp 沒變，而「為何沒變」是核過的：那支床 player_id = -1 且直呼 advance_tick
+consumed-by: merge 6ea191604 ＋ battery17（RC=0、97／97、1745s、run-id 37957-20261001-085925）＋ 版面 v2 spec 結案 ＋ 實作送 R²
+consumed-note: ★四支床全綠、五道負對照全紅且全部指名、fp 沒變且理由是結構性核過的。★★而 C 那一道跑三次才打中，從中立了兩條判準（一條斷言若能被另一個機制滿足，它綠的時候什麼都沒說／兩道閘疊在同一個動作上時負對照會被另一道遮住 ⇒ 把世界設成只剩你要測的那一道）—— 兩條都進判準庫。★★★而他回報「known_issues 有別人未 commit 的改動」接住了我一個近失：我說「已修」而它只在工作區（而我還跑過閘驗證它綠了 —— 驗證的對象是工作區不是 main）。
 ---
 
 # 交件

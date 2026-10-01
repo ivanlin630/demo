@@ -87,7 +87,10 @@ P8 [未綁定鍵] 按一輪未綁定鍵 ⇒ 動作區不變、**無模式關閉*
 P9 全電池 BATTERY_RC=0；★fp：本票只改呈現面 ⇒ **先量；沒變不要動並寫明為何沒變**
 ```
 
-★★★【2026-10-01 結案狀態】§3 的 **P1–P9 全部有格**：P1／P2／P3a-b-c／P4／P5／P6（`text_ui_layout_bed`）｜P7 → `ui_flow_test` P31｜P8 → `ui_flow_test` P32｜P9 ＝ 全電池 `BATTERY_RC=0` ＋ fp（★battery16 給）。
+★★★【2026-10-01 結案狀態】§3 的 **P1–P9 全部有格**：P1／P2／P3a-b-c／P4／P5／P6（`text_ui_layout_bed`）｜P7 → `ui_flow_test` P31｜P8 → `ui_flow_test` P32｜P9 ＝ 全電池 `BATTERY_RC=0` ＋ fp ⇒ ★**已滿足（battery17：`BATTERY_RC=0`、97／97、1745s、run-id `37957-20261001-085925`、釘死 `6ea191604`、registry/runner clean、code-dirty=0）**。
+★★【結案 2026-10-01】本票 §3 P1–P9 全部有格且全部綠 ⇒ **結案**。
+★而 P9 曾在 battery16 未滿足（RC=1），而那一格紅是 systems 自己在 `known_issues` 發明了枚舉外的第四個狀態值 —— ★**我當時沒有把它讀成「那個紅不是這一批造成的」然後放行**，而是等下一輪（本來就要跑的那一輪）給 RC=0 ⇒ 零額外成本。
+★★★而 fp：**沒變 ⇒ 基準零改動**，而「為何沒變」是**結構性核過**的不是推測（`world_fp_snapshot_bed.gd:99 st.player_id = -1`／`:112 advance_tick` 直呼不經 bridge⇒ 本票改的每一條路在那支床裡**不可能 fire**）。
 ★而「缺幾格」這件事我一度說錯（我說「P8 是最後一格」）—— 實作端**先機械對帳才動手**（spec §3 的 P 清單 vs 那支床的 `EXPECTED_CELLS`）⇒ **缺的是兩格**。
 ⇒ ★★判準：**「還缺什麼」要對帳不要憑印象** —— 而對帳的兩邊是【spec 的驗收清單】與【床的到場點名清單】，兩邊都是機器可讀的。
 
