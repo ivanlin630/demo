@@ -7,7 +7,24 @@ extends SceneTree
 #   ⇒ 恆 true／恆空，正是我們自己有守衛在抓的那一族。
 #
 # ★★而本票真正的重心有兩個，而它們不是同一件事：
-#   ·P1／P1c 守【名字】（母體 ＝ `TEAM_TARGET_ACTIONS`，而且要逐字引用那個常數）
+#   ·P1／P1c／P17 守【名字】（母體 ＝ `TEAM_TARGET_ACTIONS`，而且要逐字引用那個名字）
+#     ★★★【2026-10-01】`TEAM_TARGET_ACTIONS` 已收成 `ACTION_SHAPE` 的**衍生檢視**
+#       ⇒ 三格各自錨在**不同**的東西上，而只有一格要換：
+#       ·**P1c 沒換**（它驗的是「全列版那段 code **逐字呼那個名字**，不是另一份字面陣列」
+#         —— ★名字的來源變了不影響它，而它現在**更承重**：那個名字就是衍生檢視本身）
+#       ·**P17 換掉**（它舊版拿 `ACTION_SHAPE` 的 team 集合跟 `TEAM_TARGET_ACTIONS` 比
+#         ⇒ 收成衍生物之後**同源 ⇒ 恆真**）⇒ 新版比的是**外部期望**
+#         （`SPEC_TEAM_TARGET_TOTAL` ＋ `SPEC_TEAM_TARGET_NAMES`）
+#       ·**P19 是新的**（spec P1／P2）：全庫手抄字面 ＝ 0 處 ＋ 那條同源斷言不准回來
+#     ★★而**P1 的誠實限**（它沒有換，而它的鑑別力有一半是舊的）：
+#       `get_action_availability` 自己就是在跑 `for name in TEAM_TARGET_ACTIONS`
+#       ⇒ P1 的「雙向一致（列裡沒多的／常數裡沒缺的）」那兩條在**成員身分**這一維
+#         是**同源 ⇒ 恆真**（★而這**不是這次造成的**：它在改之前也一樣，
+#         當時是 `const` 字面 ＋ 一個迭代那個 `const` 的迴圈）。
+#       ⇒ P1 真正還在守的是**別的東西**：列數 ＝ 常數 − 具名排除、
+#         每個名字**剛好一次**、每一列有非空 `label`、`opens_submenu` 逐字等於宣告、
+#         以及那個「有鍵／沒鍵」的差距（看得見用，不是斷言）。
+#       ⇒ ★★★而「成員身分」那一維**現在由 P17 守**（它比的是外部期望）。
 #   ·P7 守【條件】（pop 1.5 倍／readiness 0.7／coin 只准有一份）
 #   ⇒ P7 更接近「一個真相一份」的本體：名字漂開看得出來，條件漂開只會讓
 #     「選單說可以、handler 說不行」，而那在卷面上是沉默的。
@@ -56,9 +73,30 @@ const SPEC_ONE_COPY_PHRASES: Array = ["非戰鬥中", "投降請和"]
 # ★★★★`ACTION_SHAPE` 的三個【具名豁免】（不在 `_action_registry` 裡）——
 #   ★床自己持有這份字面：讀 production 那邊的清單＝同源恆真（它寫什麼這一格都綠）。
 #   ★★而 spec §3① 只點名了兩個（`cancel_move`／`move_to`）；第三個 `ignore` 是
-#     **P1c 逼出來的**（`target=="team"` 要等於 `TEAM_TARGET_ACTIONS` 的 12 個，含它）
+#     **P1c（今天的 P17）逼出來的**（`target=="team"` 要等於那 12 個，含它）
 #     ⇒ 少了它那一格必紅。這一條差異已回報 systems。
 const SPEC_SHAPE_EXEMPT: Array = ["ignore", "cancel_move", "move_to"]
+# ══ ★★★★★【團隊目標動作的【逐名外部期望】—— 這一份是刻意手抄的】═════════════
+# （spec `2026-10-01-team-target-actions-becomes-a-derived-view-HOW.md` §3③，裁 (甲)）
+# ★**它的價值就在於它不是從 `ACTION_SHAPE` 導出來的。**
+#   `PlayerCommandSystem.TEAM_TARGET_ACTIONS` 現在是 `ACTION_SHAPE` 的**衍生檢視**
+#   ⇒ 拿它去跟 `ACTION_SHAPE` 比就是**同源 ⇒ 恆真**（而卷面長相是綠）。
+# ★★【壞掉會長什麼樣】（不是「別亂改」）：
+#   ·若有人把這一份收成 `ACTION_SHAPE` 的衍生物（「少一份手抄清單不是好事嗎」）
+#     ⇒ 下面 P17 那一格**從那一刻起恆真** ⇒ `ACTION_SHAPE` 的 team 欄位怎麼改都不會紅
+#     ⇒ 而它壞掉的長相是**一片綠**，沒有任何一格會說話。
+#   ·若有人只在這裡加一個名字而忘了 `SPEC_TEAM_TARGET_TOTAL`（或反過來）
+#     ⇒ P17 會紅並**指名**那個差 —— ★這一對是**刻意成對**的：
+#       `SPEC_TEAM_TARGET_TOTAL` 管【數目】、本清單管【成員】，
+#       而「少一個名字而數目不變」那一維由對方補（計數是有損投影）。
+# ★★★而 `colocation_gate_bed.gd` 的 `SPEC_TEAM_TARGET_TOTAL` 旁邊那三行 12 個名字
+#   **是給人讀的字、不承重**（systems 裁）—— ⇒ 本專案的「兩個檔各自手抄同一份清單」
+#   那個病**不成立**：**只有一份是資料，另一份是字**。
+const SPEC_TEAM_TARGET_NAMES: Array = [
+	"attack", "beg", "demand_tribute", "extort", "gather_intel", "ignore",
+	"invite_settle", "offer_surrender", "propose_alliance", "recruit",
+	"recruit_anon", "trade",
+]
 const SPEC_ENC_GATE: String = "refuse_if_not_in_encounter"
 const SPEC_ENC_CONSUMERS: Array = ["_action_offer_surrender",
 	"_action_surrender_in_encounter", "get_action_availability"]
@@ -100,6 +138,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p16_action_shape_reverse_sweep",
 	"_test_p17_shape_team_equals_team_target_actions",
 	"_test_p18_unlisted_must_be_reachable_from_some_panel",
+	"_test_p19_single_definition_and_no_same_source_cross",
 ]
 
 
@@ -216,9 +255,24 @@ func _test_p1_full_list_both_directions() -> void:
 	print("   ★母體敘述：常數 %d − 具名排除 %d，其中【子選單入口】%d 個 ＝ %s" % [
 		PlayerCommandSystem.TEAM_TARGET_ACTIONS.size(),
 		PlayerCommandSystem.STUB_NOT_IMPLEMENTED.size(), openers.size(), str(openers)])
-	_check("★`opens_submenu` 這一欄逐字等於宣告（%s／%s）" % [
+	# ★★★★★【2026-10-01：這一條從「逐字（含順序）」窄化成「逐名（集合）」，理由寫在這裡】
+	#   ·`TEAM_TARGET_ACTIONS` 收成 `ACTION_SHAPE` 的衍生檢視之後，**列序 ＝ 那張表的宣告順序**
+	#     （字母序），而 `SUBMENU_OPENERS` 宣告的是**成員**，它的順序沒有語意。
+	#   ·⇒ 拿兩個順序互比會在「有人重排那張表」時紅，而那不是缺陷 ⇒ 它是個會誤報的判準。
+	#   ★★而**窄化不是刪除**：這一條仍然在守「這一欄不准多一個也不准少一個」。
+	#   ★★★而【列序】這件事**本格不再有斷言**，所以它要被**印出來**（下一行）——
+	#     列序是玩家看得到的東西，而它現在的擁有者是 `ACTION_SHAPE` 的宣告順序。
+	var openers_sorted: Array = openers.duplicate()
+	openers_sorted.sort()
+	var decl_sorted: Array = PlayerCommandSystem.SUBMENU_OPENERS.duplicate()
+	decl_sorted.sort()
+	_check("★`opens_submenu` 這一欄逐名等於宣告（集合；列序 %s／宣告 %s）" % [
 		str(openers), str(PlayerCommandSystem.SUBMENU_OPENERS)],
-		str(openers) == str(PlayerCommandSystem.SUBMENU_OPENERS))
+		openers_sorted == decl_sorted)
+	var row_order: Array = []
+	for r5 in rows:
+		row_order.append(String(r5.get("action_id", "")))
+	print("   ★【列序】（＝玩家看到的上下順序，擁有者 ＝ `ACTION_SHAPE` 的宣告順序）＝ %s" % str(row_order))
 	# ★④（systems 裁）：每一列都要有 `label`，而來源只能是 `PlayerApiMapper.action_label`
 	_check("★★每一列都有非空的 `label`（沒有的：%s）" % str(no_label), no_label.is_empty())
 	var pcs_src: String = _code_only(FileAccess.get_file_as_string(
@@ -1223,41 +1277,303 @@ func _test_p16_action_shape_reverse_sweep() -> void:
 	_cell("_test_p16_action_shape_reverse_sweep")
 
 
-# == P17 ＝ spec P1c [★異源交叉：兩個母體不准漂開] ===============================
-# ★`ACTION_SHAPE` 裡 `target=="team"` 的集合**必須等於** `TEAM_TARGET_ACTIONS`。
-# ★★而這一格【合法】的理由要寫出來：兩邊是**兩份各自獨立的字面**
-#   （`ACTION_SHAPE` 是新宣告、`TEAM_TARGET_ACTIONS` 是既有常數，文字上分開維護）
-#   ⇒ 任何一邊被改動都會讓差集非空 ⇒ **不是同一個常數讀兩次**，不是恆真格。
-#   ★★★（本表的初版文字是從 `TEAM_TARGET_ACTIONS` 產生的，而產完之後它們就分家了
-#     —— 「產生過」不等於「同源」：同源指的是**現在**讀同一個東西。）
-# 負對照：把某一支的 `target` 從 `"team"` 改成 `"none"` ⇒ 差集非空 ⇒ 必紅並指名 ⇒ 待實測
+# == P17：★★★★★【衍生集合 vs 外部期望】（原本是異源交叉，而它已經變成同源）=======
+# ★原本這一格比的是「`ACTION_SHAPE` 的 team 集合」vs「`TEAM_TARGET_ACTIONS`」，
+#   而那在當時是**異源**（兩份各自獨立的手抄字面）。
+# ★★而 `TEAM_TARGET_ACTIONS` 收成 `ACTION_SHAPE` 的衍生檢視之後，那兩邊**同源**
+#   ⇒ 它會**恆真**（寫什麼都綠）⇒ ★**所以它被換掉，不是留著**
+#     （留著比沒有格更糟：卷面上多一行綠色的保證，而它什麼都沒保證）。
+# ★★★換成什麼：拿衍生集合去跟**外部期望**比，而外部期望有**兩個維度且刻意成對**：
+#   ·**數目** ＝ `SPEC_TEAM_TARGET_TOTAL`
+#   ·**成員** ＝ `SPEC_TEAM_TARGET_NAMES`（★那一份刻意手抄的清單，理由寫在它旁邊）
+#   ⇒ 只比數目會漏掉「換了一個名字而數目不變」；只比成員會漏掉…其實不會，
+#     但兩個都比會讓**差在哪一維**直接印在卷面上（而那是給讀的人的）。
+# 負對照：把 `extort` 的 `target` 從 `"team"` 改成 `"none"` ⇒ 本格紅 3 條並指名（差集 ["extort"]、兩個大小對照） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★而另一道**刻意不跑**（跑它要先把本格弄壞）：把 `SPEC_TEAM_TARGET_NAMES` 改成從
+#   `ACTION_SHAPE` 導出（＝有人「順手去重」）⇒ 本格從那一刻起**恆真**，而上面那一道
+#   就**再也紅不起來** ⇒ 接住它的是 **P19**（它數本格的承重斷言）—— P19 的負對照已實測。
 func _test_p17_shape_team_equals_team_target_actions() -> void:
-	print("\n── P17（spec P1c）兩個母體不准漂開 ──")
+	print("\n── P17 衍生集合 vs 外部期望 ──")
 	var shape: Dictionary = PlayerCommandSystem.ACTION_SHAPE
-	var from_shape: Array = []
+	var derived: Array = []
 	for k in shape.keys():
 		if String((shape[k] as Dictionary).get("target", "")) == "team":
-			from_shape.append(String(k))
-	from_shape.sort()
-	var from_const: Array = PlayerCommandSystem.TEAM_TARGET_ACTIONS.duplicate()
-	from_const.sort()
-	print("   ACTION_SHAPE 的 team（%d）：%s" % [from_shape.size(), str(from_shape)])
-	print("   TEAM_TARGET_ACTIONS（%d）：%s" % [from_const.size(), str(from_const)])
-	_check("★母體地板：兩邊都不是空的（空 ⇒ 兩個差集恆空 ⇒ 本格恆綠）",
-		from_shape.size() > 0 and from_const.size() > 0)
-	var only_shape: Array = []
-	var only_const: Array = []
-	for a in from_shape:
-		if not from_const.has(String(a)):
-			only_shape.append(String(a))
-	for b in from_const:
-		if not from_shape.has(String(b)):
-			only_const.append(String(b))
-	_check("★★★★★兩個差集都空（只在 ACTION_SHAPE：%s｜只在 TEAM_TARGET_ACTIONS：%s）"
-		% [str(only_shape), str(only_const)],
-		only_shape.is_empty() and only_const.is_empty())
-	print("   ★而本格合法的理由：兩邊是兩份各自獨立的字面 ⇒ 都能單獨被改壞 ⇒ 不是恆真格。")
+			derived.append(String(k))
+	derived.sort()
+	var expect: Array = SPEC_TEAM_TARGET_NAMES.duplicate()
+	expect.sort()
+	print("   衍生集合（`ACTION_SHAPE` 的 team，%d）：%s" % [derived.size(), str(derived)])
+	print("   外部期望（手抄清單，%d｜spec 常數 ＝ %d）：%s" % [
+		expect.size(), SPEC_TEAM_TARGET_TOTAL, str(expect)])
+	_check("★母體地板 A：衍生集合不是空的（空 ⇒ 下面兩個差集恆空 ⇒ 本格恆綠）",
+		derived.size() > 0)
+	_check("★母體地板 B：外部期望不是空的", expect.size() > 0)
+	# ★★★【成對】：名字加進一邊而沒加另一邊 ⇒ 這一條先紅
+	_check("★★★【成對】手抄清單的長度 ＝ `SPEC_TEAM_TARGET_TOTAL`（%d／%d；對不上 ⇒ 有人只改了一邊）"
+		% [expect.size(), SPEC_TEAM_TARGET_TOTAL], expect.size() == SPEC_TEAM_TARGET_TOTAL)
+	var only_derived: Array = []
+	var only_expect: Array = []
+	for a in derived:
+		if not expect.has(String(a)):
+			only_derived.append(String(a))
+	for b in expect:
+		if not derived.has(String(b)):
+			only_expect.append(String(b))
+	_check("★★★★★兩個差集都空（只在衍生集合：%s｜只在外部期望：%s）"
+		% [str(only_derived), str(only_expect)],
+		only_derived.is_empty() and only_expect.is_empty())
+	_check("★★衍生集合的大小 ＝ `SPEC_TEAM_TARGET_TOTAL`（%d／%d）" % [
+		derived.size(), SPEC_TEAM_TARGET_TOTAL], derived.size() == SPEC_TEAM_TARGET_TOTAL)
+	# ★★★★而「它真的是衍生物」要自己證一句：`TEAM_TARGET_ACTIONS` 必須等於衍生集合
+	#   ⇒ ★這一條**刻意是同源的**（它問的不是「兩份清單一致嗎」，
+	#     而是「那個名字現在**真的**是衍生檢視嗎」）⇒ 它與上面那條不是同一個問題。
+	var live: Array = PlayerCommandSystem.TEAM_TARGET_ACTIONS.duplicate()
+	live.sort()
+	_check("★★★★`TEAM_TARGET_ACTIONS` 現在就是那個衍生集合（＝它不再是第二份清單；%s）"
+		% ("相同" if live == derived else "★不同：%s vs %s" % [str(live), str(derived)]),
+		live == derived)
+	print("   ★而本格【不再】拿 `TEAM_TARGET_ACTIONS` 當外部期望 —— 它已經是衍生物 ⇒ 那會恆真。")
 	_cell("_test_p17_shape_team_equals_team_target_actions")
+
+# ══ P19 ＝ spec P1 ＋ P2【單一定義 ＋ 那條交叉斷言不准還在】════════════════════
+# （spec `2026-10-01-team-target-actions-becomes-a-derived-view-HOW.md` §4 P1／P2）
+# ★P1：全庫 `TEAM_TARGET_ACTIONS` 的**手抄字面** ＝ **0 處**（★指名，不數數）——
+#   它收成 `ACTION_SHAPE` 的衍生檢視之後，是一個 **`static var`**（`const` 不能用迴圈導出）
+#   ⇒ ★★它**可寫**，而「沒有人會去 append 它／沒有人會把它改回手抄」不是保證 ⇒ 由本格看著。
+# ★★P2：原本那條交叉斷言（`ACTION_SHAPE` 的 team 集合 ＝ `TEAM_TARGET_ACTIONS`）
+#   **若還在就是紅的** —— 它在收成衍生物那一刻變成**同源 ⇒ 恆真**，
+#   而恆真格比沒有格更糟（卷面上多一行綠色的保證，而它什麼都沒保證）。
+#   ⇒ 本格的驗法不是「找那段文字」（錨在文字上會被重排弄紅），而是**數 P17 的承重斷言**：
+#     ·P17 的 `_check(` 裡**至少一條**要提到 `SPEC_TEAM_TARGET_NAMES`（＝外部期望）
+#     ·P17 的 `_check(` 裡提到 `TEAM_TARGET_ACTIONS` 的**只准一條** ——
+#       就是那條**刻意同源**的（「它現在真的是衍生檢視嗎」）⇒ 多出來的就是舊斷言回來了。
+# ★★★母體地板（本格自己）：掃到的 `.gd` 檔數 > 0、P17 的 `_check(` 條數 > 0，
+#   且**陽性對照**：那個衍生宣告（`static var … = _derive_team_target_actions()`）
+#   必須被掃到剛好 1 次 —— ⇒ 掃不到它 ⇒ 抽取式壞了，而壞的方向是「什麼都沒找到」。
+# 負對照：把 `static var TEAM_TARGET_ACTIONS` 改回手抄字面 ⇒ P1 紅並指名 `player_command_system.gd:434`，而陽性對照同時紅（1 → 0） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：把 P17 裡那條比【成員】的 `_check`（兩個差集）刪掉 ⇒ P2b 紅（0 個） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# 負對照：在 P17 再加一條拿 `TEAM_TARGET_ACTIONS` 當外部期望的 `_check` ⇒ P2 紅並指名（實得 2） ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★★★★而**第一版的 P2b 對它自己的負對照沒有鑑別力**（實測：刪掉那一條，一格都沒紅）——
+#   因為它只讀 `_check(` 的**第一行**，而「成對」那一條的訊息字串裡也有 `expect`
+#   ⇒ 修法是**按括號配對切出整個呼叫**（`_check_calls()`），不是把判準的字眼換一個
+#   ⇒ ★判準的【粒度】要對上它要抓的那個擾動發生在哪一行。
+func _test_p19_single_definition_and_no_same_source_cross() -> void:
+	print("\n── P19（spec P1／P2）單一定義 ＋ 交叉斷言不准還在 ──")
+	var files: Array = []
+	_collect_gd("res://scripts", files)
+	print("   掃描母體：`res://scripts` 之下的 `.gd` ＝ %d 檔" % files.size())
+	_check("★母體地板 A：掃到的檔數 > 0（0 ⇒ 下面那個「0 處」是母體為空不是沒有違規）",
+		files.size() > 0)
+	var handwritten: Array = []
+	var derived_decl: Array = []
+	var mutations: Array = []       # ★對它的【寫入】—— 見下面那一條地板
+	for f in files:
+		var raw: String = FileAccess.get_file_as_string(String(f))
+		var ls: Array = raw.split("\n")
+		for i in range(ls.size()):
+			var line: String = String(ls[i])
+			var t: String = line.strip_edges()
+			if t.begins_with("#"):
+				continue        # ★逐行跳註解（不用 `_code_only()`：它會讓行號漂掉）
+			var code: String = line
+			var hash_at: int = code.find("#")
+			if hash_at != -1:
+				code = code.substr(0, hash_at)
+			if not code.contains("TEAM_TARGET_ACTIONS"):
+				continue
+			if code.contains("_derive_team_target_actions()"):
+				derived_decl.append("%s:%d" % [String(f), i + 1])
+			elif _is_mutation(_strip_strings(code)):   # ★剝字串 ＝ 保險（別的檔可能在字串裡印它）
+				mutations.append("%s:%d ⇒ %s" % [String(f), i + 1, t])
+			# ★★★★★【判準的描述與判準的違反在文字上同形】——
+			#   第一版寫「含 `TEAM_TARGET_ACTIONS` 且含 `= [`」⇒ **它命中了自己這一行**
+			#   （掃描器的條件式逐字長得像它要抓的東西）。
+			#   ⇒ 修法是**錨在宣告上**（`const`／`var`／`static var` ＋ 那個名字），
+			#     不是「把自己的檔排除掉」（那會讓同檔裡真的手抄回來的那一天抓不到）。
+			elif _is_handwritten_decl(code):
+				handwritten.append("%s:%d ⇒ %s" % [String(f), i + 1, t])
+	print("   ★陽性對照（衍生宣告，要剛好 1 處）＝ %s" % str(derived_decl))
+	_check("★★母體地板 B【陽性對照】：抽取式掃得到那個衍生宣告，且剛好 1 處（%d）"
+		% derived_decl.size(), derived_decl.size() == 1)
+	print("   ★P1 手抄字面（要 0 處）＝ %s" % str(handwritten))
+	_check("★★★★★P1a：全庫沒有 `TEAM_TARGET_ACTIONS` 的手抄字面（有的話逐條指名：%s）"
+		% str(handwritten), handwritten.is_empty())
+	# ★★★★★【P1b ＝ 另一個方向，而它是 2026-10-01 電池的 `cross-run-static` 紅逼出來的】
+	#   `const` → `static var` 換來了「可以用迴圈導出」，★代價是**它變成跨 run 可變狀態**：
+	#   `static` 的生命週期跨越整個進程 ⇒ 任何人對它 `append`／`erase`／`sort`
+	#   都會**洩到下一次 run**，而那種汙染的長相是「上一輪的殘留讓這一輪剛好過」。
+	#   ⇒ 電池那支閘（`cross-run-static`）抓到它沒有清除點也不在白名單 ⇒ 我走白名單，
+	#     ★而白名單那一列的理由裡寫著「grep 寫入形式命中 0」——
+	#     ★★**那句話必須有執法點，否則它會靜默腐爛**（白名單是一句話，不是一個守衛）
+	#   ⇒ **本條就是那個執法點**，而它擋的方向與 P1a **相反**：
+	#     P1a 擋「把它改回一份手抄清單」、P1b 擋「把它當成一個可以改的陣列」。
+	# 負對照：在 `colocation_gate_bed.gd` 寫一行對它的 `append` ⇒ P1b 紅並指名 `colocation_gate_bed.gd:78` ⇒ 已於 feat/text-ui-layout-v2（2026-10-01 這一輪） 實測紅
+# ★★而這一道**第一次沒跑成**而我差一步把它當成跑過了：插入點的 assert 先失敗 ⇒ **什麼都沒寫** ⇒
+#   接下來那一跑量到的是**沒有擾動的樹**，卷面印 `[]`。★那個 `[]` 與「對照紅完之後還原乾淨」
+#   在畫面上**一模一樣** ⇒ 判準：**負對照要先確認擾動真的落在檔案裡**（這次是 assert 擋住了它，
+#   而 assert 擋住的理由是「安全的失敗長相」—— 它沒有寫半套）。
+	# ★陽性對照（**sanity check 不是對照組**：它只驗「剝字串之後抽取式還認得真的寫入」，
+	#   不分辨任何兩個假設）—— 真正有鑑別力的是負對照（在某支 .gd 裡真的寫一行）。
+	var sym_probe: String = SPEC_CONSTANT_SYMBOL
+	_check("★陽性對照：抽取式認得真的寫入（認不得 ⇒ P1b 恆綠）",
+		_is_mutation(sym_probe + ".append(\"x\")"))
+	_check("★陽性對照（反面）：只是**讀**它不算（算 ⇒ 本床到處在讀它 ⇒ P1b 會恆紅）",
+		not _is_mutation("var a = " + sym_probe + ".duplicate()"))
+	print("   ★P1b 對它的寫入（要 0 處）＝ %s" % str(mutations))
+	_check("★★★★★P1b：全庫沒有人寫 `TEAM_TARGET_ACTIONS`（它是 `static var` ⇒ 寫它會洩到下一次 run；有的話逐條指名：%s）"
+		% str(mutations), mutations.is_empty())
+	# ── P2：數 P17 的承重斷言 ──
+	var self_src: String = FileAccess.get_file_as_string(
+		"res://scripts/debug/available_actions_bed.gd")
+	var p17: String = _func_body(self_src, "func _test_p17_shape_team_equals_team_target_actions")
+	_check("★母體地板 C：切得出 P17 的函式體（空 ⇒ 下面兩條恆綠）", p17.strip_edges() != "")
+	# ★★★★★【判準的粒度，第二次】NEG-b 的血證：第一版只讀 `_check(` 的**第一行**，
+	#   而「成對」那一條的**訊息字串**裡也有 `expect` ⇒ 把真正比成員的那一條刪掉
+	#   **一格都沒有紅**。⇒ 所以這裡按**括號配對**切出整個 `_check(…)` 呼叫再看它的全文。
+	#   ★而「比成員」要認的不是某個變數名碰巧出現，是**那兩個差集同時出現在同一個呼叫裡**。
+	var calls: Array = _check_calls(p17)
+	var n_check_lines: int = 0
+	for l3 in p17.split("
+"):
+		if String(l3).strip_edges().begins_with("_check("):
+			n_check_lines += 1
+	print("   P17 的 `_check(` 起始行 %d 行｜括號配對切出 %d 個完整呼叫" % [
+		n_check_lines, calls.size()])
+	_check("★母體地板 D：切得出 `_check(` 呼叫（%d；0 ⇒ 下面每一條都在空集合上成立）"
+		% calls.size(), calls.size() > 0)
+	_check("★★母體地板 E：配對切出的呼叫數 ＝ 起始行數（%d／%d；對不上 ⇒ 配對器吞掉或切斷了呼叫）"
+		% [calls.size(), n_check_lines], calls.size() == n_check_lines)
+	var checks_member: Array = []     # 真的在比【成員】的（兩個差集同時出現）
+	var checks_ttag: Array = []       # 拿 `TEAM_TARGET_ACTIONS` 當期望的
+	for c in calls:
+		var txt: String = String(c)
+		if txt.contains("only_derived") and txt.contains("only_expect"):
+			checks_member.append(txt.strip_edges().substr(0, 60))
+		if txt.contains("TEAM_TARGET_ACTIONS") and not txt.contains("SPEC_TEAM_TARGET_"):
+			checks_ttag.append(txt.strip_edges().substr(0, 60))
+	var body_refs_named: int = p17.count("SPEC_TEAM_TARGET_NAMES")
+	print("   P17 函式體引用 `SPEC_TEAM_TARGET_NAMES` %d 次｜比【成員】的呼叫 %d 個｜拿 `TEAM_TARGET_ACTIONS` 當期望的 %d 個" % [
+		body_refs_named, checks_member.size(), checks_ttag.size()])
+	_check("★★★★P2①a：P17 的函式體引用了外部期望 `SPEC_TEAM_TARGET_NAMES`（%d 次）"
+		% body_refs_named, body_refs_named > 0)
+	_check("★★★★★P2①b：而且真的有一條在比【成員】（兩個差集同時進同一個 `_check`；%d 個：%s）"
+		% [checks_member.size(), str(checks_member)], checks_member.size() > 0)
+	_check("★★★★★P2②：P17 裡拿 `TEAM_TARGET_ACTIONS` 比的**只准一條**（那條刻意同源的；實得 %d：%s）"
+		% [checks_ttag.size(), str(checks_ttag)], checks_ttag.size() == 1)
+	_cell("_test_p19_single_definition_and_no_same_source_cross")
+
+
+# 按括號配對切出一段 code 裡的每一個 `_check(…)` 呼叫**全文**（含跨行的續行）。
+# ★為什麼不逐行看：一個 `_check(` 的**條件**常在第二、三行，而訊息字串裡的字會冒充條件
+#   ⇒ 逐行判準會對「把條件刪掉」這個擾動沒有鑑別力（NEG-b 實測，2026-10-01）。
+func _check_calls(src: String) -> Array:
+	var out: Array = []
+	var ls: Array = src.split("
+")
+	var i: int = 0
+	while i < ls.size():
+		var t: String = String(ls[i]).strip_edges()
+		if not t.begins_with("_check("):
+			i += 1
+			continue
+		var buf: String = ""
+		var depth: int = 0
+		var started: bool = false
+		while i < ls.size():
+			var line: String = String(ls[i])
+			buf += line + "
+"
+			var in_str: bool = false
+			for ch in line:
+				if ch == "\"":
+					in_str = not in_str
+				elif not in_str and ch == "(":
+					depth += 1
+					started = true
+				elif not in_str and ch == ")":
+					depth -= 1
+			i += 1
+			if started and depth <= 0:
+				break
+		out.append(buf)
+	return out
+
+
+# 把一行 code 裡的【雙引號字串字面】挖掉（★長度保留成空白，行號與欄位不漂）。
+# ★★★★★為什麼需要它（2026-10-01 實測，今天同族第五次）：
+#   `_is_mutation()` 自己那份 pattern 目錄**被 P1b 命中 8 行** ——
+#   **規則的描述與規則的違反在文字上同形**，而這不是判準寫得不好，是它結構上必然遇到的
+#   ⇒ 所以「以後小心」無效，要機械處置。
+# ★★而處置是**提高精度**不是**排除自己那支函式**：
+#   真的寫入那個符號時，它出現在引號**外**；目錄項出現在引號**內**
+#   ⇒ 剝掉字串字面之後，兩者就不再同形了。
+#   （對照：P1a 當時走的是「錨在宣告關鍵字」—— 同樣是提高精度，不是縮小母體。）
+func _strip_strings(code: String) -> String:
+	var out: String = ""
+	var in_str: bool = false
+	for i in range(code.length()):
+		var ch: String = code[i]
+		if ch == "\"":
+			in_str = not in_str
+			out += " "
+		elif in_str:
+			out += " "
+		else:
+			out += ch
+	return out
+
+
+# 一行 code 是不是【對 `TEAM_TARGET_ACTIONS` 的寫入】——
+# ★母體是「會改到那個陣列的形式」：方法呼叫與下標指派。
+#   ★★`.duplicate()` 不算（它回一份新的，床裡到處在用）；讀取不算。
+func _is_mutation(code: String) -> bool:
+	# ★★★★★★【第六次同族之後改成這個形狀】：掃描器裡**不再出現那個符號的字面** ——
+	#   它從 `SPEC_CONSTANT_SYMBOL`（本床既有的單一來源）**組出來**。
+	#   ⇒ 前五次我都在補洞（剝註解／錨宣告關鍵字／剝字串字面），而每一次
+	#     「把規則寫下來」都會與規則本身再碰撞一次（最後一次命中的是我剛寫的陽性對照，
+	#     因為它含轉義引號而我的引號切換器解析錯）。
+	#   ⇒ ★★處置不是再補一個洞，是**把碰撞的源頭拿掉**：沒有字面就不會自我命中，
+	#     而母體**不縮小**（比「排除自己那支函式／那個檔」嚴格好：那是縮小母體）。
+	#   ⇒ ★★★附帶好處：掃描器因此**錨在那個宣告過的符號名上** —— 有人改名時，
+	#     `SPEC_CONSTANT_SYMBOL` 那一處改掉，本掃描器跟著走，不會變成一個掃不到東西的綠。
+	var sym: String = SPEC_CONSTANT_SYMBOL
+	for m in ["append", "erase", "clear", "sort", "sort_custom", "insert", "resize",
+			"remove_at", "push_back", "push_front", "pop_back", "pop_front",
+			"reverse", "assign", "fill", "shuffle"]:
+		if code.contains(sym + "." + String(m) + "("):
+			return true
+	# 下標指派：`<SYM>[...] = `
+	var at: int = code.find(sym + "[")
+	if at != -1 and code.substr(at).contains("] ="):
+		return true
+	return false
+
+
+# 一行 code 是不是【手抄的 `TEAM_TARGET_ACTIONS` 宣告】——
+# ★錨在「宣告關鍵字 ＋ 那個名字 ＋ `= [`」三件同時成立，所以描述這條規則的 code／註解不會命中。
+func _is_handwritten_decl(code: String) -> bool:
+	if not code.contains(SPEC_CONSTANT_SYMBOL) or not code.contains("= ["):
+		return false
+	var t: String = code.strip_edges()
+	return t.begins_with("const ") or t.begins_with("var ") or t.begins_with("static var ")
+
+
+# 遞迴收集 `.gd`（★本格的母體要從磁碟數出來，不是手抄一份檔清單）
+func _collect_gd(dir_path: String, out: Array) -> void:
+	var d: DirAccess = DirAccess.open(dir_path)
+	if d == null:
+		return
+	d.list_dir_begin()
+	var n: String = d.get_next()
+	while n != "":
+		if d.current_is_dir():
+			if not n.begins_with("."):
+				_collect_gd(dir_path + "/" + n, out)
+		elif n.ends_with(".gd"):
+			out.append(dir_path + "/" + n)
+		n = d.get_next()
+	d.list_dir_end()
+
 
 
 # 負對照：把入口那一格關掉（`elif false and SUBMENU_OPENERS.has(act)`）⇒ 本格紅（在【沒錢】的世界裡仍然可做） ⇒ 已於 fix/exploration-two-english-strings（2026-10-01 這一輪） 實測紅
@@ -1487,6 +1803,7 @@ func _initialize() -> void:
 	_test_p16_action_shape_reverse_sweep()
 	_test_p17_shape_team_equals_team_target_actions()
 	_test_p18_unlisted_must_be_reachable_from_some_panel()
+	_test_p19_single_definition_and_no_same_source_cross()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):

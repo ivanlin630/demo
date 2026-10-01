@@ -320,7 +320,15 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 #   而本票**不保證每一個宣告都對**。它保證的是兩件【可機械驗】的事：
 #     ①**每一個 registry key 都有人宣告過** —— 反向掃，漏一個紅並指名
 #       （`available_actions_bed` 的 P1；新增 handler 的人會被擋下來）
-#     ②**`target=="team"` 那一類 ＝ `TEAM_TARGET_ACTIONS`** —— P1c 異源交叉
+#     ②~~**`target=="team"` 那一類 ＝ `TEAM_TARGET_ACTIONS`** —— P1c 異源交叉~~
+#       ★★★【2026-10-01 這一條反過來了，而原文劃掉留著】：`TEAM_TARGET_ACTIONS`
+#         現在是**本表的衍生檢視**（見下面那段 `static var`）⇒ 拿它回來跟本表比
+#         就是**同源 ⇒ 恆真**。★所以守的人換成 `available_actions_bed` 的 **P17**：
+#         衍生集合 vs **外部期望**（`SPEC_TEAM_TARGET_TOTAL` ＋ `SPEC_TEAM_TARGET_NAMES`
+#         那份**刻意手抄**的逐名清單）—— ★而「為什麼它刻意不是衍生物」寫在它旁邊。
+#       ⇒ ★★所以本表的 `target == "team"` 這一欄**現在是權威**，不再是「要跟誰對上」：
+#         把一支的 `target` 從 `"team"` 改掉 ⇒ 它直接從 `TEAM_TARGET_ACTIONS` 消失
+#         ⇒ 接住它的是 P17（與外部期望的差集）＋ `colocation_gate_bed` 的 `SPEC_TEAM_TARGET_TOTAL`。
 #   ★★而**行為上真的被驗到的只有 11 個**（`target=="none"` 那一類，本票的消費者：
 #     P2／P2b／P3）⇒ **其餘 40 個的 `target` 是【宣告】**，
 #     它的正確性要靠**各自的消費者出現時咬出來**。
@@ -331,16 +339,30 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 #   ·`ignore`      —— 它在 `execute_action` 更上面就 return（同格閘那支床的
 #                     `SPEC_EARLY_RETURN_EXEMPT` 就是它）
 #   ·`cancel_move` ／ `move_to` —— 它們是**一格 dispatch 動詞**（不走 registry）
-#   ★★★而 `ignore` 這一個是 **P1c 逼出來的**：spec §3① 只點名了 `cancel_move`／`move_to`
-#     兩個豁免，而 `target=="team"` 的集合要等於 `TEAM_TARGET_ACTIONS`（12 個，含 `ignore`）
-#     ⇒ 少了它那一格必紅。⇒ **spec 的豁免清單是 2，實際是 3**（已回報）。
+#   ★★★而 `ignore` 這一個是 **P1c（今天的 P17）逼出來的**：spec §3① 只點名了
+#     `cancel_move`／`move_to` 兩個豁免，而 `target=="team"` 的集合要等於那 12 個
+#     （含 `ignore`）⇒ 少了它那一格必紅。⇒ **spec 的豁免清單是 2，實際是 3**（已回報）。
 #
-# ★而本表的初版文字是**產生**出來的（從 registry 的 key ＋ `TEAM_TARGET_ACTIONS`），
-#   ★★但那不讓 P1c 變成恆真：產完之後**兩邊是兩份各自獨立的字面**
-#   ⇒ 任何一邊被改動都會讓差集非空（這正是 P1c 的負對照在驗的事）。
+# ★而本表的初版文字是**產生**出來的（從 registry 的 key ＋ 當時那份手抄的 team 清單），
+#   ~~★★但那不讓 P1c 變成恆真：產完之後兩邊是兩份各自獨立的字面~~
+#   ★★★【2026-10-01】那個「分家」的狀態**結束了** —— 不是因為它變回同源，
+#     而是因為**第二份清單被刪掉**：現在只有本表一份資料，
+#     而「外部期望」搬到床裡（`SPEC_TEAM_TARGET_NAMES`）⇒ 它在**另一個檔、另一個作者的手**
+#     ⇒ ★那才是異源的意思（不是「曾經分開寫過」，是**現在有人能單獨把其中一邊改壞**）。
 # ★（原本這裡有一段「某個動作為什麼判成 `"none"`」的理由 —— 那一列已於 2026-10-01 退場，
 #   理由隨它一起走。形狀上的教訓留在別處：**追委派要追到底**，
 #   因為一支 handler 可能把 target 轉給另一支而那一支底線前綴不用它。）
+# ══ ★★★★★【這張表的列序 ＝ 玩家在【自家隊動作區】看到的上下順序】═══════════════
+#   ⇒ **為了查表好讀而重排這幾列 ＝ 改了玩家畫面。**
+# （systems 裁 2026-10-01：「一條【按位置記住】的規矩，它的邊界要寫在那個位置上」）
+# ★怎麼來的：`TEAM_TARGET_ACTIONS` 是本表 `target == "team"` 的衍生檢視，而**它不 `sort()`**
+#   ⇒ 用本表的**插入順序** ⇒ 全列版（`get_action_availability`）的列序 ＝ 這裡的列序。
+# ★★【2026-10-01 這一刀改掉過一次玩家畫面，而它被記錄下來】：舊的手抄 `const` 是
+#   **語意分組**（`ignore, attack, trade, propose_alliance, …`），本表是**字母序**
+#   ⇒ 玩家列序從語意分組變成字母序（systems 裁：不花錢保住舊順序，因為玩家介面正在
+#   換終端 REPL，版面與順序在那張票重新決定 ⇒ 順序的決定權在那張票的 §8）。
+# ★★★若日後要回到語意分組：**重排下面那 12 列**，★**不要加第二份順序清單**
+#   （那正是這一刀殺掉的東西）。
 const ACTION_SHAPE: Dictionary = {
 	"abandon_outpost":         {"target": "none", "listed": false},
 	"accept_encounter":        {"target": "none", "listed": false},
@@ -407,17 +429,39 @@ const ACTION_SHAPE: Dictionary = {
 	"withdraw_from_storage":   {"target": "none", "listed": false},
 }
 
-const TEAM_TARGET_ACTIONS: Array = [
-	"ignore", "attack", "trade", "propose_alliance", "demand_tribute", "extort",
-	"recruit", "recruit_anon", "invite_settle", "gather_intel", "beg",
-	# ★★★`offer_surrender` 進母體（藍圖 2026-10-01 裁：它是團隊目標動作，不開第四類）——
-	#   ★而這【不是重分類，是堵一個現存的洞】：進母體之前 `_colocation_gate` 的第一條件
-	#     （`if not TEAM_TARGET_ACTIONS.has(action): return {}` ＝ **放行**）對它放行
-	#     ⇒ `execute_action(state, 任意 target_id, "offer_surrender")` 對一支**不同格**的隊
-	#       打得通，而 accept 會轉移資產並把玩家隊收編。
-	#   ⇒ ★★所以「加一個名字」在這裡是**接上同格閘**，不是分類學。
-	"offer_surrender",
-]
+# ══ ★★★★★【`TEAM_TARGET_ACTIONS` 現在是 `ACTION_SHAPE` 的【衍生檢視】】═══════════
+# （spec `2026-10-01-team-target-actions-becomes-a-derived-view-HOW.md`，2026-10-01）
+# ★它原本是一份**手抄的 dict 字面**，與 `ACTION_SHAPE` 並存 ⇒ 兩份真相。
+#   而過渡期的保護是一條**異源**交叉斷言（`ACTION_SHAPE` 的 team 集合 ＝ 這份清單）。
+# ★★收成衍生物之後那條斷言會變成**同源** ⇒ 它**必須被換掉不是留著**
+#   （留著就是本專案最常見的那個病：比較的兩邊同源 ⇒ 恆真，而卷面長相是綠）。
+#   ⇒ 換成什麼：見 `available_actions_bed` 的 P17（衍生集合 vs **外部期望**）。
+# ★★★為什麼是 `static var` 而不是 `const`：GDScript 的 `const` 不能用迴圈從另一個 `const`
+#   導出 ⇒ 只能在類別載入時算一次。★它因此是**可寫的**（`const` 不是）——
+#   而「沒有人會去 append 它」不是保證，所以那件事由床看著（P1：全庫手抄 dict 字面 ＝ 0 處）。
+# ★★★★而**三支守衛的錨**（`available_actions_bed`／`colocation_gate_bed`／本檔同格閘的
+#   第一條件）仍然引用**這個名字** —— 它們不需要改，因為名字沒變、而它的**來源**變了。
+#   ⇒ 那正是這一刀的重點：**名字留著、第二份清單消失**。
+static var TEAM_TARGET_ACTIONS: Array = _derive_team_target_actions()
+
+# 從 `ACTION_SHAPE` 導出 `target == "team"` 的那些 id。
+# ★★★★★【順序 ＝ `ACTION_SHAPE` 的宣告順序，而**那是玩家看得到的東西**】——
+#   這個陣列的順序就是全列版（`get_action_availability`）的**列序**，而列序就是
+#   玩家在自家隊動作區看到的上下順序 ⇒ ★它不是內部細節。
+# ★★【這一刀改變了它，而 spec 沒有講】（2026-10-01，已回報 systems）：
+#   舊的手抄 `const` 是**語意分組**（`ignore, attack, trade, propose_alliance, …`）；
+#   `ACTION_SHAPE` 是**字母序**（它那樣排是為了查表好讀）⇒ 收成衍生檢視之後列序變成字母序。
+# ★★★而處置是**不要在這裡 `sort()`**：用 `ACTION_SHAPE` 的**插入順序**。
+#   兩者今天的輸出**一模一樣**（那張表本來就是字母序排的）——
+#   差別在**誰擁有那個順序**：`sort()` 會把順序藏進這支函式（那時要改列序得改 code），
+#   插入順序則讓**那張表自己**擁有它（要改列序 ＝ 重排那張表的那幾列，一處宣告）。
+#   ⇒ ★這正是本票的形狀：**一個真相一份**，而順序也是一個真相。
+static func _derive_team_target_actions() -> Array:
+	var out: Array = []
+	for k in ACTION_SHAPE.keys():
+		if String((ACTION_SHAPE[k] as Dictionary).get("target", "")) == "team":
+			out.append(String(k))
+	return out
 
 # ══ ★★★★★【純查詢前置檢查】——「能不能做」只有一份（spec 2026-10-01 §3②）═══════
 # 每一個 `target=="none" and listed` 的動作各一支，回 `{"ok": bool, "reason": String}`。

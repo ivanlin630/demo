@@ -1,5 +1,22 @@
 # 開發進度
 
+### 2026-10-01｜★**玩家可見**：自家隊動作區的**列序**由語意分組變成字母序
+
+- 來源：`TEAM_TARGET_ACTIONS` 收成 `PlayerCommandSystem.ACTION_SHAPE` 的**衍生檢視**
+  （spec `docs/superpowers/specs/2026-10-01-team-target-actions-becomes-a-derived-view-HOW.md`）。
+- ★**為什麼它進得了進度文件**：那個陣列的順序**就是**全列版的列序 ＝ 玩家看到的上下順序
+  ⇒ **玩家可見的改變不准悄悄發生**（systems 裁 2026-10-01）。
+  舊的手抄 `const` 是語意分組（`ignore, attack, trade, propose_alliance, …`）、
+  `ACTION_SHAPE` 是字母序（它那樣排是為了查表好讀）。
+- ★★裁定是**不花錢保住舊順序**：玩家介面正在換終端 REPL，版面與順序在那張票重新決定
+  （順序的決定權已交棒到 `2026-10-01-player-ui-is-a-terminal-repl-HOW.md` §8）。
+- ★★★若日後要回到語意分組：**重排 `ACTION_SHAPE` 那 12 列**，不要加第二份順序清單
+  —— 而這個耦合逐字寫在那張表的檔頭（「為了查表好讀而重排這幾列 ＝ 改了玩家畫面」）。
+- 連帶：`static var` 換來「可以用迴圈導出」，代價是**跨 run 可變狀態**
+  ⇒ 電池那支 `cross-run-static` 抓到它 ⇒ 走白名單
+  ＋ `available_actions_bed` 的 **P1b**（全庫對它的寫入 ＝ 0 處）當那一列理由的執法點。
+
+
 ### 2026-10-01｜「不配對、照預覽價直接成交」退場（已派工）
 
 - WHAT：設計端裁 **退場**（零特例：世界裡沒有這個機制，只有一條玩家專用捷徑而活介面進不去）。
