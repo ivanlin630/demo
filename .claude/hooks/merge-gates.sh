@@ -321,6 +321,7 @@ if [ "$MG_FROM" != "0" ] || [ "$MG_TO" != "0" ]; then
 fi
 FAILED=(); TOTAL0=$SECONDS; N=0; RUN_N=0
 ENVFAIL=()
+ENVWHY=()   # ★2026-10-01：每一支 ENV 紅【自己判出來的成因】—— footer 不得再自己斷言一個
 # ★★★2026-09-06:讀進來先剝【CR＝0x0D】(systems 血證)——工作區的 TSV 若被某人用 Windows 換行寫過,
 #   expect 會尾帶 0x0D ⇒ grep 永遠匹配不到 ⇒ ★【23 支全部 no-verdict】而閘本身全是好的。
 #   ★★而 .gitattributes 已 eol=lf ⇒ repo 的 blob 是乾淨的,壞的只有【工作區那一份】
@@ -397,7 +398,7 @@ while IFS=$'	' read -r id cmd purpose expect; do
     echo "[MERGE-GATES] ⚡ENV $id （${DT}s）—— ★★★環境失敗：引擎【一次都沒被啟動】（${_mg_env_why:-成因未分類}）"
     printf '%s
 ' "$OUT" | grep -E 'UnauthorizedAccess|已停用指令碼執行|無法載入|沒有真的重跑' | head -2
-    _mg_row "ENV"; ENVFAIL+=("$id"); continue
+    _mg_row "ENV"; ENVFAIL+=("$id"); ENVWHY+=("${_mg_env_why:-（未分類）}"); continue
   fi
   # ★★★2026-09-23：紅的時候把【該支的完整輸出】落檔（systems 補，血證在下）。
   #   血證：ui-flow 在一輪電池裡紅了，而卷面上只留 expect 與實際那一行
@@ -530,13 +531,31 @@ if [ ${#ENVFAIL[@]} -gt 0 ]; then
   echo "[MERGE-GATES] ⚡環境紅 ${#ENVFAIL[@]} 支：${ENVFAIL[*]}"
   echo "[MERGE-GATES] ★★★本輪【不可判】—— 引擎在這幾支上【一次都沒被啟動】，綠與紅都不算"
   echo "[MERGE-GATES]   ⇒ ★這不是【測試失敗】，是【環境失敗】；兩者在畫面上曾經長得一模一樣"
-  echo "[MERGE-GATES]   ⇒ ★★這一輪是【從錯的發射器】起跑的，而【修法是這一行】（2026-09-23 實測）："
-  echo "[MERGE-GATES]"
-  echo "[MERGE-GATES]        PSExecutionPolicyPreference=Bypass bash .claude/hooks/merge-gates.sh"
-  echo "[MERGE-GATES]"
-  echo "[MERGE-GATES]   ⇒ ★成因：Claude Code 的 PowerShell 工具進程 Process scope 已是 Bypass ⇒ 從那裡起跑就通；"
-  echo "[MERGE-GATES]   ⇒ ★★Bash 工具裡 spawn 的 powershell 沒有那個 Process scope ⇒ 被擋（機器層本來就是 Undefined）"
-  echo "[MERGE-GATES]   ⇒ ★★★上面那個環境變數會被子行程繼承 ⇒ 不必動註冊表的 76 列，也不要改機器的執行原則"
+  # ★★★2026-10-01（systems 修，implementer 揭並附逐字）：這一段**原本無條件印**
+  #   「這一輪是【從錯的發射器】起跑的」＋PowerShell 的修法與成因
+  #   ⇒ ★而它**斷言了一個它沒有判過的成因**：那一輪的真成因是**記憶體壓力**
+  #     （逐格那一行 `:83` 早就印對了「DLL init failed（0xC0000142）★先看 FreeMB」）
+  #   ⇒ ★★**兩段互相矛盾而卷面上兩段都在**，而讀的人會先看到最後那一段（它長得像結論）
+  #   ⇒ ★★★血證的代價已經發生：implementer 照 footer 去懷疑跑法（花時間核 export），
+  #     救他的是逐格那一行；而 systems 差一點反過來去改【無辜的那一行】。
+  #   ⇒ 修法（他列的兩個形狀，我裁②）：**footer 不講成因，指回那一支自己印的那一行**；
+  #     而 PowerShell 那段修法**只在真的命中那個簽名時才印**（它本來就只對那一種成立）。
+  echo "[MERGE-GATES]   ⇒ ★★成因【看上面那一支 ENV 格自己印的那一行】—— 本 footer 不替它猜："
+  _i=0
+  while [ "$_i" -lt "${#ENVFAIL[@]}" ]; do
+    echo "[MERGE-GATES]        ${ENVFAIL[$_i]}：${ENVWHY[$_i]}"
+    _i=$((_i+1))
+  done
+  if printf '%s
+' "${ENVWHY[@]}" | grep -q '停用指令碼執行'; then
+    echo "[MERGE-GATES]"
+    echo "[MERGE-GATES]        PSExecutionPolicyPreference=Bypass bash .claude/hooks/merge-gates.sh"
+    echo "[MERGE-GATES]"
+    echo "[MERGE-GATES]   ⇒ ★（這一段只在上面真的出現【PowerShell 停用指令碼執行】時才印）"
+    echo "[MERGE-GATES]   ⇒ ★成因：Claude Code 的 PowerShell 工具進程 Process scope 已是 Bypass ⇒ 從那裡起跑就通；"
+    echo "[MERGE-GATES]   ⇒ ★★Bash 工具裡 spawn 的 powershell 沒有那個 Process scope ⇒ 被擋（機器層本來就是 Undefined）"
+    echo "[MERGE-GATES]   ⇒ ★★★上面那個環境變數會被子行程繼承 ⇒ 不必動註冊表的 76 列，也不要改機器的執行原則"
+  fi
   echo "[MERGE-GATES]   ⇒ ★另一件同族的（跑之前先做）：電池要跑在【釘死 HEAD 的 worktree】，"
   echo "[MERGE-GATES]      否則共用 main dir 上 20 分鐘內 HEAD 會被別的角色推動 ⇒ 判【一輪之內兩棵樹】："
   echo "[MERGE-GATES]        git worktree add --detach .worktrees/battery \"\$(git rev-parse HEAD)\""
