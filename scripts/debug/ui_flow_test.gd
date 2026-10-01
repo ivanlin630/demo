@@ -9,7 +9,7 @@ var _errors: int = 0
 const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
 const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -118,11 +118,19 @@ func _initialize() -> void:
 	await _test_p28_screen_is_the_composed_one()
 	await _test_p29_key_on_screen_runs_that_row()
 	await _test_p30_submode_panels_reach_the_screen()
+	await _test_p31_esc_pops_exactly_one_layer()
+	await _test_p32_unbound_keys_leave_the_action_region_intact()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
 	print("\n=== UI Flow Test DONE === errors: %d%s" % [_errors, _suffix])
-	quit()
+	# ★★★離開碼（systems 裁 2026-10-01，形狀逐字沿用 `unbound_key_bed.gd:169`）——
+	#   ★本檔原本是**裸 `quit()`** ⇒ rc 恆 0 ⇒ 這支閘的判決**只有 expect 一道**：
+	#     實測血證（2026-10-01 負對照那一跑）`errors: 2` 而 `rc=0`。
+	#   ★★而 systems 的普查：註冊表 65 支床裡約 30 支 rc 恆 0（他的偵測器失效方向是多算
+	#     ⇒ 30 是上界、35 是下界）⇒ 裁「不改那 30 支，只接這一支」（爆炸半徑）。
+	#   ⇒ ★★★所以那個母體邊界要留在卷面上：**其餘那些格的紅完全依賴 expect 不被寫寬**。
+	quit(1 if _errors > 0 else 0)
 
 # P4-2:self/原地動作(hunt)應在 self-actions(目標選擇階段直接可選),不混進 team-target 行動清單。
 func _test_interact_self_team_split() -> void:
@@ -2376,7 +2384,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 28   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 33   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -2404,7 +2412,7 @@ const CONTROL_FLOOR_STRINGS: int = 3  # scripted_exploration_bed（P11 表覆蓋
 const CONTROL_FLOOR_NPCTRIB: int = 3  # npc_tribute_transfer_bed（三道：自己寫一份／拿掉恩怨／塞進表）
 const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
 const CONTROL_FLOOR_SPAM: int = 6  # spam_brake_bed（濫按煞車／兩層關係帳）
-const CONTROL_FLOOR_UNBOUND: int = 6  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）
+const CONTROL_FLOOR_UNBOUND: int = 8  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）★6 → 8（2026-10-01：P9 那一道＋異源漂一個鍵那一道）
 const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 # ★text_ui_layout_bed（版面 v2）：①display_width 換成 length()（P3b）②別處再寫一次 120（P3a）
@@ -2412,6 +2420,39 @@ const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一�
 #   ★登進【這一格】而不是新開一支閘：棘輪機制已經存在，我的床原本【不在它的母體裡】
 #     ⇒ 那三筆紀錄被拿掉會是靜默的（同「沒有人在讀那份產出」那一族）。
 const CONTROL_FLOOR_LAYOUT: int = 4  # text_ui_layout_bed（★＋P9 手抄物理那一道）
+# ★★★【反向掃第一次跑就抓到的三支】（2026-10-01）——它們有已實測紅的紀錄行，
+#   而**從來不在地板表裡** ⇒ 那些紀錄行可以一條一條被拿掉而沒有任何一格會紅。
+#   ★而這不是「有人忘了登記」，是**手抄名單的必然**：寫新床的人沒有理由知道
+#     有一張表在別的檔裡等他登記 ⇒ 所以修法是**反向掃**，不是「以後記得登記」。
+const CONTROL_FLOOR_INQUIRY: int = 7       # inquiry_v1_bed
+const CONTROL_FLOOR_TRADE_ACCEPT: int = 5  # trade_accept_bed
+const CONTROL_FLOOR_SUCCESS_SENT: int = 5  # success_sentence_bed
+
+# ★★★★★【地板表 ＝ 唯一一份】（systems 裁 2026-10-01）——
+#   ★舊版 P19 是**一串手抄呼叫**：每支床三行（count／print／check）＋一個地板常數
+#     ⇒ 漏一支是**靜默的**。現在母體是這張表，而 P19 逐支跑它 ＋ **反向掃**。
+#   ★★值**引用既有的具名常數**（不是把數字抄第二份）⇒ 每支床的理由留在它自己那一行上。
+#   ★★★而 key 是**檔名字串**（不是常數名）—— 反向掃要拿它跟檔案系統比，
+#     而檔案系統只認檔名。
+const CONTROL_FLOORS: Dictionary = {
+	"available_actions_bed.gd":    CONTROL_FLOOR_AVAIL,
+	"colocation_gate_bed.gd":      CONTROL_FLOOR_COLOC,
+	"command_replay_bed.gd":       CONTROL_FLOOR_REPLAY,
+	"decision_vs_outcome_bed.gd":  CONTROL_FLOOR_DVO,
+	"forced_event_panel_bed.gd":   CONTROL_FLOOR_FEP,
+	"inquiry_v1_bed.gd":           CONTROL_FLOOR_INQUIRY,
+	"leader_chokepoint_bed.gd":    CONTROL_FLOOR_LEADER,
+	"npc_tribute_transfer_bed.gd": CONTROL_FLOOR_NPCTRIB,
+	"player_event_feed_bed.gd":    CONTROL_FLOOR_FEED,
+	"press_is_one_tick_bed.gd":    CONTROL_FLOOR_P8,
+	"scripted_exploration_bed.gd": CONTROL_FLOOR_STRINGS,
+	"spam_brake_bed.gd":           CONTROL_FLOOR_SPAM,
+	"success_sentence_bed.gd":     CONTROL_FLOOR_SUCCESS_SENT,
+	"text_ui_layout_bed.gd":       CONTROL_FLOOR_LAYOUT,
+	"trade_accept_bed.gd":         CONTROL_FLOOR_TRADE_ACCEPT,
+	"ui_flow_test.gd":             CONTROL_FLOOR_UI,
+	"unbound_key_bed.gd":          CONTROL_FLOOR_UNBOUND,
+}
 
 # 負對照：刪掉床裡【任一行】「已於…實測紅」的紀錄（紀錄數 13 → 12） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 # ★★★#7① 面板三行人話 —— 這一格【走玩家真的會讀到的那一串】（`_build_interact_str`）,
@@ -2787,6 +2828,10 @@ func _test_p25_letter_key_only_in_interact_mode() -> void:
 		node.set(String(m3), false)
 	await _free_ui(node)
 	_cell("_test_p25_letter_key_only_in_interact_mode")
+# 負對照：讓 `_ui_pop()` 在彈出之後 `clear()` 整個堆疊（＝「Esc 全部彈掉」）⇒ 本格紅「★★★pop 一次 ＝ 深度 1（不是清空；實測 0）」 ⇒ 已於 66fab183d（2026-10-01 這一輪） 實測紅
+# ★這一道是我為 P31 設計的擾動，而它紅在【本格】—— P31 當時全綠。
+#   ⇒ 它證明兩件事：①`_ui_pop` 的退化有人守（就是這一格）
+#     ②★一個負對照紅了，不代表【被它瞄準的那一格】有鑑別力。
 
 # ══ P26：★★★展開層堆疊【步 1】（spec §2⑥；systems 裁 2026-10-01）═══════════════
 # ★母體 ＝ `PlayerCommandSystem.SUBMENU_OPENERS`（引擎側宣告）與
@@ -3251,75 +3296,317 @@ func _test_p30_submode_panels_reach_the_screen() -> void:
 
 
 
+# 負對照：讓 Esc 直接回頂層（`_handle_intel_mode` 的 Esc 分支改呼 `_close_all_modes()`，＝spec 自己寫的那個擾動）⇒ 深度 2 那兩條紅（2 -> 0、頂層變空）而深度 1 那幾列照樣綠 ⇒ 已於 66fab183d（2026-10-01 這一輪） 實測紅
+# ★★★而我第一道負對照【紅在別的格】，那件事要寫在這裡：
+#   我先改 `_ui_pop` 讓它 `clear()`（＝「Esc 全部彈掉」）⇒ 紅的是 **P26**
+#   （`★★★pop 一次 ＝ 深度 1（不是清空；實測 0）`），**P31 全綠**。
+#   ⇒ 真因：Esc 走的不是 `_ui_pop`，是 `_intel_mode = false`（property setter 移那一層）
+#   ⇒ ★判準：負對照要打在【那條路真的走過的地方】；打在同名但沒被走到的函式上，
+#     紅燈會出現在另一格，而那時「有紅」會被讀成「本格有鑑別力」。
+#   ⇒ ★★而 `_ui_pop` 的退化**已經有人守**（P26）—— 這一句話本身是有用的交叉索引：
+#     下一個人想動 `_ui_pop` 時知道去哪裡看。
+# == P31 = spec P7 [Esc 只回一層]（版面 v2 HOW §3）=============================
+# ★spec 逐字：「從每一個展開層按一次 Esc ⇒ 深度 −1 且**六個錨仍各一次**」
+# ★★而「六個錨仍各一次」我要**窄化**（不是放寬）：`panel_block` 非空時**取代** map+pages
+#   ⇒ 在子模式裡 `┌─ 地圖（`／`┬─ [` 本來就【不該】出現（那是 BLOCKER-2 的修法）
+#   ⇒ 所以本格驗：①四個【永遠在】的錨各剛好一次（TOP／動作／事件／底部）
+#     ②map+pages 與 panel **互斥**（恰好一邊在）—— ★這比「六個各一次」更嚴：
+#     它同時抓到「Esc 之後面板沒收掉」與「Esc 之後地圖沒回來」。
+# ★★★母體【機械導出】：展開層 = `TextUiMain.UI_STACK_LAYERS`（宣告在一處），
+#   而每一層的旗標／handler 名字從層名**導出**（gather_intel -> `_intel_mode`／
+#   `_handle_intel_mode`）—— 導不出來要**具名報**，不是靜默跳過。
+func _test_p31_esc_pops_exactly_one_layer() -> void:
+	_selftest_gate("_test_p31_esc_pops_exactly_one_layer").noop()
+	print("\n── P31（spec P7）Esc 只回一層，而沒有一區被搬動 ──")
+	var layers: Array = []
+	for l in TextUiMain.UI_STACK_LAYERS:
+		layers.append(String(l))
+	print("   母體（`UI_STACK_LAYERS` 宣告在一處）= %s" % str(layers))
+	_check("★母體地板：展開層不是空的（空 ⇒ 下面整格不跑）", layers.size() > 0)
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	_check("★母體地板：找到同格目標（-1 ⇒ 進不了動作層）", tgt_id != -1)
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	var bad: Array = []
+	var na: Array = []
+	var walked: Array = []
+	for layer in layers:
+		# ★旗標名從層名導出：先試 `_<層名>_mode`，再試 `_<最後一段>_mode`
+		var stem: String = String(layer)
+		var flag: String = "_%s_mode" % stem
+		if node.get(flag) == null:
+			var parts: PackedStringArray = String(layer).split("_")
+			stem = String(parts[parts.size() - 1])
+			flag = "_%s_mode" % stem
+		if node.get(flag) == null:
+			na.append("%s（導不出旗標，試過 `_%s_mode`）" % [String(layer), String(layer)])
+			continue
+		var fn: String = "_handle_%s_mode" % stem
+		if not node.has_method(fn):
+			na.append("%s（導不出 handler `%s`）" % [String(layer), fn])
+			continue
+		node._bridge.refresh_interaction_targets()
+		node._close_all_modes()
+		while node._ui_depth() > 0:
+			node._ui_pop()
+		node._interact_mode = true
+		node._interact_target = tgt_id
+		node._interact_page = 0
+		node.set(flag, true)
+		node._refresh()
+		var d_before: int = node._ui_depth()
+		if d_before <= 0:
+			na.append("%s（設了旗標而深度仍 0 ⇒ 這一層不是 stack-backed，本格測不到它）" % String(layer))
+			continue
+		walked.append(String(layer))
+		node.call(fn, KEY_ESCAPE)
+		node._refresh()
+		var d_after: int = node._ui_depth()
+		var screen: String = String(node._screen_label.text)
+		var n_top: int = screen.count(TextUiView.A_TOP)
+		var n_act: int = screen.count(TextUiView.A_ACTION)
+		var n_fd: int = screen.count(TextUiView.A_FEED)
+		var n_ft: int = screen.count(TextUiView.A_FOOT)
+		var has_map: bool = screen.contains(TextUiView.A_MAP) or screen.contains(TextUiView.A_PAGES)
+		var has_panel: bool = screen.contains(TextUiView.A_PANEL)
+		print("   %-14s 深度 %d -> %d｜四錨 %d/%d/%d/%d｜map+pages=%s panel=%s" % [
+			String(layer), d_before, d_after, n_top, n_act, n_fd, n_ft, str(has_map), str(has_panel)])
+		if d_after != d_before - 1:
+			bad.append("%s：深度 %d -> %d（不是 −1）" % [String(layer), d_before, d_after])
+		if not (n_top == 1 and n_act == 1 and n_fd == 1 and n_ft == 1):
+			bad.append("%s：四個永遠在的錨不是各一次（%d/%d/%d/%d）" % [
+				String(layer), n_top, n_act, n_fd, n_ft])
+		if has_map == has_panel:
+			bad.append("%s：map+pages 與 panel **不是互斥**（map=%s panel=%s）" % [
+				String(layer), str(has_map), str(has_panel)])
+	print("   -- 走到 %d 層｜不適用 %d 層｜母體 %d 層 --" % [walked.size(), na.size(), layers.size()])
+	for x in na:
+		print("     · 不適用：%s" % String(x))
+	_check("★★三數相加 = 母體（%d + %d = %d）" % [walked.size(), na.size(), layers.size()],
+		walked.size() + na.size() == layers.size())
+	_check("★母體地板：真的走到至少一層（0 ⇒ 下面那條恆綠）", walked.size() > 0)
+	_check("★★★★Esc 只回一層，而沒有一區被搬動（違反的：%s）" % str(bad), bad.is_empty())
+	# ── ★★★★★【深度 2 的子情境】—— 沒有它，這一格【沒有鑑別力】────────────────
+	#   ★上面每一層都是從深度 1 按下去（1 → 0）⇒ 在那個世界裡
+	#     「只回一層」與「全部彈掉」**長得一模一樣** ⇒ 它只證明「Esc 有反應」，
+	#     不分辨 spec 要的那件事（「只回**一層**」）。
+	#   ⇒ ★★判準句照用：「在我想排除的那個世界裡，它會不會長不一樣？」
+	#     深度 1 ⇒ 不會 ⇒ 那是 sanity check 不是對照；深度 2 ⇒ 會 ⇒ 這才是本格的承重點。
+	node._bridge.refresh_interaction_targets()
+	node._close_all_modes()
+	while node._ui_depth() > 0:
+		node._ui_pop()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._interact_page = 0
+	node.set("_recruit_mode", true)      # 先 push recruit
+	node.set("_intel_mode", true)        # 再 push gather_intel ⇒ 它在頂
+	node._refresh()
+	var d2_before: int = node._ui_depth()
+	var top_before: String = String(node._ui_top())
+	print("   ★深度 2 佈置：深度 %d｜頂層 `%s`" % [d2_before, top_before])
+	_check("★★母體地板：真的疊到深度 2（疊不上去 ⇒ 下面兩條沒有主詞）", d2_before == 2)
+	node._handle_intel_mode(KEY_ESCAPE)
+	node._refresh()
+	var d2_after: int = node._ui_depth()
+	var top_after: String = String(node._ui_top())
+	print("   ★按一次 Esc ⇒ 深度 %d -> %d｜頂層 `%s` -> `%s`" % [
+		d2_before, d2_after, top_before, top_after])
+	_check("★★★★★深度 2 按一次 Esc ⇒ 深度剛好 −1（%d -> %d）—— 不是回到 0" % [d2_before, d2_after],
+		d2_after == d2_before - 1)
+	_check("★★★★★而【下面那一層還在】（頂層 `%s`；空的話就是全部被彈掉了）" % top_after,
+		top_after != "" and top_after != top_before)
+	await _free_ui(node)
+	_cell("_test_p31_esc_pops_exactly_one_layer")
+
+
+# 負對照：把 handler 頂端那個未綁定出口改成靜默（`_interact_mode_binds_key` 回 false 時直接 return）⇒ 本格紅並逐一指名 9 個鍵（0／Space／Tab／Minus／Equal／Semicolon／Apostrophe／Slash／BackSlash）而全檔只有這 1 個 FAIL ⇒ 已於 66fab183d（2026-10-01 這一輪） 實測紅
+# == P32 = spec P8 [未綁定鍵]（版面 v2 HOW §3，★這是那張 spec 的最後一格）=======
+# ★spec 逐字：「按一輪未綁定鍵 ⇒ 動作區不變、**無模式關閉**（沿用既有三態）」
+# ★★母體【導出不手挑】：動作層的鍵 = `TextUiView.ACTION_DIGITS` 那張表的反查
+#   ⇒ **未綁** = 1..9 裡「反查不到 id」或「反查到的 id 這一輪不在清單上」。
+#   ★手挑會挑到一個其實有綁的鍵 —— 那時這一格測不到東西卻會過（`unbound_key_bed`
+#     那張票的檔頭逐字寫著這件事）。
+# ★★★「動作區不變」要比【動作區那一段】不是整個畫面：三態①要求**有一句話**，
+#   而那句話會進底部的「結果：」欄 ⇒ 比整個畫面就會把「它說了話」誤判成「它動了東西」。
+func _test_p32_unbound_keys_leave_the_action_region_intact() -> void:
+	_selftest_gate("_test_p32_unbound_keys_leave_the_action_region_intact").noop()
+	print("\n── P32（spec P8）未綁定鍵：動作區不變、無模式關閉 ──")
+	var node = await _make_ui()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	var tgt_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.leader_id != -1:
+			t.tile_pos = pt.tile_pos
+			tgt_id = int(k)
+			break
+	_check("★母體地板：找到同格目標（-1 ⇒ 進不了動作層）", tgt_id != -1)
+	ResourceBank.set_amt(pt, "coin", 9999.0, "bed_fixture")
+	node._bridge.refresh_interaction_targets()
+	node._interact_mode = true
+	node._interact_target = tgt_id
+	node._interact_page = 0
+	node._refresh()
+	var rows: Array = node._interact_action_split()["team"]
+	# ★★★【母體第一版是錯的，而母體地板當場接住它】（2026-10-01 實測）——
+	#   我第一版把母體定成「1..9 裡反查不到 id 的」⇒ 這一輪 11 列裡 9 個有鍵的**全在**
+	#   ⇒ 那個集合是**空的**，而最後那條斷言**在空迴圈上 PASS**
+	#   ⇒ ★一個【正數形狀的空集合】，紅的是地板不是斷言。
+	#   ⇒ ★★所以母體改成從**產品自己的宣告**導出：`_interact_mode_binds_key` 就是
+	#     那個模式的鍵空間宣告（靜態），而它與 handler 本體的機械掃描**已經有一格在異源比對**
+	#     （`unbound_key_bed` P2）⇒ 我不在這裡抄第二份綁定表。
+	var candidates: Array = []
+	for k0 in range(KEY_0, KEY_9 + 1):
+		candidates.append(k0)
+	for k1 in range(KEY_A, KEY_Z + 1):
+		candidates.append(k1)
+	for k2 in [KEY_SPACE, KEY_TAB, KEY_COMMA, KEY_PERIOD, KEY_MINUS, KEY_EQUAL,
+			KEY_SEMICOLON, KEY_APOSTROPHE, KEY_SLASH, KEY_BACKSLASH]:
+		candidates.append(k2)
+	var unbound: Array = []
+	for c in candidates:
+		if not bool(node.call("_interact_mode_binds_key", int(c))):
+			unbound.append(int(c))
+	var shown: Array = []
+	for u in unbound:
+		shown.append(OS.get_keycode_string(int(u)))
+	print("   這一輪清單 %d 列｜候選 %d 鍵｜謂詞說【沒綁】的 %d 鍵 = %s" % [
+		rows.size(), candidates.size(), unbound.size(), str(shown)])
+	_check("★★母體地板：未綁的鍵不是空集合（空 ⇒ 下面迴圈一次都不跑 ⇒ 不可判不是綠）",
+		unbound.size() > 0)
+	var bad: Array = []
+	for d2 in unbound:
+		var before_region: String = _action_region(String(node._screen_label.text))
+		var fp_before: String = StateFingerprint.compute(st)
+		var q_before: int = st.pending_commands.size()
+		var depth_before: int = node._ui_depth()
+		node._feedback_line.text = ""
+		node._handle_interact_mode(int(d2))
+		node._refresh()
+		var after_region: String = _action_region(String(node._screen_label.text))
+		var said: String = String(node._feedback_line.text)
+		var ok_region: bool = after_region == before_region
+		var kn: String = OS.get_keycode_string(int(d2))
+		print("   按 [%s] ⇒ 動作區不變=%s｜模式還開著=%s｜深度 %d->%d｜回饋「%s」" % [
+			kn, str(ok_region), str(bool(node._interact_mode)),
+			depth_before, node._ui_depth(), said])
+		if not ok_region:
+			bad.append("按 [%s]：動作區變了" % kn)
+		if not bool(node._interact_mode):
+			bad.append("按 [%s]：★模式被關掉了（spec 的「無模式關閉」）" % kn)
+		if node._interact_target != tgt_id:
+			bad.append("按 [%s]：聚焦目標被改掉了" % kn)
+		if node._ui_depth() != depth_before:
+			bad.append("按 [%s]：深度變了（%d -> %d）" % [kn, depth_before, node._ui_depth()])
+		if StateFingerprint.compute(st) != fp_before:
+			bad.append("按 [%s]：fp 變了（它改了世界）" % kn)
+		if st.pending_commands.size() != q_before:
+			bad.append("按 [%s]：佇列長度變了" % kn)
+		if not said.contains(UNBOUND_TOKEN):
+			bad.append("按 [%s]：三態① 沒有那一句話（實測「%s」）" % [kn, said])
+	_check("★★★★按一輪未綁定鍵：動作區不變、無模式關閉、三態① 有話說（違反的：%s）"
+		% str(bad), bad.is_empty())
+	await _free_ui(node)
+	_cell("_test_p32_unbound_keys_leave_the_action_region_intact")
+
+
+# 切出【動作區】那一段（`─ 動作（` 那一行起，到 `─ 事件（` 之前）
+# ★為什麼要切：三態① 要求有一句話，而那句話會進底部「結果：」欄
+#   ⇒ 比整個畫面會把「它說了話」誤判成「它動了東西」。
+static func _action_region(screen: String) -> String:
+	var a: int = screen.find(TextUiView.A_ACTION)
+	var b: int = screen.find(TextUiView.A_FEED)
+	if a < 0 or b < 0 or b <= a:
+		return "★切不出動作區（a=%d b=%d）" % [a, b]   # ★回一個【會讓比較失敗】的字串，不回空
+	return screen.substr(a, b - a)
+
+
+# ══ P19：負對照覆蓋率棘輪 —— ★這一格【自己被改過】（2026-10-01）═══════════════
+# ★舊版是一串手抄呼叫（每支床三行＋一個地板常數）⇒ 漏一支是靜默的。
+#   ⇒ 改成【地板表唯一一份 ＋ 逐支比對 ＋ 反向掃】之後，它自己要有負對照。
+# 負對照：把一支床從地板表裡拿掉（`trade_accept_bed`）⇒ 反向掃紅並指名「trade_accept_bed.gd（5 條）」而 rc 由 0 變 1 ⇒ 已於 ffcaee7ef（2026-10-01 這一輪） 實測紅
+# 負對照：拿掉 `command_replay_bed` 的一條紀錄行 ⇒ 棘輪紅並指名「command_replay_bed.gd（1 < 2）」且該列印「★往回走了」 ⇒ 已於 ffcaee7ef（2026-10-01 這一輪） 實測紅
 func _test_p19_control_coverage_ratchet() -> void:
 	_selftest_gate("_test_p19_control_coverage_ratchet").noop()
 	print("\n── P19 負對照覆蓋率棘輪 ──")
-	var n_ui: int = _count_fired("res://scripts/debug/ui_flow_test.gd")
-	var n_cr: int = _count_fired("res://scripts/debug/command_replay_bed.gd")
-	print("   已實測紅紀錄：ui_flow_test %d（地板 %d）／command_replay_bed %d（地板 %d）" % [
-		n_ui, CONTROL_FLOOR_UI, n_cr, CONTROL_FLOOR_REPLAY])
-	_check("★母體地板：兩個檔都數得到非零（%d／%d）" % [n_ui, n_cr], n_ui > 0 and n_cr > 0)
-	_check("★★ui_flow_test 的紀錄數沒有往回走（%d >= %d）" % [n_ui, CONTROL_FLOOR_UI],
-		n_ui >= CONTROL_FLOOR_UI)
-	_check("★★command_replay_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cr, CONTROL_FLOOR_REPLAY],
-		n_cr >= CONTROL_FLOOR_REPLAY)
-	var n_fp: int = _count_fired("res://scripts/debug/forced_event_panel_bed.gd")
-	print("   forced_event_panel_bed %d（地板 %d）" % [n_fp, CONTROL_FLOOR_FEP])
-	_check("★★母體地板：#7 那支床也數得到非零（%d）" % n_fp, n_fp > 0)
-	_check("★★forced_event_panel_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fp, CONTROL_FLOOR_FEP],
-		n_fp >= CONTROL_FLOOR_FEP)
-	var n_dv: int = _count_fired("res://scripts/debug/decision_vs_outcome_bed.gd")
-	print("   decision_vs_outcome_bed %d（地板 %d）" % [n_dv, CONTROL_FLOOR_DVO])
-	_check("★★decision_vs_outcome_bed 的紀錄數沒有往回走（%d >= %d）" % [n_dv, CONTROL_FLOOR_DVO],
-		n_dv >= CONTROL_FLOOR_DVO)
-	var n_av: int = _count_fired("res://scripts/debug/available_actions_bed.gd")
-	print("   available_actions_bed %d（地板 %d）" % [n_av, CONTROL_FLOOR_AVAIL])
-	_check("★★available_actions_bed 的紀錄數沒有往回走（%d >= %d）" % [n_av, CONTROL_FLOOR_AVAIL],
-		n_av >= CONTROL_FLOOR_AVAIL)
-	var n_st: int = _count_fired("res://scripts/debug/scripted_exploration_bed.gd")
-	print("   scripted_exploration_bed %d（地板 %d）" % [n_st, CONTROL_FLOOR_STRINGS])
-	_check("★★scripted_exploration_bed 的紀錄數沒有往回走（%d >= %d）" % [n_st, CONTROL_FLOOR_STRINGS],
-		n_st >= CONTROL_FLOOR_STRINGS)
-	var n_nt: int = _count_fired("res://scripts/debug/npc_tribute_transfer_bed.gd")
-	print("   npc_tribute_transfer_bed %d（地板 %d）" % [n_nt, CONTROL_FLOOR_NPCTRIB])
-	_check("★★npc_tribute_transfer_bed 的紀錄數沒有往回走（%d >= %d）" % [n_nt, CONTROL_FLOOR_NPCTRIB],
-		n_nt >= CONTROL_FLOOR_NPCTRIB)
-	var n_lc: int = _count_fired("res://scripts/debug/leader_chokepoint_bed.gd")
-	print("   leader_chokepoint_bed %d（地板 %d）" % [n_lc, CONTROL_FLOOR_LEADER])
-	_check("★★leader_chokepoint_bed 的紀錄數沒有往回走（%d >= %d）" % [n_lc, CONTROL_FLOOR_LEADER],
-		n_lc >= CONTROL_FLOOR_LEADER)
-	var n_sb: int = _count_fired("res://scripts/debug/spam_brake_bed.gd")
-	print("   spam_brake_bed %d（地板 %d）" % [n_sb, CONTROL_FLOOR_SPAM])
-	_check("★★母體地板：濫按煞車那支床也數得到非零（%d）" % n_sb, n_sb > 0)
-	_check("★★spam_brake_bed 的紀錄數沒有往回走（%d >= %d）" % [n_sb, CONTROL_FLOOR_SPAM],
-		n_sb >= CONTROL_FLOOR_SPAM)
-	var n_ub: int = _count_fired("res://scripts/debug/unbound_key_bed.gd")
-	print("   unbound_key_bed %d（地板 %d）" % [n_ub, CONTROL_FLOOR_UNBOUND])
-	_check("★★母體地板：按鍵三態那支床也數得到非零（%d）" % n_ub, n_ub > 0)
-	_check("★★unbound_key_bed 的紀錄數沒有往回走（%d >= %d）" % [n_ub, CONTROL_FLOOR_UNBOUND],
-		n_ub >= CONTROL_FLOOR_UNBOUND)
-	var n_cg: int = _count_fired("res://scripts/debug/colocation_gate_bed.gd")
-	print("   colocation_gate_bed %d（地板 %d）" % [n_cg, CONTROL_FLOOR_COLOC])
-	_check("★★母體地板：同格那支床也數得到非零（%d）" % n_cg, n_cg > 0)
-	_check("★★colocation_gate_bed 的紀錄數沒有往回走（%d >= %d）" % [n_cg, CONTROL_FLOOR_COLOC],
-		n_cg >= CONTROL_FLOOR_COLOC)
-	var n_p8: int = _count_fired("res://scripts/debug/press_is_one_tick_bed.gd")
-	print("   press_is_one_tick_bed %d（地板 %d）" % [n_p8, CONTROL_FLOOR_P8])
-	_check("★★母體地板：#8 那支床也數得到非零（%d）" % n_p8, n_p8 > 0)
-	_check("★★press_is_one_tick_bed 的紀錄數沒有往回走（%d >= %d）" % [n_p8, CONTROL_FLOOR_P8],
-		n_p8 >= CONTROL_FLOOR_P8)
-	var n_fe: int = _count_fired("res://scripts/debug/player_event_feed_bed.gd")
-	var n_tl: int = _count_fired("res://scripts/debug/text_ui_layout_bed.gd")
-	print("   text_ui_layout_bed %d（地板 %d）" % [n_tl, CONTROL_FLOOR_LAYOUT])
-	_check("★★text_ui_layout_bed 的紀錄數沒有往回走（%d >= %d）" % [n_tl, CONTROL_FLOOR_LAYOUT],
-		n_tl >= CONTROL_FLOOR_LAYOUT)
-	print("   player_event_feed_bed %d（地板 %d）" % [n_fe, CONTROL_FLOOR_FEED])
-	_check("★★母體地板：新床也數得到非零（%d）" % n_fe, n_fe > 0)
-	_check("★★player_event_feed_bed 的紀錄數沒有往回走（%d >= %d）" % [n_fe, CONTROL_FLOOR_FEED],
-		n_fe >= CONTROL_FLOOR_FEED)
-	if n_ui > CONTROL_FLOOR_UI or n_cr > CONTROL_FLOOR_REPLAY or n_fe > CONTROL_FLOOR_FEED:
-		print("   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（%d／%d／%d）" % [n_ui, n_cr, n_fe])
+	# ★★★【母體機械導出 ＋ 反向掃】（systems 裁 2026-10-01）——
+	#   ★舊版是**一串手抄呼叫**（每支床三行 ＋ 一個地板常數）⇒ 漏一支是**靜默的**：
+	#     那支床的紀錄行可以一條一條被拿掉而沒有任何一格會紅。
+	#   ★★而它當場被抓到：反向掃第一次跑就找出 **3 支**有已實測紅紀錄行
+	#     而不在地板表裡的床（`inquiry_v1_bed`／`trade_accept_bed`／`success_sentence_bed`）
+	#     ⇒ ★**「具名標記 ＝ 一份手抄名單」那條的第 N 次**：指名解決「數字對而東西不在」，
+	#       不解決「我沒看到的那些」⇒ 所以正解是三件：①地板表在一處
+	#       ②逐支比對 ③**反向掃**（有紀錄行而不在表裡 ⇒ 紅並指名）。
+	#   ★★★而反向掃的母體要**從檔案系統數出來印在卷面**，不是從表裡數
+	#     —— 從表裡數的反向掃恆空（它拿表跟表自己比）。
+	var names: Array = CONTROL_FLOORS.keys()
+	names.sort()
+	var below: Array = []
+	var seen: Dictionary = {}
+	var total_fired: int = 0
+	for nm in names:
+		var fname: String = String(nm)
+		var floor_v: int = int(CONTROL_FLOORS[fname])
+		var got: int = _count_fired("res://scripts/debug/" + fname)
+		seen[fname] = true
+		total_fired += got
+		print("   %-32s %d（地板 %d）%s" % [fname, got, floor_v,
+			"" if got >= floor_v else "★往回走了"])
+		if got < floor_v:
+			below.append("%s（%d < %d）" % [fname, got, floor_v])
+	print("   ── 表裡 %d 支床，已實測紅紀錄合計 %d 條 ──" % [names.size(), total_fired])
+	_check("★母體地板：表不是空的（空 ⇒ 下面整格沒有主詞）", names.size() > 0)
+	_check("★★母體地板：合計數得到非零（0 ⇒ 每一條 `>=` 都恆真）", total_fired > 0)
+	_check("★★★沒有任何一支床的紀錄數往回走（往回走的：%s）" % str(below), below.is_empty())
+	# ── ★★★反向掃：有紀錄行【而不在表裡】的床 ⇒ 紅並指名 ────────────────────
+	#   ★形狀逐字沿用已核過 CLEAN 的 `SUBMENU_OPENERS`／`ACTION_SHAPE`：
+	#     宣告在一處 ＋ 逐支比對 ＋ **反向掃**（缺一不可）。
+	var scanned: int = 0
+	var orphans: Array = []
+	var d := DirAccess.open("res://scripts/debug")
+	if d == null:
+		_check("★母體地板：開得了 res://scripts/debug（開不了 ⇒ 反向掃恆空 ⇒ 不是綠是不可判)", false)
+	else:
+		d.list_dir_begin()
+		var f: String = d.get_next()
+		while f != "":
+			if f.ends_with(".gd"):
+				scanned += 1
+				if not seen.has(f):
+					var n_orphan: int = _count_fired("res://scripts/debug/" + f)
+					if n_orphan > 0:
+						orphans.append("%s（%d 條）" % [f, n_orphan])
+			f = d.get_next()
+		d.list_dir_end()
+	print("   ★反向掃：掃了 %d 支 .gd（母體從檔案系統數，不是從表裡數）" % scanned)
+	_check("★★母體地板：反向掃真的掃到東西（%d 支；0 ⇒ 下面那條恆綠）" % scanned, scanned > 0)
+	_check("★★★★反向掃：沒有【有紀錄行而不在地板表裡】的床（漏掉的：%s）" % str(orphans),
+		orphans.is_empty())
+	print("   ★★而這一條抓到的東西不是「有人寫錯」——是**手抄名單的必然**：")
+	print("     寫新床的人沒有理由知道有一張表在別的檔裡等他登記。")
 	_cell("_test_p19_control_coverage_ratchet")
+
+
+# ★★★★★【2026-10-01：這兩塊是被我自己的視窗吞掉之後補回來的】——
+#   我重寫 P19 時用 `/^func /` 找「下一支函式」來定範圍，而 `_count_fired` 是
+#   **`static func`** ⇒ 那個錨**沒有涵蓋這個變體** ⇒ 視窗一路吃到下一支
+#   `func`，把 `_count_fired` 本體與下面 P2 的整段註解（**含一條已實測紅的紀錄行**）
+#   一起刪掉。★接住它的是 parse error（`_count_fired()` not found）；
+#   ★★而如果只刪了註解那一塊，接住它的會是 P19 自己的棘輪（28 → 27）。
+#   ⇒ ★★★判準：**用「下一個 X」定範圍之前，先問 X 有幾種寫法**
+#     （`func` / `static func` / `@warning_ignore` 之後的 func …）。
 
 # 數【固定格式】那一行：`# 負對照：<怎麼點火> ⇒ 已於 <分支> 實測紅`
 static func _count_fired(path: String) -> int:
