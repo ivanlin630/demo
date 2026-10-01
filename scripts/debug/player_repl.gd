@@ -1,6 +1,12 @@
 extends SceneTree
 class_name PlayerRepl   # ★床要呼它的詞法器（`keycode_for()` 是純函式）
-# @bed-kind: harness
+# @bed-kind: diagnostic
+# ★★★為什麼是 `diagnostic` 而不是 `invariant`（電池那支 `bed-kind` 紅過一次：
+#   我原本寫 `harness`，而它**不在四選一裡**（`invariant|acceptance|diagnostic|pending`））：
+#   ·它**不是斷言** —— 它不檢查任何東西，它**把畫面印出來給人看**
+#   ·★而它**不能**是 `invariant`：`invariant` 必須進註冊表，而這支腳本**阻塞等輸入**
+#     （stdin／TCP）⇒ 放進電池會把那一輪掛死
+#   ⇒ 守這支腳本產出的那些性質的是 `terminal_selfcheck_bed.gd`（它**在**註冊表裡）
 # ══ 玩家介面 ＝ 終端 REPL（骨架）═══════════════════════════════════════════════
 # spec：`docs/superpowers/specs/2026-10-01-player-ui-is-a-terminal-repl-HOW.md`
 # 用戶逐字（2026-10-01 第三輪玩測）：「新版UI更爛 爛到沒救 改用終端形式的文字UI

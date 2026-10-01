@@ -807,6 +807,21 @@ func _refresh() -> void:
 #     ⇒ ★★★那會變成**第二條組裝路徑** —— 正是這張票要治的病。
 #   ⇒ 所以 REPL 走**真的節點**（`TextUI.tscn`，與 `ui_flow_test._make_ui()` 同一條路，
 #     79 格在用 ⇒ 已驗證），而畫面只有一份、組裝只有一處。
+# 把 `pages` 內容的第一行抬頭剝掉（★只在它逐字等於那一頁的抬頭時）
+func _pages_without_header(body: String) -> String:
+	var head: String = UiPages.header(_page_idx)
+	var ls: Array = body.split("\n")
+	# ★★★★★【抬頭不在第一行】（實測訂正，2026-10-01）：`_build_state_str()` 先印
+	#   隊名／狀態／糧 幾行，抬頭在第 3~5 行 ⇒ 第一版只看 `ls[0]` ⇒ **一次都沒剝到**
+	#   （而症狀是自驗 (b-2) 照舊紅 1 條 —— ★**它救了我**，否則我會以為剝好了）。
+	#   ⇒ 改成找**逐字等於那個抬頭的那一行**，而**只剝第一個命中**（多剝會吃掉內容）。
+	for i in range(ls.size()):
+		if String(ls[i]) == head:
+			ls.remove_at(i)
+			return "\n".join(ls)
+	return body
+
+
 func build_regions(pend_txt: String) -> Dictionary:
 	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
@@ -830,7 +845,13 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
 		"tabs": String(UiPages.header(_page_idx)).trim_prefix("["),
 		"map": _map_label.text,
-		"pages": _state_label.text,
+		# ★★★★★【剝掉 `pages` 的第一行抬頭 —— 因為框標題已經印了同一份】
+		#   ★★而**只在它逐字等於 `UiPages.header(_page_idx)` 時才剝**：
+		#     若有人改了其中一邊，這裡**什麼都不剝** ⇒ 畫面上又出現兩次 ⇒ **自驗 (b-2) 會紅**
+		#     ⇒ ★那是刻意的：**它寧可紅，也不要悄悄吃掉一行它不認識的字**。
+		#   ★★★而抬頭的**產生者仍然只有一個**（`UiPages.header()`）——
+		#     這裡不是第二份字，是**同一份字的去重**。
+		"pages": _pages_without_header(_state_label.text),
 		# ★★★子模式面板（BLOCKER-2）：`_event_label` 載著 12 個子模式面板，
 		#   而它 `visible = false` ⇒ 不傳進來的話那 12 個面板【玩家一個都看不到】
 		#   —— 而「選目標」也在裡面 ⇒ 新版面的整條入口會是黑的。
@@ -1039,12 +1060,21 @@ func _build_state_str() -> String:
 	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
 	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。
 	#   ★為什麼不順手分類：那是票B。混進來的話，紅燈就分不出是【框沒做好】還是【分類錯了】。
-	# ★★★★★【抬頭只印一處】（自驗 (b-2) 實測：`生存 (1/5)` 在框標題與這一行各一次）
-	#   ⇒ `build_regions()` 的 `tabs` 已經把 `UiPages.header()` 餵給框標題
-	#     （`text_ui_view.gd` 的 `A_PAGES` 那一欄）⇒ 這裡**不要再印第二份**。
-	#   ★而那不是排版小事：**同一句話印兩次**是用戶那句「重複」的另一個實例，
-	#     而它與「選項重複」不同軸 ⇒ (b-1) 綠而畫面上有重複（檢查管道與失效管道不同軸）。
-	# ~~lines.append(UiPages.header(_page_idx))~~
+	# ══ ★★★★★★【這一行還原了，而重複改在【合成那一側】解】（2026-10-01，我自己踩的）═══
+	# ★我為了修自驗 (b-2)「抬頭印兩次」把這一行拿掉 ⇒ **電池的 `ui-flow` 紅 20 條**：
+	#   「第 N 頁的頁首出現」「找得到頁首行」「分頁區非空（0 行）」×5 頁 ＋ 零損失 ＋ 天窗 0。
+	#   ⇒ 真因：那 20 條讀的是**載體**（`_state_label.text`），★**而它們靠這一行當分頁區的
+	#     分隔符** ⇒ 拿掉它 ⇒ 區抽不出來 ⇒ 區內一切歸零（天窗 0、零損失紅都是**下游**）。
+	# ★★而這是「兩側」那一族的**鏡像版**（同一天第二次，方向相反）：
+	#   上午那次我改了**顯示**而沒改**輸入**；這一次我改了**載體**而**斷言讀的就是載體**
+	#   ⇒ ★我問的是「玩家看得到嗎」，**沒問「那些斷言在看什麼」**。
+	# ★★★而**最尖的一點**：我修的那個病與我造的這個病**是同一個病** ——
+	#   「同一句話有兩個來源」。我拿掉其中一個來源，**而那個來源是某些斷言的唯一入口**。
+	# ★★★★而「把斷言遷到合成畫面」**是已經被判過錯的選項**，理由就在本檔檔頭：
+	#   **框會把分頁 clip 到 rw≈59** ⇒ 遷移等於把斷言的主詞從【內容】換成【裁切後的版面】。
+	# ⇒ 所以：**載體照印**（斷言零遷移），而**重複在 `build_regions()` 那一側解**
+	#   —— 它把 `pages` 的這一行頭剝掉，因為框標題已經印了同一份（見那裡的理由）。
+	lines.append(UiPages.header(_page_idx))
 	if _page_idx == 0:
 		lines.append_array(_build_survival_lines(ct, ps))
 		var _unclassified: Array = _build_unclassified_lines(ct, ps, lc)
@@ -1443,7 +1473,19 @@ func _page_skylight_fields(idx: int) -> Array:
 			var _ct0: Dictionary = _cached_snapshot.get("controlled_team", {})
 			if not _ct0.has("home_pos"):
 				_base.append("位置與家（查詢面無此欄）")
-			if _cached_snapshot.get("focused_member", {}).is_empty():
+			# ★★★★★★【這個 guard 恆假，而它一次都沒執行過】（2026-10-01，systems 的偵測法抓到）
+			#   `map_focused_member()` 的哨兵（`player_api_mapper.gd:229-233`）是一個
+			#   **有欄位的字典**（`id: -1`）而**不是** `{}` ⇒ `is_empty()` **永遠為假**
+			#   ⇒ ★「被聚焦的人」那個天窗**從來沒有出現過**，而天窗的職責逐字是
+			#     「**畫面不得宣稱一個還沒發生的完成度**」⇒ 它在這一欄上從沒履行過。
+			#   ⇒ ★★而它的方向與同族的另一個實例**相反**：`:1220` 那個 guard **恆真**
+			#     ⇒ 印了不該印的；這一個**恆假** ⇒ **該印的從來沒印**。
+			#   ⇒ ★★★判準（systems 升格進判準庫）：**哨兵值要用它自己的欄位判**
+			#     （`id == -1`），**不要用 `is_empty()`／`== null`／長度** ——
+			#     「空的字典」與「表示空的字典」在 `is_empty()` 下**同形**。
+			#   ★而同檔 `:341`／`:1100` 用的是 `.get("interaction_id", "").is_empty()`
+			#     ＝ **判哨兵自己的欄位** ⇒ **那兩處是對的** ⇒ 不是「`is_empty()` 一律有罪」。
+			if int(_cached_snapshot.get("focused_member", {}).get("id", -1)) == -1:
 				_base.append("被聚焦的人")
 			return _base
 		1:
