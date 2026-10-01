@@ -2407,13 +2407,13 @@ const SPEC_UI_MODE_COUNT: int = 13
 #     （棘輪衝突一律取大），把一個【只准變少】的常數放進去會讓兩種方向混在同一處。
 const SPEC_UI_STACK_PENDING: int = 11
 const CONTROL_FLOOR_DVO: int = 2  # decision_vs_outcome_bed（分開講／具名例外）
-const CONTROL_FLOOR_AVAIL: int = 8  # available_actions_bed（五道：母體換手抄／條件複製回查詢面／原因清空／★入口寫一個欄位(P9 行為證)／★★把一個宣告拿掉(P10 反向掃要指名它)／★★★label 加回信封側(P11 唯一生產者)／★★抽取式範圍限定拿掉(多吞方向的地板)／★★★入口那一格關掉(P12 退化狀態,battery10 血證)；★原本的「排除拿掉」那一道母體是空的＝systems 裁維持「機制接電＋清單暫空」，見床裡劃掉那一行）
+const CONTROL_FLOOR_AVAIL: int = 11  # available_actions_bed（五道：母體換手抄／條件複製回查詢面／原因清空／★入口寫一個欄位(P9 行為證)／★★把一個宣告拿掉(P10 反向掃要指名它)／★★★label 加回信封側(P11 唯一生產者)／★★抽取式範圍限定拿掉(多吞方向的地板)／★★★入口那一格關掉(P12 退化狀態,battery10 血證)；★原本的「排除拿掉」那一道母體是空的＝systems 裁維持「機制接電＋清單暫空」，見床裡劃掉那一行）
 const CONTROL_FLOOR_STRINGS: int = 3  # scripted_exploration_bed（P11 表覆蓋／P12 零英文／★P6 artifact 的 sha 必須是 HEAD 祖先 —— 讓【過期不靜默】，systems 裁 2026-10-01）
 const CONTROL_FLOOR_NPCTRIB: int = 3  # npc_tribute_transfer_bed（三道：自己寫一份／拿掉恩怨／塞進表）
 const CONTROL_FLOOR_LEADER: int = 3  # leader_chokepoint_bed（三道：直寫回歸／標記拿掉／少一處 set_leader）
 const CONTROL_FLOOR_SPAM: int = 6  # spam_brake_bed（濫按煞車／兩層關係帳）
 const CONTROL_FLOOR_UNBOUND: int = 8  # unbound_key_bed（按鍵三態；★P4 那一格刻意未點火，理由寫在床裡）★6 → 8（2026-10-01：P9 那一道＋異源漂一個鍵那一道）
-const CONTROL_FLOOR_COLOC: int = 6  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
+const CONTROL_FLOOR_COLOC: int = 8  # colocation_gate_bed（同格闘；六格全點火，含 P6 第三個管道 recruit_named）
 const CONTROL_FLOOR_P8: int = 4     # press_is_one_tick_bed（#8；★P5 那一格刻意未點火，見床裡的理由）
 # ★text_ui_layout_bed（版面 v2）：①display_width 換成 length()（P3b）②別處再寫一次 120（P3a）
 #   ★★★③字母改成由位置決定（P8b）—— 而 ③ 打的是不變量 #10 的病：意義由位置／計數決定。

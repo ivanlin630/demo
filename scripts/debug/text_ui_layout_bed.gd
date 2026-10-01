@@ -448,7 +448,17 @@ func _test_p8b_letters_bind_action_id() -> void:
 		var aid: String = String(r3.get("action_id", ""))
 		if TextUiView.key_for(aid) == "":
 			unbound.append(aid)
-	print("   ★未綁鍵的列 ＝ %d 個（具名：%s）★上限 9 ⇒ 母體 11 已經有 2 個沒鍵" % [unbound.size(), str(unbound)])
+	# ★★★【這三個數全部導出，不寫死】（2026-10-01）——
+	#   ★舊版逐字寫「上限 9 ⇒ 母體 11 已經有 2 個沒鍵」，
+	#     而 `offer_surrender` 進母體之後那句話就是**假的**（會是 3 個）。
+	#   ★★而它是 `print` 不是斷言 ⇒ **不會紅** ⇒ 一句過期的話留在卷面上，
+	#     而卷面是給人讀的。
+	#   ⇒ ★★★修法不是把 11 改成 12（那會再過期一次），是把三個數【導出】——
+	#     下一次母體變大時這一行自己就對了。
+	var n_keys: int = TextUiView.ACTION_DIGITS.size()
+	var n_pop: int = PlayerCommandSystem.TEAM_TARGET_ACTIONS.size()
+	print("   ★未綁鍵的列 ＝ %d 個（具名：%s）★上限 %d ⇒ 母體 %d 已經有 %d 個沒鍵" % [
+		unbound.size(), str(unbound), n_keys, n_pop, maxi(0, n_pop - n_keys)])
 	print("     ★★沒有鍵的列印「%s」而**不用位置補一個鍵** ——" % TextUiView.UNBOUND_MARK)
 	print("       用位置補會把這一格變回不變量 #10 那個病，**而且是靜默的**。")
 	print("       判準：寧可印一個「沒有」並把它數出來，不要補一個看起來合理的值。")

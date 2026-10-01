@@ -23,14 +23,48 @@ extends SceneTree
 var _errors: int = 0
 var _cells_ran: Array = []
 
-const SPEC_TEAM_TARGET_TOTAL: int = 11      # `TEAM_TARGET_ACTIONS` 的大小（spec §7）
+const SPEC_TEAM_TARGET_TOTAL: int = 12      # `TEAM_TARGET_ACTIONS` 的大小（spec §7）
+# ★★★11 → 12（`offer_surrender` 進母體，2026-10-01）—— ★這個數**必須與母體同一顆 commit**：
+#   先改常數 ＝ 讓守衛先【要求】一件世界還沒做到的事（恆紅到期）；
+#   先改母體 ＝ 讓守衛先【接受】一件世界還沒做到的事（恆綠）。兩個方向都錯。
+# ★而 `SPEC_PAYLOAD_SITES`（下面那個也是 11）**刻意不動**：它的量綱是**呼叫點數**不是動作名數
+#   ⇒ 兩個 11 數字相同而量綱不同，動錯那一個會讓一支床綠著說謊。
 const SPEC_STUB_EXCLUDED: int = 0           # ★待裁（見 player_command_system 的 const 註解）：暫不排除任何名字
 const SPEC_STUB_WORDING: String = "尚未實裝"  # ★reviewer 要求的措辭（不要讓人讀成「停用」）
 const SPEC_CONSTANT_SYMBOL: String = "TEAM_TARGET_ACTIONS"
 # ★P7 要數的三個條件字面（來自 spec §6④，不是我從輸出抄回來的）
-const SPEC_CONDITION_LITERALS: Array = ["1.5", "0.7", "RECRUIT_COST_ANON"]
+# ★★★`refuse_if_not_in_encounter`（2026-10-01 加）—— ★為什麼錨在**函式名**而不是
+#   `encounter_active` 那個欄位：全列版那一臂是**委派**給共用前置檢查的
+#   ⇒ 欄位字面在全列版函式體裡是 **0 次**，錨在欄位上會讓這一格紅在一個【正確的世界】。
+#   ⇒ 判準：條件被抽成共用函式之後，「唯一持有者」的錨要跟著變成**那支函式的名字**。
+const SPEC_CONDITION_LITERALS: Array = ["1.5", "0.7", "RECRUIT_COST_ANON",
+	"refuse_if_not_in_encounter"]
+# ★★【判斷的單一源】（systems 裁 2026-10-01 P10）：`encounter_active` 在整支
+#   `player_command_system.gd` 裡**恰好出現一次**（就在共用前置檢查裡）
+#   ⇒ 要繞過它必須**真的再讀一次 state** ⇒ 這一條比「措辭只有一份」硬。
+const SPEC_ENCOUNTER_FIELD_HITS: int = 1
+# ★★★【措辭只有一份】（systems 裁 P8／P11）：這兩句字面在產品側各**恰好一行**。
+#   ★母體邊界逐字：`scripts/simulation/` ＋ `scripts/ui/`，**排除 `scripts/debug/`**
+#     —— 床持有外部期望字面是它的【職責】不是重複（不排除的話床自己會污染母體）。
+#   ★★而計數要**先剝掉整行註解**：討論一句措辭的註解與使用它的 code 在文字上同形
+#     ⇒ 不剝的話這一格會咬到「解釋這條規則」的那一行（實測：我自己就踩了一次）。
+const SPEC_ONE_COPY_PHRASES: Array = ["非戰鬥中", "投降請和"]
+# ★★★★★【共用前置檢查的三個消費者】（spec §2③ 實作審要優先打的那三件之②）——
+#   ★宣告在一處，而「有沒有第四個該呼而沒呼的」由**反向掃**回答（見 P7 那一段）。
+#   ★★而斷言要逐一打在【那一支的函式體】上，不是檔案層級 ——
+#     「守衛宣稱保護某支函式而它從來沒呼那支函式」那一族就是檔案層級斷言養出來的。
+const SPEC_ENC_GATE: String = "refuse_if_not_in_encounter"
+const SPEC_ENC_CONSUMERS: Array = ["_action_offer_surrender",
+	"_action_surrender_in_encounter", "get_action_availability"]
 # ★§7：兩份同形信封的呼叫點總數（普查的數字，寫進 spec）
-const SPEC_ENVELOPE_SITES_QUERY: int = 15   # 本票刪掉三處停用列之後（原 18）
+const SPEC_ENVELOPE_SITES_QUERY: int = 14   # 本票刪掉三處停用列之後（原 18 → 15）
+# ★★★15 → 14（2026-10-01，`offer_surrender` 那張票）—— ★這是【基準更新】不是弱化：
+#   那張票把查詢面 Layer 5 的 `offer_surrender` emit **整段刪掉**（它是第二個決定者）
+#   ⇒ `map_available_action` 的呼叫點真的少了一處（實測 14，床自己印在 P8 那一格）。
+#   ★★而它**原子**地跟那個刪除同一顆 commit：基準先放主線 ＝ 讓守衛先要求一件
+#     世界還沒做到的事；基準晚放 ＝ 讓守衛先接受一件世界已經不成立的事。
+#   ★★★這個數字是從床的輸出抄的，不是推算的 —— 而「它會變」是我預測到的，
+#     ⇒ 照規矩：**先量；變了才換；沒變就不要動**。這一次是「變了」。
 const SPEC_ENVELOPE_SITES_ITEM: int = 4     # `_make_item_action`（庫存，不在本票）
 # ★P9／P10（systems 裁 2026-10-01「第三類」）：`"payload"` 的呼叫點數 ——
 #   ★這個數字是【從 code 數出來印在卷面】的（不是從信裡抄的）；這一行只記「今天量到多少」
@@ -51,6 +85,9 @@ const EXPECTED_CELLS: Array = [
 	"_test_p10_reverse_sweep_payload_without_declaration",
 	"_test_p11_label_has_one_producer",
 	"_test_p12_degenerate_state_keeps_openers",
+	"_test_p13_listed_exactly_once",
+	"_test_p14_requires_being_in_an_encounter",
+	"_test_p15_neighbours_unchanged",
 ]
 
 
@@ -118,6 +155,20 @@ func _test_p1_full_list_both_directions() -> void:
 	_check("★常數大小 ＝ spec 的 %d（對不上 ⇒ 母體變了，要回報不是改這裡）" % SPEC_TEAM_TARGET_TOTAL,
 		PlayerCommandSystem.TEAM_TARGET_ACTIONS.size() == SPEC_TEAM_TARGET_TOTAL)
 	_check("★★列數 ＝ 常數 − 具名排除（%d／%d）" % [rows.size(), expect_n], rows.size() == expect_n)
+	# ★★★spec §4 要這個數**看得見**（它不是斷言，是一個會長大的痛）——
+	#   母體 12 而 `ACTION_DIGITS` 只有 9 個鍵 ⇒ 有幾列【按不到】。
+	#   ★本票**不決定鍵位**（§4 明文），但分頁那張票要等的就是這個數變大。
+	var keyed: int = 0
+	var unkeyed: Array = []
+	for r0 in rows:
+		var aid0: String = String((r0 as Dictionary).get("action_id", ""))
+		if TextUiView.key_for(aid0) != "":
+			keyed += 1
+		else:
+			unkeyed.append(aid0)
+	print("   ★這一輪 %d 列裡【有鍵】的 %d 列｜沒有鍵的 %d 列：%s" % [
+		rows.size(), keyed, unkeyed.size(), str(unkeyed)])
+	print("     ⇒ ★本票不決定鍵位（spec §4）—— 這一行只讓那個差距看得見。")
 	var seen: Dictionary = {}
 	var extra: Array = []
 	for r in rows:
@@ -367,6 +418,77 @@ func _test_p7_conditions_have_a_single_holder() -> void:
 		print("   條件字面 `%s`：查詢面 %d 次｜全列版 %d 次" % [String(lit), in_q, in_body])
 		_check("★★★`%s` 在查詢面 0 次（它是第二份的入口）" % String(lit), in_q == 0)
 		_check("★`%s` 在全列版至少 1 次（唯一持有者）" % String(lit), in_body >= 1)
+	# ★★★【判斷的單一源】（systems 裁 2026-10-01 P10）——
+	#   `encounter_active` 在整支 `player_command_system.gd` 裡恰好出現一次（共用前置檢查裡）
+	#   ⇒ ★它比「措辭只有一份」硬：**要繞過它必須真的再讀一次 state**
+	#     （措辭可以被改寫成同義句而逃掉，判斷不行）。
+	#   ★★而這裡**不剝註解**也不會誤判，因為錨是一個識別符而不是一句人話 ——
+	#     ⇒ 所以要用 `_code_only()`：如果有人在註解裡提到它，那一行不該被算進來。
+	# ★★★★【行號要是真的】：`_code_only()` 把註解那幾行**整行刪掉**
+	#   ⇒ 在它的輸出上數行號會**位移** ⇒ 印出來的 `file:line` 指到錯的行。
+	#   ⇒ 所以這裡走**原始行**、就地跳過整行註解 ⇒ 行號留在原本的坐標系裡。
+	#   ★誠實限：**行尾註解**跳不掉（`code  # …提到那個字…`）⇒ 失效方向是【多算】
+	#     ⇒ 它會誤報一個違規（吵但不靜默），不會把一個真違規藏起來。
+	var pcs_src: String = FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd")
+	var enc_hits: Array = []
+	var ln: int = 0
+	for line in pcs_src.split("\n"):
+		ln += 1
+		if String(line).strip_edges().begins_with("#"):
+			continue
+		if String(line).contains("encounter_active"):
+			enc_hits.append("player_command_system.gd:%d" % ln)
+	print("   `encounter_active`（剝掉註解之後）在全列版那一支檔裡 %d 處：%s" % [
+		enc_hits.size(), str(enc_hits)])
+	_check("★★★母體地板：印出命中的 file:line（空清單 ⇒ 那個 %d 可能是「它根本不在了」）"
+		% enc_hits.size(), enc_hits.size() > 0)
+	_check("★★★★判斷的單一源：`encounter_active` 恰好 %d 處（實測 %d）" % [
+		SPEC_ENCOUNTER_FIELD_HITS, enc_hits.size()],
+		enc_hits.size() == SPEC_ENCOUNTER_FIELD_HITS)
+	# ── ★★★★★【②兩個呼叫點都呼到同一支】（spec §2③ 第二件）────────────────────
+	#   ★①（上面那條）答的是「判斷只有一份」；★②答的是「**那一份真的被每個人用到**」
+	#     —— 兩者是獨立的：一支共用函式可以存在而某個消費者自己又判一次
+	#     （那時 ① 會紅）；也可以沒有人呼它（那時 ① 綠而 ② 紅）。
+	#   ★★而斷言打在【函式體】上：檔案層級的「這個檔有呼它」會把
+	#     「守衛宣稱保護某支函式而從來沒呼那支函式」那一族放過去。
+	var consumer_miss: Array = []
+	for cname in SPEC_ENC_CONSUMERS:
+		var fb: String = _func_body(pcs_src, "func %s(" % String(cname))
+		if fb == "":
+			consumer_miss.append("%s（★抓不到函式體 —— 名字改了？）" % String(cname))
+			continue
+		var n_call: int = _code_only(fb).count(SPEC_ENC_GATE + "(")
+		print("   消費者 %-32s 呼 `%s(` %d 次" % [String(cname), SPEC_ENC_GATE, n_call])
+		if n_call < 1:
+			consumer_miss.append("%s（0 次）" % String(cname))
+	_check("★母體地板：消費者清單不是空的（空 ⇒ 下面那條恆綠）", SPEC_ENC_CONSUMERS.size() > 0)
+	_check("★★★★★②每一個宣告的消費者都【真的呼到那一支】（沒呼到的：%s）" % str(consumer_miss),
+		consumer_miss.is_empty())
+	# ── ★★★反向掃：沒宣告卻【自己判同一件事】的 ──────────────────────────────
+	#   ★具名清單解決「數字對而東西不在」，不解決「我沒看到的那些」
+	#     ⇒ 反向掃的母體要從 code 數出來印在卷面。
+	#   ★★這裡掃的特徵 ＝ 函式體裡出現 `encounter_active` 而它不是那支共用函式
+	#     ⇒ 它就是「自己又讀了一次 state」。
+	var self_judges: Array = []
+	var scanned_funcs: int = 0
+	var cur: String = ""
+	for line2 in pcs_src.split("\n"):
+		var t2: String = String(line2)
+		if t2.begins_with("func "):
+			cur = t2.substr(5, maxi(0, t2.find("(") - 5))
+			scanned_funcs += 1
+			continue
+		if t2.strip_edges().begins_with("#"):
+			continue
+		if t2.contains("encounter_active") and cur != SPEC_ENC_GATE:
+			self_judges.append(cur)
+	print("   ★反向掃：掃了 %d 支函式｜自己讀 `encounter_active` 而不是那支共用函式的：%s" % [
+		scanned_funcs, str(self_judges)])
+	_check("★★母體地板：反向掃真的掃到函式（%d；0 ⇒ 下面那條恆綠）" % scanned_funcs,
+		scanned_funcs > 0)
+	_check("★★★★★③沒有人自己再判一次（違反的：%s）—— 這一條才讓「共用」是真的，"
+		% str(self_judges) + "而不是「兩邊剛好同值」", self_judges.is_empty())
 	print("   ★而本格比 P1 更接近「一個真相一份」的本體：名字漂開看得出來，")
 	print("     條件漂開只會讓【選單說可以而 handler 說不行】，那在卷面上是沉默的。")
 	_cell("_test_p7_conditions_have_a_single_holder")
@@ -787,6 +909,7 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	_cell("_test_p10_reverse_sweep_payload_without_declaration")
 
 
+# 負對照：在 production 再寫一句同字面（`_negctrl_e_second_copy()` 回同一個 msg）⇒ 本格紅並指名兩處真行號 player_command_system.gd:333／:337 ⇒ 已於 4e50c0ec6（2026-10-01 這一輪） 實測紅
 # 負對照：把 `_action_label(act)` 加回信封那一側 ⇒ 本格紅（在這一段 0 次，實測 1） ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P11：★label 在這條路上只有【一個生產者】（systems 裁 2026-10-01 ②）════════════
 # ★★★為什麼「兩邊都委派到同一張表」不算安全：那只代表它們**今天同值**。
@@ -817,6 +940,52 @@ func _test_p11_label_has_one_producer() -> void:
 	_check("★★★信封那一側【不再生產】label（`action_label` 在這一段 0 次，實測 %d）" % in_block,
 		in_block == 0)
 	_check("★★信封那一側是【從列裡拿】的（%d 處）" % from_row, from_row >= 1)
+	# ★★★★★【那句字面只有一份】（systems 裁 P8／P11）——
+	#   母體邊界逐字：`scripts/simulation/` ＋ `scripts/ui/`，**排除 `scripts/debug/`**
+	#     ⇒ 床持有外部期望字面是它的【職責】不是重複（不排除的話床自己會污染母體）。
+	#   ★★而計數**先剝整行註解**（`_code_only`）：討論一句措辭的註解與使用它的 code
+	#     在文字上同形 ⇒ 不剝的話這一格會咬到「解釋這條規則」的那一行。
+	#     ★實測血證（2026-10-01）：我自己寫完共用檢查之後 `git grep 非戰鬥中` 回 **2 行**，
+	#       而第二行是我**解釋這條規則**的註解 —— 那不是違規。
+	#   ★★★母體地板：**印出每一句命中的 file:line** —— 否則「1」可能是【它根本不在了】
+	#     （一個看起來剛好的數）。
+	var scan_dirs: Array = ["res://scripts/simulation", "res://scripts/ui"]
+	var scanned_files: int = 0
+	var phrase_hits: Dictionary = {}
+	for ph in SPEC_ONE_COPY_PHRASES:
+		phrase_hits[String(ph)] = []
+	for dpath in scan_dirs:
+		var d := DirAccess.open(String(dpath))
+		if d == null:
+			continue
+		d.list_dir_begin()
+		var f: String = d.get_next()
+		while f != "":
+			if f.ends_with(".gd"):
+				scanned_files += 1
+				# ★走【原始行】而不是 `_code_only()` 的輸出：後者整行刪掉註解
+				#   ⇒ 行號會位移 ⇒ 印出來的 `file:line` 指到錯的行（見 P7 那一段的理由）。
+				var raw: String = FileAccess.get_file_as_string(String(dpath) + "/" + f)
+				var n2: int = 0
+				for l2 in raw.split("\n"):
+					n2 += 1
+					if String(l2).strip_edges().begins_with("#"):
+						continue
+					for ph2 in SPEC_ONE_COPY_PHRASES:
+						if String(l2).contains(String(ph2)):
+							(phrase_hits[String(ph2)] as Array).append("%s:%d" % [f, n2])
+			f = d.get_next()
+		d.list_dir_end()
+	print("   掃了 %d 支 .gd（simulation ＋ ui，★排除 debug）" % scanned_files)
+	_check("★母體地板：真的掃到檔案（0 ⇒ 下面每一條恆綠）", scanned_files > 0)
+	var phrase_bad: Array = []
+	for ph3 in SPEC_ONE_COPY_PHRASES:
+		var hits: Array = phrase_hits[String(ph3)]
+		print("   「%s」⇒ %d 處：%s" % [String(ph3), hits.size(), str(hits)])
+		if hits.size() != 1:
+			phrase_bad.append("「%s」%d 處：%s" % [String(ph3), hits.size(), str(hits)])
+	_check("★★★★那兩句字面在產品側各恰好一行（違反的：%s）" % str(phrase_bad),
+		phrase_bad.is_empty())
 	_check("★★★生產者恰好一個：全列版裡 `PlayerApiMapper.action_label(` ＝ 1 次（實測 %d）"
 		% in_rows, in_rows == 1)
 	_cell("_test_p11_label_has_one_producer")
@@ -837,6 +1006,143 @@ func _test_p11_label_has_one_producer() -> void:
 #   ①入口在退化狀態下**仍然列得出來**（打開選單不用錢）
 #   ②而**真的要花錢的那個動作**（`recruit_anon`）在退化狀態下**消失並說出原因**
 #   ⇒ 只驗 ① 會讓「全部都永遠可做」也綠；只驗 ② 抓不到入口被錢擋掉。
+# 負對照：把 §2④ 刪掉的那段 Layer 5 emit 加回去 ⇒ 本格紅「查詢面裡恰好一次（實測 2）」（另帶信封呼叫點那一格 14 → 15） ⇒ 已於 4e50c0ec6（2026-10-01 這一輪） 實測紅
+# == P13 = spec P2 [恰好一次] ===================================================
+# ★這一格擋的是「**搬了但沒刪舊的**」—— 本票最容易漏的那一件：
+#   `offer_surrender` 進了 `TEAM_TARGET_ACTIONS` ⇒ 它由 `get_action_availability` 產出；
+#   而查詢面原本**自己也 emit 一列**（Layer 5）⇒ 兩條路各產一列 ⇒ 畫面上出現兩次。
+# ★★母體地板最承重的一條在這裡：那段舊 emit 的條件是 `encounter_active and focus != -1`
+#   ⇒ **不在遭遇中的話重複【不可能發生】** ⇒ 這一格會恆綠、而它的負對照也不會紅。
+#   ⇒ 所以 fixture **必須在遭遇中**，而那件事要印出來。
+func _test_p13_listed_exactly_once() -> void:
+	print("\n── P13（spec P2）`offer_surrender` 在清單裡恰好一次 ──")
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cs: PlayerCommandSystem = arr[1]
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams.get(ptid)
+	var tid: int = _target(st, pt)
+	_check("★母體地板：找到同格目標", tid != -1)
+	# ★★在遭遇中（否則舊那段 emit 的條件不成立 ⇒ 重複不可能發生 ⇒ 本格恆綠）
+	st.encounter_active = true
+	st.encounter_attacker_id = ptid
+	st.encounter_defender_id = tid
+	print("   fixture：encounter_active=%s｜attacker=%d defender=%d（★舊那段 emit 的條件）" % [
+		str(st.encounter_active), int(st.encounter_attacker_id), int(st.encounter_defender_id)])
+	_check("★★母體地板：真的在遭遇中（false ⇒ 重複不可能發生 ⇒ 本格不可判不是綠）",
+		st.encounter_active)
+	var q := PlayerQueryApi.new()
+	var env: Dictionary = q.get_available_actions(st, {"team_id": tid})
+	var data: Dictionary = env.get("data", {})
+	var acts: Array = data.get("actions", [])
+	print("   查詢面回了 %d 列（envelope ok=%s）" % [acts.size(), str(env.get("ok", false))])
+	_check("★母體地板：查詢面真的回了列（0 ⇒ 下面那條恆綠）", acts.size() > 0)
+	var n_os: int = 0
+	for a in acts:
+		if String((a as Dictionary).get("action_id", "")) == "offer_surrender":
+			n_os += 1
+	var rows: Array = cs.get_action_availability(st, tid)
+	var n_full: int = 0
+	for r in rows:
+		if String((r as Dictionary).get("action_id", "")) == "offer_surrender":
+			n_full += 1
+	print("   `offer_surrender`：查詢面 %d 次｜全列版 %d 次" % [n_os, n_full])
+	_check("★★★★查詢面裡恰好一次（實測 %d）—— 兩次 ＝ 搬了但沒刪舊的那一段" % n_os, n_os == 1)
+	_check("★全列版裡恰好一次（實測 %d）" % n_full, n_full == 1)
+	_cell("_test_p13_listed_exactly_once")
+
+
+# 負對照：共用前置檢查的條件【反轉】（`if state.encounter_active:`）⇒ 本格甲／乙／丙三條與 P15 一起紅（5 條），而①判斷單一源與②消費者檢查**保持綠** ⇒ 已於 4e50c0ec6（2026-10-01 這一輪） 實測紅
+# ★★用【反轉】不用 `if false`：反轉讓那個字面仍然出現一次 ⇒ ①② 保持綠 ⇒ 紅燈留在【行為】那幾格。
+# ★★★而它紅【五條】不是連帶污染：**共用之後一個擾動必然讓所有消費者的格一起紅**
+#   —— 那本身就是「它們真的共用」的證據（systems 收了這一句）。
+# == P14 = spec P4 [在遭遇中] ===================================================
+# ★spec 明文要 P3 與 P4 **分兩格**：它們是兩個獨立的洞，
+#   而一個 OR 斷言會讓其中一支永遠沒被驗到。
+#   ⇒ 本格只管【在遭遇中】那一半；【同格】那一半在 `colocation_gate_bed` 的 P7。
+# ★★而「在遭遇中可做」這一條**不斷言外交結果**：對方可以拒絕投降（那是引擎的事）
+#   ⇒ 本格驗的是「**它不再被那一閘擋住**」（msg 不是那一句）—— 不是「它成功了」。
+func _test_p14_requires_being_in_an_encounter() -> void:
+	print("\n── P14（spec P4）同格但不在遭遇中 ⇒ 拒絕；在遭遇中 ⇒ 過得了那一閘 ──")
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cs: PlayerCommandSystem = arr[1]
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams.get(ptid)
+	var tid: int = _target(st, pt)
+	_check("★母體地板：找到同格目標", tid != -1)
+	var tgt: TeamData = st.teams.get(tid)
+	_check("★★母體地板：真的【同格】（不同格的話擋住它的是另一閘 ⇒ 本格沒有主詞；玩家 %s／目標 %s）"
+		% [str(pt.tile_pos), str(tgt.tile_pos)], pt.tile_pos == tgt.tile_pos)
+	# ── 甲：不在遭遇中 ──
+	st.encounter_active = false
+	var r1: Dictionary = cs.execute_action(st, tid, "offer_surrender")
+	var m1: String = String(r1.get("msg", r1.get("message", "")))
+	print("   甲 不在遭遇中 ⇒ ok=%s｜msg「%s」" % [str(r1.get("ok", false)), m1])
+	_check("★★★甲：被拒絕（ok=false）", not bool(r1.get("ok", false)))
+	_check("★甲：原因非空", m1.strip_edges() != "")
+	_check("★★甲：原因就是那一句既有的措辭（床持有的期望：`%s`）" % String(SPEC_ONE_COPY_PHRASES[0]),
+		m1.contains(String(SPEC_ONE_COPY_PHRASES[0])))
+	# ── 乙：在遭遇中 ──
+	st.encounter_active = true
+	st.encounter_attacker_id = ptid
+	st.encounter_defender_id = tid
+	var r2: Dictionary = cs.execute_action(st, tid, "offer_surrender")
+	var m2: String = String(r2.get("msg", r2.get("message", "")))
+	print("   乙 在遭遇中   ⇒ ok=%s｜msg「%s」" % [str(r2.get("ok", false)), m2])
+	_check("★★★★乙：不再被那一閘擋住（msg 不是「%s」；實測「%s」）"
+		% [String(SPEC_ONE_COPY_PHRASES[0]), m2],
+		not m2.contains(String(SPEC_ONE_COPY_PHRASES[0])))
+	print("   ★本格【不斷言】乙成功：對方可以拒絕投降，那是引擎的事（spec §4 不在本票）。")
+	# ── 丙：全列版那一臂的原因 ＝ 同一句（spec P6 的這個動詞那一列）──
+	st.encounter_active = false
+	var rows: Array = cs.get_action_availability(st, tid)
+	var found: Dictionary = {}
+	for r in rows:
+		if String((r as Dictionary).get("action_id", "")) == "offer_surrender":
+			found = r as Dictionary
+	print("   丙 全列版那一列：enabled=%s｜原因「%s」" % [
+		str(found.get("enabled", true)), String(found.get("disabled_reason", ""))])
+	_check("★母體地板：全列版真的有那一列（沒有 ⇒ 下面兩條沒有主詞）", not found.is_empty())
+	_check("★★★丙：不在遭遇中 ⇒ `enabled=false`", not bool(found.get("enabled", true)))
+	_check("★★★★丙：原因**與 handler 同一句**（＝它讀的是同一支共用檢查的回傳）",
+		String(found.get("disabled_reason", "")).contains(String(SPEC_ONE_COPY_PHRASES[0])))
+	_cell("_test_p14_requires_being_in_an_encounter")
+
+
+# == P15 = spec P5 [鄰居沒被我動到] =============================================
+# ★本票動了一支**本來就對**的 handler（`_action_surrender_in_encounter` 那一行改呼共用檢查）
+#   ⇒ 它的爆炸半徑要有一格。★而另兩支鄰居（`surrender_pre_encounter`／`accept_encounter`）
+#   讀的是 `player_pre_encounter`，本票沒碰 ⇒ 它們驗【形狀】＋把措辭印出來（不硬寫我沒核過的字）。
+func _test_p15_neighbours_unchanged() -> void:
+	print("\n── P15（spec P5）三個鄰居的既有行為 ──")
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cs: PlayerCommandSystem = arr[1]
+	var pt: TeamData = st.teams.get(st.get_player_team_id())
+	var tid: int = _target(st, pt)
+	st.encounter_active = false
+	st.player_pre_encounter = {}
+	var bad: Array = []
+	for verb in ["surrender_in_encounter", "surrender_pre_encounter", "accept_encounter"]:
+		var r: Dictionary = cs.execute_action(st, tid, String(verb))
+		var m: String = String(r.get("msg", r.get("message", "")))
+		print("   %-26s ⇒ ok=%s｜msg「%s」" % [String(verb), str(r.get("ok", false)), m])
+		if bool(r.get("ok", false)):
+			bad.append("%s：不該成功（沒有遭遇戰、沒有預備遭遇）" % String(verb))
+		if m.strip_edges() == "":
+			bad.append("%s：靜默（沒有原因）" % String(verb))
+	_check("★★★三個鄰居都【拒絕且有話說】（違反的：%s）" % str(bad), bad.is_empty())
+	# ★而 `surrender_in_encounter` 那一支的措辭【逐字不變】—— 這是本票改它的爆炸半徑
+	var r_si: Dictionary = cs.execute_action(st, tid, "surrender_in_encounter")
+	var m_si: String = String(r_si.get("msg", r_si.get("message", "")))
+	_check("★★★★`surrender_in_encounter` 的那句話逐字不變（床持有的期望：`%s`；實測「%s」）"
+		% [String(SPEC_ONE_COPY_PHRASES[0]), m_si],
+		m_si.contains(String(SPEC_ONE_COPY_PHRASES[0])))
+	print("   ★★而它現在是**呼共用檢查**拿到這句話的 —— 回傳逐字不變就是「抽共用沒有改行為」的證據。")
+	_cell("_test_p15_neighbours_unchanged")
+
+
 func _test_p12_degenerate_state_keeps_openers() -> void:
 	print("\n── P12 退化狀態：入口仍在、動作消失 ──")
 	var arr: Array = _fresh()
@@ -907,6 +1213,9 @@ func _initialize() -> void:
 	_test_p10_reverse_sweep_payload_without_declaration()
 	_test_p11_label_has_one_producer()
 	_test_p12_degenerate_state_keeps_openers()
+	_test_p13_listed_exactly_once()
+	_test_p14_requires_being_in_an_encounter()
+	_test_p15_neighbours_unchanged()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):
