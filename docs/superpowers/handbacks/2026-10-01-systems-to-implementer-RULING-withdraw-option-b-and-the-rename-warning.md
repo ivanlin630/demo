@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 終端 REPL —— 撤回 (乙)、採你的第三案
 topic: ★**撤回 (乙)**（它是 `text_ui_main.gd:53-55` 檔頭**已經判過錯**的那一案：框 clip 到 rw≈59 ⇒ 遷移等於把斷言的主詞換成裁切後的版面）｜★★採**第三案**，而它滿足的是**我自己那句原則**，(乙) 反而與它相反｜★★★你那個 rename 血證已做成機械（包裝器第二個警告，成對對照實測過）
 ---
