@@ -18,7 +18,9 @@ extends SceneTree
 # ★★而「走法」＝ 一串**鍵的 token**，餵進 `PlayerRepl.keycode_for()` ＋ `node._input()`
 #   ⇒ 與 REPL 走**同一條路**（不另造一條驅動方式），而那也順便驗了那個詞法器。
 
-const SPEC_WALKS_MIN: int = 6        # spec §3 要六支走法（★含退化版本，見 WALKS）
+const SPEC_WALKS_MIN: int = 6        # spec §3 要**六支玩家走法**（★含退化版本，見 WALKS）
+# ★★而 `WALKS` 共 7 支：六支玩家走法 ＋ **一支 debug 走法**（它是對照組不是玩家走法）
+#   ⇒ 下面每一條「玩家走法 ＝ 0」的斷言都**只看那六支**，而 debug 那一支要**必須 > 0**。
 var _errors: int = 0
 var _cells_ran: Array = []
 
@@ -42,6 +44,9 @@ const WALKS: Array = [
 	{"name": "互動·退化（0 coin）", "tokens": ["t"], "degenerate": true},
 	{"name": "分頁切換（.）", "tokens": [".", "."], "degenerate": false},
 	{"name": "物品（i）", "tokens": ["i"], "degenerate": false},
+	# ★★★【反向走法】debug 走法 —— 它**必須**印出那幾個識別字（見 (g)）
+	#   ⇒ 它不是第七支「玩家走法」，它是那條「＝ 0」斷言的**對照組**
+	{"name": "★debug 走法", "tokens": [], "degenerate": false, "debug_pane": true},
 ]
 
 # ★debug 識別字（spec §15③，**逐一指名**）—— 玩家走法的輸出裡這些一個都不准出現
@@ -96,6 +101,14 @@ func _screen_for(walk: Dictionary) -> String:
 	get_root().add_child(node)
 	await process_frame
 	await process_frame
+	# ★★★★★【debug 走法 ＝ 真的把那個開關打開再跑】（systems 裁 §15③ 的反向那一半）
+	#   ★合成字串只證明「判準有鑑別力」，**不證明那條走法還活著** ——
+	#     真風險是 `truth_pane_enabled()` 永遠為假 ⇒ 功能死了而沒有人知道，
+	#     而那時 (g) 照樣是綠的（「玩家看不到」與「它根本不存在」在卷面上長得一樣）。
+	#   ⇒ 所以這裡**真的設環境變數**，跑完**復原**（不留給下一支走法）。
+	var dbg: bool = bool(walk.get("debug_pane", false))
+	var prev_env: String = OS.get_environment(TextUiMain.TRUTH_PANE_ENV)
+	OS.set_environment(TextUiMain.TRUTH_PANE_ENV, "1" if dbg else "")
 	if bool(walk.get("degenerate", false)):
 		var st: WorldState = node._bridge.get_state()
 		var pt: TeamData = st.teams.get(st.persons[st.player_id].team_id)
@@ -110,6 +123,7 @@ func _screen_for(walk: Dictionary) -> String:
 		node._input(ev)
 	node._refresh()
 	var s: String = String(node._screen_label.text)
+	OS.set_environment(TextUiMain.TRUTH_PANE_ENV, prev_env)   # ★復原（不污染下一支走法）
 	node.queue_free()
 	await process_frame
 	return s
@@ -120,7 +134,26 @@ func _all_screens() -> Array:
 	for w in WALKS:
 		var s: String = await _screen_for(w as Dictionary)
 		out.append({"name": String((w as Dictionary).get("name", "?")), "screen": s,
-			"degenerate": bool((w as Dictionary).get("degenerate", false))})
+			"degenerate": bool((w as Dictionary).get("degenerate", false)),
+			"debug_pane": bool((w as Dictionary).get("debug_pane", false))})
+	return out
+
+
+# ★只取**玩家走法**（debug 那一支是對照組，不是玩家會走的路）
+#   ⇒ ★★每一條「玩家走法裡某東西 ＝ 0」的斷言都只看這一組；
+#     而 debug 那一支**必須 > 0**（否則那條走法是死的而沒有人知道）
+static func _player_only(screens: Array) -> Array:
+	var out: Array = []
+	for s in screens:
+		if not bool((s as Dictionary).get("debug_pane", false)):
+			out.append(s)
+	return out
+
+static func _debug_only(screens: Array) -> Array:
+	var out: Array = []
+	for s in screens:
+		if bool((s as Dictionary).get("debug_pane", false)):
+			out.append(s)
 	return out
 
 
@@ -313,10 +346,13 @@ static func _bad_title_echo(screen: String) -> Array:
 func _test_a_regions_present_and_ordered() -> void:
 	print("\n── (a) 區塊齊全且順序固定 ──")
 	var screens: Array = await _all_screens()
-	_check("★母體地板：走法數 ＝ spec 的 %d（%d）" % [SPEC_WALKS_MIN, screens.size()],
-		screens.size() == SPEC_WALKS_MIN)
+	_check("★母體地板：**玩家**走法數 ＝ spec 的 %d（%d；另有 %d 支 debug 走法當對照組）" % [
+		SPEC_WALKS_MIN, _player_only(screens).size(), _debug_only(screens).size()],
+		_player_only(screens).size() == SPEC_WALKS_MIN)
+	_check("★★母體地板：**debug 走法**剛好 1 支（0 ⇒ 下面那條「＝ 0」沒有對照組）",
+		_debug_only(screens).size() == 1)
 	var all_bad: Array = []
-	for s in screens:
+	for s in _player_only(screens):
 		var d: Dictionary = s as Dictionary
 		var bad: Array = _bad_regions(String(d.get("screen", "")))
 		print("   %-22s 違規 %d 條%s" % [String(d.get("name", "")), bad.size(),
@@ -337,7 +373,7 @@ func _test_b_no_duplicate_labels() -> void:
 	print("\n── (b) 無重複選項標籤（整列相等）──")
 	var screens: Array = await _all_screens()
 	var all_dup: Array = []
-	for s in screens:
+	for s in _player_only(screens):
 		var d: Dictionary = s as Dictionary
 		var dup: Array = _bad_duplicate_labels(String(d.get("screen", "")))
 		print("   %-22s 重複 %d 個%s" % [String(d.get("name", "")), dup.size(),
@@ -347,7 +383,7 @@ func _test_b_no_duplicate_labels() -> void:
 	_check("★★★★★(b-1) 沒有任何一屏有重複【選項標籤】（%s）" % str(all_dup), all_dup.is_empty())
 	# ★★(b-2) 另一種重複：**框抬頭與內容逐字相同** —— (b-1) 蓋不到它（它數的是 `[n]標籤`）
 	var all_echo: Array = []
-	for s2 in screens:
+	for s2 in _player_only(screens):
 		var d2: Dictionary = s2 as Dictionary
 		var echo: Array = _bad_title_echo(String(d2.get("screen", "")))
 		print("   %-22s 抬頭回音 %d 條%s" % [String(d2.get("name", "")), echo.size(),
@@ -380,7 +416,7 @@ func _test_d_no_english_identifiers() -> void:
 	print("   白名單 ＝ %s" % str(EN_WHITELIST))
 	var screens: Array = await _all_screens()
 	var all_en: Array = []
-	for s in screens:
+	for s in _player_only(screens):
 		var d: Dictionary = s as Dictionary
 		var en: Array = _bad_english(String(d.get("screen", "")))
 		print("   %-22s 英文識別字 %d 個%s" % [String(d.get("name", "")), en.size(),
@@ -409,7 +445,7 @@ func _test_e_width_and_no_empty_region() -> void:
 	var screens: Array = await _all_screens()
 	var all_w: Array = []
 	var all_e: Array = []
-	for s in screens:
+	for s in _player_only(screens):
 		var d: Dictionary = s as Dictionary
 		var sc: String = String(d.get("screen", ""))
 		var w: Array = _bad_width(sc)
@@ -455,7 +491,7 @@ func _test_g_player_walk_has_no_debug_tokens() -> void:
 	print("   debug 識別字（逐一指名）＝ %s" % str(DEBUG_TOKENS))
 	var screens: Array = await _all_screens()
 	var hits: Array = []
-	for s in screens:
+	for s in _player_only(screens):
 		var d: Dictionary = s as Dictionary
 		var sc: String = String(d.get("screen", ""))
 		# ★逐個指名（不只回一個數）；而「有幾個」那一半用 `_debug_hits()`
@@ -464,6 +500,14 @@ func _test_g_player_walk_has_no_debug_tokens() -> void:
 			if sc.contains(String(t)):
 				hits.append("%s｜%s" % [String(d.get("name", "")), String(t)])
 	print("   命中 %d 處%s" % [hits.size(), ("：" + str(hits)) if not hits.is_empty() else ""])
+	# ★★★★★★【反向走法：debug 走法下它【必須】出現】——
+	#   沒有這一半，一個永遠為 0 的計數跟「那個功能被刪掉了」在卷面上一模一樣。
+	var dbg_hits: int = 0
+	for s3 in _debug_only(screens):
+		dbg_hits = _debug_hits(String((s3 as Dictionary).get("screen", "")))
+		print("   ★debug 走法命中 %d 個識別字（必須 > 0）" % dbg_hits)
+	_check("★★★★★★【反向走法】debug 走法下那幾個識別字**必須出現**（%d）⇒ 那條走法是活的"
+		% dbg_hits, dbg_hits > 0)
 	_check("★★★★★★(g) 玩家走法的輸出裡 debug 識別字 ＝ 0（命中：%s）" % str(hits),
 		hits.is_empty())
 	# ★★★反向對照：**同一個判準**在刻意塞進那些字的輸入上必須 > 0

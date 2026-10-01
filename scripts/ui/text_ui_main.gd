@@ -645,7 +645,7 @@ func _handle_input_mode(keycode: int) -> void:
 			_input_mode_callback = Callable()
 			_refresh()
 
-# U13: inv 選取版面 — 已裝備槽在前（[數字] 1..eq_n），背包次之，Team 取出最後
+# U13: inv 選取版面 — 已裝備槽在前（[1-9] 1..eq_n），背包次之，Team 取出最後
 #   [E]裝備背包物  [U]卸下已裝備槽  [S]存背包物  [G]取 Team 物
 func _inv_equipped_slots() -> Array:
 	var inv_state: Dictionary = _cached_snapshot.get("inventory_state", {})
@@ -910,9 +910,9 @@ const MODE_KEYMAP: Dictionary = {
 	"outpost":       "[1-9]行動 [O/Esc]關閉",
 	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
 	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
-	"storage":       "[數字]存/取 [,.]翻頁 [Esc]離開",
+	"storage":       "[1-9]存/取 [,.]翻頁 [Esc]離開",
 	"intel":         "[1-5]選題 [Esc]取消",
-	"trade":         "[數字]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
+	"trade":         "[1-9]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
 	"pre_encounter": "[1]迎擊 [2]投降",
 }
 static func _mode_keymap(mode: String) -> String:
@@ -1038,7 +1038,12 @@ func _build_state_str() -> String:
 	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
 	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。
 	#   ★為什麼不順手分類：那是票B。混進來的話，紅燈就分不出是【框沒做好】還是【分類錯了】。
-	lines.append(UiPages.header(_page_idx))
+	# ★★★★★【抬頭只印一處】（自驗 (b-2) 實測：`生存 (1/5)` 在框標題與這一行各一次）
+	#   ⇒ `build_regions()` 的 `tabs` 已經把 `UiPages.header()` 餵給框標題
+	#     （`text_ui_view.gd` 的 `A_PAGES` 那一欄）⇒ 這裡**不要再印第二份**。
+	#   ★而那不是排版小事：**同一句話印兩次**是用戶那句「重複」的另一個實例，
+	#     而它與「選項重複」不同軸 ⇒ (b-1) 綠而畫面上有重複（檢查管道與失效管道不同軸）。
+	# ~~lines.append(UiPages.header(_page_idx))~~
 	if _page_idx == 0:
 		lines.append_array(_build_survival_lines(ct, ps))
 		var _unclassified: Array = _build_unclassified_lines(ct, ps, lc)
@@ -1066,7 +1071,16 @@ func _build_state_str() -> String:
 		for _f in _page_skylight_fields(_page_idx):
 			lines.append(UiPages.skylight(_f))
 
-	lines.append_array(_build_hover_truth_lines())
+	# ══ ★★★★★★【debug 區只活在明確的 debug 走法下】（systems 裁 2026-10-01 §15）═══
+	#   ★玩家走法**不印**那一區（不是縮小、不是改字，是不印）——
+	#     實測它印 `tile_id`／格上**真實**資源／格上隊伍數 ⇒ **god-view 落在玩家面上**，
+	#     而那一區的標題逐字自稱「**非附身者所知**」⇒ 它自己說它不該被玩家看到。
+	#   ★★而**不是一個會悄悄預設錯的旗標**：開關在**環境變數**，而**走法印在卷面上**
+	#     （`player_repl.gd` 開場那一行、以及床的走法名）⇒ 讀卷面的人分得出這一輪是哪一條。
+	#   ★★★而「玩家看不到」與「它根本不存在」在卷面上長得一樣
+	#     ⇒ 所以床有**反向走法**：debug 走法下那幾個識別字**必須出現**。
+	if truth_pane_enabled():
+		lines.append_array(_build_hover_truth_lines())
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
 		_bridge.get_current_tick(),
@@ -1220,6 +1234,12 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 #   而畫面上那個好看的 `faction_display` 是【belief 推導的】⇒ 把它混進真值區塊
 #   會讓這一段變成「一半真值一半信念」，那比少一個名字糟。
 const HOVER_TRUTH_TITLE: String = "真值·debug（非附身者所知）"
+# ★debug 走法的開關（spec §15②）—— ★★**每次問環境變數，不存成 `static var`**：
+#   `static` 的生命週期跨整個進程 ⇒ 它會變成跨 run 可變狀態（電池的 `cross-run-static`
+#   那支閘在抓這個，而我今天已經為另一個符號付過一次那筆錢）。
+const TRUTH_PANE_ENV: String = "TEXTUI_DEBUG_PANE"
+static func truth_pane_enabled() -> bool:
+	return OS.get_environment(TRUTH_PANE_ENV) == "1"
 
 func _build_hover_truth_lines() -> Array:
 	var lines: Array = []
@@ -1603,7 +1623,7 @@ func _build_inv_str() -> String:
 		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
 		lines.append("  %s %s: %d%s" % [prefix, team_items[i], qty, "" if qty > 0 else "（灰）"])
 
-	lines.append("── [數字]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
+	lines.append("── [1-9]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
 	return "\n".join(lines)
 
 func _log_event(msg: String) -> void:
@@ -2414,7 +2434,7 @@ func _build_storage_str() -> String:
 		lines.append("（公庫與我方皆無可存取資源）")
 	if rows.size() > 9:
 		lines.append("第 %d/%d 頁 [,]上 [.]下" % [_storage_page + 1, int(ceil(rows.size()/9.0))])
-	lines.append("[數字]選項 [K/Esc]離開")
+	lines.append("[1-9]選項 [K/Esc]離開")
 	return "\n".join(lines)
 
 # `_handle_storage_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
@@ -2909,7 +2929,7 @@ func _build_trade_str() -> String:
 		acc = "  NPC:%s" % ("✓接受" if d.get("npc_would_accept", false) else "✗拒絕")
 	lines.append("給值 %.1f ⇄ 要值 %.1f%s" % [
 		float(d.get("give_value", 0.0)), float(d.get("want_value", 0.0)), acc])
-	lines.append("[數字]選項 [Enter]送出 [C]清 [Esc]離開")
+	lines.append("[1-9]選項 [Enter]送出 [C]清 [Esc]離開")
 	return "\n".join(lines)
 
 # `_handle_intel_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
