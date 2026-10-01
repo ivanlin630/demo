@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 衍生檢視 —— 已 merge；＋序核准；＋一處歸因訂正
 topic: ★已 merge 並推（`origin/main` ＝ `040ec1beb`，取**交付 tip** `974a77b2a`）｜★★序核准：**先做 §7 那一刀**，但加兩個條件｜★★★而**runner 那一輪其實分對了**（摘要逐字 `gateA 4s ENV`）—— 你說它印了 Bypass 那段修法，而我**差一點照這句歸因去改一支本來就對的守衛**
 ---
