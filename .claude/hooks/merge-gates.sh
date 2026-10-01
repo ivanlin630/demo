@@ -71,7 +71,7 @@ _mg_write_summary() {
     echo "run-id: ${MG_RUNID}"
     echo "runner-self: ${_mg_self:-?}"
     echo "[TREE] HEAD-start=${_mg_head:-?} HEAD-end=$(git rev-parse --short HEAD 2>/dev/null || echo '?')"
-    echo "[TREE] registry=$([ -n "${_mg_reg:-}" ] && echo DIRTY || echo clean) runner=$([ -n "${_mg_run:-}" ] && echo DIRTY || echo clean) code-dirty=${_mg_code:-?}"
+    echo "[TREE] registry=$([ -n "${_mg_reg:-}" ] && echo DIRTY || echo clean) runner=$([ -n "${_mg_run:-}" ] && echo DIRTY || echo clean) code-dirty=${_mg_code:-?} artifact-dirty=${_mg_art:-?}"
     echo "range: MG_FROM=${MG_FROM:-0} MG_TO=${MG_TO:-0}｜註冊表 ${N:-0} 支｜實跑 ${RUN_N:-0} 支"
     echo "baseline: 上一次 main 基線紅數=${_mg_prev:-未讀}｜本輪紅數=${#FAILED[@]}"
     echo "BATTERY_RC: $1"
@@ -189,6 +189,16 @@ _mg_head=$(git rev-parse --short HEAD 2>/dev/null || echo '?')
 _mg_reg=$(git --no-optional-locks status --porcelain -- "$REG" 2>/dev/null | head -c1)
 _mg_run=$(git --no-optional-locks status --porcelain -- .claude/hooks 2>/dev/null | head -c1)
 _mg_code=$(git --no-optional-locks status --porcelain -- scripts tools 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
+# ★★★2026-10-01（systems）：**`code-dirty` 只看 `scripts`／`tools`** ——
+#   而有一類檔**被床當輸入讀**且**床自己會寫它**：`docs/measurements/` 的 artifact
+#   ⇒ 它髒掉的時候 `code-dirty` 照樣是 0 ⇒ ★那一行會被讀成「工作區乾淨」而它只答了 code。
+#   ★★血證 2026-10-01：第二輪摘要逐字 `code-dirty=0`，而
+#     `scripted-exploration` 讀到的 artifact 是**工作區那份**（寫著一顆後來變成兄弟的 sha）
+#     ⇒ 兩個人（systems／implementer）各自推了一個錯的成因，而**唯一會提示它的那個數字
+#       在結構上看不到那個檔**。
+#   ⇒ ★★★所以這裡**加第三個數**（不是加閘：是把同一行的母體補完），
+#     並**刻意只收 `docs/measurements`**（整個 repo 的版本會很吵，而吵的數字沒人看）。
+_mg_art=$(git --no-optional-locks status --porcelain -- docs/measurements 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
 # ★★★2026-09-16：**runner 自己的指紋**。血證：implementer 寫「這一輪沒有印【不可判】
 #   ⇒ 開跑與結束是同一棵樹」—— ★**而那支偵測器根本不在他跑的那一份裡**
 #   （他 worktree 的 runner 227 行、0 個「不可判」；main 的 237 行、2 個）
@@ -209,7 +219,7 @@ MG_CARRY="$_mg_root/.claude/hooks/.merge-gates-carry.$$"
 MG_CARRY_RE="${MG_CARRY_RE:-已實測紅紀錄合計|^\[NOTE\]}"
 : > "$MG_ROWS"; : > "$MG_CARRY"
 echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ') run-id=$MG_RUNID｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**"
-echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"
+echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code artifact-dirty=${_mg_art:-?}"
 if [ -n "$_mg_reg$_mg_run" ]; then
   echo "[MERGE-GATES] ★★本次判決【只適用於你的工作區】——註冊表或 runner 有未 commit 的修改"
   echo "[MERGE-GATES]   ⇒ 綠【不等於】HEAD $_mg_head 是綠的。要引用成「main 綠」必須先 commit 再重跑。"
