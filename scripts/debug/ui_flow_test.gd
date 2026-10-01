@@ -2424,7 +2424,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 33   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 34   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -3613,7 +3613,7 @@ static func _action_region(screen: String) -> String:
 #   —— ★**不用** `_interact_action_split()` 的回傳：那是同一條路上的中間值
 #   ⇒ 拿它比宣告是**同源比較**（恆真），而我們今天已經栽過一次。
 # ★★★而「數字鍵按得到幾列」才是玩家那一側的真問題 ⇒ 所以要**翻完所有頁**再數。
-# 負對照：把 `cancel_move` 的 `listed` 改回 `true` ⇒ 宣告 11 而畫面 10 ⇒ 必紅並指名它 ⇒ 待實測
+# 負對照：把 `cancel_move` 的 `listed` 改回 `true` ⇒ 本格紅「宣告 11／畫面 10」而全檔只這 1 個 FAIL ⇒ 已於 74c4ccd8d（2026-10-01 這一輪） 實測紅
 func _test_p33_listed_matches_the_screen() -> void:
 	_selftest_gate("_test_p33_listed_matches_the_screen").noop()
 	print("\n── P33 宣告 vs 畫面（`listed` 要說實話）──")
