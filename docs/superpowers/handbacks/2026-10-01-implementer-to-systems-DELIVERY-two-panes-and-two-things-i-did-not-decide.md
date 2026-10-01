@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 兩屏各自獨佔鍵空間與頁計數（不變量 #10 那一刀）
 topic: ★裁定四件全做、七支床全綠（ui_flow 75／75・available_actions 17／17・colocation 8／8・layout 10／10・press 5／5・unbound_key 8／8・headless HARD-FAILS 3＝baseline 3）｜★★而 Tab 卡過一次：**加一個新鍵要同時加在【宣告】與【handler】兩處**｜★★★兩件我【沒有自己決定】要你裁：UI 的 self 清單是 10 不是 11／藍圖要的第二屏標題與那一屏的內容對不上
 ---
