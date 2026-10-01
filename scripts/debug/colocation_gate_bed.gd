@@ -33,9 +33,17 @@ var _cells_ran: Array = []
 # ★spec §3 的母體地板：需要同格的動詞有幾個／例外有幾個，相加要等於【團體目標動詞總數】。
 #   ★★而這三個數【不是我手抄的】：P2 從 `get_available_actions` 的 append 字面機械導出，
 #     再與 `TEAM_TARGET_ACTIONS` 做集合比對。這裡的常數只是「spec 說幾個」那一半。
-const SPEC_TEAM_TARGET_TOTAL: int = 11    # ignore attack trade propose_alliance demand_tribute
+const SPEC_TEAM_TARGET_TOTAL: int = 12    # ignore attack trade propose_alliance demand_tribute
                                           # extort recruit recruit_anon invite_settle
-                                          # gather_intel beg
+                                          # gather_intel beg offer_surrender
+# ★★★11 → 12（`offer_surrender` 進母體，2026-10-01）—— ★而上面那份**手抄的名字清單**
+#   也要跟著補：它是一份長度 12 的手抄名單，而手抄名單漏一個是**靜默的**
+#   ⇒ 所以 P12b 把【行為上真的被這一閘擋住的那些】逐一列出來與常數比對（指名，不數數）。
+# ★★而 `offer_surrender` 落在**需同格**那一半（不是例外）：藍圖的意圖帳逐字寫
+#   「遠程求和不該存在」，而進母體就是讓這一閘管它。
+# ★★★【例外的上限】—— P12c：例外只准變少不准變多。
+#   ★方向寫在這裡：這個數是**天花板**（`<=`），不是地板。拿它當地板會讓守衛閉嘴。
+const SPEC_EXEMPT_MAX: int = 1            # 今天 ＝ ["ignore"]；要加第二個 ⇒ 必須有人改這一行並說明理由
 const SPEC_EARLY_RETURN_EXEMPT: Array = ["ignore"]   # ★在 execute_action 更上面就 return，走不到閘
 # ★動工時量到的現況：11 個裡有幾個【自己】本來就查同格（本閘之前）
 const MEASURED_SELF_CHECKING: Array = ["invite_settle", "beg"]
@@ -47,6 +55,8 @@ const EXPECTED_CELLS: Array = [
 	"_test_p4_self_actions_are_not_blocked_by_a_stray_target_id",
 	"_test_p5_colocated_behaviour_unchanged",
 	"_test_p6_recruit_named_is_the_third_channel",
+	"_test_p7_offer_surrender_is_gated_by_name",
+	"_test_p8_gate_partition_is_proven_by_behaviour",
 ]
 
 
@@ -87,6 +97,138 @@ func _code_only(src: String) -> String:
 # ★母體地板三道：①目標真的不同格 ②那個人真的在對方隊上（不然「沒被搬走」恆真）
 #   ③玩家真的付得起（付不起的話 ok=false 可能是金幣不足而不是閘）
 # 負對照：把 `refuse_if_not_colocated` 那一行拿掉 ⇒ ★實測玩家 coin 真的少了（人被買走） ⇒ 已於 feat/colocation-in-handler（2026-09-30 這一輪） 實測紅
+# == P7 = 本票 spec P3 [★★★同格閘真的管到 `offer_surrender`] ==================
+# ★這一格存在的理由是一個【現存的洞】，不是分類學：
+#   進母體**之前**，`_colocation_gate` 的第一條件
+#     `if not TEAM_TARGET_ACTIONS.has(action): return {}`（★回空字典 ＝ **放行**）
+#   對它放行 ⇒ `execute_action(state, 任意 target_id, "offer_surrender")`
+#   對一支**不同格**的隊打得通，而 accept 會轉移資產並把玩家隊收編。
+# ★★為什麼要一個【指名】的格，而不是靠 P1 的迴圈：P1 迭代 `TEAM_TARGET_ACTIONS`
+#   ⇒ 把這個名字從常數拿掉的話，P1 的**母體跟著縮小** ⇒ 它會**綠著**放過這個洞。
+#   ⇒ ★判準：當一個守衛的母體來自「被守的那張清單」本身，
+#     「從清單拿掉」這個擾動對它沒有鑑別力 ⇒ 要有一格**指名**它。
+# 負對照：把 `offer_surrender` 從 `TEAM_TARGET_ACTIONS` 拿掉 ⇒ 遠程呼它又打得通 ⇒ 本格必紅 ⇒ 待實測
+func _test_p7_offer_surrender_is_gated_by_name() -> void:
+	print("\n── P7（本票 spec P3）同格閘真的管到 `offer_surrender` ──")
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cmd: PlayerCommandSystem = arr[1]
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams.get(ptid)
+	# ★找一支【不同格】的隊
+	var far_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.tile_pos != pt.tile_pos:
+			far_id = int(k)
+			break
+	_check("★母體地板 A：找到一支不同格的隊（-1 ⇒ 本格沒有主詞）", far_id != -1)
+	if far_id == -1:
+		_cell("_test_p7_offer_surrender_is_gated_by_name")
+		return
+	var far: TeamData = st.teams.get(far_id)
+	var dq: int = absi(int(far.tile_pos.x) - int(pt.tile_pos.x))
+	var dr: int = absi(int(far.tile_pos.y) - int(pt.tile_pos.y))
+	print("   玩家隊 %s｜目標隊 %s｜座標差 (%d, %d)" % [
+		str(pt.tile_pos), str(far.tile_pos), dq, dr])
+	_check("★★母體地板 B：真的不同格（同格的話這一格會在「大家都同格」的世界裡恆綠）",
+		pt.tile_pos != far.tile_pos)
+	_check("★★★母體地板 C：`offer_surrender` 真的在母體裡（不在 ⇒ 下面測的是另一件事）",
+		PlayerCommandSystem.TEAM_TARGET_ACTIONS.has("offer_surrender"))
+	# ★★★先印【同格閘自己回了什麼】—— 空字典 ＝ 放行 ⇒ 這一格的證據是那句人話本身
+	var gate_r: Dictionary = cmd.refuse_if_not_colocated(st, far_id, pt)
+	print("   同格閘回傳 ＝ %s（★空字典 ＝ 放行）" % str(gate_r))
+	_check("★★★★同格閘對它【不放行】（回空字典就是放行）", not gate_r.is_empty())
+	# ★★而真正要守的是**走完整條路**的結果（閘有沒有被接上）
+	var coin_before: float = float(far.resources.get("coin", 0))
+	var r: Dictionary = cmd.execute_action(st, far_id, "offer_surrender")
+	var m: String = String(r.get("msg", r.get("message", "")))
+	print("   `execute_action` ⇒ ok=%s｜msg「%s」" % [str(r.get("ok", false)), m])
+	_check("★★★★★遠程求和【被拒絕】（它曾經打得通，而 accept 會轉移資產＋收編玩家隊）",
+		not bool(r.get("ok", false)))
+	_check("★原因就是同格閘那句人話（實測「%s」）" % m, m == String(gate_r.get("msg", "")))
+	_check("★★對方的錢沒有被動（%.0f ⇒ %.0f）" % [coin_before, float(far.resources.get("coin", 0))],
+		is_equal_approx(coin_before, float(far.resources.get("coin", 0))))
+	_cell("_test_p7_offer_surrender_is_gated_by_name")
+
+
+# == P8 = P12b [行為證：真的被這一閘擋住的那些，逐一列名] =======================
+# ★取代那個【恆真加法】的承重格：它不比數字，它比**集合**，而兩邊異源 ——
+#   一邊是「行為上真的被擋住的」（跑出來的），一邊是「母體 − 例外」（宣告的）。
+#   ⇒ ★兩邊可以各自獨立改變 ⇒ 它不是「一句話講兩次」。
+# ★★而差集要**指名**不是數數：計數是有損投影，缺陷活在它丟掉的那一維
+#   （三個集合可以大小相同而成員不同）。
+# 負對照：把一個動詞從 `SPEC_EARLY_RETURN_EXEMPT` 拿掉 ⇒ 它會出現在「宣告說該被擋而行為上沒被擋」那一邊 ⇒ 必紅並指名 ⇒ 待實測
+func _test_p8_gate_partition_is_proven_by_behaviour() -> void:
+	print("\n── P8（P12b）行為上真的被同格閘擋住的那些 ──")
+	var arr: Array = _fresh()
+	var st: WorldState = arr[0]
+	var cmd: PlayerCommandSystem = arr[1]
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams.get(ptid)
+	var far_id: int = -1
+	for k in st.teams.keys():
+		var t: TeamData = st.teams[k]
+		if int(k) != ptid and t.tile_pos != pt.tile_pos:
+			far_id = int(k)
+			break
+	_check("★母體地板 A：找到一支不同格的隊", far_id != -1)
+	if far_id == -1:
+		_cell("_test_p8_gate_partition_is_proven_by_behaviour")
+		return
+	# ★那句人話從閘自己拿（不手抄一份字面）
+	var words: String = String(cmd.refuse_if_not_colocated(st, far_id, pt).get("msg", ""))
+	print("   同格閘的那句人話 ＝「%s」（★從閘自己拿，不手抄）" % words)
+	_check("★★母體地板 B：那句人話非空（空的話下面每一條都分不出來）", words.strip_edges() != "")
+	var blocked: Array = []
+	var not_blocked: Array = []
+	for act in PlayerCommandSystem.TEAM_TARGET_ACTIONS:
+		var a: String = String(act)
+		var arr2: Array = _fresh()          # ★每一個動詞一個乾淨世界（上一個可能改了狀態）
+		var st2: WorldState = arr2[0]
+		var cmd2: PlayerCommandSystem = arr2[1]
+		var pt2: TeamData = st2.teams.get(st2.get_player_team_id())
+		var far2: int = -1
+		for k2 in st2.teams.keys():
+			var t2: TeamData = st2.teams[k2]
+			if int(k2) != st2.get_player_team_id() and t2.tile_pos != pt2.tile_pos:
+				far2 = int(k2)
+				break
+		if far2 == -1:
+			not_blocked.append("%s（這一輪找不到不同格的隊）" % a)
+			continue
+		var r2: Dictionary = cmd2.execute_action(st2, far2, a)
+		var m2: String = String(r2.get("msg", r2.get("message", "")))
+		if m2 == words:
+			blocked.append(a)
+		else:
+			not_blocked.append(a)
+	blocked.sort()
+	var declared: Array = []
+	for act3 in PlayerCommandSystem.TEAM_TARGET_ACTIONS:
+		if not SPEC_EARLY_RETURN_EXEMPT.has(String(act3)):
+			declared.append(String(act3))
+	declared.sort()
+	print("   行為上被擋住的 %d 個：%s" % [blocked.size(), str(blocked)])
+	print("   宣告上該被擋的 %d 個（母體 − 例外）：%s" % [declared.size(), str(declared)])
+	print("   沒被擋的 %d 個：%s" % [not_blocked.size(), str(not_blocked)])
+	_check("★★母體地板：行為上真的擋住了一些（0 ⇒ 下面那條會在一個什麼都沒跑的世界裡比空集合）",
+		blocked.size() > 0)
+	var miss: Array = []
+	var extra: Array = []
+	for d in declared:
+		if not blocked.has(String(d)):
+			miss.append(String(d))
+	for b in blocked:
+		if not declared.has(String(b)):
+			extra.append(String(b))
+	_check("★★★★★兩邊【逐一指名】相等：宣告說該擋而行為上沒擋的 ＝ %s｜行為上擋了而宣告沒說的 ＝ %s"
+		% [str(miss), str(extra)], miss.is_empty() and extra.is_empty())
+	print("   ★★而這一格取代的是一個【恆真加法】（`(n−e)+e == n`）——")
+	print("     那個式子裡 `exempt` 被代數消掉，所以它寫幾個例外都綠。")
+	_cell("_test_p8_gate_partition_is_proven_by_behaviour")
+
+
 func _test_p6_recruit_named_is_the_third_channel() -> void:
 	print("\n── P6 第三個管道：recruit_named ──")
 	var pair: Array = _fresh()
@@ -203,6 +345,8 @@ func _initialize() -> void:
 	_test_p4_self_actions_are_not_blocked_by_a_stray_target_id()
 	_test_p5_colocated_behaviour_unchanged()
 	_test_p6_recruit_named_is_the_third_channel()
+	_test_p7_offer_surrender_is_gated_by_name()
+	_test_p8_gate_partition_is_proven_by_behaviour()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c): miss.append(c)
@@ -323,12 +467,34 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 	_check("★★★函式體裡沒有殘留的字面動詞名（有 ⇒ 有人又長了第二份）%s" % str(from_func), from_func.is_empty())
 	# ~~舊斷言：導出數與 spec 總數相符／兩邊集合相等~~ ⇒ 重構後兩邊同源 ⇒ 會恆真 ⇒ 劃掉留理由（見檔頭）。
 	#   ★而 `from_const` 仍被下面那條加法用到（需同格 ＋ 例外 ＝ 總數）⇒ 不動它。
-	# ★spec §3 的那條加法：需同格的 ＋ 例外的 ＝ 總數
+	# ~~★spec §3 的那條加法：`(from_const.size() - exempt) + exempt == SPEC_TEAM_TARGET_TOTAL`~~
+	#   ★★★★★【拿掉，理由留著】（systems 裁 2026-10-01，我自己抓到）——
+	#   那個式子**代數上等於** `from_const.size() == SPEC_TEAM_TARGET_TOTAL`：
+	#   `exempt` 被消掉了 ⇒ 不管 `SPEC_EARLY_RETURN_EXEMPT` 是空的、1 個還是 99 個，
+	#   **這一格都不可能紅**。而它的標題寫著「否則分類法漏了一格」
+	#   ⇒ ★它**宣稱驗分割，實際只驗總數**。
+	#   ★★而最毒的是它上面三行（也是我寫的）：我劃掉了一個同源恆真，
+	#     然後在它**正下方**留了第二個同族的，並寫了一句話解釋它可以不動
+	#     —— 「說服我它安全的那句話就是它恆真的證明」逐字重演。
+	#   ⇒ ★★★修法是**窄化不是刪除**：分割要跟【外部】比。接手的是三格：
+	#     ·P12a 成員檢查（例外的每一個都真的在母體裡 —— 成員，不是算術）
+	#     ·P12b 行為證（**真的被這一閘擋住的那些**逐一列出來與「母體 − 例外」比，指名）
+	#     ·P12c 棘輪（例外只准變少：`<= SPEC_EXEMPT_MAX`）
+	# ★★★而「總數」那一半沒有不見：它由 P2 的集合比對與 available_actions_bed 的
+	#   `SPEC_TEAM_TARGET_TOTAL` 那一條守著（兩邊各自獨立改變 ⇒ 不是同源）。
 	var exempt: int = SPEC_EARLY_RETURN_EXEMPT.size()
-	print("   需同格 %d ＋ early-return 例外 %d ＝ %d（總數 %d）" % [
-		from_const.size() - exempt, exempt, from_const.size(), SPEC_TEAM_TARGET_TOTAL])
-	_check("★spec §3 的加法成立（否則分類法漏了一格）",
-		(from_const.size() - exempt) + exempt == SPEC_TEAM_TARGET_TOTAL)
+	print("   母體 %d｜early-return 例外 %d（上限 %d）⇒ 需同格的應該是 %d 個" % [
+		from_const.size(), exempt, SPEC_EXEMPT_MAX, from_const.size() - exempt])
+	# ── P12a：例外的每一個都真的在母體裡（成員檢查，不是算術）──
+	var exempt_orphan: Array = []
+	for ex in SPEC_EARLY_RETURN_EXEMPT:
+		if not from_const.has(String(ex)):
+			exempt_orphan.append(String(ex))
+	_check("★★P12a：例外清單的每一個都真的在 `TEAM_TARGET_ACTIONS` 裡（不在的：%s）"
+		% str(exempt_orphan), exempt_orphan.is_empty())
+	# ── P12c：例外只准變少（★天花板不是地板）──
+	_check("★★P12c 棘輪：例外不得增加（%d <= %d；要加第二個 ⇒ 改常數並寫理由）" % [
+		exempt, SPEC_EXEMPT_MAX], exempt <= SPEC_EXEMPT_MAX)
 	# ★★動工時量到的現況：哪幾個【自己】本來就查同格（本閘之前）
 	# ★★★口徑（systems 2026-09-30 統一）：兩個數都對，而【分母不同】⇒ 一律連分母寫。
 	#   需同格的動詞 ＝ 11 − early-return 的 `ignore` ＝ **10**

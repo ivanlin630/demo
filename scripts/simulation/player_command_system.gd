@@ -121,6 +121,13 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 					if not _can_invite_settle(state, pt, tgt):
 						ok = false
 						why = "你不在自家據點上，無法邀請對方定居"
+				"offer_surrender":
+					# ★原因【不在這裡寫】：讀共用前置檢查回的那句話
+					#   ⇒ 同一條規則一份字面，而「原因」與「判斷」仍在同一個回傳裡。
+					var enc_r: Dictionary = refuse_if_not_in_encounter(state)
+					if not enc_r.is_empty():
+						ok = false
+						why = String(enc_r.get("msg", ""))
 				_:
 					ok = false
 					why = "（未知動作：%s）" % act
@@ -281,6 +288,13 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 const TEAM_TARGET_ACTIONS: Array = [
 	"ignore", "attack", "trade", "propose_alliance", "demand_tribute", "extort",
 	"recruit", "recruit_anon", "invite_settle", "gather_intel", "beg",
+	# ★★★`offer_surrender` 進母體（藍圖 2026-10-01 裁：它是團隊目標動作，不開第四類）——
+	#   ★而這【不是重分類，是堵一個現存的洞】：進母體之前 `_colocation_gate` 的第一條件
+	#     （`if not TEAM_TARGET_ACTIONS.has(action): return {}` ＝ **放行**）對它放行
+	#     ⇒ `execute_action(state, 任意 target_id, "offer_surrender")` 對一支**不同格**的隊
+	#       打得通，而 accept 會轉移資產並把玩家隊收編。
+	#   ⇒ ★★所以「加一個名字」在這裡是**接上同格閘**，不是分類學。
+	"offer_surrender",
 ]
 
 # 同格閘的本體。★回空字典 ＝ 放行（★不回 bool：呼叫端要的是【那句人話】，
@@ -300,6 +314,22 @@ func _colocation_gate(state: WorldState, action: String, target_id: int, pt: Tea
 #     我原本照用「吃 Dictionary 那條不在爆炸半徑內」這個結論而**沒有自己核**，
 #     ⇒ ★★★而那句話的錯法是【拿入口當母體】：不變量的母體是
 #       「哪些動作跟別隊發生作用」，不是「它從哪個函式進來」。
+# ★★★【在遭遇中】那一閘的本體（systems 裁 2026-10-01 (b)）——
+#   ★形狀沿用 `refuse_if_not_colocated`：**回空字典 ＝ 放行**／回 {ok,msg} ＝ 拒絕
+#     ⇒ 訊息與判斷在**同一個回傳**（不回 bool），下一個人就不會另寫一份措辭。
+#   ★★為什麼是【抽共用】而不是「兩邊措辭對齊」：對齊還是兩份字面，
+#     而這張票正在數的就是「同一條規則有幾份」⇒ 在這張票裡新造第二份會與本票動機衝突。
+#     ⇒ 措辭**逐字沿用既有那一句**（「非戰鬥中」），一個字都不新造。
+#   ★★★而它有三個消費者，這是它存在的理由（不是「以後可能會用到」）：
+#     ·`_action_offer_surrender`（本票補上的那一支）
+#     ·`_action_surrender_in_encounter`（原本自己寫那一行的那一支）
+#     ·`get_action_availability` 的 `offer_surrender` 那一臂（★`disabled_reason` 讀它回的 msg
+#       ⇒ 全列版**不自己寫文案**，而「原因」與「判斷」仍然是同一個回傳）
+func refuse_if_not_in_encounter(state: WorldState) -> Dictionary:
+	if not state.encounter_active:
+		return { "ok": false, "msg": "非戰鬥中" }
+	return {}
+
 func refuse_if_not_colocated(state: WorldState, target_id: int, pt: TeamData) -> Dictionary:
 	if pt == null:
 		return {}   # ★沒有玩家隊 ⇒ 這一閘沒有主詞；null 由既有的守衛負責回話
@@ -842,6 +872,12 @@ func _transfer_surrender_assets(from: TeamData, to: TeamData) -> void:
 		ResourceBank.add(to, res, amt, "surrender_in")
 
 func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	# ★【在遭遇中】—— 本票補上的那一件（意圖帳 2026-10-01：遠程求和不該存在）。
+	#   ★而【同格】那一件**不寫在這裡**：進了 `TEAM_TARGET_ACTIONS` 之後
+	#     `_colocation_gate` 自動管它 ⇒ 在這裡再寫一份距離檢查就是第二份。
+	var not_enc: Dictionary = refuse_if_not_in_encounter(state)
+	if not not_enc.is_empty():
+		return not_enc
 	var tgt6: TeamData = state.teams.get(target_id)
 	if tgt6 == null:
 		return { "ok": false, "msg": "目標不存在" }
@@ -856,8 +892,11 @@ func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt
 		return { "ok": false, "msg": "對方拒絕接受投降" }
 
 func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
-	if not state.encounter_active:
-		return { "ok": false, "msg": "非戰鬥中" }
+	# ★這一行原本就在這裡（它是那句措辭的來源）⇒ 現在改呼共用那一支，
+	#   而**回傳逐字不變**（同一個 msg）⇒ 本支的行為不該有任何變化（P5 守它）。
+	var not_enc2: Dictionary = refuse_if_not_in_encounter(state)
+	if not not_enc2.is_empty():
+		return not_enc2
 	var enemy_id6: int = state.encounter_defender_id if state.encounter_attacker_id == pt_id \
 		else state.encounter_attacker_id
 	var enemy6: TeamData = state.teams.get(enemy_id6)

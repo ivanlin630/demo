@@ -459,20 +459,14 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
 		))
 
-	# offer_surrender（戰鬥中對目標提出投降）
-	if state.encounter_active and focus_team_id != -1:
-		actions.append(PlayerApiMapper.map_available_action(
-			"offer_surrender", "投降請和", true, "",
-			{
-				"allowed_kinds": PackedStringArray(["team"]),
-				"requires_visible_target": true,
-				"requires_forced_interaction": false,
-				"allows_self_target": false
-			},
-			"execute_action",
-			{"action_id": "offer_surrender",
-			 "target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}}
-		))
+	# ★★★`offer_surrender` 那一段 Layer 5 的 emit **已刪掉**（本票 §2④，2026-10-01）——
+	#   ★它進了 `TEAM_TARGET_ACTIONS` ⇒ 由 `cmd_sys.get_action_availability()` 那一條路產出
+	#     （本檔 :300）⇒ 留著這一段的話**同一個名字兩條路各產一列**，畫面上出現兩次。
+	#   ★★而刪掉它同時解掉兩份字面：這裡原本手抄了「投降請和」，
+	#     而 `PlayerApiMapper.action_label()` 已經有同一句 ⇒ 刪掉就少一份（不是改成呼它）。
+	#   ★★★還有一件被它一起帶走：這裡的 `enabled` 硬寫 `true`、原因硬寫 `""`
+	#     ⇒ 那是**第二個決定者**（它與全列版對「能不能做」給不同答案）。
+	#     ⇒ 處置不是「加一格守兩邊一致」，是**移除對那一格的需求**。
 
 	# Layer 6: 玩家隊 self/tile 動作（hunt/hunt_beast，依腳下 tile）
 	var self_tile: HexTileData = pt_tile_self(state, ptid)
