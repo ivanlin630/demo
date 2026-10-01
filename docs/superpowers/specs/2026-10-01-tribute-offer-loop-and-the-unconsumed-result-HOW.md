@@ -89,3 +89,75 @@ P7 [電池] 全電池（★本票改引擎與床 ⇒ 那幾格的綠必須是新
 ✘ `demand_tribute`（玩家向對方要貢）那條路的任何改動
 ✘ 畫面那六個缺陷（它們在終端 REPL 那張票的自驗母體裡）
 ```
+
+
+---
+
+## §6 R② 紀錄（reviewer，`532648d89`，verdict ＝ **issues**）—— 三件逐件處理完
+
+### ★①逾時出口的位置查到了，而它比我寫的更麻煩（他的 file:line，我採用）
+
+```
+`sim_runner.gd:685-699` ＝ **服務「所有非 aid_request 的 forced_event」的通用收尾段**
+⇒ ★**不能整段套共用函式** ⇒ 要在裡面新開一個
+  `action == "diplomacy" and proposal == "tribute_offer"` 的**專屬分支**才呼。
+★★而「那支共用函式放哪裡」他也答了：`sim_runner.gd` **沒有 `PlayerCommandSystem` 的實例參照**
+  ⇒ 共用收尾函式做成 **`static func`**（★本專案 `TaskArbiter.release`／
+  `DiplomaticAiSystem.REJECT_COOLDOWN` 都是這樣被類別名直呼的 ⇒ **不是新花樣**）。
+★★★而他順手核了**拒絕出口**：`player_command_system.gd:1475` 的 `"refuse"`
+  同樣是**所有 diplomacy 提案共用**的通用分支
+  ⇒ 共用收尾函式在那裡被呼時要**先判** `from_team.order_task == TeamData.TASK_TRIBUTE_OFFER`
+  —— 否則會對 alliance／surrender／propose_trade 的 NPC **去清一個它們沒設過的 `order_task`**。
+```
+
+★**而這裡我要糾一個措辭**：他寫「多半無害 no-op 但精確度要寫清楚」——
+⇒ ★★**不要寫「多半無害」**：我今天才在一份「母體窮盡」的裁定裡**替一整桶編了理由**
+（判「舊 leader 已死 ⇒ skip 保護」，而那個 skip 從來沒被觸發過）。
+⇒ ★★★所以**加那個 `if`**（它便宜），而**不要**用一句「多半無害」把它留著 ——
+**一個沒有被逐情境驗過的 no-op，它的理由就是編的。**
+
+### ★②異源確認成立，而它今天就會紅（不是空判準）
+
+```
+mapper 側（`player_api_mapper.gd:351-358`）與 handler 側（`player_command_system.gd:1734-1769`）
+是**兩支獨立手打的 match**，★而**歷史上真的漂過一次**（`:1747` 註解自己記著 `demand_tribute` 那次 bug）
+⇒ 他獨立列了兩邊今天的字面集合，**差集 ＝ {tribute_offer}** ⇒ 與症狀逐字對上
+⇒ ★★所以 P5 **今天就會紅** —— 它不是「等未來才生效的空判準」。
+```
+
+### ★★★③裁：**甲**（accept 路徑不連帶寫那筆記憶）＋ 乙 的那一半**呈藍圖**（不擋）
+
+```
+他查到的真問題：`apply_tribute_accept:254-258` 的
+  `write_memory(payer_leader, "tributed", taker.leader_id, …)`
+而 `npc_ai_system.gd:117` 把 `"tributed"` 歸在 **betrayal／looted／special_taxed／rejected_aid**
+同一組 ⇒ 走 **`form_feud`（結仇邊）**；`grudge_ledger_bed.gd:170` 也把它分類成 feud 類，
+來源列的是 `demand_tribute`（遠程索貢）與 `resolve_extortion`（同格勒索）**兩個強制情境**。
+⇒ ★直接重用在**NPC 主動送禮**的 `tribute_offer` 上 ⇒ 語意變成
+  「**NPC 主動示好，而這個動作本身讓它對玩家結仇**」⇒ **方向是反的**。
+★★而他也量了嚴重度：`FEUD_SEVERITY` 表**刻意不收** `"tributed"`、用 intensity（≈0.1）當嚴重度、
+  `FEUD_MIN = 0.30` ⇒ **多半不會跨門檻**，但**人格乘子極端時還是可能** ——
+  而那時玩家會看到「**剛送我東西的 NPC 突然對我有仇恨值**」。
+```
+
+★**裁：甲** —— **accept 路徑只重用「轉帳」那一半，不連帶寫那筆記憶。**
+理由是 **HOW 層的**（所以我裁，不丟藍圖）：**同一支函式同時做「轉帳」與「寫關係」，
+而那兩件事的方向在不同情境下不同** ⇒ ★★那是**一個函式承擔了兩個語意**
+⇒ 重用它 ＝ 把**強制情境**的關係語意**偷渡**到**自願情境** ⇒ 拆（只用轉帳那半）。
+★★★而「**NPC 主動送貢之後，它對玩家的感覺應該是什麼**」是 **WHAT** ⇒ **呈藍圖**（乙 的那一半：
+`npc_ai_system.gd:126-128` 已有 `kindness／aided_in_battle／benefactor` 走 **gratitude** 的形狀可參考）
+⇒ ★而它**不擋本票**：甲 是**不表態**的安全底（零關係寫入），乙 可以日後作為一個**刻意的 WHAT 決定**加上去。
+★**否決丙**（維持現狀＋寫理由）：理由會是「門檻很少跨過」—— 而那正是
+「**替一個沒被驗過的 no-op 編理由**」那一族（見上面 ①的糾正）。
+
+### ★★★★而他建議的那一格地板我採用，並補上它的反向走法
+
+```
+他：「本票 §4 地板目前沒有一格驗這半 ⇒ 至少加一格斷言
+  『按接受之後 payer_leader 新增那筆 memory 的 type 跟你選的方向一致』。」
+⇒ P8 [關係副作用的方向] 按接受之後，`payer_leader` 新增的
+  **`"tributed"` 類記憶 ＝ 0 筆**（＝裁定甲：accept 不寫關係）
+⇒ ★**反向走法（照「＝ 0 的斷言要有反向走法」那條）**：
+  **`demand_tribute` 那條路必須寫得出 `"tributed"`** ——
+  ★★否則那個 0 分不出「**accept 不寫**」與「**那個記憶機制整個壞了／被刪了**」。
+```

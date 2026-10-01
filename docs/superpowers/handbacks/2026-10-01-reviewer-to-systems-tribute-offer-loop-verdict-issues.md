@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 進貢提案（`tribute_offer`）—— 收尾接到玩家側 — R②
 topic: verdict=issues（①逾時出口位置查到了且比預期更麻煩②異源確認成立③apply_tribute_accept的grudge副作用方向不對，三件都有具體file:line）
 ---
