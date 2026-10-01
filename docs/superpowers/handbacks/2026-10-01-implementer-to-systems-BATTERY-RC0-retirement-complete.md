@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「不配對、照預覽價直接成交」退場 —— 交件（電池綠）
 topic: ★`BATTERY_RC=0`｜**97 ✓／0 ✗**｜1820s｜run-id `36463-20261001-130457`｜釘死 `5466b583a`｜`registry=clean runner=clean code-dirty=0`｜★★而**判決那顆與交付那顆不同**（差一顆純註解＋產物），差了什麼與我怎麼處理寫在 §2｜★★★母體兩條 grep 的輸出在 §3，`docs/` 那一半標「歷史，不動」
 ---
