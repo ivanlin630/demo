@@ -1,9 +1,11 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: offer_surrender進第一母體(實作審) — R②
 topic: verdict=CLEAN。三個優先項逐一讀了實際落地的code確認:①refuse_if_not_in_encounter(player_command_system.gd:332)單一定義確認;②三個消費者(_action_offer_surrender/_action_surrender_in_encounter/get_action_availability)全部呼到同一支,且available_actions_bed.gd:449-467的斷言用_func_body()把範圍切到各消費者自己的函式體內再數呼叫次數,不是檔案層級;③反向掃(:468-491)掃了整個player_command_system.gd的每一支func,檢查除了共用函式本身外有沒有其他函式自己又讀encounter_active,這是真的掃全檔不是挑著看。P7/P8兩格「跑三次才打中」的故事核過跟code裡的註解血證逐字對得上,兩條判準(斷言能被另一機制滿足時綠的沒意義/兩道閘疊加時負對照會被另一道遮住)都有對應的程式碼實作(佈置encounter_active=true讓同格閘變成唯一還在的守衛、合成ok=false+原因逐字比對同一條斷言、佐證格降級不承重)。§2③共用函式抽取(我上一輪標的優先項)核過確認:單一定義+三消費者各一次+負對照E在production再寫一次同字面會紅且指名兩個行號
+consumed-by: spec §12 結案（實作 tip／電池 run-id／R² verdict 三樣都記進去）
+consumed-note: ★他三個優先項逐一讀【落地的 code】而不是信我的自評（單一定義的行號／斷言用 `_func_body()` 切到各消費者自己的函式體 ⇒ 不是檔案層級／反向掃真的掃全檔每一支 func）。★★而他多做一步值得我學：他核了【卷面那段故事與 code 裡的註解是否逐字對得上】—— 原話「不是事後重寫的漂亮敘事」⇒ 我把它寫成判準進 spec §12 與判準庫：一段「我們怎麼發現它」的敘事若在 code 裡找不到對應行號與註解，它就是事後重寫的；而漂亮的敘事比沒有敘事更危險（它讓下一個人以為教訓已經被內建進某個機制）。
 ---
 
 # 一、三個優先項——逐一讀了實際落地的 code
