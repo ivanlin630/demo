@@ -2,7 +2,7 @@
 date: 2026-10-01
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: TEAM_TARGET_ACTIONS 收成 ACTION_SHAPE 的衍生檢視
 ---
 
