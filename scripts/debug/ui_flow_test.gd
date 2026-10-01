@@ -10,7 +10,7 @@ const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
 const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
 
 const NL_CHR: String = "\n"   # ★具名換行：切畫面文字用（避免轉義在工具鏈裡被摺）
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer", "_test_p35_panel_must_not_print_its_own_action_list", "_test_p36_no_duplicate_option_labels"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer", "_test_p35_panel_must_not_print_its_own_action_list", "_test_p36_no_duplicate_option_labels", "_test_p37_focus_skylight_both_directions"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -125,6 +125,7 @@ func _initialize() -> void:
 	await _test_p34_trade_enter_submits_the_offer()
 	await _test_p35_panel_must_not_print_its_own_action_list()
 	await _test_p36_no_duplicate_option_labels()
+	await _test_p37_focus_skylight_both_directions()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -3966,6 +3967,57 @@ func _test_p36_no_duplicate_option_labels() -> void:
 		dup.is_empty())
 	await _free_ui(node)
 	_cell("_test_p36_no_duplicate_option_labels")
+
+# ══ P37：★★★★★★【那個天窗要【兩個方向】都驗】（systems 裁 2026-10-01 §18②）═══════
+# ★起因：`_page_skylight_fields(0)` 裡那個 guard 原本是
+#     `if _cached_snapshot.get("focused_member", {}).is_empty():`
+#   而 `map_focused_member()` 的哨兵是**有欄位的字典**（`id: -1`）而不是 `{}`
+#   ⇒ ★`is_empty()` **恆假** ⇒ 「被聚焦的人」那個天窗**一次都沒出現過**。
+# ★★而為什麼要**兩個方向**：**恆真與恆假在卷面上都是綠的**。
+#   ·只驗「沒聚焦 ⇒ 出現」：把 guard 改成 `if true` 也會綠
+#   ·只驗「有聚焦 ⇒ 不出現」：把那一欄整個刪掉也會綠
+#   ⇒ 兩個方向一起，才把那個 guard 的**兩個輸出**都釘住。
+# ★★★而「有聚焦」這個狀態**今天從 UI 走不到**（我 grep 過：`focus_member_id` 在
+#   `scripts/ui/` 的命中 ＝ **0** ⇒ 畫面從來沒有要求查詢面給它）
+#   ⇒ 所以這一格**直接佈置快照**（`node._cached_snapshot`）——
+#   ★而那是**刻意的**：它測的是「那個 guard 讀到有聚焦時會不會閉嘴」，
+#     不是「UI 怎麼進入聚焦」（後者今天不存在，而**那一件已回報**）。
+# 負對照：把 guard 改回 `is_empty()` ⇒ 第二個方向紅（有聚焦時那一欄照樣出現）
+func _test_p37_focus_skylight_both_directions() -> void:
+	_selftest_gate("_test_p37_focus_skylight_both_directions").noop()
+	print("\n── P37 「被聚焦的人」天窗：兩個方向 ──")
+	var node = await _make_ui()
+	node._page_idx = 0
+	# 方向①：**沒有**聚焦任何人（＝哨兵）⇒ 那一欄**必須**在天窗清單裡
+	node._cached_snapshot["focused_member"] = {"id": -1, "name": "", "status": {}}
+	var without: Array = node._page_skylight_fields(0)
+	print("   沒聚焦時的天窗清單 ＝ %s" % str(without))
+	_check("★母體地板：沒聚焦時清單不是空的（空 ⇒ 下面兩條都在空集合上成立）",
+		not without.is_empty())
+	_check("★★★★★方向①：沒聚焦 ⇒ 「被聚焦的人」**必須**在天窗清單裡",
+		without.has("被聚焦的人"))
+	# 方向②：**有**聚焦（一個真的 id）⇒ 那一欄**必須不**在清單裡
+	node._cached_snapshot["focused_member"] = {"id": 4321, "name": "某人",
+		"status": {"health": "正常", "stress": 0.1, "loyalty": 0.5}}
+	var with_focus: Array = node._page_skylight_fields(0)
+	print("   有聚焦時的天窗清單 ＝ %s" % str(with_focus))
+	_check("★★★★★方向②：有聚焦 ⇒ 「被聚焦的人」**必須不**在天窗清單裡",
+		not with_focus.has("被聚焦的人"))
+	# ★★而兩個方向的差**剛好是那一欄**（否則這一格可能在驗別的東西）
+	var diff: Array = []
+	for f in without:
+		if not with_focus.has(f):
+			diff.append(String(f))
+	print("   兩個方向的差 ＝ %s（★必須剛好是那一欄）" % str(diff))
+	_check("★★★★★★兩個方向的差剛好是「被聚焦的人」一欄（%s）" % str(diff),
+		diff == ["被聚焦的人"])
+	# ★★★反向對照（對這一格自己）：`is_empty()` 對這兩個哨兵**都**回 false
+	#   ⇒ 這一行就是「為什麼舊 guard 恆假」的機械證據
+	_check("★★【反向對照】舊 guard 的 `is_empty()` 對【哨兵】也回 false（＝它恆假的證據）",
+		not ({"id": -1, "name": "", "status": {}} as Dictionary).is_empty())
+	await _free_ui(node)
+	_cell("_test_p37_focus_skylight_both_directions")
+
 
 
 
