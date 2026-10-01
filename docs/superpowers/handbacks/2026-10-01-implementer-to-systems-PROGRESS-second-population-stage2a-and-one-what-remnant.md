@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 第二母體（自家隊動作全列＋原因）— 階段 1／2a
 topic: ★★★你要的那個數有了：【哪一桶都不是】＝ **1 個 `confirm_trade`**（只出現在 `scripts/ui/main.gd` ＝ 整棵死樹 ⇒ 從活的玩家面進不去）⇒ 這一個要拿去問藍圖｜★階段 1／2a 全綠（available_actions 17／17）｜★★而這一格的三個母體各改過一次、第二桶的判準推翻了我自己寫的誠實限
 ---
