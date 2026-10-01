@@ -35,6 +35,31 @@ while :; do
       # ★★★這一行是本包裝存在的理由：不印它，阻斷就會在卷面上消失
       echo "[gcr] ★第 ${_attempt} 次才成功（前 $((_attempt-1)) 次被 .git/index.lock 擋住）" >&2
     fi
+    # ★★★★★2026-10-01（systems，藍圖提、我 owner 這支）：**commit 成功之後，把「要敲誰」印在眼前**
+    #   ★病（今天第三次）：信**落地了**（寫檔＋commit）而**沒敲門** ⇒ 鏈空轉一小時
+    #     —— 而「寄信＝寫檔＋commit＋敲門」三件缺一＝沒送到，★而第三件 shell 做不到（要我呼 SendMessage）
+    #   ⇒ ★★所以這裡不做「自動敲」，只做**把那份名單變成會出現在眼前的輸出** ——
+    #     ★★★而這正是我今天立過的那條：**不要靠「我會記得」，要讓它出現在我面前**。
+    #   ★誠實限：它只認【這一次 commit 裡的】handback 檔；更早落地而沒敲的它看不到。
+    for _f in "$@"; do
+      case "$_f" in
+        *docs/superpowers/handbacks/*.md)
+          [ -f "$_f" ] || continue
+          grep -q '^status: open' "$_f" 2>/dev/null || continue
+          _to=$(sed -n 's/^to: *//p' "$_f" | head -1)
+          [ -n "$_to" ] || continue
+          [ "$_to" = "${SESSION_ROLE:-systems}" ] && continue
+          _raw=$(bash "$(dirname "$0")/peers.sh" 2>/dev/null | awk -v r="$_to" '$1==r{print $3}' | head -1)
+          # ★`peers.sh` 的 ADDR 欄會帶一個 `?`（它標「這個位址是推測的」）——
+          #   ⇒ ★★剝掉它才敲得到；而**不要靜默剝**：剝了就要說它本來帶問號
+          #     （否則我會把一個推測的位址當成確定的用）
+          _addr=$(printf '%s' "$_raw" | sed 's/[^A-Za-z0-9_-]//g')
+          _note=""
+          [ "$_raw" != "$_addr" ] && _note="（★原本是 ${_raw} —— ADDR 推測，敲不到就跑 ListAgents）"
+          echo "[gcr] ★要敲：${_to}=${_addr:-（peers.sh 查不到 ADDR）}${_note}　←　$(basename "$_f")" >&2
+          ;;
+      esac
+    done
     rm -f "$_tmp"; exit 0
   fi
   # ★只對【鎖】重試。其餘 rc 原樣回傳,不重試。
