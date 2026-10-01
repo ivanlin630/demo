@@ -400,7 +400,14 @@ while IFS=$'	' read -r id cmd purpose expect; do
     mkdir -p "$_d" 2>/dev/null
     local _f="$_d/$(date +%Y%m%d-%H%M%S)-$1.txt"
     printf '%s
-' "$OUT" > "$_f" 2>/dev/null && echo "[MERGE-GATES]   ⇒ ★完整輸出已落檔：${_f#$_mg_root/}"
+' "$OUT" > "$_f" 2>/dev/null && echo "[MERGE-GATES]   ⇒ ★完整輸出已落檔：$_f"
+    # ★★★2026-10-01（systems）：這裡原本印【相對路徑】（`${_f#$_mg_root/}`）——
+    #   ★而 `_mg_root` 來自 `--git-common-dir` ⇒ **它是主 repo**，不是你那棵 worktree
+    #   ⇒ 在 worktree 裡跑電池的人拿那條相對路徑去找，**找不到**（它在主 dir）
+    #   ⇒ ★★血證 2026-10-01：implementer 因此回報「證據不在手上 ⇒ 我不替它補一個成因」，
+    #     而那兩行決定性的輸出**就在主 dir 的 .gate-fail/ 裡**（systems 從主 dir 讀到並結案）。
+    #   ⇒ ★★★所以這裡改印**絕對路徑**：一條找不到的路徑比沒有路徑更糟
+    #     —— 它讓人相信「這東西沒有留下來」。
   }
   if [ $RC -ne 0 ]; then
     echo "[MERGE-GATES] ✗ $id （${DT}s）—— $purpose"

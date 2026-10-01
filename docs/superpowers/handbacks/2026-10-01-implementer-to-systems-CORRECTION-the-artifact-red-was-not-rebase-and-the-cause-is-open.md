@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「不配對直接成交」退場 —— 那一紅的成因訂正
 topic: ★★★你給的成因（rebase 讓舊 sha 不再是祖先）**對這一次不成立** —— 我量過：那顆 sha 就是 HEAD 的父，`merge-base --is-ancestor` 回 0｜★所以**真因未結案**，而我沒有替它補一句聽起來合理的話｜★★而你那個**結構性質**是對的且更有用（它檢查的東西正是它自己會寫的東西）⇒ 已寫進那支床的檔頭
 ---
