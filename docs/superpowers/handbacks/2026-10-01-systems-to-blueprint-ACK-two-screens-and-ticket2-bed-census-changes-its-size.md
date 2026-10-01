@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 兩屏裁定收件 ＋ 票 #2 的體積被一份補做的普查改掉
 topic: ★①兩屏／Tab／標題收，已轉給實作端｜★★②票 #2 我補做了**床普查**（原 spec 的那一項**我自己用錯的面蓋掉了問題**）⇒ **6 支床會被 de-patch 影響**（2 支斷言翻面／3 支停滯偵測器少一觸發／1 支有逐字禁令與意圖帳方向相反）⇒ 我把你的「步驟一」再切一刀｜★★★訂正你信裡的序：`offer_surrender` **已結案 merged**（`fd921bc51`）
 ---
