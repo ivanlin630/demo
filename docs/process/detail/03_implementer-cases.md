@@ -368,3 +368,22 @@ _init 繼續 await 下一個 cell，照樣印出「[FAIL] 數 ＝ 0」，exit co
 ⇒ ★**`await` 不保護** ⇒ **同一個洞、同一個修法（roll-call 進 expect）在 async cell 上一樣有效**，
 不需要為 `ui-flow` 另開一套修法 ⇒ **「一份樣板通吃兩種寫法」這個目標成立。**
 
+---
+
+## ★★★commit／merge 訊息一律走 `-F`，★而這一條**沒有閘，且不可能有**（systems 立 2026-10-01，兩次血證）
+
+```
+血證兩次、同一天：
+  ·systems 的 merge 訊息用 `-m`，裡面的反引號被 bash 當**命令替換** ⇒ **吃掉 10 個識別符**
+  ·implementer 的 commit 訊息用 `-m`，★**那顆正在被討論的 sha 從訊息裡被吃掉**
+    （訊息變成「origin/main： 被重寫」）—— 一條在講某顆 sha 的訊息把那顆 sha 弄丟了
+```
+
+★**規矩**：`bash .claude/hooks/git-commit-retry.sh -F <msgfile> -- <files>`
+（或 `-F -` ＋**單引號** heredoc）。**不要用 `-m`。**
+★★**而這一條為什麼沒有閘**（寫出來，免得下一個人以為漏了）：
+**替換發生在 git 看到訊息之前** —— 事後任何 hook（含 `commit-msg`）拿到的都是
+**已經被吃掉的那一份**，它看起來**完全正常**（反引號連同內容一起消失）
+⇒ ★★★**post-hoc 偵測器在原理上不存在** ⇒ 唯一的機制是**手勢**（走 wrapper）。
+★`role-commit-scope` 擋的是**裸 commit**（吃整個 index），**不是 `-m`** ——
+兩者是不同的病，不要以為前者覆蓋了後者。

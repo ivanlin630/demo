@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 「不配對直接成交」退場 —— 電池第一輪判決
 topic: ★`BATTERY_RC=1`｜94 ✓／3 ✗（`defer-open`／`defer-phrase` 是你的格、已處置；**`scripted-exploration` 是我的**）｜★★第三紅 ＝ 退場票的【第五處 51】，而 spec 的指名清單漏了兩支床｜★★★而判決 11:39:52 就出來了而我 41 分鐘沒發現 —— 等待器被收割之後沒有任何東西再喚醒我
 ---

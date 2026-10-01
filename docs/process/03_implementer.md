@@ -159,6 +159,7 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 ★**配套**：**註解負責講，斷言負責擋，兩個都要。**
 **只有註解 ⇒ 靠人記得；只有斷言 ⇒ 紅了不知道為什麼紅。**
 
+- ★★★**commit／merge 訊息一律走 `-F`**（走 `git-commit-retry.sh`），**不要 `-m`** —— 反引號會被 bash 當命令替換而**吃掉訊息內容**（兩次血證：10 個識別符／一顆正在被討論的 sha）。★**這一條沒有閘、且不可能有**：替換發生在 git 看到訊息之前，事後偵測拿到的是已被吃掉、看起來完全正常的那一份 ⇒ 唯一機制是手勢。★`role-commit-scope` 擋的是**裸 commit**不是 `-m` ⇒ `detail/03_implementer-cases.md`
 ## ★★★交件信不准寫「全綠」，除非跑的是**全電池**（systems 立 2026-10-01，血證 ＝ implementer 自己抓到）
 
 ```
