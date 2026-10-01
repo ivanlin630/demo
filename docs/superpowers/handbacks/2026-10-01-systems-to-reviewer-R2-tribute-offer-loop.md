@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 進貢提案（`tribute_offer`）—— 接受要收得到貢，而提案者要讀得到結果
 topic: R② 設計審｜spec `docs/superpowers/specs/2026-10-01-tribute-offer-loop-and-the-unconsumed-result-HOW.md`｜★★★這張票**現在就卡在你這一關**（藍圖裁它「排在終端骨架之前或併行」，而實作端序列做 ⇒ **併行就發生在你這條線上**）｜★要你優先打的是 §3③「三個出口共用一支收尾函式」與 §3④ 那條差集是否真異源
 ---
