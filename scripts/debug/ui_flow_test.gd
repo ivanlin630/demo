@@ -214,9 +214,25 @@ func _test_camp_action_reachable() -> void:
 		near = HexTileData.new(); near.tile_pos = near_pos; st.world.tiles[near_pos.x*1000+near_pos.y] = near
 	near.outpost_level = 1; near.outpost_owner = 999; near.outpost_type = "civilian"
 	node._refresh()
+	# ★★★★★【這條斷言翻面了，而舊標題寫的是一個【病】】（2026-10-01，systems 授權）——
+	#   舊斷言：「距離太近時 camp **不列**（N-3 gate）」
+	#   ⇒ ★它把 (乙)【不可做的那一列整列消失】**當成預期行為**寫進守衛裡，
+	#     而藍圖裁的是「情境動作不可做時【列出＋引擎給的原因】」。
+	#   ⇒ ★★新斷言：camp **仍然在列上**、`enabled==false`、而**原因非空**。
+	#     ⇒ 三條分開，因為它們是三件事（在不在／能不能／說不說）。
+	var self_rows2: Array = node._interact_action_split()["self"]
 	var self_ids2: Array = []
-	for a in node._interact_action_split()["self"]: self_ids2.append(a.get("action_id",""))
-	_check("距離太近時 camp 不列（N-3 gate）", not ("camp" in self_ids2))
+	var camp_row: Dictionary = {}
+	for a in self_rows2:
+		self_ids2.append(a.get("action_id", ""))
+		if String(a.get("action_id", "")) == "camp":
+			camp_row = a as Dictionary
+	print("   自家隊那一側 %d 列：%s" % [self_rows2.size(), str(self_ids2)])
+	_check("★★★距離太近時 camp **仍然列出**（舊斷言寫的是它消失 ＝ 把 (乙) 的病當預期）",
+		"camp" in self_ids2)
+	_check("★★而它 `enabled==false`", not bool(camp_row.get("enabled", true)))
+	_check("★★★★而它的原因**非空**（實測「%s」）" % String(camp_row.get("disabled_reason", "")),
+		String(camp_row.get("disabled_reason", "")).strip_edges() != "")
 	await _free_ui(node)
 	_cell("_test_camp_action_reachable")
 
@@ -851,9 +867,21 @@ func _test_u21_interact_paging() -> void:
 	node._refresh()
 	var pending_n: int = node._cached_snapshot.get("pending_targets", []).size()
 	_check("pending_targets >9（造同格隊成功）", pending_n > 9)
-	# 翻到第 2 頁，按 KEY_1 → 全域 idx 9（第 10 項）
-	node._handle_interact_mode(KEY_PERIOD)   # 下一頁
-	node._handle_interact_mode(KEY_1)        # 該頁第 1 = 全域第 10
+	# ★★★★★【兩側各自獨佔鍵空間與頁計數之後，這一格要先【切到目標那一側】】
+	#   （2026-10-01，systems 裁：刪掉偏移、兩個母體各自獨佔 1..9 與各自的頁計數）
+	#   ⇒ 舊版靠 `num - self_acts.size()` 的偏移落到目標清單上 ——
+	#     而那個偏移正是不變量 #10 的血證（目標鍵的意義由自家隊清單的長度決定）。
+	#   ⇒ ★所以現在要按【切換鍵】（玩家按的鍵 ⇒ #10 允許它當判別子），再翻頁。
+	_check("★母體地板：預設在自家隊那一側（否則下面那一按不是『切過去』）",
+		node._interact_pane == TextUiMain.PANE_SELF)
+	node._handle_interact_mode(TextUiMain.PANE_TOGGLE_KEY)
+	_check("★★切換鍵真的把數字鍵換到目標那一側", node._interact_pane == TextUiMain.PANE_TARGETS)
+	# 翻到第 2 頁，按 KEY_1 → 該側全域 idx 9（第 10 項）
+	node._handle_interact_mode(KEY_PERIOD)   # 下一頁（★翻的是目標那一側自己的頁）
+	_check("★★★目標那一側的頁變了，而自家隊那一側的頁【沒有被連動】（%d／%d）" % [
+		node._target_page, node._self_page],
+		node._target_page == 1 and node._self_page == 0)
+	node._handle_interact_mode(KEY_1)        # 該頁第 1 = 該側全域第 10
 	_check("分頁後可選第 10+ 項（_interact_target 已設）", node._interact_target != -1)
 	await _free_ui(node)
 
@@ -2758,7 +2786,39 @@ func _test_p24_number_keys_never_mean_response() -> void:
 	for i in range(res0, st.command_results.size()):
 		said += String(st.command_results[i].get("text", "")) + " "
 	print("   結果句 = %s" % said)
-	_check("★KEY_1 做的是自家隊動作（結果句有「行動：」前綴）", said.contains("行動："))
+	# ★★★★★【這一格的按法要改，而理由不是斷言錯了】（2026-10-01）——
+	#   自家隊那一側現在是**常駐 11 列且排序固定**（第二母體那張票的 (乙) 治好之後）
+	#   ⇒ 第 1 列不再保證**可做**（實測排序後第一個是 `camp`，而它常常不可做）
+	#   ⇒ ★按位置 1 會打到一列 disabled ⇒ 得到的是「原因」不是「行動：」
+	#   ⇒ ★★所以改成：找出**第一個可做的**那一列，按它的鍵（而鍵 ＝ 該頁位置）。
+	#     ★★★而這不是弱化：它驗的仍然是「數字鍵打在自家隊那一側」，
+	#       只是不再假設「位置 1 一定可做」—— 那個假設本來就不該在。
+	print("   結果句（按位置 1）＝ %s" % said)
+	var self_rows_k: Array = node._interact_action_split()["self"]
+	var first_ok: int = -1
+	for ii in range(mini(9, self_rows_k.size())):
+		if bool((self_rows_k[ii] as Dictionary).get("enabled", false)):
+			first_ok = ii
+			break
+	var names_k: Array = []
+	for r_k in self_rows_k:
+		names_k.append("%s%s" % [String((r_k as Dictionary).get("action_id", "")),
+			"" if bool((r_k as Dictionary).get("enabled", false)) else "(不可)"])
+	print("   自家隊那一側第一頁：%s ⇒ 第一個可做的在位置 %d" % [str(names_k), first_ok + 1])
+	_check("★母體地板：第一頁裡至少有一列可做（0 ⇒ 本格測不到「做了一個動作」）", first_ok >= 0)
+	if first_ok >= 0:
+		var res_k: int = st.command_results.size()
+		node._handle_interact_mode(KEY_1 + first_ok)
+		var frames_k: int = 0
+		while node._bridge.is_advancing() and frames_k < 8:
+			node._process(0.1)
+			frames_k += 1
+		var said_k: String = ""
+		for i_k in range(res_k, st.command_results.size()):
+			said_k += String(st.command_results[i_k].get("text", "")) + " "
+		print("   結果句（按第一個可做的 [%d]）＝ %s" % [first_ok + 1, said_k])
+		_check("★KEY_%d 做的是自家隊動作（結果句有「行動：」前綴）" % (first_ok + 1),
+			said_k.contains("行動："))
 	await _free_ui(node)
 	_cell("_test_p24_number_keys_never_mean_response")
 # ★★★不變量 #10 的執法面要【擴到全部 mode】（systems 裁 2026-09-30）：

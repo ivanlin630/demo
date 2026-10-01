@@ -72,7 +72,25 @@ var _inv_selection: int = -1
 # ui-stack-pending: _interact_mode —— 用 toggle 開（同鍵開關）
 var _interact_mode:   bool = false
 var _interact_target: int  = -1
-var _interact_page:   int  = 0   # 互動選單分頁（>9 項翻頁）
+var _interact_page:   int  = 0   # 互動選單分頁（>9 項翻頁）—— ★只給【動作層】用（見下）
+# ══ ★★★★★【兩個母體各自獨佔鍵空間與頁計數】（systems 裁 2026-10-01，依據不變量 #10）══
+# ★病的來源（血證 `text_ui_main.gd:1814`）：目標清單的索引原本是
+#   `num - self_acts.size()` ⇒ **目標鍵的意義由自家隊清單的長度決定**，
+#   而那個長度以前**隨世界變** ⇒ 那是 #10 的本體（「一個鍵的意義不得由一個會變的計數決定」）。
+#   ★★而第二母體那張票把自家隊清單釘成**常駐 11 列** ⇒ 舊的違反消失，
+#     但同一個算式從「會漂」變成「擠爆」（11 ≥ 9 ⇒ 目標清單按不到）。
+#   ⇒ ★★★裁定：**刪掉偏移**（不是調偏移）＋兩張清單各自獨佔 1..9 **與各自的頁計數**。
+# ★而「翻頁」為什麼不違反 #10：**頁是玩家自己按的**（`,` `.`）
+#   ⇒ #10 的推論逐字允許「玩家自己改變的狀態」當判別子；
+#   ★★不得用**字母**切換或編號（字母被強制事件回應獨佔 —— 同一條不變量的另一半）。
+var _self_page:   int = 0        # 自家隊動作那一側的頁
+var _target_page: int = 0        # 目標清單那一側的頁
+# ★當前數字鍵在驅動哪一側 —— ★它只由**玩家按切換鍵**改變（不由世界改變）
+var _interact_pane: String = "self"
+# ★★切換鍵宣告在一處：藍圖裁了只改這一行（systems 暫定 TAB）
+const PANE_TOGGLE_KEY: int = KEY_TAB
+const PANE_SELF: String = "self"
+const PANE_TARGETS: String = "targets"
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
 
 # ── 新 Panel Modes（互斥）────────────────────────────────────────────────────
@@ -1585,7 +1603,12 @@ func _log_event(msg: String) -> void:
 #   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
 #   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
 func _interact_mode_binds_key(keycode: int) -> bool:
-	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD:
+	# ★★★`PANE_TOGGLE_KEY`（Tab）加進鍵空間宣告（2026-10-01，兩屏那一刀）——
+	#   ★它卡過一次：沒加之前，handler 頂端那個守衛先把 Tab 當未綁定鍵吃掉
+	#   ⇒ 切換根本到不了我寫的那一段（症狀＝「切換鍵沒有反應」而 code 看起來是對的）。
+	#   ⇒ ★★判準：**加一個新鍵要同時加在【宣告】與【handler】兩處** ——
+	#     只加 handler 的那一半會被頂端守衛吃掉，而那個吃掉是靜默的（它只印一句話）。
+	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD 			or keycode == PANE_TOGGLE_KEY:
 		return true
 	# ★★★【缺口②的紀錄，而它的第一版修法被我自己推翻了 —— 兩版都留著】（2026-10-01）
 	#   ·病：原本這裡無條件對 A..Z 回 true，而 handler 那一支要求 `_interact_target < 0`
@@ -1634,6 +1657,16 @@ func _handle_interact_mode(keycode: int) -> void:
 		_refresh()
 		return
 
+	# ★★★【切換兩側】—— 只在**沒有聚焦目標**時有意義（動作層只有一張清單）
+	#   ★它是玩家按的鍵 ⇒ 可以當判別子（#10 的推論）
+	if keycode == PANE_TOGGLE_KEY:
+		if _interact_target >= 0:
+			_refuse_unbound_key("互動", keycode)
+			return
+		_interact_pane = PANE_TARGETS if _interact_pane == PANE_SELF else PANE_SELF
+		_refresh()
+		return
+
 	# 翻頁（選單 >9 項時）：[,] 上一頁 / [.] 下一頁
 	# ★★★【動作層不分頁 ⇒ 那兩個鍵在動作層是「已綁而無作用」】（systems 裁 BLOCKER-2 ④）
 	#   ⇒ 與缺口② 同一族：`binds_key` 說綁了、而 handler 什麼都不做 ⇒ 玩家零回饋。
@@ -1643,10 +1676,11 @@ func _handle_interact_mode(keycode: int) -> void:
 		if _interact_target >= 0:
 			_refuse_unbound_key("互動", keycode)
 			return
-		if keycode == KEY_COMMA:
-			_interact_page = maxi(0, _interact_page - 1)
+		# ★★翻的是【當前那一側】的頁（兩側各自獨佔頁計數 —— 共用一個會互相擠）
+		if _interact_pane == PANE_SELF:
+			_self_page = maxi(0, _self_page - 1) if keycode == KEY_COMMA else _self_page + 1
 		else:
-			_interact_page += 1
+			_target_page = maxi(0, _target_page - 1) if keycode == KEY_COMMA else _target_page + 1
 		_refresh()
 		return
 	# ★★★不變量 #10（systems 2026-09-30）：【強制事件回應】與【自家隊動作】
@@ -1685,7 +1719,10 @@ func _handle_interact_mode(keycode: int) -> void:
 	# 數字鍵 1–9（含頁偏移）
 	if keycode < KEY_1 or keycode > KEY_9:
 		return
-	var num: int = (keycode - KEY_1) + _interact_page * 9   # 0-based + 頁偏移
+	# ★動作層**不分頁**（鍵綁 id，`TextUiView.action_for_key`）⇒ 那一支不用 `num`。
+	#   非聚焦時：`num` 由**當前那一側自己的頁**算 ⇒ 兩側不共用計數。
+	var _pane_page: int = _self_page if _interact_pane == PANE_SELF else _target_page
+	var num: int = (keycode - KEY_1) + _pane_page * 9
 
 	# ── 已選目標：顯示行動清單（只 team-target 動作）──
 	if _interact_target >= 0:
@@ -1788,8 +1825,11 @@ func _handle_interact_mode(keycode: int) -> void:
 	#     只是把它藏得更深（面板在的時候數字鍵會整段位移）。
 
 	# P4-2:self/原地動作（hunt 等,直接執行不需選隊）
+	# ★★★【刪掉偏移】（systems 裁：刪掉而不是調整）——
+	#   自家隊那一側只在 `_interact_pane == PANE_SELF` 時吃數字鍵，
+	#   而索引就是 `num`（它已經含**自己那一側**的頁）⇒ 不再減任何東西。
 	var self_acts: Array = _interact_action_split()["self"]
-	var self_idx: int = num
+	var self_idx: int = num if _interact_pane == PANE_SELF else -1
 	if self_idx >= 0 and self_idx < self_acts.size():
 		var sa: Dictionary = self_acts[self_idx]
 		if not sa.get("enabled", true):
@@ -1811,7 +1851,9 @@ func _handle_interact_mode(keycode: int) -> void:
 		return
 
 	# pending_targets 選擇
-	var pending_idx: int = num - self_acts.size()
+	# ★★★偏移 `- self_acts.size()` **已刪**（血證與理由見 `_self_page` 那一段的檔頭）
+	#   ⇒ 目標清單只在 `_interact_pane == PANE_TARGETS` 時吃數字鍵，索引就是 `num`。
+	var pending_idx: int = num if _interact_pane == PANE_TARGETS else -1
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	if pending_idx >= 0 and pending_idx < pending_tgts.size():
 		_interact_target = pending_tgts[pending_idx].get("target_id", -1)
@@ -1889,9 +1931,32 @@ func _build_interact_str() -> String:
 		for r in fi.get("responses", []):
 			lines.append("   [%s] %s" % [String.chr(65 + _ri), r.get("label", "?")])
 			_ri += 1
-	for sa in _interact_action_split()["self"]:   # P4-2:self/原地動作(hunt 等)直接可選,不需先選隊
-		var en: bool = sa.get("enabled", true)
-		items.append("%s%s" % [sa.get("label", sa.get("action_id", "")), "" if en else "（不可）"])
+	# ══ ★★★★★【自家隊那一側】自己的編號與頁（不再與目標清單共用一個號碼空間）══════
+	var self_all: Array = _interact_action_split()["self"]
+	lines.append("── 自家隊動作（%d 項）%s ──" % [
+		self_all.size(), "◀ 數字鍵在這一側" if _interact_pane == PANE_SELF else ""])
+	if self_all.is_empty():
+		lines.append("（無）")
+	else:
+		var s_pages: int = maxi(1, int(ceil(self_all.size() / 9.0)))
+		_self_page = clampi(_self_page, 0, s_pages - 1)
+		var s_start: int = _self_page * 9
+		var s_shown: int = 0
+		var s_row: String = ""
+		for si in range(s_start, mini(s_start + 9, self_all.size())):
+			s_shown += 1
+			var sa2: Dictionary = self_all[si]
+			var en2: bool = bool(sa2.get("enabled", true))
+			s_row += "[%d]%s%s  " % [s_shown, sa2.get("label", sa2.get("action_id", "")),
+				"" if en2 else "（不可）"]
+			if s_shown % 3 == 0:
+				lines.append(s_row.strip_edges()); s_row = ""
+		if s_row != "":
+			lines.append(s_row.strip_edges())
+		if s_pages > 1:
+			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_self_page + 1, s_pages])
+	lines.append("── 可互動目標 %s ──" % (
+		"◀ 數字鍵在這一側" if _interact_pane == PANE_TARGETS else "（按 [Tab] 切過來）"))
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	var vts: Array = _cached_snapshot.get("visible_teams", [])
 	for target_info in pending_tgts:
@@ -1908,13 +1973,15 @@ func _build_interact_str() -> String:
 	if items.is_empty():
 		lines.append("（無可互動目標）")
 	else:
-		var t_start: int = _interact_page * 9
+		var t_pages: int = maxi(1, int(ceil(items.size() / 9.0)))
+		_target_page = clampi(_target_page, 0, t_pages - 1)
+		var t_start: int = _target_page * 9
 		var t_shown: int = 0
 		for gi in range(t_start, mini(t_start + 9, items.size())):
 			t_shown += 1
 			lines.append("[%d] %s" % [t_shown, items[gi]])
 		if items.size() > 9:
-			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_interact_page + 1, int(ceil(items.size() / 9.0))])
+			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_target_page + 1, t_pages])
 
 	lines.append("── [T/Esc]關閉 ──")
 	return "\n".join(lines)
