@@ -49,6 +49,13 @@ const SPEC_ENCOUNTER_FIELD_HITS: int = 1
 #   ★★而計數要**先剝掉整行註解**：討論一句措辭的註解與使用它的 code 在文字上同形
 #     ⇒ 不剝的話這一格會咬到「解釋這條規則」的那一行（實測：我自己就踩了一次）。
 const SPEC_ONE_COPY_PHRASES: Array = ["非戰鬥中", "投降請和"]
+# ★★★★★【共用前置檢查的三個消費者】（spec §2③ 實作審要優先打的那三件之②）——
+#   ★宣告在一處，而「有沒有第四個該呼而沒呼的」由**反向掃**回答（見 P7 那一段）。
+#   ★★而斷言要逐一打在【那一支的函式體】上，不是檔案層級 ——
+#     「守衛宣稱保護某支函式而它從來沒呼那支函式」那一族就是檔案層級斷言養出來的。
+const SPEC_ENC_GATE: String = "refuse_if_not_in_encounter"
+const SPEC_ENC_CONSUMERS: Array = ["_action_offer_surrender",
+	"_action_surrender_in_encounter", "get_action_availability"]
 # ★§7：兩份同形信封的呼叫點總數（普查的數字，寫進 spec）
 const SPEC_ENVELOPE_SITES_QUERY: int = 15   # 本票刪掉三處停用列之後（原 18）
 const SPEC_ENVELOPE_SITES_ITEM: int = 4     # `_make_item_action`（庫存，不在本票）
@@ -432,6 +439,49 @@ func _test_p7_conditions_have_a_single_holder() -> void:
 	_check("★★★★判斷的單一源：`encounter_active` 恰好 %d 處（實測 %d）" % [
 		SPEC_ENCOUNTER_FIELD_HITS, enc_hits.size()],
 		enc_hits.size() == SPEC_ENCOUNTER_FIELD_HITS)
+	# ── ★★★★★【②兩個呼叫點都呼到同一支】（spec §2③ 第二件）────────────────────
+	#   ★①（上面那條）答的是「判斷只有一份」；★②答的是「**那一份真的被每個人用到**」
+	#     —— 兩者是獨立的：一支共用函式可以存在而某個消費者自己又判一次
+	#     （那時 ① 會紅）；也可以沒有人呼它（那時 ① 綠而 ② 紅）。
+	#   ★★而斷言打在【函式體】上：檔案層級的「這個檔有呼它」會把
+	#     「守衛宣稱保護某支函式而從來沒呼那支函式」那一族放過去。
+	var consumer_miss: Array = []
+	for cname in SPEC_ENC_CONSUMERS:
+		var fb: String = _func_body(pcs_src, "func %s(" % String(cname))
+		if fb == "":
+			consumer_miss.append("%s（★抓不到函式體 —— 名字改了？）" % String(cname))
+			continue
+		var n_call: int = _code_only(fb).count(SPEC_ENC_GATE + "(")
+		print("   消費者 %-32s 呼 `%s(` %d 次" % [String(cname), SPEC_ENC_GATE, n_call])
+		if n_call < 1:
+			consumer_miss.append("%s（0 次）" % String(cname))
+	_check("★母體地板：消費者清單不是空的（空 ⇒ 下面那條恆綠）", SPEC_ENC_CONSUMERS.size() > 0)
+	_check("★★★★★②每一個宣告的消費者都【真的呼到那一支】（沒呼到的：%s）" % str(consumer_miss),
+		consumer_miss.is_empty())
+	# ── ★★★反向掃：沒宣告卻【自己判同一件事】的 ──────────────────────────────
+	#   ★具名清單解決「數字對而東西不在」，不解決「我沒看到的那些」
+	#     ⇒ 反向掃的母體要從 code 數出來印在卷面。
+	#   ★★這裡掃的特徵 ＝ 函式體裡出現 `encounter_active` 而它不是那支共用函式
+	#     ⇒ 它就是「自己又讀了一次 state」。
+	var self_judges: Array = []
+	var scanned_funcs: int = 0
+	var cur: String = ""
+	for line2 in pcs_src.split("\n"):
+		var t2: String = String(line2)
+		if t2.begins_with("func "):
+			cur = t2.substr(5, maxi(0, t2.find("(") - 5))
+			scanned_funcs += 1
+			continue
+		if t2.strip_edges().begins_with("#"):
+			continue
+		if t2.contains("encounter_active") and cur != SPEC_ENC_GATE:
+			self_judges.append(cur)
+	print("   ★反向掃：掃了 %d 支函式｜自己讀 `encounter_active` 而不是那支共用函式的：%s" % [
+		scanned_funcs, str(self_judges)])
+	_check("★★母體地板：反向掃真的掃到函式（%d；0 ⇒ 下面那條恆綠）" % scanned_funcs,
+		scanned_funcs > 0)
+	_check("★★★★★③沒有人自己再判一次（違反的：%s）—— 這一條才讓「共用」是真的，"
+		% str(self_judges) + "而不是「兩邊剛好同值」", self_judges.is_empty())
 	print("   ★而本格比 P1 更接近「一個真相一份」的本體：名字漂開看得出來，")
 	print("     條件漂開只會讓【選單說可以而 handler 說不行】，那在卷面上是沉默的。")
 	_cell("_test_p7_conditions_have_a_single_holder")
