@@ -119,9 +119,13 @@ P1  `grep -rn "confirm_trade" scripts/` ＝ **0 命中**
 P2  `resolve_trade_direct`／`get_trade_direct_preview`／`query_trade_direct_preview`／
     `preview_trade` 四個名字在 `scripts/` 下各 0 命中
 P3  三桶床：第三桶 ＝ **空名單（且印出來）**｜三數相加 ＝ 母體 29
-P4  ★負對照：把 A1 那一列加回去 ⇒ P1 必紅**並指名** `player_command_system.gd` 那一行
-    ⇒ ★**動輸入不動事實**：用 `git stash` 以外的方式 —— 在**另一棵釘死的 worktree** 或
-      對一個 fixture 做，**不要在共用 main dir 改活檔**（共用目錄的破壞式負對照已出事兩次）
+P4  ★負對照（★R² 給了更好的做法，採用）：**不建 worktree、不碰工作樹**，
+    指到退場前那棵樹驗紅：
+      `git grep -n "confirm_trade" f8a59a3f8 -- scripts/`   ⇒ **必須有命中**
+      `git grep -n "confirm_trade" HEAD      -- scripts/`   ⇒ **必須 0 命中**
+    ⇒ ★兩行放在交件信裡，**一行有命中一行沒有** ＝ P1 有鑑別力的證明。
+    ⇒ ★★這就是「動輸入不動事實」的最省形狀：零清理負擔，且不可能誤刪自己的工作
+      （我原本寫的「另一棵釘死的 worktree」也對，但那是更貴的版本）。
 P5  ★貿易正路沒壞（這張票的真風險在這裡，不在刪得乾不乾淨）：
     trade 子模式 [Enter] 送出 `submit_trade_offer` 那一格**指名**並綠
     （`text_ui_main.gd:2719` 那條路；★**指名那一格的函式名**寫進交件信）
@@ -153,3 +157,21 @@ P7  電池全綠（★跑在釘死 HEAD 的 worktree；★★本票改了床與 
   （藍圖自己寫的，`9381f77f5`；我 `grep` 核過那一行真的在那棵樹上）
   ⇒ ★★**那一列才是本票的 WHAT 權威**，spec 服從它；改機制先查那一列。
 ```
+
+
+---
+
+## §7 R② 紀錄（reviewer，`d6c8811a4`，verdict ＝ **CLEAN**）
+
+```
+①★他獨立反向溯源核過三支連帶到底，並**多列了一層我沒列的**：
+   `get_trade_direct_preview` 的三個 caller（B1 `sim_bridge` ／ D1 `headless_test` ／
+   D3 census-bed）**全在本票清單內** ⇒ **沒有第四支遺孤**。
+   ⇒ ★這正是我請他打的那一點（我用的是跟我上一輪出錯同一種核法）。
+②字面 vs 床那一條他不重審（藍圖已結，他 grep 核過 `mechanism-intents.md:74` 的字面）。
+③P4 改用 `git grep <舊 ref>`（已折進 §4）。
+P5 他讀了 `_action_confirm_trade` 本體確認 trade_offer 那半只是轉呼，
+   而活介面本來就直接 emit `submit_trade_offer` 不經過這個鍵 ⇒ **指名那一格對，不加格**。
+```
+
+★**放行**：可 dispatch。**排在實作端現有序（§3②／§3③ ＋ P2…P6）之後**。

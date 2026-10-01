@@ -8,25 +8,38 @@
 set -u
 # 逐格一行：id / 秒 / 結果。★**每一條判決分支都要呼到**，漏一條⇒摘要會少一格而不會报錯。
 _mg_row() { printf '%s\t%ss\t%s\n' "$id" "$DT" "$1" >> "$MG_ROWS" 2>/dev/null; }
-# ★★把【綠著印出來、否則無人可見】的行搶下來（具名血證：P19 棘輪的「抬到現值」）。
+# ★★把【綠著印出來、否則無人可見】的行搶下來（具名血證：P19 棘輪的合計那一行）。
+#   ★★★2026-10-01（systems）訂正：原本抓的字面是「抬到現值」，而**那句話的寫者已經不存在了**
+#     —— 全庫 `grep "抬到現值" scripts/` ＝ **0 命中**（今天核的；留下的命中全在本檔與紀錄文件裡）。
+#     P19 改成「逐支印 got（地板 N）＋ 往回走才紅」的形狀之後就不再印那句話。
+#     ⇒ ★【讀者還在、寫者沒了】：carry 於是**抓不到任何東西**，而它的沉默與「本輪真的沒有」同形。
+#     ⇒ 改抓 `已實測紅紀錄合計`（P19 在**通過**時印的那一行，否則無人可見，而它會隨床長大）。
+#     ★★★★而這個訂正**跑過一次真的 ui-flow 才敢落地**（陽性對照不能靠 --selfcheck）：
+#       2026-10-01 實測那一行逐字 ＝「── 表裡 17 支床，已實測紅紀錄合計 121 條 ──」
+#       ⇒ ★carry 的母體**不再是空的**。★★而 --selfcheck 一直是綠的
+#       —— 它證明「儀器會動」，不證明「有東西在被量」（這一支就是那個差別的血證）。
+#     ★誠實限：另一條 `^[NOTE]` 今天**沒有任何寫者**（`grep -rn '\[NOTE\]' scripts/` ＝ 0）
+#       ⇒ 它是一個**留著的約定**（誰想把一行搬進摘要就印 `[NOTE]`），不是一個在運作的通道。
 _mg_carry() { printf '%s' "$OUT" | grep -aE -- "$MG_CARRY_RE" | while IFS= read -r _l; do printf '%s\t%s\n' "$id" "$_l" >> "$MG_CARRY"; done; }
 
 # ★★★--selfcheck：這支 carry 的**陽性對照**。
-#   ★理由：carry 今天的母體是【空的】—— P19 的地板正好等於現值（15/2/7）
-#     ⇒ 那句「抬到現值」現在不會印。
+#   ★★★而原本寫在這裡的理由是【錯的】：它寫「母體空是因為 P19 的地板正好等於現值（15/2/7）」
+#     —— 真因是**那句話的寫者被改掉了**（見上），而且那三個數今天也不是現值
+#     （`CONTROL_FLOOR_UI` ＝ 33）⇒ ★一個替空母體編好理由的註解，比沒有註解更難抓：
+#     它讓下一個人不再去問「那句話今天還有人印嗎」。
 #   ⇒ ★★而【恒空母體的守衛】與【根本沒接電】在卷面上一模一樣：都是「（本輪沒有）」。
 #   ⇒ ★★★所以要有一個【不靠真的一輪電池】就能跑的對照：餵它一段假 OUT，看它接不接得住。
 if [ "${1:-}" = "--selfcheck" ]; then
-  MG_ROWS="$(mktemp)"; MG_CARRY="$(mktemp)"; MG_CARRY_RE="抬到現值|^\[NOTE\]"; _sc_fail=0
+  MG_ROWS="$(mktemp)"; MG_CARRY="$(mktemp)"; MG_CARRY_RE="已實測紅紀錄合計|^\[NOTE\]"; _sc_fail=0
   id="fake-gate"; DT=3
   OUT="一般的綠色正文
-   ★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值（16／2／7）
+   [FIXTURE 假資料] ── 表裡 N 支床，已實測紅紀錄合計 M 條 ──
 [NOTE] 另一種携帶標記
 又一行沒人要的正文"
   _mg_row "PASS"; _mg_carry
   if grep -q "^fake-gate	3s	PASS$" "$MG_ROWS"; then echo "[MG-SELFCHECK] ✓ 逐格行寫得出來"; else echo "[MG-SELFCHECK] ✗ 逐格行"; _sc_fail=1; fi
   _n=$(wc -l < "$MG_CARRY" | tr -d " ")
-  if [ "$_n" = "2" ]; then echo "[MG-SELFCHECK] ✓ carry 接到 2 行（抬到現值 ＋ [NOTE]）"; else echo "[MG-SELFCHECK] ✗ carry 接到 $_n 行（應為 2）"; _sc_fail=1; fi
+  if [ "$_n" = "2" ]; then echo "[MG-SELFCHECK] ✓ carry 接到 2 行（合計那一行 ＋ [NOTE]）"; else echo "[MG-SELFCHECK] ✗ carry 接到 $_n 行（應為 2）"; _sc_fail=1; fi
   if grep -q "又一行沒人要的" "$MG_CARRY"; then echo "[MG-SELFCHECK] ✗ ★它把不該搬的也搬了（摘要會變成第二份卷面）"; _sc_fail=1; else echo "[MG-SELFCHECK] ✓ ★負對照：普通正文沒被搬進來"; fi
   rm -f "$MG_ROWS" "$MG_CARRY"
   if [ "$_sc_fail" = "0" ]; then echo "[MG-SELFCHECK] ✅ 全綠"; exit 0; fi
@@ -40,9 +53,12 @@ fi
 #   ★★★這是【構造保證】：在每個 exit 前面各加一行，會因為有人新增一條路徑而漏掉。
 # ★★★2026-09-25（systems）：【電池摘要 writer】。
 #   ★病：runner **不 dump 通過那幾支的 stdout**（刻意的——綠的正文沒人回頭讀）
-#     ⇒ 而一支【綠著印出來的話】就此無人可見。具名血證：`ui_flow_test.gd:2340`
-#       「★紀錄數增加了 ⇒ 請把 CONTROL_FLOOR_* 抬到現值」只在 P19 **通過**時印
-#       ⇒ ★★**那句話今天寄不到任何人手上**。
+#     ⇒ 而一支【綠著印出來的話】就此無人可見。具名血證：`ui_flow_test.gd` 的 P19
+#       （錨是 `CONTROL_FLOORS` 這個符號，不是行號 —— 行號會漂）：
+#       「── 表裡 N 支床，已實測紅紀錄合計 M 條 ──」只在 P19 **通過**時印
+#       ⇒ ★★**那一行今天寄不到任何人手上**。
+#       ★★★（原文這裡寫的是「抬到現值」那句話 ＋ 一個行號 `:2340`，而兩者今天都不成立：
+#         那句話沒有寫者、那個行號指不到那一格 ⇒ 2026-10-01 systems 就地換成具名符號。）
 #   ⇒ ★★★修法不是多一支閘（用戶 2026-09-10 立規），是讓這一支**把它已經拿在手上的東西存下來**。
 #   ★卷面落在 docs/measurements/.battery/（gitignore）—— 要當 merge 證據就**明確**複製成一個有名字的檔再 commit，
 #     ★★不要讓它自動進版控：共用 main dir 下每跑一輪就動一個 tracked 檔 ＝ 保證衝突，
@@ -190,7 +206,7 @@ MG_CARRY="$_mg_root/.claude/hooks/.merge-gates-carry.$$"
 # ★★carry 規則：**逐條具名**，不用泛型樣式。
 #   ★★★理由：泛型樣式（例如「有三顆星的行」）會把半份卷面搬進來 ⇒ 摘要變成第二份卷面，而沒人讀。
 #   ★新增一條＝在這裡加一個字面（並在 --selfcheck 裡給它一個陽性對照）。
-MG_CARRY_RE="${MG_CARRY_RE:-抬到現值|^\[NOTE\]}"
+MG_CARRY_RE="${MG_CARRY_RE:-已實測紅紀錄合計|^\[NOTE\]}"
 : > "$MG_ROWS"; : > "$MG_CARRY"
 echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ') run-id=$MG_RUNID｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**"
 echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code"

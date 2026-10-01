@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 「不配對、照預覽價直接成交」退場 — R②
 topic: verdict=CLEAN（含①③獨立核過＋P5核過；②你已與藍圖結掉，我不重審）
 ---
