@@ -202,6 +202,35 @@ P7 全電池 `BATTERY_RC=0`；★fp **可能不變**（本票改的是「誰能�
      （`ACTION_DIGITS.size()`／`TEAM_TARGET_ACTIONS.size()`／差）⇒ **下一次母體變大它自己就對了**。
    ⇒ ★★★而同檔 `:112` 與 `player_query_api.gd:376` 的 11 是**別的東西**（字寬表／own-team 動作）
      ⇒ **不動**（同值不同義，這是第三次）。
+### ★★★★★§6b′ 這張表要分成【要改】與【不要動】兩類（2026-10-01 重整，implementer 要的）
+
+```
+★而重整的理由是他指出的：**不分類 ⇒ 下一個人會把「不要動」那兩處也改掉。**
+【要改】（數字會過期而且會被照著讀）
+  ①`available_actions_bed.gd:26`  SPEC_TEAM_TARGET_TOTAL 11 → 12
+  ②`colocation_gate_bed.gd:36`    SPEC_TEAM_TARGET_TOTAL 11 → 12（R² 找到）
+  ③`colocation_gate_bed.gd:36` 那一行**註解裡手抄的 11 個名字** ⇒ 補 `offer_surrender`
+  ④`text_ui_view.gd:78` 的上限說明「11 個 ⇒ 已經有 2 個沒鍵」⇒ 12／**3**，而那 3 個**具名列出**
+  ⑤`text_ui_layout_bed.gd:451` 的 **print**「上限 9 ⇒ 母體 11 已經有 2 個沒鍵」
+     ⇒ ★**不是把 11 改成 12**（會再過期一次），**三個數全部導出**
+  ⑥`colocation_gate_bed.gd:521`「它不在這 11 個裡」⇒ 現況陳述、print 不會紅 ⇒ **改成導出**
+  ⑦`player_command_system.gd:83`「母體 11 → 10」⇒ ★**兩個數都錯了**
+     （母體 12；`STUB_NOT_IMPLEMENTED` 現在是空的 ⇒ 實際是 12 → 12）
+     ⇒ 改成**不帶數字**：「列出的 ＝ 母體 − 具名排除」，兩個數**由床印在卷面**
+【不要動】（★而「為什麼不動」要寫在它旁邊，否則它會被當成過期的現況去修）
+  ⑧`colocation_gate_bed.gd:48`「動工時量到的現況：11 個裡有幾個自己本來就查同格」
+     ⇒ ★**那是歷史量測**（同格閘那一票動工時母體真的是 11）
+     ⇒ ★★★判準（implementer 立，我收）：**一個數字是【歷史】還是【現況】要寫在它旁邊**
+       —— 否則下一個人會把**歷史**當成**過期的現況**去「修」它
+       ⇒ 而那會把**一次量測改寫成一個永遠正確的句子 ＝ 把證據變成口號**。
+  ⑨`available_actions_bed.gd:29 SPEC_CONSTANT_SYMBOL`（存名字字串）
+  ⑩`available_actions_bed.gd:38 SPEC_PAYLOAD_SITES = 11`（**呼叫點數**，同值不同義）
+  ⑪`text_ui_layout_bed.gd:452` 的 11 ＝ **引述舊文**（它在講當時的那句話）
+  ⑫`colocation_gate_bed.gd:112`／`player_query_api.gd:376` 的 11（字寬表／own-team 動作）
+```
+⇒ ★**而這張表自己就是「清單會漏」的實例**：第一版 5 處（我）⇒ R² ＋1 ⇒ 掃描再 ＋3
+  ⇒ **所以交件報的是【掃描的數】不是這張表**，而這張表的用途是**分類**（要改／不要動）不是母體。
+
 ★母體以**掃描**為準：`git grep TEAM_TARGET_ACTIONS scripts/ docs/` ⇒ implementer 實測 **10 個檔**
   （其中兩處是註解、一處在另一支床、★一處是 `available_actions_controls.py`＝**負對照的錨**）
   ⇒ 交件報那個掃描的數，不要報這份清單。
