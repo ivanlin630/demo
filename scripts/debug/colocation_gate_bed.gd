@@ -46,6 +46,11 @@ const SPEC_TEAM_TARGET_TOTAL: int = 12    # ignore attack trade propose_alliance
 const SPEC_EXEMPT_MAX: int = 1            # 今天 ＝ ["ignore"]；要加第二個 ⇒ 必須有人改這一行並說明理由
 const SPEC_EARLY_RETURN_EXEMPT: Array = ["ignore"]   # ★在 execute_action 更上面就 return，走不到閘
 # ★動工時量到的現況：11 個裡有幾個【自己】本來就查同格（本閘之前）
+#   ★★這個 11 是【歷史量測】不是現況（同格閘那一票動工時母體是 11；
+#     `offer_surrender` 進母體之後是 12）⇒ **刻意不改**：
+#     它記的是「那一天量到什麼」，改它會把一次量測改寫成一個永遠正確的句子。
+#   ⇒ ★★★判準：一個數字是【歷史】還是【現況】，要寫在它旁邊 ——
+#     否則下一個人會把歷史當成過期的現況去「修」它。
 const MEASURED_SELF_CHECKING: Array = ["invite_settle", "beg"]
 
 const EXPECTED_CELLS: Array = [
@@ -518,7 +523,10 @@ func _test_p2_verb_set_is_cross_checked() -> void:
 			from_const.size() - exempt - MEASURED_SELF_CHECKING.size(),
 			from_const.size() - exempt, str(MEASURED_SELF_CHECKING)])
 	print("   ★★而本闘的母體【不是】這份動詞清單而已：`recruit_named` 走另一個入口")
-	print("     （`execute_action_with_target`）⇒ 它不在這 11 個裡，而它也要同格 ⇒ 見 P6。")
+	# ★★這一句原本寫死「這 11 個」⇒ 母體變 12 之後它是假的，而它是 print 不會紅
+	#   ⇒ 導出那個數（同 text_ui_layout_bed:451 那一處的修法）。
+	print("     （`execute_action_with_target`）⇒ 它不在這 %d 個裡，而它也要同格 ⇒ 見 P6。"
+		% PlayerCommandSystem.TEAM_TARGET_ACTIONS.size())
 	print("     ⇒ 母體的定義是【跟別隊發生作用的動作】，不是【某一份動詞清單】。")
 	for sc in MEASURED_SELF_CHECKING:
 		var fn_at: int = src.find("func _action_" + String(sc))

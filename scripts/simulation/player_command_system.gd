@@ -80,7 +80,11 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 	for name in TEAM_TARGET_ACTIONS:
 		var act: String = String(name)
 		if STUB_NOT_IMPLEMENTED.has(act):
-			continue   # ★尚未實裝此機制（不是停用）⇒ 不列；母體 11 → 10
+			# ★尚未實裝此機制（不是停用）⇒ 不列。
+			#   ★★原本這裡寫「母體 11 → 10」—— 那是一個**會過期的現況**
+			#     （母體是 12 了，而 `STUB_NOT_IMPLEMENTED` 現在是空的 ⇒ 12 → 12）
+			#     ⇒ 改成不帶數字：**列出的 ＝ 母體 − 具名排除**，而那兩個數由床印在卷面上。
+			continue
 		var ok: bool = true
 		var why: String = ""
 		if pt == null or tgt == null:
