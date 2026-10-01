@@ -140,6 +140,22 @@ func _test_p7_offer_surrender_is_gated_by_name() -> void:
 		pt.tile_pos != far.tile_pos)
 	_check("★★★母體地板 C：`offer_surrender` 真的在母體裡（不在 ⇒ 下面測的是另一件事）",
 		PlayerCommandSystem.TEAM_TARGET_ACTIONS.has("offer_surrender"))
+	# ★★★★★【讓同格閘成為唯一還在的守衛】（2026-10-01，負對照 C 逼出來的強化）——
+	#   ★第一版沒有這三行：那時 `offer_surrender` 身上**有兩道閘**（同格 ＋ 在遭遇中）
+	#     ⇒ 把名字從母體拿掉（spec P3 指定的那個擾動）之後，遠程呼它**仍然被拒絕**
+	#       —— 拒絕它的是【遭遇戰那一閘】⇒ 本格最上面那條斷言**保持綠**。
+	#   ⇒ ★★那就是「負對照紅了而紅在別的地方」：本格當時確實紅了（母體地板 C ＋ 那句人話
+	#     不符），而 spec 預測的那個機制（「遠程呼它又打得通」）**沒有發生**。
+	#   ⇒ ★★★所以這裡把世界設成【在遭遇中】：遭遇戰那一閘放行之後，
+	#     **同格是唯一還在的守衛** ⇒ 本格最上面那條斷言才真的承重。
+	#   ★而這不是放寬：它讓那個擾動打在它該打的地方。
+	st.encounter_active = true
+	st.encounter_attacker_id = ptid
+	st.encounter_defender_id = far_id
+	print("   佈置：encounter_active=%s（★讓遭遇戰那一閘放行 ⇒ 同格是唯一還在的守衛）"
+		% str(st.encounter_active))
+	_check("★★★★母體地板 D：真的在遭遇中（false ⇒ 擋住它的可能是另一閘 ⇒ 本格的主詞會漂）",
+		st.encounter_active)
 	# ★★★先印【同格閘自己回了什麼】—— 空字典 ＝ 放行 ⇒ 這一格的證據是那句人話本身
 	var gate_r: Dictionary = cmd.refuse_if_not_colocated(st, far_id, pt)
 	print("   同格閘回傳 ＝ %s（★空字典 ＝ 放行）" % str(gate_r))
