@@ -1058,7 +1058,8 @@ func _test_p18_unlisted_must_be_reachable_from_some_panel() -> void:
 	# ★★★★★★【掃描母體要排除死樹，而「哪些是活的」不是我判的】（2026-10-01 實測）——
 	#   `main.gd` 是**整棵死樹**（`press_is_one_tick_bed.gd` 的 `SPEC_LIVE_UI_FILES`
 	#   那一段逐字寫著「main.gd 10 是死樹」，而本票沒有改那件事）
-	#   ⇒ 把它算進掃描母體 ⇒ `confirm_trade` 會被判成「進得去」而它只出現在死樹裡
+	#   ⇒ 把它算進掃描母體 ⇒ 那個動作會被判成「進得去」而它只出現在死樹裡
+#     （★那個 id 於 2026-10-01 整支退場 ⇒ 這裡不再寫它的字面：P1／P2 的地板是 grep ＝ 0）
 	#   ⇒ ★那是一個**假陰性**：名單少一個，而少的那個正是要問藍圖的。
 	const DEAD_TREE: Array = ["main.gd"]
 	# ★★★★★★★【第二桶：強制事件回應】——

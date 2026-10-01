@@ -102,10 +102,12 @@ func _on_interact_execute(cmd_name: String, cmd_args: Dictionary) -> void:
 										"member_id": -1, "tile_q": -1, "tile_r": -1}
 		_popups.show_trade_preview(preview,
 			func() -> void:
-				var r2 = _bridge.command_player("execute_action", {
-					"action_id": "confirm_trade", "target": base_target})
-				_bottom.add_message("[貿易] %s" % r2.get("message", ""))
-				_sidebar.refresh_player(); _debug.refresh(),
+				# ★★【已退場 2026-10-01】confirm 那一路的 emit 已刪。
+				#   ★理由不是整理：留一個 emit **不存在動作** 的呼叫，
+				#     是給「下一個復活 main.gd 的人」的陷阱。
+				#   ★★而刪掉它之後 P1 那條地板才能成立。
+				#   ★★★`cancel_trade` **留著**：它在 registry 裡、活介面 [Esc] 走它。
+				_bottom.add_message("[貿易] 直接成交那條路線已退場"),
 			func() -> void:
 				_bridge.command_player("execute_action", {
 					"action_id": "cancel_trade", "target": base_target})

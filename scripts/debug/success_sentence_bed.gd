@@ -38,7 +38,16 @@ const EXPECT_CELLS: Array = [
 #   ★★這一族今天第四次（一張票改的就是閘）—— 而抓到它的是
 #     「改完之後要重跑那支床本身」那條紀律，不是我想起來。
 const SPEC_SUCCESS_RETURNS: int = 68
-const SPEC_REGISTRY_ACTIONS: int = 51
+const SPEC_REGISTRY_ACTIONS: int = 50
+# ★★★★★51 → 50（2026-10-01，「直接成交」那條路線退場 ⇒ registry 少一列）——
+#   ★這個數是從**床自己的輸出**抄的（它紅在「50／51」那一行），不是推算的。
+#   ★★而本處值得記：退場票的 spec 用的是【指名清單】（§3 逐一列出要改哪幾處），
+#     而**那份清單沒有點到這一支床** —— 接住它的是「跑一遍然後看它紅在哪」。
+#     ⇒ 判準：**指名清單會漏，而跑出來的紅不會**
+#       ⇒ 指名是為了「不要誤改」，不是為了「不會漏」；兩者要各自有機制。
+#   ★★★而它的負對照（本檔 :126 那一行）逐字寫著「從 registry 拿掉一個 action（51→50）」
+#     ⇒ 那一道對照**今天真的發生了**（而且是正式改動不是擾動）
+#     ⇒ 那一行的 51→50 不動：它記的是**那一天**那道對照的數，不是現況。
 const SPEC_NON_REGISTRY_DIFF: int = 3
 
 
@@ -185,7 +194,7 @@ func _test_p2_population_is_visible() -> void:
 		defs.size(), vals.size(), diff.size(), str(diff)])
 	print("      ＋早返／inline：choose_heir、ignore")
 	print("      ＋第二條分派邊 execute_action_with_target 的 4 個 case")
-	print("      ＋轉出別系統 dict：_action_confirm_trade、_action_submit_trade_offer")
+	print("      ＋轉出別系統 dict：_action_submit_trade_offer（★另一支已退場 2026-10-01）")
 	print("        （★列【函式名】不列行號 —— 行號逐樹會飄）")
 	_check("★★★欄②差集與【spec 的常數】相符（%d／%d）" % [diff.size(), SPEC_NON_REGISTRY_DIFF],
 		diff.size() == SPEC_NON_REGISTRY_DIFF)

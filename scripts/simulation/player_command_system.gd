@@ -198,7 +198,13 @@ func _setup_registry() -> void:
 		"leave_loot":             _action_leave_loot,
 		"establish_faction":      _action_establish_faction_cmd,
 		"refresh_targets":        _action_refresh_targets,
-		"confirm_trade":          _action_confirm_trade,
+		# ★【已退場 2026-10-01】「直接成交」那條路線的 registry 列已刪（藍圖裁 (乙)）——
+		#   ★★連別名鍵一起刪（藍圖 `9381f77f5` 逐字同意）：留成別名鍵的話
+		#     第三桶還是 1，而裁定要的是它變空。
+		#   ★★★而這幾行**刻意不寫那些已退場的函式名**：退場票的 P1／P2 是
+		#     `grep -rn <名字> scripts/` ＝ 0，而一段**描述它們**的註解與一處
+		#     **使用它們**的 code 在文字上同形 ⇒ 寫進去會把那條地板咬紅。
+		#     ⇒ 要查它們叫什麼：看退場票的 spec（§3 的指名清單）。
 		"submit_trade_offer":     _action_submit_trade_offer,
 		"cancel_trade":           _action_cancel_trade,
 		"set_tribute_rate":       _action_set_tribute_rate,
@@ -332,10 +338,9 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 # ★而本表的初版文字是**產生**出來的（從 registry 的 key ＋ `TEAM_TARGET_ACTIONS`），
 #   ★★但那不讓 P1c 變成恆真：產完之後**兩邊是兩份各自獨立的字面**
 #   ⇒ 任何一邊被改動都會讓差集非空（這正是 P1c 的負對照在驗的事）。
-# ★`confirm_trade` 判成 `"none"` 的理由（★追委派追到底）：它的 `target_id` 被
-#   **轉給** `_action_submit_trade_offer`，而那一支的參數是 `_target_id`（底線前綴 ＝ 刻意不用、
-#   函式體 0 次讀取）⇒ 轉過去的值被丟掉 ⇒ 玩家不是用「選一支隊」來做它
-#   （真正的對象來自 `state.player_state["pending_trade_target"]`）。
+# ★（原本這裡有一段「某個動作為什麼判成 `"none"`」的理由 —— 那一列已於 2026-10-01 退場，
+#   理由隨它一起走。形狀上的教訓留在別處：**追委派要追到底**，
+#   因為一支 handler 可能把 target 轉給另一支而那一支底線前綴不用它。）
 const ACTION_SHAPE: Dictionary = {
 	"abandon_outpost":         {"target": "none", "listed": false},
 	"accept_encounter":        {"target": "none", "listed": false},
@@ -360,7 +365,6 @@ const ACTION_SHAPE: Dictionary = {
 	"choose_heir":             {"target": "none", "listed": false},
 	"clear_member_order":      {"target": "none", "listed": false},
 	"confirm_gather_intel":    {"target": "none", "listed": true},
-	"confirm_trade":           {"target": "none", "listed": false},
 	"demand_tribute":          {"target": "team", "listed": false},
 	"demolish_outpost":        {"target": "none", "listed": false},
 	"deposit_to_storage":      {"target": "none", "listed": false},
@@ -877,18 +881,14 @@ func _action_refresh_targets(state: WorldState, _target_id: int, _pt: TeamData, 
 	refresh_colocation_targets(state)
 	return { "ok": true, "msg": "互動目標已更新" }
 
-func _action_confirm_trade(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
-	# If a structured trade_offer is present, delegate to the new offer system
-	if state.player_state.has("trade_offer"):
-		return _action_submit_trade_offer(state, target_id, pt, pt_id)
-	# Legacy fallback: NPC-initiated trade confirmation
-	var tid2: int = int(state.player_state.get("pending_trade_target", -1))
-	if tid2 < 0 or not state.teams.has(tid2):
-		return { "ok": false, "msg": "無待確認貿易" }
-	var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
-	state.player_pending_targets.erase(tid2)
-	state.player_state.erase("pending_trade_target")
-	return result2
+# ★★★★★【已退場 2026-10-01】「不配對、照預覽價直接成交」那條路線 ——
+#   藍圖裁 (乙)：世界裡沒有這個機制，只有一條**玩家專用捷徑**，而活介面進不去。
+#   ★能力沒有少：出價那一路（`submit_trade_offer`）一行沒動，活介面直接 emit 它
+#     （`text_ui_main.gd:2719`）⇒ 刪掉的是**那個鍵**不是那個能力。
+#   ★★連帶**三支**一起走（遞移閉包數到「新增的零呼叫點集合為空」才停 ——
+#     而第三支是 systems 自己漏掉、我核出來的：它唯一的呼叫點在第二支的函式體裡）。
+#   ★★★那三支叫什麼**刻意不寫在這裡**：P1／P2 的地板是 `grep -rn <名字> scripts/` ＝ 0，
+#     而描述它們與使用它們在文字上同形 ⇒ 名單在退場票 spec 的 §3。
 
 func _action_submit_trade_offer(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
 	var tid: int          = int(state.player_state.get("pending_trade_target", -1))
@@ -1678,7 +1678,7 @@ func _get_player_team_id(state: WorldState) -> int:
 	return state.get_player_team_id()
 
 func _can_trade(state: WorldState, pt: TeamData, tgt: TeamData) -> bool:
-	# 雙方任一有 coin 即可嘗試貿易（細節由 resolve_trade_direct 判定）
+	# 雙方任一有 coin 即可嘗試貿易（細節由直接成交那一路的結算（★已於 2026-10-01 退場） 判定）
 	return float(pt.resources.get("coin", 0)) > 0.0 \
 		or float(tgt.resources.get("coin", 0)) > 0.0
 

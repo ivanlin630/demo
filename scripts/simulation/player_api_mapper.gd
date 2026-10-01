@@ -445,7 +445,7 @@ static func action_label(action_id: String) -> String:
 		"recruit_anon":          return "招募匿名"
 		"invite_settle":         return "邀請定居"
 		"recruit_named":         return "招募成員"
-		"confirm_trade":         return "確認貿易"
+		# ★「確認貿易」那一列已退場（2026-10-01）：那個動作不存在了 ⇒ 它的顯示名也不該在。
 		"cancel_trade":          return "取消貿易"
 		"gather_intel":           return "打聽情報"
 		"beg":                    return "乞討"

@@ -9,7 +9,7 @@ var _errors: int = 0
 const UNBOUND_TOKEN: String            = "此鍵在此模式無作用"
 const LETTER_NO_RESPONSE_EXPECT: String = "現在沒有要回應的事件"
 
-const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen"]
+const EXPECTED_CELLS: Array = ["_test_interact_self_team_split", "_test_train_action_reachable", "_test_camp_action_reachable", "_test_join_request_ui", "_test_forced_choose_heir_ui", "_test_forced_aid_request_ui", "_test_recruit_named_reachable", "_test_capabilities_shown", "_test_storage_panel_ui", "_test_outpost_build_abandon", "_test_faction_extract_treasury", "_test_member_equip_flow", "_test_armed_ratio_cmd", "_test_armed_count_shown", "_test_u15_overlay_input_guard", "_test_player_status_label", "_test_q7_3_take_loot_flow", "_test_q7_5_dispatch_subteam_task", "_test_q7_6_faction_gate_leader", "_test_n1_subteam_promote_anon_hint", "_test_harness_smoke", "_test_u19_forced_auto_enter", "_test_u21_interact_paging", "_test_u12_trade_str", "_test_trade_offer_builder", "_test_hunt_action_listed", "_test_pages_frame", "_test_pages_zero_loss", "_test_pages_switch_key", "_test_pages_skylight", "_test_pages_single_source", "_test_pages_q1_source", "_test_pages_q3_changes", "_test_home_p1_value", "_test_home_p2_pair", "_test_home_p3_none", "_test_home_p4_multi", "_test_home_p5_halfset", "_test_home_p6_zero_is_real", "_test_render_idempotent", "_test_refresh_idempotent", "_test_p1b_exclude_empty", "_test_p11_pending_footer", "_test_p15_echo_at_most_twice", "_test_p17_consume_then_render", "_test_hover_p1_live", "_test_hover_p2_title", "_test_hover_p3_no_state_write", "_test_hover_p5_empty_and_crowded", "_test_recruit_pay_matches_delivery", "_test_p8_x_advances_one_hour", "_test_p8s_x_uses_the_constant", "_test_p9_single_advance_path", "_test_p10_footer_x_says_one_hour", "_test_p11_esc_interrupts_x", "_test_p13_dedupe_repeated_t", "_test_p14_dedupe_does_not_eat_meaningful", "_test_p15b_footer_labels_same_source", "_test_p16b_pending_zero_after_advance", "_test_p18_unbounded_sentinel_is_named", "_test_p19_control_coverage_ratchet", "_test_p2_whole_day_not_dropped", "_test_p20_forced_panel_three_lines", "_test_p21_snap_both_directions", "_test_p22_overlay_callsites_advance_one_tick", "_test_p23_response_settles_on_press", "_test_p24_number_keys_never_mean_response", "_test_p25_letter_key_only_in_interact_mode", "_test_p26_ui_stack_step1", "_test_p27_forced_takes_over_and_keys_speak", "_test_p28_screen_is_the_composed_one", "_test_p29_key_on_screen_runs_that_row", "_test_p30_submode_panels_reach_the_screen", "_test_p31_esc_pops_exactly_one_layer", "_test_p32_unbound_keys_leave_the_action_region_intact", "_test_p33_listed_matches_the_screen", "_test_p34_trade_enter_submits_the_offer"]
 
 # ★★★【到場點名 ＋ 陽性對照】（systems 派工 2026-09-17）——
 #   ★這支床的格是 **coroutine**（`await _test_X()`），而 `await` **不保護**：
@@ -121,6 +121,7 @@ func _initialize() -> void:
 	await _test_p31_esc_pops_exactly_one_layer()
 	await _test_p32_unbound_keys_leave_the_action_region_intact()
 	await _test_p33_listed_matches_the_screen()
+	await _test_p34_trade_enter_submits_the_offer()
 	await _test_p19_control_coverage_ratchet()
 	await _test_p2_whole_day_not_dropped()
 	var _suffix: String = _roll_call_suffix()
@@ -889,8 +890,12 @@ func _test_u21_interact_paging() -> void:
 	_cell("_test_u21_interact_paging")
 # U12：交易確認顯示真有資源（解過去顯「無資源」的 GUI 路徑 bug）。
 # ★★★★★【這段註解今天之前是假的，而它怎麼過期的值得留著】（2026-10-01，systems 抓到）：
-#   舊註解逐字寫「真路徑：`_build_trade_str` → `query_trade_direct_preview`
-#   → `InteractionSystem.preview_trade`」—— ★而 `_build_trade_str`
+#   舊註解寫的「真路徑」指向**直接成交那條路線的預覽 API**
+#   （★那兩個函式名已於 2026-10-01 整支退場 ⇒ ★★這裡**刻意不寫它們的字面**：
+#     退場票的 P2 要求那幾個名字在 `scripts/` 下各 0 命中，而一段**描述它們**的註解
+#     與一處**使用它們**的 code 在文字上同形 ⇒ 會把那條地板咬紅。
+#     ⇒ 判準：寫「某個名字已經不該存在」的註解時，不要把那個名字寫進去。）
+#   ★而 `_build_trade_str`
 #   （`scripts/ui/text_ui_main.gd:2777`）讀的是 **`query_trade_session`**（`:2782`），
 #   而 `text_ui_main.gd` 全檔 `trade_direct` 命中數 ＝ **0**。
 # ★★而它為什麼沒有人發現：**本格的斷言對路徑不可知** ——
@@ -3681,6 +3686,54 @@ func _test_p33_listed_matches_the_screen() -> void:
 	print("     ⇒ ★而指名那一半由 P16／P18 的反向掃守（它們比的是 id 集合）。")
 	await _free_ui(node)
 	_cell("_test_p33_listed_matches_the_screen")
+
+
+# == P34：★★★★★【貿易正路沒壞】trade 子模式 [Enter] 真的送出出價 ================
+# ★這一格是「不配對直接成交退場」那張票的 P5，而它**原本不存在** ——
+#   我照 spec 去指名「那一格」的時候發現：**全庫沒有任何床按過 `KEY_ENTER`**
+#   （`grep -rn KEY_ENTER scripts/debug/` ＝ 0 命中）⇒ 送出那條路**零行為覆蓋**。
+#   ⇒ ★★而那張票的真風險**正是**把正路一起弄壞（不是刪得乾不乾淨）
+#     ⇒ 一張票的真風險沒有守衛，而那件事是**照著 spec 去找那一格**才發現的。
+#   ⇒ ★★★判準：**spec 說「那一格要綠」的時候，先確認那一格存在** ——
+#     「指名一格」與「那一格存在」是兩件事，而前者讀起來像後者。
+# ★而本格**不驗成交結果**（對方可以拒絕／資源可能不足）：它驗的是
+#   **[Enter] 真的把 `submit_trade_offer` 這道令送出去**（送出 ≠ 成功）。
+# 負對照：把送出那一支的 `KEY_ENTER` 分支拿掉 ⇒ 佇列裡沒有那道令 ⇒ 必紅 ⇒ 待實測
+func _test_p34_trade_enter_submits_the_offer() -> void:
+	_selftest_gate("_test_p34_trade_enter_submits_the_offer").noop()
+	print("
+── P34 trade 子模式 [Enter] 送出出價 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	st.teams[ptid].resources["food"] = 50.0
+	var npc := TeamData.new(); npc.team_id = 7778; npc.tile_pos = ppos
+	AnonTierSystem.add_anon(npc, "平民", 5)
+	npc.resources = {"coin": 100}
+	st.teams[7778] = npc
+	node._trade_mode = true
+	node._trade_target_id = 7778
+	st.player_state["pending_trade_target"] = 7778
+	st.player_state["trade_offer"] = {"player_gives": {"food": 10}, "player_wants": {"coin": 10}}
+	node._refresh()
+	_check("★母體地板 A：真的在 trade 子模式（否則按 Enter 走的是別的 handler）",
+		bool(node._trade_mode))
+	_check("★★母體地板 B：出價真的在 state 裡（空出價時那一支可能早退 ⇒ 本格沒有主詞）",
+		not (st.player_state.get("trade_offer", {}) as Dictionary).is_empty())
+	var before: int = st.pending_commands.size()
+	node._handle_trade_mode(KEY_ENTER)
+	var sent: Array = []
+	for i in range(before, st.pending_commands.size()):
+		var a: Dictionary = (st.pending_commands[i] as Dictionary).get("args", {})
+		if a.has("action_id"):
+			sent.append(String(a.get("action_id", "")))
+	print("   按 [Enter] ⇒ 佇列新增 %d 道令：%s" % [st.pending_commands.size() - before, str(sent)])
+	_check("★★★★★[Enter] 真的把 `submit_trade_offer` 送出去（送出 ≠ 成功；實測 %s）" % str(sent),
+		sent.has("submit_trade_offer"))
+	print("   ★本格不驗成交結果（對方可以拒絕、資源可能不足）—— 它驗的是那道令有沒有被送出。")
+	await _free_ui(node)
+	_cell("_test_p34_trade_enter_submits_the_offer")
 
 
 # ══ P19：負對照覆蓋率棘輪 —— ★這一格【自己被改過】（2026-10-01）═══════════════

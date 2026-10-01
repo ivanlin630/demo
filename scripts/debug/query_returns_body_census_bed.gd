@@ -196,7 +196,7 @@ func _census() -> void:
 		["player.get_member_details",       func(s): return q.get_member_details(s, 3, 30)],
 		["player.get_location_context",     func(s): return q.get_location_context(s, 1, 1)],
 		["player.get_trade_preview",        func(s): return q.get_trade_preview(s, 4)],
-		["player.get_trade_direct_preview", func(s): return q.get_trade_direct_preview(s, 4)],
+		# ★【已退場 2026-10-01】那一列的查詢面函式整支退場（退場票）⇒ 母體 −1。★母體常數【先跑再逐字抄】，不憑預測。
 		["player.get_trade_session",        func(s): return q.get_trade_session(s, 4)],
 		["player.get_available_actions",    func(s): return q.get_available_actions(s, {})],
 		["player.pt_tile_self",             func(s): return q.pt_tile_self(s, 3)],

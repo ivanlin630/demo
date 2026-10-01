@@ -195,23 +195,8 @@ func get_trade_preview(state: WorldState, target_team_id: int) -> Dictionary:
 		"offer_preview": preview,
 	})
 
-# U12: 直接互動交易（resolve_trade_direct）的預覽 — 回 {feasible, player_gives, player_gets}
-# text UI confirm_trade 流程走此 auto-trade，非 offer-based get_trade_preview
-func get_trade_direct_preview(state: WorldState, target_team_id: int) -> Dictionary:
-	var check := _check_player_with_team(state)
-	if check["code"] != "ok":
-		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
-	var p: PersonData = state.persons[state.player_id]
-	var pt_id: int    = p.team_id
-	if not state.teams.has(target_team_id):
-		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
-	var discovered: Array = state.team_discovered.get(pt_id, [])
-	if target_team_id != pt_id and not discovered.has(target_team_id):
-		return PlayerApiMapper.map_query_envelope(false, "not_visible", "team not visible", {})
-	var preview: Dictionary = InteractionSystem.new().preview_trade(state, pt_id, target_team_id)
-	return PlayerApiMapper.map_query_envelope(true, "ok", "", { "preview": preview })
+# ★已退場（2026-10-01）：直接成交那一路的**預覽查詢** —— 理由見 `player_command_system.gd` 那一段。
 
-# 互動 offer-builder：雙方清單+估值+公平度 DTO（reuse evaluate_offer / TradeValuation.local_value）
 func get_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var check := _check_player_with_team(state)
 	if check["code"] != "ok":
