@@ -96,6 +96,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_p15_neighbours_unchanged",
 	"_test_p16_action_shape_reverse_sweep",
 	"_test_p17_shape_team_equals_team_target_actions",
+	"_test_p18_unlisted_must_be_reachable_from_some_panel",
 ]
 
 
@@ -1001,6 +1002,149 @@ func _test_p11_label_has_one_producer() -> void:
 
 
 
+
+# == P18 ＝ 第三條反向掃 [★★★`listed==false` 的那些要【進得去某一屏】] ===========
+# ★systems 裁 (甲) 時加的那一條：`listed` 把「出現在自家隊動作區」宣告出來，
+#   而**被宣告為不在那一屏的那些**，必須在**某個子模式 handler 的函式體**裡出現
+#   —— 否則它是**哪一屏都進不去**的動作 ＝ **一個真正的新呈現決定（WHAT）**。
+# ★★而這一格**不裁定**那件事：它只把那份名單**逐名印出來**，拿去問藍圖。
+#   ⇒ ★★★它讓「哪一屏都進不去」從【一句需要有人想起來的話】
+#     變成【卷面上一份會自己長出來的名單】。
+# ★★★★而空名單**也要印**：那是「這一輪沒有 WHAT 殘餘物」的證據
+#   （一個沒有印出來的空集合跟一個沒有跑的迴圈長得一樣）。
+# ★誠實限（就地寫）：本格掃的是 `_handle_*_mode` 的**函式體文字**
+#   ⇒ 它答「那個 action_id 的字面在某一屏的 handler 裡出現過」，
+#     **不答**「玩家真的按得到它」（後者要行為證，而那不在本票）。
+#   ⇒ 失效方向是【少算 WHAT 殘餘物】（字面出現就算進去了）⇒ 名單是**下界**。
+# 負對照：把一個 `listed==false` 的 id 從它那一屏的 handler 裡拿掉 ⇒ 它出現在名單上 ⇒ 待實測
+func _test_p18_unlisted_must_be_reachable_from_some_panel() -> void:
+	print("\n── P18 `listed==false` 的那些進得去哪一屏 ──")
+	var shape: Dictionary = PlayerCommandSystem.ACTION_SHAPE
+	# ★★★★★【母體第一版太寬，而寬的壞得更安靜】（2026-10-01 實測）——
+	#   第一版母體 ＝ 所有 `listed==false`（43 個）⇒ 名單生出 **19 個**名字，
+	#   而其中 8 個是**團隊目標動作**（`attack`／`extort`／`propose_alliance`…）：
+	#   它們從**互動層查表**進去（`TextUiView.action_for_key` → `action_id`）
+	#   ⇒ handler 的函式體裡**根本沒有那個字面** ⇒ 我的掃描看不到它們。
+	#   ⇒ ★★那是一個「看起來像大工作的數字」—— 而真正要問藍圖的只有
+	#     **不吃目標而又不在那一屏**的那些（`target=="none" and not listed`）。
+	#   ⇒ ★★★所以母體收窄成那一類；而 `team`／`tile` 有它們自己的入口
+	#     （互動層的查表／地圖游標）⇒ 它們不是本格的問題。
+	var unlisted: Array = []
+	for k in shape.keys():
+		var row: Dictionary = shape[k] as Dictionary
+		if String(row.get("target", "")) == "none" and not bool(row.get("listed", false)):
+			unlisted.append(String(k))
+	unlisted.sort()
+	print("   母體 ＝ `target==\"none\"` 且 `listed==false` ⇒ %d 個" % unlisted.size())
+	_check("★母體地板 A：那一類不是空的（空 ⇒ 下面整格不跑）", unlisted.size() > 0)
+	# ★★★★掃描母體也放寬：不只 `_handle_*_mode`，而是 `scripts/ui/` 的**每一行非註解**
+	#   ★理由（實測逼出來的）：`surrender_in_encounter` 走 `encounter_view.gd` 的按鍵處理，
+	#     那裡**沒有** `_handle_*_mode` 這種函式 ⇒ 只掃那個命名樣式會把它誤報成「進不去」。
+	#   ⇒ ★★判準：**掃描母體用「哪些檔」不要用「哪些函式名」** ——
+	#     函式命名慣例是一個會有例外的東西，而例外會變成假的 WHAT 殘餘物。
+	# ★★★★★★【掃描母體要排除死樹，而「哪些是活的」不是我判的】（2026-10-01 實測）——
+	#   `main.gd` 是**整棵死樹**（`press_is_one_tick_bed.gd` 的 `SPEC_LIVE_UI_FILES`
+	#   那一段逐字寫著「main.gd 10 是死樹」，而本票沒有改那件事）
+	#   ⇒ 把它算進掃描母體 ⇒ `confirm_trade` 會被判成「進得去」而它只出現在死樹裡
+	#   ⇒ ★那是一個**假陰性**：名單少一個，而少的那個正是要問藍圖的。
+	const DEAD_TREE: Array = ["main.gd"]
+	# ★★★★★★★【第二桶：強制事件回應】——
+	#   `choose_heir`／`respond_aid_request` 這一類是**強制事件的回應動作**
+	#   （`event_system.gd:85` 逐字 `"action": "choose_heir"`）⇒ 玩家按的是**字母鍵**，
+	#   而 `action_id` 從 **payload** 來 ⇒ UI 的 code 裡**沒有那個字面**。
+	#   ⇒ ★所以它們不是「哪一屏都進不去」，是**我的掃描結構上看不到它們**
+	#     —— 與團隊目標動作被查表派發是同一個形狀（第三次）。
+	#   ⇒ ★★處置：把它們分到自己一桶，而歸類的依據是**機械的**
+	#     （`scripts/simulation/` 裡有 `"action": "<id>"` 這個字面）不是我手挑。
+	var hits: Dictionary = {}
+	var n_files: int = 0
+	var skipped: Array = []
+	var d := DirAccess.open("res://scripts/ui")
+	if d == null:
+		_check("★母體地板 B：開得了 res://scripts/ui（開不了 ⇒ 本格不可判不是綠）", false)
+	else:
+		d.list_dir_begin()
+		var f: String = d.get_next()
+		while f != "":
+			if f.ends_with(".gd"):
+				if DEAD_TREE.has(f):
+					skipped.append(f)
+					f = d.get_next()
+					continue
+				n_files += 1
+				for line in FileAccess.get_file_as_string("res://scripts/ui/" + f).split("\n"):
+					var l: String = String(line)
+					if l.strip_edges().begins_with("#"):
+						continue
+					for aid in unlisted:
+						if l.contains('"%s"' % String(aid)):
+							if not hits.has(String(aid)):
+								hits[String(aid)] = []
+							if not (hits[String(aid)] as Array).has(f):
+								(hits[String(aid)] as Array).append(f)
+			f = d.get_next()
+		d.list_dir_end()
+	print("   掃了 `scripts/ui/` 的 %d 支 .gd（★排除死樹 %s）" % [n_files, str(skipped)])
+	_check("★★母體地板 B：真的掃到檔（%d；0 ⇒ 下面那份名單會是【全部】而那是假的）" % n_files,
+		n_files > 0)
+	_check("★★★母體地板 C：死樹真的被排除了（%d 支；0 ⇒ 那個排除沒有生效）" % skipped.size(),
+		skipped.size() == DEAD_TREE.size())
+	# ★★★★★★★★【第二桶的判準第一版太窄 ⇒ 它【多報】了一個】（2026-10-01 實測）——
+	#   第一版判準 ＝ `scripts/simulation/` 裡有 `"action": "<id>"` 這個字面。
+	#   ★而 `respond_aid_request` 的可達路徑是 `respond_to_forced()`（`:1242`）
+	#     **直接呼 handler**（`:1281` 逐字 `result = _action_respond_aid_request(state, -1, …)`）
+	#     ⇒ 沒有那個字面 ⇒ 它被誤判成「哪一桶都不是」。
+	#   ⇒ ★★而那個誤判的方向是**多報**，與我原本寫的「失效方向是少算」**相反**
+	#     —— ⇒ 判準的失效方向要**逐桶**講，不能用一句話蓋兩桶。
+	#   ⇒ ★★★所以判準換成**行為形狀**：那支 handler 在 registry 之外**還有直接呼叫點**
+	#     ⇒ 它有第二條派發路徑 ⇒ 玩家進得去（而卷面要**指名那支函式**）。
+	var forced: Dictionary = {}
+	var pcs_src: String = FileAccess.get_file_as_string(
+		"res://scripts/simulation/player_command_system.gd")
+	var cur_fn: String = ""
+	for line2 in pcs_src.split("\n"):
+		var l2: String = String(line2)
+		if l2.begins_with("func "):
+			cur_fn = l2.substr(5, maxi(0, l2.find("(") - 5))
+			continue
+		if l2.strip_edges().begins_with("#") or cur_fn == "_setup_registry":
+			continue
+		for aid3 in unlisted:
+			if l2.contains("_action_%s(" % String(aid3)) and cur_fn != "_action_%s" % String(aid3):
+				forced[String(aid3)] = cur_fn
+	_check("★★母體地板 D：第二桶真的讀到那支檔（%d 行）" % pcs_src.split("\n").size(),
+		pcs_src.length() > 0)
+	var nowhere: Array = []
+	var in_panel: int = 0
+	var n_forced: int = 0   # ★用分類時的計數，不用 forced.size()：有 id 同時在兩桶 ⇒ 會重複計
+	for aid2 in unlisted:
+		if hits.has(String(aid2)):
+			in_panel += 1
+			print("     · %-24s 出現在 %s" % [String(aid2), str(hits[String(aid2)])])
+		elif forced.has(String(aid2)):
+			n_forced += 1
+			print("     · %-24s ★registry 之外的第二條派發路徑：`%s()`" % [
+				String(aid2), String(forced[String(aid2)])])
+		else:
+			nowhere.append(String(aid2))
+	print("   ── 三桶相加 ＝ 母體 ──")
+	print("   某一屏的 UI code 裡有字面 %d｜強制事件回應 %d｜★哪一桶都不是 %d｜母體 %d" % [
+		in_panel, n_forced, nowhere.size(), unlisted.size()])
+	_check("★★★★三數相加 ＝ 母體（%d ＋ %d ＋ %d ＝ %d）" % [
+		in_panel, n_forced, nowhere.size(), unlisted.size()],
+		in_panel + n_forced + nowhere.size() == unlisted.size())
+	print("   ★★★【哪一桶都不是】＝ %s　⇒ 這份名單要拿去問藍圖（systems 裁）" % str(nowhere))
+	print("     ★空名單也是結果：它是「這一輪沒有 WHAT 殘餘物」的證據。")
+	print("   ★誠實限要【逐桶】講（一句話蓋兩桶會把方向講錯 —— 2026-10-01 實測過一次）：")
+	print("     ·第一桶：答【字面出現在某支活的 UI 檔裡】，不答【玩家真的按得到】")
+	print("       ⇒ 失效方向【少算殘餘物】（字面在就算進去了）")
+	print("     ·第二桶：答【handler 在 registry 之外還有直接呼叫點】")
+	print("       ⇒ 失效方向也是【少算】（有第二條路就算進去，不問那條路通不通）")
+	print("     ⇒ 兩桶都少算 ⇒ 最後那份名單是**下界**（真正進不去的可能更多）。")
+	_check("★★★★本格只要求名單被印出來（印了 %d 個）" % nowhere.size(), true)
+	_cell("_test_p18_unlisted_must_be_reachable_from_some_panel")
+
+
 # == P16 ＝ spec P1 [母體機械導出 ＋ 反向掃] =====================================
 # ★母體【不是一份新清單】：`_action_registry` 是權威，`ACTION_SHAPE` 只多一個維度。
 #   ⇒ 完整性靠**反向掃**不靠紀律：registry 的每一個 key 都要有人宣告過，
@@ -1328,6 +1472,7 @@ func _initialize() -> void:
 	_test_p15_neighbours_unchanged()
 	_test_p16_action_shape_reverse_sweep()
 	_test_p17_shape_team_equals_team_target_actions()
+	_test_p18_unlisted_must_be_reachable_from_some_panel()
 	var miss: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(c):

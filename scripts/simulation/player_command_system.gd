@@ -294,6 +294,21 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 #   ·`"none"` ＝ 不吃目標（自家隊／腳下那格）   ·`"team"` ＝ 要一支別隊
 #   ·`"tile"` ＝ 要一格座標
 #
+# ★★★★★【`listed` 的語意 —— 寫死，不准漂】（systems 裁 (甲) 2026-10-01）：
+#   `listed == true` ＝ **這個動作出現在【自家隊動作區】那一屏**。
+#   ★★它**不是**「它能不能做」—— 能不能做 ＝ `enabled` ＋ `disabled_reason`，那是**另一個維度**。
+#   ★★★而它**不是一個新的呈現決定**：這個分別**產品裡已經存在**，
+#     只是今天**只隱含在「哪些 emit 點存在」裡** ——
+#     `listed == false` 的那些是從【子模式面板】進去的，實例（systems 開檔核過）：
+#       `build_facility`     → `text_ui_main.gd:2169`（`_handle_outpost_mode`）
+#       `deposit_to_storage` → `:2374`（`_handle_storage_mode`）
+#       `order_subteam`      → `:2510`（`_handle_subteam_mode`）
+#   ⇒ 所以 `listed` 是**把一個已經存在的事實宣告出來**，而那正是本票 §2 那句話的本體：
+#     **邊界沒有被宣告，所以它只能被手抄**。
+#   ⇒ ★而「哪一屏都進不去」那一類**不靠紀律發現**：床的第三條反向掃
+#     （`listed == false` 的那些必須在某個 `_handle_*_mode` 的函式體裡出現）
+#     會把它們**逐名印在卷面上**，而那份名單是要拿去問藍圖的 —— 不是在這裡決定。
+#
 # ★★★★★★【誠實限 —— 這一段是給下一個人的，不是裝飾】（spec §4b 逐字）：
 #   本表宣告 **51 個 registry key ＋ 3 個具名豁免** 的 `target`，
 #   而本票**不保證每一個宣告都對**。它保證的是兩件【可機械驗】的事：
@@ -322,60 +337,60 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 #   函式體 0 次讀取）⇒ 轉過去的值被丟掉 ⇒ 玩家不是用「選一支隊」來做它
 #   （真正的對象來自 `state.player_state["pending_trade_target"]`）。
 const ACTION_SHAPE: Dictionary = {
-	"abandon_outpost":         {"target": "none"},
-	"accept_encounter":        {"target": "none"},
-	"attack":                  {"target": "team"},
-	"beg":                     {"target": "team"},
-	"betray_faction":          {"target": "none"},
-	"build_facility":          {"target": "none"},
-	"build_outpost":           {"target": "none"},
-	"camp":                    {"target": "none"},
-	"cancel_move":             {"target": "none"},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
-	"cancel_trade":            {"target": "none"},
-	"choose_heir":             {"target": "none"},
-	"clear_member_order":      {"target": "none"},
-	"confirm_gather_intel":    {"target": "none"},
-	"confirm_trade":           {"target": "none"},
-	"demand_tribute":          {"target": "team"},
-	"demolish_outpost":        {"target": "none"},
-	"deposit_to_storage":      {"target": "none"},
-	"disband_faction":         {"target": "none"},
-	"dispatch_subteam":        {"target": "none"},
-	"establish_faction":       {"target": "none"},
-	"extort":                  {"target": "team"},
-	"extract_treasury":        {"target": "none"},
-	"gather_intel":            {"target": "team"},
-	"hunt":                    {"target": "none"},
-	"hunt_beast":              {"target": "none"},
-	"ignore":                  {"target": "team"},   # ★具名豁免：不在 `_action_registry`（它在 `execute_action` 更上面就 return）
-	"invite_settle":           {"target": "team"},
-	"leave_faction":           {"target": "none"},
-	"leave_loot":              {"target": "none"},
-	"move_to":                 {"target": "tile"},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
-	"offer_surrender":         {"target": "team"},
-	"order_faction_member":    {"target": "none"},
-	"order_subteam":           {"target": "none"},
-	"promote_anon":            {"target": "none"},
-	"propose_alliance":        {"target": "team"},
-	"recall_subteam":          {"target": "none"},
-	"recruit":                 {"target": "team"},
-	"recruit_anon":            {"target": "team"},
-	"refresh_targets":         {"target": "none"},
-	"respond_aid_request":     {"target": "none"},
-	"set_armed_anon_ratio":    {"target": "none"},
-	"set_faction_goal":        {"target": "none"},
-	"set_tribute_rate":        {"target": "none"},
-	"subjugate_enemy":         {"target": "none"},
-	"submit_trade_offer":      {"target": "none"},
-	"surrender_in_encounter":  {"target": "none"},
-	"surrender_pre_encounter": {"target": "none"},
-	"take_loot":               {"target": "none"},
-	"trade":                   {"target": "team"},
-	"train":                   {"target": "none"},
-	"upgrade_farming":         {"target": "none"},
-	"upgrade_manufacturing":   {"target": "none"},
-	"upgrade_outpost":         {"target": "none"},
-	"withdraw_from_storage":   {"target": "none"},
+	"abandon_outpost":         {"target": "none", "listed": false},
+	"accept_encounter":        {"target": "none", "listed": false},
+	"attack":                  {"target": "team", "listed": false},
+	"beg":                     {"target": "team", "listed": false},
+	"betray_faction":          {"target": "none", "listed": false},
+	"build_facility":          {"target": "none", "listed": false},
+	"build_outpost":           {"target": "none", "listed": false},
+	"camp":                    {"target": "none", "listed": true},
+	"cancel_move":             {"target": "none", "listed": true},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
+	"cancel_trade":            {"target": "none", "listed": false},
+	"choose_heir":             {"target": "none", "listed": false},
+	"clear_member_order":      {"target": "none", "listed": false},
+	"confirm_gather_intel":    {"target": "none", "listed": true},
+	"confirm_trade":           {"target": "none", "listed": false},
+	"demand_tribute":          {"target": "team", "listed": false},
+	"demolish_outpost":        {"target": "none", "listed": false},
+	"deposit_to_storage":      {"target": "none", "listed": false},
+	"disband_faction":         {"target": "none", "listed": false},
+	"dispatch_subteam":        {"target": "none", "listed": false},
+	"establish_faction":       {"target": "none", "listed": true},
+	"extort":                  {"target": "team", "listed": false},
+	"extract_treasury":        {"target": "none", "listed": false},
+	"gather_intel":            {"target": "team", "listed": false},
+	"hunt":                    {"target": "none", "listed": true},
+	"hunt_beast":              {"target": "none", "listed": true},
+	"ignore":                  {"target": "team", "listed": false},   # ★具名豁免：不在 `_action_registry`（它在 `execute_action` 更上面就 return）
+	"invite_settle":           {"target": "team", "listed": false},
+	"leave_faction":           {"target": "none", "listed": false},
+	"leave_loot":              {"target": "none", "listed": true},
+	"move_to":                 {"target": "tile", "listed": false},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
+	"offer_surrender":         {"target": "team", "listed": false},
+	"order_faction_member":    {"target": "none", "listed": false},
+	"order_subteam":           {"target": "none", "listed": false},
+	"promote_anon":            {"target": "none", "listed": true},
+	"propose_alliance":        {"target": "team", "listed": false},
+	"recall_subteam":          {"target": "none", "listed": false},
+	"recruit":                 {"target": "team", "listed": false},
+	"recruit_anon":            {"target": "team", "listed": false},
+	"refresh_targets":         {"target": "none", "listed": false},
+	"respond_aid_request":     {"target": "none", "listed": false},
+	"set_armed_anon_ratio":    {"target": "none", "listed": false},
+	"set_faction_goal":        {"target": "none", "listed": false},
+	"set_tribute_rate":        {"target": "none", "listed": false},
+	"subjugate_enemy":         {"target": "none", "listed": true},
+	"submit_trade_offer":      {"target": "none", "listed": false},
+	"surrender_in_encounter":  {"target": "none", "listed": false},
+	"surrender_pre_encounter": {"target": "none", "listed": false},
+	"take_loot":               {"target": "none", "listed": true},
+	"trade":                   {"target": "team", "listed": false},
+	"train":                   {"target": "none", "listed": true},
+	"upgrade_farming":         {"target": "none", "listed": false},
+	"upgrade_manufacturing":   {"target": "none", "listed": false},
+	"upgrade_outpost":         {"target": "none", "listed": false},
+	"withdraw_from_storage":   {"target": "none", "listed": false},
 }
 
 const TEAM_TARGET_ACTIONS: Array = [
