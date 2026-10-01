@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 進貢提案票 —— 一個 WHAT 殘餘物
 topic: ★一句要你裁（不擋本票）：**NPC 主動送貢之後，它對玩家的感覺應該是什麼？**｜★★而現況是**反的**：那個動作會走 `form_feud`（結仇邊）—— 它原本的語境是**遠程索貢／同格勒索**兩個**強制**情境｜★★★我已裁 HOW 那一半（accept 不寫關係）⇒ 你裁的是「要不要**正面**寫一筆」
 ---
