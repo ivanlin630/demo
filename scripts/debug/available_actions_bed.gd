@@ -909,6 +909,7 @@ func _test_p10_reverse_sweep_payload_without_declaration() -> void:
 	_cell("_test_p10_reverse_sweep_payload_without_declaration")
 
 
+# 負對照：在 production 再寫一句同字面（`_negctrl_e_second_copy()` 回同一個 msg）⇒ 本格紅並指名兩處真行號 player_command_system.gd:333／:337 ⇒ 已於 4e50c0ec6（2026-10-01 這一輪） 實測紅
 # 負對照：把 `_action_label(act)` 加回信封那一側 ⇒ 本格紅（在這一段 0 次，實測 1） ⇒ 已於 feat/available-actions-full-list（2026-10-01 這一輪） 實測紅
 # ══ P11：★label 在這條路上只有【一個生產者】（systems 裁 2026-10-01 ②）════════════
 # ★★★為什麼「兩邊都委派到同一張表」不算安全：那只代表它們**今天同值**。
@@ -1005,6 +1006,7 @@ func _test_p11_label_has_one_producer() -> void:
 #   ①入口在退化狀態下**仍然列得出來**（打開選單不用錢）
 #   ②而**真的要花錢的那個動作**（`recruit_anon`）在退化狀態下**消失並說出原因**
 #   ⇒ 只驗 ① 會讓「全部都永遠可做」也綠；只驗 ② 抓不到入口被錢擋掉。
+# 負對照：把 §2④ 刪掉的那段 Layer 5 emit 加回去 ⇒ 本格紅「查詢面裡恰好一次（實測 2）」（另帶信封呼叫點那一格 14 → 15） ⇒ 已於 4e50c0ec6（2026-10-01 這一輪） 實測紅
 # == P13 = spec P2 [恰好一次] ===================================================
 # ★這一格擋的是「**搬了但沒刪舊的**」—— 本票最容易漏的那一件：
 #   `offer_surrender` 進了 `TEAM_TARGET_ACTIONS` ⇒ 它由 `get_action_availability` 產出；
@@ -1050,6 +1052,10 @@ func _test_p13_listed_exactly_once() -> void:
 	_cell("_test_p13_listed_exactly_once")
 
 
+# 負對照：共用前置檢查的條件【反轉】（`if state.encounter_active:`）⇒ 本格甲／乙／丙三條與 P15 一起紅（5 條），而①判斷單一源與②消費者檢查**保持綠** ⇒ 已於 4e50c0ec6（2026-10-01 這一輪） 實測紅
+# ★★用【反轉】不用 `if false`：反轉讓那個字面仍然出現一次 ⇒ ①② 保持綠 ⇒ 紅燈留在【行為】那幾格。
+# ★★★而它紅【五條】不是連帶污染：**共用之後一個擾動必然讓所有消費者的格一起紅**
+#   —— 那本身就是「它們真的共用」的證據（systems 收了這一句）。
 # == P14 = spec P4 [在遭遇中] ===================================================
 # ★spec 明文要 P3 與 P4 **分兩格**：它們是兩個獨立的洞，
 #   而一個 OR 斷言會讓其中一支永遠沒被驗到。
