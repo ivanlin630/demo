@@ -1892,24 +1892,30 @@ func _interact_action_split() -> Dictionary:
 func _build_interact_str() -> String:
 	var lines: Array = []
 
-	# 已選目標：顯示行動清單（只 team-target 動作,self-actions 在目標選擇階段）
+	# 已選目標：★不再印行動清單（它與 handler 不同源 ⇒ 已砍，見下）—— 只留標題與出口
 	if _interact_target >= 0:
-		var tgt_name: String = "Team%d" % _interact_target
-		lines.append("── %s 行動 ──" % tgt_name)
-		var actions: Array = _interact_action_split()["team"]
-		var a_start: int = _interact_page * 9
-		var row: String = ""
-		var a_shown: int = 0
-		for gi in range(a_start, mini(a_start + 9, actions.size())):
-			a_shown += 1
-			row += "[%d]%s  " % [a_shown, actions[gi].get("label", actions[gi].get("action_id", ""))]
-			if a_shown % 4 == 0:
-				lines.append(row.strip_edges())
-				row = ""
-		if not row.strip_edges().is_empty():
-			lines.append(row.strip_edges())
-		if actions.size() > 9:
-			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_interact_page + 1, int(ceil(actions.size() / 9.0))])
+		# ══ ★★★★★★【這一段原本自己印一份動作清單，而它說謊 —— 已砍】═══
+		# （spec `2026-10-01-player-ui-is-a-terminal-repl-HOW.md` §7／§9，systems 裁 (甲)）
+		# ★它印的是 `"[%d]" % a_shown` ＝**位置索引**（＋`_interact_page * 9`），
+		#   而玩家按下去由 `_handle_interact_mode` 解讀，而那裡走
+		#   `TextUiView.action_for_key()` ＝ **靜態綁 `action_id`** ⇒ 兩者不是同一份。
+		# ★★實測（`docs/measurements/2026-10-01-interact-duplicate-options-census.md` 861 字原文）：
+		#   **9 個裡 7 個對不上，2 個是巧合對上** —— 面板印 `[1]忽略` 而按 `1` 實際做**貿易**、
+		#   印 `[2]攻擊` 而按 `2` 實際做**提議同盟**。
+		#   ⇒ ★用戶看到的是「重複選項」，而真正發生的是**他做了他沒有選的事，而他不會知道**。
+		# ★★★而這不是「上一張票那個病又犯」：那張票把**顯示（`action_block`）**與
+		#   **輸入（handler）**都遷成靜態綁 id，而**這一處從來沒有被遷移過，也從來沒有觀察者**
+		#   —— 三支床各驗一側，沒有一格把 panel 與 handler 接起來（現在有了）。
+		# ★★★★為何砍 panel 而不是砍 `action_block`（spec 原本寫的方向）：
+		#   **哪一份與執法端同源，就留哪一份**。`action_block` 與 handler 讀同一張
+		#   `ACTION_DIGITS`；panel 是第三種讀法 ⇒ 砍錯邊的代價不是「少一份」，
+		#   是**留下一份會說謊的**，而那比重複更糟。
+		# ★★★★★順帶解決的兩件：①那行「第 N/M 頁 `[,]`上 `[.]`下」是**假廣告**
+		#   —— handler 在聚焦目標時對 `,`／`.` 走 `_refuse_unbound_key`（本檔 `:1676-1678`）
+		#   ②`action_block` 多給 panel 沒有的兩件：`（不可：原因）` 與「未綁鍵 N」抬頭。
+		# ⇒ **這一段只留標題與出口**，而動作清單**只有一處組裝**（`action_block`）。
+		lines.append("── Team%d 行動 ──" % _interact_target)
+		lines.append("（行動與按鍵列在下方「動作」區 —— ★這裡不再印第二份）")
 		lines.append("── [Esc]返回 ──")
 		return "\n".join(lines)
 
