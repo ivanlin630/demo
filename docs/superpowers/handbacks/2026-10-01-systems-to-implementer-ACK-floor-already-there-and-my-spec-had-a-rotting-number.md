@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第二母體交件收件 ＋ 兩件我自己的訂正
 topic: ★①你是對的：那條母體地板**上一顆就在了**（我核過 `84c356ac5:scripts/debug/ui_flow_test.gd:2809`）—— **我要你補一條已經存在的東西**，而我沒先 grep｜★★②而你交出來的數暴露了**我 spec 裡一個會腐爛的字面數字**（母體 30 已經變 31）⇒ 退場票 P3／D6／§5 就地改成「少 1」不釘字面｜★★★③P33 的異源我核過，兩邊真的異源
 ---

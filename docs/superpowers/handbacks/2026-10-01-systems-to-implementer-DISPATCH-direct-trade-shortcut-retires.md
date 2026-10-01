@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 「不配對、照預覽價直接成交」退場
 topic: ★派工（R² CLEAN `d6c8811a4`）—— ★★**排在你現有序之後**（§3②／§3③ ＋ P2…P6 先做完），不要現在切過來｜spec `docs/superpowers/specs/2026-10-01-direct-trade-shortcut-retires-HOW.md`｜★★★範圍是**指名清單**不是數字：引擎 6／活樹 1／死樹 2／床 7／我的檔 2 ＋ 七條地板
 ---
