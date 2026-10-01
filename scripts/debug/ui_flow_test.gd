@@ -2384,7 +2384,7 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 #   ⇒ no-op ⇒ 不可能紅）⇒ **淨變化 0** ⇒ 地板維持 28。
 #   ★把它往上調會讓這一格立刻紅（本檔只有 28 條可數的），
 #     而把它往下調＝讓守衛閉嘴 ⇒ 兩個方向都不對：**沒變就不要動**。
-const CONTROL_FLOOR_UI: int = 30   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
+const CONTROL_FLOOR_UI: int = 33   # ★＋P31（Esc 直接回頂層）／P32（未綁出口改靜默）／P26（pop 之後 clear）   # ★＋P19 自己那兩道（表裡拿掉一支床／拿掉一條紀錄行）   # ★＋P30（不傳 panel ⇒ 12 個面板全部指名）   # ★＋P29 兩道（handler 回位置索引／手抄第二份對照表）   # ★＋P28（接電的行為證：拿掉 _render_screen 呼叫 ⇒ 六個錨全 0）   # ★＋P27 三道（強制搶走互動／鍵位會說話／信封帶 opens_submenu）
 const CONTROL_FLOOR_REPLAY: int = 2
 # ★新床要納進同一把尺 —— 否則棘輪只守舊的那兩支，而新寫的格不在它的母體裡
 const CONTROL_FLOOR_FEED: int = 7
@@ -2828,6 +2828,10 @@ func _test_p25_letter_key_only_in_interact_mode() -> void:
 		node.set(String(m3), false)
 	await _free_ui(node)
 	_cell("_test_p25_letter_key_only_in_interact_mode")
+# 負對照：讓 `_ui_pop()` 在彈出之後 `clear()` 整個堆疊（＝「Esc 全部彈掉」）⇒ 本格紅「★★★pop 一次 ＝ 深度 1（不是清空；實測 0）」 ⇒ 已於 66fab183d（2026-10-01 這一輪） 實測紅
+# ★這一道是我為 P31 設計的擾動，而它紅在【本格】—— P31 當時全綠。
+#   ⇒ 它證明兩件事：①`_ui_pop` 的退化有人守（就是這一格）
+#     ②★一個負對照紅了，不代表【被它瞄準的那一格】有鑑別力。
 
 # ══ P26：★★★展開層堆疊【步 1】（spec §2⑥；systems 裁 2026-10-01）═══════════════
 # ★母體 ＝ `PlayerCommandSystem.SUBMENU_OPENERS`（引擎側宣告）與
@@ -3292,6 +3296,15 @@ func _test_p30_submode_panels_reach_the_screen() -> void:
 
 
 
+# 負對照：讓 Esc 直接回頂層（`_handle_intel_mode` 的 Esc 分支改呼 `_close_all_modes()`，＝spec 自己寫的那個擾動）⇒ 深度 2 那兩條紅（2 -> 0、頂層變空）而深度 1 那幾列照樣綠 ⇒ 已於 66fab183d（2026-10-01 這一輪） 實測紅
+# ★★★而我第一道負對照【紅在別的格】，那件事要寫在這裡：
+#   我先改 `_ui_pop` 讓它 `clear()`（＝「Esc 全部彈掉」）⇒ 紅的是 **P26**
+#   （`★★★pop 一次 ＝ 深度 1（不是清空；實測 0）`），**P31 全綠**。
+#   ⇒ 真因：Esc 走的不是 `_ui_pop`，是 `_intel_mode = false`（property setter 移那一層）
+#   ⇒ ★判準：負對照要打在【那條路真的走過的地方】；打在同名但沒被走到的函式上，
+#     紅燈會出現在另一格，而那時「有紅」會被讀成「本格有鑑別力」。
+#   ⇒ ★★而 `_ui_pop` 的退化**已經有人守**（P26）—— 這一句話本身是有用的交叉索引：
+#     下一個人想動 `_ui_pop` 時知道去哪裡看。
 # == P31 = spec P7 [Esc 只回一層]（版面 v2 HOW §3）=============================
 # ★spec 逐字：「從每一個展開層按一次 Esc ⇒ 深度 −1 且**六個錨仍各一次**」
 # ★★而「六個錨仍各一次」我要**窄化**（不是放寬）：`panel_block` 非空時**取代** map+pages
@@ -3416,6 +3429,7 @@ func _test_p31_esc_pops_exactly_one_layer() -> void:
 	_cell("_test_p31_esc_pops_exactly_one_layer")
 
 
+# 負對照：把 handler 頂端那個未綁定出口改成靜默（`_interact_mode_binds_key` 回 false 時直接 return）⇒ 本格紅並逐一指名 9 個鍵（0／Space／Tab／Minus／Equal／Semicolon／Apostrophe／Slash／BackSlash）而全檔只有這 1 個 FAIL ⇒ 已於 66fab183d（2026-10-01 這一輪） 實測紅
 # == P32 = spec P8 [未綁定鍵]（版面 v2 HOW §3，★這是那張 spec 的最後一格）=======
 # ★spec 逐字：「按一輪未綁定鍵 ⇒ 動作區不變、**無模式關閉**（沿用既有三態）」
 # ★★母體【導出不手挑】：動作層的鍵 = `TextUiView.ACTION_DIGITS` 那張表的反查
