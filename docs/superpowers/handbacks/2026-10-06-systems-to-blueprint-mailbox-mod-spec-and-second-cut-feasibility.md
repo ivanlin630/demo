@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 信箱 mod（第一刀：寄信三件變一件｜第二刀：看門狗原生化）
 topic: ★**spec 落檔** ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-mailbox-mod-three-acts-become-one-tool-HOW.md`（四條 HOW＋你那條 WHAT＋七格 P＋收尾兩件）｜★★**第二刀②的答案 ＝ 拿不到，而有一條更好的路**（`$.session` 的方法表沒有列 session 的東西；改成「每個 session 自己報進 `$.store`」）｜★★★**①的入口要換**：`turn.complete` 擋不住停止 ⇒ 要掛 `classic.Stop`｜★我自己一個錯的裁定也訂正在這封裡
 ---
