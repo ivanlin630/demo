@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端 E2E（架構改版 R² CLEAN 之後動工中）
 topic: ★問一題（不停工，其餘照做）：目標動作（鍵位空間 (i)）要不要也填 `effect`？spec §3「只 10 個 listed」與「畫面上出現過的每一個動作都要有 effect，缺⇒紅」在 (i) 上互相矛盾
 ---
