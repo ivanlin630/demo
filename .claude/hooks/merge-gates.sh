@@ -30,16 +30,18 @@ _mg_carry() { printf '%s' "$OUT" | grep -aE -- "$MG_CARRY_RE" | while IFS= read 
 #   ⇒ ★★而【恒空母體的守衛】與【根本沒接電】在卷面上一模一樣：都是「（本輪沒有）」。
 #   ⇒ ★★★所以要有一個【不靠真的一輪電池】就能跑的對照：餵它一段假 OUT，看它接不接得住。
 if [ "${1:-}" = "--selfcheck" ]; then
-  MG_ROWS="$(mktemp)"; MG_CARRY="$(mktemp)"; MG_CARRY_RE="已實測紅紀錄合計|^\[NOTE\]"; _sc_fail=0
+  MG_ROWS="$(mktemp)"; MG_CARRY="$(mktemp)"; MG_CARRY_RE="已實測紅紀錄合計|^\[NOTE\]|已知紅排除: [1-9]"; _sc_fail=0
   id="fake-gate"; DT=3
   OUT="一般的綠色正文
    [FIXTURE 假資料] ── 表裡 N 支床，已實測紅紀錄合計 M 條 ──
 [NOTE] 另一種携帶標記
+=== fake DONE === errors: 0｜已知紅排除: 2（K1 K2）
+=== fake2 DONE === errors: 0｜已知紅排除: 0
 又一行沒人要的正文"
   _mg_row "PASS"; _mg_carry
   if grep -q "^fake-gate	3s	PASS$" "$MG_ROWS"; then echo "[MG-SELFCHECK] ✓ 逐格行寫得出來"; else echo "[MG-SELFCHECK] ✗ 逐格行"; _sc_fail=1; fi
   _n=$(wc -l < "$MG_CARRY" | tr -d " ")
-  if [ "$_n" = "2" ]; then echo "[MG-SELFCHECK] ✓ carry 接到 2 行（合計那一行 ＋ [NOTE]）"; else echo "[MG-SELFCHECK] ✗ carry 接到 $_n 行（應為 2）"; _sc_fail=1; fi
+  if [ "$_n" = "3" ]; then echo "[MG-SELFCHECK] ✓ carry 接到 3 行（合計那一行 ＋ [NOTE] ＋ 已知紅排除: 2；★已知紅排除: 0 不搬）"; else echo "[MG-SELFCHECK] ✗ carry 接到 $_n 行（應為 3）"; _sc_fail=1; fi
   if grep -q "又一行沒人要的" "$MG_CARRY"; then echo "[MG-SELFCHECK] ✗ ★它把不該搬的也搬了（摘要會變成第二份卷面）"; _sc_fail=1; else echo "[MG-SELFCHECK] ✓ ★負對照：普通正文沒被搬進來"; fi
   rm -f "$MG_ROWS" "$MG_CARRY"
   if [ "$_sc_fail" = "0" ]; then echo "[MG-SELFCHECK] ✅ 全綠"; exit 0; fi
@@ -216,7 +218,9 @@ MG_CARRY="$_mg_root/.claude/hooks/.merge-gates-carry.$$"
 # ★★carry 規則：**逐條具名**，不用泛型樣式。
 #   ★★★理由：泛型樣式（例如「有三顆星的行」）會把半份卷面搬進來 ⇒ 摘要變成第二份卷面，而沒人讀。
 #   ★新增一條＝在這裡加一個字面（並在 --selfcheck 裡給它一個陽性對照）。
-MG_CARRY_RE="${MG_CARRY_RE:-已實測紅紀錄合計|^\[NOTE\]}"
+# ★已知紅排除（藍圖裁 2026-10-07，ui-flow 之後第二次撞同一個病）：床把本來會紅的格登成「已知」時，
+#   它的 DONE 行必須印「已知紅排除: N（id…）」；N>0 的那一行被搬進摘要，而本輪結語不得說「全部通過」
+MG_CARRY_RE="${MG_CARRY_RE:-已實測紅紀錄合計|^\[NOTE\]|已知紅排除: [1-9]}"
 : > "$MG_ROWS"; : > "$MG_CARRY"
 echo "[MERGE-GATES] runner-self=$_mg_self lines=$(wc -l < "${BASH_SOURCE[0]}" | tr -d ' ') run-id=$MG_RUNID｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**"
 echo "[MERGE-GATES] [TREE] HEAD=$_mg_head registry=$([ -n "$_mg_reg" ] && echo DIRTY || echo clean) runner=$([ -n "$_mg_run" ] && echo DIRTY || echo clean) code-dirty=$_mg_code artifact-dirty=${_mg_art:-?}"
@@ -585,6 +589,9 @@ elif [ "${_mg_undecidable:-0}" = "1" ]; then
   echo "[MERGE-GATES] ★★★本輪【不可判】：每一支都通過了，★**但它們不是跑在同一棵樹上**"
   echo "[MERGE-GATES]   ⇒ ★**不得當作 merge 判決** —— 乾淨重跑一輪再說。"
   exit 2
+elif grep -q "已知紅排除: [1-9]" "${MG_CARRY:-/nonexistent}" 2>/dev/null; then
+  echo "[MERGE-GATES] PASS（判決通過）｜★但有床帶著已知紅：$(grep -c '已知紅排除: [1-9]' "$MG_CARRY") 支 —— ★不得稱「全綠」"
+  grep "已知紅排除: [1-9]" "$MG_CARRY" | sed 's/^/[MERGE-GATES]   /'
 elif [ -n "${FORK_NOTE:-}" ]; then
   echo "[MERGE-GATES] PASS：本地這 $N 支全部通過｜${FORK_NOTE}"
 else
