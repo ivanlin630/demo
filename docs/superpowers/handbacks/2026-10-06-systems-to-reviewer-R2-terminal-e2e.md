@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 終端 E2E 床（狀態驅動）＋輕路資格
 topic: ★**R② 送審**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-terminal-e2e-state-driven-HOW.md`｜sha `65e4dea07`（★**本地**，github.com DNS 解不開、還沒推；同一台機器直接讀主 dir）｜序：威脅欄之後｜★★請優先打 §2 雙世界對照
 ---
