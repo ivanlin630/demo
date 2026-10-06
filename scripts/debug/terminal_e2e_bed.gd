@@ -43,11 +43,7 @@ const EFFECT_FIELDS: Dictionary = {
 # ★每一條必須**這一輪真的再現**，否則紅（世界修好之後這一句就不成立 ⇒ 要回來拿掉，不能讓它變成恆綠的豁免）
 #   key ＝ "<格>|<動作名>"
 #   ★這張表是**回報清單的機械形**（交件信逐條列給 systems），不是豁免：不在這裡的紅照紅
-var KNOWN: Dictionary = {
-	"P3|打聽情報": "走完選題（ask_food_source）⇒ 畫面只有「已排入：行動：確認打聽」，belief 沒變；"
-		+ "handler 回 ok:true（『他說了些事情（記下 0 筆…）』／『他也不知道』）而那句完成句不上畫面",
-	"P3|確認打聽": "同上（自家隊動作區的「確認打聽」重送上一次的選題）：ok:true、belief 不變、畫面只有回音",
-}
+var KNOWN: Dictionary = {}
 var _known_hit: Dictionary = {}
 
 
@@ -511,7 +507,15 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		# ★打聽：effect 掛在選題之後那道令 ⇒ 走完子選單（選第 1 題）（systems 裁 2026-10-07）
 		var expect_label: String = label
 		if _hint(wa["node"]).contains(SUBMENU_INTEL_HINT):
-			await _press(wa, "1")
+			# ★選第一個**可選**的題目（打聽票 I2 之後問糧源灰掉帶原因 ⇒ 按它是被拒、不是打聽）
+			var _tk: String = "1"
+			for _ln in _screen(wa["node"]).split("
+"):
+				var _mo := RegEx.create_from_string("^\\[(\\d)\\] ").search(_ln)
+				if _mo != null and not _ln.contains("（不可："):
+					_tk = _mo.get_string(1)
+					break
+			await _press(wa, _tk)
 			# ★走完子選單 ⇒ 下令的是選題之後那一道（confirm_gather_intel）⇒ 結果句該說的是它的名字
 			#   （名字取自唯一一份 label 表，不手寫）
 			expect_label = PlayerApiMapper.action_label("confirm_gather_intel")
@@ -534,6 +538,8 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 			print(_screen(wa["node"]))
 		var a_keys: Array = (wa["keys"] as Array).slice(prefix.size())
 		var snap_a: Dictionary = _snap(wa["node"])
+		# ★打聽那兩個動作：這一步實際問的題目（confirm 讀 player_state 的選題）⇒ 自知題不寫 belief，紅二不適用
+		var intel_topic: String = String(wa["node"]._bridge._state.player_state.get("gather_intel_choice", "")) 			if label in [PlayerApiMapper.action_label("gather_intel"), PlayerApiMapper.action_label("confirm_gather_intel")] else ""
 		var tick_a: int = _tick(wa["node"])
 		p10_n += int(wa["p10_n"])
 		p10_bad.append_array(wa["p10_bad"])
@@ -575,7 +581,8 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		var diff: Array = _diff_fields(snap_a, snap_b)
 		var rec: Dictionary = {"step": step, "space": space, "label": label, "kind": String(pick["kind"]),
 			"a_keys": a_keys, "b_keys": b_keys, "tick_a": tick_a, "tick_b": tick_b, "adv": adv,
-			"result": result, "said": said, "new_ev": new_ev, "diff": diff, "expect_label": expect_label}
+			"result": result, "said": said, "new_ev": new_ev, "diff": diff, "expect_label": expect_label,
+			"intel_topic": intel_topic}
 		steps.append(rec)
 		var sp_name: String = {"forced": "字母", "self": "數字", "action": "目標動作"}.get(space, space)
 		var line: String = "step %02d｜%s %s｜A %s（t%d）｜B %s（t%d）｜結果：%s｜差異：%s" % [step, sp_name, label,
@@ -680,7 +687,10 @@ func _judge(r: Dictionary) -> void:
 				p2_bad += 1
 				_check("P2 step %d 按「%s」⇒ 結果句沒有說「%s」（%s）" % [int(s["step"]), label, want, said], false)
 		# P3 紅二：說成功 ⇒ effect 那幾欄在 A−B 非空
-		if queued and not refused and eff != "" and not (EFFECT_FIELDS[eff] as Array).is_empty():
+		var self_knowledge: bool = InquirySystem.SELF_KNOWLEDGE_TOPICS.has(String(s.get("intel_topic", "")))
+		if self_knowledge:
+			print("   step %02d「%s」問的是自知題（%s）⇒ 不寫 belief、紅二不適用" % [int(s["step"]), label, String(s["intel_topic"])])
+		if queued and not refused and eff != "" and not (EFFECT_FIELDS[eff] as Array).is_empty() and not self_knowledge:
 			p3_n += 1
 			var need: Array = EFFECT_FIELDS[eff]
 			if not need.all(func(f): return diff.has(f)):

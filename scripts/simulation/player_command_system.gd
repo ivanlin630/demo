@@ -1370,7 +1370,7 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 	#   ＝ self-knowledge，不是別人給的情報（spec §2／§3(D)）。
 	var msg_gi: String = "情報獲取"
 	var out_gi: Dictionary = {}
-	if choice_gi == "ask_faction_status":
+	if InquirySystem.SELF_KNOWLEDGE_TOPICS.has(choice_gi):
 		msg_gi = "你確認了自家勢力的狀況"
 	else:
 		SimMessageSystem.new()._exchange_intel(state, npc_id_gi, _pt_id, choice_gi, out_gi)

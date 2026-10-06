@@ -914,6 +914,40 @@ func _test_p7_positive_control_fixtures() -> void:
 	var pv: String = _rule_d(String(panel.get("message", "")))
 	if pv != "":
 		_note("d", "P7[3]:面板 message", pv, "面板文字（map_forced_interaction）把 id 原樣印給玩家")
+	# ④【打聽票 P0，藍圖點名】不誠實＋有近期事件＋那 30% 擲骰成立 ⇒ 偽造訊息那一條路
+	#   ★走訪的母體從沒走到它（擲骰靠運氣）⇒ 佈置固定走到：關係壓低（不誠實）、對方有一則近期訊息、
+	#     擲骰用 seed 控制（找一個第一個 randf() < 0.3 的 seed，再用它重播 —— resolve_inquiry 在這個題目裡第一個擲的就是它）
+	#   ★修前：MessageData（RefCounted）呼 `.duplicate()` ⇒ SCRIPT ERROR（runner 的 SCRIPT ERROR 偵測讓本床紅）
+	var tri4: Array = _fresh()
+	var st4: WorldState = tri4[0]
+	var pt4: TeamData = st4.teams.get(st4.get_player_team_id())
+	var npc4: TeamData = null
+	for k in st4.teams.keys():
+		if int(k) != pt4.team_id and st4.teams[k].leader_id != -1:
+			npc4 = st4.teams[k]
+			break
+	npc4.known_reputations[pt4.team_id] = 0.1
+	var m4 := MessageData.new()
+	m4.id = 990001
+	m4.type = "battle"
+	m4.description = "P7[4] 佈置的近期事件"
+	m4.origin_team_id = npc4.team_id
+	if not st4.team_known.has(npc4.team_id):
+		st4.team_known[npc4.team_id] = []
+	st4.team_known[npc4.team_id].append(m4)
+	var roll_seed: int = -1
+	for sd in range(1, 200):
+		seed(sd)
+		if randf() < 0.3:
+			roll_seed = sd
+			break
+	seed(roll_seed)
+	var r4: Dictionary = InquirySystem.new().resolve_inquiry(st4, pt4, npc4, "ask_recent_events")
+	var ev4: Array = r4.get("events", [])
+	var distorted4: bool = not ev4.is_empty() and bool((ev4[0] as MessageData).is_distorted)
+	print("   [4] 打聽近期事件（不誠實、擲骰 seed %d）⇒ 第一則 is_distorted ＝ %s（原訊息 is_distorted ＝ %s）" % [
+		roll_seed, str(distorted4), str(m4.is_distorted)])
+	_check("★[4] 偽造訊息那一條路走得到且產出失真副本（原訊息不被改）", distorted4 and not m4.is_distorted)
 	print("   ★★★本格【只印不判】那三件的有無 —— 判它們的是 tsv 裡有沒有那幾列，")
 	print("     而兩棵樹（今天／修法前）的差集才是「這支床接上電了」的證據。")
 	_cell("_test_p7_positive_control_fixtures")

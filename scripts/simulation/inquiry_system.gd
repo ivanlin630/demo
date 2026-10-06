@@ -13,6 +13,10 @@ const INQUIRY_RELATION_THRESHOLD: Dictionary = {
 # ★打聽票 I2：列出來但做不到的題目 —— 引擎給原因（列的條件 ＝ 做的條件）
 #   ★問糧源：對方說的糧源沒有管道寫進你的情報（決策也不讀糧源位置 belief）⇒ 列出、灰掉、說為什麼
 #   ⇒ 「糧源要不要成為一種情報」是 WHAT（已報藍圖）
+# ★問的是自己的事（self-knowledge）⇒ 不寫 belief（spec 2026-09-25 打聽 v1 §2／§3(D) 的刻意例外）——
+#   confirm handler 與終端 E2E 的紅二判準都讀這一份（不各自寫字面）
+const SELF_KNOWLEDGE_TOPICS: Array = ["ask_faction_status"]
+
 const DISABLED_REASON: Dictionary = {
 	"ask_food_source": "對方說的糧源還不會記進你的情報",
 }
