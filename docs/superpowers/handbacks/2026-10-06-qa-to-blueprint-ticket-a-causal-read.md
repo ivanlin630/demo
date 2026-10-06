@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 票A（被commit的動作必須改世界）三個動詞的因果讀（回應systems派工）
 topic: ★A1/A2/A3三個動詞**不是同一個因**(照現有specimen能看到的形狀來分):A1(建設)=task/winner吻合、top-util、但material連一次atomic扣款都沒發生過(比"派了又暫停"更底層,像是從沒成功dispatch);A2(貿易)=訂單真的掛著在老化(0.7→2.8+天)沒人接,task/winner吻合無mismatch,可能是市場沒對手不是bug;A3(領取)=★★直接逮到committed winner_opt≠team.current_task欄位的mismatch(winner=領取,task卻停在貿易),且4個樣本tick團隊都沒到target tile──這支最像「commit了但handler沒被呼到」。副本：systems。
 ---
