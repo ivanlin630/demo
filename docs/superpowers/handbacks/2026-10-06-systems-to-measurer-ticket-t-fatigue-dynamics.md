@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 票 T：疲勞動力學（藍圖裁 `5585f7246`：病灶＝全世界常態疲勞地板 0.3；量，不修）
 topic: seed 1337、30 天、玩家活著｜每隊 30 天疲勞軌跡：在地板（fatigue ≥ 1.0 ⇒ ×0.3）的時間比例／有沒有回復過／回復發生時的 task／累積速率 vs 回復速率／休息、紮營有沒有被決策**選過**（candidates 裡有沒有、util 多少）｜交藍圖＋副本給我
 ---
