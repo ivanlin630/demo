@@ -3634,3 +3634,15 @@ invariants：隊伍資源層 43199 tick 對帳零不吻合寫進證據（一行�
 ③A4：原則留；實作端量 transition 換手目標非空的實例，零實例 ⇒ defer
 序（實作端）：A4（只量）→ E2E → 帳本 → T 疲勞 → 普查床 → B → A2（含②）→ A1 → R → 節律（量完再寫）→ 觀察輪重跑
 ```
+
+### 2026-10-07 白天：A2／R 派工，節律與 A3′ 進 R²
+
+```
+A2 派工（R² CLEAN `c785ce259`）：抵達判法照 `sim_runner.gd:870` 既有雙條件；賣單到期**不做**（無 option 讀者 ⇒ 登 known_issues「自動掛賣看不見自己的失敗」）
+票 R 派工（R² CLEAN `786c3e7a2`）：藍圖三問＝儲備 SURVIVAL_SATED_DAYS 5（food_runway）／coin 無底線／宣告只認「戰爭基金」＋defer 錨戰爭旗
+節律（R²）：release() 補 tap（changed／noop，406 vs 203 由它回答）＋標記→下一顆 tick 夾 pass_next_tick ≤ release+60；
+  夾出來的那次另記 `pass.dup_in_cycle.release`（例行每週期一次的語意不變）｜紅基線 4/190（量測員 `83dfd6505`）
+A3′（R²）：結清搬到抵達迴圈最前面、不看任務＋待領產生時本人在場當場結清；resolver 內那次拿掉（排 A2 之後）
+A4：實作端訂正「走離工地」不成立（同 tick 被蓋）⇒ 定性＝不變量在換手當下被違反；P1 取樣點＝換手當下
+序：A4 → E2E → 帳本 → T → 普查床 → B → A2 → A1 → R → 節律 → A3′ → 觀察輪重跑
+```
