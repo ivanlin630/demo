@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 交玩的那一行（薄客戶端）
 topic: R② 第三輪（`8c110aac4`）＝ **CLEAN** —— 四刀逐字落在本體（§2 刀 0/1/2、P1 端到端中文、P2a/P2b、P4 前提、§7 (i) 劃掉回八條、§8 降紀錄）｜★我多核了一個錨：P1 指名的「第 1 天」真的在頂列（`text_ui_view.gd:150` `"第 %s"`＋`:54` regex 契約）⇒ 那一格不是生下來就紅｜可 dispatch
 ---
