@@ -3,9 +3,10 @@ extends SceneTree
 # ══ 故事結束之後，原玩家隊照 NPC 的路補領袖 ═══════════════════════════════════════════════
 # spec：`docs/superpowers/specs/2026-10-06-player-team-succession-after-story-end-HOW.md` §4／§4b
 #
-# ★死亡一律走**真的路徑** `NpcCombatSystem._kill_named_npc`（戰死）：它依序做
-#   `on_leader_death`（→ 玩家分支 → `handle_player_succession`）→ 勢力交接的讀者（`:786-790`）→ 出 named → erase
-#   ⇒ 不在床裡手抄「勢力交接」那幾行（抄的那份不會跟著產線改）
+# ★兩條死法（理由寫在 `_orphan_qa` 上方）：
+#   ·P1／P2／P7 ＝ QA 那條（玩家人物留在 persons、直呼寫入者）—— 舊版在這條上**永遠**補不到領袖
+#   ·P4 ＝ 戰死真路徑 `NpcCombatSystem._kill_named_npc`：它依序做 `on_leader_death` → 勢力交接的讀者（`:786-790`）
+#     → 出 named → erase ⇒ 不在床裡手抄「勢力交接」那幾行（抄的那份不會跟著產線改）
 #
 # 格：P1 補到領袖（game_over 照設）｜P2 推過一個溢出檢查邊界不被切到 1｜P3 單一定義（反向掃）｜
 #     P4 勢力兩個方向｜P7 全世界 leaderless 活隊掃描（先量；原玩家隊以外的逐隊印出、回報不擴票）
@@ -64,15 +65,39 @@ func _orphan_and_kill(ws: WorldState) -> Dictionary:
 	return {"ptid": ptid, "named_before": named_before, "pop_before": pop_before, "was_leader": was_leader}
 
 
+# ══ ★★QA 那條佈置（逐字照 story_end_not_physics_bed／player_death_7day_specimen 的殺法）══════════
+#   清 named、**玩家人物留在 persons**（他是領袖、不在 named 迴圈裡）、直呼真的寫入者
+#   ⇒ ★★這正是 QA 讀到的形狀：玩家人物還在 ⇒ `get_player_team_id()` 仍回原隊
+#     ⇒ loop3 安全網每 tick 重呼 `on_leader_death` 都走**玩家分支** ⇒ 舊版永遠 `return false`
+#   ⇒ ★而戰死真路徑（`_kill_named_npc`）最後會 erase 玩家 ⇒ 安全網查不到玩家隊、走 NPC 路**自己補上**
+#     ⇒ 用它當 P2 的佈置，負對照（改回 return false）**不會紅**（2026-10-06 實測：pop 8 → 8）
+#     ⇒ 所以 P1／P2／P7 用這條，戰死路徑只留給 P4（它要的是 `:786-790` 那個讀者）
+func _orphan_qa(ws: WorldState) -> Dictionary:
+	var pid: int = ws.player_id
+	var ptid: int = ws.persons[pid].team_id
+	var pt: TeamData = ws.teams[ptid]
+	var was_leader: bool = pt.leader_id == pid
+	for m in pt.named_members.duplicate():
+		ws.remove_member(pt, int(m), false)
+		if int(m) == pid:
+			ws.persons.erase(pid)
+	var named_before: int = pt.named_members.size()
+	var pop_before: int = pt.population
+	EventSystem.new().handle_player_succession(ws, pt)
+	return {"ptid": ptid, "named_before": named_before, "pop_before": pop_before, "was_leader": was_leader,
+		"player_in_persons": ws.persons.has(pid)}
+
+
 # ══ P1／P2 ════════════════════════════════════════════════════════════════════════
 func _p1_p2() -> void:
 	print("\n── P1 絕後之後 game_over 照設、原玩家隊補到領袖｜P2 推過溢出檢查邊界不被切到 1 ──")
 	var ws: WorldState = _mk_world()
-	var r: Dictionary = _orphan_and_kill(ws)
+	var r: Dictionary = _orphan_qa(ws)
 	var ptid: int = int(r["ptid"])
 	var pt: TeamData = ws.teams.get(ptid)
-	print("   Team%d：死前 named（玩家以外）＝ %d｜玩家是領袖 ＝ %s｜死前 pop ＝ %d" % [ptid,
-		int(r["named_before"]), str(r["was_leader"]), int(r["pop_before"])])
+	print("   Team%d：死前 named（玩家以外）＝ %d｜玩家是領袖 ＝ %s｜死前 pop ＝ %d｜玩家人物仍在 persons ＝ %s" % [ptid,
+		int(r["named_before"]), str(r["was_leader"]), int(r["pop_before"]), str(r["player_in_persons"])])
+	_check("★母體地板：QA 的形狀（玩家人物仍在 persons ⇒ 安全網仍走玩家分支）", bool(r["player_in_persons"]))
 	_check("★母體地板：玩家死前是領袖、而隊裡沒有其他 named（走的是絕後那條，不是選繼承人）",
 		bool(r["was_leader"]) and int(r["named_before"]) == 0)
 	print("   game_over ＝ %s「%s」｜原玩家隊 leader_id ＝ %d" % [str(ws.game_over), ws.game_over_reason,
@@ -172,7 +197,7 @@ func _p4_faction_both_directions() -> void:
 func _p7_no_leaderless_live_team() -> void:
 	print("\n── P7 長跑 %d 天（玩家絕後）之後：leaderless 且 pop ≥ 1、連兩個每日邊界都如此的隊 ＝ 0 ──" % P7_DAYS)
 	var ws: WorldState = _mk_world()
-	var r: Dictionary = _orphan_and_kill(ws)
+	var r: Dictionary = _orphan_qa(ws)
 	var ptid: int = int(r["ptid"])
 	_check("★母體地板：這一輪真的有玩家絕後（game_over ＝ true）", ws.game_over)
 	var runner := SimRunner.new()
