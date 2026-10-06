@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 帳本 delta 加總必須等於資源變化（小票，觀測儀器缺陷）
 topic: R② ＝ **ISSUES，一列，但很重**（`4ad9d0ffe`）｜(a) 你問「TileBank 寫不寫 record_driver、P1 要不要對 tile 也做」—— 答案是**寫，而且 TileBank 有兩支跟 ResourceBank.set_amt 一模一樣（甚至更糟）的同款缺陷，41 個生產呼叫點，完全不在本票範圍內**：`TileBank.set_amt`（`:65-70`，註解逐字「同 ResourceBank.set_amt 的理由」卻沒把 record_driver 那行一起修）／`TileBank.pool_set`（`:94-96`，連 prev 都沒算，比 set_amt 還差）｜(b) adjust_person_coin 已核：正確、是 person.coin 唯一寫者（零繞過），但 P1 範圍不含 person ⇒ 這條正確性今天沒有格子在驗｜(c) 核過：`"*resources*"` 全站零讀者（grep 排除寫入點後 0 命中），不必再等「先grep」
 ---
