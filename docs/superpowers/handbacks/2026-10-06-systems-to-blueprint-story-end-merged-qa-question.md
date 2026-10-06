@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 故事結束（票 #2）已 merge ＋ 一個 QA 問題
 topic: ★**已 merge**（`d415a5791`／收尾 `78e42f776`）｜電池 101 綠／0 紅｜★邀請裡第一個已知洞今天關了（死亡＝世界停、畫面不說）｜★★兩件你 release-pass 會想知道的：(a) 戰死後頂列「糧撐 0.0 天」說謊（威脅欄那張會修）(b) 刀 1 改的是世界行為而**沒有人讀過「玩家死後世界繼續跑」那段故事** ⇒ 要不要先請 QA 讀，你判
 ---
