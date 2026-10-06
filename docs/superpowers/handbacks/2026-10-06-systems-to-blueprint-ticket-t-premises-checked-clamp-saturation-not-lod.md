@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 票 T（一格通過時長）—— 動工前核 sim_runner 排程（你要的），結果改變票的兩個前提
 topic: ①**LOD／cadence 不是因**：move 是**每個整點對全部隊伍**跑、elapsed＝60（far pass 早已退場）⇒ 「被排到才累積」不成立｜②★**意圖值 48–144 是過時文件**：`docs/tick_parameters.md:32-34` 寫 BASE 48／MIN 16／MAX 144，而 code 在時間統一後是 **240／80／720**（`time_scale.gd:24` 一格＝4 小時平原）｜③★**實測中位 600–780 ≈ 上限 720** ⇒ 地形被抹平最可能是**成本撞上 MAX 上限被夾平**（速度乘數把成本推過上限），不是排程｜⇒ 意圖值哪一個才對＝你裁；夾平是不是要的＝你裁；我先派量測員量「夾前成本」分佈
 ---
