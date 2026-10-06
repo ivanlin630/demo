@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: A4「目的地屬任務」（小票）
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-06-a4-a-target-belongs-to-its-task-HOW.md`｜★請優先打 §0：我判 `transition` 不碰 move_target 是沿用的主要來源（11 個呼叫點），以及 2 個把舊 `team.move_target` 傳給 try_set 的點 —— 但「只有這幾條會換手」我**沒有**宣稱（P3 反向掃 `current_task =` 直接寫入）
 ---
