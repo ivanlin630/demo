@@ -29,6 +29,9 @@ Q3 ~~率＝勢力自己的…兩條底線（①不取到 5 天儲備以下 ②�
       ·候選＝ 0（不徵）＋ 成員**當下** food 庫存的幾個比例（格子由你定、表放函式旁；★格子是候選不是底線：最大一檔必須是全部）
       ·util ＝ 收益 − 三個成本，**同一單位**（★util 必＝真值，禁為了讓它 fire 而調）：
         收益：填戰爭基金缺口（`WAR_CHEST_MIN` − 盟主隊 material 的差額；超過缺口的部分收益遞減），乘盟主 野心／好戰
+        ★徵後糧撐推估（R² 核：沒有現成公開純函式；`FoodFlow.update()` 直接寫 `team.food_runway`、`_sustainable_inflow` 底線前綴私有）
+          ⇒ 在 `food_flow.gd` **抽一支公開純函式**（把 update() 裡算 runway 的式子抽出來，參數帶「假設庫存」），update() 與徵用秤**都呼它**
+          ⇒ 不另抄算式、不伸手進私有函式；★抽完 update() 寫出的值必須逐字不變（fp 床那一格會證）
         成本①推成員向挨餓：以徵後 `member.food_runway` 推估值對 `SURVIVAL_SATED_DAYS`（`need_hierarchy.gd:16`）為**參考點**，
               低於它曲線變陡、**連續、單調、不 clamp**（不是牆）；乘盟主 慎重／義氣
         成本②忠誠流失：成員對盟主的關係帳現值（兩層關係帳）—— 關係越薄，抽多越貴
@@ -36,7 +39,13 @@ Q3 ~~率＝勢力自己的…兩條底線（①不取到 5 天儲備以下 ②�
       ·人格鍵用既有正典鍵（貪婪／慎重／義氣／野心／好戰 —— `interaction_system.gd:757-759` 已在讀其中三個），**先 grep 確認每個鍵存在**
    ⇒ ★tap（藍圖點名）：每次 choose_amount 一筆樣本 {tick, overlord, member, gap, member_runway, 每個候選的 {amount, gain, c1, c2, c3, util}, chosen}
    ⇒ 成員回應＝決策：照勒索那條 `DiplomaticAiSystem.tribute_accept(state, member, overlord, threat)`（`diplomatic_ai_system.gd:49`，
-      呼叫形狀見 `interaction_system.gd:446`）；拒絕 ⇒ 不轉移、記入關係帳、後果照勒索拒絕那條既有路（不另寫）
+      呼叫形狀見 `interaction_system.gd:446`）；拒絕 ⇒ ~~不轉移、記入關係帳、後果照勒索拒絕那條既有路（不另寫）~~
+      ★★R² 打回（第四輪）：勒索拒絕的既有路 ＝ `_should_attack`（`interaction_system.gd:466-481`）→ `start_combat`（`npc_combat_system.gd:118-133`），
+        兩支**零 faction 檢查** ⇒ 照抄 ＝ **盟主對自己的成員開戰**；今天沒出事只因沒有東西把同勢力兩隊送進那個分支，本票會是第一個
+      ⇒ 改：只重用 **tribute_accept 的判斷**，**不呼 `_should_attack`／`start_combat`**；拒絕 ⇒ 零轉移＋關係帳記一筆（盟主對成員的好感下降，
+        走既有關係寫入口）＋tap 記 refused；社會性後果只有 Q4 那一套（記怨／可能脫離），**不並存第二個後果模型**
+      ⇒ 「拒絕可能引發內戰」**不是本票的設計**；若要，另開票，且在呼 `_should_attack` 之前**明判 faction_id** 讓那個決定看得見
+      ⇒ 床：P6 補一格「拒絕之後同 tick 與後 24 tick 雙方 combat_target 都不是對方」
       ★★藍圖確認問「它是不是無條件接受」⇒ 核過（`diplomatic_ai_system.gd:49-103`）：**不是**，回 `score > TRIBUTE_ACCEPT_THRESHOLD`，score 讀
         人格（慎重／義氣／求生欲）＋fear＋**兩層關係帳**（好感 `leader.relations` ＋ typed 邊 feud／gratitude）＋belief 實力比＋threat
         ⇒ ★**缺兩樣**：①成員**自身處境**（food_runway）②**被要求的量** —— 今天對它來說抽 1 糧與抽光一樣

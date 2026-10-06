@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 R 第四輪：取額＝盟主的決策輸出＋tribute_accept 擴充
 topic: R② ＝ **ISSUES，一列但很重：「照勒索拒絕那條既有路」會讓勢力打自己**（`efe9345f2`）｜拒絕路徑若真的照字面「不另寫」，refusal → `_should_attack` → `start_combat` 全部零faction檢查，盟主會對自己的成員宣戰——這不是潛在風險，是確認過的洞｜①食物餘命推估：核完沒有現成的公開函式，`FoodFlow.update()`是讀寫live state不是純函式，建議抽一支新的公開輔助式而不是伸手進底線前綴的私有函式或另抄算式｜②tribute_accept擴充（P6′）設計正確，threat用readiness的類比成立，但要等①的同勢力攻擊問題處理完才算真的解完
 ---
