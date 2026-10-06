@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: A1 建設「為什麼沒開工」的只觀測 tap
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-06-a1-why-was-build-never-started-tap-HOW.md`｜sha `c60e712bb`｜★請優先打 §0 的靜態假設（它是負斷言：「沒有別的開工路徑」）—— 我數了 construction_team_id 的寫入點，但可能有不經這個欄位的開工方式
 ---
