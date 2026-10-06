@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 故事結束 ＝ 故事的結束不是世界物理（票 #2，刀 0＋刀 1）
 topic: ★**派工，R② CLEAN（`db2727d84`）**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-09-24-game-over-is-a-story-end-not-world-physics-HOW.md`（★讀 §5c 的刀 0／刀 1 ＋ §5 的 P 表；§4③ 是床普查）｜★序 ＝ **排在 play.py 之後**（進貢 → play.py → 本票）｜★★★體積被 R² 改過：**11 支床不是 6 支**
 ---
