@@ -26,6 +26,11 @@ const STALL_EXCLUDE_WINDOW: int = WorldState.TICKS_PER_DAY * 20   # TEST VALUE �
 const STALL_PATIENCE_MIN: float = 0.5     # patience clamp 下限(急換者)
 const STALL_PATIENCE_MAX: float = 1.5     # patience clamp 上限(撐久者)
 
+# ★組成 dump 的選項清單（Probe-gated、不改 u、零 RNG）—— 原本兩行各手抄一份，具名成一份
+# ★「掠奪」：藍圖裁 848e2aaea §4b② —— QA 讀到 Team11「掠奪 util 倒數第二卻被選」＝ tap 缺口
+#   ⇒ 加進來只讓既有四欄拆解也對掠奪印；開 Probe 與重產 specimen 是量測員的活（那支床本票沒動）
+const CMP_DUMP_OPTS: Array = ["收留", "攻擊", "偵查", "掠奪"]
+
 # stall 判定：before/after relief-magnitude（禁瞬時比昨日；比 committed baseline）。純函式（可測）。
 static func stall_verdict(committed_tick: int, committed_food: float, cur_tick: int, cur_food: float,
 		stall_ticks: int, relief_min: float) -> int:
@@ -311,8 +316,8 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		#   ★而本函式的結構是：**四個 term 相【加】，之後乘 `coeff`、乘 `fail_mult`（、乘 persist）**
 		#   ⇒ ★★**一個 0 的乘數就能把全部殺掉** ⇒ 逐項 dump 必須**同時**記【加法那半】與【乘法那半】。
 		#   ⇒ ★★★所以「攻擊」比照「收留」開組成 dump（Probe-gated、不改 u、零 RNG）。
-		var _cmp: Dictionary = {} if (Probe.enabled and opt in ["收留", "攻擊", "偵查"]) else {}
-		var _cmp_on: bool = Probe.enabled and opt in ["收留", "攻擊", "偵查"]
+		var _cmp: Dictionary = {} if (Probe.enabled and opt in CMP_DUMP_OPTS) else {}
+		var _cmp_on: bool = Probe.enabled and opt in CMP_DUMP_OPTS
 		var _terms_row: Array = []
 		var _ot0: int = Time.get_ticks_usec() if Probe.enabled else 0
 		for tw in DecisionOptions.terms_of(opt):
