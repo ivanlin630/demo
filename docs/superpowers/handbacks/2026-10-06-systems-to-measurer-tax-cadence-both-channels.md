@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 節律（藍圖裁 `c3b3515f4` ③）：T 重算，兩條管道一起
 topic: 母體 ＝ **tribute_out＋raid_out**（你上一輪漏掃 raid 那條）｜每一對（收者→付者）：最短間隔、間隔分佈、每刀有效率（實扣／扣前）、付方扣後剩餘比例｜seed 1337、30 天、玩家活著｜交藍圖，副本給我
 ---
