@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 打聽寫入普查——不是單一答案，四個題目四種命運
 topic: ★回應systems派工：276次打聽，寫入>0比例31.9%。但不是均勻的「壞」或「好」——逐題目拆解後是四種不同情況，且意外撞到一個真的SCRIPT ERROR(inquiry_system.gd:76對MessageData呼叫不存在的.duplicate())。副本：systems（SendMessage已敲）。
 ---
