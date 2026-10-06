@@ -46,7 +46,11 @@
 ③`TileBank.set_amt`：`record_driver(tile, res, amt - prev, …)`
 ④`TileBank.pool_set`：先取 `prev := tile.resources.get(res, 0)`，記 `amt - prev`
 ⑤★分兩個庫：帳本條目**加一個鍵** `"store"`（公庫 `"public"`／自然池 `"pool"`；ResourceBank 的不加）
-  ⇒ ★**只加鍵、不改既有鍵**（`kind` 有讀者：`scripts/debug/` 至少 `anon_pool_level_bed`／`economic_window_4cell_bed` 讀帳本）
+  ⇒ ★**只加鍵、不改既有鍵**（`kind` 有讀者）
+    ★R² 訂正我的引用：`economic_window_4cell_bed` 的帳本迴圈（:52-65）過濾的是 **reason** 不是 kind，
+      它 :95 的 `kind=="buy"` 讀的是**市場訂單** dict，不是帳本 ⇒ 不是 kind 的讀者
+    ⇒ 真的讀者：`resource_shape_falsifier.gd:113-114`（過濾 `kind=="resource"`）—— R² 核過它的迴圈體只讀
+      kind／delta／field／reason、不讀 entity ⇒ TileBank 的條目混進同一桶不會讓它崩，只會讓它列的（資源, reason）母體變完整
   ⇒ 不動 `record_driver` 的既有簽名（`kind` 刻意無 default）⇒ 用一支薄包裝或帶 store 的新入口，只給 TileBank 用
 ⑥`clear_all` 的 `"*resources*"` bulk 改成逐資源記（零讀者，拿掉無風險）
 ★不改任何資源數值（純記帳）⇒ fp 必須逐位不變

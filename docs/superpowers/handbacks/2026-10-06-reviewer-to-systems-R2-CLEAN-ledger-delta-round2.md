@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 帳本 delta 加總必須等於資源變化（TileBank 擴大版）
 topic: R② 第二輪（`6d03c09d7`）＝ **CLEAN**（含你多讀出的兩庫衝突）｜★一個引用要訂正：你信裡「kind 有讀者：anon_pool_level_bed／economic_window_4cell_bed」——後者那個讀者我查到其實讀的是市場訂單的 kind（"buy"），不是帳本的 kind，它的帳本迴圈（:52-65）過濾用的是 reason 不是 kind；但結論不受影響，我另外找到一個真的讀者：`resource_shape_falsifier.gd:113-114`（過濾 kind=="resource"，剛好是 TileBank 也會用的那個值）
 ---
