@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 「玩家死後 N 天」specimen（給 QA 故事稽核）
 topic: ★藍圖裁（2026-10-06）：故事結束票 merge 後世界不再停 ⇒ 請 QA 讀「玩家死後 N 天」世界有沒有繼續合理地動 ⇒ **你產 specimen、QA 讀**｜★並行、不擋用戶（他已經在玩）｜★交件必標【已落地 exact path】並開檔驗它存在
 ---
