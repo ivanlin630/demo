@@ -435,7 +435,7 @@ const ACTION_SHAPE: Dictionary = {
 	"order_faction_member":    {"target": "none", "listed": false},
 	"order_subteam":           {"target": "none", "listed": false},
 	"promote_anon":            {"target": "none", "listed": true, "effect": "roster"},
-	"rest":                    {"target": "none", "listed": true, "effect": "task"},   # 票 T：`_action_rest` → TaskArbiter.try_set(TASK_REST @原地)
+	"rest":                    {"target": "none", "listed": true, "effect": "task"},   # 票 T：`_action_rest` → 仲裁器設 TASK_REST（原地）
 	"propose_alliance":        {"target": "team", "listed": false, "effect": "faction"},
 	"recall_subteam":          {"target": "none", "listed": false},
 	"recruit":                 {"target": "team", "listed": false, "effect": "menu"},
@@ -760,7 +760,7 @@ func _action_rest(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int)
 	var pre_r: Dictionary = precheck_rest(state, pt)
 	if not bool(pre_r.get("ok", false)):
 		return { "ok": false, "msg": String(pre_r.get("reason", "")) }
-	if not TaskArbiter.try_set(state, pt, TeamData.TASK_REST, Vector2i(-1, -1), TaskArbiter.PRIO_PLAYER, "player_rest"):
+	if not TaskArbiter.try_set(state, pt, TeamData.TASK_REST, Vector2i(-1, -1), TaskArbiter.PRIO_PLAYER, "player_rest"):   # gate-ok：玩家指令（PRIO_PLAYER 權威，同 _action_camp 那一行）
 		return { "ok": false, "msg": "現在停不下來（有更急的事）" }
 	return { "ok": true, "msg": "原地休息（疲勞 %d%%）" % int(round(pt.fatigue * 100.0)) }
 
