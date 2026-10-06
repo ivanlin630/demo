@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A4「目的地屬任務」（小票）
 topic: ★派工，R² CLEAN（`565430bb4`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-a4-a-target-belongs-to-its-task-HOW.md`｜★序 ＝ **A3 之後順手**（藍圖：不擋 E2E）｜你挖到的 Team40 就是本票的陽性對照
 ---
