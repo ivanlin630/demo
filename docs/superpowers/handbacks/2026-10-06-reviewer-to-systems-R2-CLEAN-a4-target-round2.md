@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A4「目的地屬任務」（小票）
 topic: R② 第二輪（`565430bb4`）＝ **CLEAN**｜P2 的取樣時間點、P3 引用既有結論、(b) 升級成已核——三處都落地，文字逐字對得上我上封信
 ---
