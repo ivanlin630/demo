@@ -156,11 +156,21 @@ static func top_row(v: Dictionary) -> String:
 	var sep: String = " ｜ "
 	var used: int = TextUiLayout.display_width(sep.join(PackedStringArray(head)))
 	used += TextUiLayout.display_width(sep) * 2
-	used += TextUiLayout.display_width("威脅：") + TextUiLayout.display_width(tail)
+	# ══ ★★★★★【故事結束 ⇒ 取代威脅欄】（票 #2 刀 0，寬度預算 systems 裁 (甲)）═══════════
+	#   ·威脅欄是頂列**唯一無界欄**、吃剩餘並被 clip ⇒ 原因字串（≈30 cols）放這裡**有預算**
+	#   ·故事結束之後「威脅」一句沒有意義 ⇒ **取代而非新增**
+	#   ·★★「既有床零影響」的條件①：這一欄**只在 `story_end` 非空時**出現
+	#     （常駐「故事：進行中」會讓釘頂列字面的床全變）
+	var story_end: String = String(v.get("story_end", ""))
+	var label: String = STORY_END_LABEL if story_end != "" else "威脅："
+	var body: String = story_end if story_end != "" else String(v.get("threat", "—"))
+	used += TextUiLayout.display_width(label) + TextUiLayout.display_width(tail)
 	var budget: int = TextUiLayout.COLS - used
-	var threat: String = "威脅：" + TextUiLayout.clip_to(
-		String(v.get("threat", "—")), maxi(budget, 0))
+	var threat: String = label + TextUiLayout.clip_to(body, maxi(budget, 0))
 	return sep.join(PackedStringArray(head + [threat, tail]))
+
+# ★故事結束那一欄的欄標（床的 P0 斷言這個字面 ⇒ 給它名字，不在兩處各寫一次）
+const STORY_END_LABEL: String = "故事已結束："
 
 
 # ══ ④動作區：逐列 `[字母] label ▸`＋（不可：`disabled_reason`）（spec §2③）═══════

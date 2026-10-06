@@ -830,7 +830,7 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 		and state.teams.has(focus_team_id) and state.persons.has(focus_member_id)
 	var cursor_valid: bool = cursor_q != -1 and cursor_r != -1 \
 		and state.world.tiles.has(cursor_q * 1000 + cursor_r)
-	return {
+	var out: Dictionary = {
 		"player_summary":     map_player_summary(state),
 		"controlled_team":    map_controlled_team(state),
 		"visible_teams":      map_visible_teams(state),
@@ -844,6 +844,25 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 		"members_detail":     map_members_detail(state),
 		"team_stats":         map_team_stats(state),
 	}
+	# ★故事結束（票 #2 刀 0）：**只加鍵、不改既有鍵** —— 兩鍵的產生者只有 `map_story_end()`
+	out.merge(map_story_end(state))
+	return out
+
+# ══ ★★★★★【故事結束的兩鍵 —— UI 讀 `game_over` 的【唯一】資料路徑】（票 #2 刀 0）═══════
+# spec：`docs/superpowers/specs/2026-09-24-game-over-is-a-story-end-not-world-physics-HOW.md` §5c
+#   ★意圖帳 #43：`game_over` ＝【UI 層的故事結束】⇒ UI 要讀得到它，而**不准走 `_bridge` 直讀**
+#     （那會是第二條資料路徑）⇒ 由 mapper 出，view 讀 snapshot 的那兩鍵。
+# ★★★★★而 snapshot 有**兩個出口**，兩鍵必須**兩個都有**（實作端讀 code 抓到，spec 沒寫）：
+#   ·成功：`map_player_snapshot()` 那一份（上面）
+#   ·★失敗：`player_query_api.get_player_snapshot()` 在 `_check_player_with_team` 不過時
+#     回 `data = {}` ⇒ ★而**真的 game_over 很可能走這條**（讀 code 的推論，實測見
+#     `terminal_selfcheck_bed` 的「已結束（戰死）」走法）：玩家戰死 ⇒
+#     `npc_combat_system.gd` 的 `state.persons.erase(p.id)` ⇒ `_check_player` 回 `no_player`
+#   ⇒ ★★只放在成功那份的話，**那一欄只會在「旗標被手動設在一個活世界上」的 fixture 裡亮**，
+#     而玩家真的死掉的那一屏**一個字都沒有** —— 正是本票要治的那個病。
+#   ⇒ 所以失敗出口也帶這兩鍵（`get_player_snapshot` 呼叫本函式），**產生者仍然只有這一個**。
+static func map_story_end(state: WorldState) -> Dictionary:
+	return {"game_over": state.game_over, "game_over_reason": state.game_over_reason}
 
 # ── Faction panel ──────────────────────────────────────────────────────────────
 
