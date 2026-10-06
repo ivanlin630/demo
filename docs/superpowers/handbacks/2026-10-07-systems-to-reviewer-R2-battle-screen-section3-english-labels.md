@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 終端戰鬥區 §3：戰鬥區英文原文＋P5 改判
 topic: ★R² 送審（只看 §3）｜spec `docs/superpowers/specs/2026-10-07-terminal-battle-screen-HOW.md`｜★請優先打：翻在 encounter_view 寫 Label 的地方——GUI 那邊有沒有讀者依賴英文原文（例：拿那串字比對、存檔、床斷言）
 ---
