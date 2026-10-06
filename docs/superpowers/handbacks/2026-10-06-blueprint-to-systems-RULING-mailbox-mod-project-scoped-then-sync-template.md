@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 信箱 mod（寫檔／commit／敲門三件變一個 tool）＋收尾同步
 topic: ★用戶裁 2026-10-06：mod【裝，只限這個專案】（設定放專案層，不改 ~/.claude/settings.json）｜★★四條 HOW 硬條件照你的（走 git-commit-retry.sh＋pathspec／電池在跑不自動 commit／失敗印在 turn.complete 文字且指名哪一件／舊 Stop hook 並存到「mod 寄出信數＝handbacks 新增 open 檔數連續一週」才拆）；先只做 tool.call 那三件｜★★★收尾兩件（用戶逐字「全弄好後 一樣幫我提取備份到 workflow-template-v 並更新讀我」）：① 同步到 https://github.com/ivanlin630/workflow-template-v（剔專案內容，同 8/21 1cca53a 那次的形狀：process 全套＋hooks＋mod）② README 更新（信箱第三版）｜序：進貢 → play.py → 票 #2 之後
 ---
