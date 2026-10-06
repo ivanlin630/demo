@@ -869,7 +869,8 @@ func _has_control(state: WorldState, team_id: int, tile: HexTileData) -> bool:
 	var owner_faction_present: bool = false
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
-		if t.tile_pos == tile.tile_pos and t.faction_id == owner.faction_id:
+		# S1：「據點主人那一方在場」＝ 主人自己或同勢力；舊版主人無勢力時任何無勢力隊（含想奪控的那一支自己）都算
+		if t.tile_pos == tile.tile_pos and (t.team_id == owner.team_id or TeamData.same_faction(t, owner)):
 			owner_faction_present = true
 			break
 	return not owner_faction_present

@@ -967,6 +967,8 @@ const MODE_KEYMAP: Dictionary = {
 	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
 	"storage":       "[1-9]存/取 [,.]翻頁 [Esc]離開",
 	"intel":         "[1-5]選題 [Esc]取消",
+	# ★U2（spec 2026-10-07 terminal-ui-fixes）：招募子選單原本沒有自己的一列 ⇒ 鍵列印主畫面那一份（E2E K1）
+	"recruit":       "[1-9]記名 [A]匿名 [Esc]取消",
 	"trade":         "[1-9]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
 	"pre_encounter": "[1]迎擊 [2]投降",
 }
@@ -1957,6 +1959,9 @@ func _handle_interact_mode(keycode: int) -> void:
 						_recruit_target_id = _interact_target
 						_recruit_mode = true
 						_interact_mode = false
+						# ★U2：開子選單那一刻結果行換成這一鍵的回音 —— 舊版不動它 ⇒ 結果行留著**上一道令**的「已排入：…」（E2E K1）
+						#   ★開選單是查詢不是令（上面那段註解）⇒ 用 ok 那一色，措辭不說「已排入」
+						_set_feedback(true, "招募 Team%d：選記名成員或 [A] 匿名，[Esc] 取消" % _interact_target)
 			else:
 				var result: Dictionary = _bridge.command_player(
 					act.get("command_name", "execute_action"), act.get("command_args", {}))

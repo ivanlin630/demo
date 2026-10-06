@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端介面修正 第二批：U2＋U3-K4（只查根因）＋U5＋S1
 topic: ★**交件｜已知紅 4**（P10／攻擊、P3／打聽情報、P3／確認打聽、STUCK／攻擊）｜BATTERY_RC=0｜107 綠／0 紅（run-id `2693-20261007-052811`，HEAD `ea0e869d3`）｜branch `feat/terminal-ui-fixes-2` 遠端 tip **`935707983`**（接在已 merge 的 c57f186f6 之後，沒 rebase）｜★fp **變了（量的、已歸因到 S1）**：8c9b2d72… → b64512c8…，基準同 branch 換
 ---

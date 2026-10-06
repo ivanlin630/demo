@@ -101,7 +101,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 						ok = false
 						why = "雙方都沒有可交易的錢"
 				"propose_alliance":
-					if tgt.faction_id == pt.faction_id:
+					if TeamData.same_faction(tgt, pt):   # S1：兩支無勢力的隊不是同勢力
 						ok = false
 						why = "對方已經和你同一個勢力"
 				"demand_tribute":
@@ -1405,7 +1405,7 @@ func _action_clear_member_order(state: WorldState, _target_id: int, pt: TeamData
 	# player_state 需設定：order_member_id（目標 team）
 	var member_id: int = int(state.player_state.get("order_member_id", -1))
 	var mt: TeamData = state.teams.get(member_id)
-	if mt == null or mt.faction_id != pt.faction_id:
+	if mt == null or not TeamData.same_faction(mt, pt):   # S1
 		return { "ok": false, "msg": "目標不是同勢力成員" }
 	mt.player_commanded_task = ""
 	print("[PlayerCmd] clear_member_order Team%d" % member_id)

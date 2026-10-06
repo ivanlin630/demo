@@ -408,7 +408,7 @@ static func pick_recon_target(state: WorldState, team: TeamData) -> Dictionary:
 	for _rid in state.teams:
 		var _rt: TeamData = state.teams[_rid]
 		if _rt == null or int(_rid) == team.team_id: continue
-		if _rt.faction_id == team.faction_id: continue
+		if TeamData.same_faction(_rt, team): continue   # S1：無勢力隊不把其他無勢力隊當自己人
 		var _rbel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, int(_rid))
 		if _rbel.is_empty():
 			# ★格2a：**連一筆 claim 都沒有** ⇒ 不是候選（連它存不存在都不該由真值告訴我）
@@ -1088,7 +1088,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 				if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.scan.home_food.iter")   # ★§1 母體樁（★不同母體）
 				if _mid == team.team_id: continue
 				var _mt: TeamData = state.teams[_mid]
-				if _mt.faction_id != team.faction_id: continue
+				if not TeamData.same_faction(_mt, team): continue   # S1
 				var _be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _mid)
 				var _mpos = _be.get("tile_pos", Vector2i(-1, -1))
 				var _st: float

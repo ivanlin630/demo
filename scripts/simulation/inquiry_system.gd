@@ -63,7 +63,7 @@ func resolve_inquiry(state: WorldState, player_team: TeamData,
 			var enemy_intel: Array = []
 			for tid in BeliefSystem.known_targets(state, npc_team.team_id):
 				var t: TeamData = state.teams.get(tid)
-				if t and t.faction_id != player_team.faction_id:
+				if t and not TeamData.same_faction(t, player_team):   # S1：無勢力玩家問「敵人動向」，其他無勢力隊也算
 					var e2: Dictionary = BeliefSystem.best_estimate(state, npc_team.team_id, tid)
 					enemy_intel.append({ "team_id": tid,
 						"tile_pos": e2.get("tile_pos", t.tile_pos),

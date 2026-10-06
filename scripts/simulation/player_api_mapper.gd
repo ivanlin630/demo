@@ -561,14 +561,17 @@ static func diplomacy_reply_label(resp: String) -> String:
 		"refuse", "reject":  return "拒絕"
 	return "（未知回覆：%s）" % resp
 
+# ★U5（spec 2026-10-07 terminal-ui-fixes，E2E E4）：標籤不帶 ✓／✗ 前綴 —— 舊版四個選項帶著它們，
+#   終端（CP950）印不出來，看起來是「[A]  接受」多一格；事件句「回應了「✓ 接受」」也帶著它
+#   ⇒ 接受／拒絕的意思由字本身說，不靠記號
 static func forced_label(action: String, rid: String, state: WorldState, evt: Dictionary) -> String:
 	match action:
 		"diplomacy":
 			match rid:
-				"accept": return "✓ 接受"
+				"accept": return "接受"
 				"accept_join": return "加入對方勢力（對方為主）"
 				"accept_lead": return "自立後接納對方（我為主）"
-				"refuse": return "✗ 拒絕"
+				"refuse": return "拒絕"
 		"extort":
 			return "付錢" if rid == "pay" else "拒絕"
 		"join_request":
@@ -576,9 +579,9 @@ static func forced_label(action: String, rid: String, state: WorldState, evt: Di
 			var n: int = ft.population if ft != null else 0
 			if rid == "accept":
 				return "收留（食物 -%.1f,+%d 人）" % [PlayerCommandSystem.JOIN_ONBOARD_MEAL * n, n]
-			return "✗ 婉拒"
+			return "婉拒"
 		"aid_request":
-			return "施捨 %.0f 糧" % PlayerCommandSystem.AID_GIVE_DEFAULT if rid == "give" else "✗ 拒絕"
+			return "施捨 %.0f 糧" % PlayerCommandSystem.AID_GIVE_DEFAULT if rid == "give" else "拒絕"
 		"choose_heir":
 			var pid: int = int(rid.trim_prefix("heir_"))
 			var p: PersonData = state.persons.get(pid)

@@ -3012,7 +3012,7 @@ func _tick_solo_settle(state: WorldState, team: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(team.tile_pos))
 	if tile != null and tile.outpost_owner != -1:
 		var o: TeamData = state.teams.get(tile.outpost_owner)
-		if o != null and o.faction_id == team.faction_id and o.team_id != team.team_id:
+		if o != null and TeamData.same_faction(o, team) and o.team_id != team.team_id:   # S1：無勢力隊不落腳別的無勢力隊的據點
 			InteractionSystem.new()._convert_to_resident(state, team)   # 被邀入 faction 後同 faction outpost 落腳
 			if Probe.enabled: Probe.bump("convert_via_settle")
 			return
@@ -3027,7 +3027,7 @@ func _settle_relocated_village(state: WorldState, v: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(v.tile_pos.x * 1000 + v.tile_pos.y)
 	if tile != null and tile.outpost_owner != -1:
 		var o: TeamData = state.teams.get(tile.outpost_owner)
-		if o != null and o.faction_id == v.faction_id and o.team_id != v.team_id:
+		if o != null and TeamData.same_faction(o, v) and o.team_id != v.team_id:   # S1
 			InteractionSystem.new()._convert_to_resident(state, v)   # own-faction outpost 落腳（併入現據點）
 			_finish_relocate(state, v, true); return
 	if establish_crude_camp(state, v):   # 空地 founding（新 level-1 outpost、身分躍遷 PRODUCE）
@@ -3339,7 +3339,7 @@ func _resolve_help_target(state: WorldState, team: TeamData) -> Dictionary:
 		if tile.outpost_owner == team.team_id:
 			continue   # 自家 outpost 不寄己
 		var owner: TeamData = state.teams.get(tile.outpost_owner)
-		if owner == null or owner.faction_id != team.faction_id:
+		if owner == null or not TeamData.same_faction(owner, team):   # S1：不寄存到別的無勢力隊的據點
 			continue
 		var d: int = _hex_dist(team.tile_pos, tile.tile_pos)
 		if d < best_d:
@@ -3353,7 +3353,7 @@ func _resolve_scout_target(state: WorldState, team: TeamData) -> Dictionary:
 	for mid in state.teams:
 		if mid == team.team_id: continue
 		var mt: TeamData = state.teams[mid]
-		if mt.faction_id != team.faction_id: continue
+		if not TeamData.same_faction(mt, team): continue   # S1
 		var be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, mid)
 		var mpos = be.get("tile_pos", Vector2i(-1, -1))
 		var st: float

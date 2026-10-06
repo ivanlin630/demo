@@ -49,6 +49,14 @@ const TAG_EXILE    := "流亡"
 const TAG_SUBTEAM  := "子團"
 const TAG_BEAST    := "野獸"
 
+# ══ ★★★同勢力判斷的**唯一一支**（spec 2026-10-07 terminal-ui-fixes S1）════════════════════════════════
+#   ★病：`a.faction_id == b.faction_id` 在兩邊都是 −1（無勢力）時為真 ⇒ 兩支互不相干的獨立隊被當成同一個勢力
+#     （E2E 抓到的那一例：玩家與 NPC 都無勢力 ⇒「提議同盟（不可：對方已經和你同一個勢力）」）
+#   ★取代了 12 處裸比較（逐處理由在 S1 交件信的表；另 5 處刻意不換 —— 那幾處「兩邊 −1」本來就要包含
+#     無勢力隊與**自己的**子隊／居民，換掉會把自家人也排除，需要另一個判準：「屬於誰」而不是「同勢力」）
+static func same_faction(a: TeamData, b: TeamData) -> bool:
+	return a != null and b != null and a.faction_id != -1 and a.faction_id == b.faction_id
+
 static func pop_cap_from_leadership(skill: float) -> int:
 	return clampi(int(round(49.0 * minf(skill / 0.8, 1.0))) + 1, 1, 50)
 
