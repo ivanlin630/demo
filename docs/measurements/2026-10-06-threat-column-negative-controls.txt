@@ -115,3 +115,31 @@ ERROR: [FAIL] ★★★P7 失敗出口也帶 threat_line 鍵
 ERROR: [FAIL] ★★★P7 而它是佔位符「—」（附身者沒有隊 ＝ 不知道）
 ERROR: [FAIL] ★★★P8 無隊  頂列印佔位符「威脅：—」
 ```
+
+## text_ui_layout_bed 的 `_func_body` 窄化（發現輪電池 text-ui-layout 紅）
+★真因：舊版只在 `
+func ` 截止，player_api_mapper 全是 `static func` ⇒ tick_clock 的「函式體」＝ 到檔尾；本票 `_bearing` 的 0.8660254／360.0 含「60」
+### 修後
+```
+  PASS: ★母體地板：真的切到 `action_block` 的函式體（切不到  下面那條恆綠）
+  PASS: ★母體地板：抓到 `tick_clock` 的函式體（抓不到  下面三條恆綠）
+   tick_clock 函式體 9 行
+  PASS: ★★窗口只含 `tick_clock` 一個函式（9 行、內含其他簽名 ＝ false）
+   函式體裡出現的可疑字面（手抄物理的指紋）＝ []
+  ★★★接電狀態（縮到函式體）：`_refresh()` 裡呼 `_render_screen` ＝ 1 次
+  PASS: ★母體地板：兩支函式體都抓到了（抓不到  下面兩條恆綠）
+=== text_ui_layout DONE === errors: 0｜到場點名 10／10
+```
+### NA 抽取式改回舊截止點 ⇒ 預期窗口格紅（675 行）
+```
+   tick_clock 函式體 675 行
+=== text_ui_layout DONE === errors: 2｜到場點名 10／10
+ERROR: [FAIL] ★★窗口只含 `tick_clock` 一個函式（675 行、內含其他簽名 ＝ true）
+ERROR: [FAIL] ★★★沒有手抄的物理常數（60／1440／24；實測 ["60"]）
+```
+### NB 在 tick_clock 本體塞一個 60 ⇒ 預期原守衛仍紅（窄化沒弄瞎它）
+```
+   函式體裡出現的可疑字面（手抄物理的指紋）＝ ["60"]
+=== text_ui_layout DONE === errors: 1｜到場點名 10／10
+ERROR: [FAIL] ★★★沒有手抄的物理常數（60／1440／24；實測 ["60"]）
+```

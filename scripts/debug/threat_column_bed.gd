@@ -166,6 +166,8 @@ func _p3_priority() -> void:
 	ws.encounter_defender_id = bid
 	var fight: String = PlayerApiMapper.map_threat_line(ws)
 	print("   ①＋② ⇒「%s」" % fight)
+	# ★這個期望字面全庫只出現一次 ⇒ value-key 閘的 lookup-key 段會把它當可疑鍵；已精確名登在
+	#   docs/process/.lookup-key-allow.tsv（理由：產線是 "交戰中：%s" 組出來的，整句本來就只該在這裡出現）
 	_check("★★★P3 ①＋② ⇒ 印①「交戰中：野豬」", fight == "交戰中：野豬")
 	# ★①的判準是「我是不是這場戰的一方」：別人的戰不算
 	ws.encounter_attacker_id = g
