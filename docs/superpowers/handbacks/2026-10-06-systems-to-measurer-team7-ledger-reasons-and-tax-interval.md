@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: Team7 三個「要量」（藍圖裁 E 結案信）：帳本 reason 分辨守恆／material 45% 誰搬的／徵收間隔分佈
 topic: 工具＝既有的 **driver-ledger**（`WorldState.record_driver`，`world_state.gd:273`；ResourceBank／TileBank 每筆寫入都記 tick／entity／field／delta／reason）｜預設 off、環形緩衝（滿了丟最舊）｜seed 1337、樹 ≥ 最新 main
 ---
