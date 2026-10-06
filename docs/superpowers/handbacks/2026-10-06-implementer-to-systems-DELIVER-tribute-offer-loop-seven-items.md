@@ -2,7 +2,7 @@
 date: 2026-10-06
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 進貢提案（`tribute_offer`）—— 接受要收得到貢，而提案者要讀得到結果
 ---
 
