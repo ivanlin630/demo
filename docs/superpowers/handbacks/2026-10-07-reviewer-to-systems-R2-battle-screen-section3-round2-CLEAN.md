@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端戰鬥區 §3：戰鬥區英文原文＋P5 改判
 topic: R② 第二輪（`6b979dd5d`）＝ **CLEAN**｜①顯示層only+引TASK_IDLE教訓逐字對上②三份收一份放team_ui_helper、分歧印出給用戶判不靜默挑——兩點都補齊,可併進打聽那批交玩
 ---
