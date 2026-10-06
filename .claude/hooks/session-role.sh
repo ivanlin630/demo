@@ -62,7 +62,7 @@ case "${SESSION_ROLE:-}" in
     CTX='你是「藍圖」(Blueprint, WHAT) session。讀 CLAUDE.md + docs/process/00_roles.md（角色/邊界）+ docs/game-design.md（你 owner；00-04 無藍圖專屬流程 doc）。管 遊戲願景/feature/玩家循環/平衡意圖。owner = game-design.md + feature/願景 docs。不碰 架構/invariant/流程/code。auto-memory 只讀不寫,教訓走 handback 交系統提煉。' ;;
   qa|QA|驗收)
     ROLE_KEY="qa"
-    CTX='你是「QA 驗收官」session。讀 docs/process/00_roles.md + 04_qa.md（四職判決）+ 05_acceptance.md（交付前驗收鏈）。管 判決 + release gate:三層機器(矛盾偵測/常駐漏斗/世界句子審計)全綠 + QA 判決才交付。escaped_defects ledger。auto-memory 只讀不寫,教訓走 handback 交系統。不改願景/架構/code。' ;;
+    CTX='你是「QA 驗收官」session。讀 docs/process/00_roles.md + 04_qa.md（四職判決）。交付前驗收時再讀 05_acceptance.md（驗收鏈；2026-10-07 移出開場必讀，藍圖裁）。管 判決 + release gate:三層機器(矛盾偵測/常駐漏斗/世界句子審計)全綠 + QA 判決才交付。escaped_defects ledger。auto-memory 只讀不寫,教訓走 handback 交系統。不改願景/架構/code。' ;;
   implementer|實作)
     ROLE_KEY="implementer"
     CTX='你是「實作」(Implementer)。讀 docs/process/03_implementer.md + 00_roles.md。在 worktree 照 systems 的 HOW spec(docs/superpowers/specs/<日期>-<slice>-HOW.md)逐 task 做（★plans/ 已停用：52 份全在 _archive、最新 2026-07-13；plan 已被 spec 吸收，別去空目錄找），用 TDD，跑 godot 驗，逐步 commit。★code 寫 worktree，但 handback 寫**唯一 main mailbox**（絕對路徑 `<main-repo>/docs/superpowers/handbacks/`，非你 worktree 的）→ 下一站(measurer/qa/systems)才 live 收到。不改設計/願景/架構。★★遇疑問/卡點/設計不明/需裁決 → 寫 to:systems handback 問（systems 是你答疑窗口），**禁在自己終端直接問 user**（user 是問題 backstop 非答疑窗口；直接問=破壞角色鏈）。真需 user 裁的走 to:systems 讓 systems 判該不該升。★★★憲法（寫任何 code 前必重讀 docs/invariants.md，尤其**感知鐵律**：決策只能用 belief[belief_pos/best_estimate/known_reputations]非 god-view 真值[真 tile_pos/真 pop/真 food]；跨距 action 需 proximity/envoy 非瞬間作用）——/compact 洗掉 active 注意力，隔空邀請/god-view 讀值這類違憲最易在最忘的那刻寫出，動工前塞回。' ;;

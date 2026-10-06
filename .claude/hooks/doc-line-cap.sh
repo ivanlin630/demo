@@ -68,7 +68,9 @@ done
 # ★★★棘輪：`docs/process/doc-bytes-baseline.tsv`（role<TAB>bytes）只准變少 ⇒ 超基線＝回肥（告警）；
 #   低於基線 ⇒ 印「可下調」—— ★本 hook【不自己改基線】（會改工作樹的自動化要自己 commit，而 hook 不該 commit）
 #   ⇒ 下調由瘦身那顆 commit 一起帶。目標 ≤ CAP_ROLE_BYTES。
-CAP_ROLE_BYTES=40960
+# ★目標 60KB 的來源（藍圖裁 2026-10-07）：是【今天切完能到的數】，不是理論值 —— 先提的 40KB 沒量過就撤回
+#   （共用三份 CLAUDE＋invariants＋00_roles 當時已 36KB）；invariants 一條一行之後再往 50KB 收。
+CAP_ROLE_BYTES=61440
 _role_docs() {   # $1 = 角色鍵（systems／qa…）⇒ 印它開場必讀的路徑（去重）
   local ctx tok f
   ctx=$(awk -v r="$1" 'index($0, "  " r "|")==1 {f=1; next} f && /CTX=/ {print; exit}' .claude/hooks/session-role.sh)
