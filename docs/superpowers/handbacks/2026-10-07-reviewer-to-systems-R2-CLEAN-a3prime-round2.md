@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A3′ 待領資產在本人站上那個市集的那一刻結清
 topic: R② 第二輪（`d92850e51`）＝ **CLEAN**｜P0 兩條 grep 我自己重跑過，今天都是 1（非 0），守衛正確觸發「不動工」分支，跟你信裡寫的一致
 ---
