@@ -14,7 +14,7 @@
     `faction_ai_system.gd:7856`（TASK_HOLD）／`interaction_system.gd:832`（herald_order）
 `transition`（:373）：**只改 task／priority／reason／start_tick，完全不碰 move_target**（本體 :373-392）
   ⇒ 呼叫點 11 處 ⇒ ★這是沿用的主要來源：任何經 transition 換手的隊，都帶著前一個任務的目的地
-`release`（:334）／`set_strategic_move`（:43）：另核（release 回 IDLE 應清目標；strategic_move 是設目標本身）
+`release`（:334）：★R² 已核：`:354` `team.move_target = Vector2i(-1,-1)` ⇒ **已經清，對**｜`set_strategic_move`（:43）是設目標本身
 ★Team40 那一次走的是哪一條：**先查**（印 t8973 那一刻的呼叫來源 —— `_source` 參數已經帶在兩支裡）
 ★這份清單是我**數入口**得來的，不宣稱只有這幾條會改 task（`current_task =` 的直接寫入要另 grep 一次，見 §2 P3）
 ```
@@ -35,9 +35,14 @@
 ```
 P1 [陽性對照] Team40（fp 那個世界，seed 與 fp 床同）t8973 換手那一刻：move_target ∈ {新任務給的, (-1,-1)}
    ⇒ ★修前必紅（印舊值 (10,25)）
-P2 [不變量] 一段世界裡**每一次** task 變更的那一 tick：move_target ∈ {新任務給的, (-1,-1)}
-   ⇒ ★「新任務給的」怎麼判：換手時記下傳入的 target，與 tick 結束時的 move_target 比
+P2 [不變量] 一段世界裡**每一次** task 變更：move_target ∈ {新任務給的, (-1,-1)}
+   ⇒ ~~換手時記下傳入的 target，與 tick 結束時的 move_target 比~~ ★R² 打回：同 tick 二次換手會比錯對象
+   ⇒ ★**在每一次換手呼叫回傳的那一刻**（try_set／transition／release 任一）**立刻**取樣 move_target，
+     跟**那一次**呼叫給的值比 —— 同一時刻，不等 tick 結束（判準庫：同一欄印的值與被斷言的值必須是同一時刻）
    ⇒ 母體地板：那一段 task 變更次數 ≥ N（印出來）；transition／try_set 兩條各自 ≥1
 P3 [反向掃] `current_task = ` 的直接寫入（不經 TaskArbiter）全站列出 ⇒ 每一處說它換手時目的地怎麼處理
+   ⇒ ★R² 指出已有現成的窮盡結論：`task_arbiter.gd:49-60` 註解 —— 「對已存在的隊，寫入路只有 try_set／release／transition 三條；
+     其餘命中是新隊建立豁免與 recruit_tutorial（寫別的隊）；decision_context 那筆是讀」⇒ **先引用它**，
+     P3 只需**重跑那一行 grep 確認結論今天仍成立**（印命中數與當時的數對照），不必從頭做
 P4 [fp] **會變**（行為改了）⇒ 量；變了 ⇒ 基準與改動原子落地；★而 A3 的 fp 結論（不變）先落，本票後落，兩張分開判
 ```
