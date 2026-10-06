@@ -831,7 +831,11 @@ func build_regions(pend_txt: String) -> Dictionary:
 		rows = _interact_action_split()["team"]
 	var threat: String = String(_cached_snapshot.get("threat_line", ""))
 	if threat == "":
-		threat = "（無）"
+		# ★藍圖裁（`c8f39da3d`）：今天 `threat_line` **零寫入者** ⇒「（無）」是一句我們不知道真假的話
+		#   （等於對玩家說「你很安全」）⇒ 過渡字面改「尚未提供」。
+		#   ★之後給內容的小票會改用 `has("threat_line")` 判 —— `== ""` 分不出「寫入者說沒有威脅」
+		#     與「根本沒有寫入者」（這個洞的原形）。
+		threat = "尚未提供"
 	return {
 		"top": {
 			"clock": PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
