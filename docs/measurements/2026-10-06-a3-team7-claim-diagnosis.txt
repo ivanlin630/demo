@@ -1,0 +1,22 @@
+# 票 A3 第一步：分辨 Team7 那 4 個 tick（seed 1337、30 天觀察輪的世界）
+
+- 世界：MeasureBedHelper.arm_and_setup("res://config/default.json", false)、seed 1337、玩家活著、Probe 關（同 observation_round_30day 的 PASS A）
+- 樹：origin/main fc91f0178（腳本是臨時的 scripts/debug/_tmp_a3_diag.gd，跑完刪除，不進 repo）
+- 印：WATCH 那 5 個 tick ＋ Team7 的 current_option 進出「領取」的每一刻
+
+```
+[A3] t28630 ★WATCH opt=領取 task=貿易 pos=(2, 7) move_target=(3, 7) 腳下owner=-1 coin=93.9 material=0.0 claims=["(3, 7) owner=26 kind=goods res=material amt=15.0 "]
+[A3] t28911 ★WATCH opt=領取 task=貿易 pos=(2, 7) move_target=(3, 7) 腳下owner=-1 coin=99.0 material=0.0 claims=["(3, 7) owner=26 kind=goods res=material amt=15.0 "]
+[A3] t29194 ★WATCH opt=領取 task=貿易 pos=(2, 7) move_target=(3, 7) 腳下owner=-1 coin=96.0 material=0.0 claims=["(3, 7) owner=26 kind=goods res=material amt=15.0 "]
+[A3] t29288 ★WATCH opt=領取 task=貿易 pos=(2, 7) move_target=(3, 7) 腳下owner=-1 coin=96.0 material=0.0 claims=["(3, 7) owner=26 kind=goods res=material amt=15.0 "]
+[Claim] Team7 於 (3, 7) 領回 coin=0.00 goods=15.0
+[A3] t29340 ★WATCH opt=領取 task=idle pos=(3, 7) move_target=(-1, -1) 腳下owner=26 coin=96.0 material=15.0 claims=[]
+[A3] t29390 opt=建設 task=建設 pos=(3, 7) move_target=(3, 7) 腳下owner=26 coin=96.0 material=15.0 claims=[]
+```
+
+## 判讀
+·待領在 (3,7)，那格 outpost_owner ＝ 26 ⇒ **不是自家市集** ⇒「自家市集不自交易」的早返回擋不到它（②不成立）
+·Team7 在 t28630／28911／29194／29288 都在 (2,7)、move_target ＝ (3,7) ⇒ **相鄰一格、約 660 tick 沒有移動**
+·t29340 站上 (3,7)：[Claim] Team7 於 (3,7) 領回 goods=15.0 ⇒ material 0 → 15 ⇒ 執行端是好的（③）
+·⇒ 慢的是移動層（相鄰一格卡了 ~700 tick），照派工信：沒到場＝移動層，回報不在本票修
+·★coin 87→96 的小幅變動與這筆待領無關（它是 material）——「coin 不動」不是失敗的證據（systems 已訂正）
