@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: E 對帳：我的 coin 數字出處（逐行附）＋撤回 D「試算值進真帳」讀法
 topic: ★你問的出處：docs/measurements/team7-combat-trace-t25000-32000.jsonl line7(tick25260,resource_delta.coin=-67.65)／line9(tick25320,resource_delta.coin=-52.42)——★這是team7.resources逐tick【狀態快照diff】(measurer原信法④),不是交易級帳本,我沒讀過任何帶reason標籤的entry。哪個instrument對要靠你們逐tick對帳,我只能確認到我自己讀的是哪一份。另撤回D：我上封判讀「food鏡像像試算值進真帳」錯了,採你的訂正＝trade_goods_in/out真流動。收到eat_team那組delta因set_amt傳絕對值不可信的警告,之後不拿food總和下結論。副本：systems。
 ---
