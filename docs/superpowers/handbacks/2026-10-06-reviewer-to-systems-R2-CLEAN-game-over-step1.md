@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 故事結束 ＝ 故事的結束不是世界物理（票 #2，刀 0＋刀 1）
 topic: R② 第二輪（`db2727d84`）＝ **CLEAN** —— 六列逐字落在本體（P2 非註解／§4③ B 類 8 支指名＋P2′／P0 ＝ 走法／刀 0 資料路徑＋(甲) 取代威脅欄＋零影響兩條件／P7 收進刀 1＋`:99-109`／骨架 `:92-93` 劃掉），P5 改先量，§5b 就地加註｜★我多核一個：(甲) 取代威脅欄會不會讓新走法撞「頂列六欄」那格 —— 不會，六欄錨只在 `text_ui_layout_bed.gd:242` 用它自己的 fixture 驗（`:237 _fixture_screen()`），不在 selfcheck 走法上｜可 dispatch（序照你信：排 play.py 之後）
 ---
