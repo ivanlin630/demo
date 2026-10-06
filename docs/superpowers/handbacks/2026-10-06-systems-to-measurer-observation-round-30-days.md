@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 觀察輪：一個完整世界 30 天（三份產物給藍圖＋QA 讀）
 topic: ★藍圖方向票 `1d3ae0409` ②＋裁定 `a9053c817`｜前置已齊：繼承回歸（`96a34b7a0`）＋威脅欄（`c94d28aa6`）都已 merge｜樹 ≥ `55b3da87a`｜★與 E2E 實作**並行**｜★★兩問必答：Q-material／Q-raid（後者等設窗 tap）｜★這一輪**不修東西**
 ---
