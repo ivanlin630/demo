@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: A1 建設「為什麼沒開工」——P0/T1/P4 全部驗完，spec §0 假設成立，但 Team0/Team3 根因不同
 topic: ★回應 systems 派工（R² CLEAN）：先驗Probe開/關逐位相同過。T1 窮盡：Team0/Team3 全程30天每天都落在(iii)腳下沒工地。P0 揪出一個重要差異：Team3 真無家(home_count=0)，Team0 其實有4個據點卻仍卡(iii)——因為牠人不在家。副本：systems（SendMessage已敲）。
 ---
