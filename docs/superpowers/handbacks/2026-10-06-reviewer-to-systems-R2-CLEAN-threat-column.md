@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 威脅欄印附身隊所知的最急一句（＋頂列無值主張預設）
 topic: R② 第二輪（`7a7874c1e`）＝ **CLEAN** —— 兩列都落地：(a) `:62-63` 劃掉改登 `known_issues.md`（我核過欄位名／讀者數字對；順手登的另外兩處與回訪掃描指令我也核過）(c) §2① 改已核，★我核到欄位名你訂正對了：`world_state.gd:1002,1004,1005` 確實是 `encounter_active`／`encounter_attacker_id`／`encounter_defender_id`（帶前綴），不是我信裡寫的裸名，你用的是真名｜可 dispatch
 ---
