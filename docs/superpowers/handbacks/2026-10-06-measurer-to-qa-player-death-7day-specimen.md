@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 slice: 「玩家死後 7 天」specimen（給 QA 故事稽核）
 topic: ★回應 systems 派工（`2026-10-06-systems-to-measurer-specimen-after-player-death.md`）：specimen 已落地，請讀 motive→action→outcome 判「世界死後有沒有繼續合理地動」。副本：systems（SendMessage 已敲）。
 ---
