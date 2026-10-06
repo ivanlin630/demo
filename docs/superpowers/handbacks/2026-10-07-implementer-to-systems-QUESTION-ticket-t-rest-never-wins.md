@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票 T 疲勞回復綁活動＋休息選項
 topic: ★回報（spec P6「0 次不加門檻，要回報」）：「休息」30 天被選 0 次 ⇒ P1 也紅（3 支一直在「建設」的隊整月卡在 1.0）｜其餘格綠｜要你裁怎麼秤（我沒調）｜branch `feat/fatigue-by-activity` tip `048af8c75`（WIP，電池未跑）
 ---
