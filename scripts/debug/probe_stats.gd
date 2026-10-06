@@ -121,9 +121,30 @@ static func add_amount(event: String, value: float) -> void:
 #   ★★★而靜音了什麼**必須印在交件裡** —— 否則下一個人會把「這一族沒樣本」讀成「它沒發生」。
 static var sample_mute: Dictionary = {}
 
+# ══ ★★取樣窗：讓 first-N 桶能對準「某一隊、某一段時間」（spec 2026-10-06 decision-tap-can-target）══════
+# ★病：bump_sample 是 first-N ⇒ 長跑時桶被**早期**評估佔滿 ⇒ 結構上看不到晚期那一刻（「沒接電」的一種：視窗不含目標）
+#   ⇒ 加大 cap 不是解（多少才夠？）⇒ 解是能對準
+# ★形狀照上面的 `sample_mute`（按 event 調整取樣）：床在 `reset()`／`arm()` 之後設
+#   `Probe.sample_window = {"raid.composition": {"team": 11, "tick_min": 13350, "tick_max": 13400}}`
+#   ·team ＝ -1 ⇒ 不篩隊｜樣本靠 instance 的 "team"／"tick" 兩鍵判；沒有那兩鍵 ⇒ 視為窗外
+# ★★只影響樣本收集：計數器、決定性、RNG 一律不動（不讀 state、不呼 rand）
+# ★★★被窗擋掉的筆數記在 `sample_window_dropped` —— 同 sample_mute 那條：**擋掉了什麼必須印在交件裡**
+#   （否則「窗內 0 筆」與「窗根本沒在作用」分不開）
+static var sample_window: Dictionary = {}
+static var sample_window_dropped: Dictionary = {}
+
 static func bump_sample(event: String, instance: Dictionary, cap: int = 8) -> void:
 	if not enabled: return
 	if sample_mute.has(event): return
+	if sample_window.has(event):
+		var w: Dictionary = sample_window[event]
+		var wt: int = int(w.get("team", -1))
+		var k: int = int(instance.get("tick", -1))
+		var in_team: bool = wt == -1 or int(instance.get("team", -1)) == wt
+		var in_tick: bool = k >= int(w.get("tick_min", -1)) and k <= int(w.get("tick_max", -1))
+		if not (in_team and in_tick):
+			sample_window_dropped[event] = int(sample_window_dropped.get(event, 0)) + 1
+			return
 	var arr: Array = samples.get(event, [])
 	if arr.size() < cap:
 		arr.append(instance)
@@ -136,6 +157,7 @@ static func reset() -> void:
 	# ★★★setup_saw_unarmed / setup_unarmed_sites 【刻意不清】——
 	#   盲床的順序就是「先 setup、後 reset+arm」⇒ 清掉的話證據會被它要抓的那個 bug 抹掉。
 	counts = {}; peaks = {}; amounts = {}; samples = {}
+	sample_window_dropped = {}   # ★資料 ⇒ 清｜`sample_window` 是設定 ⇒ 不清（同 sample_mute 的理由）
 	# ★`sample_mute` **不清** —— 它是【本輪要不要收這一族】的設定，不是資料；
 	#   ★★清掉的話，床在 `reset()` 之前設的靜音會默默失效（而那只會在 OOM 時才被發現）。
 	_streak = {}
@@ -229,6 +251,10 @@ static func _rate(num_key: String, den_key: String) -> String:
 
 static func summary() -> void:
 	print("\n========== [ProbeSummary] ==========")
+	# ★取樣窗：設了窗的 event 一律印「窗 ＋ 收到幾筆 ＋ 擋掉幾筆」（擋掉 0 ⇒ 窗沒在作用；收到 0 ⇒ 窗內沒發生）
+	for ev in sample_window.keys():
+		print("[ProbeSummary] sample_window %s ＝ %s｜收 %d 筆｜窗外擋掉 %d 筆" % [ev, str(sample_window[ev]),
+			(samples.get(ev, []) as Array).size(), int(sample_window_dropped.get(ev, 0))])
 	var keys: Array = counts.keys(); keys.sort()
 	for k in keys:
 		print("[ProbeSummary] %-28s = %d" % [k, int(counts[k])])
