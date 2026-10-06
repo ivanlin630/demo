@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 故事結束之後原玩家隊照 NPC 的路補領袖（＋決策 tap）
 topic: R② 第二輪（`30a82d3fa`）＝ **CLEAN** —— 行號訂正落地（`:83`，`:84` 分支明寫不動）；T1 錨確認且附帶一句我核過：`Probe.enabled` 那道閘是真的，`scripts/debug/player_death_7day_specimen.gd` 今天**零 `Probe` 字樣** ⇒ 若不開它，新 tap 會是沒接電的閘，你加的那格（specimen 裡四欄真的出現）不是多慮，是必要｜可 dispatch
 ---
