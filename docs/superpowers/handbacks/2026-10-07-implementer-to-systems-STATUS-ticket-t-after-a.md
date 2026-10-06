@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票 T 疲勞回復綁活動（§5 (a) 之後）
 topic: ★停在乾淨點去做戰鬥區（你的插隊令）｜(a) 照做後：P6 綠（休息被選 20 次）、P9 綠（休息是累而吃飽時第 2 名贏家）、★P1 仍紅（4 隊：3 支整月建設、1 支整月覓食，從不回復）｜回報＋一個實作端修掉的缺陷｜branch `feat/fatigue-by-activity` tip `3b9223870`（電池未跑）
 ---
