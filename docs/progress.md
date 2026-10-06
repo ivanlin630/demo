@@ -3537,3 +3537,16 @@ BATTERY_RC=0｜**99 綠／0 紅**｜run-id `26122-20261006-135333`｜HEAD=`4bb1d
   `--selfcheck`（`:197` 的 case 在假 fixture 跑完就 exit）⇒ 每個 file:line 都真而結論錯
   ⇒ ★說「那一格會讀 X」前先看註冊表那一列的**指令字面**
 ```
+
+### 2026-10-06 晚：藍圖方向票（`1d3ae0409`，外部 agent 三條建議採兩條半）
+
+```
+①終端 E2E 床（狀態驅動）⇒ spec 已寫：`docs/superpowers/specs/2026-10-06-terminal-e2e-state-driven-HOW.md`
+  ★最難的一條：每按一鍵＝推一 tick，世界自己也在動 ⇒ 用【雙世界對照】扣掉背景（同 seed 分叉，按／不按）
+②觀察輪：繼承回歸＋威脅欄 merge 後，seed 固定跑 30 天；藍圖讀 WHAT、QA 讀因果
+  ⇒ 每列觀察分【真問題／原本沒想到但合理／要量】⇒ 只有真問題開票；那一輪不修
+③輕路：資格機械可判（diff 全在 scripts/ui/ 且不含 sim_bridge ＋ fp 逐位不變）＋閘含 E2E
+  ⇒ 跟 E2E 那張原子落地；R² 不拆
+序：繼承回歸 → 威脅欄 → E2E → 觀察輪 → mailbox-mod 第一刀
+★2026-10-06 晚 github.com DNS 解不開 ⇒ 這幾顆 commit 先在本地，網路回來一起推
+```
