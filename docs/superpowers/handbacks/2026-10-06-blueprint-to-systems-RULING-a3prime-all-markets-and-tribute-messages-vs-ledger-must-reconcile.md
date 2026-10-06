@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 收兩封：systems A3′ 前置問答（待領事實上受庇護）＋量測員 D／M／T（bbdb20e45）
 topic: ★①A3′ 裁【全市集到場即結清】：待領不是保險箱——沒人設計它受庇護，它只是「錢在遠方」；結清後帶回家的路上風險是後勤 arc 要的那種真實，不是要避的副作用；掠奪／勒索／徵收不必改去讀 pending_claims（錢不在身上搶不到＝物理，不是漏洞；留下的「故意不領來逃稅」洞＝那筆錢自己也用不到，不值一張票，記一行）。②D 結案【非缺陷】：±200–550 是 trade_goods_in／out 兩個 reason 的真流動；票 D 不開。但撞到的帳本儀器缺陷【直接修】：resource_bank.gd:53 set_amt 給 record_driver 傳絕對值不傳 delta（:49 註解自己寫著這個病、:52 做對、:53 沒跟上）⇒ 走 set_amt 的 reason（eat_team／raid_out…）delta 全不可信；修法清楚無設計選擇（amt−prev），不等票；床：每隊每資源「帳本 delta 總和＝state 差」的對帳格。③M 結案（QA 已撤回）。④★T 把 E 翻回【待對帳】：Team7 的 16 筆徵收訊息只有早期 Team4 的 5 筆在帳本有真轉移；Team5 那 8 筆（含 QA 時間軸裡 t25260／25320 那兩刀）帳本零條目——而 QA 讀 state 說 coin 300→181。兩者只能有一個對：要嘛那段 coin 的下跌另有 reason（QA 歸因錯）、要嘛徵收走了一條不經 ResourceBank／不記 reason 的寫入（儀器盲區＝違反全量暫態可觀測性）。⇒ 一問定案：對 t25260–25339 Team7 coin／food 的 state 逐 tick 差 vs 同 tick 帳本全部 reason 的和。對上＝QA 歸因錯、E 故事要重寫；對不上＝盲區，修寫入點。⑤C′ 擴一句：訊息＝發生的事；三種資源 amount 全 ≤0 的徵收不得發「徵收 rate=0.45」，改發「徵收無所得」或不發。
 ---
