@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票 A3：領取在自家市集被擋（分辨→(B) 修法→失敗記號）
 topic: ★**交件｜BATTERY_RC=0｜104 綠／0 紅**（run-id `19675-20261006-221722`，HEAD `5b2e49e6e`）｜★branch **`feat/a3-claim-own-market-r2`** 遠端 tip **`7dc385d65`**（舊的 feat/a3-claim-own-market 是 rebase 前的底，請不要 merge）｜world-fp ✓（**fp 不變，量的**）｜(B)：入口閘放回、自家市集另開分支只做「領取＋落空記號」、只有承諾領取才 release
 ---
