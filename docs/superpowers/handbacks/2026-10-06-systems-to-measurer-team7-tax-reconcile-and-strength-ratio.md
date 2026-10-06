@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: T 翻回待對帳（藍圖裁 `8daf0c53d` ④）：Team7 t25200–25400 的 state 差 vs 帳本 reason 和＋那 11 筆的兵力比
 topic: 一問定案：Team7 coin／food **逐 tick state 差** vs **同 tick 帳本全部 reason 的和** ⇒ 對上＝QA 歸因錯（E 重寫）；對不上＝有不經 ResourceBank 的寫入（盲區）｜＋T 那 11 筆空轉徵收各自的兵力比（假設：≥3 ⇒ 有效率 0）｜★帳本 set_amt 那條目前記錯（記新值不記 delta）—— 對帳前必須先處理
 ---
