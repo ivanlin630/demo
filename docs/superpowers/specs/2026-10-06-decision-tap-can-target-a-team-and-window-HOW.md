@@ -29,6 +29,17 @@ first-N 是一個**取樣設計**，本身沒錯 ——
   ⇒ ★★而被窗**擋掉了多少筆**要計數並能印（同 `sample_mute` 那條：靜音了什麼必須印在交件裡）
 ```
 
+### ③（systems 2026-10-06 追加，派工後；★不重送 R²：同一機制的參數化，交件寫明）
+
+```
+真實需求：QA 讀 30 天觀察輪要分隊看 `construct.stall`／`construct.start`
+  ⇒ `outpost_system.gd:379` 的 `construct.stall` 樣本隊伍鍵叫 **`"ct_id"`**（`:361` 的 `construct.start` 才叫 `"team"`）
+  ⇒ 而且兩者都是 `bump_sample` **預設 cap 8**（同一個 first-N 病，更嚴重）
+⇒ `sample_window` 的設定可選帶 `"team_key"`（預設 `"team"`）
+⇒ ★不准把各處 bump_sample 統一改名成 `"team"` —— 那會動到一堆床讀的鍵名（爆炸半徑在讀的那端）
+P5 對 `construct.stall` 設 `{"team": X, "team_key": "ct_id", …}` ⇒ 樣本全是那一隊
+```
+
 ## §2 驗收（P）
 
 ```
