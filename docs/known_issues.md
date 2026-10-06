@@ -5460,3 +5460,18 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
 ```
 
 回訪：觸發事件 —— 若觀察輪或故事稽核出現「有隊靠留在市集的待領資產長期逃避徵收」的實例（屆時再判是不是 WHAT 問題）。
+
+---
+
+## 夜襲判定 `_check_night_raid` 是零呼叫者的死碼（dormant code 族；藍圖 2026-10-07 裁：登記一行）
+
+狀態：已知未實裝
+
+```
+`scripts/simulation/npc_combat_system.gd:818-822 _check_night_raid`：防守方 task＝TASK_REST 且無崗哨 ⇒ 突襲成功
+⇒ `git grep "_check_night_raid("` 排除定義 ＝ **0 呼叫者**；頭上註解 `TODO: 接入 _try_interact`
+⇒ ★票 T 給 TASK_REST 第一個寫入者之後，它**仍然不會跑**（不是被 TASK_REST 擋，是沒人呼它）
+★藍圖裁：休息接上後它**不得無聲活起來** —— 要活也要經一張票（紮營無崗哨的風險會跟著 TASK_REST 一起活）
+```
+
+回訪：觸發事件 —— 有人要它（某張票或故事稽核提出「紮營應該怕夜襲」）；屆時接線要附 tap（被走到幾次／成功幾次）。

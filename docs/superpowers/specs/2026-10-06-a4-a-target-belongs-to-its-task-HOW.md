@@ -19,6 +19,18 @@ Team40 t8973（fp 世界，臨時儀器已還原）：`try_set Team40 idle→貿
 ⇒ 下面 §2 P1 的 Team40 那一格**作廢**（原文保留）
 ```
 
+### ★★★實作端量到實例（2026-10-07）⇒ 本票照做，陽性對照換成 **fp 世界 t65 Team26**
+
+```
+30 天觀察世界（default、seed 1337）：transition 換手 3 次、沿用 **0**
+fp 世界（warring_states、seed 20260922、20000 tick）：換手 7 次、沿用 **1**：
+  `[A4TR] t65 Team26 idle→建設 沿用 move_target=(20,6) at=(22,4)`
+  `[A4SITE] 腳下 (22,4) ct=26 target={upgrade_facility, workshop}｜move_target 格 (20,6) ct=-1 target={}`
+⇒ ★**工地就在腳下，它卻帶著「建設」往一格沒有任何工程的地走** ⇒ 真病
+⇒ 呼叫點：`outpost_system.gd:675 _begin_facility_construction`（就地開工、tile＝隊腳下那格，transition 成 TASK_BUILD 而沒給目標）
+⇒ P1 改用它：修前必紅（印 (20,6)）、修後 move_target ∈ {(22,4) 或 (-1,-1)}
+```
+
 ## §0 換手的入口（我數過，`task_arbiter.gd`）
 
 ```
