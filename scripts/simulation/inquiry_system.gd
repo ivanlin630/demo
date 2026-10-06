@@ -10,6 +10,13 @@ const INQUIRY_RELATION_THRESHOLD: Dictionary = {
 	"ask_faction_status": 0.4,
 }
 
+# ★打聽票 I2：列出來但做不到的題目 —— 引擎給原因（列的條件 ＝ 做的條件）
+#   ★問糧源：對方說的糧源沒有管道寫進你的情報（決策也不讀糧源位置 belief）⇒ 列出、灰掉、說為什麼
+#   ⇒ 「糧源要不要成為一種情報」是 WHAT（已報藍圖）
+const DISABLED_REASON: Dictionary = {
+	"ask_food_source": "對方說的糧源還不會記進你的情報",
+}
+
 const ALL_INQUIRY_IDS: Array = [
 	"ask_team_location",
 	"ask_food_source",
@@ -34,6 +41,8 @@ func get_options(state: WorldState, player_team: TeamData,
 			"label": TextBank.fmt("ui_inquiry_" + id, "label", {}),
 			"desc":  TextBank.fmt("ui_inquiry_" + id, "desc", {}),
 			"relevance": _score_option(id, state, player_team, npc_team),
+			"enabled": not DISABLED_REASON.has(id),
+			"disabled_reason": String(DISABLED_REASON.get(id, "")),
 		})
 	options.sort_custom(func(a, b): return a["relevance"] > b["relevance"])
 	return options.slice(0, MAX_OPTIONS)
@@ -73,7 +82,7 @@ func resolve_inquiry(state: WorldState, player_team: TeamData,
 			var known: Array = state.team_known.get(npc_team.team_id, [])
 			var recent: Array = known.slice(maxi(known.size()-5, 0))
 			if not recent.is_empty() and not honest and randf() < 0.3:
-				var copy: MessageData = recent[0].duplicate()
+				var copy: MessageData = MessageData.copy_of(recent[0])   # ★打聽票 I1（舊：RefCounted 沒有 .duplicate() ⇒ SCRIPT ERROR）
 				copy.is_distorted = true
 				copy.description = TextBank.fmt(copy.type, "malicious", copy.params)
 				recent[0] = copy

@@ -1356,6 +1356,9 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 	var npc_gi: TeamData   = state.teams.get(npc_id_gi)
 	if npc_gi == null or choice_gi.is_empty():
 		return { "ok": false, "msg": "參數遺漏" }
+	# ★打聽票 I2：灰掉的題目 ⇒ 說原因、零寫入（不呼 resolve／_exchange_intel）
+	if InquirySystem.DISABLED_REASON.has(choice_gi):
+		return { "ok": false, "msg": String(InquirySystem.DISABLED_REASON[choice_gi]) }
 	var result_gi: Dictionary = InquirySystem.new().resolve_inquiry(state, pt, npc_gi, choice_gi)
 	# ══════ 打聽 v1（spec 2026-09-25）══════
 	# ★★★情報【必進 belief】，而走的是既有那條 relay —— `_exchange_intel()`（單向：我問他）。
@@ -1382,6 +1385,9 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 			msg_gi = "他不願多說"
 		elif wrote_gi <= 0 and _inquiry_payload_empty(result_gi):
 			msg_gi = "他也不知道"
+		elif wrote_gi <= 0:
+			# ★打聽票 I5（藍圖第四句）：他說了（payload 非空）而一筆都沒記下 ⇒ 你早就知道了 —— 舊版印「記下 0 筆」
+			msg_gi = "他說的你早就知道了"
 		else:
 			msg_gi = "他說了些事情（記下 %d 筆，來自 Team%d）" % [wrote_gi, npc_id_gi]
 	print("[PlayerCmd] gather_intel choice=%s mode=%s 寫入=%d 結果筆數=%d" % [

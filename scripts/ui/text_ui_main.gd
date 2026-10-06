@@ -3102,7 +3102,10 @@ func _handle_intel_mode(keycode: int) -> void:
 		return
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		var idx: int = keycode - KEY_1
-		if idx < _intel_options.size():
+		if idx < _intel_options.size() and not bool(_intel_options[idx].get("enabled", true)):
+			# ★打聽票 I2：灰掉的題目 ⇒ 說原因、不下令（零寫入）
+			_set_feedback(false, String(_intel_options[idx].get("disabled_reason", "現在問不了")))
+		elif idx < _intel_options.size():
 			var choice: String = _intel_options[idx].get("id", "")
 			_bridge.set_player_input("gather_intel_npc_id", _intel_target_id)
 			_bridge.set_player_input("gather_intel_choice", choice)
@@ -3121,7 +3124,12 @@ func _build_intel_str() -> String:
 	if _intel_options.is_empty():
 		lines.append("（無可用問題）")
 	for i in range(_intel_options.size()):
-		lines.append("[%d] %s" % [i + 1, _intel_options[i].get("label", "?")])
+		var _io: Dictionary = _intel_options[i]
+		if bool(_io.get("enabled", true)):
+			lines.append("[%d] %s" % [i + 1, _io.get("label", "?")])
+		else:
+			# ★打聽票 I2：同外層動作區的視覺語彙（「（不可：原因）」）
+			lines.append("[%d] %s（不可：%s）" % [i + 1, _io.get("label", "?"), _io.get("disabled_reason", "")])
 	lines.append("[1~5]選題  [Esc]取消")
 	return "\n".join(lines)
 
