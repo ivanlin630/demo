@@ -2567,7 +2567,7 @@ func _test_p20_forced_panel_three_lines() -> void:
 	# ★★★不變量 #10：回應在【專屬字母鍵】上，而數字清單【不含】它們
 	_check("★★★回應列在專屬字母鍵上（畫面有 `[A] `）", txt.contains("[A] "))
 	_check("★★數字清單不含回應（`[1] ` 那一行不是接受／拒絕）",
-		not txt.contains("[1] ✓ 接受") and not txt.contains("[1] ✗ 拒絕"))
+		not txt.contains("[1] 接受") and not txt.contains("[1] 拒絕"))   # U5：標籤拿掉 ✓／✗ 之後跟著改，否則這一格恆真
 	await _free_ui(node)
 	_cell("_test_p20_forced_panel_three_lines")
 

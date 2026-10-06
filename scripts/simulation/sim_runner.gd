@@ -907,7 +907,7 @@ func _step4e_faction_snapshot(state: WorldState, team_ids: Array) -> void:
 			for other_tid in same_tile:
 				if other_tid == tid: continue
 				var other: TeamData = state.teams[other_tid]
-				if other.faction_id == t.faction_id:
+				if TeamData.same_faction(other, t):   # S1：無勢力隊不是誰的勢力成員
 					state.snapshot_faction_member(tid, state.world.current_tick)
 					break
 

@@ -283,7 +283,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 		# ★「敵人動向」只問非同勢力的那些 —— 判準抄 `inquiry_system.gd:61` 既有那一行，不另寫
 		if topic == "ask_enemy_movement":
 			var _t2: TeamData = state.teams.get(tgt_id)
-			if _t2 == null or _t2.faction_id == receiver.faction_id:
+			if _t2 == null or TeamData.same_faction(_t2, receiver):   # S1（同 inquiry_system 那一行）
 				continue
 		var src_val: Dictionary = BeliefSystem.best_estimate(state, giver_id, tgt_id)
 		var entry: Dictionary = DistortionEngine.distort_intel_entry(src_val, mode, HOP_DECAY)

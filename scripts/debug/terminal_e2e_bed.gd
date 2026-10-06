@@ -43,14 +43,10 @@ const EFFECT_FIELDS: Dictionary = {
 #   key ＝ "<格>|<動作名>"
 #   ★這張表是**回報清單的機械形**（交件信逐條列給 systems），不是豁免：不在這裡的紅照紅
 var KNOWN: Dictionary = {
-	"P2|招募": "按目標動作「招募」⇒ 開招募子選單（`── 招募 TeamN ──`），而結果行仍是**上一道令**的回音"
-		+ "（實測「已排入：行動：拔擢匿名→記名」）；同時鍵列印的是主畫面那一份",
 	"P3|打聽情報": "走完選題（ask_food_source）⇒ 畫面只有「已排入：行動：確認打聽」，belief 沒變；"
 		+ "handler 回 ok:true（『他說了些事情（記下 0 筆…）』／『他也不知道』）而那句完成句不上畫面",
 	"P3|確認打聽": "同上（自家隊動作區的「確認打聽」重送上一次的選題）：ok:true、belief 不變、畫面只有回音",
 	"P10|攻擊": "按「攻擊」回來那一屏的頂列時間比世界慢 1 tick（實測畫面 35／世界 36）",
-	"E2|提議同盟": "兩支都沒有勢力（faction_id −1）的隊：「提議同盟（不可：對方已經和你同一個勢力）」⇒ −1 == −1 被當同勢力（票 S1）",
-	"E4|記號": "強制回應標籤帶 ✓／✗ 前綴（forced_label 自己加的；CP950 印不出來像一格空白）（U5）",
 	"STUCK|攻擊": "攻擊之後（交戰中）互動面板 Esc 關不掉：連按 6 次仍在面板、世界還被推了 1 tick",
 }
 var _known_hit: Dictionary = {}
@@ -811,7 +807,57 @@ func _e2_no_faction_alliance() -> void:
 		pass
 	else:
 		_check("E2「%s」沒有因「同一個勢力」被判不可（%s）" % [lab, String(row.get("why", ""))], not wrong)
+	# ★反向（spec P3）：真的同勢力 ⇒ 仍然不可（佈置：兩邊設成同一個 faction_id）——否則上一格對「判斷整個拿掉」也綠
+	var w2: Dictionary = _new_w(await _build(SEED_A))
+	var st2: WorldState = w2["node"]._bridge._state
+	var fid: int = int(st2.factions.keys()[0]) if not st2.factions.is_empty() else 0
+	st2.teams[st2.get_player_team_id()].faction_id = fid
+	st2.teams[NPC_ID].faction_id = fid
+	await _press(w2, "t")
+	var p2: Dictionary = parse_screen(_screen(w2["node"]))
+	if not bool(p2["targets_active"]):
+		await _press(w2, "tab")
+	await _press(w2, "1")
+	var pa2: Dictionary = parse_screen(_screen(w2["node"]))
+	await _drop(w2["node"])
+	var row2: Dictionary = {}
+	for a in pa2["actions"]:
+		if String(a["label"]) == lab:
+			row2 = a
+	print("   【反向】兩邊都設成勢力 %d ⇒「%s」列：%s" % [fid, lab, str(row2)])
+	_check("E2【反向】真的同勢力 ⇒「%s」不可且原因是同一個勢力（%s）" % [lab, String(row2.get("why", ""))],
+		not row2.is_empty() and not bool(row2.get("enabled", true)) and String(row2.get("why", "")).contains("同一個勢力"))
+	# ★S1 母體（spec P4：印在卷面）：裸比較 `faction_id ==/!= x.faction_id` 剩幾行、共用函式被呼幾處（數字報掃描的數）
+	var raw: Array = []
+	var helper: int = 0
+	var re_raw := RegEx.new()
+	re_raw.compile("faction_id (==|!=) [a-z_0-9]*\\.faction_id")
+	for root in ["res://scripts/simulation", "res://scripts/ui"]:
+		for f in _gd_files(root):
+			var i: int = 0
+			for l in FileAccess.get_file_as_string(f).split("\n"):
+				i += 1
+				var code: String = String(l).split("#")[0]
+				if re_raw.search(code) != null:
+					raw.append("%s:%d" % [String(f).trim_prefix("res://scripts/"), i])
+				helper += code.count("TeamData.same_faction(")
+	print("   S1 母體：裸比較剩 %d 行（非註解）｜TeamData.same_faction( 呼叫 %d 處" % [raw.size(), helper])
+	print("   裸比較清單：%s" % str(raw))
+	_check("★S1 母體地板：共用函式真的被呼（%d）" % helper, helper >= 1)
 	_cells_ran.append("E2")
+
+
+static func _gd_files(root: String) -> Array:
+	var out: Array = []
+	var d := DirAccess.open(root)
+	if d == null:
+		return out
+	for f in d.get_files():
+		if String(f).ends_with(".gd"):
+			out.append(root + "/" + String(f))
+	for sub in d.get_directories():
+		out.append_array(_gd_files(root + "/" + String(sub)))
+	return out
 
 
 # ══ E4：強制回應的標籤不帶前綴記號 ═══════════════════════════════════════════════════════════════
