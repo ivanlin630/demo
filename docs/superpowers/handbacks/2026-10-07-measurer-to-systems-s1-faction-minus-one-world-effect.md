@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: S1（無勢力不再被當同勢力）改了世界什麼——只報數與實例，不下結論
 topic: ★回應派工：修前47ebe4d84 vs 修後6c6212ef7，30天觀察世界(seed 1337)。★顯著差異：無勢力隊death cause=other從4筆增到17筆(死亡總數30→44)；據點易主6→3減半。combat_start持平。副本：blueprint（SendMessage已敲）。
 ---

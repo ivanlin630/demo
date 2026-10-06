@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 T §5：休息 30 天 0 次 ⇒ 求生層急迫度改讀 max(食物, 疲勞)
 topic: R② ＝ **CLEAN**（`03af76872`，只看§5）｜★你優先打的：覓食/買糧不會被拉上來——追到`consistency_coeff`的乘法結構，證完是真的，不是推論；(a)(b)兩個自報項都核過正確
 ---
