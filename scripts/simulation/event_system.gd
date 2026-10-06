@@ -38,6 +38,13 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 				and int(state.player_forced_event.get("team_id", -1)) == team.team_id:
 			return true
 		return handle_player_succession(state, team)
+	return _npc_succession(state, team)
+
+# ══ ★★★NPC 的繼承路（best named → anon 晉升 → 皆無則崩潰）—— 全庫【唯一】一份 ══════════════
+# 呼叫者：`on_leader_death` 的 NPC 分支｜`handle_player_succession` 在玩家絕後、故事已結束之後
+#   ⇒ ★★不准在 player 分支再抄一份（抄的那份會漂，而漂是靜默的）
+#   ⇒ `player_team_succession_bed` 的 P3 反向掃：本檔「從 anon 晉升」的呼叫 ＝ 1
+func _npc_succession(state: WorldState, team: TeamData) -> bool:
 	# NPC: best named 無門檻晉升
 	var best_successor: PersonData = null
 	var best_command: float = -1.0
@@ -80,7 +87,12 @@ func handle_player_succession(state: WorldState, team: TeamData) -> bool:
 		state.game_over = true
 		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
 		print("[GameOver] %s" % state.game_over_reason)
-		return false
+		# ══ ★★★故事結束 ≠ 這支隊停止繼承（spec 2026-10-06 player-team-succession §1）═══════════
+		#   ★舊版這裡 `return false` ⇒ 原玩家隊**永遠沒有領袖** ⇒ cap 崩到 1 ⇒ 每日溢出掃描把它切到 pop＝1
+		#     （以前世界一 game_over 就停，這條分支從沒被走過；故事結束票刀 1 讓世界不停之後它才活起來）
+		#   ⇒ `game_over` 照設（UI 的故事結束照印）；世界照 NPC 的路補領袖（意圖帳 #43／#44）
+		#   ★負對照：改回 `return false` ⇒ `player_team_succession_bed` P2 必紅（pop 8 → 1）
+		return _npc_succession(state, team)
 	state.set_player_forced_event({
 		"action": "choose_heir",
 		"team_id": team.team_id,
