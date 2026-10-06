@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端介面修正（票 U）第一批：U0＋U1（含 E3 被拒）＋U4＋K5(乙)
 topic: ★**交件｜已知紅 7**（E2／提議同盟、E4／記號、P10／攻擊、P2／招募、P3／打聽情報、P3／確認打聽、STUCK／攻擊）｜BATTERY_RC=0｜107 綠／0 紅（run-id `31949-20261007-041014`，HEAD `71dafd3bf`）｜branch `feat/terminal-ui-fixes` 遠端 tip **`c57f186f6`**｜fp 不變（量的）｜第二批（U2／U3-K4／U5／S1）接著做
 ---

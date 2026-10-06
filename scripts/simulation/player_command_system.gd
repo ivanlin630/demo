@@ -878,7 +878,9 @@ func _action_extort(state: WorldState, target_id: int, _pt: TeamData, pt_id: int
 		if tgt2:
 			UnrestBank.add(tgt2, 1, "player")
 		print("[PlayerCmd] 勒索遭拒 Team%d unrest+1" % target_id)
-	return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
+	# ★accepted 照傳（handler 契約：ok＝指令有執行、accepted＝對方答應）—— 舊版丟掉它 ⇒ 被拒的勒索在結果句上讀起來是成功
+	return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", ""),
+		"accepted": bool(extort_result.get("accepted", true)) }
 
 func _action_recruit(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	# Always return a menu — never auto-execute. Player must call recruit_anon or recruit_named.
@@ -1747,7 +1749,7 @@ func _action_beg(state: WorldState, target_id: int, pt: TeamData, pt_id: int) ->
 	var r: Dictionary = _interaction._resolve_aid_request(state, pt_id, target_id)
 	if r.get("accepted", false):
 		return { "ok": true, "msg": "Team%d 施捨食物 %.0f" % [target_id, float(r.get("amount", 0))] }
-	return { "ok": true, "msg": "Team%d 不予施捨（%s）" % [target_id, r.get("msg", "拒絕")] }
+	return { "ok": true, "msg": "Team%d 不予施捨（%s）" % [target_id, r.get("msg", "拒絕")], "accepted": false }
 
 # ── 內部 helper ──────────────────────────────────────────────
 

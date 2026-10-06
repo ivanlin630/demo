@@ -74,6 +74,9 @@ func execute_action(state: WorldState, action_id: String, target: Dictionary) ->
 			payload["requires_preview"] = result["requires_preview"]
 		if result.has("preview_target_id"):
 			payload["preview_target_id"] = result["preview_target_id"]
+		# ★accepted 透傳（U1／E3：結果句要分得出「對方拒絕」；map_command_result 只留 ok/code/message/payload）
+		if result.has("accepted"):
+			payload["accepted"] = result["accepted"]
 		return PlayerApiMapper.map_command_result(true, "ok", result.get("msg", ""), payload)
 	return PlayerApiMapper.map_command_result(false, "action_unavailable", result.get("msg", ""), {})
 
