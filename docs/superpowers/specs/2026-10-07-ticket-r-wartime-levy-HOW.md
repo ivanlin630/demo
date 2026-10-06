@@ -37,6 +37,13 @@ Q3 ~~率＝勢力自己的…兩條底線（①不取到 5 天儲備以下 ②�
    ⇒ ★tap（藍圖點名）：每次 choose_amount 一筆樣本 {tick, overlord, member, gap, member_runway, 每個候選的 {amount, gain, c1, c2, c3, util}, chosen}
    ⇒ 成員回應＝決策：照勒索那條 `DiplomaticAiSystem.tribute_accept(state, member, overlord, threat)`（`diplomatic_ai_system.gd:49`，
       呼叫形狀見 `interaction_system.gd:446`）；拒絕 ⇒ 不轉移、記入關係帳、後果照勒索拒絕那條既有路（不另寫）
+      ★★藍圖確認問「它是不是無條件接受」⇒ 核過（`diplomatic_ai_system.gd:49-103`）：**不是**，回 `score > TRIBUTE_ACCEPT_THRESHOLD`，score 讀
+        人格（慎重／義氣／求生欲）＋fear＋**兩層關係帳**（好感 `leader.relations` ＋ typed 邊 feud／gratitude）＋belief 實力比＋threat
+        ⇒ ★**缺兩樣**：①成員**自身處境**（food_runway）②**被要求的量** —— 今天對它來說抽 1 糧與抽光一樣
+        ⇒ 本票補：tribute_accept 加一個可選參數「這次要求佔我庫存的比例」＋讀自身 food_runway（同樣以 SURVIVAL_SATED_DAYS 為參考點），
+          兩項都讓 score 下降（要得越多、自己越窮 ⇒ 越可能拒）
+        ⇒ ★既有呼叫點（勒索兩處 `interaction_system.gd:446/:455` 等，交件時 grep 列全）不傳 ⇒ 該項＝0 ⇒ **行為逐字不變**（負對照：不傳參數時勒索那支床的 score 序列不變）
+        ⇒ threat 參數在同勢力徵用：填盟主隊 readiness（同勒索的定義）—— R² 若判語意不合再改
    ⇒ ★argmax＝0 ⇒ 不徵、不發訊息、tap 照記（「決定不徵」也是一個決策結果）
 Q1 有宣告才可選 ⇒ ★R² 核過：**全站沒有廣義的 at_war 旗標**；唯一可用的是 `FactionData.strategy == "戰爭基金"`（`faction_ai_system.gd:1999`）
    ⇒ ★而它**範圍窄**：只在「野心或好戰 > 0.6 **且** 盟主隊 material < 200」時才是這個值 ⇒ **材料充足的戰爭不會被抓到**
@@ -62,6 +69,7 @@ P3 [不得一條線]（藍圖點名）全世界所有徵用的「徵後 food_run
 P4 [曲線不是牆] 佈置：缺口極大＋貪婪極端的盟主 ⇒ 允許取到 food_runway < SURVIVAL_SATED_DAYS（印出實值）；慎重極端 ⇒ 取額明顯較少
 P5 [再抽變貴] 同一成員連續兩次結算 ⇒ 第二次的 c3 > 0 且 chosen 不大於第一次（同條件下）
 P6 [成員可拒] 佈置成員關係薄＋威脅低 ⇒ tribute_accept 回 false ⇒ 零轉移、關係帳有紀錄
+P6′ [量與處境會被讀] 同一成員、同關係：要求比例小 vs 大、自身 runway 高 vs 低 ⇒ score 單調下降（印四個 score）；★不傳參數的勒索路 score 與修前逐字相同
 P7 [名字] 同 tick 訊息機制名＝「戰時徵用」＋實抽量 ＝ 帳本 reason（wartime_levy_out／in）對照出的機制名；守恆兩 tag
 P8 [tap] choose_amount 樣本存在、每筆含所有候選與三個成本項
 P9 fp 會變 ⇒ 量、原子落地
