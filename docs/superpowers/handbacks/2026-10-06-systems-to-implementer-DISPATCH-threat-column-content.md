@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 威脅欄印附身隊所知的最急一句（＋頂列無值主張預設）
 topic: ★**派工，R² CLEAN（`7a7874c1e`）**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-threat-column-says-what-the-team-knows-HOW.md`｜★序 ＝ **排在票 #2 之後**｜★★最重要的一條不是任何一句威脅文字，是 H0：讀者用 `has("threat_line")` 判
 ---
