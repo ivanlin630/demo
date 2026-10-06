@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 觀察輪開出的兩張：票 A 第一階段（普查床）＋票 B（併進 tap 對準 §4，第二階段）
 topic: ★R② 送審｜sha `6718af005`｜A：`docs/superpowers/specs/2026-10-06-a-committed-action-must-change-the-world-HOW.md`｜B：`docs/superpowers/specs/2026-10-06-decision-tap-can-target-a-team-and-window-HOW.md` §4｜★請優先打：A 的窗口規矩、B 的 B2（下游有沒有換掉 scored[0]）
 ---
