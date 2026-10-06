@@ -25,25 +25,28 @@
 
 ## 移動速度
 
-> 2026-07-05 update（time-scale wave **slice A1**：骨架單源,×5 先留=零行為）：BASE_MOVE_TICKS 走 `TimeScale.MOVE_TICKS_PER_HEX = BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE / WORLD_SPEED_MULT(5) = 48`（連動）。**A2（×5→1→MOVE 240）綁 ④沿途補給+FOOD 重校+gen 重校四件一 landing**（藍圖 timewave-five-rulings,防餓死潮）。
+> ★2026-10-06 訂正（藍圖裁 `92eff0040` ①：**意圖值＝code 那組**，時間統一 wave 刻意裁的）：A2 已落地 ⇒ `MOVE_TICKS_PER_HEX` ＝ `BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE` ＝ **240**（`time_scale.gd:24`；1 tick ＝ 1 分鐘、1 天 ＝ 1440 tick ⇒ 平原一格 **4 小時**）。下表舊值（48／16／144，A1 ×5 那一版）已過時，曾被引成「意圖值」而讓票 T 的前提偏了 5 倍。
+> ★上限 720 是**保險絲不是目標**（藍圖裁 ③）：實測中位撞在 720 ＝ 某個速度乘數把 speed 常態壓到 ≤ 0.33（票 T「夾平飽和」）。
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 |
 |---|---|---|---|---|
-| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **見 code**（＝`TimeScale.MOVE_TICKS_PER_HEX`，由根導出）| 平原 speed_mult=1.0：48 tick/hex = 0.2 天（A1 ×5留;A2→240=1天）| A2 |
-| `MIN_MOVE_TICKS` | `movement_system.gd:6` | **16**（= BASE/3）| 最快：16 tick/hex | A2 |
-| `MAX_MOVE_TICKS` | `movement_system.gd:7` | **144**（= BASE×3）| 最慢：144 tick/hex | A2 |
-| `NAMED_WEIGHT` | `movement_system.gd:?` | **3** | named 個人 speed 在 team avg 中加權 ×3 | — |
-| `TERRAIN_SPEED_MULT` plains | `movement_system.gd:?` | 1.0 | 平原 ×1 | — |
-| `TERRAIN_SPEED_MULT` forest | `movement_system.gd:?` | 0.7 | 林地 ×0.7 | — |
-| `TERRAIN_SPEED_MULT` mountain | `movement_system.gd:?` | 0.4 | 山地 ×0.4 | — |
+| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **240**（＝`TimeScale.MOVE_TICKS_PER_HEX`，由根導出）| 平原 speed＝1.0：240 tick/hex ＝ **4 小時** | — |
+| `MIN_MOVE_TICKS` | `movement_system.gd:6` | **80**（＝BASE/3）| 最快：80 tick/hex ＝ 1h20m | — |
+| `MAX_MOVE_TICKS` | `movement_system.gd:7` | **720**（＝BASE×3）| 最慢：720 tick/hex ＝ 12 小時 ★保險絲 | — |
+| `NAMED_WEIGHT` | `movement_system.gd:8` | **3** | named 個人 speed 在 team avg 中加權 ×3 | — |
+| `TERRAIN_SPEED_MULT` plains | `movement_system.gd:11` | 1.0 | 平原 ×1 ⇒ 240 tick（4h） | — |
+| `TERRAIN_SPEED_MULT` forest | `movement_system.gd:12` | 0.7 | 林地 ×0.7 ⇒ ~343 tick（5.7h） | — |
+| `TERRAIN_SPEED_MULT` mountain | `movement_system.gd:13` | 0.4 | 山地 ×0.4 ⇒ 600 tick（10h） | — |
+
+★成本公式：`clamp(round(240 / speed), 80, 720)`（`movement_system.gd:267`）；speed ＝ 隊速 × 地形 × 疲勞 × 超載 × 車輛地形。
 
 ### Tier 速度（AnonTierSystem）
 
-實際 anon speed mult：
-- 平民 0.7 → 平原 ~68 tick/hex = 0.29 天
-- 新兵 0.8 → ~60 tick = 0.25 天
-- 老兵 0.9 → ~53 tick = 0.22 天
-- 菁英 1.0 → 48 tick = 0.2 天
+實際 anon speed mult（平原；以 BASE 240 換算）：
+- 平民 0.7 → ~343 tick/hex ≈ 5.7 小時
+- 新兵 0.8 → ~300 tick ＝ 5 小時
+- 老兵 0.9 → ~267 tick ≈ 4.4 小時
+- 菁英 1.0 → 240 tick ＝ 4 小時
 
 ---
 
