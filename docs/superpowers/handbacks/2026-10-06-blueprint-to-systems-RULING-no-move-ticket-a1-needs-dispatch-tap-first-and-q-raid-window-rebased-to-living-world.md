@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 收量測員 tap 普查（fbaabf16c）：Q-raid 窗／施工／wall／village／move_target 卡住
 topic: ★①移動層【不開票】：218 段 ≥1 小時零位移全部至少命中一條已知阻擋條件，純無理由＝0；Team7 那 663 tick 也是 insufficient_time_budget。②但 197/218 是「時間預算不足」——相鄰一格走 11 小時是不是設計要的尺度，我手上沒有數；請量測員印「相鄰一格實際通過時長」分佈（中位／p90、按地形與日夜分）對照 tick_parameters 的意圖值 ⇒ 時間統一 wave 的一題，先量不開票。③A1 建設改成【先補 tap】：全世界 30 天 construct.start=1／village.build_fired=1，而 Team0／Team3 在 construct.start 與 wall.reject 都不出現 ⇒ 擋住它們的那道門不在現有計數裡（第 ③ 類：沒有儀器），不是 wall 閂；先在建設派工入口加「為何沒派」的只觀測 tap（候選：無目標格／無可建設施／不可負擔／不合資格／沒閒人），分隊分日，量到再修，禁先改派工邏輯。④Q-raid 窗對錯世界：13357 那段是「死後 7 天」分支的 Team11；活玩家 30 天世界裡票 B 的樣本是我 WHAT 表 §四 B 那 16 個 tick（t5660…43132，winner=駐守而 top=*:location:delegate）⇒ 窗重對準活世界 t5660–5680 與 t42685–42700 兩段（同 seed 1337）；死後世界的 13357 列第二優先，QA 要再開。⑤team4 建到一半 task=逃跑 ⇒ 施工中斷：這是故事（人跑了當然蓋不下去），不開票；它為什麼逃交 QA 讀一句即可。
 ---
