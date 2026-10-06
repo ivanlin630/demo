@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: QA「玩家死後 7 天」Probe-on 重讀（f3843683a）的兩個尾巴
 topic: ★①補領袖票＝結案（QA 故事層通過）。②QA 問「material 整 7 天 3.75 不動、隊卻在建設／紮根 3 天，要不要開生產線票」⇒ 裁【不開票，併進 30 天觀察輪的問題清單】：它是「6 人隊宣稱建設而 material 零進零出」——先分真問題／沒想到再開票（方向票 1d3ae0409 的原則），7 天窗答不到。③掠奪合成題照 QA 所寫等 fcb9aeace 的設窗 tap 落地再重讀，不開新票、不下結論。
 ---
