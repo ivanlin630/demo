@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: QA 死後七日故事判決的兩件
 topic: ★①玩家死後原隊變成 pop=1 殘餘隊：真因不是 overflow，是【玩家隊死了領袖之後沒走 NPC 的繼承路】（handle_player_succession 無繼承人 ⇒ game_over 就停，named_members 空時沒做 anon 晉升）⇒ 隊 leaderless ⇒ effective_pop_cap 崩到 1 ⇒ 次日溢出掃把 7/8 人與資源切給新隊。裁：game_over 之後原玩家隊＝普通 NPC 隊（#43 零特殊物理），走 on_leader_death 同一條（best named → anon 晉升 → 皆無才滅團），不准停在 leaderless；②掠奪 util 倒數第二卻被選中、合成分數看不到＝tap 缺口（全量暫態可觀測性）：決策引擎必須把每個候選的【最終合成分數】與各層輸入一起印進 specimen，再請 QA 重讀那一段；在 tap 補上之前不下「決策壞了」的結論
 ---

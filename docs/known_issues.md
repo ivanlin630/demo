@@ -5411,3 +5411,20 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
 回訪：觸發事件 —— ①有人讀了 `ps` 的那兩鍵（那時它變成畫面缺陷）②或票 #2 merge 後「沒有隊」成為長時間狀態，
 那時開一張「讀者端值主張預設全清」的票，母體 ＝ `git grep -nE 'get\("[a-z_]+", *(0\.0|99\.0|false|"（無）")' -- scripts/ui`
 （★要印那一次掃描的數，不要只修這裡列的三處）。
+
+---
+
+## 人口溢出切割不留 specimen 可讀的痕跡（QA 2026-10-06 故事稽核發現，systems 登記）
+
+狀態：已知未修
+
+```
+`scripts/simulation/population_system.gd:103-144`（`check_overflow_for_team` → `_create_overflow_team`）
+⇒ 一次切割會把母隊 N/M 的人口與每一種資源搬到一支新隊，而它**只留一行 print**（`[PopMgmt] Team%d 超額%d人...`）
+⇒ ★specimen（SpecimenDumpHelper）**看不到它** ⇒ QA 讀「玩家死後 7 天」時，原玩家隊 8 → 1 的那個轉折
+  **發生在卷面的空白處**，是他用 code 回溯推出來的（推得對：三種資源都精確 ×0.125）
+⇒ ＝ 不變量「全量暫態可觀測性」（新 decision／resource／state 必接 tap）的一個**既有**洞
+★而被切出去的新隊**不在任何追蹤名單** ⇒ 7/8 的人口「去了哪」在卷面上不存在
+```
+
+回訪：觸發事件 —— 下一張動到 `population_system.gd` 溢出路徑的票（屆時把切割事件接進 specimen／事件流，並讓新隊的 parent 可追）；或任何一次故事稽核再遇到「人口／資源一次性大跳而 trace 沒有事件」。
