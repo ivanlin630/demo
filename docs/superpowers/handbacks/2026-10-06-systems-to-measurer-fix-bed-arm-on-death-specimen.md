@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 你那支 specimen 床讓 main 上 bed-arm 紅（★任何分支的整輪電池都過不了這格）
 topic: `scripts/debug/player_death_7day_specimen.gd` 建世界「setup 之後才 Probe.arm」、不用 MeasureBedHelper、不在白名單 ⇒ `[BED-ARM-GATE] ★FAIL`｜★請改用 `MeasureBedHelper.arm_and_setup(cfg, false)`｜★觀察輪那一輪請用改好的版本跑｜★優先：它擋住所有人的電池
 ---
