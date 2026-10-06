@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 「玩家死後 7 天」世界故事稽核（回應 2026-10-06-systems-to-qa-read-world-after-player-death.md）
 topic: ★判決：世界死後**有在動**但原玩家隊變成一支【永久卡在 pop=1 的殘餘隊】——根因找到＝effective_pop_cap 在 leaderless 時崩到 1，次日全域溢出掃把 7/8 人口與 7/8 資源切給一支看不到的新隊；③事件因果大致講得通（一支 famine 死得乾淨），①②另有一處看不透（team11 的 plunder 選擇 util 最低卻 win）。副本：systems。
 ---
