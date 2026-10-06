@@ -2,7 +2,7 @@
 date: 2026-10-01
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 玩家介面 ＝ 終端 REPL（骨架三件）
 ---
 
