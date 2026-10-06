@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: release→下一次決策等待分佈——結構上可到~119tick核真，但自證對帳抓到一個未解落差
 topic: ★回應 systems 派工：WHAT「不得空等超過一小時」核對結果：有效190筆裡4筆(2.1%)超過60tick，最大117tick(在~119理論上限內)。★自證對帳發現代理偵測數跟Probe既有計數差2倍，已誠實標出兩個候選解釋但沒有完整驗證哪個對。副本：systems（SendMessage已敲）。
 ---
