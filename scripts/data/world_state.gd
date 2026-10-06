@@ -273,7 +273,7 @@ static var _driver_drop_warned: bool = false
 static func record_driver(entity, field: String, delta: float, reason: String, kind: String) -> void:
 	if not driver_ledger_enabled:
 		return
-	driver_ledger.append({
+	_append_driver({
 		"tick":   driver_tick_hint,
 		"entity": entity,
 		"field":  field,
@@ -281,6 +281,24 @@ static func record_driver(entity, field: String, delta: float, reason: String, k
 		"reason": reason,
 		"kind":   kind,
 	})
+
+# ★同一個實體上有兩個庫的寫入口（TileBank：公庫／自然池）用這一支 —— 條目多一個 `store` 鍵
+#   ★不改 `record_driver` 的既有簽名（`kind` 刻意無 default；既有讀者只讀 kind／delta／field／reason）
+static func record_driver_store(entity, field: String, delta: float, reason: String, kind: String, store: String) -> void:
+	if not driver_ledger_enabled:
+		return
+	_append_driver({
+		"tick":   driver_tick_hint,
+		"entity": entity,
+		"field":  field,
+		"delta":  delta,
+		"reason": reason,
+		"kind":   kind,
+		"store":  store,
+	})
+
+static func _append_driver(row: Dictionary) -> void:
+	driver_ledger.append(row)
 	while driver_ledger.size() > driver_ledger_cap:
 		driver_ledger.pop_front()
 		# ★★★丟棄必須可見（blueprint 守衛令 2026-09-05，全量觀測法）——
