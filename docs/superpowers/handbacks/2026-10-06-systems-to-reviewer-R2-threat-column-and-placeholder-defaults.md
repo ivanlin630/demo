@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 威脅欄印附身隊所知的最急一句（＋頂列無值主張預設）
 topic: ★**R② 送審**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-threat-column-says-what-the-team-knows-HOW.md`｜spec sha ＝ `9551c018b`（★遠端 tip 同一顆）｜★★請優先打 §0b 我吸收進來的那一刀（H0′：頂列讀者 default 一律佔位符）——它把票擴大了，而擴大的理由是一次掃描
 ---
