@@ -1,0 +1,5 @@
+{"kind":"meta","seed":1337,"tree":"685446903"}
+{"c1_den":5,"c1_num":3,"c2_den":7,"c2_num":1,"c3_den":0,"c3_num":0,"days":7,"final_tick":10080,"seconds":9.802}
+{"c1_den":10,"c1_num":7,"c2_den":12,"c2_num":4,"c3_den":0,"c3_num":0,"days":10,"final_tick":14400,"seconds":16.721}
+{"c1_den":10,"c1_num":6,"c2_den":18,"c2_num":9,"c3_den":0,"c3_num":0,"days":15,"final_tick":21600,"seconds":33.978}
+{"c1_den":11,"c1_num":6,"c2_den":40,"c2_num":22,"c3_den":3,"c3_num":2,"days":30,"final_tick":43200,"seconds":117.118}

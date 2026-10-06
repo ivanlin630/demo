@@ -1,0 +1,196 @@
+{"kind":"meta","seed":1337,"team_id":7,"tree":"25c2c5a48","window":[25000,32000]}
+{"changed":["(window_start_baseline)"],"kind":"state_change","snapshot":{"current_option":"建設","current_task":"建設","faction_id":1,"population":10,"rung":0,"tile_pos":[2,7]},"tick":25000}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.33,"material":0},"resource_end":{"coin":300.65,"food":216.09,"material":0.29},"tick":25067}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.34,"material":0},"resource_end":{"coin":300.65,"food":215.75,"material":0.29},"tick":25097}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.33,"material":0},"resource_end":{"coin":300.65,"food":215.42,"material":0.29},"tick":25155}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.33,"material":0},"resource_end":{"coin":300.65,"food":215.09,"material":0.29},"tick":25213}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-67.65,"food":-33.79,"material":-0.13},"resource_end":{"coin":233,"food":181.3,"material":0.16},"tick":25260}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.34,"material":0},"resource_end":{"coin":233,"food":180.96,"material":0.16},"tick":25290}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-52.42,"food":-18.43,"material":-0.07},"resource_end":{"coin":180.58,"food":162.53,"material":0.09},"tick":25320}
+{"changed":["population"],"kind":"state_change","snapshot":{"current_option":"建設","current_task":"建設","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":25339}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.33,"material":0},"resource_end":{"coin":180.58,"food":162.2,"material":0.09},"tick":25339}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":180.58,"food":161.93,"material":0.09},"tick":25399}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.31,"material":0},"resource_end":{"coin":180.58,"food":163.24,"material":0.09},"tick":25482}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.28,"material":0},"resource_end":{"coin":180.58,"food":164.52,"material":0.09},"tick":25546}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.23,"material":0},"resource_end":{"coin":180.58,"food":165.75,"material":0.09},"tick":25603}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.19,"material":0},"resource_end":{"coin":180.58,"food":166.94,"material":0.09},"tick":25647}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.16,"material":0},"resource_end":{"coin":180.58,"food":168.1,"material":0.09},"tick":25701}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.1,"material":0},"resource_end":{"coin":180.58,"food":169.2,"material":0.09},"tick":25781}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.06,"material":0},"resource_end":{"coin":180.58,"food":170.26,"material":0.09},"tick":25851}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1.03,"material":0},"resource_end":{"coin":180.58,"food":171.29,"material":0.09},"tick":25883}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":1,"material":0},"resource_end":{"coin":180.58,"food":172.29,"material":0.09},"tick":25933}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.97,"material":0},"resource_end":{"coin":180.58,"food":173.26,"material":0.09},"tick":25986}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.93,"material":0},"resource_end":{"coin":180.58,"food":174.19,"material":0.09},"tick":26066}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.86,"material":0},"resource_end":{"coin":180.58,"food":175.05,"material":0.09},"tick":26142}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":34,"material":0},"resource_end":{"coin":180.58,"food":209.05,"material":0.09},"tick":26160}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.85,"material":0},"resource_end":{"coin":180.58,"food":209.9,"material":0.09},"tick":26188}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.79,"material":0},"resource_end":{"coin":180.58,"food":210.69,"material":0.09},"tick":26275}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":3,"material":0},"resource_end":{"coin":180.58,"food":213.69,"material":0.09},"tick":26280}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.75,"material":0},"resource_end":{"coin":180.58,"food":214.44,"material":0.09},"tick":26317}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.74,"material":0},"resource_end":{"coin":180.58,"food":215.18,"material":0.09},"tick":26359}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.71,"material":0},"resource_end":{"coin":180.58,"food":215.89,"material":0.09},"tick":26417}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.67,"material":0},"resource_end":{"coin":180.58,"food":216.56,"material":0.09},"tick":26501}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.64,"material":0},"resource_end":{"coin":180.58,"food":217.2,"material":0.09},"tick":26552}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.62,"material":0},"resource_end":{"coin":180.58,"food":217.82,"material":0.09},"tick":26620}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-40.63,"food":-47.62,"material":-0.04},"resource_end":{"coin":139.95,"food":170.2,"material":0.05},"tick":26640}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.6,"material":0},"resource_end":{"coin":139.95,"food":170.8,"material":0.05},"tick":26667}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-3.5,"food":0.53,"material":0},"resource_end":{"coin":136.45,"food":171.33,"material":0.05},"tick":26752}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":6,"material":0},"resource_end":{"coin":136.45,"food":177.33,"material":0.05},"tick":26760}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.52,"material":0},"resource_end":{"coin":136.45,"food":177.85,"material":0.05},"tick":26800}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.5,"material":0},"resource_end":{"coin":136.45,"food":178.35,"material":0.05},"tick":26830}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":3,"material":0},"resource_end":{"coin":136.45,"food":181.35,"material":0.05},"tick":26880}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.47,"material":0},"resource_end":{"coin":136.45,"food":181.82,"material":0.05},"tick":26899}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.43,"material":0},"resource_end":{"coin":136.45,"food":182.25,"material":0.05},"tick":26984}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.42,"material":0},"resource_end":{"coin":136.45,"food":182.67,"material":0.05},"tick":27030}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.41,"material":0},"resource_end":{"coin":136.45,"food":183.08,"material":0.05},"tick":27063}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.4,"material":0},"resource_end":{"coin":136.45,"food":183.48,"material":0.05},"tick":27123}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.38,"material":0},"resource_end":{"coin":136.45,"food":183.86,"material":0.05},"tick":27208}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.36,"material":0},"resource_end":{"coin":136.45,"food":184.22,"material":0.05},"tick":27291}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.35,"material":0},"resource_end":{"coin":136.45,"food":184.57,"material":0.05},"tick":27321}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-30.7,"food":-32.66,"material":-0.02},"resource_end":{"coin":105.75,"food":151.91,"material":0.03},"tick":27360}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.34,"material":0},"resource_end":{"coin":105.75,"food":152.25,"material":0.03},"tick":27385}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.32,"material":0},"resource_end":{"coin":105.75,"food":152.57,"material":0.03},"tick":27434}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":15.4,"food":9,"material":0},"resource_end":{"coin":121.15,"food":161.57,"material":0.03},"tick":27480}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.31,"material":0},"resource_end":{"coin":121.15,"food":161.88,"material":0.03},"tick":27482}
+{"changed":["current_task","current_option"],"kind":"state_change","snapshot":{"current_option":"外交","current_task":"外交","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":27548}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.29,"material":0},"resource_end":{"coin":121.15,"food":162.17,"material":0.03},"tick":27574}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.28,"material":0},"resource_end":{"coin":121.15,"food":162.45,"material":0.03},"tick":27611}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-27.26,"food":-22.7,"material":-0.02},"resource_end":{"coin":93.89,"food":139.75,"material":0.01},"tick":27660}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.26,"material":0},"resource_end":{"coin":93.89,"food":140.01,"material":0.01},"tick":27701}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.25,"material":0},"resource_end":{"coin":93.89,"food":140.26,"material":0.01},"tick":27764}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.25,"material":0},"resource_end":{"coin":93.89,"food":140.51,"material":0.01},"tick":27828}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.23,"material":0},"resource_end":{"coin":93.89,"food":140.74,"material":0.01},"tick":27858}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.22,"material":0},"resource_end":{"coin":93.89,"food":140.96,"material":0.01},"tick":27953}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.21,"material":0},"resource_end":{"coin":93.89,"food":141.17,"material":0.01},"tick":27983}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.21,"material":0},"resource_end":{"coin":93.89,"food":141.38,"material":0.01},"tick":28032}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.19,"material":0},"resource_end":{"coin":93.89,"food":141.57,"material":0.01},"tick":28086}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.17,"material":0},"resource_end":{"coin":93.89,"food":141.74,"material":0.01},"tick":28161}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.17,"material":0},"resource_end":{"coin":93.89,"food":141.91,"material":0.01},"tick":28213}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.15,"material":0},"resource_end":{"coin":93.89,"food":142.06,"material":0.01},"tick":28291}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.15,"material":0},"resource_end":{"coin":93.89,"food":142.21,"material":0.01},"tick":28337}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.13,"material":0},"resource_end":{"coin":93.89,"food":142.34,"material":0.01},"tick":28422}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.12,"material":0},"resource_end":{"coin":93.89,"food":142.46,"material":0.01},"tick":28454}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.11,"material":0},"resource_end":{"coin":93.89,"food":142.57,"material":0.01},"tick":28550}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.1,"material":0},"resource_end":{"coin":93.89,"food":142.67,"material":0.01},"tick":28609}
+{"changed":["current_task","current_option"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":28630}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.09,"material":0},"resource_end":{"coin":93.89,"food":142.76,"material":0.01},"tick":28639}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-6.62,"food":238,"material":0},"resource_end":{"coin":87.27,"food":380.76,"material":0.01},"tick":28680}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":2,"tile_pos":[2,7]},"tick":28706}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.08,"material":0},"resource_end":{"coin":87.27,"food":380.84,"material":0.01},"tick":28706}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-192,"material":0},"resource_end":{"coin":87.27,"food":188.84,"material":0.01},"tick":28740}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":28781}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.07,"material":0},"resource_end":{"coin":87.27,"food":188.91,"material":0.01},"tick":28781}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":11.72,"food":201,"material":0},"resource_end":{"coin":98.99,"food":389.91,"material":0.01},"tick":28800}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":2,"tile_pos":[2,7]},"tick":28811}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.06,"material":0},"resource_end":{"coin":98.99,"food":389.97,"material":0.01},"tick":28811}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-192,"material":0},"resource_end":{"coin":98.99,"food":197.97,"material":0.01},"tick":28860}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":28881}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.05,"material":0},"resource_end":{"coin":98.99,"food":198.02,"material":0.01},"tick":28881}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-2.96,"food":200,"material":0},"resource_end":{"coin":96.03,"food":398.02,"material":0.01},"tick":28920}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":2,"tile_pos":[2,7]},"tick":28931}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.05,"material":0},"resource_end":{"coin":96.03,"food":398.07,"material":0.01},"tick":28931}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-192,"material":0},"resource_end":{"coin":96.03,"food":206.07,"material":0.01},"tick":28980}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":29032}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.02,"material":0},"resource_end":{"coin":96.03,"food":206.09,"material":0.01},"tick":29032}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":198,"material":0},"resource_end":{"coin":96.03,"food":404.09,"material":0.01},"tick":29040}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":2,"tile_pos":[2,7]},"tick":29062}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.03,"material":0},"resource_end":{"coin":96.03,"food":404.12,"material":0.01},"tick":29062}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-192,"material":0},"resource_end":{"coin":96.03,"food":212.12,"material":0.01},"tick":29100}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":29147}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.02,"material":0},"resource_end":{"coin":96.03,"food":212.14,"material":0.01},"tick":29147}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":547,"material":0},"resource_end":{"coin":96.03,"food":759.14,"material":0.01},"tick":29160}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":2,"tile_pos":[2,7]},"tick":29208}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-547,"material":0},"resource_end":{"coin":96.03,"food":212.14,"material":0.01},"tick":29220}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":0,"tile_pos":[2,7]},"tick":29238}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":0.01,"material":0},"resource_end":{"coin":96.03,"food":212.15,"material":0.01},"tick":29238}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":547,"material":0},"resource_end":{"coin":96.03,"food":759.15,"material":0.01},"tick":29280}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"貿易","faction_id":1,"population":8,"rung":2,"tile_pos":[2,7]},"tick":29312}
+{"changed":["current_task","tile_pos"],"kind":"state_change","snapshot":{"current_option":"領取","current_task":"idle","faction_id":1,"population":8,"rung":2,"tile_pos":[3,7]},"tick":29340}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-79,"material":15},"resource_end":{"coin":96.03,"food":680.15,"material":15.01},"tick":29340}
+{"changed":["current_task","current_option"],"kind":"state_change","snapshot":{"current_option":"建設","current_task":"建設","faction_id":1,"population":8,"rung":2,"tile_pos":[3,7]},"tick":29390}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":679.88,"material":15.01},"tick":29390}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":679.61,"material":15.01},"tick":29420}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":679.35,"material":15.01},"tick":29472}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":679.08,"material":15.01},"tick":29544}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":678.81,"material":15.01},"tick":29624}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":678.55,"material":15.01},"tick":29689}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":678.28,"material":15.01},"tick":29731}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":678.01,"material":15.01},"tick":29779}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":677.75,"material":15.01},"tick":29875}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":677.48,"material":15.01},"tick":29937}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":677.21,"material":15.01},"tick":29986}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":676.95,"material":15.01},"tick":30016}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":676.68,"material":15.01},"tick":30119}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":676.41,"material":15.01},"tick":30149}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":676.15,"material":15.01},"tick":30191}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":675.88,"material":15.01},"tick":30283}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":675.61,"material":15.01},"tick":30319}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":675.35,"material":15.01},"tick":30397}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":675.08,"material":15.01},"tick":30477}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":674.81,"material":15.01},"tick":30527}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":674.55,"material":15.01},"tick":30570}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":674.28,"material":15.01},"tick":30656}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":674.01,"material":15.01},"tick":30706}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":673.75,"material":15.01},"tick":30761}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":673.48,"material":15.01},"tick":30832}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":673.21,"material":15.01},"tick":30879}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":672.95,"material":15.01},"tick":30928}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":672.68,"material":15.01},"tick":31012}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":672.41,"material":15.01},"tick":31073}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":96.03,"food":672.15,"material":15.01},"tick":31108}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":96.03,"food":671.88,"material":15.01},"tick":31195}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-21.61,"food":-251.95,"material":-6.75},"resource_end":{"coin":74.42,"food":419.93,"material":8.26},"tick":31200}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":74.42,"food":419.67,"material":8.26},"tick":31237}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":74.42,"food":419.4,"material":8.26},"tick":31268}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":74.42,"food":419.13,"material":8.26},"tick":31334}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":74.42,"food":418.87,"material":8.26},"tick":31433}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":74.42,"food":418.6,"material":8.26},"tick":31463}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":74.42,"food":418.33,"material":8.26},"tick":31531}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":74.42,"food":418.07,"material":8.26},"tick":31611}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":74.42,"food":417.8,"material":8.26},"tick":31679}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-16.74,"food":-137.61,"material":-3.72},"resource_end":{"coin":57.68,"food":280.19,"material":4.54},"tick":31680}
+{"changed":["rung"],"kind":"state_change","snapshot":{"current_option":"建設","current_task":"建設","faction_id":1,"population":8,"rung":0,"tile_pos":[3,7]},"tick":31709}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":57.68,"food":279.92,"material":4.54},"tick":31709}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":57.68,"food":279.66,"material":4.54},"tick":31743}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":-12.98,"food":-75.45,"material":-2.04},"resource_end":{"coin":44.7,"food":204.21,"material":2.5},"tick":31800}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":44.7,"food":203.94,"material":2.5},"tick":31807}
+{"changed":["faction_id"],"kind":"state_change","snapshot":{"current_option":"建設","current_task":"建設","faction_id":-1,"population":8,"rung":0,"tile_pos":[3,7]},"tick":31893}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.26,"material":0},"resource_end":{"coin":44.7,"food":203.68,"material":2.5},"tick":31893}
+{"changed":["resources"],"kind":"state_change","resource_delta":{"coin":0,"food":-0.27,"material":0},"resource_end":{"coin":44.7,"food":203.41,"material":2.5},"tick":31933}
+{"changed":["current_task","current_option"],"kind":"state_change","snapshot":{"current_option":"貿易","current_task":"貿易","faction_id":-1,"population":8,"rung":0,"tile_pos":[3,7]},"tick":31980}
+{"action":"joined/first_seen","kind":"membership","person_id":19,"tick":25000}
+{"action":"joined/first_seen","kind":"membership","person_id":20,"tick":25000}
+{"action":"left/died","kind":"membership","person_id":19,"tick":25339}
+{"action":"left/died","kind":"membership","person_id":20,"tick":25339}
+{"description":"Team7 售 material ×33","id":130,"kind":"global_message","origin_tick":9210,"params":{"expire_tick":16410,"order_id":118,"origin_pos":"(3, 7)","origin_team":7,"price":4.43759597951582,"qty":33,"res":"material"},"type":"order_sell"}
+{"description":"Team7 徵 weapon_melee_low ×3","id":131,"kind":"global_message","origin_tick":9210,"params":{"expire_tick":16410,"order_id":119,"origin_pos":"(3, 7)","origin_team":7,"price":68,"qty":3,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"Team7 徵 weapon_ranged_low ×3","id":132,"kind":"global_message","origin_tick":9210,"params":{"expire_tick":16410,"order_id":120,"origin_pos":"(3, 7)","origin_team":7,"price":78,"qty":3,"res":"weapon_ranged_low"},"type":"order_buy"}
+{"description":"Team7 徵 tools ×1","id":133,"kind":"global_message","origin_tick":9210,"params":{"expire_tick":16410,"order_id":121,"origin_pos":"(3, 7)","origin_team":7,"price":40,"qty":1,"res":"tools"},"type":"order_buy"}
+{"description":"Team4 向 Team7 徵收（rate=0.00）","id":155,"kind":"global_message","origin_tick":13740,"params":{"origin":"4","rate":"0.00","target":"7"},"type":"tribute"}
+{"description":"Team4 向 Team7 徵收（rate=0.00）","id":157,"kind":"global_message","origin_tick":13860,"params":{"origin":"4","rate":"0.00","target":"7"},"type":"tribute"}
+{"description":"Team7 徵 weapon_melee_low ×2","id":204,"kind":"global_message","origin_tick":16485,"params":{"expire_tick":23685,"order_id":181,"origin_pos":"(3, 7)","origin_team":7,"price":68,"qty":2,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"Team7 徵 weapon_ranged_low ×1","id":205,"kind":"global_message","origin_tick":16485,"params":{"expire_tick":23685,"order_id":182,"origin_pos":"(3, 7)","origin_team":7,"price":78,"qty":1,"res":"weapon_ranged_low"},"type":"order_buy"}
+{"description":"Team7 徵 tools ×1","id":206,"kind":"global_message","origin_tick":16485,"params":{"expire_tick":23685,"order_id":183,"origin_pos":"(3, 7)","origin_team":7,"price":40,"qty":1,"res":"tools"},"type":"order_buy"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":226,"kind":"global_message","origin_tick":18420,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team7 售 material ×15","id":231,"kind":"global_message","origin_tick":19431,"params":{"expire_tick":26631,"order_id":206,"origin_pos":"(3, 7)","origin_team":7,"price":4.64575267737865,"qty":15,"res":"material"},"type":"order_sell"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":240,"kind":"global_message","origin_tick":20160,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":241,"kind":"global_message","origin_tick":20220,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team7 徵 weapon_melee_low ×2","id":235,"kind":"global_message","origin_tick":23809,"params":{"expire_tick":31009,"order_id":250,"origin_pos":"(2, 7)","origin_team":7,"price":68,"qty":2,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"Team7 徵 weapon_ranged_low ×1","id":236,"kind":"global_message","origin_tick":23809,"params":{"expire_tick":31009,"order_id":251,"origin_pos":"(2, 7)","origin_team":7,"price":78,"qty":1,"res":"weapon_ranged_low"},"type":"order_buy"}
+{"description":"Team7 徵 tools ×1","id":237,"kind":"global_message","origin_tick":23809,"params":{"expire_tick":31009,"order_id":252,"origin_pos":"(2, 7)","origin_team":7,"price":40,"qty":1,"res":"tools"},"type":"order_buy"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":261,"kind":"global_message","origin_tick":25260,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":262,"kind":"global_message","origin_tick":25320,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team39 向 Team7 徵收（rate=0.45）","id":265,"kind":"global_message","origin_tick":26640,"params":{"origin":"39","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"[Board-relay] Team7 buy weapon_melee_low ×2","id":269,"kind":"global_message","origin_tick":23809,"params":{"expire_tick":31009,"order_id":250,"origin_pos":"(2, 7)","origin_team":7,"price":68,"qty":2,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"[Board-relay] Team7 buy weapon_ranged_low ×1","id":270,"kind":"global_message","origin_tick":23809,"params":{"expire_tick":31009,"order_id":251,"origin_pos":"(2, 7)","origin_team":7,"price":78,"qty":1,"res":"weapon_ranged_low"},"type":"order_buy"}
+{"description":"[Board-relay] Team7 buy tools ×1","id":271,"kind":"global_message","origin_tick":23809,"params":{"expire_tick":31009,"order_id":252,"origin_pos":"(2, 7)","origin_team":7,"price":40,"qty":1,"res":"tools"},"type":"order_buy"}
+{"description":"Team36 向 Team7 徵收（rate=0.45）","id":273,"kind":"global_message","origin_tick":27360,"params":{"origin":"36","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":277,"kind":"global_message","origin_tick":27660,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team7 徵 weapon_melee_low ×1","id":256,"kind":"global_message","origin_tick":31012,"params":{"expire_tick":38212,"order_id":300,"origin_pos":"(3, 7)","origin_team":7,"price":68,"qty":1,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"Team7 徵 weapon_ranged_low ×1","id":257,"kind":"global_message","origin_tick":31012,"params":{"expire_tick":38212,"order_id":301,"origin_pos":"(3, 7)","origin_team":7,"price":78,"qty":1,"res":"weapon_ranged_low"},"type":"order_buy"}
+{"description":"[Board] Team7 buy weapon_melee_low ×1","id":266,"kind":"global_message","origin_tick":31200,"params":{"expire_tick":38212,"order_id":300,"origin_pos":"(3, 7)","origin_team":7,"price":68,"qty":1,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":267,"kind":"global_message","origin_tick":31200,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"[Board] Team7 buy weapon_melee_low ×1","id":280,"kind":"global_message","origin_tick":31680,"params":{"expire_tick":38212,"order_id":300,"origin_pos":"(3, 7)","origin_team":7,"price":68,"qty":1,"res":"weapon_melee_low"},"type":"order_buy"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":284,"kind":"global_message","origin_tick":31680,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team5 向 Team7 徵收（rate=0.45）","id":286,"kind":"global_message","origin_tick":31800,"params":{"origin":"5","rate":"0.45","target":"7"},"type":"tribute"}
+{"description":"Team7 脫離勢力1","id":290,"kind":"global_message","origin_tick":31893,"params":{"origin":"7"},"type":"faction_defect"}
