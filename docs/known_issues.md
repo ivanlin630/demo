@@ -5428,3 +5428,20 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
 ```
 
 回訪：觸發事件 —— 下一張動到 `population_system.gd` 溢出路徑的票（屆時把切割事件接進 specimen／事件流，並讓新隊的 parent 可追）；或任何一次故事稽核再遇到「人口／資源一次性大跳而 trace 沒有事件」。
+
+---
+
+## `shelter.cmp.*_sum` 四行沒閘在「收留」⇒ 攻擊／偵查／掠奪混進收留的總和（implementer 2026-10-06 回報，systems 登記）
+
+狀態：已知未修
+
+```
+`scripts/simulation/decision/decision_engine.gd` 的 `_cmp_on` 區塊：
+  `shelter.cmp.drive_sum／after_weight_sum／after_coeff_sum／final_sum` 四行在 `if _cmp_on:` 底下、
+  **`if opt == "收留":` 外面** ⇒ `_cmp_on` 清單裡的每一個選項（收留／攻擊／偵查，2026-10-06 起加掠奪）
+  都會累加進這四個以「shelter」為名的總和
+⇒ ★同處註解自己寫著「不要混母體」—— 而它在混
+⇒ ★★**讀過這四個 sum 下結論的舊分析，母體都是錯的**（它們以為在看收留，實際是收留＋攻擊＋偵查）
+```
+
+回訪：觸發事件 —— 下一次有人要用 `shelter.cmp.*_sum` 下結論之前（屆時先把四行移進 `if opt == "收留":`，或改名為全選項總和）；或任何一張動到 `_cmp_on` 區塊的票（順手修，並列出用過這四個 sum 的舊結論）。

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 故事結束之後原玩家隊照 NPC 的路補領袖（＋決策 tap「掠奪」）
 topic: ★**交件｜BATTERY_RC=0｜102 綠／0 紅**（run-id `36605-20261006-184757`，HEAD `ea7c5f94b`）｜branch `feat/player-team-succession` 遠端 tip **`4371bfd76`**（基於 `fae319cb4`；origin/main 之後多的 10 顆只動 docs/superpowers／progress，沒碰 scripts／註冊表 ⇒ 沒 rebase）｜①改世界 ②只加觀測 兩顆分開｜P2 負對照紅的長相 ＝ QA 的 8 → 1｜fp 沒變（基準不動）
 ---
