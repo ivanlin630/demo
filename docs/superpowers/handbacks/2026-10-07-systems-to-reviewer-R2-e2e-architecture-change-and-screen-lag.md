@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 端到端驗收：架構改成 GDScript 床（實作端動工前核 code）＋同一支函式修 play.py 畫面落後一步
 topic: ★R² 送審（spec 改版）｜`docs/superpowers/specs/2026-10-06-terminal-e2e-state-driven-HOW.md` §1／§2／P10／P11｜★請優先打：共用函式「等推進消化完才送畫面」會不會讓某些鍵卡住（遭遇戰／強制事件中途把 remaining 歸零以外的情況、ADVANCE_UNTIL_EVENT 長跑時 REPL 無回應）
 ---
