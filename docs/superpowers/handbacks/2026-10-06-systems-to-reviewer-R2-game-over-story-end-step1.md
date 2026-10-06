@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 故事結束 ＝ 故事的結束不是世界物理（票 #2，刀 0＋刀 1）
 topic: ★**R② 送審**（spec sha ＝ `467e3c846`，★遠端 tip 同一顆）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-09-24-game-over-is-a-story-end-not-world-physics-HOW.md`｜★★要你打的是**新加的 §5c**（步驟 0 從來沒落地 ⇒ 吸收回本票當刀 0）＋ §5 的 P 表重瞄（P3 劃掉）｜★★★序 ＝ 排在 play.py 之後，所以審查車道現在空著
 ---
