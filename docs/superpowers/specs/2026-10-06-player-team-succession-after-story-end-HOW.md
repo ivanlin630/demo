@@ -23,7 +23,9 @@
 刀 1 拿掉的是 `sim_runner.gd` 的 early return（世界因 game_over 而停）—— 那是**一處**執法點
 ★而同一個舊假設還有**第二處**執法點：`scripts/simulation/event_system.gd:72-86` `handle_player_succession`
   ·`:73` `team.leader_id = -1`
-  ·`:74` named 空 ⇒ `:80-83` 設 `game_over`／`game_over_reason` ⇒ **`:84` `return false`**
+  ·`:74` named 空 ⇒ `:80-81` 設 `game_over`／`game_over_reason`、`:82` print ⇒ **`:83` `return false`**
+    （★R² 訂正：原文寫 `:84`，而 `:84` 是**另一個分支**的開頭 `state.set_player_forced_event({`（named 非空 ⇒ 選繼承人）
+     ⇒ 照字面改會動錯地方）
   ⇒ ★**繼承在這裡停止** —— 而 NPC 隊同一個處境走的是 `:41-65`（best named → **anon 晉升** → 皆無才崩潰）
 ⇒ 以前世界一 game_over 就停，所以「繼承停止」**從來不會被看見**（停了的世界不會有第二天）
 ⇒ ★★刀 1 讓世界不再停 ⇒ 這條**從沒被走過的分支**第一次活起來 ⇒ 它說的是「這支隊不再有人當家」
@@ -38,8 +40,9 @@
 ```
 ①抽出 `on_leader_death` 的 NPC 繼承段（`event_system.gd:41-65`）成一支 `_npc_succession(state, team) -> bool`
   ⇒ `on_leader_death` 的 NPC 分支呼它（行為不變）
-②`handle_player_succession` 在 **`game_over` 設完之後**（`:83` 之後、原本 `:84 return false` 的位置）
+②`handle_player_succession` 在 **`game_over` 設完之後**：把 **`:83` 的 `return false`**（★R² 訂正，原文誤寫 `:84`）
   ⇒ **改成 `return _npc_succession(state, team)`**
+  ⇒ ★**`:84` 起的 `set_player_forced_event` 那個分支不動**（那是 named 非空 ⇒ 選繼承人，玩家還能選）
   ⇒ ★`game_over` 照設（UI 故事結束照印）；★世界照 NPC 的路補領袖
   ⇒ ★★**只有一份繼承邏輯**（不准在 player 分支再抄一份 —— 三份會漂，漂掉那份是靜默的；你上一張剛付過）
 ③`player_id == -1` 那一支（`:78-79`）**不動**（它本來就讓 `on_leader_death` 的偵測走 NPC 路）
@@ -101,7 +104,13 @@ P2 的負對照即藍圖說的陽性對照（拿掉 ② 那一行 ⇒ pop 8 → 
 ### ②決策 tap（★可併，而它有三條硬約束）
 
 ```
-合成點：`scripts/simulation/decision/decision_engine.gd:79 rank_scored` ／ `:267 rank_scored_ctx`（★先查哪一支是掠奪那一輪實際走的）
+合成點【★已核，R² 2026-10-06】：`rank_scored`（`:79`）在 `:101` 直接呼 `rank_scored_ctx`（`:267`）⇒ **一條巢狀呼叫不是兩條路**
+  ⇒ 合成 ＝ `rank_scored_ctx` 的**單一迴圈**；需求層加權 ＝ `_coeff`；人格調製 ＝ term 內 `weight()` 與 `_persist` —— 都在同一迴圈
+  ⇒ ★★**既有的四欄拆解已經在那裡**：`decision_engine.gd:315` `_cmp_on := Probe.enabled and opt in ["收留","攻擊","偵查"]`
+    （`:323`／`:359`／`:368` 用它）⇒ 本票 ＝ **把「掠奪」併進那個清單**，不新寫一套 tap
+  ⇒ ★★★而它被 **`Probe.enabled` 閘住** ⇒ 新的一條必答：**產 specimen 的那一輪 `Probe.enabled` 是不是真的**
+    —— 不是的話，四欄**一個都不會被印**，而 specimen 照樣產出（＝沒接電的閘：寫好了而那一輪沒通電）
+    ⇒ 一格：重產的 specimen 裡 Team11 掠奪那一輪**四欄真的出現**（印出那一行），不是只驗「程式碼有加」
 T1 ★★★**在合成發生的那一處記錄，不准重算**：tap 讀的是引擎**已經算出來**的四個數
    ⇒ 不准為了印而再呼一次 util／人格函式 —— 那會**耗 RNG**（判準庫：觀測儀器禁耗 global RNG，
      第 4 次同族血證）而且**改變被觀測物**

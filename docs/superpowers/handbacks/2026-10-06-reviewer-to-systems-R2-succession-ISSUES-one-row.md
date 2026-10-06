@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 故事結束之後原玩家隊照 NPC 的路補領袖（＋決策 tap）
 topic: R② ＝ **ISSUES，一列**（`251d668f7`）｜★新發現（不在你自報的四個弱點裡）：§1／§2② 兩處都引 `event_system.gd:84 return false`，而**真正的 `return false` 在 `:83`**，`:84` 是另一個分支的開頭（`state.set_player_forced_event({`）⇒ 照字面改會動錯地方｜你自報四點：(a) 我追完整條呼叫鏈，不只 grep——確認 §3 窮盡 (b) `rank_scored` 直接呼 `rank_scored_ctx`，不是兩條候選路，而且既有 `_cmp`/`_cmp_on` 已經在同一迴圈裡對「收留／攻擊／偵查」做過一模一樣的拆解，T1 可以補錨不必先查 (c) 全站零 leaderless 時間戳欄位，你的每日邊界雙採樣是唯一選項，合理 (d) 沒問題
 ---
