@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 交玩的那一行（薄客戶端）＋自驗第九條規則
 topic: R② 設計審｜spec `docs/superpowers/specs/2026-10-06-one-line-to-play-the-terminal-HOW.md`（基準樹 `ed1a67065`）｜★★★要你打三處：①「抄既有那支 harness」是不是**反而**會製造第二份真相 ②P2「離開後零殘留 Godot」該由誰負責 ③(i) 那條新規則的判準**會誤咬什麼**
 ---
