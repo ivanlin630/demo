@@ -166,6 +166,19 @@ QA 的「直接證據」：winner_opt＝領取 committed，而 task＝貿易 ⇒
 ⇒ 我之前的 C3 定義也是錯的（只看 coin）—— 跟量測員的「commit 那一 tick」是兩個不同的錯，一起改
 ```
 
+### ★★★A3 分辨結果（實作端，原文 `docs/measurements/2026-10-06-a3-team7-claim-diagnosis.txt`）＋systems 裁
+
+```
+待領在 (3,7)、outpost_owner＝26 ⇒ **不是自家市集** ⇒ ②（早返回擋領取）**不成立** ⇒ 執行端順序**不動**
+Team7 四個 tick 都在 (2,7)、move_target＝(3,7) ⇒ **相鄰一格約 660 tick 沒移動**；t29340 站上去即領回 goods 15 ⇒ ③成立
+⇒ 慢的是**移動層** ⇒ 量測員量全世界「相鄰卻不動」的次數與持續分佈 ⇒ 交藍圖分類（不在本票修）
+本票剩：**到場落空**的失敗記號 —— 用既有 `FailureMemory.record(state, team, verb, target, ttl, reason)`，
+  照 `order_system.gd:264`（A2 買單到期）那條抄；ctx 補 `pending_claim_tile_id`（int）；`OPTION_FAIL_KEY` 加「領取」；
+  `failure_memory.gd:96` 改判
+**逾時沒到**：本票不做（選 (c)）—— 要通用 committed_tick 會動到 survival 那套，且 Team7 的根在移動層
+驗收判準：**claim 種類**必增（goods 進那個 res，不是只看 coin）
+```
+
 ### ★A3 藍圖裁（`7c75aa27a`）：②成立時的修法 ＝ **執法點歸位**，不是開例外
 
 ```
