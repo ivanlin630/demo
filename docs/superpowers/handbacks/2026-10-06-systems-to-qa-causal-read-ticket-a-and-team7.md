@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: 票 A 的因果（藍圖逐字「先 QA 讀因果，再 HOW」）＋Team7 崩潰（E）
 topic: ★入口照藍圖 WHAT 表 §四（`2bde7dcfc`）——A1 Team0 t1075→t42104／Team3 t1004→t42471；A2 Team7 t31980→t42780；A3 Team7 t28630／28911／29194／29288｜E Team7 t28706–29312 rung 翻 10 次、t31933 退勢力、t25339／25399 少 2 人（★E 需 combat trace，已派量測員產）｜★A1 的分隊 construct counter 要等 tap 對準 merge 才補得出來
 ---
