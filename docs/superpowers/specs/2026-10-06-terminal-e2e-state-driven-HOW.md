@@ -20,7 +20,17 @@
 ## §1 走法（★透過終端，不透過 API 下指令）
 
 ```
-transport ＝ `tools/play.py` 的 `start_server`（`:132`）＋ `read_frame`（`:183`）—— ★不另寫第三套 socket 迴圈
+~~transport ＝ `tools/play.py` 的 `start_server`（`:132`）＋ `read_frame`（`:183`）—— ★不另寫第三套 socket 迴圈~~
+★★2026-10-07 實作端動工前核 code、systems 裁（改架構）：socket 只搬畫面字串，§2 要的世界狀態／fp 讀不到 ⇒
+  床寫 **GDScript**：實例化 `TextUI.tscn`，送鍵走**跟 REPL 逐字同一條路**（`PlayerRepl.keycode_for` → `node._input(ev)` → `node._refresh()`
+  ＝ `player_repl.gd:180 _feed` 的本體）⇒ ★**抽成一支共用函式**，REPL 與床都呼它（不准床裡手抄一份）
+  讀畫面 ＝ `node._screen_label.text`；世界狀態唯讀走 `node._bridge`
+  ★socket 那一層**不在本票**：由 play_selfcheck 守（它只搬字串）
+★★共用函式的送畫面點 ＝ **推進消化完之後**（`_bridge.is_advancing() == false`，`sim_bridge.gd:52`；await process_frame 讓 `text_ui_main.gd:265 _process` 跑）
+  ⇒ 血證（實作端實測 origin/main `6a5b56c7e`，play.py）：送 `x` 後立刻回的一屏＝推進**前**（第 1 天 00:00），
+     上一次的結果要到**下一次按鍵**才看得到 ⇒ 玩家畫面永遠落後一步（Space 隔日也一樣）
+  ⇒ 真因：`_feed` 在 `_input`＋`_refresh` 之後**立刻** `_send_screen`，而 request_advance 的量是之後的幀才消化
+  ⇒ 同一支共用函式修好它 ⇒ ★本票同時修 play.py 的落後一步（P10）
 每一步：
   ①讀一屏 ⇒ **只從畫面文字**解析「可做的事」（鍵 ＋ 動作名 ＋ enabled／disabled）
     ★★★**畫面上至少有兩個鍵位空間**（R² 2026-10-06 打回，原文只寫了一種）：
@@ -42,6 +52,10 @@ N 步：從常數推導（★不寫死；例：可做的事種數 × 2）
 
 ```
 問題：每按一鍵 ＝ 推一 tick（press-is-one-tick），而那一 tick 裡**整個世界都在動**（別隊移動、經濟結算、時間流逝）
+  ★實作端核（`sim_bridge.gd:355 command_player`）：**下令的鍵**（入列成功且不在自動推進中）＝ `request_advance(1)` ⇒ 一鍵一 tick 成立；
+    **不下令的鍵**（Esc、換頁）不推進 ⇒ B 世界要用推進鍵補齊同樣的 tick 數
+  ⇒ 例：A＝[t, 動作數字, esc]（2 tick：重掃＋動作）｜B＝[t, esc, g, 1, enter]（2 tick：重掃＋跳 1 tick）
+  ⇒ ★床印兩邊的鍵序列與 tick 數；兩邊 tick 數不同 ⇒ 不可判（ABORT）
   ⇒ 直接比前後快照 ⇒ 每一步都「有差異」⇒ (紅二) 永遠不紅、(紅三) 永遠在紅 —— 兩個都沒有鑑別力
 ⇒ ★解法 ＝ **雙世界對照**（確定性讓它成立）：
   同 seed、同一個走法前綴，**分叉成兩份**：A 按那個鍵；B 不按（推同樣的 tick）
@@ -92,6 +106,10 @@ P5 [確定性] 同 seed 逐字相同；換 seed 必須不同
 P6 [雙世界前提] 每次分叉兩份 fp 相同
 P7 [觀測不改物] 跑不跑 E2E，同 seed 世界 fp 相同
 ```
+
+P10 [畫面不落後] 透過共用函式送一個推進鍵（x）⇒ 回的那一屏時間 ＝ 推進**後**（第 1 天 01:00，不是 00:00）；★紅基線＝實作端那組實測（修前必落後一步）
+   ★反向：不推進的鍵（Esc）⇒ 立刻回、不等待（不准把所有鍵都改成等一幀）
+P11 [第一次跑抓到的] 實作端探路已見一例疑似（紅三）：「建立勢力」⇒ faction_id −1→2 而無完成句、無事件流 ⇒ 照 §6 回報清單、不在本票修
 
 ## §5 ★★輕路（藍圖 ③）—— **跟本票一起落地，不准先落**
 
