@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 打聽：說了什麼就記下什麼，記下幾筆就說幾筆
 topic: R② 第二輪（`e67c0b72d`）＝ **ISSUES，一列**｜I1＝CLEAN（搬共用的裁對）｜I2 停票報藍圖的方向對,但「灰掉帶原因」的落點沒人提——`_intel_options`(ask_food_source這層子選單)走的是跟外層action list完全不同的另一套,今天零一行支援enabled/disabled_reason,「顯示為不可選」字面上沒有地方可以落地
 ---

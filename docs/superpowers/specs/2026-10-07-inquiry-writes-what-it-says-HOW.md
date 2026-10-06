@@ -24,6 +24,11 @@ I1 偽造訊息改用既有的逐欄位複製 `message_system.gd:325 _copy_messa
 ~~I2 ask_food_source 接進寫入路~~ ★R² 核完踩中停止條件：`_find_food_seek_target` 只讀視野內真值與賣單 belief、零讀糧源位置 belief；
    `_exchange_intel` 兩分支形狀接不上「某格是糧源」；record_claim 呼叫點有封頂 ⇒ **沒有既有管道可插**
    ⇒ 本票：ask_food_source **灰掉帶原因**（引擎的 disabled_reason，例「對方說的糧源還不會記進你的情報」；列的條件＝做的條件）
+   ★R² 第二輪：內層選題子選單今天**沒有**灰掉機制（`inquiry_system.gd get_options()` 回傳無 enabled／disabled_reason；
+     `text_ui_main.gd:3118-3119 _intel_options` 渲染迴圈無 disabled 分支）—— 外層動作清單那套不在這層
+   ⇒ 裁（最小形）：①`get_options()` 每個選項加 `enabled`／`disabled_reason` 兩鍵（引擎側給原因，問糧源＝false＋原因；其餘＝true）
+     ②`_intel_options` 渲染：disabled 的印成灰＋原因（同外層的視覺語彙）③確認那一步：disabled ⇒ 印原因、不呼 `_exchange_intel`（仿 ask_faction_status 既有特例分支的寫法）
+   ⇒ 不搬整套外層機制（範圍變大）；兩鍵命名與外層一致，日後要合併時不用改讀者
    ⇒ 「糧源要不要成為一種情報、決策要不要讀它」＝WHAT，已報藍圖
 I3 written 在 msgs 那段也計（每複製一則新訊息 +1；已知的不算）
 I5 結果句：mode＝told 而 written＝0 而 payload 非空 ⇒「他說的你早就知道了」（藍圖第四句）；三句既有的不動
