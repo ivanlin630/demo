@@ -12,6 +12,10 @@ class_name TileBank
 #   豁免：本檔自身、world_generator / game_setup（bootstrap 初始化）、player 路徑（F-P 傘：
 #         player_command_system / player_api_mapper）。新 tile 儲量寫入一律經 TileBank。
 
+# 帳本 `store` 鍵的兩個值（只有本檔用；ResourceBank 的條目不帶 store）
+const STORE_PUBLIC: String = "public"
+const STORE_POOL: String = "pool"
+
 # ── 公庫容量（單點；OutpostSystem._get_storage_cap / storage_cap 委派此）──
 const OUTPOST_STORAGE_CAP: Dictionary = {
 	# ★★★civilian 兩級由 [200, 500] → [250, 650]（spec 2026-08-26 storage-fits-own-next-step）：
@@ -54,7 +58,9 @@ static func cap(tile: HexTileData, res: String) -> float:
 static func get_stored(tile: HexTileData, res: String) -> float:
 	return float(tile.public_storage.get(res, 0))
 
-# 原始 set（呼叫端已算好目標值，含已 clamp / 已扣的結果）。delta 記絕對值（同 ResourceBank.set_amt 慣例）。
+# 原始 set（呼叫端已算好目標值，含已 clamp / 已扣的結果）。delta 記【變化量】（新值 − 舊值）。
+# ★★兩個庫記在同一個 (tile, res) 上 ⇒ 帳本條目帶 `store`（公庫 "public"／自然池 "pool"），
+#   否則對 (tile, res) 加總 delta 會把兩個庫混在一起（spec 2026-10-06 ledger-delta §1⑤）
 # ★真盈餘計量：公庫食物流入/流出（★只記帳，不改任何數值）
 static func _tally_food(tile: HexTileData, res: String, delta: float) -> void:
 	if res != "food" or tile == null or delta == 0.0:
@@ -64,10 +70,12 @@ static func _tally_food(tile: HexTileData, res: String, delta: float) -> void:
 
 static func set_amt(tile: HexTileData, res: String, amt: float, reason: String) -> void:
 	# ★set 是蓋值 ⇒ 流量＝新值 − 舊值（同 ResourceBank.set_amt 的理由）
+	if Probe.enabled: Probe.bump("bank.call.tile_set_amt")   # ★帳本守恆床的母體地板（純觀測、零 RNG）
 	var prev: float = float(tile.public_storage.get(res, 0))
 	tile.public_storage[res] = amt
 	_tally_food(tile, res, amt - prev)
-	WorldState.record_driver(tile, res, amt, reason, "resource")
+	# ★舊版記 `amt`（新值）—— 註解寫著「同 ResourceBank.set_amt 的理由」而這一行沒跟上
+	WorldState.record_driver_store(tile, res, amt - prev, reason, "resource", STORE_PUBLIC)
 
 # capped add（cap 單點）→ 回實際入庫量。溢出 = sink（呼叫端另處理殘量：私產留 / 落地面）。
 static func deposit(tile: HexTileData, res: String, amt: float, reason: String) -> float:
@@ -75,7 +83,7 @@ static func deposit(tile: HexTileData, res: String, amt: float, reason: String) 
 	var newv: float = minf(cur + amt, cap(tile, res))
 	tile.public_storage[res] = newv
 	_tally_food(tile, res, newv - cur)
-	WorldState.record_driver(tile, res, newv - cur, reason, "resource")
+	WorldState.record_driver_store(tile, res, newv - cur, reason, "resource", STORE_PUBLIC)
 	return newv - cur
 
 # clamp 到現量的提領 → 回實際取出量。
@@ -84,7 +92,7 @@ static func withdraw(tile: HexTileData, res: String, amt: float, reason: String)
 	var m: float = clampf(amt, 0.0, cur)
 	tile.public_storage[res] = cur - m
 	_tally_food(tile, res, -m)
-	WorldState.record_driver(tile, res, -m, reason, "resource")
+	WorldState.record_driver_store(tile, res, -m, reason, "resource", STORE_PUBLIC)
 	return m
 
 # ── 自然池 tile.resources（uncapped；cap 由呼叫端各自套 resource_cap / WILD_*）──
@@ -92,9 +100,12 @@ static func pool_get(tile: HexTileData, res: String) -> float:
 	return float(tile.resources.get(res, 0))
 
 static func pool_set(tile: HexTileData, res: String, amt: float, reason: String) -> void:
+	# ★舊版連 prev 都沒取、直接記 `amt`（新值）⇒ 改記變化量
+	if Probe.enabled: Probe.bump("bank.call.tile_pool_set")
+	var prev: float = float(tile.resources.get(res, 0))
 	tile.resources[res] = amt
-	WorldState.record_driver(tile, res, amt, reason, "resource")
+	WorldState.record_driver_store(tile, res, amt - prev, reason, "resource", STORE_POOL)
 
 static func pool_add(tile: HexTileData, res: String, amt: float, reason: String) -> void:
 	tile.resources[res] = float(tile.resources.get(res, 0)) + amt
-	WorldState.record_driver(tile, res, amt, reason, "resource")
+	WorldState.record_driver_store(tile, res, amt, reason, "resource", STORE_POOL)

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 帳本 delta 加總必須等於資源變化（觀測儀器缺陷，小票）
 topic: ★**交件｜BATTERY_RC=0｜107 綠／0 紅**（run-id `6014-20261007-033049`，HEAD `9f4283b0d`）｜branch `feat/ledger-delta-sums` 遠端 tip **`72a268c80`**｜fp **不變（量的）**｜負對照 4／4 紅（其中 clear_all 那一支要佈置才看得到，§三）
 ---
