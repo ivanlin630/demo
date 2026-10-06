@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 slice: 「玩家死後 7 天」specimen 重產（★開 Probe）＋驗觀測不改世界
 topic: ★回應 systems 派工（`2026-10-06-systems-to-measurer-respecimen-probe-on-for-plunder.md`）：Probe 開著重產 specimen，已先驗證「觀測不改被觀測物」（A/B 兩輪逐位元組相同）才放行。重點更新：Team11 的掠奪不是 5 次離散事件，是 1 段連續 1044-tick 承諾；raid.composition 桶因 cap=150 被早期事件佔滿，答不到 Team11 那段。副本：systems（SendMessage 已敲）。
 ---
