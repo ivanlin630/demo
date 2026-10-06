@@ -40,7 +40,20 @@ const SPEC_ARRIVAL_SITES: int = 8
 #   ⇒ ★★這個分法是被卷面逼出來的：我第一版把兩者放同一個清單，
 #     而改人話之後 `propose_trade` 進了 B ⇒ 差集只剩一個 ⇒ 集合相等紅。
 #     ★★★紅得對：那個紅說的是「你的分類法把兩件事當成一件」。
-const SPEC_UNKNOWN_OK: Array = ["tribute_offer"]
+# ★★★★★★【2026-10-01：這一組【空了】，而它是基準更新不是弱化】═══════════════
+#   ~~`const SPEC_UNKNOWN_OK: Array = ["tribute_offer"]`~~
+#   ★那個豁免存在的**唯一理由**是「handler **刻意**不認得 `tribute_offer`」
+#     —— 而進貢迴圈那張票把**正確的那一半**做掉了：handler 現在有一支
+#     `"tribute_offer"` arm，它呼 `apply_tribute_transfer`（轉帳那一半）**不呼** `_pay_extortion`
+#     ⇒ 玩家**收得到貢品**、而且**不會倒付**。
+#   ⇒ ★★所以這一組清空 ＝ **那個刻意的空缺被填上了**，不是「把判準放寬」。
+#     （而守「不倒付」的 P10 **照舊有效**：它斷言按接受之後玩家 coin 不得減少。）
+#   ★★★而**清空會讓 `diff == want` 變成 `[] == []`** ⇒ 它可能恆真
+#     ⇒ 所以下面**加兩道母體地板**：A 非空、B 非空（抽取式壞掉時兩邊都會是空的，
+#       而那時 `[] == []` 照樣綠 —— 那正是「正數形狀的空集合」那一族）。
+#   ⇒ ★★★★而這一組**留著不刪**（而不是把那一條斷言拿掉）：
+#     它現在的語意是**更強的**那一句 —— **mapper 印給玩家的每一個提案字串，handler 都認得**。
+const SPEC_UNKNOWN_OK: Array = []
 # ★★★2026-09-30 通商票之後這一組的語意【變了】，而我改斷言不刪格：
 #   ~~`SPEC_REFUSED_BY_DESIGN = ["propose_trade"]`（認得而刻意只回一句人話拒絕）~~
 #   ~~`SPEC_REFUSAL_SENTENCE = "對方提議通商，而你目前還沒有回應通商的方式"`~~
@@ -372,7 +385,18 @@ func _test_p9_proposal_strings_cross_source() -> void:
 	var want: Array = SPEC_UNKNOWN_OK.duplicate()
 	want.sort()
 	print("   ★A ＼ B ＝ %s（①完全不認得而正確 ＝ %s）" % [str(diff), str(want)])
+	# ★★★★★【`want` 空了之後這一條會變成 `[] == []`】⇒ 兩道母體地板撐住它：
+	#   抽取式壞掉時 A 與 B **都會是空的**，而那時 `[] == []` 照樣綠
+	#   ⇒ 那是「正數形狀的空集合」—— 一個看起來像通過的失敗。
+	_check("★★母體地板 A1′：A（mapper 的提案字串）非空（%d 個；0 ⇒ 下面那條恆真）"
+		% a_set.size(), a_set.size() > 0)
+	_check("★★母體地板 B2′：B（handler 認得的）非空（%d 個；0 ⇒ 下面那條恆真）"
+		% b_set.size(), b_set.size() > 0)
 	_check("★★★A ＼ B 與【①完全不認得】那一組集合相等（多一個少一個都紅）", diff == want)
+	# ★而 `want` 空的時候這一條的語意**更強**：mapper 印給玩家的每一個提案字串，handler 都認得。
+	if want.is_empty():
+		print("   ★★而 `SPEC_UNKNOWN_OK` 是空的 ⇒ 本條現在說的是【更強的那一句】：")
+		print("     **mapper 印給玩家的每一個提案字串，handler 都認得**（一個都沒有落到「未知提案類型」）。")
 	# ══ ②認得【而且真的做事】的那一組（2026-09-30 通商票之後）
 	for e0 in SPEC_HANDLED_BY_SHARED_CODE:
 		print("   二：`%s` 在 B 裡＝%s（handler 認得它）" % [String(e0), str(b_set.has(String(e0)))])
