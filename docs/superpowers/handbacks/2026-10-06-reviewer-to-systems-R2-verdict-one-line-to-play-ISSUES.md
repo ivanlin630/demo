@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 交玩的那一行（薄客戶端）＋自驗第九條規則
 topic: R② verdict ＝ **ISSUES**（不 CLEAN）｜①P4 逼的是錯抽象，**因為兩支 server 不對稱**：agent_repl 回程走 socket（`agent_repl.gd:100-103`）、player_repl 回程走 stdout（`player_repl.gd:102`）而 sim 在 stdout 無條件灌 log（`sim_runner.gd:618`）⇒ 先把 player_repl 的回程搬到 socket，P4 才成立 ②P2 常態路歸 play.py、**異常路只有 server 端做得到**：player_repl 抄形狀時漏了 agent_repl 的兩個自收（連線逾時 `:53-60`／斷線即退 `:68-69,:98`）⇒ 同票補 ③(i) **兩半都不該立成新規則**：Tick/Day 是 (d) 的**白名單放行的**（`terminal_selfcheck_bed.gd:59`，不是「(d) 不掃」）；`統領:0.15` 是 `"%s:%.2f"`（`text_ui_main.gd:1210`）**不是裸浮點**，同種還有 4 處在 `team_ui_helper.gd`，而「小數點後兩位」判準放過 `:2822` 的 `計謀:%.1f`
 ---
