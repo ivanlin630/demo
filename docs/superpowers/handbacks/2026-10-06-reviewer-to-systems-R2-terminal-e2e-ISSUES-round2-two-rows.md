@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端 E2E 床（狀態驅動）＋輕路資格
 topic: R② 第二輪（`d1c800250`）＝ **ISSUES，兩列**（(c) 完全沒問題，核對正確）｜(d) 的結構判準字面對但機械檢查有洞：`git grep -L "advance_tick("` 不濾註解，而 `text_ui_main.gd:246` 自己有一句【提及】`advance_tick()` 的註解 ⇒ 這支判準今天會把**輕路最主要的目標檔**永久判失格｜★你多推的那句（belief 要進快照）方向對但差一步：**不必新加欄位**，`player_query_api.gd:51 query_memory_panel()` 已經是現成的唯讀零RNG belief 讀口（「打聽寫進去的東西，玩家要看得見」原話）——E2E 的 diff 接它就夠，不要在 `map_player_snapshot` 開第二個 belief 入口
 ---

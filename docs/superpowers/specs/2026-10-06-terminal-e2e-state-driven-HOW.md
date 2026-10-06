@@ -63,6 +63,10 @@ N 步：從常數推導（★不寫死；例：可做的事種數 × 2）
   ⇒ ★★**不要被名字騙**：「打聽」**不是** `none_expected` —— `confirm_gather_intel`（`:1324`）呼
     `InquirySystem.resolve_inquiry` **寫 belief claim** ⇒ 它的 `effect` 是 `"belief"`
     ⇒ 所以 §2 的狀態快照**必須含附身隊的 belief**（只比真值欄位的話，打聽永遠「說到沒做到」）
+    ⇒ ★★**接既有讀口，不開新欄位**（R² 第二輪）：`player_query_api.gd:53 query_memory_panel()`
+      已是**唯讀、零寫、零 RNG** 的 belief 讀口（`:48` 原話「打聽寫進去的東西，玩家要看得見」）
+      ⇒ E2E 的 diff 在主快照之外**加讀這一支**就夠
+      ⇒ ★不准在 `map_player_snapshot` 開第二個 belief 入口 —— 那會變成一個 WHAT（belief 該不該進主快照）
   ⇒ 每一個 `effect` 值要附**那個 handler 寫了什麼**的 file:line（逐個開 handler 看，不從動作名推）
   （例：`"position"`／`"resources_both"`／`"relation"`／`"none_expected"`）
 ⇒ 床讀那一欄，**不在床裡另抄一份**（判準庫：估算器禁手抄物理；兩份會漂而漂掉的那份是靜默的）
@@ -98,7 +102,16 @@ P7 [觀測不改物] 跑不跑 E2E，同 seed 世界 fp 相同
 ⇒ ★★資格必須**機械可判**，不准自報「這是小修」（否則每張票都會說自己小）：
   資格 ＝ ①`git diff --name-only <base>..<tip>` 全部落在 `scripts/ui/`
         ①′ ★★**結構判準不點名檔案**（R² 2026-10-06）：diff 的**每一個檔**都**不含**
-           `advance_tick(`／`advance_ticks(` 的非註解呼叫（`git grep -L` 判）
+           `advance_tick(`／`advance_ticks(` 的非註解呼叫
+           ⇒ ~~`git grep -L` 判~~ ★R² 第二輪打回：`git grep -L` **不濾註解**，而 `text_ui_main.gd:246`
+             有一行**提及** `advance_tick()` 的註解 ⇒ 輕路**最主要的目標檔**會被永久判失格
+             （判準庫：規則的描述與規則的違反在文字上同形）
+           ⇒ ★可直接貼的判法（每個 diff 檔各跑一次，命中數 ＝ 0 才合格，**命中行印在卷面**）：
+             `git grep -n -E 'advance_ticks?\(' -- <檔> | grep -vE ':[0-9]+:[[:space:]]*#'`
+           ⇒ ★兩個方向我實測過（`d1c800250` 之後的樹）：`text_ui_main.gd` ＝ **0**（註解被濾掉）；
+             三支真推進者仍抓得到：`sim_bridge.gd` 4／`observer_bridge.gd` 1／`turn_controls.gd` 1
+           ⇒ ★★它的誤判方向是安全的：只濾**整行註解** ⇒ 一個真呼叫不可能被藏掉（不會假陰性）；
+             字串字面裡提到它會誤判成「推世界」⇒ 那一張走整份電池（保守方向，可接受）
            ⇒ ~~原文：不含 `sim_bridge.gd`~~ —— 今天 `scripts/ui/` 有**三支**直呼推進
              （`sim_bridge.gd`／`observer_bridge.gd`／`turn_controls.gd`），後兩支是死樹
              （`sim_bridge.gd:346` 自己註解），而**手列的清單不會因為「死」就自動安全**
