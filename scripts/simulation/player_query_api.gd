@@ -88,7 +88,11 @@ func query_memory_panel(state: WorldState) -> Dictionary:
 func get_player_snapshot(state: WorldState, request: Dictionary) -> Dictionary:
 	var player_check := _check_player_with_team(state)
 	if player_check["code"] != "ok":
-		return PlayerApiMapper.map_query_envelope(false, player_check["code"], player_check["msg"], {})
+		# ★★故事結束的兩鍵**失敗出口也要有**（理由見 `PlayerApiMapper.map_story_end()`：
+		#   玩家戰死 ⇒ persons 裡沒有他 ⇒ 走的就是這一條）⇒ 只加 `snapshot` 裡那兩鍵，
+		#   `ok`／`code`／`msg` 不變（失敗仍是失敗）。
+		return PlayerApiMapper.map_query_envelope(false, player_check["code"], player_check["msg"],
+			{"snapshot": PlayerApiMapper.map_story_end(state)})
 
 	var focus_team_id: int   = request.get("focus_team_id",   -1)
 	var focus_member_id: int = request.get("focus_member_id", -1)

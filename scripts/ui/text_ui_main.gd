@@ -822,6 +822,15 @@ func _pages_without_header(body: String) -> String:
 	return body
 
 
+# ★故事結束那一欄的內容：`game_over` 為假 ⇒ 空字串（view 據此**不印**那一欄）
+#   ★原因字串為空時仍要印**某個字** —— 否則「故事已結束：」後面一片空白像是 bug
+func _story_end_text() -> String:
+	if not bool(_cached_snapshot.get("game_over", false)):
+		return ""
+	var reason: String = String(_cached_snapshot.get("game_over_reason", ""))
+	return reason if reason != "" else "（原因未記）"
+
+
 func build_regions(pend_txt: String) -> Dictionary:
 	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
@@ -844,6 +853,9 @@ func build_regions(pend_txt: String) -> Dictionary:
 			"home": ("(%d,%d)" % [int(hp.get("q", 0)), int(hp.get("r", 0))]) if not hp.is_empty() else "（無）",
 			"food": "%.1f 天" % float(ct.get("food_days", 0.0)),
 			"threat": threat,
+			# ★故事結束（票 #2 刀 0）：讀 snapshot 的兩鍵（mapper 出）—— **不走 `_bridge` 直讀**
+			#   ⇒ 空字串 ＝ 故事沒結束 ⇒ view 照舊印威脅欄
+			"story_end": _story_end_text(),
 			"pending": pend_txt.trim_prefix("待執行 "),
 		},
 		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
@@ -1050,7 +1062,7 @@ func _build_state_str() -> String:
 	var ct: Dictionary  = _cached_snapshot.get("controlled_team", {})
 	var ps: Dictionary  = _cached_snapshot.get("player_summary", {})
 	var lc: Dictionary  = _cached_snapshot.get("location_context", {})
-	if ct.is_empty(): return "（無玩家 team）"
+	if ct.is_empty(): return "（你已沒有隊伍）"
 	var lines: Array = []
 
 	var pos: Dictionary = ct.get("position", {})
@@ -1607,7 +1619,7 @@ func _equip_selected_member(member: Dictionary) -> void:
 			grade = g
 			break
 	if grade == "":
-		_set_feedback(false, "team 無可裝備武器")
+		_set_feedback(false, "隊伍沒有可裝備的武器")
 		return
 	var r: Dictionary = _bridge.command_player("execute_action",
 		{"action_id": "equip_member",
@@ -1651,7 +1663,7 @@ func _build_member_str() -> String:
 	var team_stats: Dictionary = _cached_snapshot.get("team_stats", {})
 	var ct: Dictionary    = _cached_snapshot.get("controlled_team", {})
 	if members.is_empty() and ct.is_empty():
-		return "（無玩家 team）"
+		return "（你已沒有隊伍）"
 
 	# Clamp selection to valid range
 	if members.size() > 0:
