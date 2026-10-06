@@ -14501,9 +14501,13 @@ func _test_succession_player_extinct() -> void:
 	s.player_id = t.leader_id
 	t.leader_id = -1   # person 尚在 persons（見 choose_heir 測試註）
 	var ok: bool = EventSystem.new().on_leader_death(s, t)
-	assert(not ok, "player 絕後 → false")
-	assert(s.game_over, "應設 game_over")
-	print("player extinct OK")
+	# ~~assert(not ok, "player 絕後 → false")~~ ★補領袖票（2026-10-06）翻極性：故事結束 ≠ 這支隊停止繼承
+	#   ⇒ 絕後分支設完 game_over 之後走 `_npc_succession`；這支有 5 個匿名人口 ⇒ 晉升成功 ⇒ true
+	#   （spec 的爆炸半徑只數了產線讀回傳值的地方；這一格是電池抓到的床側讀者）
+	assert(s.game_over, "應設 game_over（故事結束照設）")
+	assert(ok, "player 絕後但有匿名人口 → 照 NPC 的路晉升 → true")
+	assert(t.leader_id != -1, "原玩家隊補到領袖（leader_id=%d）" % t.leader_id)
+	print("player extinct OK（game_over=%s｜新 leader P%d）" % [str(s.game_over), t.leader_id])
 
 func _test_succession_detection_net() -> void:
 	print("--- 繼承：faction_ai 安全網捕捉 leaderless（named 全滅）---")
