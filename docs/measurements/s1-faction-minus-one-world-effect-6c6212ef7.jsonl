@@ -1,0 +1,53 @@
+{"kind":"meta","seed":1337,"tree":"6c6212ef7"}
+{"kind":"death","row":{"cause":"combat","faction_at_death":-1,"team":-1000000,"tick":420}}
+{"kind":"death","row":{"cause":"combat","faction_at_death":-1,"team":-1000001,"tick":660}}
+{"kind":"death","row":{"cause":"combat","faction_at_death":-1,"team":-1000002,"tick":4560}}
+{"kind":"death","row":{"cause":"combat","faction_at_death":-1,"team":-1000003,"tick":5520}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":16,"tick":6206}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":18,"tick":6420}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":21,"tick":7200}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":22,"tick":7560}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":24,"tick":12540}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":27,"tick":14896}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":28,"tick":14899}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":23,"tick":15177}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":26,"tick":15360}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":29,"tick":15360}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":31,"tick":17520}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":34,"tick":18900}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":32,"tick":19080}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":33,"tick":19500}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":35,"tick":20280}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":38,"tick":21780}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":39,"tick":23340}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":36,"tick":23460}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":37,"tick":23700}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":40,"tick":24300}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":41,"tick":24315}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":43,"tick":25920}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":42,"tick":26160}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":45,"tick":28415}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":44,"tick":28923}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":30,"tick":31440}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":48,"tick":31860}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":46,"tick":32700}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":50,"tick":34320}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":47,"tick":34576}}
+{"kind":"death","row":{"cause":"other","faction_at_death":1,"team":52,"tick":35760}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":51,"tick":36180}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":53,"tick":37020}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":55,"tick":38640}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":57,"tick":38715}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":58,"tick":40080}}
+{"kind":"death","row":{"cause":"combat","faction_at_death":-1,"team":-1000004,"tick":40200}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":56,"tick":40433}}
+{"kind":"death","row":{"cause":"combat","faction_at_death":-1,"team":-1000005,"tick":40500}}
+{"kind":"death","row":{"cause":"other","faction_at_death":-1,"team":62,"tick":41040}}
+{"kind":"faction_pair_msg","row":{"a":-1000001,"b":12,"description":"Team -1000001 對 Team 12 宣戰（task=idle reason=（無） readiness 1.00 vs 1.00）","tick":642,"type":"combat_start"}}
+{"kind":"faction_pair_msg","row":{"a":-1000002,"b":11,"description":"Team -1000002 對 Team 11 宣戰（task=idle reason=（無） readiness 1.00 vs 1.00）","tick":4518,"type":"combat_start"}}
+{"kind":"faction_pair_msg","row":{"a":-1000003,"b":11,"description":"Team -1000003 對 Team 11 宣戰（task=idle reason=（無） readiness 1.00 vs 1.00）","tick":5505,"type":"combat_start"}}
+{"kind":"faction_pair_msg","row":{"a":-1000004,"b":61,"description":"Team -1000004 對 Team 61 宣戰（task=idle reason=（無） readiness 1.00 vs 1.00）","tick":40148,"type":"combat_start"}}
+{"kind":"faction_pair_msg","row":{"a":-1000005,"b":61,"description":"Team -1000005 對 Team 61 宣戰（task=idle reason=（無） readiness 1.00 vs 1.00）","tick":40493,"type":"combat_start"}}
+{"kind":"owner_change","row":{"from":-1,"tick":11460,"tile":[3,7],"to":14}}
+{"kind":"owner_change","row":{"from":4,"tick":28380,"tile":[4,6],"to":14}}
+{"kind":"owner_change","row":{"from":-1,"tick":37740,"tile":[10,3],"to":11}}
