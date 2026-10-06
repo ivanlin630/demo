@@ -5366,6 +5366,8 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
 
 ## 頂列「威脅」欄恆為「（無）」—— ★讀者在、寫者從來沒有過（implementer 2026-10-06 順手抓到，systems 登記）
 
+狀態：已知未修
+
 ```
 讀者：`scripts/ui/text_ui_main.gd:832`
   var threat: String = String(_cached_snapshot.get("threat_line", ""))
@@ -5380,11 +5382,13 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
   ⇒ 那個裁定**今天仍然成立**（它取代的是一個位置與預算，不是一段內容）；
   ⇒ 但「威脅欄平常該印什麼」是 **WHAT**（威脅的定義：誰、多近、多強？用感知不用真值）
   ⇒ ★已問藍圖；在他裁之前**不要**讓實作端隨手補一個寫入者（那會是發明 WHAT）。
-**回訪條件**：藍圖裁「威脅欄要顯示什麼」之後開票；或有人決定**拿掉**這一欄（那也是一個答案）。
+回訪：觸發事件 —— 「威脅欄給內容」那張 merge 時關閉本條（藍圖已裁 (丙)→(甲) `c8f39da3d`；(丙) 已 merge `c8248194d`，(甲) 已派工 `1f4842153`，spec `docs/superpowers/specs/2026-10-06-threat-column-says-what-the-team-knows-HOW.md`）
 
 ---
 
 ## `player_summary` 的 `food_days`／`starving` 在沒有隊時自己編值（死寫入者）＋另兩處值主張預設（2026-10-06 systems 登記，R² 指出）
+
+狀態：已知未修
 
 ```
 寫入者：`scripts/simulation/player_api_mapper.gd:62-63`（`map_player_summary`）
@@ -5404,6 +5408,6 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
 `scripts/ui/text_ui_main.gd:1383`  float(ct.get("food_days", 99.0))   ⇒ 同上
 ```
 ★它們跟頂列那三欄是同一個判準（「預設值分佔位符與值主張」），但不在頂列 ⇒ 不在威脅欄那張的母體。
-**回訪條件**：①有人讀了 `ps` 的那兩鍵（那時它變成畫面缺陷）②或票 #2 merge 後「沒有隊」成為長時間狀態，
+回訪：觸發事件 —— ①有人讀了 `ps` 的那兩鍵（那時它變成畫面缺陷）②或票 #2 merge 後「沒有隊」成為長時間狀態，
 那時開一張「讀者端值主張預設全清」的票，母體 ＝ `git grep -nE 'get\("[a-z_]+", *(0\.0|99\.0|false|"（無）")' -- scripts/ui`
 （★要印那一次掃描的數，不要只修這裡列的三處）。
