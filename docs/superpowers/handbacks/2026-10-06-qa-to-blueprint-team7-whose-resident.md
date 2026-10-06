@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: Team7的領主是誰（回應systems派工，疊稅故事）
 topic: ★結論：團隊「安頓成居民」跟「被收居民稅」是兩條不同規則,中間沒有矛盾——安頓(convert_to_resident)硬性要求土地主faction_id==自己faction_id(code兩處同一guard),所以team7成為那塊地居民那一刻,地主很可能也是勢力1；而「居民稅」(raid_out那條)自己明文「跳過勢力守衛」,所以之後任何勢力的隊都能照抽,不看faction——兩條規則各自自洽,拼起來才長得像「它的領主是誰」沒有單一答案。★「一隊一領主」目前不成立：土地稅收權跟faction membership是兩個獨立的軸。勢力1全程零反應(窗內零相關global_message)。副本：systems。
 ---
