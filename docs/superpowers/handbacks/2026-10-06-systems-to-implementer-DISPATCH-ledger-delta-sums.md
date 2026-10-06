@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 帳本 delta 加總必須等於資源變化（觀測儀器缺陷，小票）
 topic: ★派工，R² CLEAN（`6d03c09d7`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-ledger-delta-must-sum-to-the-change-HOW.md`｜★序 ＝ A3（在做）→ E2E → **本票** → 普查床 → B → A2 → A1｜純記帳、不改任何數值 ⇒ fp 必須逐位不變
 ---
