@@ -16,7 +16,9 @@
 ⇒ 帳本裡一筆 set 會看起來像「流入了整個存量」⇒ 前後兩筆 set 看起來就是巨大的 ± 鏡像
 ★同檔另兩個洞（同一族：寫入口沒有完整記帳）：
   `set_amt` 沒呼 `_tap_coin` ⇒ coin 被 set 時 coin 流量 tap 看不到
-  `clear_all`（`:55-`）只記 food 的 tally，**不呼 record_driver** ⇒ 清空在帳本上不存在
+  `clear_all`（`:55-59`）只記 food 的 tally，帳本只記**一筆** `record_driver(team, "*resources*", 0.0, reason, "bulk")`
+    ⇒ ★有記，但 delta＝0、field 不是任何一種資源 ⇒ **逐資源加總時清空不存在**
+    （~~原文：不呼 record_driver ⇒ 清空在帳本上不存在~~ —— 我寫完才讀到 `:59`，訂正）
 呼叫點：`ResourceBank.set_amt(` 全站 26 處（爆炸半徑在讀帳本的那端：量測床）
 ```
 
@@ -24,7 +26,8 @@
 
 ```
 ①`set_amt`：`record_driver(team, res, amt - prev, …)`；並呼 `_tap_coin(res, amt - prev, reason)`
-②`clear_all`：清之前逐 res 記一筆 `record_driver(team, res, -old, reason, "resource")`（＋coin 的 tap）
+②`clear_all`：清之前逐 res 記一筆 `record_driver(team, res, -old, reason, "resource")`（＋coin 的 tap）；
+  既有那筆 `"*resources*"` bulk 標記**保留**（讀它的人可能存在 ⇒ 先 `git grep '\*resources\*'` 列讀者再決定）
 ★不改任何資源數值（純記帳）⇒ fp 必須逐位不變
 ```
 
