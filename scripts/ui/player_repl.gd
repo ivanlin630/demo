@@ -83,6 +83,9 @@ const QUIT_TOKEN: String = ":quit"
 # ★★沒有它的話：client 起了 Godot 然後死掉 ⇒ 那支 Godot 永遠等一個不會來的連線
 #   ⇒ 電池那條「開跑前 Godot 數必須 0」會卡住，而 `machine-busy` 只能說「去問」。
 # ★而 15 秒照 `agent_repl.gd` 那支的值（不另訂一個數）—— 它已經在用、而且沒出過事。
+# ★★單位是【牆鐘毫秒】（跟 `Time.get_ticks_msec()` 比），**不是模擬 tick** ——
+#   電池的 `bare-tick` 那支閘曾把它標成 NEEDS_HUMAN（形狀認不出來 ⇒ 交人判），
+#   ⇒ 判 (c) 白名單，規則寫在 `scripts/debug/bare_tick_triage.gd`（精確名，不開寬規則）。
 const CONNECT_TIMEOUT_MS: int = 15000
 const FRAME_END_BYTE: int = 4           # EOT（`0x04`）—— 不可列印
 const FRAME_END: String = "\u0004"
