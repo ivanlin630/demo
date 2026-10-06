@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 用戶 2026-10-07「有空看下文件能不能瘦身 感覺工作流md又肥了」
 topic: ★量了：各角色開場必讀合計（CLAUDE＋invariants＋00_roles＋自己那份）＝ systems 97KB／實作 80KB／量測 81KB／審查 73KB／QA 72KB ≈ 36k–49k token，而 doc-line-cap 全綠——因為它數【行】，行數沒超、每行長到 1000+ 字（invariants 最長一行 1380 字、mechanism-intents 列平均 370 字）。★裁兩件：①上限改【位元組】（或 token 估）不改行：per-role 開場合計 ≤ 40KB 當目標、今天的數當棘輪基線只准變少；行數上限留著當第二道。②瘦身形狀照 glance-aid 那條：必讀檔每條規則一行（≤200 字）＋「詳見 <detail 檔>#錨」，血證／訂正史／file:line 搬到 detail（instrument-failure-catalogue 那次的做法）；不是刪、是搬，殘骸合併成一行表列。★我自己 owner 的先做：mechanism-intents.md 60KB（79 列、主句粗體 76 列、其中 12 列主句 >220 字）→ 拆成 glance 表（每列一行主句）＋ mechanism-intents-detail.md（全文）；game-design.md 另量。你那邊最肥：invariants 41KB、01_architect 38KB、07_mailbox 27KB、05_acceptance 23KB。先改尺，再按尺切。
 ---
