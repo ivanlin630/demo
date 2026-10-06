@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 觀察者世界永不凍結（deb051f61，2026-08-20）；②於故事結束票 #2 刀 1 翻極性（2026-10-06）
 # 觀察者世界永不凍結 TDD。
 # ①無玩家世界不凍：清 player_id 後殺該隊 leader 且 named 空 → 世界照常推進、game_over 保持 false
 # ~~②★有玩家仍凍、不得誤傷：player_id != -1 同款情境 → game_over=true、advance_tick 回 "game_over"~~

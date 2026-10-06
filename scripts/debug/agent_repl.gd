@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 var _bridge: SimBridge = null
 

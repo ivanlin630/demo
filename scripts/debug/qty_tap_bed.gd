@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # ★★★S2 前置：quantity tap 的量測床（純觀測）。
 #   ★它回答的是【量】不是【次數】，且每一項都帶【分母】——

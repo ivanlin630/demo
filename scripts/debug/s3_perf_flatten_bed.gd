@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # ★★★S3 的 perf 主張要【量】不是宣稱（systems 定）：七支攤平之後，burst 是否真的變平。
 #   ★既有證據形狀（cadence_stagger.gd 檔頭）：burst tick dt 中位 14.9M vs non-burst 4.2M = 3.5×
 #   ⇒ ★★所以要看的是【分佈的尾巴】，不是平均 —— 攤平會讓 p99/中位 的比值下降。
