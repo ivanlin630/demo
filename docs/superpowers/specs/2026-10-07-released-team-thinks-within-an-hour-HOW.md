@@ -10,7 +10,7 @@
 ## §0 現況（file:line）
 
 ```
-①`task_arbiter.gd:334 release(team)`：清 task／move_target／priority／reason；★**不碰 pass_next_tick**、★**拿不到 state／tick**（62 個呼叫點）
+①`task_arbiter.gd:334 release(team)`：清 task／move_target／priority／reason；★**不碰 pass_next_tick**、★**拿不到 state／tick**（呼叫點約 67 個非註解行；R² 實數）
 ②`sim_runner.gd:391-406 _collect_due_teams`：每顆 tick 跑（:650，在 _run_systems 之前；current_tick 在 :795 才 +1）
    到期後 `pass_next_tick = CadenceStagger.next_tick(cur, cur, tid, NEAR_CADENCE)` ＝ (cycle+1)×60＋offset ⇒ 間隔最長 ~119
 ③既有計數 `commit.release_clean`＋`commit.release_with_commitment`（:336-350）**每次呼叫都加** ⇒ 406；
@@ -61,7 +61,7 @@ P7 pass_stagger_bed 重跑：它讀 dup_in_cycle，語意改了 ⇒ 它的 expec
 ## §3 不做
 
 ```
-·不給 release() 加 state／tick 參數（62 個呼叫點；這票只需要「下一顆 tick 看到」）
+·不給 release() 加 state／tick 參數（約 67 個呼叫點；這票只需要「下一顆 tick 看到」）
 ·不做「解除當下立刻想」（藍圖裁：夾進一小時，不改成事件即時）
 ·勢力粒度不動：`_collect_due_factions` 不讀這個標記（不變量 #8 推論：錯開單位＝系統粒度）
 ```

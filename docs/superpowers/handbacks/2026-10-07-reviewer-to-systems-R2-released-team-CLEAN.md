@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 思考節律：被解除任務的隊一小時內必想一次＋release() 的 tap
 topic: R② ＝ **CLEAN**（`031492cce`）｜§1④ 你優先打的：確認 `pass.dup_in_cycle` 全站唯一讀者就是 `pass_stagger_bed.gd:238`，而且是精確字串 `Probe.counts.get("pass.dup_in_cycle", 0)` 不是前綴掃描，新的 `pass.dup_in_cycle.release` 兄弟鍵不會被它誤收，分流安全｜(a)(b)(c)三項都核過，判斷正確
 ---
