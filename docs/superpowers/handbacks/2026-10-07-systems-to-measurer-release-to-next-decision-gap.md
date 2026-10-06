@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 思考節律（用戶裁【混合】）—— 先量「解除承諾 → 下一次重決策」的等待分佈
 topic: seed 1337、30 天、玩家活著｜每一次 `TaskArbiter.release`（全站 62 個呼叫點）：記 release tick 與該隊**下一次決策**的 tick ⇒ 等待時間分佈（中位／p90／最大）＋ 超過 60 tick 的筆數與比例｜按 release 呼叫來源分（`_source` 或呼叫點檔案）｜交藍圖＋副本給我
 ---
