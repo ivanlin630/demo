@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 戰時徵用三條前提逐刀核對——11/11全部不成立
 topic: ★回應 systems 派工：Team7 被抽的 11 刀，①fund_war應急狀態②收稅者是盟主③扣後低於生存儲備，三條全部 0/11。帳本set_amt已用逐entry重建法處理。副本：systems（SendMessage已敲）。
 ---
