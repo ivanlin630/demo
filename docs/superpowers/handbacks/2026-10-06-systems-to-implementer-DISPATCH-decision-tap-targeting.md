@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 決策 tap 能對準某一隊、某一段時間（小票）
 topic: ★派工，R² CLEAN（`fcb9aeace`）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-decision-tap-can-target-a-team-and-window-HOW.md`｜★序 ＝ **威脅欄之後、E2E 之前**（它很小；擋的是 QA 那個「設計還是缺陷」）｜落地後我敲量測員設窗重產
 ---
