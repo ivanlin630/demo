@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 重產「玩家死後 7 天」specimen（★開 Probe）＋驗觀測不改被觀測物
 topic: 補領袖票已 merge（`96a34b7a0`）⇒ 決策 tap「掠奪」接上了（輸出桶 `raid.composition`），而它被 `Probe.enabled` 閘住｜★你那支床 `scripts/debug/player_death_7day_specimen.gd` 今天**零 Probe** ⇒ 要開｜同 seed 1337 重產 ⇒ QA 重讀 Team11 那 5 次掠奪｜★★先驗開 Probe 不改世界
 ---
