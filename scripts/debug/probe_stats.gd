@@ -126,7 +126,9 @@ static var sample_mute: Dictionary = {}
 #   ⇒ 加大 cap 不是解（多少才夠？）⇒ 解是能對準
 # ★形狀照上面的 `sample_mute`（按 event 調整取樣）：床在 `reset()`／`arm()` 之後設
 #   `Probe.sample_window = {"raid.composition": {"team": 11, "tick_min": 13350, "tick_max": 13400}}`
-#   ·team ＝ -1 ⇒ 不篩隊｜樣本靠 instance 的 "team"／"tick" 兩鍵判；沒有那兩鍵 ⇒ 視為窗外
+#   ·team ＝ -1 ⇒ 不篩隊｜樣本靠 instance 的 "tick" 與隊伍鍵判；沒有那兩鍵 ⇒ 視為窗外
+#   ·隊伍鍵預設 "team"，可用 "team_key" 指名（例：construct.stall 的隊伍鍵是 "ct_id"）：
+#     `Probe.sample_window["construct.stall"] = {"team": 0, "team_key": "ct_id", "tick_min": a, "tick_max": b}`
 # ★★只影響樣本收集：計數器、決定性、RNG 一律不動（不讀 state、不呼 rand）
 # ★★★被窗擋掉的筆數記在 `sample_window_dropped` —— 同 sample_mute 那條：**擋掉了什麼必須印在交件裡**
 #   （否則「窗內 0 筆」與「窗根本沒在作用」分不開）
@@ -140,7 +142,11 @@ static func bump_sample(event: String, instance: Dictionary, cap: int = 8) -> vo
 		var w: Dictionary = sample_window[event]
 		var wt: int = int(w.get("team", -1))
 		var k: int = int(instance.get("tick", -1))
-		var in_team: bool = wt == -1 or int(instance.get("team", -1)) == wt
+		# ★隊伍鍵**可選**（`team_key`，預設 "team"）：各處 bump_sample 的隊伍鍵名不一樣
+		#   （`construct.start` 用 "team"、`construct.stall` 用 "ct_id"）⇒ 由設窗的人指名，
+		#   **不**去把各處改成統一鍵名（那會動到讀那些鍵的床 —— 爆炸半徑在讀的那端）
+		var tk: String = String(w.get("team_key", "team"))
+		var in_team: bool = wt == -1 or int(instance.get(tk, -1)) == wt
 		var in_tick: bool = k >= int(w.get("tick_min", -1)) and k <= int(w.get("tick_max", -1))
 		if not (in_team and in_tick):
 			sample_window_dropped[event] = int(sample_window_dropped.get(event, 0)) + 1
