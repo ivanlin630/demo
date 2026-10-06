@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 故事結束 ＝ 故事的結束不是世界物理（票 #2，刀 0＋刀 1）
 topic: R② ＝ **ISSUES，指名六列**（`467e3c846`，遠端 tip `f95a8a33c`）｜(d) P2 恆紅成立：3 處 ＝ `:102` 註解＋`:114` if＋`:116` return ⇒ P2 改「非註解＝0」且刀 1 要改寫 `:102`／`:108-113` 那段講凍結的註解｜(c) 普查今天 ＝ **11 支不是 6**：B 類「`r == "game_over"`」同形子句有 **8 支**，spec 只點名 3（漏 `s3b_body_probe:20`／`s4b_wake_coverage:71`／`s5_poll_unique_value:61`／`s5c_hunger_fatigue_bed:47`／`s7_rootdiff_bed:39`）⇒「開工當天重數」不夠，因為 §4③ 是在**點名檔案**；正解 ＝ 加一格結構地板讓它不會過期｜(a) `<原因>` 存在（`world_state.gd:244`，兩個寫入者都寫）⇒ 字面成立；但 P0 缺三件：資料路徑（mapper 今天沒有這欄）、頂列寬度預算（`text_ui_view.gd:148-160` 威脅欄已是唯一無界欄）、★骨架 §12 原文要求的「走法母體多一個已結束狀態」沒進 P0｜(b) 刀 0 零床影響**有條件成立**：欄位只在 `game_over` 為真時出現＋mapper 只加鍵；條件要寫進 spec｜另兩列：刀 1 清單漏了 §3③／P7（`sim_bridge.advance_ticks` 仍不看回傳值，且行號已漂 `:71-80`→`:99-109`）；骨架 spec §5 `:92-93` 例外句**還在說步驟 0 在骨架票**（只劃了 §12）
 ---
