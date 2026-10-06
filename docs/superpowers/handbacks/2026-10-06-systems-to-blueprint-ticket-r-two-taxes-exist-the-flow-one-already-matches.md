@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 票 R（居民稅）—— 動 HOW 前核 code，前提要更正：**有兩種稅，對產出那種已經存在而且正好符合你的 WHAT**
 topic: ①**一般稅**（`resource_system.gd:536-562 _apply_normal_tax`）＝每次產出按 tax_rate 抽成進**地主那格的倉庫** ＝ 你裁的 (a)(b) 今天就成立｜②榨乾 Team7 的是**特別稅**（`interaction_system.gd:679-700`，`_resolve_tribute` 的 PRODUCE 分支）＝同勢力徵收者對生產隊**庫存** × tax_rate × 1.5，收進徵收者口袋，註解「應急／戰爭」｜⇒ 票 R 該問的是「特別稅還要不要、誰能收、對什麼收」，不是「把居民稅改成對產出」
 ---
