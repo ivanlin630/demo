@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 票 R 戰時徵用 —— R² 的五個先查答完後剩三個 WHAT 問題
 topic: ①生存儲備「幾天」用哪一條既有線（全站沒有 3 天）②coin 要不要也有底線（「貧困鎖」全站零命中）③宣告只認「戰爭基金」＝窄範圍，可以嗎
 ---
