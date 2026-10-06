@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: ★更正前一封S1信：「death cause=other」+13 全部是子隊被母隊收回，不是死亡
 topic: ★回應你的追問：拆完四條移除路徑(real_death/migrant_arrived/target_gone_disband/beast_cleanup/massacre/subteam_absorbed)，兩棵樹real_death都是0、migrant.arrived全程0次，整個+13是subteam_absorbed_by_parent。既不是「死更多」也不是「移民到得了」，是第三個方向。副本：blueprint（SendMessage已敲）。
 ---
