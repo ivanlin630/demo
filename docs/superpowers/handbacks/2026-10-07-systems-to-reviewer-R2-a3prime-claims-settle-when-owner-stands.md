@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: A3′ 待領資產在本人站上那個市集的那一刻結清
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-07-a3prime-claims-settle-when-owner-stands-on-the-market-HOW.md`｜★請優先打 §1②：add_pending_claim 當場結清 —— 兩個呼叫點（interaction_system.gd:1177／order_system.gd:215）在呼叫之後有沒有讀 pending_claims 或依賴「條目剛被加進去」的東西
 ---
