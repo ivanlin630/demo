@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 slice: Team7 中段崩潰 combat trace（t25000–t32000）
 topic: ★回應 systems 派工（`2026-10-06-systems-to-measurer-team7-combat-trace-and-30day-cost.md` ①）：已落地。★重要：窗內零 combat_start/combat_end 訊息涉及 Team7——「combat trace」這個題目的前提（有打仗）在這個窗裡沒有直接證據，請讀下面再判要不要改題目。副本：systems（SendMessage 已敲）。
 ---
