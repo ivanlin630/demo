@@ -1,0 +1,122 @@
+extends SceneTree
+# @bed-kind: invariant
+# ══ A4「目的地屬任務」：任務換手時 move_target 由新任務重給或清空，禁沿用 ════════════════════════
+# spec：`docs/superpowers/specs/2026-10-06-a4-a-target-belongs-to-its-task-HOW.md` §2
+#
+# 格：P1 陽性對照：fp 那個世界（warring_states、seed 20260922、無玩家）t65 Team26 就地開工升級 workshop
+#        ⇒ 換手**當下** move_target ∈ {(22,4), (-1,-1)}（★修前：(20,6)，前一段留下、一格沒有工程的地）
+#        ★它在同一個 tick 內就被別的寫入者改成工地格 ⇒ 舊版沒有真的走離工地；沿用只活在換手當下
+#     P2 不變量：Probe 開跑一段，每一次換手（try_set／transition／release）**回傳那一刻**取樣
+#        move_target ＝ 那一次給的值（TaskArbiter._note_handoff 計 handoff.<path>.ok／.bad）
+#        ⇒ .bad 三條全 0；母體地板：transition／try_set 兩條各自 ok ≥ 1
+#     P3 反向掃：`current_task = ` 的直接寫入（非 ==）在 scripts/simulation 的命中，跟 task_arbiter.gd 註解裡那份
+#        窮盡結論對照（寫入路只有 try_set／release／transition 三條＋新隊建立豁免＋recruit_tutorial）
+
+const CFG: String = "warring_states"
+const SEED: int = 20260922
+const P1_TEAM: int = 26
+const P1_TICK: int = 65
+const P1_SITE: Vector2i = Vector2i(22, 4)
+const P2_TICKS: int = 3000
+
+var _errors: int = 0
+var _cells_ran: Array = []
+const EXPECTED_CELLS: Array = ["P1", "P2", "P3"]
+
+
+func _initialize() -> void:
+	print("=== task_target_handoff：目的地屬任務 ===")
+	_p1_team26()
+	_p2_every_handoff()
+	_p3_direct_writes()
+	var missing: Array = []
+	for c in EXPECTED_CELLS:
+		if not _cells_ran.has(String(c)):
+			missing.append(String(c))
+	_check("★到場點名：%d／%d（缺：%s）" % [_cells_ran.size(), EXPECTED_CELLS.size(), str(missing)], missing.is_empty())
+	print("\n=== task_target_handoff DONE === errors: %d" % _errors)
+	quit(1 if _errors > 0 else 0)
+
+
+func _check(msg: String, cond: bool) -> void:
+	if cond:
+		print("  PASS: " + msg)
+	else:
+		_errors += 1
+		push_error("[FAIL] " + msg)
+
+
+func _p1_team26() -> void:
+	print("\n── P1 Team26 t65：就地開工那一次換手的**當下** move_target ＝ 給的值 ──")
+	# ★★第一版量的是 tick 末與 30 tick 後 —— 負對照（拿掉 transition 的寫入）下照樣綠：
+	#   同一個 tick 裡有別的寫入者把 move_target 改成工地格 ⇒ 舊版的沿用只活在「transition 回傳 → 同 tick 下一個寫入者」之間
+	#   ⇒ 只有換手**當下**看得到它 ⇒ 改用 TaskArbiter._note_handoff 的取樣（同一時刻）
+	seed(SEED)
+	var ws: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % CFG, true)
+	var runner := SimRunner.new()
+	while ws.world.current_tick <= P1_TICK:
+		runner.advance_tick(ws, Vector2i(-1, -1))
+	var hit: Dictionary = {}
+	for r in Probe.samples.get("handoff.transition.ok", []) + Probe.samples.get("handoff.bad", []):
+		var d: Dictionary = r
+		if int(d.get("team", -1)) == P1_TEAM and String(d.get("path", "")) == "transition":
+			hit = d
+	var site: HexTileData = ws.world.tiles.get(P1_SITE.x * 1000 + P1_SITE.y)
+	print("   Team%d 那一次 transition 換手 ＝ %s" % [P1_TEAM, str(hit)])
+	print("   工地 %s ct=%s target=%s" % [str(P1_SITE), str(site.construction_team_id) if site != null else "-",
+		str(site.construction_target) if site != null else "-"])
+	_check("★★母體地板：Team%d 在 t%d 真的經 transition 換成建設、工地 ct ＝ %d" % [P1_TEAM, P1_TICK, P1_TEAM],
+		not hit.is_empty() and int(hit.get("tick", -1)) == P1_TICK and String(hit.get("task", "")) == TeamData.TASK_BUILD
+		and site != null and site.construction_team_id == P1_TEAM)
+	var mt: Vector2i = hit.get("move_target", Vector2i(-9, -9))
+	_check("★★★P1 換手當下 move_target ∈ {%s, (-1,-1)} 且 ＝ 給的值（%s，給 %s）" % [str(P1_SITE), str(mt), str(hit.get("given", "?"))],
+		(mt == P1_SITE or mt == Vector2i(-1, -1)) and mt == hit.get("given", Vector2i(-9, -9)))
+	_cells_ran.append("P1")
+
+
+func _p2_every_handoff() -> void:
+	print("\n── P2 每一次換手回傳那一刻：move_target ＝ 那一次給的值 ──")
+	seed(SEED)
+	var ws: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % CFG, true)
+	var runner := SimRunner.new()
+	for _i in range(P2_TICKS):
+		runner.advance_tick(ws, Vector2i(-1, -1))
+	var rows: Array = []
+	for path in ["try_set", "transition", "release"]:
+		var ok: int = int(Probe.counts.get("handoff.%s.ok" % path, 0))
+		var bad: int = int(Probe.counts.get("handoff.%s.bad" % path, 0))
+		rows.append([path, ok, bad])
+		print("   %-10s ok %d｜bad %d" % [path, ok, bad])
+	var bads: Array = Probe.samples.get("handoff.bad", [])
+	if not bads.is_empty():
+		print("   壞的取樣：%s" % str(bads.slice(0, 5)))
+	_check("★母體地板：try_set 換手 ≥ 1（%d）" % int(rows[0][1] + rows[0][2]), int(rows[0][1]) + int(rows[0][2]) >= 1)
+	_check("★母體地板：transition 換手 ≥ 1（%d）" % int(rows[1][1] + rows[1][2]), int(rows[1][1]) + int(rows[1][2]) >= 1)
+	for r in rows:
+		_check("★★★P2 %s 的 bad ＝ 0（%d）" % [String(r[0]), int(r[2])], int(r[2]) == 0)
+	_cells_ran.append("P2")
+
+
+func _p3_direct_writes() -> void:
+	print("\n── P3 `current_task = ` 的直接寫入（反向掃，scripts/simulation）──")
+	var hits: Array = []
+	var dir := DirAccess.open("res://scripts/simulation")
+	var files: Array = dir.get_files()
+	for sub in dir.get_directories():
+		for f2 in DirAccess.open("res://scripts/simulation/" + String(sub)).get_files():
+			files.append(String(sub) + "/" + String(f2))
+	for f in files:
+		if not String(f).ends_with(".gd"):
+			continue
+		var text: String = FileAccess.get_file_as_string("res://scripts/simulation/" + String(f))
+		var i: int = 0
+		for l in text.split("\n"):
+			i += 1
+			var code: String = l.split("#")[0]
+			if code.contains("current_task = ") and not code.contains("current_task == "):
+				hits.append("%s:%d" % [f, i])
+	print("   命中 %d：%s" % [hits.size(), str(hits)])
+	var outside: Array = hits.filter(func(h): return not String(h).begins_with("task_arbiter.gd"))
+	print("   task_arbiter.gd 以外 %d：%s" % [outside.size(), str(outside)])
+	_check("★母體地板：真的掃到寫入（%d）" % hits.size(), hits.size() >= 1)
+	_cells_ran.append("P3")

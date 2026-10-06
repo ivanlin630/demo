@@ -194,6 +194,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		if Probe.enabled: _note_task_lost(team, "higher", new_task, "try_set")
 		team.current_task = new_task
 		team.move_target = move_target
+		if Probe.enabled: _note_handoff(team, "try_set", move_target)
 		team.task_priority = priority
 		team.task_reason = _source
 		team.task_start_tick = state.world.current_tick
@@ -210,6 +211,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			and team.task_reason.trim_prefix("defy_") in ENGINE_SOURCES:
 		if new_task == team.current_task:
 			team.move_target = move_target   # A1a: 同 task 但新 target（換更好市場/新 prey 位）→ 手跟腦更新目標
+			if Probe.enabled: _note_handoff(team, "try_set", move_target)
 			return true   # 不重蓋 task_start_tick（單源，timeout 不歸零）；move_target 更新無關 timeout
 		if Probe.enabled and team.current_task == TeamData.TASK_TRADE:
 			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])   # 漏斗站4 parity
@@ -221,6 +223,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		if Probe.enabled: _note_task_lost(team, "same_level", new_task, "try_set")
 		team.current_task = new_task
 		team.move_target = move_target
+		if Probe.enabled: _note_handoff(team, "try_set", move_target)
 		team.task_priority = priority
 		team.task_reason = _source
 		team.task_start_tick = state.world.current_tick
@@ -239,6 +242,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			if Probe.enabled: _note_task_lost(team, "defy", new_task, "try_set_defy")
 			team.current_task = new_task
 			team.move_target = move_target
+			if Probe.enabled: _note_handoff(team, "try_set", move_target)
 			team.task_priority = priority
 			team.task_reason = "defy_" + _source
 			team.task_start_tick = state.world.current_tick
@@ -353,6 +357,7 @@ static func release(team: TeamData) -> void:
 	if Probe.enabled: _note_convoy_rewrite(team, "release", TeamData.TASK_IDLE)
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
+	if Probe.enabled: _note_handoff(team, "release", Vector2i(-1, -1))
 	team.task_priority = 0
 	team.flee_from_pos = Vector2i(-1, -1)   # flee 位移根治：清逃離位（避 stale 殘留）
 	# ★★★同一條紀律漏了一個欄位（systems 2026-09-02）：上面那行的註解就寫著「避 stale 殘留」，
@@ -370,7 +375,14 @@ static func release(team: TeamData) -> void:
 # 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）。
 # A1a：蓋 task_start_tick（與 try_set 同源）——否則 transition 進場的 task（如 PRODUCE）
 # 拿 stale 起算，timeout 檢查派出即秒殺（W2 TRADE 漏斗定罪過同型 bug）。
-static func transition(state: WorldState, team: TeamData, new_task: String, priority: int, _source: String = "transition") -> void:
+# ══ ★★★A4「目的地屬任務」（spec 2026-10-06 a4-a-target-belongs-to-its-task）═════════════════════
+#   ★move_target 是**當前任務的附屬狀態**，不是隊的 ⇒ 換手時由新任務重給或清空，**禁沿用**
+#   ★舊版 transition 只改 task／priority／reason／start_tick、完全不碰 move_target
+#     ⇒ 實測（fp 世界 warring_states seed 20260922，t65）：Team26 就地開工升級 workshop（工地在腳下 (22,4)），
+#       而它帶著前一段留下的 move_target (20,6)（一格沒有工程的地）⇒ 帶著「建設」走離自己的工地
+#   ★★move_target **必填、不給 default**（同 record_driver 的 kind：default 只會讓下一個忘記的人靜默通過）
+#     ⇒ 每個呼叫點自己決定：新任務有目的地就傳那個，沒有就傳 Vector2i(-1, -1)
+static func transition(state: WorldState, team: TeamData, new_task: String, priority: int, move_target: Vector2i, _source: String = "transition") -> void:
 	# ★arbiter 後門根治（手不聽腦，team16 凍死）：transition 舊為無條件 raw 覆寫繞 arbiter → 外部低 prio
 	# 呼叫（defection「等待新領主」@AMBIENT）clobber 引擎剛派的 survival@80 + 繞免疫 → crisis 永不 fire。
 	# 補齊三 guard（對齊 try_set 的 current_task 寫入不變量）：擋「外部 in-place stomp active emergency」。
@@ -389,6 +401,8 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 	team.task_priority = priority
 	team.task_reason = _source
 	team.task_start_tick = state.world.current_tick
+	team.move_target = move_target   # ★A4：目的地跟著任務走（三道守衛擋下時不寫 —— 任務沒換，目的地也不動）
+	if Probe.enabled: _note_handoff(team, "transition", move_target, state.world.current_tick)
 
 
 # 抗命判定：確定性，無 RNG。desire > obedience + 0.3 → 抗命
@@ -400,3 +414,18 @@ static func _defiance_check(leader: PersonData) -> bool:
 		+ float(leader.values.get("野心", 0.5)) * 0.5 \
 		+ leader.stress * 0.3   # 壓抑累積 → 越憋越想反
 	return desire > obedience + 0.3
+
+
+# ══ ★A4 P2：換手**回傳那一刻**取樣 —— 不等 tick 結束（同 tick 二次換手會比錯對象）══════════════════════
+#   ★純觀測（Probe-gated、零 RNG、不寫 state）：move_target 必須 ＝ 這一次呼叫給的值
+#   ⇒ 計數 handoff.<path>.ok／.bad；壞的取樣（cap 32）
+static func _note_handoff(team: TeamData, path: String, given: Vector2i, tick: int = -1) -> void:
+	var ok: bool = team.move_target == given
+	Probe.bump("handoff.%s.%s" % [path, "ok" if ok else "bad"])
+	var row: Dictionary = {"team": team.team_id, "path": path, "given": given,
+		"move_target": team.move_target, "task": team.current_task, "tick": tick}
+	if not ok:
+		Probe.bump_sample("handoff.bad", row, 32)
+	elif path == "transition":
+		# ★transition 換手稀少（3000 tick 才 2 次）⇒ 好的也取樣：P1 要對準某一次換手的**當下**
+		Probe.bump_sample("handoff.transition.ok", row, 64)

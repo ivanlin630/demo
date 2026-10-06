@@ -11587,7 +11587,7 @@ func _test_arbiter_release_transition() -> void:
 	var t := TeamData.new(); t.team_id = 0
 	state.teams[0] = t
 	TaskArbiter.try_set(state, t, "安頓", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH)
-	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))
 	assert(t.current_task == TeamData.TASK_PRODUCE and t.task_priority == 10)
 	TaskArbiter.release(t)
 	assert(t.current_task == TeamData.TASK_IDLE and t.task_priority == 0)

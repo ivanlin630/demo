@@ -2979,7 +2979,7 @@ func _begin_village_relocate(state: WorldState, village: TeamData, target_pos: V
 	TaskArbiter.release(village)
 	# ★遷村 lifecycle 轉換（同 _convert_to_resident/establish_crude_camp 生命週期 transition；brain=決策層 relocate_value+從抗+閾、
 	#   此為 hand 執行）。★constitution taskarbiter 硬凍(無 gate-ok 豁免)→呈報 systems bless baseline(74→75、legit 新機制)。
-	TaskArbiter.transition(state, village, TeamData.TASK_MIGRATE, TaskArbiter.PRIO_SURVIVAL, "relocate")
+	TaskArbiter.transition(state, village, TeamData.TASK_MIGRATE, TaskArbiter.PRIO_SURVIVAL, target_pos, "relocate")   # A4：遷村目標
 	village.task_reason = "relocate"
 	village.move_target = target_pos
 	if Probe.enabled: Probe.bump("relocate.started")
@@ -5670,7 +5670,7 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		})
 	# release-first：zombie 現任常 RETURN_HOME survival@80，先 release→IDLE@0 過 transition guard，再 set BUILD（正當復工退場）。
 	TaskArbiter.release(worker)
-	TaskArbiter.transition(state, worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH, tile.tile_pos)   # A4：復工那一格
 	worker.move_target = tile.tile_pos
 	print("[Infra] Team%d 復工 at (%d,%d)%s" % [worker.team_id,
 		tile.tile_pos.x, tile.tile_pos.y,
@@ -7853,7 +7853,9 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	var stand: bool = stand_score > flee_score
 	# 起義 = PRIO_THREAT (70)：反抗行為，玩家命令 (60) 壓不住；被擋（combat lock）→ 不執行後續副作用
 	if stand:
-		if not TaskArbiter.try_set(state, team, TeamData.TASK_HOLD, team.move_target,
+		# ★A4：同任務（已在守）才沿用目的地；換任務 ⇒ 起義＝就地守 ⇒ (-1,-1)（禁沿用前一個任務的目的地）
+		if not TaskArbiter.try_set(state, team, TeamData.TASK_HOLD,
+				team.move_target if team.current_task == TeamData.TASK_HOLD else Vector2i(-1, -1),
 				TaskArbiter.PRIO_THREAT, "uprising"):
 			return
 	else:
@@ -7981,7 +7983,7 @@ func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: St
 	if a_score >= b_score and a_score >= c_score:
 		print("[Defection] Team%d path A: 留 faction (原因=%s)" % [team.team_id, reason])
 		# faction_id 不變，task=待命新領主（隨時可被高層蓋 → AMBIENT 就地轉換）
-		TaskArbiter.transition(state, team, "等待新領主", TaskArbiter.PRIO_AMBIENT)
+		TaskArbiter.transition(state, team, "等待新領主", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))   # A4：等待＝不走（舊版沿用前一個任務的目的地）
 	elif b_score >= c_score:
 		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
 		var strong_id: int = _find_strong_neighbor(state, team)
