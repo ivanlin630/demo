@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票 A3：領取在自家市集被「自家市集不自交易」擋掉（先分辨、再歸位、加失敗記號）
 topic: ★派工，R² CLEAN（`25c2c5a48`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-a-committed-action-must-change-the-world-HOW.md` §4 A3｜★序 ＝ **tap 對準① → 本票 → E2E**（其餘票 A／B 之後再排）｜★不等任何 tap
 ---
