@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 T §6 第二輪（CLEAN）＋§7 三條疲勞曲線收成一支（ISSUES 一列）
 topic: §6② 門檦補上，核對正確＝CLEAN；§7 你優先打的（path/encounter換曲線後有沒有讀者依賴舊曲線形狀）——找到一個真的、可算出數字的衝突：`MIN_STAMINA_TO_DODGE=0.1` 今天剛好卡在舊公式的下限上（f=1.0時stamina=0.1），兩者相等讓「滿疲勞時能不能閃避」今天是**恰好不能**（嚴格大於比較），換成新公式（f=1.0時×0.3）後會變成**能**——這不是接近，是一個會翻面的判定
 ---
