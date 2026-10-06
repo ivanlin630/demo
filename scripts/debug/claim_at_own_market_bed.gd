@@ -9,14 +9,16 @@ extends SceneTree
 # ★為什麼用佈置不用自然樣本：seed 1337、30 天的世界裡沒有任何隊「承諾領取並抵達自家市集」
 #   （Team14 那筆卡住的待領，是因為它從沒選領取 —— 實測選領取 0 tick，修改前後 [Claim] 事件逐行相同）
 #
-# 格：P1 自家市集：承諾領取＋抵達 ⇒ 那個種類（material）必增、待領清空
+# 格：P1 自家市集：承諾領取＋抵達 ⇒ 那個種類（material）必增、待領清空、★領完被 release（latch 不再）
 #     P2 別人的市集：照舊領得到（不被這次搬動弄壞）
 #     P3 失敗記號：承諾領取、到場落空 ⇒ recent_failures 有「領取|<tile_id>」且對那一格折價 < 1；
 #        ★反向：領到了 ⇒ 沒有那一筆；★反向二：沒承諾領取（路過）⇒ 落空也不記
+#     P4 ★非領取的 option 帶 TRADE 抵達自家市集 ⇒ **不** release、任務照舊（systems 裁 (B)：
+#        拆閘會讓它們全被 release —— world-fp 實測唯一實例 Team40，逃跑換貿易時沿用了自家目的地）
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P1", "P2", "P3"]
+const EXPECTED_CELLS: Array = ["P1", "P2", "P3", "P4"]
 const AMT: float = 7.0
 
 
@@ -25,6 +27,7 @@ func _initialize() -> void:
 	_p1_own_market()
 	_p2_other_market()
 	_p3_failure_marker()
+	_p4_non_claim_option_not_released()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(String(c)):
@@ -98,6 +101,9 @@ func _p1_own_market() -> void:
 	print("   material %.1f → %.1f｜待領剩 %d 筆" % [before, after, tile.pending_claims.size()])
 	_check("★★★P1 material 必增 %.1f（%.1f → %.1f）" % [AMT, before, after], is_equal_approx(after - before, AMT))
 	_check("★★P1 那筆待領被清掉", tile.pending_claims.is_empty())
+	# ★★latch：承諾領取、到了、領完 ⇒ 必須被 release（否則它領完還卡在 TASK_TRADE）
+	print("   領完之後 task ＝ %s" % str(team.current_task))
+	_check("★★★P1 領完被 release（task 不再是 TRADE：%s）" % str(team.current_task), team.current_task != TeamData.TASK_TRADE)
 	_cells_ran.append("P1")
 
 
@@ -175,3 +181,21 @@ func _p3_failure_marker() -> void:
 	print("   (c) 沒承諾領取：recent_failures 有那一筆 ＝ %s" % str(team3.recent_failures.has(k3)))
 	_check("★★P3(c)【反向】沒承諾領取 ⇒ 落空不記", not team3.recent_failures.has(k3))
 	_cells_ran.append("P3")
+
+
+func _p4_non_claim_option_not_released() -> void:
+	print("\n── P4 非領取的 option 帶 TRADE 抵達自家市集 ⇒ 不 release ──")
+	var ws: WorldState = _mk_world()
+	var pick: Array = _pick(ws, true)
+	if pick.is_empty():
+		_check("★母體地板：找得到有主的市集格", false)
+		_cells_ran.append("P4")
+		return
+	var tile: HexTileData = pick[0]
+	var team: TeamData = pick[1]
+	_stage(team, tile, "survival")   # ★Team40 的形狀：option 是 survival 標籤、task 是 TRADE、站在自家市集
+	SimRunner.new()._step3c_read_market_board(ws, [team.team_id])
+	print("   option＝survival、task＝TRADE 抵達自家市集之後 task ＝ %s" % str(team.current_task))
+	_check("★★★P4 不 release（task 仍是 TRADE）", team.current_task == TeamData.TASK_TRADE)
+	_check("★★P4 也沒記落空（不是承諾領取）", not team.recent_failures.has(FailureMemory.key("領取", str(tile.tile_id))))
+	_cells_ran.append("P4")

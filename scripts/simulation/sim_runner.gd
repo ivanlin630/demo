@@ -854,10 +854,19 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 		# unified-commerce M2：TRADE 隊到市集 outpost → market-as-place 到場 resolver（owner-mediated，免賣方在場）。
 		if _t.current_task == TeamData.TASK_TRADE:
 			var _mt: HexTileData = state.world.tiles.get(_t.tile_pos.x * 1000 + _t.tile_pos.y)
-			# ★★票 A3：入口**不再**排除自家市集 —— 舊版這裡多一道 `outpost_owner != _t.team_id`
-			#   ⇒ 自家市集根本進不了 resolver ⇒ 函式內把領取搬到「不自交易」之前也零作用（spec 只讀了函式本體）
-			#   ⇒ 「不自交易」只留**一處**：resolver 自己的早返回（領取之後）—— 兩處同一條規矩會漂
-			if _mt != null and _mt.outpost_level > 0:
+			# ══ ★★★票 A3：自家市集另開一個分支 —— 只做「領取＋落空記號」，不進交易 resolver（systems 裁 (B)）══════
+			#   ★舊版自家市集被這裡的 owner 閘整個擋掉 ⇒ 待領在自己市集的隊**永遠領不到**（resolver 裡搬順序也進不來）
+			#   ★★為什麼不直接拆閘：拆了會讓**任何**帶 TRADE 抵達自家市集的隊都走到下面的 release
+			#     （實測 world-fp 變：唯一實例是 Team40——逃跑換貿易時 move_target 沒重設、沿用了自家目的地；跟領取無關）
+			#   ★★★只有承諾「領取」才 release：它的目的就是到這裡領，到了就是完成
+			#     ⇒ 否則它領完還卡在 TASK_TRADE（latch）；其他 option 照舊不碰
+			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner == _t.team_id:
+				InteractionSystem.claim_on_arrival(state, _t, _mt)
+				if String(_t.current_option) == "領取" \
+						and (_t.move_target == Vector2i(-1, -1) or _t.tile_pos == _t.move_target):
+					Probe.bump("trade.release_at_dest.claim_own")
+					TaskArbiter.release(_t)
+			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner != _t.team_id:
 				_interaction_system._resolve_market_at_outpost(state, _t, _mt)
 				# 到市場（arrived＝到 dest）→ 交易畢 release 重評（避免 TASK_TRADE latch 卡死市集不再 fire）。
 				# 續有需求→下輪 re-dispatch 再赴市場＝連續交易循環（非一次凍結）。

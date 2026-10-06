@@ -933,21 +933,9 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	#   那正是本專案有前科的【手不聽腦】（committed 求生卻不 dispatch 的同族，只是這次在下游）。
 	#   ★★而它掛在【到場】這一刻：訪客站上這個市集 ⇒ 結清他自己的待領資產。
 	#   ★★★紅線的另一半：領取【必須是本人到場】—— 而這一段就是「不在場不給」的執行證明。
-	# ══ ★★★票 A3：領取【在「自家市集不自交易」之前】—— 執法點歸位（藍圖裁 7c75aa27a，不開例外）══════
-	#   ★舊版這段排在早返回之後 ⇒ 待領落在**自己的**市集就永遠領不到
-	#   ★★真樣本（seed 1337、30 天）：Team14 一筆 material 5.0 在自家市集 (4,6)，day 20 留到 day 30
-	#   ★「不自交易」管的是**交易**，領回自己的待領不是交易 ⇒ 規矩沒錯，是位置錯
-	var claimed: bool = _claim_pending_here(state, visitor, tile)
-	# ══ ★★★票 A3：「領取」到場而這一格一筆都沒領到 ⇒ 執行失敗，不准靜默（執行失敗反饋鐵律）═══════
-	#   ★形狀照 A2 已在用的那一條（`order_system.gd` 買單到期：FailureMemory.record(動詞, 目標, ttl, reason)）
-	#     ⇒ 一種事件、帶動詞與原因 ⇒ 下輪「領取」對**這一格**折價（OPTION_FAIL_KEY 的 ctx:pending_claim_tile_id）
-	#   ★只在**承諾的是領取**時記：路過市集（貿易、行軍）沒東西可領不是失敗
-	#   ★TTL ＝ ORDER_LIFETIME：待領資產就是掛單成交／到期產生的，它的自然週期就是訂單壽命（相對錨定）
-	#   ★劣勢非失效：只折價、不 T0 喚醒（同買單到期那一條）
-	#   ★★這一格只管「到場落空」；「逾時沒到」需要承諾起點欄位，另議（交件信寫明）
-	if not claimed and String(visitor.current_option) == "領取":
-		FailureMemory.record(state, visitor, "領取", str(tile.tile_id), OrderSystem.ORDER_LIFETIME,
-			"claim_arrived_nothing")
+	# ★票 A3：領取＋到場落空記號 ＝ `claim_on_arrival`（入口的自家市集分支也呼同一支，產生者只有一份）
+	#   ★排在「自家市集不自交易」之前：那條規矩管交易，領回自己的待領不是交易
+	claim_on_arrival(state, visitor, tile)
 	var owner_id: int = tile.outpost_owner
 	if owner_id == visitor.team_id:
 		return false   # 自家市集不自交易
@@ -1065,6 +1053,21 @@ static func add_pending_claim(tile: HexTileData, kind: String, res: String, amt:
 #   ★款 ⇒ 進 `team.resources["coin"]`；貨 ⇒ 進 `team.resources[res]`
 #   ★★而【逐筆對帳】：交出去的量 == 條目上的量（零蒸發），★★★而條目【清乾淨】不留 0 額幽靈
 #     —— 留 0 額條目會讓 `pending_claims` 越積越長，而 `audit_escrow`/腦欄位都要掃它。
+# ══ ★★★票 A3：到場領取＋落空記號（唯一一份；resolver 與 sim_runner 入口的自家市集分支共用）═══════════
+# ★回「這一格這次有沒有領到東西」
+# ★落空記號：承諾「領取」而這一格一筆都沒領到 ⇒ 執行失敗，不准靜默（執行失敗反饋鐵律）
+#   ·形狀照 A2 已在用的那一條（`order_system.gd` 買單到期：FailureMemory.record(動詞, 目標, ttl, reason)）
+#   ·只在**承諾的是領取**時記：路過市集（貿易、行軍）沒東西可領不是失敗
+#   ·TTL ＝ ORDER_LIFETIME：待領資產就是掛單成交／到期產生的，它的自然週期就是訂單壽命（相對錨定）
+#   ·劣勢非失效：只折價、不 T0 喚醒（同買單到期那一條）
+#   ·★只管「到場落空」；「逾時沒到」不在本票（systems 裁 (c)）
+static func claim_on_arrival(state: WorldState, visitor: TeamData, tile: HexTileData) -> bool:
+	var claimed: bool = _claim_pending_here(state, visitor, tile)
+	if not claimed and String(visitor.current_option) == "領取":
+		FailureMemory.record(state, visitor, "領取", str(tile.tile_id), OrderSystem.ORDER_LIFETIME,
+			"claim_arrived_nothing")
+	return claimed
+
 # ★回「這一格這次有沒有領到東西」（票 A3：呼叫端據此記「到場落空」）
 static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
 	if tile.pending_claims.is_empty():
