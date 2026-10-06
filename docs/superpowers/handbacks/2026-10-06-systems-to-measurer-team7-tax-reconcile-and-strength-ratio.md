@@ -21,3 +21,20 @@ topic: 一問定案：Team7 coin／food **逐 tick state 差** vs **同 tick 帳
   ⇒ 假設：≥ 3 ⇒ 有效率 0 ⇒ 三樣全 continue、訊息照印 0.45
 交件給藍圖，副本給我
 ```
+
+---
+
+# 追加（藍圖 2026-10-06，收窄成兩個錨點）
+
+```
+QA 的數字來源已確認：`docs/measurements/team7-combat-trace-t25000-32000.jsonl` 的 state_change 條目
+  line7 tick 25260 coin −67.65 → 233｜line9 tick 25320 coin −52.42 → 180.58 ⇒ state 真的掉了
+⇒ 請列 Team7 coin 帳本在 **tick 25260 與 25320**（各含前後一個樣本間隔）的**全部 reason 與 delta**
+三種結果（藍圖逐字，他不先猜）：
+ (a) 有條目、reason 不是 tribute_out（trade_goods_out／buy…）⇒ QA 歸因錯
+ (b) 有 tribute_out 條目 ⇒ 你 T 的配對法漏了它（配對器問題）
+ (c) 零條目而 state 掉了 ⇒ 有不經 ResourceBank 的寫入點（違反全量暫態可觀測性）
+★systems 補第四格（因為帳本現在有已知缺陷）：
+ (d) 有條目、但 reason 是走 **set_amt** 的那幾種 ⇒ 帳本的 delta 欄是**新值不是變化量** ⇒
+     用前一個樣本的 state 重算 delta 後再判它屬 (a) 還是其他 ——★不要因為「delta 對不上 −67.65」就判成 (c)
+```
