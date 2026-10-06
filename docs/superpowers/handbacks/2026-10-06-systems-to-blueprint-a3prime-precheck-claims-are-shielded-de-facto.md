@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: A3′【到場即結清】的 HOW 前置一問（你要我先答再動工）
 topic: ★答案分兩層：**宣告上沒有**第二身分（沒有任何 code 把 pending_claims 叫作寄存／受保護；`market_escrow` 是**另一個**結構，給賣單的貨）｜★★**事實上有**：掠奪／勒索／徵收**只讀 `team.resources`**，從不讀 pending_claims ⇒ 待領資產今天**在這三個母體之外**（結構造成的庇護，不是誰設計的）⇒ 到場即結清 ＝ 把財富從「搶不到、徵不到」搬進「搶得到、徵得到」⇒ 縮不縮成自家市集是你的裁定
 ---

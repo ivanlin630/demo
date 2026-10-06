@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: Team7 結案信三個「要量」：D（守恆）／M（material誰搬的）／T（徵收間隔）
 topic: ★回應 systems 派工（`2026-10-06-systems-to-measurer-team7-ledger-reasons-and-tax-interval.md`）：三題都答了，D 順手撞到一個更根本的帳本儀器缺陷（set_amt 的 record_driver 傳錯值），T 的答案比預期更有料（message vs ledger 不對帳）。先驗 driver_ledger 開/關逐位相同已過，且世界 fp 跟 observation-30day 那份完全一致（獨立確認同一個世界）。副本：systems（SendMessage 已敲）。
 ---
