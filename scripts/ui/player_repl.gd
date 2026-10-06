@@ -177,6 +177,19 @@ static func keycode_for(token: String) -> int:
 	return -1
 
 
+# ══ ★★★按一個鍵的**唯一**實作（REPL 與終端 E2E 床共用；E2E spec 2026-10-06，systems 裁）══════════════
+# ★走**真玩家那一條路**：`_input(event)` ⇒ 逐模式分派到 `_handle_*_mode(keycode)`
+#   ⇒ dispatch **一行都不複製**（spec §2③「同源」最便宜的形狀）
+# ★★抽出來的理由：E2E 床要送鍵而**不經 socket**（它要讀世界狀態），若在床裡手抄這三行，
+#   「床走的路」與「玩家走的路」就是兩份 —— 兩份會漂，而漂掉的那份是靜默的
+static func press_on(node, kc: int) -> void:
+	var ev: InputEventKey = InputEventKey.new()
+	ev.keycode = kc
+	ev.pressed = true
+	node._input(ev)
+	node._refresh()
+
+
 func _feed(token: String) -> void:
 	if token.strip_edges().to_lower() == QUIT_TOKEN:
 		print("[player-repl] 離開（%s）" % QUIT_TOKEN)
@@ -189,13 +202,7 @@ func _feed(token: String) -> void:
 		print("[player-repl] ✗ 打不出這個鍵：%s（具名鍵：%s｜離開：%s）" % [
 			token, ", ".join(PackedStringArray(NAMED_KEYS.keys())), QUIT_TOKEN])
 		return
-	# ★★走**真玩家那一條路**：`_input(event)` ⇒ 逐模式分派到 `_handle_*_mode(keycode)`
-	#   ⇒ dispatch **一行都不複製**（spec §2③「同源」最便宜的形狀）
-	var ev: InputEventKey = InputEventKey.new()
-	ev.keycode = kc
-	ev.pressed = true
-	_node._input(ev)
-	_node._refresh()
+	press_on(_node, kc)
 	_send_screen()
 
 

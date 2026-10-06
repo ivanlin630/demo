@@ -363,6 +363,21 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 #   換終端 REPL，版面與順序在那張票重新決定 ⇒ 順序的決定權在那張票的 §8）。
 # ★★★若日後要回到語意分組：**重排下面那 12 列**，★**不要加第二份順序清單**
 #   （那正是這一刀殺掉的東西）。
+# ══ ★★★`effect` 欄（終端 E2E spec 2026-10-06 §3）：這個動作**說它會改世界的哪一塊** ══════════════════════
+# ★E2E 床讀這一欄判「說到沒做到」（結果句說成功 ⇒ 這一塊在 A−B 差異裡必須非空）
+#   ⇒ ★單一來源：床**不另抄一份**；畫面上出現過而沒有 effect 的動作 ⇒ 床紅並指名
+# ★只填 10 個 `listed: true`；每一個逐支開 handler 核過它**寫了什麼**（不從動作名推）：
+#   camp                 task            `_action_camp`:736 → TaskArbiter.try_set(TASK_BUILD @腳下)；工程之後才開
+#   confirm_gather_intel belief          `_action_confirm_gather_intel`:1339 → InquirySystem.resolve_inquiry 寫 belief claim
+#                                        （★不是 none_expected：打聽會改附身隊的 belief ⇒ E2E 加讀 query_memory_panel）
+#   establish_faction    faction         `_action_establish_faction_cmd`:936 → establish_faction(:1958) 建勢力
+#   hunt                 resources_self  `_action_hunt`:665 → HuntSystem.hunt_small_game（hunt_system.gd:9）自家食物
+#   hunt_beast           encounter       `_action_hunt_beast`:675 → tile predator_density −1、建野獸隊、init_encounter
+#   leave_loot           encounter_result `_action_leave_loot`:924 → state.last_encounter_result = {}
+#   promote_anon         roster          `_action_promote_anon`:722 → PersonGenerator ＋ add_member（anon → named）
+#   subjugate_enemy      roster_other    `_action_subjugate_enemy`:1125 → InteractionSystem.subjugate_team（收編敗者）
+#   take_loot            resources_both  `_action_take_loot`:905 → ResourceBank.remove(敗者) ＋ add(玩家)
+#   train                resources_self  `_action_train`:691 → coin −TRAIN_COST_COIN（可能升階）
 const ACTION_SHAPE: Dictionary = {
 	"abandon_outpost":         {"target": "none", "listed": false},
 	"accept_encounter":        {"target": "none", "listed": false},
@@ -371,7 +386,7 @@ const ACTION_SHAPE: Dictionary = {
 	"betray_faction":          {"target": "none", "listed": false},
 	"build_facility":          {"target": "none", "listed": false},
 	"build_outpost":           {"target": "none", "listed": false},
-	"camp":                    {"target": "none", "listed": true},
+	"camp":                    {"target": "none", "listed": true, "effect": "task"},
 	"cancel_move":             {"target": "none", "listed": false},  # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
 	#   ★★★`listed: true → false`（systems 裁 2026-10-01）—— ★**不要改回 true**：
 	#     `listed` 的語意逐字是「出現在【自家隊動作區】那一屏」⇒ **畫面就是這個欄位的定義**，
@@ -386,27 +401,27 @@ const ACTION_SHAPE: Dictionary = {
 	"cancel_trade":            {"target": "none", "listed": false},
 	"choose_heir":             {"target": "none", "listed": false},
 	"clear_member_order":      {"target": "none", "listed": false},
-	"confirm_gather_intel":    {"target": "none", "listed": true},
+	"confirm_gather_intel":    {"target": "none", "listed": true, "effect": "belief"},
 	"demand_tribute":          {"target": "team", "listed": false},
 	"demolish_outpost":        {"target": "none", "listed": false},
 	"deposit_to_storage":      {"target": "none", "listed": false},
 	"disband_faction":         {"target": "none", "listed": false},
 	"dispatch_subteam":        {"target": "none", "listed": false},
-	"establish_faction":       {"target": "none", "listed": true},
+	"establish_faction":       {"target": "none", "listed": true, "effect": "faction"},
 	"extort":                  {"target": "team", "listed": false},
 	"extract_treasury":        {"target": "none", "listed": false},
 	"gather_intel":            {"target": "team", "listed": false},
-	"hunt":                    {"target": "none", "listed": true},
-	"hunt_beast":              {"target": "none", "listed": true},
+	"hunt":                    {"target": "none", "listed": true, "effect": "resources_self"},
+	"hunt_beast":              {"target": "none", "listed": true, "effect": "encounter"},
 	"ignore":                  {"target": "team", "listed": false},   # ★具名豁免：不在 `_action_registry`（它在 `execute_action` 更上面就 return）
 	"invite_settle":           {"target": "team", "listed": false},
 	"leave_faction":           {"target": "none", "listed": false},
-	"leave_loot":              {"target": "none", "listed": true},
+	"leave_loot":              {"target": "none", "listed": true, "effect": "encounter_result"},
 	"move_to":                 {"target": "tile", "listed": false},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
 	"offer_surrender":         {"target": "team", "listed": false},
 	"order_faction_member":    {"target": "none", "listed": false},
 	"order_subteam":           {"target": "none", "listed": false},
-	"promote_anon":            {"target": "none", "listed": true},
+	"promote_anon":            {"target": "none", "listed": true, "effect": "roster"},
 	"propose_alliance":        {"target": "team", "listed": false},
 	"recall_subteam":          {"target": "none", "listed": false},
 	"recruit":                 {"target": "team", "listed": false},
@@ -416,13 +431,13 @@ const ACTION_SHAPE: Dictionary = {
 	"set_armed_anon_ratio":    {"target": "none", "listed": false},
 	"set_faction_goal":        {"target": "none", "listed": false},
 	"set_tribute_rate":        {"target": "none", "listed": false},
-	"subjugate_enemy":         {"target": "none", "listed": true},
+	"subjugate_enemy":         {"target": "none", "listed": true, "effect": "roster_other"},
 	"submit_trade_offer":      {"target": "none", "listed": false},
 	"surrender_in_encounter":  {"target": "none", "listed": false},
 	"surrender_pre_encounter": {"target": "none", "listed": false},
-	"take_loot":               {"target": "none", "listed": true},
+	"take_loot":               {"target": "none", "listed": true, "effect": "resources_both"},
 	"trade":                   {"target": "team", "listed": false},
-	"train":                   {"target": "none", "listed": true},
+	"train":                   {"target": "none", "listed": true, "effect": "resources_self"},
 	"upgrade_farming":         {"target": "none", "listed": false},
 	"upgrade_manufacturing":   {"target": "none", "listed": false},
 	"upgrade_outpost":         {"target": "none", "listed": false},
