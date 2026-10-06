@@ -182,12 +182,25 @@ static func keycode_for(token: String) -> int:
 #   ⇒ dispatch **一行都不複製**（spec §2③「同源」最便宜的形狀）
 # ★★抽出來的理由：E2E 床要送鍵而**不經 socket**（它要讀世界狀態），若在床裡手抄這三行，
 #   「床走的路」與「玩家走的路」就是兩份 —— 兩份會漂，而漂掉的那份是靜默的
+#
+# ══ ★★★★【回來的那一屏 ＝ 推進消化完之後的世界】（E2E spec P10；藍圖 2026-10-07 press-is-do）══════════
+# ★舊版：`_input`＋`_refresh` 之後**立刻**回 ⇒ 而 `request_advance()` 只是記一個量，
+#   真正走 tick 的是之後幾幀的 `text_ui_main._process`（每幀最多 `SimBridge.STEP_TICK_BOUND`）
+#   ⇒ 實測（origin/main `6a5b56c7e`，play.py）：送 `x` 立刻回的那一屏仍是「第 1 天 00:00」，
+#     上一次的結果要到**下一次按鍵**才看得到 ⇒ ★玩家畫面永遠落後一步（Space 隔日也一樣）
+# ⇒ 現在：推進中就讓幀跑（`await process_frame` ＝ `_process` 那一個幀鐘），直到 `is_advancing()` 為假
+#   ★不推進的鍵（Esc／換頁／開面板）`is_advancing()` 一開始就是假 ⇒ **不等任何一幀，立刻回**
+#   ★不會卡住（R² 2026-10-07 核過）：事件退出路徑把 remaining 歸零；remaining 每幀單調遞減；
+#     await 與 `_process` 是同一個幀鐘
+# ⇒ ★呼叫端必須 `await PlayerRepl.press_on(...)`（REPL 的 `_feed` 與 E2E 床都是）
 static func press_on(node, kc: int) -> void:
 	var ev: InputEventKey = InputEventKey.new()
 	ev.keycode = kc
 	ev.pressed = true
 	node._input(ev)
 	node._refresh()
+	while node._bridge.is_advancing():
+		await node.get_tree().process_frame
 
 
 func _feed(token: String) -> void:
@@ -202,7 +215,7 @@ func _feed(token: String) -> void:
 		print("[player-repl] ✗ 打不出這個鍵：%s（具名鍵：%s｜離開：%s）" % [
 			token, ", ".join(PackedStringArray(NAMED_KEYS.keys())), QUIT_TOKEN])
 		return
-	press_on(_node, kc)
+	await press_on(_node, kc)
 	_send_screen()
 
 
@@ -213,7 +226,7 @@ func _run_stdin_loop(stdin: FileAccess) -> void:
 		var line: String = stdin.get_line()
 		if line.strip_edges() == "":
 			continue
-		_feed(line)
+		await _feed(line)
 	quit(0)
 
 
@@ -272,6 +285,6 @@ func _run_tcp_loop() -> void:
 				var line: String = buf.substr(0, at)
 				buf = buf.substr(at + 1)
 				if line.strip_edges() != "":
-					_feed(line)
+					await _feed(line)
 		else:
 			await process_frame

@@ -366,22 +366,34 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 # ══ ★★★`effect` 欄（終端 E2E spec 2026-10-06 §3）：這個動作**說它會改世界的哪一塊** ══════════════════════
 # ★E2E 床讀這一欄判「說到沒做到」（結果句說成功 ⇒ 這一塊在 A−B 差異裡必須非空）
 #   ⇒ ★單一來源：床**不另抄一份**；畫面上出現過而沒有 effect 的動作 ⇒ 床紅並指名
-# ★只填 10 個 `listed: true`；每一個逐支開 handler 核過它**寫了什麼**（不從動作名推）：
-#   camp                 task            `_action_camp`:736 → TaskArbiter.try_set(TASK_BUILD @腳下)；工程之後才開
-#   confirm_gather_intel belief          `_action_confirm_gather_intel`:1339 → InquirySystem.resolve_inquiry 寫 belief claim
+# ★自家隊動作 10 個（`listed: true`）＋目標動作 9 個（見下）；每一個逐支開 handler 核過它**寫了什麼**（不從動作名推）：
+#   camp                 task            `_action_camp`:748 → TaskArbiter.try_set(TASK_BUILD @腳下)；工程之後才開
+#   confirm_gather_intel belief          `_action_confirm_gather_intel`:1351 → InquirySystem.resolve_inquiry 寫 belief claim
 #                                        （★不是 none_expected：打聽會改附身隊的 belief ⇒ E2E 加讀 query_memory_panel）
-#   establish_faction    faction         `_action_establish_faction_cmd`:936 → establish_faction(:1958) 建勢力
-#   hunt                 resources_self  `_action_hunt`:665 → HuntSystem.hunt_small_game（hunt_system.gd:9）自家食物
-#   hunt_beast           encounter       `_action_hunt_beast`:675 → tile predator_density −1、建野獸隊、init_encounter
-#   leave_loot           encounter_result `_action_leave_loot`:924 → state.last_encounter_result = {}
-#   promote_anon         roster          `_action_promote_anon`:722 → PersonGenerator ＋ add_member（anon → named）
-#   subjugate_enemy      roster_other    `_action_subjugate_enemy`:1125 → InteractionSystem.subjugate_team（收編敗者）
-#   take_loot            resources_both  `_action_take_loot`:905 → ResourceBank.remove(敗者) ＋ add(玩家)
-#   train                resources_self  `_action_train`:691 → coin −TRAIN_COST_COIN（可能升階）
+#   establish_faction    faction         `_action_establish_faction_cmd`:948 → establish_faction(:1970) 建勢力
+#   hunt                 resources_self  `_action_hunt`:677 → HuntSystem.hunt_small_game（hunt_system.gd:9）自家食物
+#   hunt_beast           encounter       `_action_hunt_beast`:687 → tile predator_density −1、建野獸隊、init_encounter
+#   leave_loot           encounter_result `_action_leave_loot`:936 → state.last_encounter_result = {}
+#   promote_anon         roster          `_action_promote_anon`:734 → PersonGenerator ＋ add_member（anon → named）
+#   subjugate_enemy      roster_other    `_action_subjugate_enemy`:1137 → InteractionSystem.subjugate_team（收編敗者）
+#   take_loot            resources_both  `_action_take_loot`:917 → ResourceBank.remove(敗者) ＋ add(玩家)
+#   train                resources_self  `_action_train`:703 → coin −TRAIN_COST_COIN（可能升階）
+# ★★母體改裁（systems 2026-10-07，spec 58e41cfee）：不是「10 個 listed」，是**畫面上綁了鍵、按得到的所有動作**
+#   ⇒ 目標動作（`─ 動作（` 區、ACTION_DIGITS 綁鍵）9 個也填；未綁鍵的 3 個（乞討／忽略／投降請和）不填（按不到）
+#   attack               encounter       `_action_attack`:862 → _encounter.init_encounter ＋ player_hostile_teams
+#   trade                menu            `_action_trade`:802 → 只寫 player_state.pending_trade_target、回 requires_preview（開交易子選單）
+#   propose_alliance     faction         `_action_propose_alliance`:811 → accept 時 create_faction ＋ _form_alliance
+#   demand_tribute       resources_both  `_action_demand_tribute`:827 → accept 時 DiplomaticAiSystem.apply_tribute_accept（對方 coin → 玩家）
+#   extort               resources_both  `_action_extort`:873 → InteractionSystem.resolve_extortion_direct（interaction_system.gd:1471）搬資源
+#   recruit              menu            `_action_recruit`:883 → 逐字「Always return a menu — never auto-execute」
+#   recruit_anon         roster_other    `_action_recruit_anon`:911 → _recruit_anon_internal（:1859）AnonTierSystem.transfer_proportional(對方→玩家)
+#   gather_intel         belief          `_action_gather_intel`:1338 → 回選題子選單；★effect 掛在選題後那道 confirm_gather_intel（走法要走完子選單）
+#   invite_settle        roster_other    `_action_invite_settle`:1725 → accept 時 InteractionSystem._execute_settlement（interaction_system.gd:1703）改對方 tile／faction
+#   menu ＝ 這道令只打開一個子選單、不改世界 ⇒ 紅二不適用、紅三適用
 const ACTION_SHAPE: Dictionary = {
 	"abandon_outpost":         {"target": "none", "listed": false},
 	"accept_encounter":        {"target": "none", "listed": false},
-	"attack":                  {"target": "team", "listed": false},
+	"attack":                  {"target": "team", "listed": false, "effect": "encounter"},
 	"beg":                     {"target": "team", "listed": false},
 	"betray_faction":          {"target": "none", "listed": false},
 	"build_facility":          {"target": "none", "listed": false},
@@ -402,19 +414,19 @@ const ACTION_SHAPE: Dictionary = {
 	"choose_heir":             {"target": "none", "listed": false},
 	"clear_member_order":      {"target": "none", "listed": false},
 	"confirm_gather_intel":    {"target": "none", "listed": true, "effect": "belief"},
-	"demand_tribute":          {"target": "team", "listed": false},
+	"demand_tribute":          {"target": "team", "listed": false, "effect": "resources_both"},
 	"demolish_outpost":        {"target": "none", "listed": false},
 	"deposit_to_storage":      {"target": "none", "listed": false},
 	"disband_faction":         {"target": "none", "listed": false},
 	"dispatch_subteam":        {"target": "none", "listed": false},
 	"establish_faction":       {"target": "none", "listed": true, "effect": "faction"},
-	"extort":                  {"target": "team", "listed": false},
+	"extort":                  {"target": "team", "listed": false, "effect": "resources_both"},
 	"extract_treasury":        {"target": "none", "listed": false},
-	"gather_intel":            {"target": "team", "listed": false},
+	"gather_intel":            {"target": "team", "listed": false, "effect": "belief"},
 	"hunt":                    {"target": "none", "listed": true, "effect": "resources_self"},
 	"hunt_beast":              {"target": "none", "listed": true, "effect": "encounter"},
 	"ignore":                  {"target": "team", "listed": false},   # ★具名豁免：不在 `_action_registry`（它在 `execute_action` 更上面就 return）
-	"invite_settle":           {"target": "team", "listed": false},
+	"invite_settle":           {"target": "team", "listed": false, "effect": "roster_other"},
 	"leave_faction":           {"target": "none", "listed": false},
 	"leave_loot":              {"target": "none", "listed": true, "effect": "encounter_result"},
 	"move_to":                 {"target": "tile", "listed": false},   # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
@@ -422,10 +434,10 @@ const ACTION_SHAPE: Dictionary = {
 	"order_faction_member":    {"target": "none", "listed": false},
 	"order_subteam":           {"target": "none", "listed": false},
 	"promote_anon":            {"target": "none", "listed": true, "effect": "roster"},
-	"propose_alliance":        {"target": "team", "listed": false},
+	"propose_alliance":        {"target": "team", "listed": false, "effect": "faction"},
 	"recall_subteam":          {"target": "none", "listed": false},
-	"recruit":                 {"target": "team", "listed": false},
-	"recruit_anon":            {"target": "team", "listed": false},
+	"recruit":                 {"target": "team", "listed": false, "effect": "menu"},
+	"recruit_anon":            {"target": "team", "listed": false, "effect": "roster_other"},
 	"refresh_targets":         {"target": "none", "listed": false},
 	"respond_aid_request":     {"target": "none", "listed": false},
 	"set_armed_anon_ratio":    {"target": "none", "listed": false},
@@ -436,7 +448,7 @@ const ACTION_SHAPE: Dictionary = {
 	"surrender_in_encounter":  {"target": "none", "listed": false},
 	"surrender_pre_encounter": {"target": "none", "listed": false},
 	"take_loot":               {"target": "none", "listed": true, "effect": "resources_both"},
-	"trade":                   {"target": "team", "listed": false},
+	"trade":                   {"target": "team", "listed": false, "effect": "menu"},
 	"train":                   {"target": "none", "listed": true, "effect": "resources_self"},
 	"upgrade_farming":         {"target": "none", "listed": false},
 	"upgrade_manufacturing":   {"target": "none", "listed": false},
