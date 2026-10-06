@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端戰鬥區 §3：戰鬥區英文原文＋P5 改判
 topic: R② ＝ **ISSUES，一列**｜★你優先打的：GUI沒有讀者依賴Label文字本身(terminal_e2e_bed的六欄逐字比對是動態互證,語言中立,不受影響)——但真正的風險在資料層："healthy/wounded/critical/severed"與六個部位名是`PersonData.body_parts[part]["status"]`的**實際儲存值**,被health_system/npc_combat_system/player_api_mapper等十餘處用`==`字面比對讀,翻譯只能留在顯示層,不能動這個值；而且已有3份既有中文名表沒被查到,新表的措辭要跟它們一致，不要生出第4種叫法
 ---
