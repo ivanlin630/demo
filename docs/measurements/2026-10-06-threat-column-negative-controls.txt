@@ -143,3 +143,17 @@ ERROR: [FAIL] ★★★沒有手抄的物理常數（60／1440／24；實測 ["6
 === text_ui_layout DONE === errors: 1｜到場點名 10／10
 ERROR: [FAIL] ★★★沒有手抄的物理常數（60／1440／24；實測 ["60"]）
 ```
+
+### 同檔另兩處 `_func_body` 用法：窄化有沒有把它們要守的東西推出窗外（systems 要的，2026-10-06）
+量法：在 text_ui_main.gd（HEAD）上用改前（只認 `
+func `）與改後（`
+func `／`
+static func ` 較早者）兩個截止點各切一次，數非註解命中行
+```
+text_ui_main.gd 中 static func 數 = 10
+func _refresh() -> void:          改前: 窗口 74 行（檔案 737–810）｜_render_screen( 非註解命中行 [792]
+func _refresh() -> void:          改後: 窗口 74 行（檔案 737–810）｜_render_screen( 非註解命中行 [792]
+func _render_screen(pend_txt…    改前: 窗口 10 行（檔案 890–899）｜TextUiView.compose 非註解命中行 [893]
+func _render_screen(pend_txt…    改後: 窗口 10 行（檔案 890–899）｜TextUiView.compose 非註解命中行 [893]
+```
+⇒ 兩處改前改後窗口逐行相同（兩支函式之後下一個簽名都是 `func`），要守的呼叫點都在窗內 ⇒ 不是運氣綠；窄化只改變了 tick_clock 那一處
