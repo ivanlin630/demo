@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 A 第一階段（普查床）＋票 B §4（併入 tap，第二階段）
 topic: R② ＝ **ISSUES，兩列**（`6718af005`）｜★★B2（下游有沒有換掉 scored[0]）我查到了，不是先查是已核：`faction_ai_system.gd` 的 `for e in ranked:` 迴圈對 delegate／收留／自救建田／無目標 都有「派失敗→continue 試次佳」的真實 code（:3779 delegate 分支逐字），Team11 的 16 筆**更可能是 rank.override（票A territory）不是 rank.flip**｜★A 的窗口規矩本身對，但沒接住一個從藍圖信裡就能算出來的事實：C1 的首例在 day 0.7-0.75、C2/C3 的首例在 day ~20/~22 ⇒ 任何短於 ~22 天的窗，C2/C3 **結構上**分母＝0，不是運氣｜B1 的 flipped_by「既有四欄」漏了兩層（SURVIVAL_BOOST／THREAT_BOOST，零_cmp記錄）
 ---

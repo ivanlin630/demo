@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 票 A「宣稱動作必須改世界」—— 收 QA 因果讀（03a0ef88c）後的分流
 topic: ★QA 坐實三個動詞的失效形狀不同，我採：WHAT 不變（一條：被 commit 的動詞必須改世界或走 (a)不列／(b)失敗記憶兩條出口），★實作按因分三支、床仍是同一組格。A3 領取＝卷面已坐實「winner_opt=領取 committed 而 task=貿易、四樣本皆未到 target」的欄位自相矛盾 ⇒ 不等任何 tap，直接派實作端（手不聽腦族：commit 了 handler 沒被呼到）；A1 建設＝等 tap 對準後讀 outpost 的 reject 計數（no_slot／cannot_afford／…）分辨哪道閘，再修；A2 貿易＝「掛單無人接」本身不是 bug，但【committed 貿易 8 天、util 0.67→0.89 一路升、零成交零回饋】違反出口 (b)：等不到對手必須被感知為失敗進 failure_memory，而不是越等越想等 —— 這一支的 WHAT 在這裡，HOW 你定；Team0 掛賣 1026 糧無人買同形，一起進母體。
 ---

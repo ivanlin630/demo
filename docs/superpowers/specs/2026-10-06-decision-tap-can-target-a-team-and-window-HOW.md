@@ -85,8 +85,14 @@ P4 [沒設窗的照舊] 其他 composition 桶（attack／recon／shelter）樣�
 B1 在 `rank_scored_ctx` 的**同一處**（合成完成、排序之後）：若 `scored[0]` 不是原始 util 最高的那個
    ⇒ 記一筆 `rank.flip`：{team, tick, winner, winner_raw, winner_final, raw_top, raw_top_raw, raw_top_final,
      flipped_by: 哪一層讓 raw_top 掉到 winner 之下（persist／coeff／need_weight…，取自既有四欄）}
+   ★R² 打回：「既有四欄」**漏兩層** —— `SURVIVAL_BOOST`／`THREAT_BOOST` 今天**零 `_cmp` 記錄**
+     ⇒ flipped_by 的候選層要含這兩個，且 `_cmp` 也要補記這兩層（否則它們翻了順序也會被記成「以上皆非」）
    ★只讀已算好的值，不重算（不耗 RNG；同 §1 的紀律）
-B2 ★先查（R² 請核）：`scored[0]` 之後有沒有任何下游**換掉** winner（dispatch 失敗、閒人不足、guard）
+B2 ★【已核，R² `6718af005` ISSUES】下游**確實會**換掉 winner：`faction_ai_system.gd` 的 `for e in ranked:` 迴圈
+   對 delegate／收留／自救建田／無目標 都有「派失敗 ⇒ `continue` 試次佳」（`:3779` delegate 分支）
+   ⇒ ★Team11 的 16 筆**更可能是 override 而不是 flip** ⇒ B2 **是本階段的主角**，不是附帶
+   ⇒ ★而 override 就是「列的條件≠做的條件」⇒ 記下來之後，修法屬票 A 的 (a) 出口
+   （原文：`scored[0]` 之後有沒有任何下游換掉 winner —— 先查）
    ⇒ 有 ⇒ 那條路也要記一筆 `rank.override`：{原 winner, 實際做的, 原因}
    ⇒ ★若 Team11 的 16 筆落在 override 而不是 flip ⇒ 交票 A（列的條件要等於做的條件）
 B3 ineligible：候選若因前提不足而不該被選 ⇒ **不列**，或列而帶 `ineligible: <原因>`（機器可讀 enum，不是自由文字）
