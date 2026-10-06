@@ -26,6 +26,7 @@ HB="docs/superpowers/handbacks"
 [ -d "$HB" ] || { echo "[archive] 無 $HB"; exit 0; }
 DRY=0; [ "${1:-}" = "--dry-run" ] && DRY=1
 today="$(date +%Y-%m-%d)"
+_ARCH_LIST=$(mktemp); trap 'rm -f "$_ARCH_LIST"' EXIT   # ★本輪搬了誰（每行一個路徑：舊、新交替）
 moved=0; kept_open=0; kept_today=0
 shopt -s nullglob
 for f in "$HB"/*.md; do
@@ -46,10 +47,38 @@ for f in "$HB"/*.md; do
   if [ "$DRY" = 1 ]; then echo "  would move $bn -> ${dest#$HB/}"; else
     mkdir -p "$dest"
     git mv "$f" "$dest/$bn" 2>/dev/null || mv "$f" "$dest/$bn"
+    printf '%s
+%s
+' "$f" "$dest/$bn" >> "$_ARCH_LIST"   # ★搬了誰就記誰（下面只 commit 這份清單）
   fi
   moved=$((moved+1))
 done
 echo "[archive] 歸檔 ${moved} 封｜保留：open ${kept_open} 封、今天 ${kept_today} 封"
+
+# ★★★【搬完就自己 commit】（systems 2026-10-06 補，血證見下）
+#   ★舊版只 `git mv`、零個 commit ⇒ 277 筆 rename 躺在【共用 main dir 的索引】裡
+#     ⇒ pathspec commit 不會吃到它，★★但 `git merge` 會（merge 不吃 pathspec）
+#     ⇒ 2026-10-06 我差一步就把 277 封歸檔夾帶進一張無關票的 merge commit（a93ff745d 代為落地）。
+#   ⇒ 本體是【搬的人】，它就該是【commit 的人】—— 不留給下一個碰索引的人。
+#   ★只 commit 清單裡的路徑（--pathspec-from-file）⇒ 別人 staged 的東西進不來。
+#   ★走共用的 retry 包裝（鎖爭用是常態；包裝會印「第 N 次才成功」）。
+_commit_rc="skip"
+if [ "$DRY" != 1 ] && [ "$moved" -gt 0 ] && [ -s "$_ARCH_LIST" ]; then
+  git add -A --pathspec-from-file="$_ARCH_LIST" 2>/dev/null   # ★`|| mv` 那條（非 git mv）也要進索引
+  _msg=$(mktemp)
+  printf '信箱歸檔（自動）：%s 封 consumed 且非今日的信 → archive/<月>
+
+熱目錄剩 %s 封｜保留 open %s 封、今天 %s 封
+本 commit 由 handback-archive.sh 自己做（只含它搬的路徑）
+'     "$moved" "$(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ')" "$kept_open" "$kept_today" > "$_msg"
+  bash .claude/hooks/git-commit-retry.sh -q -F "$_msg" --pathspec-from-file="$_ARCH_LIST"
+  _commit_rc=$?
+  rm -f "$_msg"
+  if [ "$_commit_rc" != 0 ]; then
+    echo "[archive] ★★★FAIL：搬了 ${moved} 封而 commit 失敗（rc=${_commit_rc}）⇒ 那批 rename 留在共用索引裡"
+    echo "[archive]   ⇒ ★下一個跑 git merge 的人會把它夾帶進去 —— 先單獨 commit 它（清單：${_ARCH_LIST}）"
+  fi
+fi
 echo "[archive] 熱目錄剩 $(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ') 封"
 
 # ★寫下【它有在跑】的正面證據（2026-09-06）。
@@ -59,5 +88,5 @@ echo "[archive] 熱目錄剩 $(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ') �
 #   ★★★而這個檔只證明【它跑過】；證明【它沒停下來】的是 merge gate `mailbox-size`（>600 就紅）。
 #     兩層缺一層都會再靜默長回去。
 _hot=$(ls "$HB"/*.md 2>/dev/null | wc -l | tr -d ' ')
-printf '%s 搬=%s 熱目錄剩=%s 時間=%s
-' "$(date +%s)" "${moved}" "${_hot}" "$(date +%FT%T)" > .claude/hooks/.archive-last
+printf '%s 搬=%s 熱目錄剩=%s 時間=%s commit_rc=%s
+' "$(date +%s)" "${moved}" "${_hot}" "$(date +%FT%T)" "${_commit_rc}" > .claude/hooks/.archive-last
