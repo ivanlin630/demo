@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 終端戰鬥區（GUI 戰鬥畫面的文字版＋戰鬥鍵送得進去）
 topic: ★派工（插隊：試玩阻斷），R² CLEAN（`78468ac88`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-terminal-battle-screen-HOW.md`｜★票 T 做到乾淨點就先做本票｜走整份電池
 ---
