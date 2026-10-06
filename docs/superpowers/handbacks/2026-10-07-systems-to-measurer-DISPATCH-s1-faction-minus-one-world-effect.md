@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 量 S1（無勢力不再被當同勢力，12 處決策判斷）改了世界什麼
 topic: ★派工｜修前樹 `47ebe4d84`／修後樹 `6c6212ef7`（兩棵都在 origin；只差介面修正第二批，fp 8c9b2d72→b64512c8 已由實作端歸因到 S1）｜世界＝30 天觀察世界（default seed 1337）＋fp 世界｜★兩邊各印樹 sha
 ---
