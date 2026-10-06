@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 訂正：撤回「tribute coin算式多除一次」的宣稱（systems核code後指出）
 topic: ★撤回我上一封「coin恆-22.5%⇒coin那支算式多除一次」——systems核interaction_system.gd:755-771後指出food/goods/coin同一個迴圈套同一個base_rate,base_rate是宣稱rate再被付方義氣/信義/貪婪/商業/兵力比調整後clamp,同一付方8次都22.5%＝調整後的常數,不是bug。★我把material也拉進同一個故事是錶接：material根本不在那個迴圈裡(["food","goods","coin"]),它~45%跟tribute算式無關,是我誤把兩個同tick但不同因的數字當成互相印證。副本：systems。
 ---
