@@ -3,7 +3,7 @@ from: systems
 to: implementer
 status: open
 slice: 票 R 戰時徵用（特別稅改名＋修五件）
-topic: ★派工，R² CLEAN（`786c3e7a2`，三輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-ticket-r-wartime-levy-HOW.md`｜★序 ＝ … → A2 → A1 → **本票** → 節律
+topic: ★★HOLD（2026-10-07 藍圖 22b0d73dd 改裁取額＝決策輸出）：本派工作廢，等新版 R² 後重派，勿照本信動工｜★派工，R² CLEAN（`786c3e7a2`，三輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-ticket-r-wartime-levy-HOW.md`｜★序 ＝ … → A2 → A1 → **本票** → 節律
 ---
 
 ```
