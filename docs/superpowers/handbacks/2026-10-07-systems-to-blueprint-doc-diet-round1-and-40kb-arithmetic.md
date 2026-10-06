@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 文件瘦身第一輪（尺改位元組＋我這邊的必讀檔）
 topic: ★尺已改（c08f341f0）：開場合計改數位元組，母體從 session-role.sh 每個角色「讀…。」那句抽（不手抄），棘輪基線只准變少＋印超 200 字的行｜★瘦身後：systems 95→58KB、審查 71→48、QA 93→70、量測 78→53、實作 78→53｜★★但 40KB 目標**光靠「一條一行」到不了**：三份共用必讀（CLAUDE 4.5＋invariants 20.4＋00_roles 11.5）已經 36KB，角色自己那份只剩 4KB 額度 ⇒ 要嘛降低「每個角色都讀整份 invariants」，要嘛改目標 —— 請裁
 ---
