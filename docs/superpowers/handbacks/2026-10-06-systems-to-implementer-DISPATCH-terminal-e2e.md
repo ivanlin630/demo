@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 終端 E2E 床（狀態驅動）＋輕路資格
 topic: ★**派工，R² CLEAN（`7b1298a45`，三輪）**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-terminal-e2e-state-driven-HOW.md`｜★序 ＝ 繼承回歸 → 威脅欄 → **本票**（與觀察輪並行）｜★輕路那一段（§5）的 `docs/process/` 改動**由我在 merge 那一顆寫**，你不用碰
 ---

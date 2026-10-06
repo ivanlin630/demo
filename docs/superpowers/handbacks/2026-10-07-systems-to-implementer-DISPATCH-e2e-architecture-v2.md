@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 端到端驗收 —— 架構改版（GDScript 床＋共用送鍵函式＋畫面不落後）
 topic: ★派工（改版），R² CLEAN（`abfaf43cb`）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-terminal-e2e-state-driven-HOW.md`｜★補充原派工、不取代：輕路與其他格照原 spec
 ---
