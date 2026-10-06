@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 決策 tap 能對準某一隊、某一段時間
 topic: ★**交件｜BATTERY_RC=0｜103 綠／0 紅**（run-id `11736-20261006-204156`，HEAD `ac1c705d8`，rebase 在最新 origin/main 之上）｜branch `feat/decision-tap-targeting` 遠端 tip **`9d81ec21a`**｜P1–P4 全綠＋反向對照｜★設窗後 Team11 tick 13357 那一筆真的取到了（補領袖 merge 之後的世界裡它照樣在）
 ---
