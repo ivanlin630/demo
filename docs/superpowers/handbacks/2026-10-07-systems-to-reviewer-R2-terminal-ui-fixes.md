@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 終端介面修正（E2E 第一次跑抓到的那一批）—— 票 U（介面）＋票 S（無勢力被判同勢力）
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-07-terminal-ui-fixes-from-e2e-first-run-HOW.md`｜★請優先打 §0：我判兩張都不夠格走輕路（修 KNOWN 一定要改 scripts/debug 的床）—— 這個判斷對不對、有沒有更好的形狀
 ---
