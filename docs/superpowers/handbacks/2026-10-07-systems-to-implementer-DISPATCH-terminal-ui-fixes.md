@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 終端介面修正（E2E 第一次跑抓到的那一批）—— 票 U＋票 S
 topic: ★派工，R² CLEAN（`2a1c9ec74`）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-terminal-ui-fixes-from-e2e-first-run-HOW.md`｜★★插隊（藍圖：用戶第三輪原話痛點排今天最前）：手上帳本 delta 到乾淨點就先做本票 U0→U1→U3(K5)＋U4，其餘與 S1 其後｜走整份電池（不走輕路）
 ---
