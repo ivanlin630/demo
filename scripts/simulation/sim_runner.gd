@@ -583,6 +583,11 @@ func _consume_player_commands(state: WorldState) -> void:
 		#     而它【不是】靠註解說自己有用：P3 用【注入式】對照餵一個回空 msg 的假 handler 點它。
 		var say: String = ("%s：完成" % PlayerCommandApi.describe(name, args)) if why == "" \
 			else ("%s：%s" % [PlayerCommandApi.describe(name, args), why])
+		# ★U1（E3）：ok＝指令有執行、accepted＝對方答應（handler 契約不改）⇒ accepted:false 的那一句
+		#   要帶可辨識的拒絕字樣（詞表唯一一份在 PlayerApiMapper），否則玩家讀到的是一句「成功」
+		if ok and not bool(res.get("payload", {}).get("accepted", res.get("accepted", true))):
+			say = "%s：%s（%s）" % [PlayerCommandApi.describe(name, args), PlayerApiMapper.DECLINED_WORD,
+				why if why != "" else "沒有給原因"]
 		state.command_results.append({
 			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
 			"text": say if ok
@@ -598,7 +603,7 @@ func _refused_text(name: String, args: Dictionary, why: String) -> String:
 	var reason: String = why if why != "" else "沒有給原因"
 	if name == "respond_to_forced":
 		return "%s：%s" % [head, reason]
-	return "%s：被拒絕（%s）" % [head, reason]
+	return "%s：%s（%s）" % [head, PlayerApiMapper.REFUSED_WORD, reason]
 
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置

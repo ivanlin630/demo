@@ -548,6 +548,13 @@ static func tick_clock(tick: int) -> String:
 #   ★★★未知值【不吞】：印「（未知回覆：xxx）」——
 #     `handle_diplomacy_message` 回的是 "accept"／"refuse"／"reject"，
 #     而多一個值的時候我要在畫面上看到它，不是看到一個空字串。
+# ══ ★★★「對方拒絕了」的可辨識字樣 —— **唯一一份**（spec 2026-10-07 terminal-ui-fixes U1，R² 加）════════
+#   ★結果句（`sim_runner._refused_text` 與 accepted:false 那一支）用它組字；終端 E2E 的紅二分類器讀同一份判「被拒」
+#   ⇒ 一處定義兩處讀：文案改了而分類器沒跟上 ⇒ 不可能（沒有第二份可以漂）
+const REFUSED_WORD: String = "被拒絕"      # 指令本身被拒（前置／消費點）
+const DECLINED_WORD: String = "對方拒絕"   # 指令有執行、對方不答應（handler 回 ok:true、accepted:false）
+const REFUSAL_WORDS: Array = [REFUSED_WORD, DECLINED_WORD]
+
 static func diplomacy_reply_label(resp: String) -> String:
 	match resp:
 		"accept":            return "接受"

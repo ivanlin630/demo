@@ -308,11 +308,23 @@ func _process(_delta: float) -> void:
 	#     而下一個人只會遇到其中一種。
 		_events.append({"type": "cmd",
 			"msg": "%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))]})
+		# ★★★U1（spec 2026-10-07 terminal-ui-fixes）：結果句**同時**進 `_feed_rows`（主畫面事件區只印它）
+		#   ★舊版只進 `_events` ⇒ 成功句從來不上畫面（終端 E2E P11：每一道成功的令都只有「已排入」回音）
+		#   ★形狀照 `_log_event`（介面自己講的話）的慣例，來源具名「指令」；成功失敗同一處
+		#   ★時間用結果自己的 tick（同上面世界事件那一份的理由：補「現在」會讓畫面說謊）
+		#   ★不改成讓事件區讀 `_events`（:876 註解：那是另一個區的料，傳了會印兩份）
+		_feed_rows.append({
+			"when": "第 " + PlayerApiMapper.tick_clock(int(r.get("tick", _bridge.get_current_tick()))),
+			"source": "指令",
+			"text": "%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))],
+		})
 		if not bool(r.get("ok", false)):
 			_feedback_line.text = _feedback_text(false, String(r.get("text", "")))
 			_feedback_line.modulate = _feedback_color(false)
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
+	if _feed_rows.size() > 100:
+		_feed_rows = _feed_rows.slice(_feed_rows.size() - 100)
 
 	var move_target: Vector2i = _bridge.get_player_move_target()
 	if move_target == Vector2i(-1, -1) and _input_bar.text.begins_with("移動中"):
@@ -2142,7 +2154,10 @@ func _build_interact_str() -> String:
 		if items.size() > 9:
 			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_target_page + 1, t_pages])
 
-	lines.append("── [T/Esc]關閉 ──")
+	# ★U4（spec 2026-10-07 terminal-ui-fixes）：頁腳寫的鍵＝按下去會做的事
+	#   ★舊版寫「[T/Esc]關閉」，而互動模式裡字母鍵歸強制回應獨佔（不變量 #10）⇒ 按 T 印「現在沒有要回應的事件」、面板不關
+	#   ⇒ 改頁腳不改行為：讓 T 在這裡關面板，就是讓同一個字母鍵在同一個模式有兩個意思
+	lines.append("── [Esc]關閉 ──")
 	return "\n".join(lines)
 
 # `_handle_faction_mode` 綁了哪些鍵。★★★它與那些分支【緊鄰】而不是放在檔頭：

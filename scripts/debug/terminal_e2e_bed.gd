@@ -17,7 +17,7 @@ extends SceneTree
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7"]
+const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4"]
 
 const SEED_A: int = 1337
 const SEED_B: int = 4242
@@ -49,6 +49,8 @@ var KNOWN: Dictionary = {
 		+ "handler 回 ok:true（『他說了些事情（記下 0 筆…）』／『他也不知道』）而那句完成句不上畫面",
 	"P3|確認打聽": "同上（自家隊動作區的「確認打聽」重送上一次的選題）：ok:true、belief 不變、畫面只有回音",
 	"P10|攻擊": "按「攻擊」回來那一屏的頂列時間比世界慢 1 tick（實測畫面 35／世界 36）",
+	"E2|提議同盟": "兩支都沒有勢力（faction_id −1）的隊：「提議同盟（不可：對方已經和你同一個勢力）」⇒ −1 == −1 被當同勢力（票 S1）",
+	"E4|記號": "強制回應標籤帶 ✓／✗ 前綴（forced_label 自己加的；CP950 印不出來像一格空白）（U5）",
 	"STUCK|攻擊": "攻擊之後（交戰中）互動面板 Esc 關不掉：連按 6 次仍在面板、世界還被推了 1 tick",
 }
 var _known_hit: Dictionary = {}
@@ -76,6 +78,9 @@ func _initialize() -> void:
 		(r1["lines"] as Array) != (r3["lines"] as Array))
 	_cells_ran.append("P5")
 	await _p7_observation(r1)
+	await _footer_keys_do_what_they_say()
+	await _e2_no_faction_alliance()
+	await _e4_forced_label_marks(r1)
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -83,7 +88,11 @@ func _initialize() -> void:
 		if not _cells_ran.has(String(c)):
 			missing.append(String(c))
 	_check("★到場點名：%d／%d（缺：%s）" % [_cells_ran.size(), EXPECTED_CELLS.size(), str(missing)], missing.is_empty())
-	print("\n=== terminal_e2e DONE === errors: %d" % _errors)
+	# ★★U0（spec 2026-10-07 terminal-ui-fixes，不變量 #11）：判決行要說出它**排除了什麼**
+	#   ★KNOWN 是「本來會紅的格被登成已知」⇒ 只印 errors: 0 ＝ 讀卷面的人看到全綠（同 ui-flow「9 跑紅 4」那一病）
+	var excluded: Array = _known_hit.keys()
+	excluded.sort()
+	print("\n=== terminal_e2e DONE === errors: %d｜已知紅排除: %d（%s）" % [_errors, excluded.size(), "、".join(PackedStringArray(excluded))])
 	quit(1 if _errors > 0 else 0)
 
 
@@ -142,7 +151,7 @@ static func parse_screen(screen: String) -> Dictionary:
 			var ma := re_act.search(l)
 			if ma != null:
 				out["actions"].append({"space": "action", "key": ma.get_string(1), "label": ma.get_string(2).strip_edges(),
-					"enabled": ma.get_string(4) == ""})
+					"enabled": ma.get_string(4) == "", "why": ma.get_string(4)})
 			else:
 				var mu := re_unbound.search(l)
 				if mu != null:
@@ -646,7 +655,9 @@ func _judge(r: Dictionary) -> void:
 		var label: String = String(s["label"])
 		var said: String = String(s["said"])
 		var queued: bool = int(s["adv"]) > 0
-		var refused: bool = said.contains("被拒絕") or said.contains("✗")
+		# ★被拒 ＝ 畫面帶可辨識的拒絕字樣 —— 詞表**唯一一份**在 PlayerApiMapper.REFUSAL_WORDS（結果句組字讀同一份）
+		#   ★E3：accepted:false（對方不答應）也是被拒，不是成功（U1 之後它的結果句帶 DECLINED_WORD）
+		var refused: bool = said.contains("✗") or PlayerApiMapper.REFUSAL_WORDS.any(func(w): return said.contains(String(w)))
 		var diff: Array = s["diff"]
 		var eff: String = ""
 		if String(s["space"]) != "forced":
@@ -683,7 +694,14 @@ func _judge(r: Dictionary) -> void:
 	_check("P3 紅二：判了 %d 步、0 步錯（%d）" % [p3_n, p3_bad], p3_bad == 0)
 	_check("P3 母體地板：至少判過 1 步（%d）" % p3_n, p3_n >= 1)
 	_check("P4 紅三：0 步錯（%d）" % p4_bad, p4_bad == 0)
-	print("   P11 回報（不判）：沒被拒、而畫面只有「已排入」回音、沒有完成句：%s" % str(p11.keys()))
+	# ★★U0②：P11 升判決格（原本只印不判）—— 不在 KNOWN 的每一個 ⇒ 紅
+	var p11_bad: Array = []
+	for lab in p11:
+		if not _known("P11", String(lab)):
+			p11_bad.append(String(lab))
+	print("   P11 沒被拒、而畫面只有「已排入」回音、沒有完成句：%s（已知以外 %s）" % [str(p11.keys()), str(p11_bad)])
+	_check("P11 每一道沒被拒的令都有完成句（已知以外缺 %d）" % p11_bad.size(), p11_bad.is_empty())
+	_cells_ran.append("P11")
 	_cells_ran.append("P2")
 	_cells_ran.append("P3")
 	_cells_ran.append("P4")
@@ -721,3 +739,87 @@ func _p7_observation(r: Dictionary) -> void:
 	print("   觀測過的走法 fp %s｜不觀測重放 fp %s（%d 鍵）" % [String(r["fp_end"]).substr(0, 12), fp_plain.substr(0, 12), (r["keys"] as Array).size()])
 	_check("P7 跑不跑 E2E 的觀測，同 seed 同按鍵 ⇒ fp 相同", fp_plain == String(r["fp_end"]) and fp_plain != "")
 	_cells_ran.append("P7")
+
+
+# ══ FOOTER（U4／E1 的常駐版）：面板頁腳寫的「[鍵]關閉／返回」，按下去就真的關／返回 ═══════════════════
+# ★舊版頁腳寫「[T/Esc]關閉」而 T 在互動模式是強制回應的字母鍵 ⇒ 按 T 印「現在沒有要回應的事件」、面板不關
+# ★母體 ＝ 畫面上真的印出來的頁腳（不手抄鍵表）；每一個鍵各開一次面板、按一次
+func _footer_keys_do_what_they_say() -> void:
+	print("\n── FOOTER 面板頁腳寫的鍵 ＝ 按下去會做的事 ──")
+	var re := RegEx.new()
+	re.compile("^── \\[([^\\]]+)\\](關閉|返回) ──$")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	await _press(w, "t")
+	var footer: String = ""
+	var keys: Array = []
+	for l in _screen(w["node"]).split("\n"):
+		var m := re.search(l)
+		if m != null:
+			footer = l
+			for k in m.get_string(1).split("/"):
+				keys.append(String(k).strip_edges())
+	await _drop(w["node"])
+	print("   互動面板頁腳：「%s」⇒ 鍵 %s" % [footer, str(keys)])
+	_check("★母體地板：互動面板印得出頁腳、至少一個鍵（%d）" % keys.size(), keys.size() >= 1)
+	var bad: Array = []
+	for k in keys:
+		var w2: Dictionary = _new_w(await _build(SEED_A))
+		await _press(w2, "t")
+		var before: bool = _screen(w2["node"]).contains("── 互動 ──")
+		await _press(w2, String(k).to_lower())
+		var after: bool = _screen(w2["node"]).contains("── 互動 ──")
+		print("   按 %s：面板 %s → %s" % [k, "開" if before else "關", "開" if after else "關"])
+		if not before or after:
+			bad.append(String(k))
+		await _drop(w2["node"])
+	_check("FOOTER 頁腳寫的每一個鍵都真的關掉互動面板（沒做到：%s）" % str(bad), bad.is_empty())
+	_cells_ran.append("FOOTER")
+
+
+# ══ E2：兩支都沒有勢力的隊，「提議同盟」不得因「同一個勢力」而不可 ══════════════════════════════
+# ★舊版：faction_id −1 == −1 被當成同勢力（S1）
+func _e2_no_faction_alliance() -> void:
+	print("\n── E2 無勢力 vs 無勢力：提議同盟不得被判「同一個勢力」──")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var st: WorldState = w["node"]._bridge._state
+	var pf: int = st.teams[st.get_player_team_id()].faction_id
+	var nf: int = st.teams[NPC_ID].faction_id
+	await _press(w, "t")
+	var p: Dictionary = parse_screen(_screen(w["node"]))
+	if not bool(p["targets_active"]):
+		await _press(w, "tab")
+	await _press(w, "1")
+	var pa: Dictionary = parse_screen(_screen(w["node"]))
+	await _drop(w["node"])
+	var lab: String = PlayerApiMapper.action_label("propose_alliance")
+	var row: Dictionary = {}
+	for a in pa["actions"]:
+		if String(a["label"]) == lab:
+			row = a
+	print("   玩家勢力 %d｜NPC 勢力 %d｜「%s」列：%s" % [pf, nf, lab, str(row)])
+	_check("★母體地板：兩邊都是 −1、且畫面上有「%s」那一列" % lab, pf == -1 and nf == -1 and not row.is_empty())
+	var wrong: bool = not row.is_empty() and String(row.get("why", "")).contains("同一個勢力")
+	if wrong and _known("E2", lab):
+		pass
+	else:
+		_check("E2「%s」沒有因「同一個勢力」被判不可（%s）" % [lab, String(row.get("why", ""))], not wrong)
+	_cells_ran.append("E2")
+
+
+# ══ E4：強制回應的標籤不帶前綴記號 ═══════════════════════════════════════════════════════════════
+# ★實測（U5 查出）：多出來的那個字元是 `forced_label` 自己加的 ✓／✗（`player_api_mapper.gd` diplomacy 那一支）
+#   ⇒ 終端 CP950 印不出來，看起來像一格空白；事件句「回應了「✓ 接受」」也帶著它
+func _e4_forced_label_marks(r: Dictionary) -> void:
+	print("\n── E4 強制回應標籤不帶 ✓／✗ 記號 ──")
+	var labels: Dictionary = {}
+	for k in r["offered"]:
+		if String(k).begins_with("字母:"):
+			labels[String(k).trim_prefix("字母:")] = true
+	var marked: Array = labels.keys().filter(func(x): return String(x).begins_with("✓") or String(x).begins_with("✗"))
+	print("   走法看過的強制回應標籤：%s｜帶記號：%s" % [str(labels.keys()), str(marked)])
+	_check("★母體地板：走法看過 ≥ 1 個強制回應標籤（%d）" % labels.size(), labels.size() >= 1)
+	if not marked.is_empty() and _known("E4", "記號"):
+		pass
+	else:
+		_check("E4 強制回應標籤不帶 ✓／✗（%s）" % str(marked), marked.is_empty())
+	_cells_ran.append("E4")
