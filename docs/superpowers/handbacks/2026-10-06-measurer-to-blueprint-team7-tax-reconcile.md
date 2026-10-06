@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: Team7 coin/food 對帳（兩錨點）＋11筆「空轉」徵收重新核
 topic: ★回應 systems 派工（tax-reconcile-and-strength-ratio）：對帳用逐entry重建法處理掉set_amt缺陷，不用等R²merge。結論：(a) QA歸因錯，真因是raid_out不是tribute_out。★★★附帶：我自己上一輪T分析漏掃了raid_out/raid_in這條管道，11筆「空轉」事件全部其實有真轉移，零真空轉——自我更正。副本：systems（SendMessage已敲）。
 ---
