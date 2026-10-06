@@ -108,9 +108,30 @@ func _initialize() -> void:
 				owner_prev[tile_id] = int(tile.outpost_owner)
 
 	# ── 彙總輸出 ──────────────────────────────────────────────────────────────
-	print("\n========== ①死亡原因（真隊 faction!=-1 vs 無勢力隊 faction==-1） ==========")
-	var cause_by_group: Dictionary = {}   # "has_faction|cause" or "no_faction|cause" → n
+	print("\n========== ①消失路徑：先分真死亡(extinct.team.<id>) vs 併入/解散(MEASURER_TEMP.*) ==========")
+	print("（★MEASURER_TEMP.* 是臨時tap，只在本worktree，不會進任何commit——systems授權，用來\
+分辨 state.teams 移除的三個寫入點：faction_ai_system.gd:2935目標村消失解散／:2951移民抵達併入\
+／:5166真死亡）")
+	var path_by_group: Dictionary = {}   # "has_faction|path" → n
+	var real_death_events: Array = []
 	for d in death_events:
+		var grp: String = "has_faction" if int(d["faction_at_death"]) != -1 else "no_faction"
+		var tid_d: int = int(d["team"])
+		var path: String = _classify_path(tid_d)
+		if path == "real_death":
+			real_death_events.append(d)
+		var key: String = "%s|%s" % [grp, path]
+		path_by_group[key] = int(path_by_group.get(key, 0)) + 1
+	var pkeys: Array = path_by_group.keys()
+	pkeys.sort()
+	for k in pkeys:
+		print("  %s ＝ %d" % [k, int(path_by_group[k])])
+	print("  消失事件總數＝%d｜migrant.arrived(全域)＝%d" \
+		% [death_events.size(), int(Probe.counts.get("migrant.arrived", 0))])
+
+	print("\n========== ①b 真死亡(real_death)才分 starve/combat/other ==========")
+	var cause_by_group: Dictionary = {}
+	for d in real_death_events:
 		var grp: String = "has_faction" if int(d["faction_at_death"]) != -1 else "no_faction"
 		var key: String = "%s|%s" % [grp, String(d["cause"])]
 		cause_by_group[key] = int(cause_by_group.get(key, 0)) + 1
@@ -118,12 +139,15 @@ func _initialize() -> void:
 	ckeys.sort()
 	for k in ckeys:
 		print("  %s ＝ %d" % [k, int(cause_by_group[k])])
-	print("  死亡事件總數＝%d" % death_events.size())
-	print("  前3個實例：")
+	print("  真死亡事件總數＝%d" % real_death_events.size())
+	print("  前3個實例（消失事件，含路徑分類）：")
 	for i in range(min(3, death_events.size())):
 		var d2 = death_events[i]
-		print("    tick=%d｜team=%d｜faction_at_death=%d｜cause=%s" \
-			% [int(d2["tick"]), int(d2["team"]), int(d2["faction_at_death"]), String(d2["cause"])])
+		var tid_d2: int = int(d2["team"])
+		var path2: String = "unknown"
+		path2 = _classify_path(tid_d2)
+		print("    tick=%d｜team=%d｜faction_at_death=%d｜path=%s｜cause(若real_death才有意義)=%s" \
+			% [int(d2["tick"]), tid_d2, int(d2["faction_at_death"]), path2, String(d2["cause"])])
 
 	print("\n========== ②無勢力隊之間的互動事件（combat_start/tribute/diplomacy等） ==========")
 	var by_type: Dictionary = {}
@@ -167,6 +191,16 @@ func _initialize() -> void:
 	print("\n[DUMP-PATH] %s" % out_path)
 	print("=== s1_faction_minus_one_world_effect DONE ===")
 	quit(0)
+
+
+func _classify_path(tid: int) -> String:
+	if Probe.counts.has("extinct.team.%d" % tid): return "real_death"
+	if Probe.counts.has("MEASURER_TEMP.arrived.team.%d" % tid): return "migrant_arrived_merged"
+	if Probe.counts.has("MEASURER_TEMP.disband.team.%d" % tid): return "target_gone_disbanded"
+	if Probe.counts.has("MEASURER_TEMP.beast_cleanup.team.%d" % tid): return "beast_hunted_cleanup"
+	if Probe.counts.has("MEASURER_TEMP.massacre.team.%d" % tid): return "massacre_village_erased"
+	if Probe.counts.has("MEASURER_TEMP.subteam_absorbed.team.%d" % tid): return "subteam_absorbed_by_parent"
+	return "unknown"
 
 
 func _git_head_sha() -> String:
