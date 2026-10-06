@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 R 戰時徵用（修法）
 topic: R② 第三輪（`786c3e7a2`）＝ **CLEAN**｜SURVIVAL_SATED_DAYS=5.0 核對存在（need_hierarchy.gd:16）；defer 條目核對存在（defers.tsv:321），met_check 的 grep 我自己重跑過 exit=1，今天確實為假，不是錨在已經成真的事
 ---
