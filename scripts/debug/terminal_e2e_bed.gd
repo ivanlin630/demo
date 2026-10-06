@@ -3,7 +3,11 @@ extends SceneTree
 # ══ 終端 E2E 床（狀態驅動）：從畫面挑動作、按它印的鍵、驗世界真的照那句話變了 ══════════════════════
 # spec：`docs/superpowers/specs/2026-10-06-terminal-e2e-state-driven-HOW.md`
 #
-# ★本檔目前只有**解析器**＋它的自驗（R² 回來之前先做的、不依賴架構裁定的那一件）
+# ★送鍵走 `PlayerRepl.press_on`（跟玩家 REPL 同一支；它等推進消化完才回 ⇒ 畫面＝結算後的世界）
+# ★世界狀態唯讀走 `node._bridge`；belief 走 `query_memory_panel()`
+# 格：P0 解析器｜P10 畫面不落後（開場 x＋反向 Esc）＋常駐（每一鍵）｜WALK 走 N 步（雙世界 A／B）
+#     P1 母體地板｜P2 紅一｜P3 紅二｜P4 紅三｜P5 確定性｜P6 分叉 fp 相同｜P7 觀測不改物｜KNOWN 必須再現
+# 除錯：E2E_DUMP=<步數> ⇒ 印那一步動作鍵之後與回主畫面之後的整屏
 #
 # ══ 解析器：畫面上的**三個**鍵位空間（spec 原文寫兩個；實測三個）══════════════════════════════════
 #   (i)  目標動作：`─ 動作（` 區塊的 ` [n] 標籤 ▸（不可：原因）`（TextUiView.action_block；ACTION_DIGITS 靜態綁 id）
