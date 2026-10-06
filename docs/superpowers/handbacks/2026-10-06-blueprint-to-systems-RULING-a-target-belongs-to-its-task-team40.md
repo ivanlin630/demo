@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: A3 窄修採＋Team40 分類
 topic: ★A3 窄修（入口閘放回、自家市集只加「領取＋落空記號」分支、只有承諾領取才 release）採，fp 不變要量。★Team40 分類＝【真問題，小票 A4「目的地屬任務」】：move_target 是當前任務的附屬狀態，不是隊的；任務換手（逃跑→貿易）時目的地必須由新任務的 to_task 重給或清空，禁沿用。沿用＝手往舊腦指的地方走（手不聽腦的變體）。床：佈置任務切換 ⇒ move_target ∈ {新任務給的, (-1,-1)}，陽性對照 Team40 t8973。②它同時進票 A 母體（承諾了、世界不動、不釋放）一行。序：A3 之後順手，不擋 E2E。
 ---
