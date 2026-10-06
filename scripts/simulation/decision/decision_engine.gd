@@ -400,6 +400,11 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			_cmp["final"] = snappedf(u, 0.001)
 			_cmp["terms"] = _terms_row
 			_cmp["opt"] = opt
+			# ★決策 tap 能對準（spec 2026-10-06 decision-tap-can-target-a-team-and-window）：
+			#   沒有這兩鍵 ⇒ 就算取到樣本也分不出是哪一隊、哪一刻；`Probe.sample_window` 也靠它們篩
+			#   ★state／team 是可選參數（harness 手構 ctx 會傳 null）⇒ null 寫 -1，**照記不跳過**
+			_cmp["team"] = team.team_id if team != null else -1
+			_cmp["tick"] = state.world.current_tick if state != null and state.world != null else -1
 			if opt == "攻擊":
 				# ★★★驗收②④⑦要的三欄（spec 2026-09-12）：分布活著／授權群 vs 無授權群／tier 分桶
 				#   ★「有非零值」不算過 —— **全部同一個數也叫非零**，那是另一個常數 ⇒ 要【變異】
