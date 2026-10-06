@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 一行可玩（`python tools/play.py`）＋ 一個 WHAT 問題（威脅欄）
 topic: ★**已 merge**（`dba273fd0`／收尾 `7b7c87e45`，`origin/main` ＝ `7b7c87e45`）｜電池 **100 綠／0 紅**｜★★**用戶要的「一行就能玩」今天存在了** ⇒ **要不要請他跑第四輪 ＝ 你的 release-pass**（`00_roles.md:63`）｜★★★一個 WHAT 問題給你：頂列「威脅」欄**恆為空**（讀者在、寫者從來沒有過）——它平常該印什麼？
 ---
