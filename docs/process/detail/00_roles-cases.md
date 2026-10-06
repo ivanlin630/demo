@@ -464,3 +464,30 @@ v3 背景 Bash ：閒置真的安靜，★但它印完那一行就結束 ⇒ 每
   而輪詢的成本隨【角色數 × 小時數】長，推播的成本隨【真實信件數】長。
 ```
 ```
+
+## 2026-10-07 瘦身搬入：00_roles.md 長行全文（必讀檔留一行，原文逐字在此）
+
+### roles-topic-line
+
+（原 00_roles.md:4）
+
+> ★★★**信的【被消費單位】是 `topic:` 那一行，不是本文**（implementer 立 2026-09-22）—— **一句【下游不知道就會做錯事】的話，必須在 `topic:` 行**；★血證：一句更正擺在第三節末尾 ⇒ 信箱摘要漏掉 ⇒ systems 在帳上記了一個**不存在的守衛**，兩封信才修回來。★★而它與「守衛輸出單位 ＝ 被消費單位」、「操作元要在判決那一行」**是同一條規則的三個層級**：**把載重的資訊放在【真正會被讀到的那一層】。**
+
+### roles-multi-terminal
+
+（原 00_roles.md:6）
+
+> **★2026-07-08 切回多終端為主軌**（見下 §現行偏好）：pipeline/orchestrator（`06`）曾於 2026-07-06 取代多終端，但機器誤判(A2a 假 reject)+燒錢後**切回多終端信箱 relay 為預設**——各角色**持久 session 平行開** + 信箱主動觸發（`07_mailbox_trigger.md`），langgraph 機器只大/並行才上。**下列角色職責 / owner 表 / 邊界規則全有效**。**auto-memory 單寫者 = 系統 session**（兩軌恢復持久角色 session → 單寫者回系統，見 §auto-memory + §2 owner 表）。QA 獨立 adversarial + 用戶最終驗收硬閘不變（`04_qa`/`05_acceptance`）。
+
+### roles-no-menu
+
+（原 00_roles.md:12）
+
+★**同族既有紀律**：**除【藍圖】外的任何角色（含 systems）禁 `AskUserQuestion`／選單中斷用戶；卡住寫 handback 給 00 並敲門，不問用戶。**★用戶 2026-09-30 逐字重申：「除藍圖外禁止用選單跟我互動 算違反規則」——而它**不是新規**（2026-07-15 已定、2026-08-26「我只跟 00 討論」再定）⇒ ★★systems 那天仍用選單問了一個 config 問題：**理由正當不代表管道正當**。
+
+### roles-traceable-numbers
+
+（原 00_roles.md:55）
+
+**任何角色**（measurer/systems/QA/blueprint…）把數字寫進 handback / doc 前：**原始輸出必先落地成檔**（`docs/measurements/*.log`，非憑記憶轉述）＋**引數字附來源檔:行**＋**標量測當下 commit hash（+`-dirty`）**。裸轉述數字＝違規（日後對不上分不清「過期數字」vs「determinism 壞」，只能重跑）。血教訓：71/22/7% winner 轉述無存檔無 hash → 對不上 main 無法辨真偽。協議本體＝`03b_measurer.md §量測可溯源協議`（measurer 讀），此為跨角色鐵律指標。
+

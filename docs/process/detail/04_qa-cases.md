@@ -193,3 +193,23 @@ measurer 可以拿到 `12 > 11`，QA 仍可能證不了「是同一個機制造�
    ⇒ ★★★code 數完之後只有一條路 ⇒ 疑點的來源從【架構】變成【可比性】。
 ```
 
+## 2026-10-07 瘦身搬入：04_qa.md 長行全文（必讀檔留一行，原文逐字在此）
+
+### qa-status-dont-write
+
+（原 04_qa.md:3）
+
+> ★**現況檔 `docs/process/status/*` 已停更，★★【不要再寫入】**（O1，2026-08-21）——**誰在線一律讀 `bash .claude/hooks/peers.sh`**（讀 lock 租約、**推導不手寫**）。★★★systems 2026-09-22：這一行原本還在命令你去更新那些檔 —— **停更宣告寫在別的文件裡，而這裡的指令沒拿掉** ⇒ 審查員 9/02、9/17 各寫了一次，**他是照著這一行做的**。
+
+### qa-status-stopped
+
+（原 04_qa.md:4）
+
+> **⏸ 停更中（O1，2026-08-21）**：本現況檔的**更新義務已停**——它宣稱是「即時狀態快照」，實際 `03_implementer` 停在 8/5（16 天）、`04_qa` 停在 8/14（7 天），而且已從快照長成 append log（02 已 153KB）。**★病根：它是「不會過期的手寫狀態」，所以爛了**——對照 `.busy.*` beacon 帶死線會自動過期，兩個方向的錯都不致命。
+
+### qa-story-judge
+
+（原 04_qa.md:11）
+
+> **★★2026-07-14 QA 加回 = 故事性判官（用戶定案，`blueprint-to-systems-story-coherence-qa-full-observability`）**：QA **擴充職能非新開角色**（maker 外獨立腦判故事性=adversarial 判決自然延伸）。**流程位置**：量測完成後 → QA 讀**全量 specimen trace** → 判故事性合不合理（motive→action→outcome 鏈完整）→ 餵藍圖。**故事性=好戲關做成可稽核閘**（[[project_playable_priority]] 四關之首「好戲」）；**聚合 metric 過≠好戲過**——需人讀全量 trace 判。詳下 §第五職。**2026-07-09 release-gate 砍、pass 權→藍圖仍成立**（故事性判官≠release-gate，是量測後故事稽核餵藍圖，user-in-loop 下 release-pass 仍藍圖）。**thrash-fix slice 當首個試驗。**
+

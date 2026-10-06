@@ -1,7 +1,7 @@
 # 03b_measurer.md — 量測員（Measurer）職責正典
 > ★**每一節的血證／案例都在 `detail/03b_measurer-cases.md` 的【同標題節】**；★環境紀元 → `docs/process/env-epochs.tsv`。（★systems 2026-09-22：原本這句話重複 8 行，收成 1 行——★★而這一行是為了付 invariants 新增一條的行數，不是白省的。）
 
-> pipeline 位置：`implementer(03) → 【量測員】 → QA 故事性稽核 → 藍圖判`（原 QA release-gate 2026-07-09 砍；2026-07-14 QA 以**故事性判官**加回=量測後讀你的**全量 specimen trace** 判 motive→action→outcome，見下 §⑤ + `04_qa §第五職`）。maker/checker 的 **maker 側**。
+> pipeline 位置：`implementer(03) → 【量測員】 → QA 故事性稽核 → 藍圖判`；QA 讀你的全量 specimen trace 判 motive→action→outcome（§⑤＋`04_qa §第五職`）。maker／checker 的 maker 側。〔詳 03b_measurer-cases.md#meas-pipeline〕
 > 一句話：**你產獨立數字 + 全量 specimen trace，QA 讀 trace 判故事、藍圖讀數字判/升。你不判、不改 code。**
 
 > **★★2026-07-09 流程改（用戶定案）**：下游 checker 從 QA 改**藍圖**（release-pass 權在藍圖）；handback `to:` 用 `blueprint`。
@@ -13,7 +13,7 @@
 ## 身分
 
 - **maker 側**（產證據），**不是** QA。QA=checker 讀你的數字判決；你 ≠ QA、≠ implementer（它產 code、你產數字）。
-- **★留 main dir，用 `--path` 跑 branch code（別 cd 進 worktree、別 checkout）**：量測員 session 開在 `A:\GDS\demo`（main）→ **留 live 信箱**。跑 beds 對 feature 的 code 時用 `godot --path .worktrees/<slice>`（feature 的 worktree 由 implementer 建，你只讀不改）：
+- **★留 main dir，用 `--path` 跑 branch code**（不 cd 進 worktree、不 checkout）⇒ 留在 live 信箱；跑 feature 時 `godot --path .worktrees/<slice>`（只讀不改）：〔詳 03b_measurer-cases.md#meas-stay-main〕
   ```powershell
   .\tools\godot.ps1 --path .worktrees/<slice> --headless --script scripts/debug/hand_obeys_brain_bed.gd
 
@@ -29,7 +29,7 @@
 | ③ | ★★★**報總數必附【集中度】**：**同一句附 ①top-1 佔比 ②幾個成員參與** | ★**同日兩次**：material 均值 74 而 `≥50` 只有 4/12 隊（前 3 隊 80.8%）／`attempt 12→81` 而 70/81 是同一支隊 |
 | ④ | ★**`top-1 > 50%` ⇒ 那個總數【不得單獨當趨勢用】** | **否則「總數上升」會被讀成「普遍發生」** |
 
-| ⑤ | ★★★**`min == median` 是【這是初始值／常數】的簽名 —— 看到就要先排除它，再談世界的性質** | ★**2026-09-09（implementer 自陳「我印了卻沒讀」）**：床印出 `home_food min 800 / median 800 / max 1005.9`，結論寫成「世界不產生會用到那個門檻的狀態」；★★實際是 `config/warring_states.json:11 opening_granary_food: 800` 的**初始值**，而窗只有 1 天 ⇒ 糧倉根本還沒被吃。★★★**訊號當場就在自己的卷面上** |
+| ⑤ | ★★★**`min == median` 是「這是初始值／常數」的簽名**——看到先排除它，再談世界的性質。〔詳 03b_measurer-cases.md#meas-min-eq-median〕 | 2026-09-09 |
 
 ★**⑤的操作形式**：看到 `min == median`（或三數相等）⇒ **先去 config／初始化找那個數**；
 找得到 ⇒ 你量到的是**初始條件**，不是**世界的行為** ⇒ ★**要改的是窗長或情境，不是結論的措辭**。
@@ -50,12 +50,12 @@
 > 根因（一 session 燒最多 wall-time）：大窗(35-85分)在 **code 還迭代時**反覆跑（pursuit rev1/2/3 各跑大窗、consolidation 多輪）+ seed 序列跑沒吃滿核 + 窗太短重跑 + 變因混淆重跑。分兩層治：
 
 **Tier 1｜迭代用（秒級，code 還在改時只用這個）**：
-- **控制場景床**（手構最小 WorldState，如 `consolidation_decision_trace.gd`）→ 機制/邏輯/因果。**查因果 > organic 聚合**（decision-trace 秒級且更有料，本 session 驗兩次）。 ★**同 process 多輪的床要先量【跨輪共享量】**：**第二輪跑兩次（一次不清、一次先清）取差額** —— 免記鍵，且「先清的第二輪 ≡ 第一輪」順便證明沒有別的東西在漂。★★**跨世界比較（修前世界沒有那支儀器）先證【儀器等價】再比數字**（詳 detail）。
+- **控制場景床**（手構最小 WorldState）→ 機制／因果，查因果勝 organic 聚合；同 process 多輪的床先量跨輪共享量（第二輪清／不清取差額）；跨世界比較先證儀器等價。〔詳 03b_measurer-cases.md#meas-control-bed〕
 
 
 ## ★診斷通則：量不到某湧現 → 先查補丁閘（用戶定 2026-07-09）
 
-full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（rout=0、征服=0…）→ **報數字時附「先查補丁閘」提示**：是不是硬 gate/override/`continue`/絕對門檻 pre-empt 掉引擎/人格決策（如殲滅線 pre-empt 逃決策）→ 交 systems characterize 時標「疑補丁閘」，別讓 systems 猜 tuning。你量「量不到」，補丁閘查揭「為何量不到」。詳 `00_roles §診斷通則`。
+探針顯「某行為缺失／從不 fire／量不到」⇒ 報數字時附「先查補丁閘」提示（硬 gate／override／continue／絕對門檻 pre-empt 引擎），交 systems 時標「疑補丁閘」。詳 `00_roles §診斷通則`。〔詳 03b_measurer-cases.md#meas-patch-gate-hint〕
 
 ## ★併行量測（多工單不序列阻塞，2026-07-09 用戶定案，Part B）
 
@@ -91,9 +91,9 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 ## 產物
 
 1. **`docs/process/verdicts/<slice>.measure.json`**：
-   `{measured_at_head:<shortHASH[-dirty]>, ★touches:[<這顆結論建立在哪些 production 檔 scripts/simulation|data/*.gd——★不是床路徑,床不會出現在 production diff 裡>], raw_logs:[<docs/measurements/*.log 路徑>], specimen_trace:<.specimen.jsonl 路徑>, obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。（`measured_at_head`+`raw_logs`＝可溯源錨，見 §量測可溯源協議；★`touches`＝根修時哪些舊結論會過期的唯一機械鍵，2026-09-03 起必填——存量 91% 沒有它而**不回填**（憑印象補來源＝捏造）。）
-1b. **★`<slice>.specimen.jsonl`（故事性場合＝有 QA 故事稽核的 slice）**：逐 specimen 逐事件全量 trace（想法/狀態/資源時序，含死隊）＝**QA 故事性判官讀的料**（見 §⑤）。聚合 `.measure.json` 給藍圖判率、`.specimen.jsonl` 給 QA 判 motive→action→outcome。落地全量暫態可觀測性不變量。
-2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`——**★寄件一律 open,絕不自寫 consumed**，全角色規則本體見 `00_roles §跨角色 handback 生命週期`；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
+   `.measure.json` 欄位：measured_at_head、★touches（結論建立在哪些 production 檔）、raw_logs、specimen_trace、各指標、spec_guards、incomplete、summary；commit。〔詳 03b_measurer-cases.md#meas-measure-json〕
+1b. **★`<slice>.specimen.jsonl`**（有 QA 故事稽核的 slice）：逐 specimen 逐事件全量 trace（含死隊）＝QA 讀的料；聚合 `.measure.json` 給藍圖判率。〔詳 03b_measurer-cases.md#meas-specimen-jsonl〕
+2. **handback** `…/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（status:open，寄件絕不自寫 consumed）：數字＋before/after＋spec 守衛 count／delta＋誠實揭未量到項；★全量完成才寄，一封完整信。〔詳 03b_measurer-cases.md#meas-handback〕
 
 ## 交接
 
@@ -104,7 +104,7 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
   - 你若把守衛數字 + specimen trace 產齊，藍圖/QA 全程零 godot。
 
 ## 關聯
-`00_roles.md`（角色表/maker-checker/接力流向含 QA 故事站）、`04_qa.md §第五職`（QA 故事性判官讀 specimen trace 判什麼）、`invariants.md §全量暫態可觀測性`（specimen dump 零盲點鐵律）、`05_acceptance.md`（release gate）、`reference_hob_perf_protocol`（perf 協議）。
+參考：`00_roles.md`（角色／接力）、`04_qa.md §第五職`、`invariants.md §全量暫態可觀測性`、`05_acceptance.md`、`reference_hob_perf_protocol`（perf）。〔詳 03b_measurer-cases.md#meas-refs〕
 
 ---
 
@@ -126,8 +126,8 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 | 6 | 改 `fp` 的【組成】時 | 該次 `fp` 比較【作廢】（兩個方向都會騙） |
 | 7 | 門檻判準 | 必須寫明【在哪一層】（aggregate 過而單層不過 ＝ 假綠） |
 | ★8 | **率判準之前先驗【分母穩定】** | ★★**分母動 > 5% ⇒ raw ＋ rate 雙軌並報**（blueprint 立 2026-09-01）<br>★血證：S6 after 的「停滯 −19.2%」是**純分母效應**（raw 只動 −2.0%，隊-日 +21.3%）<br>★★★而它只因為 raw 與 rate 兩欄同時在場才看得見 |
-| ★★9 | **床有效性前置：窗 ≥ 被量機制的【一個週期】** | ★★★**【正常運作但週期比窗長】量出來，與【死閘】長得一模一樣**（時間版的「無解析度」）<br>★血證 2026-09-01：born≈0 追了三票，而真相是 `breed_progress = 0.9052`（1.0＝一名額）——**它不是卡住，是還沒到**；90 天窗 < 週期 ≈100 天<br>★★而**期望值要用到底**：`90 天 born=1` ⇒ 90 天的期望值本身就只有 1 ⇒ **那個窗只夠看到一次，看到 0 或 1 都在雜訊裡**（★判準⑧ 的同一條式子：期望值 ＝ 速率 × 窗長） |
-| ★★★10 | **比兩份輸出之前，先證明它們是【同一棵樹】** | ★★★血證 2026-09-16：v2→v3 數字對不上，追了兩個假說（RNG 污染／並發）—— **而真因是兩者之間落地了兩個真的 production commit**（`bea3068f1` 走廊降可行性、`2ce8f36a4` (4a)(4b) tap）<br>★**「同 seed 同 config」不蔑涵「同 code」** —— 而這個前提失效時，**它的症狀跟【儀器改變被觀測物】一模一樣**<br>★★**修法不是新工具：閘的橫幅已經有 `[TREE] HEAD=<sha> clean`** ⇒ **量測床的 `[BedSelfCheck]` 同樣要蓋這一行**，而**比對兩份輸出前先比 sha；sha 不同 ⇒ 差異未歸因之前不得讀成【世界變了】** <br>★★★**而【樹 sha】不夠 —— 還要【哪一版的床】**（血證 2026-09-17：同 seed 兩輪母體 **9 → 6**，而真因是床從 `4725bb819` 改成 `495c497be`）<br>⇒ ★**「同 seed」不等於「同母體」：母體是【床】定義的，而床會改**<br>⇒ ★★**分辨法（一輪一 seed 就夠）**：**用【新那份床】重跑舊 seed** —— **數字重現 ⇒ 是床；不重現 ⇒ 才找世界層的解釋** |
+| ★★9 | **床有效性前置：窗 ≥ 被量機制的一個週期** | ★★★正常運作但週期比窗長，量出來與死閘一模一樣；期望值＝速率×窗長，窗只夠看到一次就落在雜訊裡。〔詳 03b_measurer-cases.md#meas-window-ge-cycle〕 |
+| ★★★10 | **比兩份輸出前先證明是同一棵樹、同一版的床** | ★★「同 seed 同 config」不蘊涵同 code、同母體；sha 不同 ⇒ 差異未歸因前不得讀成世界變了；分辨法＝用新床重跑舊 seed。〔詳 03b_measurer-cases.md#meas-same-tree〕 |
 
 ## ★★★量測七母題（2026-08-27 收攏：七節殘骸壓成一張表）
 
@@ -155,7 +155,7 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 > ★**觸發式**：要在交件裡寫 `fp`／`eph`／`full` **雜湊**時 ⇒ 先讀 `detail/03b_measurer-cases.md` §雜湊交件必附【那棵樹的 commit】——★**雜湊只在【同一棵樹】內可比**，沒有 commit 的雜湊下游只能重跑。
 ## ★★★「0」怎麼讀 ＋ 判準⑨的統一形式（blueprint 立三讀法；★systems 2026-09-02 收攏 latch／crash 兩例外）
 
-★**指定一個驗收指標＝下了一個「效果會現形在哪」的【假設】，不是定義。** ⇒ **三讀：①真的沒效果 ②★效果在【下一格】 ③★★母體塌陷【或★★★儀器沒跑到】——「跑到一半被砍、分段輸出的第一段還沒到」與「沒發生」印出來一模一樣（血證：checkpoint 間隔 20000 tick 而跑死在之前 ⇒ 分段吐值退化回【只在最後吐】）⇒ ★分段輸出的【間隔必須小於你預期能跑到的長度】；讀任何 0 之前先確認【輸出真的印到了那一段】。規則＝先往下一格找。**
+★**指定一個驗收指標＝下了「效果會現形在哪」的假設**：三讀①真沒效果②效果在下一格③母體塌陷或儀器沒跑到；分段輸出間隔要小於預期能跑到的長度。先往下一格找。〔詳 03b_measurer-cases.md#meas-metric-is-hypothesis〕
 ★★**判準⑨的真問題【不是窗長，是機會母體】**——「窗 ≥ 一週期」只是**週期型**取得非空母體的手段：★**latch**（卡住不自解，無週期）問**窗內有幾次進入 latch 的機會**（`near_death=97`）；★★**crash-check**（崩了當場現形）**只需母體非零，窗長無本質差異**（`trade.meet` 上界代理）。
 ⇒ ★★★**任何型的「命中 0」都必須與【機會母體】同印**，否則「沒發生」與「母體是 0」長得一樣（★而母體＝1 是「幾乎沒母體」，不是「驗過了」）。　★血證（差集 0 vs `scan_kill_tile_unknown=161`／`near_death=97`／peaceful `trade.meet=1`）→ `detail/03b_measurer-cases.md`。
 
@@ -163,7 +163,7 @@ full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（r
 ★**強→弱**：①**兩盲交叉驗證** ②同床雙向對照（陽性＋陰性）③單一量測＋誠實限 ★★④「數字看起來合理」＝**不是證據**。★血證：`乞食` 全 pool 贏 6 次（#12 床）＝ flee 表 `top_乞食 = 6`（#5 床），★★兩支床互不知道對方存在 —— **合理性是我對世界的預期；兩盲同數是世界對兩個問法給了同一個答案。**
 
 ## ★★★命名紀律：**桶名／欄位名只准宣稱【判準本身】**（blueprint 立 2026-09-02）
-★**標籤宣稱的比量測支持的多 ⇒ 三個月後它會變成一個沒人查的「事實」。**（血證：`stuck-task` 的判準只有 `survival_committed_option != ""`＝**有承諾**，而名字宣稱**卡住** ⇒「已承諾、正在路上、仍近死」也被叫 stuck；★該叫 `has-committed-option` 類。）　★★**改名的代價一起付**：舊輸出會對不上 ⇒ **改名時在床／tap 檔頭寫「舊名 → 新名、自哪一顆 commit 起」**，否則舊量測檔變成不可解讀。
+★**標籤宣稱的比量測支持的多 ⇒ 三個月後變成沒人查的「事實」**（stuck-task 實為 has-committed-option）；改名時在床／tap 檔頭寫「舊名→新名、自哪顆 commit 起」。〔詳 03b_measurer-cases.md#meas-label-overclaim〕
 
 ## ★★★★有 cap 的來源：**「缺席」不是缺席的證據**，**飽和值就是溢出的簽名**（systems 立 2026-09-05）
 > ★**機械偵測**：**每窗的 `seen` 增量恰好等於 cap ⇒ 一定溢出過**（不是巧合）；
