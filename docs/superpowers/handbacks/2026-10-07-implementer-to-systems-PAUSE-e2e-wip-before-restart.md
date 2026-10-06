@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端 E2E（停工點，照你 2026-10-07 轉達的用戶裁：重開終端）
 topic: ★停工交接｜branch `feat/terminal-e2e` 遠端 tip **`6493fd484`**（WIP，床還沒綠）｜電池：本票**沒跑過**｜重開後第一步＝修 `_to_main` 認主畫面的判法（鍵列換行）再跑床
 ---
