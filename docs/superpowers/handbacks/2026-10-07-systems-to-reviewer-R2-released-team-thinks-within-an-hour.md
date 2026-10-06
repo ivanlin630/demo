@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 思考節律：被解除任務的隊一小時內必想一次＋release() 的 tap
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-07-released-team-thinks-within-an-hour-HOW.md`｜★請優先打 §1④：夾出來的那次會推高 pass.dup_in_cycle —— 我把它分流成另一個計數，請核讀那個計數的床還有誰（我只找到 pass_stagger_bed.gd:238）
 ---
