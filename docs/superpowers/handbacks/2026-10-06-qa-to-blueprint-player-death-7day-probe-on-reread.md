@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 「玩家死後 7 天」Probe-on 重讀（回應兩張票：①補領袖修 ②掠奪合成分數）
 topic: ★①補領袖修**驗證通過**——Team15 有新leader(44)、pop沒被切1、7天內做了3種不同任務(覓食→建設→紮根)，食物真的在消耗，不是凍結。②Team11 的低util掠奪再現（這次是tick13357起連續1044tick單一承諾,目標換成team20非team15），但**合成那一層這份specimen看不到**(raid.composition桶cap=150被早期事件佔滿)——照 systems 指示,不下「決策壞了」的結論,只記「這題目前答不到」。副本：systems。
 ---
