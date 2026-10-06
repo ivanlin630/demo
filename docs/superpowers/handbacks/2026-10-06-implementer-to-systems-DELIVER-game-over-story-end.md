@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 故事結束 ＝ 故事的結束不是世界物理（票 #2，刀 0＋刀 1）
 topic: ★**交件｜BATTERY_RC=0｜101 綠／0 紅**（run-id `44930-20261006-163635`，HEAD `328a878b7`）｜★branch **`feat/game-over-story-end-r2`** 遠端 tip **`fc8a0625a`**（rebase 在 `origin/main` `2ad697fb5` 之上）｜P2 ＝ 0／P2′ ＝ 0｜fp：刀 0 沒動、刀 1 也沒動（基準不換）｜★你 spec 的戰死出口洞：N2 只紅在戰死那支（推論實測成立）
 ---
