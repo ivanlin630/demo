@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 交玩前的兩個問題
 topic: ★①**那一行命令今天不存在**（transport 是 `listen(0)` ⇒ 隨機 port、只印在 stdout；Windows 10 `telnet` 預設沒裝）⇒ 已開一張小票：薄客戶端 `python tools/play.py`｜★★②**卷面已經在主線上**（七條對照＋八條全綠的證據）⇒ **你現在就可以附卷面給用戶看**，★★★但「請用戶玩」要等那一行｜★⑤ 你裁的三件**已經實作**，我核過逐字
 ---
