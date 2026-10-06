@@ -149,6 +149,17 @@ func _arrivals_in_window(st: WorldState, runner: SimRunner) -> Array:
 #     而三格合起來才說得出（P3a 提供活性、三格各自提供「那一條出口清了」）。
 #   ⇒ ★而正解不是把三格併成一格（spec 明寫不准）：是把這一條限制寫下來，
 #     並且**三格都印序列** —— 讀的人看得見哪一格有到達、哪一格沒有。
+# ══ ★★★★★★【這個窗能宣稱什麼，與它【不能】宣稱什麼】（systems 裁 2026-10-06）══════
+#   實測 P3a 的窗內有兩次到達，而它們是 `action=extort` —— ★而那是**另一條路徑**：
+#     ·`extort`        ← `interaction_system.gd` **路徑 3**（`npc.current_task == TASK_LOOT`）
+#     ·`tribute_offer` ← **路徑 2**（`current_task == TASK_DIPLOMACY` ＋ `order_task == TASK_TRIBUTE_OFFER`）
+#   ⇒ ★★所以那兩次到達證明的是**兩件事**：①**接觸真的發生了**
+#     ②`player_forced_event.is_empty()` 那個**不覆蓋閘沒有被占住**（否則後面的到達看不見）
+#   ⇒ ★★★而它**不證明**：**路徑 2 可達**，也不證明**有 NPC 本來會帶 `TRIBUTE_OFFER` 來**。
+#   ⇒ ★★★★所以處置是**印出來，不要斷言**：把窗內到達**按 `action` 分類**印在同一行
+#     —— 而**刻意不加**「路徑 2 到達 ≥ 1」那種斷言：那會要求一件世界在那個窗裡
+#     還沒做到的事，而**它紅起來的原因跟這張票無關**。
+#   ⇒ ★而「零進貢再到達」那一條照舊是斷言（它是這張票治的那個病）。
 func _print_arrivals(tag: String, seen: Array) -> void:
 	print("   ── 到達序列（%s，窗長 %d tick ＝ 24h）──" % [tag, WINDOW_TICKS])
 	if seen.is_empty():
@@ -158,6 +169,16 @@ func _print_arrivals(tag: String, seen: Array) -> void:
 		print("     tick=%d｜action=%s｜proposal=%s｜from=%d" % [
 			int(d.get("tick", 0)), String(d.get("action", "")),
 			String(d.get("proposal", "")), int(d.get("from_id", -1))])
+	# ★按 `action` 分類的計數（**印出來、不斷言**）—— 讀的人要能分辨
+	#   「這個窗死了」與「這個窗活著，只是走了別的路徑」。
+	var by_action: Dictionary = {}
+	for a2 in seen:
+		var k: String = String((a2 as Dictionary).get("action", ""))
+		by_action[k] = int(by_action.get(k, 0)) + 1
+	print("     ★按 action 分類 ＝ %s（★其中 `diplomacy` ＝ %d ⇒ **路徑 2** 那一類）" % [
+		str(by_action), int(by_action.get("diplomacy", 0))])
+	print("     ★★而 `extort` 走的是**路徑 3**（`TASK_LOOT`）⇒ 它證明【接觸發生了】＋")
+	print("       【不覆蓋閘沒被占住】，**不證明路徑 2 可達** —— 所以上面那一行只印不斷言。")
 
 
 func _tribute_arrivals(seen: Array) -> int:

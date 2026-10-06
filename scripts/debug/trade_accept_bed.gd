@@ -312,8 +312,31 @@ func _test_p4_proposal_crosscheck_still_green() -> void:
 	print("   %s" % refused)
 	_check("★兩個豁免集合都找得到（找不到＝那支床被改過形狀，本格不可判）",
 		unknown_ok != "" and refused != "")
-	_check("★★★「完全不認得」那一組仍然只有那個方向相反的提案（沒有被放寬）",
-		unknown_ok.contains("tribute_offer") and not unknown_ok.contains("propose_trade"))
+	# ══ ★★★★★★【這一條的方向原本是錯的，而它 2026-10-06 紅了】═══════════════════
+	#   ~~`unknown_ok.contains("tribute_offer") and not unknown_ok.contains("propose_trade")`~~
+	#   ★它的標題寫「**沒有被放寬**」（＝那一組不准**變大**），
+	#     ★★而它實際斷言的是「`tribute_offer` **必須在裡面**」＝ 不准**變小**
+	#     ⇒ **兩者是相反的方向**，而那個差在缺陷被修掉的那一天才看得見。
+	#   ★★★而 2026-10-06 進貢那張票把它修掉了：handler 現在**認得** `tribute_offer`
+	#     （它呼轉帳那一半、不呼 `_pay_extortion`）⇒ 那個豁免**沒有理由再存在**
+	#     ⇒ `forced_event_panel_bed` 的 `SPEC_UNKNOWN_OK` 清空（那邊補了兩道母體地板）
+	#     ⇒ ★而本格因此**要求一件世界已經不成立的事** —— 它要求那個缺陷繼續存在。
+	#   ⇒ ★★★★改成只斷言**它要的那個方向**：那一組**不得含** `propose_trade`
+	#     （那才是「被放寬」的樣子：把一個 handler 認得的東西塞進「完全不認得」那一組）
+	#     ＋**不得變大**（用一個具名基準，而那個基準今天 ＝ 0）。
+	#   ★而為什麼不是直接刪掉這一條：它守的是**真的東西**（別人為了讓紅變綠而把提案塞進豁免）
+	#     ⇒ **窄化不是刪除**。
+	const SPEC_UNKNOWN_OK_MAX: int = 0   # ★今天那一組是空的（進貢票把最後一個修掉了）
+	var _n_unknown: int = 0
+	for _tok in unknown_ok.split(","):
+		if String(_tok).contains("\""):
+			_n_unknown += 1
+	print("   ★「完全不認得」那一組今天有 %d 個（上限 %d；它**不准變大**）" % [
+		_n_unknown, SPEC_UNKNOWN_OK_MAX])
+	_check("★★★「完全不認得」那一組**沒有被放寬**：不得含 `propose_trade`（handler 認得它）",
+		not unknown_ok.contains("propose_trade"))
+	_check("★★★★而它**沒有變大**（%d ≤ %d）—— 有人為了讓紅變綠把提案塞進豁免就會紅"
+		% [_n_unknown, SPEC_UNKNOWN_OK_MAX], _n_unknown <= SPEC_UNKNOWN_OK_MAX)
 	# ★★★2026-09-30 同一顆 commit 裡那一組被改名了（`SPEC_REFUSED_BY_DESIGN`
 	#   → `SPEC_HANDLED_BY_SHARED_CODE`，語意從「只回人話」變成「真的做事」）
 	#   ⇒ 而本格第一版 grep 的是【舊名字】⇒ 找不到 ⇒ 母體地板紅。
