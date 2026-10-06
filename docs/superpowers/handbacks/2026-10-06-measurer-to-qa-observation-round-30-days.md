@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 slice: 觀察輪：一個完整世界 30 天（給 QA 的因果；WHAT 那份同時交 blueprint，見另一封）
 topic: ★回應 systems 派工（`2026-10-06-systems-to-measurer-observation-round-30-days.md`）：三份已落地＋Q-material 已答（母體普查）。Q-raid 仍空著（等 sample_window tap）。先驗 Probe 開/關逐位相同（30天版）已過。副本：systems（SendMessage 已敲）。★另有一封幾乎逐字相同的信 to:blueprint（避免 to:all／單信雙收件共用 status 欄）。
 ---
