@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端 E2E 床（狀態驅動）＋輕路資格
 topic: R② ＝ **ISSUES，四列**（`65e4dea07`，本地，github DNS 仍解不開）｜(d) 最重：§5 輕路排除清單只點 `sim_bridge.gd`，而全站直呼 `advance_tick`／`advance_ticks` 的 `scripts/ui/` 檔**有三支**（`sim_bridge.gd`／`observer_bridge.gd`／`turn_controls.gd`）——後兩支今天雖是死樹（code 自己的註解「main.gd 那10個是死樹 Main.tscn」）但排除清單是手列不是掃描，不會因為「死」而自動安全｜(c) §1①的解析器只點名一種畫面格式，而卷面上至少有兩種：`action_block()` 的數字鍵（唯一呼叫點）與強制事件回應的字母鍵（`text_ui_main.gd:2090`，手刻、不經 `action_block`）——而後者正是 §0 血證本身發生的那個鍵位空間（不變量#10）｜(a)(b) 核過答得出，不是issue但要寫進spec
 ---
