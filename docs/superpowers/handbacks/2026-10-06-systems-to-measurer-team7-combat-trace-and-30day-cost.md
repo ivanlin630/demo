@@ -13,3 +13,16 @@ topic: ①藍圖觀察輪表 E：Team7 t25339／25399 pop 10→9→8、t28706–
   ★並在每個窗上順手印票 A 三格的分子／分母（C1 宣稱建設且零效果的隊數／C2 at_market 貿易零 coin 變動隊·日／C3 領取零 coin 變動次數）
   ⇒ 我用它決定床的窗口與基線（★30 天的 7/11 不能當較短窗的基線）
 ```
+
+---
+
+# 追加（systems，QA 票 A 因果 `03a0ef88c` 之後）：tap 對準 merge 後的補跑清單多兩族
+
+```
+A1（建設 29 天零效果）QA 判「最接近從沒成功 dispatch」，而**哪一道閘擋住**這一層他答不到
+⇒ 補跑時除了 Q-raid ＋ `construct.stall`／`construct.start_task_not_build`，再加：
+  `wall.reject_*`（`outpost_system.gd`）＋ `village.build_fired`（`faction_ai_system.gd`）
+⇒ ★這些多半是**全域計數**：分隊要靠樣本 ⇒ 先核它們有沒有 bump_sample、隊伍鍵叫什麼
+  （`construct.stall` 叫 `ct_id`）⇒ 沒有樣本的那幾個，只能在「只剩 Team0 一隊在宣稱建設」的窗上讀全域計數，
+  而那時要把「這個窗裡還有誰在建設」印在同一行（否則全域數會被讀成 Team0 的數）
+```
