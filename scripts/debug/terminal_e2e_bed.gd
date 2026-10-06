@@ -25,6 +25,7 @@ const FORCED_PROPOSAL: String = "propose_alliance"   # diplomatic_ai_system 真�
 const MAIN_HINT: String = "[T]互動"   # MODE_KEYMAP["main"] 的一段 ⇒ 判「回到主畫面了」
 const SUBMENU_INTEL_HINT: String = "選題"   # MODE_KEYMAP["intel"] ⇒ 打聽要走完子選單（systems 裁 2026-10-07）
 const TO_MAIN_MAX_ESC: int = 6
+const PANEL_HEADER: String = "─ 面板（接管畫面）"
 # ★effect → 快照裡要變的那幾塊（單一來源是 ACTION_SHAPE 的 effect 值；這裡只是「那個值讀哪幾欄」）
 const EFFECT_FIELDS: Dictionary = {
 	"task": ["task"], "belief": ["belief"], "faction": ["faction"],
@@ -36,7 +37,16 @@ const EFFECT_FIELDS: Dictionary = {
 # ══ 已知（第一次跑抓到、spec §6「列清單、回報，不在本票修」）════════════════════════════════════
 # ★每一條必須**這一輪真的再現**，否則紅（世界修好之後這一句就不成立 ⇒ 要回來拿掉，不能讓它變成恆綠的豁免）
 #   key ＝ "<格>|<動作名>"
-var KNOWN: Dictionary = {}
+#   ★這張表是**回報清單的機械形**（交件信逐條列給 systems），不是豁免：不在這裡的紅照紅
+var KNOWN: Dictionary = {
+	"P2|招募": "按目標動作「招募」⇒ 開招募子選單（`── 招募 TeamN ──`），而結果行仍是**上一道令**的回音"
+		+ "（實測「已排入：行動：拔擢匿名→記名」）；同時鍵列印的是主畫面那一份",
+	"P3|打聽情報": "走完選題（ask_food_source）⇒ 畫面只有「已排入：行動：確認打聽」，belief 沒變；"
+		+ "handler 回 ok:true（『他說了些事情（記下 0 筆…）』／『他也不知道』）而那句完成句不上畫面",
+	"P3|確認打聽": "同上（自家隊動作區的「確認打聽」重送上一次的選題）：ok:true、belief 不變、畫面只有回音",
+	"P10|攻擊": "按「攻擊」回來那一屏的頂列時間比世界慢 1 tick（實測畫面 35／世界 36）",
+	"STUCK|攻擊": "攻擊之後（交戰中）互動面板 Esc 關不掉：連按 6 次仍在面板、世界還被推了 1 tick",
+}
 var _known_hit: Dictionary = {}
 
 
@@ -116,7 +126,7 @@ static func parse_screen(screen: String) -> Dictionary:
 			continue
 		var mf := re_forced.search(l)
 		if mf != null:
-			out["forced"].append({"space": "forced", "key": mf.get_string(1), "label": mf.get_string(2), "enabled": true})
+			out["forced"].append({"space": "forced", "key": mf.get_string(1), "label": mf.get_string(2).strip_edges(), "enabled": true})
 			continue
 		if region == "self":
 			for m in re_self.search_all(l):
@@ -234,8 +244,21 @@ static func _line_starting(screen: String, prefix: String) -> String:
 	return ""
 
 
+# ★鍵列會折行（主畫面的鍵列是兩行：第二行以空白縮排開頭）⇒ 收「 鍵：」那一行＋它的續行
+#   （第一版只讀第一行 ⇒ `[T]互動` 在第二行 ⇒ 永遠判「不在主畫面」，step 0 就 ABORT）
 static func _hint(node: Node) -> String:
-	return _line_starting(_screen(node), " 鍵：")
+	var out: String = ""
+	var on: bool = false
+	for l in _screen(node).split("\n"):
+		if l.begins_with(" 鍵："):
+			on = true
+			out = l
+			continue
+		if on and l.begins_with("     "):
+			out += " " + l.strip_edges()
+			continue
+		on = false
+	return out
 
 
 static func _result_line(screen: String) -> String:
@@ -288,7 +311,8 @@ func _press(w: Dictionary, k: String) -> void:
 	var stt: int = _status_tick(scr)
 	w["p10_n"] = int(w["p10_n"]) + 1
 	if top != wt or (stt != -1 and stt != wt):
-		(w["p10_bad"] as Array).append("key=%s 畫面頂列 %d／狀態列 %d／世界 %d" % [k, top, stt, wt])
+		(w["p10_bad"] as Array).append({"label": String(w.get("label", "")),
+			"msg": "key=%s（%s）畫面頂列 %d／狀態列 %d／世界 %d" % [k, String(w.get("label", "")), top, stt, wt]})
 
 
 func _press_all(w: Dictionary, keys: Array) -> void:
@@ -300,12 +324,19 @@ func _new_w(node: Node) -> Dictionary:
 	return {"node": node, "keys": [], "p10_n": 0, "p10_bad": []}
 
 
+# ★「在主畫面」＝ 鍵列是主畫面那一份 **且** 沒有接管畫面的面板
+#   ★只看鍵列不夠（實測 step 8）：招募子選單（`── 招募 TeamN ──`）開著時，鍵列印的仍是**主畫面**那一份
+#     ⇒ 只看鍵列會判「已回主畫面」，下一步的 [T] 打進招募層 ⇒ 候選集為空
+static func _at_main(node: Node) -> bool:
+	return _hint(node).contains(MAIN_HINT) and not _screen(node).contains(PANEL_HEADER)
+
+
 func _to_main(w: Dictionary) -> bool:
 	for _i in range(TO_MAIN_MAX_ESC):
-		if _hint(w["node"]).contains(MAIN_HINT):
+		if _at_main(w["node"]):
 			return true
 		await _press(w, "esc")
-	return _hint(w["node"]).contains(MAIN_HINT)
+	return _at_main(w["node"])
 
 
 static func _fp(node: Node) -> String:
@@ -390,6 +421,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 	var p10_bad: Array = []
 	var n: int = n_fixed
 	var step: int = 0
+	var dead_end: String = ""
 	while n < 0 or step < n:
 		# ── A：建 → 重放前綴 → 這一步
 		var wa: Dictionary = _new_w(await _build(sd))
@@ -454,10 +486,15 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 			space = "action"
 		var scr0: String = _screen(wa["node"])
 		var t0: int = _tick(wa["node"])
+		wa["label"] = label
 		await _press(wa, String(pick["key"]))
 		# ★打聽：effect 掛在選題之後那道令 ⇒ 走完子選單（選第 1 題）（systems 裁 2026-10-07）
+		var expect_label: String = label
 		if _hint(wa["node"]).contains(SUBMENU_INTEL_HINT):
 			await _press(wa, "1")
+			# ★走完子選單 ⇒ 下令的是選題之後那一道（confirm_gather_intel）⇒ 結果句該說的是它的名字
+			#   （名字取自唯一一份 label 表，不手寫）
+			expect_label = PlayerApiMapper.action_label("confirm_gather_intel")
 		var adv: int = _tick(wa["node"]) - t0
 		var scr1: String = _screen(wa["node"])
 		var ev0: Array = _event_lines(scr0)
@@ -466,7 +503,14 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		var said: String = result
 		if not new_ev.is_empty():
 			said += "｜" + "｜".join(PackedStringArray(new_ev))
+		if OS.get_environment("E2E_DUMP") == str(step):
+			print("[E2E_DUMP] 動作鍵之後：")
+			print(scr1)
+		wa["label"] = ""
 		var ok_main: bool = await _to_main(wa)
+		if OS.get_environment("E2E_DUMP") == str(step):
+			print("[E2E_DUMP] 回主畫面之後：")
+			print(_screen(wa["node"]))
 		var a_keys: Array = (wa["keys"] as Array).slice(prefix.size())
 		var snap_a: Dictionary = _snap(wa["node"])
 		var tick_a: int = _tick(wa["node"])
@@ -475,7 +519,11 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		pressed[String(pick["kind"])] = true
 		await _drop(wa["node"])
 		if not ok_main:
-			aborts.append("step %d：按完 %s 之後回不到主畫面" % [step, label])
+			# ★死路：已知的（KNOWN 裡有 `STUCK|<動作名>`）⇒ 走法在這裡結束、不算 ABORT，但那一條必須再現
+			if KNOWN.has("STUCK|" + label):
+				dead_end = label
+			else:
+				aborts.append("step %d：按完 %s 之後回不到主畫面" % [step, label])
 			break
 		# ── B：建 → 重放同一個前綴 → 同樣打開、不按動作鍵 → 用推進鍵補齊同樣的 tick 數
 		var wb: Dictionary = _new_w(await _build(sd))
@@ -486,9 +534,13 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		await _to_main(wb)
 		await _press_all(wb, open_keys)
 		await _to_main(wb)
-		if adv > 0:
+		# ★補齊量 ＝ A 這一步結束時的 tick − B 此刻的 tick（不是只看動作鍵那一下的 adv）：
+		#   關子選單本身也可能是一道令（實測：交易子選單按 Esc ＝ 取消貿易，+1 tick）
+		#   ⇒ 第一版只補 adv ⇒ A t7／B t6 ⇒ ABORT。補齊之後兩邊 tick 仍不同（B 已經超過 A）⇒ 照舊 ABORT
+		var need: int = tick_a - _tick(wb["node"])
+		if need > 0:
 			var gk: Array = ["g"]
-			for ch in str(adv):
+			for ch in str(need):
 				gk.append(ch)
 			gk.append("enter")
 			await _press_all(wb, gk)
@@ -501,7 +553,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		var diff: Array = _diff_fields(snap_a, snap_b)
 		var rec: Dictionary = {"step": step, "space": space, "label": label, "kind": String(pick["kind"]),
 			"a_keys": a_keys, "b_keys": b_keys, "tick_a": tick_a, "tick_b": tick_b, "adv": adv,
-			"result": result, "said": said, "new_ev": new_ev, "diff": diff}
+			"result": result, "said": said, "new_ev": new_ev, "diff": diff, "expect_label": expect_label}
 		steps.append(rec)
 		var sp_name: String = {"forced": "字母", "self": "數字", "action": "目標動作"}.get(space, space)
 		var line: String = "step %02d｜%s %s｜A %s（t%d）｜B %s（t%d）｜結果：%s｜差異：%s" % [step, sp_name, label,
@@ -522,7 +574,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 	await _drop(wz["node"])
 	return {"lines": lines, "n": n, "keys": prefix, "fp_end": fp_end, "steps": steps, "offered": offered,
 		"pressed": pressed, "p10_n": p10_n, "p10_bad": p10_bad, "aborts": aborts, "p6_bad": p6_bad,
-		"p6_n": steps.size(), "unbound": unbound}
+		"p6_n": steps.size(), "unbound": unbound, "dead_end": dead_end}
 
 
 # ══ 判 ══════════════════════════════════════════════════════════════════════════════════════════
@@ -551,7 +603,11 @@ func _judge(r: Dictionary) -> void:
 	print("   畫面提供過 %d 種／本輪按過 %d 種" % [(r["offered"] as Dictionary).size(), (r["pressed"] as Dictionary).size()])
 	print("   提供過而沒按到（含不可做的）：%s" % str(never))
 	print("   列出卻沒綁鍵（不判，回報）：%s" % str((r["unbound"] as Dictionary).keys()))
-	_check("P1 走滿 N 步（%d／%d）" % [steps.size(), int(r["n"])], steps.size() == int(r["n"]) and int(r["n"]) > 0)
+	if String(r["dead_end"]) != "":
+		_known("STUCK", String(r["dead_end"]))
+		print("   ★走法在已知死路結束（%s）⇒ 只走了 %d／%d 步" % [String(r["dead_end"]), steps.size(), int(r["n"])])
+	_check("P1 走滿 N 步或停在已知死路（%d／%d）" % [steps.size(), int(r["n"])],
+		int(r["n"]) > 0 and (steps.size() == int(r["n"]) or String(r["dead_end"]) != ""))
 	_check("P1 字母鍵 ≥ 1（%d）—— 否則 §0 那個鍵位空間沒被走過" % n_letter, n_letter >= 1)
 	_check("P1 自家隊數字鍵 ≥ 1（%d）" % n_self, n_self >= 1)
 	_check("P1 目標動作數字鍵 ≥ 1（%d）" % n_action, n_action >= 1)
@@ -565,10 +621,13 @@ func _judge(r: Dictionary) -> void:
 	_cells_ran.append("P6")
 	# ── P10 常駐：每一鍵回來那一屏的時間 ＝ 世界 tick
 	print("\n── P10 常駐：每一鍵回來的那一屏 ＝ 結算後的世界 ──")
-	for b in (r["p10_bad"] as Array).slice(0, 8):
-		print("   ✗ " + String(b))
-	_check("P10 常駐：%d 次按鍵，畫面時間 ≠ 世界 tick 的 %d 次" % [int(r["p10_n"]), (r["p10_bad"] as Array).size()],
-		int(r["p10_n"]) >= 1 and (r["p10_bad"] as Array).is_empty())
+	var p10_unknown: int = 0
+	for b in r["p10_bad"]:
+		if not _known("P10", String(b["label"])):
+			p10_unknown += 1
+			print("   ✗ " + String(b["msg"]))
+	_check("P10 常駐：%d 次按鍵，畫面時間 ≠ 世界 tick 的 %d 次（已知以外 %d）" % [int(r["p10_n"]), (r["p10_bad"] as Array).size(), p10_unknown],
+		int(r["p10_n"]) >= 1 and p10_unknown == 0)
 	# ── P2／P3／P4 逐步
 	print("\n── P2 紅一／P3 紅二／P4 紅三（逐步）──")
 	var p2_bad: int = 0
@@ -591,10 +650,11 @@ func _judge(r: Dictionary) -> void:
 				_check("★反向掃：畫面上按到的「%s」在 ACTION_SHAPE 有合法 effect（id=%s effect=%s）" % [label, aid, eff], false)
 				continue
 		# P2 紅一：下了令 ⇒ 結果句要說出按下那一行的動作名
-		if queued and not said.contains(label):
+		var want: String = String(s["expect_label"])
+		if queued and not said.contains(want):
 			if not _known("P2", label):
 				p2_bad += 1
-				_check("P2 step %d 按「%s」⇒ 結果句沒有說它（%s）" % [int(s["step"]), label, said], false)
+				_check("P2 step %d 按「%s」⇒ 結果句沒有說「%s」（%s）" % [int(s["step"]), label, want, said], false)
 		# P3 紅二：說成功 ⇒ effect 那幾欄在 A−B 非空
 		if queued and not refused and eff != "" and not (EFFECT_FIELDS[eff] as Array).is_empty():
 			p3_n += 1
@@ -604,12 +664,13 @@ func _judge(r: Dictionary) -> void:
 					p3_bad += 1
 					_check("P3 step %d「%s」說成功（%s）而 effect=%s 的 %s 在 A−B 沒變（差異 %s）" % [int(s["step"]), label, said, eff, str(need), str(diff)], false)
 		# P4 紅三：A−B 有變 ⇒ 結果句提到那個動作
-		if not diff.is_empty() and not said.contains(label):
+		if not diff.is_empty() and not said.contains(want):
 			if not _known("P4", label):
 				p4_bad += 1
 				_check("P4 step %d 世界變了（%s）而結果句沒說「%s」（%s）" % [int(s["step"]), str(diff), label, said], false)
 		# P11 回報：沒被拒，而畫面只有「已排入」回音、沒有完成句
-		if queued and not refused and (s["new_ev"] as Array).is_empty() and String(s["result"]).begins_with("已排入"):
+		#   ★結果行開頭帶 `✓ `（`_feedback_text`；終端 CP950 印不出它，看起來像一格空白）⇒ 先剝掉再比
+		if queued and not refused and (s["new_ev"] as Array).is_empty() and String(s["result"]).trim_prefix("✓").strip_edges().begins_with("已排入"):
 			p11[label] = true
 	_check("P2 紅一：0 步錯（%d）" % p2_bad, p2_bad == 0)
 	_check("P3 紅二：判了 %d 步、0 步錯（%d）" % [p3_n, p3_bad], p3_bad == 0)
