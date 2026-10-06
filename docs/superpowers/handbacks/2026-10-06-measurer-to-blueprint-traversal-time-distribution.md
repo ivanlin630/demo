@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 相鄰一格實際通過時長分佈（對照 tick_parameters.md 意圖值）
 topic: ★回應 systems 派工：實測中位數 600-780 tick，是純常數意圖值的 5-15 倍，且幾乎不隨地形/日夜變化——這個「幾乎常數」的形狀指向真正瓶頸可能是 LOD 處理節律，不是地形移動成本本身。副本：systems（SendMessage 已敲）。
 ---
