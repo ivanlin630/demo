@@ -92,7 +92,9 @@ func _initialize() -> void:
 	#   ★KNOWN 是「本來會紅的格被登成已知」⇒ 只印 errors: 0 ＝ 讀卷面的人看到全綠（同 ui-flow「9 跑紅 4」那一病）
 	var excluded: Array = _known_hit.keys()
 	excluded.sort()
-	print("\n=== terminal_e2e DONE === errors: %d｜已知紅排除: %d（%s）" % [_errors, excluded.size(), "、".join(PackedStringArray(excluded))])
+	#   ★名單裡的 `|` 換成 `／`：runner 用 `grep -E` 比 expect，ASCII `|` 在那裡是「或」⇒ expect 會被拆成幾段各自比
+	var names: Array = excluded.map(func(x): return String(x).replace("|", "／"))
+	print("\n=== terminal_e2e DONE === errors: %d｜已知紅排除: %d（%s）" % [_errors, excluded.size(), "、".join(PackedStringArray(names))])
 	quit(1 if _errors > 0 else 0)
 
 
@@ -438,6 +440,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 	var n: int = n_fixed
 	var step: int = 0
 	var dead_end: String = ""
+	var dead_end_said: String = ""
 	while n < 0 or step < n:
 		# ── A：建 → 重放前綴 → 這一步
 		var wa: Dictionary = _new_w(await _build(sd))
@@ -524,6 +527,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 			print(scr1)
 		wa["label"] = ""
 		var ok_main: bool = await _to_main(wa)
+		var dead_said: String = _result_line(_screen(wa["node"]))
 		if OS.get_environment("E2E_DUMP") == str(step):
 			print("[E2E_DUMP] 回主畫面之後：")
 			print(_screen(wa["node"]))
@@ -538,6 +542,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 			# ★死路：已知的（KNOWN 裡有 `STUCK|<動作名>`）⇒ 走法在這裡結束、不算 ABORT，但那一條必須再現
 			if KNOWN.has("STUCK|" + label):
 				dead_end = label
+				dead_end_said = dead_said
 			else:
 				aborts.append("step %d：按完 %s 之後回不到主畫面" % [step, label])
 			break
@@ -590,7 +595,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 	await _drop(wz["node"])
 	return {"lines": lines, "n": n, "keys": prefix, "fp_end": fp_end, "steps": steps, "offered": offered,
 		"pressed": pressed, "p10_n": p10_n, "p10_bad": p10_bad, "aborts": aborts, "p6_bad": p6_bad,
-		"p6_n": steps.size(), "unbound": unbound, "dead_end": dead_end}
+		"p6_n": steps.size(), "unbound": unbound, "dead_end": dead_end, "dead_end_said": dead_end_said}
 
 
 # ══ 判 ══════════════════════════════════════════════════════════════════════════════════════════
@@ -621,7 +626,10 @@ func _judge(r: Dictionary) -> void:
 	print("   列出卻沒綁鍵（不判，回報）：%s" % str((r["unbound"] as Dictionary).keys()))
 	if String(r["dead_end"]) != "":
 		_known("STUCK", String(r["dead_end"]))
-		print("   ★走法在已知死路結束（%s）⇒ 只走了 %d／%d 步" % [String(r["dead_end"]), steps.size(), int(r["n"])])
+		print("   ★走法在已知死路結束（%s）⇒ 只走了 %d／%d 步｜那時結果行：%s" % [String(r["dead_end"]), steps.size(), int(r["n"]), String(r["dead_end_said"])])
+		# ★K5（systems 裁 (乙)）：死路可以存在（終端戰鬥區另開票），但**不准靜默** ⇒ 結果行要說為什麼
+		_check("K5 交戰中按鍵不靜默：結果行說「%s」（實際：%s）" % [TextUiMain.ENCOUNTER_NO_TERMINAL_MSG, String(r["dead_end_said"])],
+			String(r["dead_end_said"]).contains(TextUiMain.ENCOUNTER_NO_TERMINAL_MSG))
 	_check("P1 走滿 N 步或停在已知死路（%d／%d）" % [steps.size(), int(r["n"])],
 		int(r["n"]) > 0 and (steps.size() == int(r["n"]) or String(r["dead_end"]) != ""))
 	_check("P1 字母鍵 ≥ 1（%d）—— 否則 §0 那個鍵位空間沒被走過" % n_letter, n_letter >= 1)

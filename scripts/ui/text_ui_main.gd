@@ -377,6 +377,11 @@ func _input(event: InputEvent) -> void:
 	# 否則 Q 會落到下方 KEY_Q→get_tree().quit() 造成戰後一按鍵就閃退；
 	# WASD 也會同時漂移世界地圖游標。用 overlay 可見性（非 encounter_active）判定。
 	if _encounter_view != null and _encounter_view.visible:
+		# ★K5（systems 裁 (乙) 2026-10-07）：終端還沒有戰鬥畫面 —— 這裡的鍵交給 encounter_view（GUI 走它自己的 _input），
+		#   而終端（PlayerRepl.press_on 只送這個節點）送不到它 ⇒ **不靜默吞鍵**：結果行說清楚為什麼沒反應
+		#   ★終端戰鬥區另開票（內容待藍圖裁）；這一句在那張票落地時拿掉
+		_set_feedback(false, ENCOUNTER_NO_TERMINAL_MSG)
+		_refresh()
 		return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
@@ -1005,6 +1010,8 @@ const UI_STACK_LAYERS: Array = [LAYER_RECRUIT, LAYER_INTEL]
 #     當【外部期望】—— ★★那不是重複：床拿產品的常數來比＝同源恆真
 #     （寫什麼都綠），所以那一份字面**必須**住在床裡。
 const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
+# ★K5：交戰中終端按鍵的那一句（終端尚無戰鬥畫面；戰鬥區另開票）
+const ENCOUNTER_NO_TERMINAL_MSG: String = "交戰中：終端尚無戰鬥畫面（按鍵交給戰鬥畫面，這裡收不到）"
 
 var _ui_stack: Array = []
 
