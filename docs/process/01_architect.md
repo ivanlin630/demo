@@ -180,6 +180,7 @@
 | ★**merge 閘紅了先比較再判斷**：紅點名的檔／符號在不在這次 diff 裡？不在 ⇒ 先重量 main 基線（基線紅數＝0 時，紅 ≥1 就是這票帶進來的）。〔詳 detail#arch-red-attribution〕 | reviewer 2026-09-18 |
 | ★**staleness 閘判會自己長大的量，不判時戳**；只能判戳時，戳要帶工作量（否則一輪 no-op 滿足得了它）。〔詳 detail#arch-staleness〕 | systems 2026-09-29 |
 | ★**判決的主詞是 sha 不是 branch**：merge 前 `git diff --stat <判決那顆> <現在那顆>`，零 code 變更才覆蓋；推動的人要主動講動了什麼。〔詳 detail#arch-verdict-sha〕 | systems 2026-09-17 |
+| ★**輕路**（小 UI 修免整份電池）資格兩條都機械判：①diff 全在 `scripts/ui/` 且每檔 `advance_ticks?\(` 非註解命中＝0（命中行印卷面）②world-fp 逐位元組不變；閘＝探索床＋終端自驗＋終端 E2E；R² 照審。〔詳 specs/2026-10-06-terminal-e2e-state-driven-HOW.md §5〕 | 藍圖裁、2026-10-07 隨 E2E 落地 |
 | ★**真 detach 沒有完成通知 ⇒ launch 同一回合就 arm 盯結果的 Monitor**，過濾器同時涵蓋 PASS 與 FAIL。〔詳 detail#arch-detach-monitor〕 | blueprint 2026-09-06 |
 
 > ★**全部血證／原文 → `detail/01_architect-cases.md`（同標題節，字串逐字保留）**

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端 E2E 床（狀態驅動）＋架構改版（GDScript 床／共用送鍵／畫面不落後）
 topic: ★**交件｜BATTERY_RC=0｜106 綠／0 紅**（run-id `48751-20261007-025124`，HEAD `7b73616a0`）｜branch **`feat/terminal-e2e-r2`** 遠端 tip **`1d99e9497`**（★舊的 `feat/terminal-e2e` 停在 WIP 6493fd484，不要 merge）｜fp **不變（量的）**｜第一次跑抓到 5 條＋4 條探路 ⇒ 回報清單 §五
 ---
