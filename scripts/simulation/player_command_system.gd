@@ -1472,7 +1472,19 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				"accept_lead":
 					result = _accept_diplomacy_as_leader(state, fe.get("from_id", -1))
 				"refuse":
-					result = { "ok": true, "msg": "拒絕外交提案" }
+					# ★★★★★【拒絕也要收尾】（spec §3③）—— 用戶那句「**接受或拒絕都一樣重提**」
+					#   就是這一行缺了收尾的症狀：拒絕只回一句話，而**任務還在**。
+					#   ★而這一支是**所有 diplomacy 提案共用**的通用分支
+					#     ⇒ 守衛（只對 `tribute_offer` 收尾）在 `settle_tribute_offer` **裡面**
+					#     ⇒ ★★這裡不寫 `if`：三個呼叫端各寫一份 `if` 會漂，而漂掉的那一份是靜默的。
+					#   ★★★而 R² 提過「多半無害」那個說法 —— **我們沒有用它**：
+					#     守衛是真的加了（在那一支裡），而**一個沒有被逐情境驗過的 no-op，
+					#     它的理由就是編的**。
+					var _settled: bool = DiplomaticAiSystem.settle_tribute_offer(
+						state, state.teams.get(int(fe.get("from_id", -1))),
+						_get_player_team_id(state))
+					result = { "ok": true, "msg": "婉拒 Team%d 的提案" % int(fe.get("from_id", -1)) \
+						if _settled else "拒絕外交提案" }
 				_:
 					result = { "ok": false, "msg": "未知回應: %s" % response }
 		"extort":
@@ -1758,12 +1770,42 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 		"propose_trade":
 			DiplomaticAiSystem.apply_trade_accept(pt, from_team)
 			return { "ok": true, "msg": "與 Team%d 談成通商（名聲互有加分）" % from_id }
-	# ★★★注意這裡【沒有】`tribute_offer`，而那是刻意的：
+		# ══ ★★★★★★【接受 ＝ 收貢】（spec §3①，2026-10-01）═══════════════════════
+		#   ★用戶實測：按接受 ⇒ 畫面印「**未知提案類型：tribute_offer**」⇒ 兩小時後再問一次。
+		#   ★★而金額**不新算也不抄常數** —— 呼 `apply_tribute_transfer`，
+		#     它吃 **payer 自己的 coin**（`coin_before * TRIBUTE_TAKE_RATIO`）
+		#     ⇒ ★「金額用 NPC 側自己算的那一份」本來就成立，而**本檔不得出現那個常數的字面**
+		#       （同本檔既有那條紀律）。
+		#   ★★★方向：`payer` ＝ **來進貢的那一隊**（`from_team`）、`taker` ＝ **玩家隊**
+		#     —— 反過來就是用戶看到的那個更糟的版本（倒付錢）。
+		#   ★★★★而它呼的是 `apply_tribute_transfer` **不是** `apply_tribute_accept`：
+		#     後者會連帶寫 `"tributed"` 記憶，而那筆記憶走**結仇邊**
+		#     ⇒ 「NPC 主動送我東西，然後它對我結仇」＝方向是反的（藍圖裁 (甲) 不寫關係）。
+		"tribute_offer":
+			var amount: float = DiplomaticAiSystem.apply_tribute_transfer(state, from_team, pt)
+			# ★收尾（三件）—— 不然任務還在，兩小時後它再提一次
+			DiplomaticAiSystem.settle_tribute_offer(state, from_team, _get_player_team_id(state))
+			if amount <= 0.0:
+				# ★對方其實沒有錢 ⇒ **說出來**，不要回一句「收下了」然後什麼都沒進帳
+				#   （「收到 0」與「沒收到」在玩家那裡是兩句不同的話）
+				return { "ok": true,
+					"msg": "Team%d 要進貢，但它身上沒有錢可以給" % from_id }
+			return { "ok": true,
+				"msg": "收下 Team%d 的貢品（+%.0f 錢）" % [from_id, amount] }
+	# ★★★注意這裡【以前沒有】`tribute_offer`，而那**曾經**是刻意的（原文留在下面）：
 	#   它的語意是【對方要給你進貢】（`TeamData.TASK_TRIBUTE_OFFER`，由 `interaction_system`
 	#   經 `npc.order_task` 寫進 proposal）⇒ 若把它併進上面那支 `"tribute"` arm，
 	#   會走 `_pay_extortion` ⇒ ★**變成玩家付錢給來進貢的人**。
 	#   ⇒ ★★「把所有字串都加進 match」是一個【看起來像修好】的錯，而它比現在的 bug 更糟：
 	#     現在是收不到貢品，改壞之後是倒付錢。
+	# ══ ★★★★★★【而那個裁定只做對了一半 —— 2026-10-01 補完】═════════════════════
+	#   ★它擋住了**錯的改法**（併進 `"tribute"` arm ⇒ 倒付），而**沒有開「正確的那一半」的票**
+	#   ⇒ 留給玩家的是：**永遠收不到貢品 ＋ 畫面印一句內部錯誤 ＋ 每兩小時再問一次**。
+	#   ⇒ ★★判準（寫給下一個人）：**裁「不做 X」的同時要開「正確的那一半」的票** ——
+	#     否則一個**刻意的空缺**會長成玩家面的缺陷，而它的卷面長相是
+	#     「**這裡有一段很有道理的註解**」。
+	#   ⇒ ★★★正確的那一半就在上面那支 `"tribute_offer"` arm（它呼轉帳那一半，不呼 `_pay_extortion`）
+	#     ⇒ 而守「不倒付」的那一格**照舊有效**（它斷言按接受之後玩家 coin 不得減少）。
 	#   ⇒ ★★★守它的是 `forced_event_panel_bed` 那一格（按接受之後玩家 coin 不得減少），
 	#     負對照就是「故意併進去 ⇒ coin 減少 ⇒ 紅」（systems 裁 2026-09-30）。
 	return { "ok": false, "msg": "未知提案類型：%s" % proposal }

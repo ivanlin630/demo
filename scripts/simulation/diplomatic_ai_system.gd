@@ -241,7 +241,28 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 #   回傳實際拿走的金額（玩家端的結果句要用它）。
 const TRIBUTE_TAKE_RATIO: float = 0.1   # TEST VALUE（藍圖明文留給平衡階段，本票不動它）
 
-static func apply_tribute_accept(state: WorldState, payer: TeamData, taker: TeamData) -> float:
+# ══ ★★★★★★【轉帳那一半，拆出來】（spec `2026-10-01-tribute-offer-loop…` §3①，裁 甲）══
+# ★為什麼要拆：`apply_tribute_accept` 同時做**兩件語意不同的事** ——
+#   ①`payer → taker` 轉 coin（**物理**：東西換了手）
+#   ②`write_memory(payer_leader, "tributed", …)`（**關係**：對方記得這件事）
+#   ★★而②的方向**隨情境相反**：
+#     ·`demand_tribute`（索貢／勒索）＝**強制** ⇒ 對方記一筆（`npc_ai_system.gd:117`
+#       把 `"tributed"` 歸在 betrayal／looted／rejected_aid 同一組 ⇒ 走 `form_feud` 結仇邊）
+#     ·★`tribute_offer`（**對方主動**來進貢）＝**自願** ⇒ 玩家接受它**不該讓對方結仇**
+#       —— 不然玩家會看到「剛送我東西的 NPC 突然對我有仇恨值」
+#   ⇒ ★★★所以重用整支 ＝ 把**強制情境的關係語意偷渡到自願情境**
+#     ⇒ 拆：轉帳那一半可以重用，關係那一半不行。
+# ★而藍圖裁 **(甲) 不寫關係**（主動進貢 ＝ **買保險**不是示好）⇒ 接受那一刻**雙方情感都不動**：
+#   ·付方好感**不升** —— **恐懼或算計不是好感**
+#   ·也**不結仇** —— 自願的，沒人搶他
+#   ⇒ ★★★而否決「寫正面」的理由最硬：**寫正面 ＝ 把保險誤記成友誼**，
+#     而後面每一個讀好感的決策都會把「**怕你的人**」當成「**喜歡你的人**」
+#     ⇒ **錯誤不會留在那一筆記憶裡，它會跑到後面每一個讀好感的決策上。**
+# ★★「NPC 主動送貢之後它對玩家的感覺應該是什麼」＝ **WHAT** ⇒ 已呈藍圖，不在本票。
+# ★`_state` 底線前綴 ＝ **刻意不用**（轉帳不需要世界；簽章與 `apply_tribute_accept` 對齊
+#   是為了讓兩支在呼叫端長得一樣 —— 而「長得一樣」在這裡是刻意的：它讓
+#   「我該呼哪一支」只取決於**情境是強制還是自願**，不取決於參數湊不湊得出來）。
+static func apply_tribute_transfer(_state: WorldState, payer: TeamData, taker: TeamData) -> float:
 	if payer == null or taker == null:
 		return 0.0
 	var coin_before: float = float(payer.resources.get("coin", 0))
@@ -251,12 +272,55 @@ static func apply_tribute_accept(state: WorldState, payer: TeamData, taker: Team
 	var amount: float = coin_before * TRIBUTE_TAKE_RATIO
 	ResourceBank.add(payer, "coin", -amount, "demand_tribute_out")
 	ResourceBank.add(taker, "coin", amount, "demand_tribute_in")
+	return amount
+
+
+# 索貢／勒索那條路的【全部】效果 ＝ 轉帳 ＋ 對方記一筆（**強制情境**）
+# ★它的兩個呼叫端都是強制情境：`:218`（NPC↔NPC 索貢）與
+#   `player_command_system` 的 `demand_tribute`（玩家向對方索貢）
+#   ⇒ ★★而 `tribute_offer`（對方主動送）**不呼這一支**，它呼上面那一支
+#     —— 那一條差別就是本票的全部內容。
+static func apply_tribute_accept(state: WorldState, payer: TeamData, taker: TeamData) -> float:
+	var coin_before: float = float(payer.resources.get("coin", 0)) if payer != null else 0.0
+	var amount: float = apply_tribute_transfer(state, payer, taker)
+	if amount <= 0.0:
+		return amount
 	if taker.leader_id != -1:
 		var payer_leader: PersonData = state.persons.get(payer.leader_id)
 		if payer_leader != null:
 			NpcAiSystem.new().write_memory(payer_leader, "tributed", taker.leader_id,
 				state.world.current_tick, amount / coin_before)
 	return amount
+
+
+# ══ ★★★★★★【`tribute_offer` 的收尾：三件，而它只有一處定義】（spec §3③）═══════════
+# ★真因（spec §1）：**同一個狀態機有兩條出口，而玩家那一條沒有收尾** ——
+#   NPC↔NPC 那條（`interaction_system.gd` 那一段）本來就做了這三件；
+#   而玩家那條（`interaction_system` 寫 forced_event 那一段）**一件都沒有**
+#   ⇒ 任務還在 ⇒ 下一輪再提 ⇒ 用戶看到的「**接受或拒絕都一樣重提**」。
+# ★★所以修法不是「新增一個 handler」，是**把已經存在的收尾接到玩家那一側**，
+#   而**三個出口（接受／拒絕／逾時）各自呼它一次** —— 不要在三個地方各抄一份。
+# ★★★`static func` 的理由（R² 查到的）：`sim_runner.gd` **沒有 `PlayerCommandSystem` 的實例參照**
+#   ⇒ 收尾必須能被類別名直呼（同 `TaskArbiter.release`／`DiplomaticAiSystem.REJECT_COOLDOWN`
+#   本來就是這樣被呼的 ⇒ **不是新花樣**）。
+# ★★★★而它**自己判 `order_task`**（不要求呼叫端先判）：
+#   接受／拒絕／逾時那三處都是**所有 diplomacy 提案共用**的通用分支
+#   ⇒ 若收尾無條件執行，會對 alliance／surrender／propose_trade 的 NPC
+#     **去清一個它們沒設過的 `order_task`**、去 release 一個不是它設的 task。
+#   ⇒ ★**所以守衛放在這一支裡面**（一處）而不是三個呼叫端各寫一次 `if`
+#     —— 三份 `if` 會漂，而漂掉的那一份是靜默的。
+#   ⇒ ★★而它**回傳有沒有真的收尾**（`bool`）：呼叫端要能分辨「收了」與「不是這條路」，
+#     而**那個差別不可以只能靠猜**。
+static func settle_tribute_offer(state: WorldState, from_team: TeamData, target_id: int) -> bool:
+	if from_team == null or state == null:
+		return false
+	if from_team.order_task != TeamData.TASK_TRIBUTE_OFFER:
+		return false
+	TaskArbiter.release(from_team)
+	from_team.diplomacy_reject_cooldown[target_id] = \
+		state.world.current_tick + REJECT_COOLDOWN
+	from_team.order_task = ""   # 清 order_task（防殘留→下次外交/結盟誤路由為求和）
+	return true
 
 # ★★★接受通商的【全部】效果 —— 一個真相只存一份（spec 2026-09-30 §2①）。
 #   NPC↔NPC 那一支與玩家 handler **都呼這一支**（呼叫點恰好 2 個，床 P2(a) 指名斷言）。

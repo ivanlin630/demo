@@ -547,11 +547,16 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 	# （不誤觸發 propose_alliance＝不靜默恢復成求盟）。真息兵行為＝backlog（WHAT，需另建 sue_for_peace/
 	# offer_tribute handler）；此刀只讓求和 grounded（fire 一次→release+cooldown→不 loop、不偽裝求盟）。
 	# 外交/結盟 order_task=""→不入此支→走下方 propose_alliance 不動（不誤傷）。
-	if initiator.order_task == TeamData.TASK_TRIBUTE_OFFER:
-		TaskArbiter.release(initiator)
-		initiator.diplomacy_reject_cooldown[target_id] = \
-			state.world.current_tick + DiplomaticAiSystem.REJECT_COOLDOWN
-		initiator.order_task = ""   # 清 order_task（防殘留→下次外交/結盟誤路由為求和）
+	# ★★★★★【這三行原本手抄在這裡，而它是那支共用收尾的【第四份】】（2026-10-01）——
+	#   spec §3③ 要「抽一支共用收尾，三個出口（接受／拒絕／逾時）各呼一次」，
+	#   ★而**這一處本來就有同樣的三行**（它是 NPC↔NPC 那條出口，唯一做對的那一條）
+	#   ⇒ 不把它一起接上去 ＝ 留一份手抄的複本，而**複本會漂**
+	#     （而漂掉的長相是「NPC 那條還會重提而玩家那條不會」）。
+	#   ⇒ ★★所以呼叫點是 **4 個**不是 spec 寫的 3 個 —— 而那是**少一份手抄**，
+	#     不是多一個消費者（P6 的反向掃要的正是「沒有第四處自己寫的收尾」）。
+	#   ★★★而守衛（`order_task == TASK_TRIBUTE_OFFER`）現在在**那一支裡面**
+	#     ⇒ 這裡不再自己判；`settle_tribute_offer` 回 `true` 才是「真的收尾了」。
+	if DiplomaticAiSystem.settle_tribute_offer(state, initiator, target_id):
 		return
 	var resp: String = DiplomaticAiSystem.new().handle_diplomacy_message(
 		state, target, initiator, "propose_alliance")

@@ -685,6 +685,18 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 					else:
 						TaskArbiter.release(beggar_t)
 					beggar_t.previous_task = ""
+			# ══ ★★★★★★【逾時也要收尾】（spec §3③ ＋ R² 查到的位置）═══════════════
+			#   ★用戶那句「**接受或拒絕都一樣重提**」的第三個出口就是這裡：
+			#     玩家**沒按**也會被重提，而那是因為逾時這一段**只清面板不收任務**。
+			#   ★★而**這一整段是服務所有非 `aid_request` 的 forced_event 的通用收尾**
+			#     （R² 查到的，spec 原本不知道）⇒ **不能整段套共用函式**
+			#     ⇒ 新開一個**專屬分支**才呼（而守衛在那一支裡面：它自己判 `order_task`）。
+			#   ★★★`static func` 的理由：本檔**沒有 `PlayerCommandSystem` 的實例參照**
+			#     ⇒ 收尾必須能被類別名直呼（同本檔既有的 `TaskArbiter.release` 寫法）。
+			if String(fe_timeout.get("action", "")) == "diplomacy" 					and String(fe_timeout.get("proposal", "")) == TeamData.TASK_TRIBUTE_OFFER:
+				var _from_t: TeamData = state.teams.get(int(fe_timeout.get("from_id", -1)))
+				DiplomaticAiSystem.settle_tribute_offer(state, _from_t,
+					state.get_player_team_id())
 			# ★★★生命週期第三點（spec 2026-09-29 #7③）：逾時進玩家事件流＋人話終端。
 			#   ★舊版印的是 `str(dict)` —— 那是 debug 卷面,不是玩家看得懂的一句。
 			var _ptid_to: int = state.get_player_team_id()
