@@ -17,7 +17,7 @@ const FLOOR_RATIO_BASELINE: float = 0.6225   # 修前實測：地板 9909／全�
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P1", "P2", "P3", "P4", "P5", "P6", "P8"]
+const EXPECTED_CELLS: Array = ["P1", "P2", "P3", "P4", "P5", "P6", "P8", "P9"]
 
 
 func _initialize() -> void:
@@ -85,6 +85,7 @@ func _p_world() -> void:
 	var p3_bad: Array = []
 	var rest_choices: Array = []   # [tid, tick, fatigue]
 	var task_hist: Dictionary = {}   # tid → {task: 小時數}
+	var ever_pos: Dictionary = {}    # 疲勞曾經 > 0 的隊
 	var floor_n: int = 0
 	var all_n: int = 0
 	var ticks: int = DAYS * WorldState.TICKS_PER_DAY
@@ -98,6 +99,8 @@ func _p_world() -> void:
 			if not first_seen.has(tid):
 				first_seen[tid] = now
 			var f: float = t.fatigue
+			if f > 0.0:
+				ever_pos[tid] = true
 			if last_f.has(tid) and f < float(last_f[tid]):
 				decreased[tid] = true
 			# ★P3 以【疲勞 pass】為單位（不是以「疲勞有變」為單位）：
@@ -127,6 +130,11 @@ func _p_world() -> void:
 		if st.teams.has(tid) and ticks - int(first_seen[tid]) >= WorldState.TICKS_PER_DAY:
 			pop.append(int(tid))
 	pop.sort()
+	# ★從頭到尾疲勞都是 0 的隊沒有東西可降（實測 Team49 偵查 55 小時、疲勞 0.00）⇒ 不在「必須降過」的母體裡，另印
+	var zero_all: Array = pop.filter(func(x): return not ever_pos.has(x))
+	pop = pop.filter(func(x): return ever_pos.has(x))
+	if not zero_all.is_empty():
+		print("   從頭到尾疲勞 0（沒東西可降，不判）：%s" % str(zero_all))
 	var never: Array = pop.filter(func(x): return not decreased.has(x))
 	print("   母體（活到最後、在場 ≥ 1 天、非野獸）%d 隊｜降過 %d｜沒降過 %s" % [pop.size(), pop.size() - never.size(), str(never)])
 	for x in never:
@@ -187,6 +195,12 @@ func _p_world() -> void:
 			float(Probe.amounts.get("diag.休息.winutil_sum", 0.0)) / dn])
 	else:
 		print("   「休息」可選卻輸 0 次（★它可能根本沒進候選 —— 看 diag 前綴）")
+	var rest_keys: Array = []
+	for k in Probe.counts:
+		if String(k).contains("休息") or String(k).contains(TeamData.TASK_REST):
+			rest_keys.append("%s=%d" % [String(k), int(Probe.counts[k])])
+	rest_keys.sort()
+	print("   含「休息」的計數：%s" % str(rest_keys))
 	_check("P6 30 天內「休息」至少被選中一次（%d）—— 0 次不加門檻，要回報" % rest_choices.size(), rest_choices.size() >= 1)
 	_cells_ran.append("P6")
 	# ── P8
@@ -194,3 +208,17 @@ func _p_world() -> void:
 	var p8: int = int(Probe.counts.get("goal.escape_war.rest_plus", 0))
 	print("   因 TASK_REST 給出 +0.005 的次數 ＝ %d（tap 在、數字印出；不判多少）" % p8)
 	_cells_ran.append("P8")
+	# ── P9（spec §5）
+	print("
+── P9 疲勞 ≥ 0.8 且糧撐 > 5 天的隊·pass：贏家前 5 名 ──")
+	var p9n: int = int(Probe.counts.get("fatigue.tired_fed.n", 0))
+	var wins: Array = []
+	for k in Probe.counts:
+		if String(k).begins_with("fatigue.tired_fed.winner."):
+			wins.append([String(k).trim_prefix("fatigue.tired_fed.winner."), int(Probe.counts[k])])
+	wins.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
+	print("   隊·pass %d｜前 5：%s" % [p9n, str(wins.slice(0, 5))])
+	var top5: Array = wins.slice(0, 5).map(func(x): return String(x[0]))
+	_check("★P9 母體地板：疲勞高而吃飽的隊·pass ≥ 1（%d）" % p9n, p9n >= 1)
+	_check("P9 「休息」進前 5（%s）" % str(top5), top5.has("休息"))
+	_cells_ran.append("P9")

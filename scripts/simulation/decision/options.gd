@@ -297,8 +297,11 @@ static var REGISTRY: Dictionary = {
 		"terms": [["rest_drive", "rest"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.fatigue > 0.0,
-		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
-			return {"task": TeamData.TASK_REST, "target": Vector2i(-1, -1)},
+		# ★target ＝ 自己腳下（不是 (-1,-1)）：派工迴圈把 (-1,-1) 當「不可派、試次佳」（faction_ai_system.gd 三處
+		#   `if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE: continue`）
+		#   ⇒ 第一版回 (-1,-1) ⇒ 秤贏了 50 次、一次都沒派出去（床 P9 贏家有它、P6 轉換 0 次）
+		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
+			return {"task": TeamData.TASK_REST, "target": team.tile_pos},
 	},
 	"紮營": {
 		"affinity": [0.6, 0.1, 0.0, 0.1, 0.2], "sets": {"survival": true, "passive_survival": true},

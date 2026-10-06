@@ -42,7 +42,11 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 	var raw := PackedFloat32Array()
 	raw.resize(N_LAYERS)
 	# 生存：食物餘命距飽線
-	raw[L_SURVIVAL] = clampf((SURVIVAL_SATED_DAYS - food_days) / SURVIVAL_SATED_DAYS, 0.0, 1.0)
+	# ★票 T §5（systems 裁 (a)）：求生層也讀體力 —— 取 max（身體最急的那一樣）；不新增常數、不加權重
+	#   ★舊版只讀食物 ⇒ 「休息」掛在求生層而那層讀不到疲勞（決策讀不到自己的狀態）⇒ 吃飽的累隊休息被係數壓到 ~0.5、30 天 0 次
+	#   ★team.fatigue 本來就是 0..1（sim_runner `_step6d_fatigue` 兩端 clamp）⇒ 不用換算
+	raw[L_SURVIVAL] = maxf(clampf((SURVIVAL_SATED_DAYS - food_days) / SURVIVAL_SATED_DAYS, 0.0, 1.0),
+		clampf(team.fatigue, 0.0, 1.0))
 	# 安全：威脅(ctx.threat 已 0..1 clamp)
 	raw[L_SAFETY] = clampf(threat, 0.0, 1.0)
 	# 歸屬：faction 規模距 STATE 門檻；solo(faction_id==-1)→完全未滿足=1

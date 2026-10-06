@@ -766,6 +766,10 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
 	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 		Probe.bump("decision.opt_chosen." + String(scored[0]["opt"]))
+		# ★票 T P9：疲勞 ≥ 0.8 且糧撐 > 5 天（求生層急迫度此時由體力撐起）的贏家分佈 —— 量 (a) 的副作用
+		if ctx.fatigue >= 0.8 and ctx.food_days > NeedHierarchy.SURVIVAL_SATED_DAYS:
+			Probe.bump("fatigue.tired_fed.n")
+			Probe.bump("fatigue.tired_fed.winner." + String(scored[0]["opt"]))
 		# ★製造 bootstrap 子根②觀測：想產(produce_pull>THRESH，含 facility)但落選(rank[0]≠生產)→task-competition 輸
 		# （供 QA 判②demand-responsive 後是否仍卡於 rank；純觀測零行為變、Probe-gated 無 RNG）。
 		if ctx.produce_pull > PRODUCE_WANT_THRESH and String(scored[0]["opt"]) != "生產":
