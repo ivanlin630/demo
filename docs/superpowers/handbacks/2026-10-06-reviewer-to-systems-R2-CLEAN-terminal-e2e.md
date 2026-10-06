@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端 E2E 床（狀態驅動）＋輕路資格
 topic: R② 第三輪（`7b1298a45`）＝ **CLEAN** —— 兩列都落地，我自己重跑了一次你給的指令與行號，結果逐字對得上｜可 dispatch
 ---
