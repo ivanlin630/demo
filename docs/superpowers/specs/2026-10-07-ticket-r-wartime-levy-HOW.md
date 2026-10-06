@@ -25,6 +25,9 @@ Q3 率＝**勢力自己的**：盟主人格＋戰況的活變數 ⇒ 一支**新
    ⇒ 禁借繳稅方地主的 tax_rate、禁 ×1.5（`SPECIAL_TAX_MULT` 退場）
    基礎可以是庫存，兩條底線：
    ①不得取到繳稅方**生存儲備**以下 ⇒ 用既有定義，★禁另抄常數（今天的 `pop×14`／`coin 留一半` 是手抄的，一併換掉）
+     ★★藍圖裁（2026-10-07 e52932ccb）：儲備＝**`SURVIVAL_SATED_DAYS`（5，`need_hierarchy.gd:16`）**，用 `team.food_runway` 判
+       ⇒ 可徵糧額＝超過 5 天的那部分（徵後 food_runway ≥ 5）；可徵額 0 ⇒ **不列**此選項
+       ⇒ **coin 無底線**（「留一半」刪）—— 錢被徵光的後果走怨恨→脫離，不另加保護
      ★R² 打回：~~`goal_resolver.gd:462 _resident_food_runway`~~ —— 它被 `goal_resolver.gd:418` 自己的註解標過 **god-view 嫌疑**
        ⇒ 改用 **`team.food_runway`**（`team_data.gd:168`，`food_flow.gd:27` 每日寫入的快取，零 RNG、自家數）
      ★門檻值：量測員報告用的「糧撐 3 天」—— **先查它的來源常數**；找不到 ⇒ 那是 WHAT 數字，回藍圖，不發明
@@ -33,7 +36,8 @@ Q3 率＝**勢力自己的**：盟主人格＋戰況的活變數 ⇒ 一支**新
 Q1 有宣告才可選 ⇒ ★R² 核過：**全站沒有廣義的 at_war 旗標**；唯一可用的是 `FactionData.strategy == "戰爭基金"`（`faction_ai_system.gd:1999`）
    ⇒ ★而它**範圍窄**：只在「野心或好戰 > 0.6 **且** 盟主隊 material < 200」時才是這個值 ⇒ **材料充足的戰爭不會被抓到**
    ⇒ 「緊急徵收」是**糧食危機**，不是戰爭 —— 不准混進來
-   ⇒ 本票照**窄範圍**做（只認「戰爭基金」），spec 明寫「這不是廣義的戰爭宣告」；要不要另立廣義宣告狀態 ＝ WHAT，已問藍圖
+   ⇒ 本票照**窄範圍**做（只認「戰爭基金」），spec 明寫「這不是廣義的戰爭宣告」；要不要另立廣義宣告狀態 ＝ WHAT ⇒ ★藍圖裁：照窄範圍做，**登 defer**（`defers.tsv` 列 `ticket-r-declaration-narrow-until-war-flag`，
+     錨＝faction／world 出現戰爭狀態欄位的那一天，宣告條件改接它）
    ⇒ 沒有宣告 ⇒ 不列
 Q4 名字＝**戰時徵用**：訊息印徵用者、率、應急理由；帳本 reason 改成 `wartime_levy_out`／`wartime_levy_in`
    ⇒ ★改 reason 的爆炸半徑在讀者：`raid_out` 的字面讀者今天是**量測員的三支床**（`tax_cadence_both_channels`／

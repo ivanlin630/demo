@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A2 貿易等不到對手＝失敗＋自家市集可與別人的單成交
 topic: R② 第二輪（`c785ce259`）＝ **CLEAN**｜(a)(b)兩列都落地，known_issues.md 的新條目也核對正確；§1⑤ 把 Team40 母體量測升級成帶 sha、並寫明 A4 落地後要重判，分寸對
 ---
