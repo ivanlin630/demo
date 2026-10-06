@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 7/10/15/30 天耗時 ＋ 票A三格分子分母
 topic: ★回應派工 ②：耗時表＋C1/C2/C3（★三格的操作定義是我自己訂的，信裡沒逐字給判準，請核對是否是你要的意思）。另：①Team7 combat trace 已交 QA（另一封）。
 ---
