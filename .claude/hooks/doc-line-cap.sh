@@ -59,6 +59,48 @@ for role in "${!ROLEDOC[@]}"; do
   [ "$tot" -gt "$CAP_PER_ROLE" ] && _w "$(printf '%-20s' "${role} 開場合計")${tot} > ${CAP_PER_ROLE}  ★（CLAUDE+invariants+00_roles+自己那份）"
 done
 
+# ★★★位元組上限（2026-10-07，藍圖量、用戶「工作流 md 又肥了」引出）——★行數尺會被【長行】繞過：
+#   行數全綠，而每行長到 1000+ 字（invariants 最長一行 1380 字）⇒ 開場合計 72–97KB ≈ 36k–49k token。
+#   ⇒ ★本層數【位元組】；行數那層留著當第二道。
+# ★★母體不再手抄角色→檔對照：從 session-role.sh 的 CTX【那一行自己點名的 .md】抽（開場讀什麼以 hook 為準，
+#   見那支檔 :106）＋ CLAUDE.md（自動載入）＋ invariants.md（CLAUDE.md：每 session 開頭讀一次）。
+#   ★舊 ROLEDOC 表（上面）是手抄的：它說 QA 讀 04_qa，而 CTX 還點名 05_acceptance ⇒ 少算 23KB。
+# ★★★棘輪：`docs/process/doc-bytes-baseline.tsv`（role<TAB>bytes）只准變少 ⇒ 超基線＝回肥（告警）；
+#   低於基線 ⇒ 印「可下調」—— ★本 hook【不自己改基線】（會改工作樹的自動化要自己 commit，而 hook 不該 commit）
+#   ⇒ 下調由瘦身那顆 commit 一起帶。目標 ≤ CAP_ROLE_BYTES。
+CAP_ROLE_BYTES=40960
+_role_docs() {   # $1 = 角色鍵（systems／qa…）⇒ 印它開場必讀的路徑（去重）
+  local ctx tok f
+  ctx=$(awk -v r="$1" 'index($0, "  " r "|")==1 {f=1; next} f && /CTX=/ {print; exit}' .claude/hooks/session-role.sh)
+  { echo CLAUDE.md; echo docs/invariants.md
+    # ★只取「讀 …。」那一句（第一個「讀」到其後第一個「。」）：CTX 其餘部分也提到 .md（owner 清單、「不碰 game-design.md」）
+    #   ⇒ 提到≠開場讀；量測員那句寫「（+ 00_roles）」不帶 .md ⇒ 認 0X_ 開頭的裸名
+    ctx=$(printf '%s' "$ctx" | sed -n 's/^[^讀]*讀\([^。]*\)。.*/\1/p')
+    for tok in $(printf '%s' "$ctx" | grep -oE '[0-9A-Za-z_-]+\.md|0[0-9][a-z]?_[a-z_]+' | sed 's/\.md$//' | sort -u); do
+      for f in "docs/process/$tok.md" "docs/$tok.md" "$tok.md"; do [ -f "$f" ] && { echo "$f"; break; }; done
+    done; } | awk '!seen[$0]++'
+}
+_bl=docs/process/doc-bytes-baseline.tsv
+_bout=""; _bwarn=0
+for role in blueprint systems reviewer qa measurer implementer; do
+  _files=$(_role_docs "$role"); _tot=0
+  while read -r f; do [ -f "$f" ] && _tot=$(( _tot + $(wc -c < "$f") )); done <<< "$_files"
+  _base=$(awk -F'\t' -v r="$role" '$1==r{print $2}' "$_bl" 2>/dev/null)
+  _st=""
+  if [ -n "$_base" ] && [ "$_tot" -gt "$_base" ]; then _st="★回肥（基線 $((_base/1024))KB）"; _bwarn=$((_bwarn+1))
+  elif [ -n "$_base" ] && [ "$_tot" -lt "$_base" ]; then _st="可下調基線（$((_base/1024))KB→$((_tot/1024))KB）"; fi
+  [ "$_tot" -gt "$CAP_ROLE_BYTES" ] && _st="${_st} 超目標 $((CAP_ROLE_BYTES/1024))KB"
+  _bout="${_bout}
+  $(printf '%-12s' "$role")$((_tot/1024))KB  ${_st}  ⇐ $(printf '%s' "$_files" | xargs -n1 basename | tr '\n' ' ')"
+done
+echo "[doc-bytes] 開場必讀合計（位元組；目標 ≤ $((CAP_ROLE_BYTES/1024))KB／角色；基線只准變少）：${_bout}"
+# ★最長三行（判準：一條規則一行 ≤ 200 字；超過的要把血證搬去 detail）——數【字】不數位元組
+_allf=$(for role in blueprint systems reviewer qa measurer implementer; do _role_docs "$role"; done | sort -u)
+_long=$(while read -r f; do [ -f "$f" ] && LC_ALL=C.UTF-8 awk -v f="$f" 'length($0)>200{print length($0) "\t" f ":" NR}' "$f"; done <<< "$_allf" | sort -rn)
+_nlong=$(printf '%s' "$_long" | grep -c .)
+echo "[doc-bytes] 超過 200 字的行：${_nlong} 行｜最長三行：$(printf '%s' "$_long" | head -3 | awk -F'\t' '{printf "%s（%s 字） ", $2, $1}')"
+[ "$_bwarn" -gt 0 ] && echo "[doc-bytes] ★★回肥 ${_bwarn} 個角色：新寫進必讀檔的東西要嘛壓成一行、要嘛進 detail（處置同下方 doc-cap）"
+
 # ★★★第二層檢查：**未閉合 code fence**（2026-08-27 systems 立，血證見下）
 #   ★病：把節「壓縮進 detail」的動作會截在 ``` 中間 —— 留下孤兒【開】或孤兒【閉】。
 #     孤兒【開】⇒ 從它到檔尾整段 render 成一坨 code；孤兒【閉】⇒ 位移整條 parity。
