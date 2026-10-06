@@ -18,9 +18,9 @@ Godot 4.2.2 GDScript 世界模擬器。
 # 跑 multi sanity
 .\tools\godot.ps1 --headless --script scripts/debug/game_sim_multi.gd
 
-# ★★★merge 前跑【全部】merge-gate —— ★清單見註冊表 docs/process/merge-gates.tsv
-#   ★★這裡【只留這一行】（用戶裁「搬」2026-09-01）：新增閘往註冊表加一行，不要往本檔加。
-#   ★★★而註冊表是給 runner 讀的，不是給人照著跑的 —— 要人照著跑的清單會長大然後沒人跑完整份。
+# ★merge 前跑【全部】merge-gate —— 清單見註冊表 docs/process/merge-gates.tsv
+#   ★這裡【只留這一行】（用戶裁「搬」2026-09-01）：新增閘往註冊表加一行，不要往本檔加。
+#   ★而註冊表是給 runner 讀的，不是給人照著跑的 —— 要人照著跑的清單會長大然後沒人跑完整份。
 bash .claude/hooks/merge-gates.sh
 ```
 
@@ -82,7 +82,7 @@ docs/
 
 **★信箱（2026-09-23 第二版，用戶裁）＝ 不掛任何 inbox watcher**：收信＝別人敲你（harness 推播）；
 寄信＝**①Write handback ②commit ③立刻 SendMessage 敲收件人**（`to:` 填 `peers.sh` 的 ADDR 欄）
-—— ★★**三件缺一＝沒送到**。開場唯一要做的事＝`whoami.sh` 登記通訊錄。動完把該信改 `status:consumed`。
+—— ★**三件缺一＝沒送到**。開場唯一要做的事＝`whoami.sh` 登記通訊錄。動完把該信改 `status:consumed`。
 ★看門狗照舊掛（`role-watch.sh watchdog`）。為什麼三代 watcher 全退、Telegram 進站退役 → `07_mailbox_trigger.md`。
 
 - **git doc ＝ 共享大腦**：handback ＋ `game-design`／`invariants`／`progress` 是**持久狀態**（不是聊天紀錄）。
