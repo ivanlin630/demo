@@ -2470,6 +2470,7 @@ const SPEC_UI_MODE_COUNT: int = 13
 #   ★而它刻意【不放在棘輪那幾個常數旁邊】：那一區是 rebase 的衝突熱點
 #     （棘輪衝突一律取大），把一個【只准變少】的常數放進去會讓兩種方向混在同一處。
 const SPEC_UI_STACK_PENDING: int = 11
+const CONTROL_FLOOR_TRIB: int = 4  # tribute_offer_loop_bed（四道：接受那一支併成索貢語意⇒倒付／接受那一支的收尾被刪⇒24h 內再到達 1 次／拒絕同上／逾時那個專屬分支被刪⇒對方在同一個窗裡又擺一個面板）
 const CONTROL_FLOOR_DVO: int = 2  # decision_vs_outcome_bed（分開講／具名例外）
 const CONTROL_FLOOR_AVAIL: int = 16  # ★15 → 16（2026-10-01：P1b「全庫對它的寫入 ＝ 0 處」實測紅於 colocation_gate_bed.gd:78；棘輪一律取大）｜# ★11 → 15（2026-10-01「衍生檢視」那張票：P17 的「target 改掉 ⇒ 差集非空並指名」＋P19 的三道（改回手抄字面／刪掉比成員那一條／再加一條同源斷言）全部實測紅；棘輪一律取大）｜# available_actions_bed（五道：母體換手抄／條件複製回查詢面／原因清空／★入口寫一個欄位(P9 行為證)／★★把一個宣告拿掉(P10 反向掃要指名它)／★★★label 加回信封側(P11 唯一生產者)／★★抽取式範圍限定拿掉(多吞方向的地板)／★★★入口那一格關掉(P12 退化狀態,battery10 血證)；★原本的「排除拿掉」那一道母體是空的＝systems 裁維持「機制接電＋清單暫空」，見床裡劃掉那一行）
 const CONTROL_FLOOR_STRINGS: int = 3  # scripted_exploration_bed（P11 表覆蓋／P12 零英文／★P6 artifact 的 sha 必須是 HEAD 祖先 —— 讓【過期不靜默】，systems 裁 2026-10-01）
@@ -2503,6 +2504,7 @@ const CONTROL_FLOORS: Dictionary = {
 	"colocation_gate_bed.gd":      CONTROL_FLOOR_COLOC,
 	"command_replay_bed.gd":       CONTROL_FLOOR_REPLAY,
 	"decision_vs_outcome_bed.gd":  CONTROL_FLOOR_DVO,
+	"tribute_offer_loop_bed.gd":   CONTROL_FLOOR_TRIB,
 	"forced_event_panel_bed.gd":   CONTROL_FLOOR_FEP,
 	"inquiry_v1_bed.gd":           CONTROL_FLOOR_INQUIRY,
 	"leader_chokepoint_bed.gd":    CONTROL_FLOOR_LEADER,

@@ -171,7 +171,9 @@ func _tribute_arrivals(seen: Array) -> int:
 # ══ P1：接受 ＝ 收貢（玩家 coin 增加、對方減少，而金額 ＝ 轉帳那一半的回傳）═══════
 # ★母體地板（spec P1 逐字）：對方 `coin_before > 0` —— 否則 `apply_tribute_transfer` 回 0
 #   ⇒ 這一格會在「什麼都沒發生」的世界裡恆綠。
-# 負對照：把那一支 arm 併進 `"tribute"`（走 `_pay_extortion`）⇒ 玩家 coin **減少** ⇒ 本格紅
+# 負對照：接受那一支額外走 `_pay_extortion`（＝併成索貢語意）⇒ 本格紅 2 條，而方向逐字相反：玩家 2110.1 → **1685.3**、對方 500 → **924.8** ⇒ 已於 feat/text-ui-layout-v2（2026-10-06 這一輪） 實測紅
+# ★★而**同一個擾動也讓既有那個倒付守衛紅**（`forced_event_panel_bed`：玩家 coin 500.0 → 387.5）
+#   ⇒ spec P2「既有那一格不得弱化」**有實證**，不是一句話。
 func _test_p1_accept_collects_the_tribute() -> void:
 	print("\n── P1 接受 ＝ 收貢 ──")
 	var pair: Array = _fresh()
@@ -291,7 +293,8 @@ func _settle_assertions(tag: String, npc: TeamData, st: WorldState, ptid: int) -
 		npc.current_task != TeamData.TASK_TRIBUTE_OFFER)
 
 
-# 負對照：把接受那一支 arm 裡的 `settle_tribute_offer` 那一行刪掉 ⇒ 本格紅（收尾三件 ＋ 再到達）
+# 負對照：把接受那一支的 `settle_tribute_offer` 刪掉 ⇒ 本格紅 4 條（order_task 沒清／cooldown 無鍵／cooldown ＝ -1／★**24h 窗內再到達 1 次**） ⇒ 已於 feat/text-ui-layout-v2（2026-10-06 這一輪） 實測紅
+# ★★★那個「實得 1 次」就是用戶那句「**接受或拒絕都一樣重提**」被機械重現的樣子。
 func _test_p3a_accept_exit_no_rearrival() -> void:
 	print("\n── P3a 出口①接受：收尾 ＋ 24h 零再到達 ──")
 	var pair: Array = _fresh()
@@ -312,7 +315,7 @@ func _test_p3a_accept_exit_no_rearrival() -> void:
 	_cell("_test_p3a_accept_exit_no_rearrival")
 
 
-# 負對照：把拒絕那一支裡的 `settle_tribute_offer` 刪掉 ⇒ 本格紅
+# 負對照：把拒絕那一支的 `settle_tribute_offer` 刪掉 ⇒ 本格紅 4 條，含**24h 窗內再到達 1 次** ⇒ 已於 feat/text-ui-layout-v2（2026-10-06 這一輪） 實測紅
 func _test_p3b_refuse_exit_no_rearrival() -> void:
 	print("\n── P3b 出口②拒絕：收尾 ＋ 24h 零再到達 ──")
 	var pair: Array = _fresh()
@@ -333,7 +336,7 @@ func _test_p3b_refuse_exit_no_rearrival() -> void:
 	_cell("_test_p3b_refuse_exit_no_rearrival")
 
 
-# 負對照：把 `sim_runner` 那個專屬分支刪掉 ⇒ 本格紅
+# 負對照：把 `sim_runner` 那個專屬分支刪掉 ⇒ 本格紅（含母體地板「面板真的被逾時清掉」—— ★**沒收尾的話對方在同一個窗裡又擺了一個面板**，而那正是迴圈本身） ⇒ 已於 feat/text-ui-layout-v2（2026-10-06 這一輪） 實測紅
 # ★而這一格**不按任何鍵** —— 它是「玩家沒回應」那條路（用戶也會遇到：他可能就是沒按）
 func _test_p3c_timeout_exit_no_rearrival() -> void:
 	print("\n── P3c 出口③逾時（不按任何鍵）：收尾 ＋ 24h 零再到達 ──")
