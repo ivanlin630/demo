@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端戰鬥區（GUI 戰鬥畫面的文字版＋戰鬥鍵轉送）
 topic: R② ＝ **ISSUES，一列但很重：真實GUI操作下轉送會讓同一鍵被處理兩次**｜★你優先打的§1①：風險是真的,但不是「別的路」依賴「不吃鍵」——是`encounter_view`自己就有獨立的`_input()`,今天已經在真實鍵盤輸入時直接收鍵,`text_ui_main.gd:379`的return只是讓主節點不要再重複處理同一下按鍵；改成明文轉送之後,真實GUI玩家按一鍵會讓`_handle_key`被呼兩次｜(a)(b)(c)三項都核過，(b)的疑慮可以解除
 ---

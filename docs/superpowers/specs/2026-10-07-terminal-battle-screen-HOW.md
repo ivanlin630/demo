@@ -21,14 +21,17 @@ GUI 戰鬥的六欄＝`encounter_view.gd:22-27` 六個 Label，內容由 `_refre
 ## §1 做什麼
 
 ```
-①【鍵送得進去】戰鬥中（encounter_view.visible）主節點把鍵轉給 `encounter_view._handle_key(kc)` —— ★唯一分派，不另寫一份
-  ⇒ 改 `text_ui_main.gd:379`：從「return」改成「轉送」；press_on 不必改（它本來就呼主節點 _input）
+①【鍵送得進去】★R² 打回（第一版「改 :379 成轉送」會讓真 GUI 玩家一鍵被處理兩次：引擎本來就把同一次按鍵廣播給 `encounter_view._input:333`）
+  ⇒ 裁 R² 方向②：**`text_ui_main.gd:379` 的 return 不動**（GUI 路照舊由引擎廣播給 encounter_view）
+  ⇒ 終端路在送鍵的唯一函式 `PlayerRepl.press_on` 分流：戰鬥中（`encounter_view.visible`）⇒ 呼 `encounter_view._handle_key(kc)`；否則照舊呼主節點 `_input`
+  ⇒ ★戰鬥按鍵分派仍只有一份（`_handle_key`）；兩種呼叫者各走各的入口，不讓 `_input(event)` 同時服務引擎廣播與直呼
+  ⇒ P10b：GUI 路負對照——模擬引擎廣播一次按鍵（同時送主節點與 encounter_view 的 _input），`_handle_key` 只被呼一次
 ②【畫面】compose 在戰鬥中加一區「── 戰鬥 ──」：
   ·六欄＝直接讀 `encounter_view` 那六個 Label 的 `.text`（★同一份字串，不重算、不手抄）
-  ·單位座標列表：我方／敵方每個單位一行（名、座標、血量、★下一次行動的時間 —— 藍圖：遭遇戰時間尺 1:1、單位計時要看得到；欄位名先查 encounter state）
+  ·單位座標列表：我方／敵方每個單位一行（名、座標、血量、★下一次行動的時間＝單位的 `action_timer`（R² 核過）—— 藍圖：單位計時要看得到）
   ·鍵提示＝`_lbl_actions.text`（GUI 顯示的那一句就是綁定的說明，從同一處讀）
   ⇒ 戰鬥中其他區照常（頂列、事件區），主畫面的動作區不顯示（那些鍵現在不歸它）
-③【畫面＝結算後】press_on 的等待條件加一條：戰鬥中等到 `_waiting_for_player` 或戰鬥結束（不只 is_advancing）
+③【畫面＝結算後】press_on 的等待條件加一條：戰鬥中等到「輪到玩家」或戰鬥結束（不只 is_advancing）⇒ encounter_view 加一支公開查詢（例 `is_waiting_for_player()`），不讀私有 `_waiting_for_player`
 ④【Z 命令選單】`_open_command_menu:532` 開的是 GUI 彈出選單 ⇒ 終端看不到 ⇒ 把選單項目印進戰鬥區（編號），數字鍵轉 `_on_command_selected(id)`
   ★若這一步改動超過「印出＋轉送」⇒ 回報、Z 先標「終端未支援」（不准靜默無反應）
 ⑤滑鼠功能（點格、縮放）不做：終端用 QWEASD 移游標已能瞄準
