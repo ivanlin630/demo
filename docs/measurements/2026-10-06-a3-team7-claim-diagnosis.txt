@@ -97,3 +97,46 @@ ERROR: [FAIL] ★★★P3(a) 下輪對那一格的「領取」折價 < 1（1.000
 # 另一個結構洞（不修，回報）
 ·arrived 只收「真的移動並抵達」⇒ 若隊**已經站在**待領那一格才承諾領取，它不會「抵達」⇒ resolver 永遠不被呼 ⇒ 那筆待領領不到
   （Team14 若在 (4,6) 上選了領取，就會撞這個；它這 30 天沒選，所以這個世界沒走到）
+
+# 第四步：拆入口閘讓 world-fp 變 ⇒ 改 (B)（systems 裁）
+·電池 world-fp：final_fp ＝ be2d20812963b4d7c27bd4c490168a7f ≠ 基準 8c9b2d72e28aef7116edef1283ab9974
+·二分（另一棵 worktree，不動電池那棵）：只把入口 owner 閘放回去 ⇒ final_fp ＝ 8c9b2d72…（基準）⇒ 變化 100% 來自拆入口閘
+·fp 世界整輪只有一次「帶 TRADE 抵達自家市集」：
+```
+[OWNARR] t9000 Team40 opt=survival claims_here=0 at=(10, 25) target=(-1, -1)
+```
+·Team40 的 move_target 序列（t7800 起）：
+```
+[T40MT] t7800 move_target (10, 25) → (-1, -1)｜目標格 owner ＝ - lvl=-｜opt=survival surv= task=逃跑
+[T40MT] t7860 move_target (-1, -1) → (13, 25)｜目標格 owner ＝ -1 lvl=0｜opt=survival surv= task=逃跑
+[T40MT] t8540 move_target (13, 25) → (10, 25)｜目標格 owner ＝ 40 lvl=1｜opt=survival surv= task=逃跑
+[T40MT] t9000 move_target (10, 25) → (-1, -1)｜目標格 owner ＝ - lvl=-｜opt=survival surv= task=idle
+[T40MT] t9007 move_target (-1, -1) → (10, 25)｜目標格 owner ＝ 40 lvl=1｜opt=survival surv= task=貿易
+[T40MT] t9627 move_target (10, 25) → (13, 23)｜目標格 owner ＝ 32 lvl=1｜opt=maintain_tools:resource surv= task=貿易
+```
+  ⇒ t8540 以**逃跑**把目標設成自家 (10,25)；t8973 任務換成**貿易**（option＝survival 標籤）而 move_target 沒重設；t9000 抵達
+  ⇒ 拆閘後它走到 step3c 的 release（以前不進那個 if）⇒ 世界從這裡分岔
+·★★我那張母體表錯在哪：我數的是「哪些 TRADE 派工會把**目標設成**自家」，而 TRADE 任務的目的地**可以是前一個任務留下的**
+  ⇒ 真正的母體是「任何帶 TRADE 抵達自家市集的隊」——拆閘因此改到了非領取隊（Team40）的 release，超出本票
+·★Team40 本身是另一個缺陷（systems 登記交藍圖，不在本票）：任務從逃跑換成貿易時 move_target 沒重設；
+  它帶著 TRADE 抵達自家市集，在舊版裡**永遠不被 release**（入口閘擋住了那段 release）
+
+## (B) 的負對照（commit 之後跑、git checkout HEAD -- 還原）
+### 拿掉入口的自家市集分支（claim_on_arrival 改 pass）
+```
+=== claim_at_own_market DONE === errors: 4
+ERROR: [FAIL] ★★★P1 material 必增 7.0（80.0 → 80.0）
+ERROR: [FAIL] ★★P1 那筆待領被清掉
+ERROR: [FAIL] ★★★P3(a) 承諾領取、到場落空  有那一筆失敗記憶
+ERROR: [FAIL] ★★★P3(a) 下輪對那一格的「領取」折價 < 1（1.000）
+```
+### release 不看「領取」（任何 option 都 release）
+```
+=== claim_at_own_market DONE === errors: 1
+ERROR: [FAIL] ★★★P4 不 release（task 仍是 TRADE）
+```
+### 拿掉自家市集分支的 release
+```
+=== claim_at_own_market DONE === errors: 1
+ERROR: [FAIL] ★★★P1 領完被 release（task 不再是 TRADE：貿易）
+```
