@@ -26,13 +26,23 @@
   撮合時跳過 `origin_team == visitor`（自己的單）的那幾張，**其餘照常**
   ⇒ ★A3 加的入口自家市集分支（`:864`）就不再需要 —— 領取在 resolver 早返回之前已做（A3）⇒ **拿掉那個分支、只留 resolver 一條路**
     （判準庫：兩個入口做同一件事 ⇒ 會漂；A3 那時加它是因為入口閘還在）
-②【到場無可成交單 ＝ 失敗】resolver 回 `dealt == false` 且隊伍是**承諾貿易而來**（current_task＝TRADE 且 move_target＝這格）⇒
+②【到場無可成交單 ＝ 失敗】resolver 回 `dealt == false` 且隊伍是**承諾貿易而來** ⇒
+  ★R² 打回：~~current_task＝TRADE 且 move_target＝這格~~ —— 抵達時 move_target 可能已被清成 (-1,-1)（`movement_system.gd` 三處）
+  ⇒ 判法**照隔壁既有寫法** `sim_runner.gd:870`：`current_task == TRADE and (move_target == Vector2i(-1,-1) or tile_pos == move_target)`
+  ⇒ 不發明第二種「抵達」判法（最好抽成一支共用函式，兩處都呼它）
   `FailureMemory.record(state, team, "貿易", str(tile_id), ORDER_LIFETIME, "trade_arrived_no_deal")` ＋ **當場 release**
   ⇒ `failure_memory.gd:67` 那一格從缺席清單移到 `OPTION_FAIL_KEY`（它自己寫著「補上時這格要改判」的那種）
   ⇒ ★「承諾貿易而來」的判法要窄：路過的 TRADE 隊（目的地不是這格）不算失敗
-③【賣單到期 ＝ 失敗】`order_system.gd:262` 的 `if kind == "buy"` 擴成買賣兩邊（賣單 reason `order_abandoned_sell`），
-  動詞照建單的那個 option（★先查：賣單是哪幾個 option 建的、`OPTION_FAIL_KEY` 有沒有對應鍵）
+~~③【賣單到期 ＝ 失敗】`order_system.gd:262` 的 `if kind == "buy"` 擴成買賣兩邊（賣單 reason `order_abandoned_sell`），
+  動詞照建單的那個 option~~ ★**R² 核完：本票不做**
+  ⇒ 賣單**不是任何 option 建的**：`post_order(..."sell")` 兩處（`order_system.gd:293/:333`）都在 `tick_team_orders`／`_tick_food_granary_sell`，
+     由 `faction_ai_system.gd:1607` 對每支有領袖的隊**無條件**跑（有剩就掛）；`options.gd` 賣糧／賣料 0 命中；`OPTION_FAIL_KEY` 無賣鍵
+  ⇒ 記 FailureMemory ＝ **沒有讀者的狀態**（下一個人會去鍵表找賣鍵、找不到、以為漏做）
+  ⇒ 觀測已存在：同一段 `Probe.bump_sample("order.abandoned.sample", {kind…})` 已帶 kind ⇒ 賣單到期**看得見**，不缺 tap
+  ⇒ 真正沒解的是「自動掛賣看不見自己的失敗」（Team0 掛 1026 糧無人買照掛）—— 那要改的是**掛賣的量／價**，不是 option util ⇒ 另一個決定，不在本票
 ④★TTL 用 `ORDER_LIFETIME`（相對錨定，同買單那條的理由），不新增常數
+⑤§1① 的母體（拆閘後 fp 世界裡還有誰會帶 TRADE 抵達自家市集）：R² 指出 `sim_runner.gd:861-862` 註解已答「唯一實例是 Team40」
+  ⇒ 那句沒附樹 ⇒ 本票 P8 跑 fp 時**順手重量同一個數**，把樹的 sha 印進卷面；★A4 落地後 Team40 的前提可能消失 ⇒ 以 P8 那一輪為準
 ```
 
 ## §2 驗收
@@ -42,8 +52,9 @@ P1 [Team40 紅對照] fp 世界 t9000：修前 Team40 卡在自家市集（不�
    沒有就失敗記號＋release（印 t9000 之後它下一個 task）
 P2 [自家市集成交] 佈置：自家市集上有一張**別人**掛的單、本隊帶 TRADE 抵達 ⇒ 成交；★反向：只有**自己**的單 ⇒ 不成交（＋失敗記號）
 P3 [無單即失敗] 佈置：承諾貿易抵達一個空板市集 ⇒ 同 tick 失敗記號＋release；★反向：路過（目的地非此格）⇒ 不記
+   ★兩種抵達都要一格：move_target＝這格／move_target 已被清成 (-1,-1)（後者是 R² 抓到的那個漏）
 P4 [持守變弱] 同一市集連撞兩次無單 ⇒ 第二次之後「貿易」對那個市集的 util 下降（失敗記憶生效的證明）
-P5 [賣單到期] 佈置一張無人買的賣單到期 ⇒ 失敗記號（`order_abandoned_sell`）
+~~P5 [賣單到期] 佈置一張無人買的賣單到期 ⇒ 失敗記號（`order_abandoned_sell`）~~（③不做 ⇒ 本格作廢）
 P6 [單一路徑] 反向掃：`claim_on_arrival` 的呼叫點 ＝ 1（入口分支拿掉後）
 P7 [普查床] 票 A 的 C2（at_market 且 committed 貿易而 coin 零變動的隊·日）**必須變小**（本票的鑑別格）
 P8 fp 會變 ⇒ 量、原子落地

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A2 貿易等不到對手＝失敗＋自家市集可與別人的單成交
 topic: R② ＝ **ISSUES，兩列**（`3ef373600`）｜★你優先打的§1①母體問題：已有答案，寫在`sim_runner.gd:861-862`自己的註解裡——「拆閘後唯一會變的實例是Team40」(fp測過)，不用你再量一次，但那句話沒附sha/樹，按量測可溯源鐵律要補一句；而A4(move_target重設)還沒落地，這個答案今天仍成立｜(a)核完是真的：movement_system.gd有3處把move_target清成(-1,-1)，「承諾貿易而來」判法要跟sim_runner.gd:870同一行的既有寫法一致（接受(-1,-1)或==這格），不能只判==這格｜(b)核完：賣糧/賣料根本不是decision option（只有買糧/買料是），賣單是tick_team_orders的環境背景行為，OPTION_FAIL_KEY沒有賣單的插槽，記了也沒人消費
 ---

@@ -5475,3 +5475,18 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
 ```
 
 回訪：觸發事件 —— 有人要它（某張票或故事稽核提出「紮營應該怕夜襲」）；屆時接線要附 tap（被走到幾次／成功幾次）。
+
+## 自動掛賣看不見自己的失敗（賣單到期只退貨，下一輪照掛）
+
+狀態：已知未修
+
+```
+賣單不是任何 option 建的：`order_system.gd:293/:333`（`tick_team_orders`／`_tick_food_granary_sell`）
+由 `faction_ai_system.gd:1607` 對每支有領袖的隊無條件跑（有剩就掛）
+⇒ 賣單到期 `order_system.gd:262-264` 只退貨、不記失敗；觀測有（`order.abandoned.sample` 帶 kind）
+⇒ 血證：Team0 掛 1026 糧無人買，每輪照掛（同 :2597 那條 churn 家族）
+⇒ ★A2 票（2026-10-07）原想記 FailureMemory，R² 核完不做：沒有 option 會讀它 ＝ 沒有讀者的狀態
+⇒ 真要修的是**掛賣的量／價**看見到期（不是 option util）＝ 另一個決定
+```
+
+回訪：觸發事件 —— 有票或故事稽核要「賣不掉的隊會降價／少掛／換市集」；屆時修在 tick_team_orders 而非 FailureMemory。

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 R 戰時徵用（修法）
 topic: R② 第二輪（`fa5bab2f3`）＝ **CLEAN**｜生存儲備換成 team.food_runway（:168 核對存在）、宣告欄位明寫窄範圍並把門檻常數與貧困鎖的缺口回報藍圖而非發明，兩處都落地正確；其餘三個已核項逐字收進 spec
 ---
