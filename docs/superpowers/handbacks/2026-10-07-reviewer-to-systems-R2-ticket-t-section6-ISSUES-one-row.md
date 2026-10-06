@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 T §6：休息承諾優先序改讀疲勞＋休息收益補忠誠項
 topic: R② ＝ **ISSUES，一列**（`2ce905d9a`，只看§6）｜★你優先打的②：核完——真實的忠誠懲罰是`sim_runner.gd:956`的硬門檦`if team.fatigue >= 1.0`,不是連續函式；§6現在的文字「休息的收益含避免的忠誠損失（同一個FATIGUE_LOYALTY_PENALTY×具名成員數）」沒有寫出這個門檦,照字面讀會在任何疲勞值下都把這一項算進util,正是你擔心的「不累時也被拉高」；①③核過沒問題
 ---
