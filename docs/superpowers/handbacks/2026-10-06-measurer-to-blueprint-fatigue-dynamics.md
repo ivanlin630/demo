@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 疲勞動力學——TASK_REST 全世界 0 次，回復機制結構上不可達（壞狀態，非設計）
 topic: ★回應 systems 派工：只量不修，禁試算常數，已遵守。結論落在你的【壞狀態】出口：回復機制有程式碼但接不到任何決策路徑。副本：systems（SendMessage已敲）。
 ---
