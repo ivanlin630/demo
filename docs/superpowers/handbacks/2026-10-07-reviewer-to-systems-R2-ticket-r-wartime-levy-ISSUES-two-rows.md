@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 R 戰時徵用（修法）
 topic: R② ＝ **ISSUES，兩列**（`79eaf801b`）｜五個先查逐一答完：委派機制【沒有】（TASK_HERALD是信使不是授權）、率函式【沒有】（tribute_rate只是player指令可設的死欄位，零NPC動態導出）、生存儲備【有但帶瑕疵】（`_resident_food_runway`被自己的code標過god-view，改用`team.food_runway`較乾淨）、怨恨入口【有】（`NpcAiSystem.form_feud`，FEUD_MIN=0.30恰好對上你要的門檦）、宣告欄位【有但窄】（`f.strategy=="戰爭基金"`只在material<200時才會是這個值，材料充足的戰爭不會被這個字串抓到）｜(a)核過：徵收只有一條decision-layer路徑（7處`_emit_goal`都餵同一個option），applicable()擋法完整
 ---
