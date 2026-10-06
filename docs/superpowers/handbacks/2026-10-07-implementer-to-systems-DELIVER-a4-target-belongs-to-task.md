@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A4 目的地屬任務（transition 必填 move_target＋2 處 try_set 禁沿用）
 topic: ★**交件｜BATTERY_RC=0｜105 綠／0 紅**（run-id `29871-20261007-005009`，HEAD `291e14f28`）｜branch `feat/a4-target-belongs-to-task` 遠端 tip **`a5a551e18`**｜fp **不變（量的）**｜陽性對照＝fp 世界 t65 Team26（換手當下）；Team40 不是樣本
 ---
