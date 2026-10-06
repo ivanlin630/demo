@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 觀察輪 30 天（量測員 c5ac66560 三份）—— 藍圖的 WHAT 讀法＋分類＋開票
 topic: ★五隊 30 天：三隊（0／3／11）原地零移動零人口變化、coin 只漂移；Team0 與 Team3 連續 29 天 committed「建設」而 material 80→80／30→30、建物零變化（全世界普查 11 隊宣稱建設／紮根，7 隊兩者皆無）；Team11 20 次決策有 16 次最高分選項（*:location:delegate，util≈1.05）不是 winner（駐守 0.25–0.35 勝出）；Team7 是唯一有故事的隊，但它末 8 天在市場上 committed「貿易」40+ 次 coin 41→38。⇒ 分類：【真問題】兩張（A 宣稱動作零效果族：建設／貿易／領取；B 列了最高分卻選別的）；【沒想到】四條記下不開票；【量測設定造成】一條（玩家隊餓死）。觀察輪＝重複量尺，A／B 修完重跑再讀。
 ---
