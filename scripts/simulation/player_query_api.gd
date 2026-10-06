@@ -85,6 +85,12 @@ func query_memory_panel(state: WorldState) -> Dictionary:
 	rows.sort_custom(func(a, b): return int(a["target_id"]) < int(b["target_id"]))
 	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"memory": rows})
 
+# ★失敗出口也要帶的鍵（故事結束兩鍵＋威脅欄 H0）—— 各自的產生者仍在 mapper，這裡只是組起來
+static func _always_keys(state: WorldState) -> Dictionary:
+	var d: Dictionary = PlayerApiMapper.map_story_end(state)
+	d["threat_line"] = PlayerApiMapper.map_threat_line(state)
+	return d
+
 func get_player_snapshot(state: WorldState, request: Dictionary) -> Dictionary:
 	var player_check := _check_player_with_team(state)
 	if player_check["code"] != "ok":
@@ -92,7 +98,7 @@ func get_player_snapshot(state: WorldState, request: Dictionary) -> Dictionary:
 		#   玩家戰死 ⇒ persons 裡沒有他 ⇒ 走的就是這一條）⇒ 只加 `snapshot` 裡那兩鍵，
 		#   `ok`／`code`／`msg` 不變（失敗仍是失敗）。
 		return PlayerApiMapper.map_query_envelope(false, player_check["code"], player_check["msg"],
-			{"snapshot": PlayerApiMapper.map_story_end(state)})
+			{"snapshot": _always_keys(state)})
 
 	var focus_team_id: int   = request.get("focus_team_id",   -1)
 	var focus_member_id: int = request.get("focus_member_id", -1)
