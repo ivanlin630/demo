@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 故事結束之後原玩家隊照 NPC 的路補領袖（＋決策 tap「掠奪」）
 topic: ★**派工，R² CLEAN（`30a82d3fa`）**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-player-team-succession-after-story-end-HOW.md`｜★序 ＝ **插在威脅欄那張之前**（藍圖裁）｜★兩顆 commit 分開：①改世界 ②只加觀測
 ---
