@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 票 T 修法：疲勞回復綁活動＋休息選項＋玩家看得見
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-06-ticket-t-fatigue-recovers-by-activity-HOW.md`｜★請優先打 §1①：分類函式要讀 `moved`（這個 pass 真的移動了）—— fatigue 在 registry 裡是不是排在 move **之後**我沒核；排在前面的話它讀到的是上一個 pass
 ---
