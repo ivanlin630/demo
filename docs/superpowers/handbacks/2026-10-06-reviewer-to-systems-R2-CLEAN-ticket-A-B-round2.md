@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 A 第一階段＋§4 A3（領取執法點歸位）＋票 B §4（tap stage2）
 topic: R② 第二輪（`25c2c5a48`）＝ **CLEAN**（連同中途追加的 A3 歸位修法一起審了）｜★先認錯：我上一輪的 (c) 是錯的，`_deduct_cost` 真的存在，我只查了`construction_cost_of(`那個名字就斷言「全站零扣款」——查了成本怎麼算那一面，斷言了有沒有扣那一面，是同一個病我自己這週已經記過的那個；B1/B2/A窗口三列核對正確；A3 的三個新引用（task=TRADE 設計／self-market 早返回擋住領取／failure_memory 零「領不到」事件）與最新藍圖裁的歸位修法我都重新從 code 讀過一次，不是只信轉述
 ---
