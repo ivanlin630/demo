@@ -829,7 +829,9 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 		# 玩家信使命令 60，NPC 對 NPC 下令 50；被高層擋下時 player_commanded_task
 		# 仍保留意圖，faction_ai 後續重試
 		var order_prio: int = TaskArbiter.PRIO_PLAYER if is_player_order else TaskArbiter.PRIO_DISPATCH
-		TaskArbiter.try_set(state, target, order, target.move_target, order_prio, "herald_order")
+		# ★A4：信使只帶任務、不帶目的地 ⇒ 同任務才沿用目的地；換任務 ⇒ (-1,-1)（禁沿用前一個任務的目的地）
+		TaskArbiter.try_set(state, target, order,
+			target.move_target if target.current_task == order else Vector2i(-1, -1), order_prio, "herald_order")
 	TaskArbiter.release(messenger)
 	messenger.order_target_id = -1
 	messenger.order_task      = ""
@@ -1708,7 +1710,7 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 	state.set_team_faction(t, faction_id)   # 安頓入 faction（雙向同步）
 	# release-first：流亡隊常在 survival@80，先 release→IDLE@0 過 transition guard，再 set 生產（正當安頓退場）。
 	TaskArbiter.release(t)
-	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))   # A4：安頓後原地生產
 	t.move_target = Vector2i(-1, -1)
 	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
 	var existing: int = _find_existing_resident(state, outpost_pos, team_id, faction_id)
@@ -1735,7 +1737,7 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	state.remove_tag(subteam, "流亡", "convert_resident")
 	# release-first：清 emergency→IDLE@0 過 transition guard，再 set 生產（正當變居民退場）。
 	TaskArbiter.release(subteam)
-	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))   # A4：轉居民原地生產
 	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
 	# ★B4：settle 落腳即刷 labor cache（覆蓋所有 _convert_to_resident 呼叫端）→ 新居民同 tick 採糧非硬零(免等 3 天 cadence)。
 	var _settle_tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(subteam.tile_pos))   # canonical tile-key(非 inline 公式、公式改不靜默斷)

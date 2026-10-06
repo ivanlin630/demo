@@ -40,7 +40,7 @@ func _mk_team(task: String, prio: int) -> Array:
 func _test_defection_stomp_blocked() -> void:
 	print("--- ②defection stomp survival@80 被擋（team16）---")
 	var w: Array = _mk_team(TeamData.TASK_FORAGE, TaskArbiter.PRIO_SURVIVAL)   # 引擎剛派 survival@80
-	TaskArbiter.transition(w[0], w[1], "等待新領主", TaskArbiter.PRIO_AMBIENT)          # defection 外部 stomp
+	TaskArbiter.transition(w[0], w[1], "等待新領主", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))          # defection 外部 stomp
 	var t: TeamData = w[1]
 	_ok(t.current_task == TeamData.TASK_FORAGE, "survival task 留（未被 AMBIENT stomp，got '%s')" % t.current_task)
 	_ok(t.task_priority == TaskArbiter.PRIO_SURVIVAL, "priority 留 80（got %d）" % t.task_priority)
@@ -50,7 +50,7 @@ func _test_defection_stomp_blocked() -> void:
 func _test_non_emergency_passes() -> void:
 	print("--- ⑤非-emergency 轉換照過（現任<70）---")
 	var w: Array = _mk_team(TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)   # 現任 DISPATCH 50 <70
-	TaskArbiter.transition(w[0], w[1], "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(w[0], w[1], "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))
 	_ok((w[1] as TeamData).current_task == "生產", "現任<70 → AMBIENT 轉換過（got '%s')" % (w[1] as TeamData).current_task)
 
 # ⑥ combat lock：combat_target≠-1 → 擋
@@ -58,7 +58,7 @@ func _test_combat_lock_blocks() -> void:
 	print("--- ⑥combat lock 擋 ---")
 	var w: Array = _mk_team(TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	var t: TeamData = w[1]; t.combat_target = 99
-	TaskArbiter.transition(w[0], t, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(w[0], t, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))
 	_ok(t.current_task == TeamData.TASK_BUILD, "combat 中 transition 被擋（task 留 '%s')" % t.current_task)
 
 # ⑦ crisis-免疫：crisis_released task 窗內重鎖 → 擋
@@ -67,7 +67,7 @@ func _test_crisis_immunity_blocks() -> void:
 	var w: Array = _mk_team(TeamData.TASK_FORAGE, TaskArbiter.PRIO_SURVIVAL)
 	var t: TeamData = w[1]
 	t.crisis_released_task = "建設"; t.crisis_released_until = 2000   # 窗到 tick2000，現 tick1000
-	TaskArbiter.transition(w[0], t, "建設", TaskArbiter.PRIO_DISPATCH)   # 試重鎖剛 released 的建設
+	TaskArbiter.transition(w[0], t, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # 試重鎖剛 released 的建設
 	_ok(t.current_task == TeamData.TASK_FORAGE, "免疫窗內 transition 重鎖被擋（task 留 '%s')" % t.current_task)
 
 # ③④ core：emergency task 自身退場走 release-first → 現任=IDLE@0 → 後續轉換過（不誤傷）
@@ -78,13 +78,13 @@ func _test_release_first_from_emergency() -> void:
 	var t: TeamData = w[1]
 	TaskArbiter.release(t)   # resolution caller 先 release
 	_ok(t.current_task == TeamData.TASK_IDLE and t.task_priority == 0, "release → IDLE@0")
-	TaskArbiter.transition(w[0], t, "生產", TaskArbiter.PRIO_AMBIENT)   # 現任 IDLE@0 → guard 不 fire → 過
+	TaskArbiter.transition(w[0], t, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))   # 現任 IDLE@0 → guard 不 fire → 過
 	_ok(t.current_task == "生產" and t.task_priority == TaskArbiter.PRIO_AMBIENT, "release 後 AMBIENT 轉換過（got '%s'@%d）" % [t.current_task, t.task_priority])
 	# zombie 型：RETURN_HOME@80 → release → BUILD@DISPATCH（同 pattern，換高 prio 亦過）
 	var w2: Array = _mk_team(TeamData.TASK_RETURN_HOME, TaskArbiter.PRIO_SURVIVAL)
 	var t2: TeamData = w2[1]
 	TaskArbiter.release(t2)
-	TaskArbiter.transition(w2[0], t2, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(w2[0], t2, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))
 	_ok(t2.current_task == TeamData.TASK_BUILD, "zombie release-first → BUILD set（got '%s')" % t2.current_task)
 
 # ① beggar-restore：BEG resolution → release-first → previous_task 恢復 + ★move_target 還原（非 -1）

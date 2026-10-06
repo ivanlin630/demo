@@ -580,7 +580,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
 	_tap_build_start(state, team, tile, "build")
 	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
@@ -603,7 +603,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	tile.construction_target    = { "action": "upgrade_level", "level": new_level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
 	_tap_build_start(state, team, tile, "upgrade_level")
 	print("[Outpost] Team%d 升級 → Lv%d at (%d,%d)" % [
 		team.team_id, new_level, tile.tile_pos.x, tile.tile_pos.y])
@@ -672,7 +672,7 @@ func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTi
 	#   ★★但那是【間接】——閘看不見，而下一個人也看不見。寫入點自己說出來源，才守得住。
 	tile.construction_ticks_left = build_person_hours(facility, cur + 1)
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
-	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
 	_tap_build_start(state, team, tile, "upgrade_facility")
 	if Probe.enabled:
 		Probe.bump("village.build_fired")   # ★復甦 R2 §6 tap（驗執行端：村端建設真 fire、料到→蓋）
@@ -690,7 +690,7 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = build_person_hours(tile.outpost_type, tile.outpost_level) / 2
 	tile.construction_target    = { "action": "demolish" }
-	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
 	_tap_build_start(state, team, tile, "demolish")
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -832,7 +832,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
 	_tap_build_start(state, team, tile, "upgrade_level")
 	print("[Outpost] 子隊 Team%d 開始升級 → Lv%d at (%d,%d)" % [
 		team.team_id, target_level, tile.tile_pos.x, tile.tile_pos.y])
@@ -883,7 +883,7 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = build_person_hours(tile.outpost_type, tile.outpost_level) / 2
 	tile.construction_target    = { "action": "demolish" }
-	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
 	_tap_build_start(state, team, tile, "demolish")
 	print("[Outpost] Team%d 拆除（control）at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
