@@ -2,7 +2,7 @@
 
 ```
 票源 ＝ 量測員打聽普查（`docs/superpowers/handbacks/2026-10-07-measurer-to-blueprint-inquiry-write-census.md`，276 次，四個題目四種命運）
-     ＋藍圖裁（記下 0 筆而對方有說 ⇒ 改說「他說的你早就知道了」，第四種結果句）
+     ＋藍圖裁（記下 0 筆而對方有說 ⇒ 改說「他說的你早就知道了」，第四種結果句）＋藍圖裁 `1518bddaa`（四題四修）
 基準樹 ＝ 當下 origin/main｜玩家可見 ⇒ 已知問題清單「打聽」那列同 commit 更新｜E2E KNOWN K2／K3 修好後刪
 ```
 
@@ -31,6 +31,9 @@ I5 結果句：mode＝told 而 written＝0 而 payload 非空 ⇒「他說的你
 ## §2 驗收
 
 ```
+P0 [藍圖點名] 觸發 I1 的組合（不誠實關係＋有近期事件＋那 30% 擲骰成立）佈置成**探索床的陽性對照**：
+   探索床「無 SCRIPT ERROR」那一格的母體從沒走到這條 ⇒ 加一步固定走到它（擲骰用佈置控制，不靠運氣）；修前必紅、修後綠
+   ★I2 與修正同票落地 ⇒ 不需要「修前灰掉」的中間版；若 I2 因 §1 的停止條件拆出去，本票就把 ask_food_source 不列或灰掉帶原因（列的條件＝做的條件）
 P1 普查床重跑（量測員那支，`scripts/debug/inquiry_write_census.gd`）：SCRIPT ERROR ＝ 0；ask_food_source written>0 比例 > 0；ask_recent_events 的 written ＝ 實際新增訊息數（逐筆對）
 P2 I5：佈置玩家已知對方所說的那一筆 ⇒ 結果句＝「他說的你早就知道了」；★反向：未知 ⇒「他說了些事情（記下 N 筆）」N>0
 P3 I1：不誠實＋有近期事件 ⇒ 偽造訊息 is_distorted＝true 出現在 result（固定 seed 下找一例印出）
