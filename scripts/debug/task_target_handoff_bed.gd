@@ -4,8 +4,8 @@ extends SceneTree
 # spec：`docs/superpowers/specs/2026-10-06-a4-a-target-belongs-to-its-task-HOW.md` §2
 #
 # 格：P1 陽性對照：fp 那個世界（warring_states、seed 20260922、無玩家）t65 Team26 就地開工升級 workshop
-#        ⇒ 換手那一刻 move_target ∈ {(22,4), (-1,-1)}；再推幾 tick 它還站在工地 (22,4)
-#        ★修前：它帶著前一段的 (20,6)（一格沒有工程的地）走離工地 ⇒ 必紅
+#        ⇒ 換手**當下** move_target ∈ {(22,4), (-1,-1)}（★修前：(20,6)，前一段留下、一格沒有工程的地）
+#        ★它在同一個 tick 內就被別的寫入者改成工地格 ⇒ 舊版沒有真的走離工地；沿用只活在換手當下
 #     P2 不變量：Probe 開跑一段，每一次換手（try_set／transition／release）**回傳那一刻**取樣
 #        move_target ＝ 那一次給的值（TaskArbiter._note_handoff 計 handoff.<path>.ok／.bad）
 #        ⇒ .bad 三條全 0；母體地板：transition／try_set 兩條各自 ok ≥ 1
@@ -47,38 +47,30 @@ func _check(msg: String, cond: bool) -> void:
 
 
 func _p1_team26() -> void:
-	print("\n── P1 Team26 t65：就地開工時不得帶著舊目的地 ──")
+	print("\n── P1 Team26 t65：就地開工那一次換手的**當下** move_target ＝ 給的值 ──")
+	# ★★第一版量的是 tick 末與 30 tick 後 —— 負對照（拿掉 transition 的寫入）下照樣綠：
+	#   同一個 tick 裡有別的寫入者把 move_target 改成工地格 ⇒ 舊版的沿用只活在「transition 回傳 → 同 tick 下一個寫入者」之間
+	#   ⇒ 只有換手**當下**看得到它 ⇒ 改用 TaskArbiter._note_handoff 的取樣（同一時刻）
 	seed(SEED)
 	var ws: WorldState = MeasureBedHelper.arm_and_setup("res://config/%s.json" % CFG, true)
-	Probe.enabled = false
-	Probe.reset()
 	var runner := SimRunner.new()
-	var before_task: String = ""
-	var mt_at: Vector2i = Vector2i(-9, -9)
-	var task_at: String = ""
-	while ws.world.current_tick < P1_TICK:
-		var t: TeamData = ws.teams.get(P1_TEAM)
-		before_task = String(t.current_task) if t != null else ""
+	while ws.world.current_tick <= P1_TICK:
 		runner.advance_tick(ws, Vector2i(-1, -1))
-	var t26: TeamData = ws.teams.get(P1_TEAM)
-	_check("★母體地板：Team%d 存在" % P1_TEAM, t26 != null)
-	if t26 == null:
-		_cells_ran.append("P1")
-		return
-	mt_at = t26.move_target
-	task_at = String(t26.current_task)
+	var hit: Dictionary = {}
+	for r in Probe.samples.get("handoff.transition.ok", []) + Probe.samples.get("handoff.bad", []):
+		var d: Dictionary = r
+		if int(d.get("team", -1)) == P1_TEAM and String(d.get("path", "")) == "transition":
+			hit = d
 	var site: HexTileData = ws.world.tiles.get(P1_SITE.x * 1000 + P1_SITE.y)
-	print("   t%d Team%d：%s → %s｜pos=%s｜move_target=%s｜工地 %s ct=%s target=%s" % [ws.world.current_tick, P1_TEAM,
-		before_task, task_at, str(t26.tile_pos), str(mt_at), str(P1_SITE),
-		str(site.construction_team_id) if site != null else "-", str(site.construction_target) if site != null else "-"])
-	_check("★★母體地板：t%d Team%d 真的換成建設、工地在腳下 %s（ct ＝ %d）" % [P1_TICK, P1_TEAM, str(P1_SITE), P1_TEAM],
-		task_at == TeamData.TASK_BUILD and t26.tile_pos == P1_SITE and site != null and site.construction_team_id == P1_TEAM)
-	_check("★★★P1 換手後 move_target ∈ {%s, (-1,-1)}（%s）" % [str(P1_SITE), str(mt_at)],
-		mt_at == P1_SITE or mt_at == Vector2i(-1, -1))
-	for _i in range(30):
-		runner.advance_tick(ws, Vector2i(-1, -1))
-	print("   再推 30 tick：pos=%s｜task=%s" % [str(t26.tile_pos), str(t26.current_task)])
-	_check("★★P1 沒有走離工地（pos 仍是 %s）" % str(P1_SITE), t26.tile_pos == P1_SITE)
+	print("   Team%d 那一次 transition 換手 ＝ %s" % [P1_TEAM, str(hit)])
+	print("   工地 %s ct=%s target=%s" % [str(P1_SITE), str(site.construction_team_id) if site != null else "-",
+		str(site.construction_target) if site != null else "-"])
+	_check("★★母體地板：Team%d 在 t%d 真的經 transition 換成建設、工地 ct ＝ %d" % [P1_TEAM, P1_TICK, P1_TEAM],
+		not hit.is_empty() and int(hit.get("tick", -1)) == P1_TICK and String(hit.get("task", "")) == TeamData.TASK_BUILD
+		and site != null and site.construction_team_id == P1_TEAM)
+	var mt: Vector2i = hit.get("move_target", Vector2i(-9, -9))
+	_check("★★★P1 換手當下 move_target ∈ {%s, (-1,-1)} 且 ＝ 給的值（%s，給 %s）" % [str(P1_SITE), str(mt), str(hit.get("given", "?"))],
+		(mt == P1_SITE or mt == Vector2i(-1, -1)) and mt == hit.get("given", Vector2i(-9, -9)))
 	_cells_ran.append("P1")
 
 

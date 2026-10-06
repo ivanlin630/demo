@@ -402,7 +402,7 @@ static func transition(state: WorldState, team: TeamData, new_task: String, prio
 	team.task_reason = _source
 	team.task_start_tick = state.world.current_tick
 	team.move_target = move_target   # ★A4：目的地跟著任務走（三道守衛擋下時不寫 —— 任務沒換，目的地也不動）
-	if Probe.enabled: _note_handoff(team, "transition", move_target)
+	if Probe.enabled: _note_handoff(team, "transition", move_target, state.world.current_tick)
 
 
 # 抗命判定：確定性，無 RNG。desire > obedience + 0.3 → 抗命
@@ -419,9 +419,13 @@ static func _defiance_check(leader: PersonData) -> bool:
 # ══ ★A4 P2：換手**回傳那一刻**取樣 —— 不等 tick 結束（同 tick 二次換手會比錯對象）══════════════════════
 #   ★純觀測（Probe-gated、零 RNG、不寫 state）：move_target 必須 ＝ 這一次呼叫給的值
 #   ⇒ 計數 handoff.<path>.ok／.bad；壞的取樣（cap 32）
-static func _note_handoff(team: TeamData, path: String, given: Vector2i) -> void:
+static func _note_handoff(team: TeamData, path: String, given: Vector2i, tick: int = -1) -> void:
 	var ok: bool = team.move_target == given
 	Probe.bump("handoff.%s.%s" % [path, "ok" if ok else "bad"])
+	var row: Dictionary = {"team": team.team_id, "path": path, "given": given,
+		"move_target": team.move_target, "task": team.current_task, "tick": tick}
 	if not ok:
-		Probe.bump_sample("handoff.bad", {"team": team.team_id, "path": path, "given": given,
-			"move_target": team.move_target, "task": team.current_task}, 32)
+		Probe.bump_sample("handoff.bad", row, 32)
+	elif path == "transition":
+		# ★transition 換手稀少（3000 tick 才 2 次）⇒ 好的也取樣：P1 要對準某一次換手的**當下**
+		Probe.bump_sample("handoff.transition.ok", row, 64)
