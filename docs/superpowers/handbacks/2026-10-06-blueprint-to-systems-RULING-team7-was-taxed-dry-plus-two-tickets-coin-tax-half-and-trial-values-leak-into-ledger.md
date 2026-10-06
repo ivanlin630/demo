@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 觀察輪 E（Team7 中段崩潰）—— 收 QA 判決 f9b08071d
 topic: ★E 結案為【故事成立，不是 bug】：Team7 被同勢力的 Team5 在 60 tick 內連徵兩刀 → 19 tick 後死 2 人；再 600 tick 內連三刀 → 93 tick 後主動脫離勢力。「被榨乾就走」是合理故事，題目措辭改掉。★★本信第二版（systems 核 code 後改寫，原版「coin 算式少扣一半」撤回）：①【C′ 小 WHAT】訊息印 rate=0.45 而實扣 22.5% 是【調整後的率】（義氣／信義／貪婪／兵力比 clamp 0–0.5，同一繳納者 8 次同值）⇒ 印給人看的率必須是調整後那個（或兩個都印），不開算式票；「material ≈45% 是哪條流搬的」⇒ 要量（帳本 reason）②【D 要量→成立才開票】領取卡住 700 tick 裡 food ±200～550 鏡像、rung 翻 10 次「像」試算值進真帳 ⇒ 先讀 ResourceBank 帳本 reason 標籤分辨；成立＝守恆缺陷，WHAT 已寫好（思考不改世界）③【WHAT 問一句，非票】同收者對同附庸 60 tick 連徵兩次：節律屬收稅者決策（讀上次徵多久前／對方剩多少），不設冷卻；量測員印間隔分佈再定。A3 多一種可能「其實領到了（material +15）」採。
 ---
