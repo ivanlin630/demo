@@ -1,0 +1,31 @@
+# 決策 tap 取樣窗：decision_tap_window_bed 的原文
+
+- 世界：default.json、seed 1337、setup 後 Probe.arm、暖身 3 天、照 story_end_not_physics_bed 殺玩家、推到 tick 13400
+- 三輪：A Probe 關｜B Probe 開不設窗｜C Probe 開設窗 {team 11, tick 13350–13400}
+- ★本輪世界已含補領袖（玩家死後原隊會補領袖），與量測員原本那輪不同；而 Team11 在 tick 13357 照樣有掠奪那一筆
+
+```
+[ProbeSummary] sample_window raid.composition ＝ { "team": 11, "tick_min": 13350, "tick_max": 13400 }｜收 1 筆｜窗外擋掉 153 筆
+   A（Probe 關）：decision_hash=4cdce6286272691e｜fp=0924915271cef4ec6886fd54811a60d7
+   B（Probe 開、不設窗）：decision_hash=4cdce6286272691e｜fp=0924915271cef4ec6886fd54811a60d7
+   C（Probe 開、設窗）：decision_hash=4cdce6286272691e｜fp=0924915271cef4ec6886fd54811a60d7
+  PASS: ★★★P1 A／B／C 決策序列 hash 相同
+  PASS: ★★★P1 A／B／C 世界 fp 相同
+   ★母體地板：Team11 在 tick 13350–13400 的 current_option（51 個 tick，去重後 ["駐守", "掠奪"]）
+  PASS: ★母體地板：Team11 在窗內真的評估過掠奪（current_option 含「掠奪」）
+   C 的 raid.composition：1 筆｜窗外的 ＝ []
+   第一筆 ＝ { "drive": 0, "weight": 1, "after_weight": 0.003, "coeff": 0.35, "after_coeff": 0.001, "fail_mult": 1, "after_fail": 0.001, "final": 0.001, "terms": ["loot_drive:d=0.003 w=1.000", "intent_fit:d=0.000 w=1.000"], "opt": "掠奪", "team": 11, "tick": 13357 }
+  PASS: ★★★P2 至少 1 筆（1）
+  PASS: ★★★P2 全部 team ＝ 11 且 tick 在 [13350, 13400]（窗外 0 筆）
+   ★對照 B（不設窗）：raid.composition 150 筆，其中窗外 150 筆
+  PASS: ★★【反向】不設窗時桶裡有窗外的筆（150）—— 否則 P2 的「全在窗內」沒有鑑別力
+   C：窗外擋掉 153 筆
+  PASS: ★★★P3 擋掉 N > 0（153）
+   attack.composition：B 150 筆｜C 150 筆｜內容相同 ＝ true
+  PASS: ★★P4 attack.composition 在 B／C 逐筆相同
+   recon.composition：B 150 筆｜C 150 筆｜內容相同 ＝ true
+  PASS: ★★P4 recon.composition 在 B／C 逐筆相同
+   shelter.composition：B 0 筆｜C 0 筆｜內容相同 ＝ true
+  PASS: ★★P4 shelter.composition 在 B／C 逐筆相同
+=== decision_tap_window DONE === errors: 0
+```
