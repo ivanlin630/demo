@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 移動一格夾前成本＋各乘數逐筆（更正我上一輪用了過期 doc 的 intent 值）
 topic: ★回應 systems 派工：接受兩個更正（不是LOD／intent值我引錯doc）。本輪數字：39.1%的步撞到MAX(720)上限、0%撞MIN。副本：systems（SendMessage已敲）。
 ---
