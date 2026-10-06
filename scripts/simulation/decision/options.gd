@@ -288,6 +288,18 @@ static var REGISTRY: Dictionary = {
 			if prey_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_MERGE, "target": prey_pos, "order_target": prey},
 	},
+	# ★票 T（spec 2026-10-06 ticket-t-fatigue §1②）：「休息」—— TASK_REST 的**第一個寫入者**
+	#   ★意義是「主動停下來」：選了它就原地不動 ⇒ 疲勞分類落「不耗力」⇒ 回復（崗哨照舊折回復）
+	#   ★util ＝ 疲勞 × 人格（求生欲／慎重）；★禁「疲勞 > X 強制休息」硬門檻 —— 累不累由秤決定
+	#   ★求生層：體力是活下去的那一層（affinity 主層＝求生）
+	"休息": {
+		"affinity": [0.9, 0.1, 0.0, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
+		"terms": [["rest_drive", "rest"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.fatigue > 0.0,
+		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
+			return {"task": TeamData.TASK_REST, "target": Vector2i(-1, -1)},
+	},
 	"紮營": {
 		"affinity": [0.6, 0.1, 0.0, 0.1, 0.2], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["camp_drive", "camp"]],

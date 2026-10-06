@@ -514,6 +514,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 					"flow_util": snappedf(_jflow, 0.0001),
 					"util": snappedf(_jflow * _rep_mult, 0.0001)}, 120)
 			return _jflow * _rep_mult
+		"rest_drive":
+			# ★票 T：「休息」的驅力 ＝ 自己的疲勞（0..1）—— 累了才想停；不設「疲勞 > X 強制休息」門檻（util 秤，不 override）
+			if opt != "休息":
+				return 0.0
+			return clampf(ctx.fatigue, 0.0, 1.0)
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:
@@ -777,6 +782,8 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"join":              return (float(v.get("義氣", 0.5)) * 0.4 \
 			+ float(v.get("信義", 0.5)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3) \
 			* clampf(1.0 - float(v.get("野心", 0.5)), JOIN_LOW_AMBITION_FLOOR, 1.0)
+		# ★票 T：休息 ＝ 求生欲（怕累垮）＋慎重（不硬撐）—— 人格只 MODULATE 疲勞那個真值
+		"rest":              return float(v.get("求生欲", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
 		"camp":              return float(v.get("野心", 0.5)) * 0.4 \
 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
 		# ★④b：人格只 MODULATE（多一個人＝多一份稅 ⇒ 貪婪加分；慎重＝怕養不起 ⇒ 減分）
