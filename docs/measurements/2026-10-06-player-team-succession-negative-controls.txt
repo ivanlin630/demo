@@ -87,3 +87,15 @@ ERROR: [FAIL] ★★★P4 勢力仍在、盟主仍是原玩家隊
 基準 expect：final_fp = 8c9b2d72e28aef7116edef1283ab9974
 ```
 ⇒ 變了 ⇒ world-fp 對「tap 改變被觀測物」有鑑別力；而實際的 ② 只加清單、Probe 關時整段不跑 ⇒ fp 不變由電池那一格量
+
+## ②之二：「掠奪」的輸出桶真的有東西（接電證明）
+只把「掠奪」加進 CMP_DUMP_OPTS 時，_cmp 依選項分桶輸出而掠奪沒有桶 ⇒ 一筆都不會印。補了 raid.composition 之後：
+臨時腳本（Probe.arm、warring_states、seed 1337、player_id=-1、10 天；跑完已刪，不進 repo）
+```
+[TMP] raid.composition 樣本 150
+[TMP] attack.composition 樣本 150
+[TMP] recon.composition 樣本 150
+[TMP] shelter.composition 樣本 0
+[TMP] raid 第一筆 ＝ { "drive": 0, "weight": 1, "after_weight": 0, "coeff": 0.534, "after_coeff": 0, "fail_mult": 1, "after_fail": 0, "final": 0, "terms": ["loot_drive:d=0.000 w=1.000", "intent_fit:d=0.000 w=1.000"], "opt": "掠奪" }
+```
+★既有洞（沒動，回報）：shelter.cmp.*_sum 四行沒閘在「收留」⇒ 凡 _cmp_on 的選項（攻擊／偵查，現在加掠奪）都加進收留的總和
