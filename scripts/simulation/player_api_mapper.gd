@@ -846,6 +846,8 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 	}
 	# ★故事結束（票 #2 刀 0）：**只加鍵、不改既有鍵** —— 兩鍵的產生者只有 `map_story_end()`
 	out.merge(map_story_end(state))
+	# ★威脅欄（H0）：寫入者**永遠**帶 `threat_line` 鍵 —— 產生者只有 `map_threat_line()`
+	out["threat_line"] = map_threat_line(state)
 	return out
 
 # ══ ★★★★★【故事結束的兩鍵 —— UI 讀 `game_over` 的【唯一】資料路徑】（票 #2 刀 0）═══════
@@ -863,6 +865,93 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 #   ⇒ 所以失敗出口也帶這兩鍵（`get_player_snapshot` 呼叫本函式），**產生者仍然只有這一個**。
 static func map_story_end(state: WorldState) -> Dictionary:
 	return {"game_over": state.game_over, "game_over_reason": state.game_over_reason}
+
+
+# ══ ★★★★★【威脅欄：附身隊【所知】的最急一句】（spec 2026-10-06 threat-column-says-what-the-team-knows）══
+# ★★H0：本函式是 `threat_line` 的**唯一**產生者，而且**永遠回一個字串**（快照兩個出口都帶這個鍵）
+#   ·讀者用 `has("threat_line")` 判：鍵不存在 ⇒「尚未提供」（＝沒有寫入者）
+#   ·「（無）」由**這裡明示**寫出 ⇒ 與「沒有寫入者」**不再同形**（那正是這一欄說謊了一整輪的機制）
+# ★H0′：附身者沒有隊（`map_controlled_team` 走 `{}` 出口）⇒ 回佔位符「—」（＝不知道），不是值主張
+# 優先序（藍圖逐字）：①交戰中 ②敵對且最後所知 ≤ N 格 ③所知野獸群 ≤ N 格 ④勢力交戰 ⑤（無）
+#   ★④**不做**：「與某勢力交戰」的狀態不存在（`git grep -E "at_war|war_with" -- scripts/simulation scripts/data` ＝ 0；
+#     `FactionData.relations`〔neutral／ally／enemy〕全站零寫入者）⇒ spec §2 逐字：找不到就不做、回報
+# ★★★感知鐵律：只讀【附身隊自己知道的】——
+#   ·①＝「我是不是這場戰的一方」（`encounter_active` ＋ 兩方 id）—— **不讀 `encounter_log`**（今天安全是意外）
+#   ·②③＝ **同一條** `BeliefSystem.best_estimate` 迴圈（野獸是偽隊伍，差別只在 `beast_kind`）
+#     ⇒ 位置用 belief 的 `tile_pos`，**不讀**其他隊的真實 `tile_pos`
+#   ·「敵對」＝ `state.player_hostile_teams`（自己的敵意清單＝自我知識）
+#   ·N ＝ `VisionSystem.vision_range(附身隊, 當下晝夜倍率)`（不寫死）
+#   ·★誠實限：野獸種類讀 `state.teams[tgt].beast_kind`（spec §2 指定的判準）——那是身分不是位置；
+#     目標已不在 `state.teams`（死了／散了）⇒ 當作非野獸（**不**因此跳過，否則「它死了」會從真值漏進來）
+const BEAST_LABEL: Dictionary = {"deer": "鹿群", "boar": "野豬", "bear": "熊", "wolves": "狼群"}
+
+static func map_threat_line(state: WorldState) -> String:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return "—"
+	# ①交戰中
+	if state.encounter_active and tid in [state.encounter_attacker_id, state.encounter_defender_id]:
+		var other: int = state.encounter_defender_id if tid == state.encounter_attacker_id \
+			else state.encounter_attacker_id
+		return "交戰中：%s" % _threat_name(state, other)
+	# ②③ 一個迴圈（★P5：本函式體內呼叫 best_estimate 的地方 ＝ 1）
+	var n: int = VisionSystem.vision_range(state, t, DayNightSystem.new().get_vision_mult(state))
+	var enemy_id: int = -1
+	var enemy_d: int = 1 << 30
+	var beast_id: int = -1
+	var beast_d: int = 1 << 30
+	var beast_pos: Vector2i = Vector2i(-1, -1)
+	for tgt in BeliefSystem.known_targets(state, tid):
+		var g: int = int(tgt)
+		if g == tid:
+			continue
+		var bel: Dictionary = BeliefSystem.best_estimate(state, tid, g)
+		if not bel.has("tile_pos"):
+			continue
+		var at: Vector2i = bel["tile_pos"]
+		var d: int = _hex_d(t.tile_pos, at)
+		if d > n:
+			continue
+		var tt: TeamData = state.teams.get(g)
+		if tt != null and tt.beast_kind != "":
+			if d < beast_d:
+				beast_d = d; beast_id = g; beast_pos = at
+		elif state.player_hostile_teams.has(g):
+			if d < enemy_d:
+				enemy_d = d; enemy_id = g
+	if enemy_id != -1:
+		return "Team%d 敵對，最後所知 %d 格" % [enemy_id, enemy_d]
+	if beast_id != -1:
+		return "%s有%s" % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
+	return "（無）"
+
+static func _threat_name(state: WorldState, team_id: int) -> String:
+	var tt: TeamData = state.teams.get(team_id)
+	if tt != null and tt.beast_kind != "":
+		return String(BEAST_LABEL.get(tt.beast_kind, "野獸"))
+	return "Team%d" % team_id
+
+static func _hex_d(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x
+	var dy: int = b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+# 方位：axial (q, r) → 平面（x ＝ q ＋ r／2、y ＝ r·√3／2，y 往下 ＝ 南）→ 八方位
+#   ★誠實限：「r 增加 ＝ 往南」是照地圖逐列由上往下印的慣例；同格 ⇒「附近」
+static func _bearing(from: Vector2i, to: Vector2i) -> String:
+	var dq: float = float(to.x - from.x)
+	var dr: float = float(to.y - from.y)
+	var x: float = dq + dr * 0.5
+	var y: float = dr * 0.8660254
+	if absf(x) < 0.01 and absf(y) < 0.01:
+		return "附近"
+	var ang: float = rad_to_deg(atan2(-y, x))   # 0 ＝ 東、90 ＝ 北
+	var names: Array = ["東邊", "東北", "北邊", "西北", "西邊", "西南", "南邊", "東南"]
+	var idx: int = int(round(fposmod(ang, 360.0) / 45.0)) % 8
+	return String(names[idx])
 
 # ── Faction panel ──────────────────────────────────────────────────────────────
 

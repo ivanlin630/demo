@@ -1,0 +1,159 @@
+# 威脅欄票：負對照先紅＋綠的原文
+
+- 床：`scripts/debug/threat_column_bed.gd`；負對照都在改動 commit 之後跑、跑完 `git checkout HEAD -- <檔>` 還原
+
+## 綠
+```
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   鍵不存在 「尚未提供」｜寫入者明示（無）「（無）」｜一句 「Team7 敵對，最後所知 2 格」｜鍵在而空 「」
+  PASS: ★★★P1 鍵不存在 「尚未提供」
+  PASS: ★★★P1 寫入者明示  照印「（無）」
+  PASS: ★★★P1 寫入者一句  照印
+  PASS: ★★★P1 三態互不同形
+  PASS: ★★★★P1 鍵在而空  **不得**印「尚未提供」（`has()` 判；`== ""` 判會在這裡同形）
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   Team0 真值距離 1 格｜N ＝ 2｜附身隊有它的 belief ＝ false
+  PASS: ★★母體地板：真值那支敵隊真的在  N 格（1  2）
+  PASS: ★母體地板：附身隊真的沒有它的 belief
+   不知道 「（無）」
+  PASS: ★★★★P2 不知道  不得提到 Team0（（無））
+  PASS: ★★★★P2 不知道  必印「（無）」
+   知道 「Team0 敵對，最後所知 1 格」
+  PASS: ★★★★P2【反向】知道  必印「Team0 敵對，最後所知 1 格」
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   只有 「東南有野豬」
+  PASS: ★母體地板：只有野獸時印（含「野豬」）
+   ＋ 「Team0 敵對，最後所知 2 格」
+  PASS: ★★★P3 ＋  印（敵隊先於野獸，即使野獸更近）
+   ＋ 「交戰中：野豬」
+  PASS: ★★★P3 ＋  印「交戰中：野豬」
+   別人的戰 「Team0 敵對，最後所知 2 格」
+  PASS: ★★P3【反向】不是戰的一方  不印
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   白天 tick 144  N＝3｜夜晚 tick 1296  N＝2
+  PASS: ★母體地板：夜晚的 N 真的比白天小（2 < 3）
+   距離 3 格：白天 「Team0 敵對，最後所知 3 格」｜夜晚 「（無）」
+  PASS: ★★★P4 白天（N＝3） 那一句在
+  PASS: ★★★P4 夜晚（N＝2） 那一句不在
+  PASS: ★母體地板：切到 map_threat_line 的函式體（42 行）
+   函式體內呼叫 best_estimate 的非註解行 ＝ 1
+  PASS: ★★★P5 產生者裡呼叫 best_estimate 的地方 ＝ 1
+   寫 threat_line 鍵的地方（母體）＝ ["player_api_mapper.gd:850", "player_query_api.gd:91"]
+  PASS: ★★P5 反向掃：寫那個鍵的地方都在 mapper／query 組裝（2 處）
+  PASS: ★★【反向對照】合成兩次呼叫  計數 2
+   第 999 天 23:59 ｜ Team99999（人口 9999） ｜ 家：(999,999) ｜ 糧撐 999.9 天 ｜ 威脅：Team99999 敵對，最 ｜ 待執行 99 道（display width 119／COLS 120）
+  PASS: ★★P6 頂列  COLS（119）
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   ok=false code=no_player｜snapshot 鍵 ＝ ["game_over", "game_over_reason", "threat_line"]｜threat_line ＝「—」
+  PASS: ★母體地板：真的走失敗出口（ok ＝ false）
+  PASS: ★★★P7 失敗出口也帶 threat_line 鍵
+  PASS: ★★★P7 而它是佔位符「—」（附身者沒有隊 ＝ 不知道）
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   無隊：第 1 天 00:00 ｜ —（人口 —） ｜ 家：— ｜ 糧撐 — ｜ 威脅：— ｜ 待執行 0 道
+  PASS: ★★母體地板：render 那一刻 `ct.is_empty()` 真的為真
+  PASS: ★★★P8 無隊  頂列**不得**出現「糧撐 0.0 天」
+  PASS: ★★★P8 無隊  頂列**不得**出現「家：（無）」
+  PASS: ★★★P8 無隊  頂列**不得**出現「威脅：（無）」
+  PASS: ★★★P8 無隊  頂列印佔位符「家：—」
+  PASS: ★★★P8 無隊  頂列印佔位符「糧撐 —」
+  PASS: ★★★P8 無隊  頂列印佔位符「威脅：—」
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+   有隊而 0 天糧：第 1 天 00:00 ｜ Team15（人口 10） ｜ 家：（無） ｜ 糧撐 0.0 天 ｜ 威脅：（無） ｜ 待執行 0 道
+  PASS: ★母體地板：這一屏真的有隊（ct 非空）
+  PASS: ★★★★P8【反向】有隊而真的 0 天糧  **必須**印「糧撐 0.0 天」（真警報不准被吃掉）
+  PASS: ★到場點名：8／8（缺：[]）
+=== threat_column DONE === errors: 0
+```
+
+## N1 讀者改回 `== ""` 判 ⇒ 預期只紅「鍵在而空」那格（`has()` 與 `== ""` 唯一分得開的輸入）
+```
+=== threat_column DONE === errors: 1
+ERROR: [FAIL] ★★★★P1 鍵在而空  **不得**印「尚未提供」（`has()` 判；`== ""` 判會在這裡同形）
+```
+
+## N2 讀者糧撐 default 改回 `ct.get("food_days", 0.0)` ⇒ 預期 P8 紅
+★第一次做 N2 無效：行內 `# NEG` 註解把行尾逗號一起註解掉 ⇒ 語法錯 ⇒ 紅在不相干的格（P1 全紅、P8 沒跑到）。下面是重做的那次。
+```
+   無隊：第 1 天 00:00 ｜ —（人口 —） ｜ 家：— ｜ 糧撐 0.0 天 ｜ 威脅：— ｜ 待執行 0 道
+=== threat_column DONE === errors: 2
+ERROR: [FAIL] ★★★P8 無隊  頂列**不得**出現「糧撐 0.0 天」
+ERROR: [FAIL] ★★★P8 無隊  頂列印佔位符「糧撐 —」
+```
+
+## N3 snapshot 失敗出口不帶 threat_line ⇒ 預期 P7 紅＋P8 威脅欄不再是「—」
+```
+=== threat_column DONE === errors: 3
+ERROR: [FAIL] ★★★P7 失敗出口也帶 threat_line 鍵
+ERROR: [FAIL] ★★★P7 而它是佔位符「—」（附身者沒有隊 ＝ 不知道）
+ERROR: [FAIL] ★★★P8 無隊  頂列印佔位符「威脅：—」
+```
+
+## text_ui_layout_bed 的 `_func_body` 窄化（發現輪電池 text-ui-layout 紅）
+★真因：舊版只在 `
+func ` 截止，player_api_mapper 全是 `static func` ⇒ tick_clock 的「函式體」＝ 到檔尾；本票 `_bearing` 的 0.8660254／360.0 含「60」
+### 修後
+```
+  PASS: ★母體地板：真的切到 `action_block` 的函式體（切不到  下面那條恆綠）
+  PASS: ★母體地板：抓到 `tick_clock` 的函式體（抓不到  下面三條恆綠）
+   tick_clock 函式體 9 行
+  PASS: ★★窗口只含 `tick_clock` 一個函式（9 行、內含其他簽名 ＝ false）
+   函式體裡出現的可疑字面（手抄物理的指紋）＝ []
+  ★★★接電狀態（縮到函式體）：`_refresh()` 裡呼 `_render_screen` ＝ 1 次
+  PASS: ★母體地板：兩支函式體都抓到了（抓不到  下面兩條恆綠）
+=== text_ui_layout DONE === errors: 0｜到場點名 10／10
+```
+### NA 抽取式改回舊截止點 ⇒ 預期窗口格紅（675 行）
+```
+   tick_clock 函式體 675 行
+=== text_ui_layout DONE === errors: 2｜到場點名 10／10
+ERROR: [FAIL] ★★窗口只含 `tick_clock` 一個函式（675 行、內含其他簽名 ＝ true）
+ERROR: [FAIL] ★★★沒有手抄的物理常數（60／1440／24；實測 ["60"]）
+```
+### NB 在 tick_clock 本體塞一個 60 ⇒ 預期原守衛仍紅（窄化沒弄瞎它）
+```
+   函式體裡出現的可疑字面（手抄物理的指紋）＝ ["60"]
+=== text_ui_layout DONE === errors: 1｜到場點名 10／10
+ERROR: [FAIL] ★★★沒有手抄的物理常數（60／1440／24；實測 ["60"]）
+```
+
+### 同檔另兩處 `_func_body` 用法：窄化有沒有把它們要守的東西推出窗外（systems 要的，2026-10-06）
+量法：在 text_ui_main.gd（HEAD）上用改前（只認 `
+func `）與改後（`
+func `／`
+static func ` 較早者）兩個截止點各切一次，數非註解命中行
+```
+text_ui_main.gd 中 static func 數 = 10
+func _refresh() -> void:          改前: 窗口 74 行（檔案 737–810）｜_render_screen( 非註解命中行 [792]
+func _refresh() -> void:          改後: 窗口 74 行（檔案 737–810）｜_render_screen( 非註解命中行 [792]
+func _render_screen(pend_txt…    改前: 窗口 10 行（檔案 890–899）｜TextUiView.compose 非註解命中行 [893]
+func _render_screen(pend_txt…    改後: 窗口 10 行（檔案 890–899）｜TextUiView.compose 非註解命中行 [893]
+```
+⇒ 兩處改前改後窗口逐行相同（兩支函式之後下一個簽名都是 `func`），要守的呼叫點都在窗內 ⇒ 不是運氣綠；窄化只改變了 tick_clock 那一處

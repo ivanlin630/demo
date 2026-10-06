@@ -838,20 +838,21 @@ func build_regions(pend_txt: String) -> Dictionary:
 	var rows: Array = []
 	if _interact_mode and _interact_target >= 0:
 		rows = _interact_action_split()["team"]
-	var threat: String = String(_cached_snapshot.get("threat_line", ""))
-	if threat == "":
-		# ★藍圖裁（`c8f39da3d`）：今天 `threat_line` **零寫入者** ⇒「（無）」是一句我們不知道真假的話
-		#   （等於對玩家說「你很安全」）⇒ 過渡字面改「尚未提供」。
-		#   ★之後給內容的小票會改用 `has("threat_line")` 判 —— `== ""` 分不出「寫入者說沒有威脅」
-		#     與「根本沒有寫入者」（這個洞的原形）。
-		threat = "尚未提供"
+	# ══ ★★★H0：用 `has()` 判，**不用** `== ""`（威脅欄 spec §0）══════════════════════════
+	#   鍵不存在 ⇒ 沒有寫入者 ⇒「尚未提供」｜鍵存在 ⇒ 寫入者說了什麼就印什麼（含它明示的「（無）」）
+	#   ★舊版 `== ""` 讓「沒有寫入者」與「寫入者判定沒有威脅」同形 —— 這一欄因此說謊了一整輪。
+	var threat: String = String(_cached_snapshot["threat_line"]) \
+		if _cached_snapshot.has("threat_line") else "尚未提供"
 	return {
 		"top": {
 			"clock": PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
 			"team_name": String(ct.get("name", "—")),
 			"pop": str(ct.get("population", "—")),
-			"home": ("(%d,%d)" % [int(hp.get("q", 0)), int(hp.get("r", 0))]) if not hp.is_empty() else "（無）",
-			"food": "%.1f 天" % float(ct.get("food_days", 0.0)),
+			# ★★H0′：附身者沒有隊（`ct` 是 `{}`）⇒ 家／糧撐印佔位符「—」（＝不知道），
+			#   **不印值主張**（「家：（無）」說你沒有家、「糧撐 0.0 天」說你在挨餓 —— 兩句都沒有寫入者）
+			#   ★有隊時照舊：家 null ＝ 寫入者明示沒有家 ⇒「（無）」；糧 0 天 ＝ 真警報 ⇒ 照印
+			"home": "—" if ct.is_empty() else (("(%d,%d)" % [int(hp.get("q", 0)), int(hp.get("r", 0))]) if not hp.is_empty() else "（無）"),
+			"food": ("%.1f 天" % float(ct["food_days"])) if ct.has("food_days") else "—",
 			"threat": threat,
 			# ★故事結束（票 #2 刀 0）：讀 snapshot 的兩鍵（mapper 出）—— **不走 `_bridge` 直讀**
 			#   ⇒ 空字串 ＝ 故事沒結束 ⇒ view 照舊印威脅欄

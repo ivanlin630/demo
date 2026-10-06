@@ -56,9 +56,16 @@ func _func_body(src: String, sig: String) -> String:
 	if i < 0:
 		return ""
 	var rest: String = src.substr(i + sig.length())
-	var j: int = rest.find("
-func ")
-	return rest if j < 0 else rest.substr(0, j)
+	# ★★窗口錯過一次（威脅欄票 2026-10-06 實測）：舊版只在 `\nfunc ` 截止，而 player_api_mapper
+	#   全是 `static func` ⇒ `tick_clock` 的「函式體」其實是【從 tick_clock 到檔尾】（數百行）
+	#   ⇒ 後面別的函式裡的 `0.8660254`／`360.0` 被當成 tick_clock 手抄了「60」。
+	#   ⇒ 截止點改成「下一個 `func ` 或 `static func ` 的較早者」—— 窄化回那一個函式。
+	var cut: int = -1
+	for stop in ["\nfunc ", "\nstatic func "]:
+		var j: int = rest.find(stop)
+		if j >= 0 and (cut < 0 or j < cut):
+			cut = j
+	return rest if cut < 0 else rest.substr(0, cut)
 
 func _code_only(src: String) -> String:
 	var out: String = ""
@@ -505,6 +512,12 @@ func _test_p9_tick_clock_derives_from_constants() -> void:
 		"res://scripts/simulation/player_api_mapper.gd"))
 	var body: String = _func_body(src, "static func tick_clock(tick: int) -> String:")
 	_check("★母體地板：抓到 `tick_clock` 的函式體（抓不到 ⇒ 下面三條恆綠）", body.length() > 0)
+	# ★★窗口上界（另一個方向）：函式體裡不得再出現另一個函式簽名 ⇒ 否則它量的是別人的 code
+	var body_lines: int = body.split("\n").size()
+	print("   tick_clock 函式體 %d 行" % body_lines)
+	_check("★★窗口只含 `tick_clock` 一個函式（%d 行、內含其他簽名 ＝ %s）" % [body_lines,
+		str(body.contains("static func ") or body.contains("\nfunc "))],
+		not body.contains("static func ") and not body.contains("\nfunc "))
 	_check("★★它逐字引用 `WorldState.TICKS_PER_DAY`", body.contains("WorldState.TICKS_PER_DAY"))
 	_check("★★它逐字引用 `WorldState.TICKS_PER_HOUR`", body.contains("WorldState.TICKS_PER_HOUR"))
 	# ★★★而這個守衛咬對了一半（2026-10-01 實測）：它第一次跑就抓到我寫的 `* 60.0`。
