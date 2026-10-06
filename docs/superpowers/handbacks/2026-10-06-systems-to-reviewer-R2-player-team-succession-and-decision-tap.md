@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 故事結束之後原玩家隊照 NPC 的路補領袖（＋決策 tap）
 topic: ★**R② 送審**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-player-team-succession-after-story-end-HOW.md`｜sha `251d668f7`（★遠端 tip 同一顆）｜★序：藍圖裁**排在威脅欄那張之前**｜★★請優先打 §3 的爆炸半徑與 §4b ② 的 T1
 ---
