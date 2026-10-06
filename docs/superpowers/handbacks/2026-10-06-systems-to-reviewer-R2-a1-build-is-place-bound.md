@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: A1 建設綁地點（修法）
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-06-a1-build-is-place-bound-HOW.md`｜★請優先打：§1② 選哪個據點／做哪種工程要重用基建評估層的純函式（我寫「先查」，沒核它存不存在）｜§2 我訂正藍圖一個前提（「建材枯」有讀真值，門檻 200；病在用詞，且它讀的是盟主隊的倉庫）
 ---
