@@ -854,7 +854,10 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 		# unified-commerce M2：TRADE 隊到市集 outpost → market-as-place 到場 resolver（owner-mediated，免賣方在場）。
 		if _t.current_task == TeamData.TASK_TRADE:
 			var _mt: HexTileData = state.world.tiles.get(_t.tile_pos.x * 1000 + _t.tile_pos.y)
-			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner != _t.team_id:
+			# ★★票 A3：入口**不再**排除自家市集 —— 舊版這裡多一道 `outpost_owner != _t.team_id`
+			#   ⇒ 自家市集根本進不了 resolver ⇒ 函式內把領取搬到「不自交易」之前也零作用（spec 只讀了函式本體）
+			#   ⇒ 「不自交易」只留**一處**：resolver 自己的早返回（領取之後）—— 兩處同一條規矩會漂
+			if _mt != null and _mt.outpost_level > 0:
 				_interaction_system._resolve_market_at_outpost(state, _t, _mt)
 				# 到市場（arrived＝到 dest）→ 交易畢 release 重評（避免 TASK_TRADE latch 卡死市集不再 fire）。
 				# 續有需求→下輪 re-dispatch 再赴市場＝連續交易循環（非一次凍結）。

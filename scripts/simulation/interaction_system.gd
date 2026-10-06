@@ -929,6 +929,25 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	# 回 dealt（true=有成交/settle；後勤 SLICE A convoy DELIVER 讀此分流 settled vs bail）。既有 caller(sim_runner:380)忽略回值=安全。
 	if tile == null or tile.outpost_level <= 0:
 		return false
+	# ★★★B-v0 領取【執行端】——★沒有這一段，「領取」option 會 dispatch 而【什麼都不會發生】：
+	#   那正是本專案有前科的【手不聽腦】（committed 求生卻不 dispatch 的同族，只是這次在下游）。
+	#   ★★而它掛在【到場】這一刻：訪客站上這個市集 ⇒ 結清他自己的待領資產。
+	#   ★★★紅線的另一半：領取【必須是本人到場】—— 而這一段就是「不在場不給」的執行證明。
+	# ══ ★★★票 A3：領取【在「自家市集不自交易」之前】—— 執法點歸位（藍圖裁 7c75aa27a，不開例外）══════
+	#   ★舊版這段排在早返回之後 ⇒ 待領落在**自己的**市集就永遠領不到
+	#   ★★真樣本（seed 1337、30 天）：Team14 一筆 material 5.0 在自家市集 (4,6)，day 20 留到 day 30
+	#   ★「不自交易」管的是**交易**，領回自己的待領不是交易 ⇒ 規矩沒錯，是位置錯
+	var claimed: bool = _claim_pending_here(state, visitor, tile)
+	# ══ ★★★票 A3：「領取」到場而這一格一筆都沒領到 ⇒ 執行失敗，不准靜默（執行失敗反饋鐵律）═══════
+	#   ★形狀照 A2 已在用的那一條（`order_system.gd` 買單到期：FailureMemory.record(動詞, 目標, ttl, reason)）
+	#     ⇒ 一種事件、帶動詞與原因 ⇒ 下輪「領取」對**這一格**折價（OPTION_FAIL_KEY 的 ctx:pending_claim_tile_id）
+	#   ★只在**承諾的是領取**時記：路過市集（貿易、行軍）沒東西可領不是失敗
+	#   ★TTL ＝ ORDER_LIFETIME：待領資產就是掛單成交／到期產生的，它的自然週期就是訂單壽命（相對錨定）
+	#   ★劣勢非失效：只折價、不 T0 喚醒（同買單到期那一條）
+	#   ★★這一格只管「到場落空」；「逾時沒到」需要承諾起點欄位，另議（交件信寫明）
+	if not claimed and String(visitor.current_option) == "領取":
+		FailureMemory.record(state, visitor, "領取", str(tile.tile_id), OrderSystem.ORDER_LIFETIME,
+			"claim_arrived_nothing")
 	var owner_id: int = tile.outpost_owner
 	if owner_id == visitor.team_id:
 		return false   # 自家市集不自交易
@@ -939,11 +958,6 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	# 觀測：到市場地方＝會合（鏡射舊 pairwise trade.meet 語意，全量暫態可觀測性）。
 	if Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
 		Probe.bump("trade.meet")
-	# ★★★B-v0 領取【執行端】——★沒有這一段，「領取」option 會 dispatch 而【什麼都不會發生】：
-	#   那正是本專案有前科的【手不聽腦】（committed 求生卻不 dispatch 的同族，只是這次在下游）。
-	#   ★★而它掛在【到場】這一刻：訪客站上這個市集 ⇒ 結清他自己的待領資產。
-	#   ★★★紅線的另一半：領取【必須是本人到場】—— 而這一段就是「不在場不給」的執行證明。
-	_claim_pending_here(state, visitor, tile)
 	var dealt: bool = false
 	var saw_live_order: bool = false
 	for entry in tile.market_orders.duplicate():   # 複製：沖銷改動原陣列
@@ -1051,9 +1065,10 @@ static func add_pending_claim(tile: HexTileData, kind: String, res: String, amt:
 #   ★款 ⇒ 進 `team.resources["coin"]`；貨 ⇒ 進 `team.resources[res]`
 #   ★★而【逐筆對帳】：交出去的量 == 條目上的量（零蒸發），★★★而條目【清乾淨】不留 0 額幽靈
 #     —— 留 0 額條目會讓 `pending_claims` 越積越長，而 `audit_escrow`/腦欄位都要掃它。
-static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+# ★回「這一格這次有沒有領到東西」（票 A3：呼叫端據此記「到場落空」）
+static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
 	if tile.pending_claims.is_empty():
-		return
+		return false
 	var kept: Array = []
 	var got_coin: float = 0.0
 	var got_goods: float = 0.0
@@ -1080,6 +1095,7 @@ static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTile
 			# ★★★款與貨【分開記】——抽象共用不代表被同等使用，而那正是要量的東西
 			if got_coin > 0.0: Probe.bump("mkt.claim.taken.coin")
 			if got_goods > 0.0: Probe.bump("mkt.claim.taken.goods")
+	return got_coin > 0.0 or got_goods > 0.0
 
 func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary,

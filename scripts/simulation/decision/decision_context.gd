@@ -126,6 +126,7 @@ var feud_target_id: int = -1
 #     ⇒ 只有額沒有位置的話，「一筆很大但在天邊」與「一筆很小但就在腳下」會秤成一樣。
 var pending_claim_amt: float = 0.0        # 全部待領（款＋貨折值）的總額
 var pending_claim_pos: Vector2i = Vector2i(-1, -1)   # 最近一筆的所在（sentinel = 沒有；★to_task 的旅行目標）
+var pending_claim_tile_id: int = -1   # ★同一格的 tile_id（票 A3）：FailureMemory 的 `ctx:` 目標只吃 int ⇒ 「領取」的失敗記憶靠它對準那一格
 # ★★★距離【在 gather 時就算好】放進 ctx，而不是讓 term 自己算幾何 ——
 #   ★DecisionContext 沒有 `self_pos`（我原本假設有，實測沒有）⇒ term 層算不出距離。
 #   ★★而就算有，讓 term 層做幾何也是錯的分工：term 是【秤】，它該吃現成的輸入。
@@ -1647,6 +1648,7 @@ static func _gather_pending_claims(c: DecisionContext, state: WorldState, team: 
 			if d < best_d:
 				best_d = d
 				c.pending_claim_pos = tile.tile_pos
+				c.pending_claim_tile_id = tile.tile_id
 	if c.pending_claim_amt > 0.0:
 		c.pending_claim_dist = float(best_d)
 		if Probe.enabled:
