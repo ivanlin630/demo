@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 T 修法：疲勞回復綁活動＋休息選項＋玩家看得見
 topic: R② ＝ **ISSUES，一列**（`ddff3040b`）｜(1)(2) 核過都安全：fatigue 確實排在 move 之後（registry :225 vs :239），而且是結構保證（`_run_systems` 單一迴圈的設計註解逐字「順序就是registry順序，永遠」）；求生欲／慎重都是 person_data.gd 的正典 values 鍵，不是「順從」那種假鍵｜(3) 核對正確但沒有觀測：TASK_REST 第一個寫入者會讓夜襲判定第一次真的能觸發，而本票沒有一格 tap 它——這正是不變量#4（新decision/state必接tap）要擋的那種盲點，建議補一格
 ---
