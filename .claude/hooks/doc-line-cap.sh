@@ -103,6 +103,26 @@ _nlong=$(printf '%s' "$_long" | grep -c .)
 echo "[doc-bytes] 超過 200 字的行：${_nlong} 行｜最長三行：$(printf '%s' "$_long" | head -3 | awk -F'\t' '{printf "%s（%s 字） ", $2, $1}')"
 [ "$_bwarn" -gt 0 ] && echo "[doc-bytes] ★★回肥 ${_bwarn} 個角色：新寫進必讀檔的東西要嘛壓成一行、要嘛進 detail（處置同下方 doc-cap）"
 
+# 文件風格 lint（藍圖裁 2026-10-07，用戶三點意見；warn-only，跟位元組尺同一支、不另開閘）
+#   必讀檔：每行 ★ 至多一個｜不帶自白（撤回／訂正／我曾／我錯）｜用戶裁定寫意思＋日期、逐字只留在 handback
+#   ★這三種位元組尺抓不到：★ 不佔位元組卻佔注意力。誠實限：「用戶逐字」只認「用戶…原話／逐字／說：「」三種寫法。
+_sty=""; _stot=0
+while read -r f; do
+  [ -f "$f" ] || continue
+  _r=$(LC_ALL=C.UTF-8 awk '
+    { n=gsub(/★/,"★"); if (n>1) a=a" "NR;
+      if ($0 ~ /撤回|訂正[:：]|我曾|我錯/) b=b" "NR;
+      if ($0 ~ /用戶[^。]{0,12}(原話|逐字|說：「|說「)/) c=c" "NR }
+    END { printf "%d|%d|%d|%s|%s|%s", split(a,x," "), split(b,y," "), split(c,z," "), substr(a,1,40), substr(b,1,40), substr(c,1,40) }' "$f")
+  IFS='|' read -r _na _nb _nc _la _lb _lc <<< "$_r"
+  [ $((_na+_nb+_nc)) -eq 0 ] && continue
+  _stot=$((_stot+_na+_nb+_nc))
+  _sty="${_sty}
+  $(printf '%-22s' "$(basename "$f")")★多於一個 ${_na} 行（${_la# }…）｜自白 ${_nb}（${_lb# }）｜用戶逐字 ${_nc}（${_lc# }）"
+done <<< "$_allf"
+if [ "$_stot" -gt 0 ]; then echo "[doc-style] 🟡 必讀檔風格 ${_stot} 處（warn-only；處置：拉平 ★、自白移 detail／memory、用戶原話改寫意思＋日期）：${_sty}"
+else echo "[doc-style] ✅ 必讀檔風格乾淨"; fi
+
 # ★★★第二層檢查：**未閉合 code fence**（2026-08-27 systems 立，血證見下）
 #   ★病：把節「壓縮進 detail」的動作會截在 ``` 中間 —— 留下孤兒【開】或孤兒【閉】。
 #     孤兒【開】⇒ 從它到檔尾整段 render 成一坨 code；孤兒【閉】⇒ 位移整條 parity。

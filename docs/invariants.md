@@ -2,7 +2,7 @@
 
 > 每 session 開頭讀一次。★一條一行（≤200 字）；血證、enforcement 細節、file:line 在 `process/detail/invariants-cases.md`（〔detail#錨〕＝同名小節；〔detail 快照〕＝2026-10-07 全文快照同標題節）。
 
-## ★★★ 沙盒憲法（governing invariant，凌駕級，藍圖 2026-07-05）
+## ★ 沙盒憲法（governing invariant，凌駕級，藍圖 2026-07-05）
 
 **凡 NPC 行為必經統一決策引擎（means-end 子需求＋utility weigh，人格調製）；禁繞過引擎的行為規則／判斷器／行為 subsystem。行為是引擎輸出，永不是輸入。**〔detail 快照〕
 
@@ -19,15 +19,15 @@
 
 - **引擎是唯一的秤**：技能過濾感知 → 人格＋記憶＋現況能力三腳秤 → utility argmax；同一感知不同腦 ⇒ 不同行為。〔detail 快照〕
 - **★B 重框**：塑造行為的全域常數門檻不該存在，門檻只活在世界代價或人格／記憶／現況裡；冒出具名 margin／gate 常數＝照妖鏡響。〔詳 detail#inv-b-reframe〕
-- **★★域專判斷器**：合法＝真穿人格／記憶／現況＋讀同一組人格值。〔詳 detail#inv-domain-scorer〕
-- **★★★人格 WEIGH 不 GATE**：人格只加權、不開關選項；世界物理約束不算。〔詳 detail#inv-weigh-not-gate〕
+- **★域專判斷器**：合法＝真穿人格／記憶／現況＋讀同一組人格值。〔詳 detail#inv-domain-scorer〕
+- **★人格 WEIGH 不 GATE**：人格只加權、不開關選項；世界物理約束不算。〔詳 detail#inv-weigh-not-gate〕
 - **① 下游零決策**：下游純執行，供狀態給思考層讀＝OK。〔詳 detail#inv-downstream-no-decision〕
 - **★手不聽腦**：所有 current_task 寫入守 arbiter 鎖；emergency 正當退場走 release。〔詳 detail#inv-hand-obeys-brain〕
 - **② 下游零干擾**：一狀態一 owner；同概念不各算（單一源 oracle）；tick 順序走 registry。〔詳 detail#inv-downstream-no-interference〕
 - **RNG 三案**：純骰無人格選行為＝de-patch；世界不確定 outcome＝合法；人格加權機率＝合法 IF 曲線陡。〔詳 detail#inv-weighted-random〕
-- **★★單一源 oracle**：oracle 外另算同概念＝違規必遷；oracle 內暫為常數＝可接受 deferred。〔詳 detail#inv-single-source-oracle〕
+- **★單一源 oracle**：oracle 外另算同概念＝違規必遷；oracle 內暫為常數＝可接受 deferred。〔詳 detail#inv-single-source-oracle〕
 
-## ★★ 全量暫態可觀測性（governing invariant，憲法同級，用戶 2026-07-14）
+## ★ 全量暫態可觀測性（governing invariant，憲法同級，用戶 2026-07-14）
 
 - **任何改動不准製造量測盲點**：新增決策層／資源／狀態機必同步接 tap（想法／狀態／資源三類）；dump 可 scope，tap 不打折。〔detail 快照〕
 - **已坐實**：隊伍資源層零不經 ResourceBank 的寫入；tile 倉庫／自然池／person.coin 由帳本守恆床證。〔詳 detail#inv-ledger-proven〕
@@ -40,12 +40,12 @@
 
 - **執行失敗＝事件，必反饋決策層（失敗記憶／壓分或 T0 喚醒），禁靜默丟棄；同一原因禁無記憶反覆撞。**〔detail 快照〕
 
-## ★★★感知鐵律的鏡像：決策不得讀不到自己的狀態（2026-08-25）
+## ★感知鐵律的鏡像：決策不得讀不到自己的狀態（2026-08-25）
 
 - **blind-view**：同一流程裡「產出／檢查」與「投入／扣款」若讀不同的池集，就是腦沒有眼睛。〔detail 快照〕
 - **第三端（顯示）**：玩家走法不印真值·debug 區；它只活在明確的 debug 走法下，自驗雙向。〔詳 detail#inv-display-boundary〕
 
-## ★★可慢不可卡（用戶立法 2026-09-10；憲法級）
+## ★可慢不可卡（用戶立法 2026-09-10；憲法級）
 
 - **畫面節奏均勻＝硬要求、吞吐＝軟要求**：一次做完一大批的設計先問會不會凍 frame；正解是跨 frame 分攤，不是做得更快。〔detail 快照〕
 
@@ -53,9 +53,9 @@
 
 域：World／Map／Time／Information／Simulation／關鍵設計規則／對稱性／玩法節奏／UI 邊界／NPC／Interaction／Anon／Task／財產 / 守恆／飢餓 / 人口／team reference 契約／Leader 繼承單一 owner／訂單系統／隊目標單一 owner = leader 野心階梯
 另有：三條對稱不變量｜意圖驅動完備｜統一搬運脊椎｜統一勞力池｜資料模型不變量｜關係圖｜私人脫軌｜混合協調｜perf 優化 arc｜resource 分類學｜競爭範圍與承諾優先級解耦｜死亡窗口決策紀律｜LOD 降頻補償｜長跑量測床三硬規｜承諾態只能經仲裁移轉｜specimen 血緣封閉｜means-end 無手段終止不得靜默
-- ★★★**觀測器禁任何副作用**：不耗 RNG、查詢面不交出本體、被當查詢用的指令其寫入路徑在查詢版走不到。〔詳 detail#inv-observer-no-side-effect〕
+- ★**觀測器禁任何副作用**：不耗 RNG、查詢面不交出本體、被當查詢用的指令其寫入路徑在查詢版走不到。〔詳 detail#inv-observer-no-side-effect〕
 
-## ★★★近期立的不變量（一條一行；血證在 detail 同標題節）
+## ★近期立的不變量（一條一行；血證在 detail 同標題節）
 
 1. **跑 tick 的床必接 `advance_tick` 回傳值**，印首次非推進的 tick 與原因；分母＝有效窗。〔詳 detail#inv-1〕
 2. **T0 事件瞬醒**：喚醒單一真值＝`WorldEvents`、排程＝`CadenceStagger`；預設全喚醒、例外寫理由。〔詳 detail#inv-2〕
