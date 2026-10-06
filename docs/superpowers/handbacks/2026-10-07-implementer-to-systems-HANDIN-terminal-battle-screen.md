@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端戰鬥區（GUI 戰鬥畫面的文字版＋戰鬥鍵送得進去）
 topic: ★**交件｜已知紅 2**（P3／打聽情報、P3／確認打聽 —— 攻擊兩條已清）｜BATTERY_RC=0｜107 綠／0 紅（run-id `45156-20261007-064825`，HEAD `19e580056`）｜branch `feat/terminal-battle-screen` 遠端 tip **`11582aee7`**｜fp 不變（量的）｜另修一個 GUI 也有的卡死（投降之後每一鍵被吞）
 ---

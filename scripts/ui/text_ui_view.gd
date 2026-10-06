@@ -313,6 +313,15 @@ static func panel_block(panel_body: String) -> String:
 	return "\n".join(lines)
 
 
+const BATTLE_TITLE: String = "─ 戰鬥（接管畫面）"
+static func battle_block(body: String) -> String:
+	var lines: Array = []
+	lines.append(_fill_to(BATTLE_TITLE, TextUiLayout.COLS, "─"))
+	for l in body.split("\n"):
+		lines.append(TextUiLayout.clip_to(String(l), TextUiLayout.COLS))
+	return "\n".join(lines)
+
+
 # ══ 六區組成整個畫面（★順序固定：任何模式都不搬，模式只改【動作區】的內容）═════
 # regions：top(Dictionary)／map(String)／pages(String)／map_note／tabs／
 #          action(Array)／feed(Array)／result(String)／keymap(String)
@@ -322,6 +331,16 @@ static func compose(regions: Dictionary) -> String:
 	var mid: String = panel_block(panel) if panel.strip_edges() != "" else map_pages_box(
 		String(regions.get("map", "")), String(regions.get("pages", "")),
 		String(regions.get("map_note", "")), String(regions.get("tabs", "")))
+	# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1②）：戰鬥中取代中間那個框；
+	#   主畫面的動作區不印（那些鍵現在不歸它）；頁腳鍵列換成戰鬥的鍵（`_lbl_actions.text`，同一處讀）
+	var battle: String = String(regions.get("battle", ""))
+	if battle.strip_edges() != "":
+		return "\n".join([
+			top_row(regions.get("top", {}) as Dictionary),
+			battle_block(battle),
+			feed_block(regions.get("feed", []) as Array),
+			foot_block(String(regions.get("result", "")), "戰鬥｜" + String(regions.get("battle_keys", ""))),
+		])
 	return "\n".join([
 		top_row(regions.get("top", {}) as Dictionary),
 		mid,

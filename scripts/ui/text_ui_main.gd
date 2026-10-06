@@ -341,6 +341,8 @@ func _process(_delta: float) -> void:
 			_input_bar.text = ""
 	elif not _input_bar.text.begins_with("移動中"):
 		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _bridge.get_current_tick()
+	if _encounter_view != null and _encounter_view.visible:
+		_encounter_view.sync_with_world()   # ★戰鬥在世界那一 tick 裡結算（例：投降令）⇒ 戰鬥畫面跟上
 	_refresh()
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
 	if ps.get("pre_encounter_pending", false) and not _pre_encounter_mode:
@@ -377,11 +379,10 @@ func _input(event: InputEvent) -> void:
 	# 否則 Q 會落到下方 KEY_Q→get_tree().quit() 造成戰後一按鍵就閃退；
 	# WASD 也會同時漂移世界地圖游標。用 overlay 可見性（非 encounter_active）判定。
 	if _encounter_view != null and _encounter_view.visible:
-		# ★K5（systems 裁 (乙) 2026-10-07）：終端還沒有戰鬥畫面 —— 這裡的鍵交給 encounter_view（GUI 走它自己的 _input），
-		#   而終端（PlayerRepl.press_on 只送這個節點）送不到它 ⇒ **不靜默吞鍵**：結果行說清楚為什麼沒反應
-		#   ★終端戰鬥區另開票（內容待藍圖裁）；這一句在那張票落地時拿掉
-		_set_feedback(false, ENCOUNTER_NO_TERMINAL_MSG)
-		_refresh()
+		# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1①）：這裡照舊 return ——
+		#   GUI 的那一次按鍵引擎本來就廣播給 encounter_view._input；終端路由 PlayerRepl.press_on 直接分流到
+		#   encounter_view.terminal_handle_key ⇒ 兩條路各走各的入口，同一次按鍵不會被分派兩次（床 P10b）
+		#   ★介面修正票 K5 那一句「交戰中：終端尚無戰鬥畫面」隨本票拿掉
 		return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
@@ -896,7 +897,13 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"feed": _feed_rows,
 		"result": _feedback_line.text,
 		"keymap": _hint_line.text,
+		# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1②）：戰鬥中才非空；內容與鍵提示都從 encounter_view 讀
+		"battle": _encounter_view.terminal_block() if _in_battle() else "",
+		"battle_keys": _encounter_view.terminal_keys() if _in_battle() else "",
 	}
+
+func _in_battle() -> bool:
+	return _encounter_view != null and _encounter_view.visible
 
 
 # ══ ★★★【接電】把六區合成到唯一顯示面（spec §1／§2；systems 裁 2026-10-01）═══════
@@ -1012,8 +1019,6 @@ const UI_STACK_LAYERS: Array = [LAYER_RECRUIT, LAYER_INTEL]
 #     當【外部期望】—— ★★那不是重複：床拿產品的常數來比＝同源恆真
 #     （寫什麼都綠），所以那一份字面**必須**住在床裡。
 const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
-# ★K5：交戰中終端按鍵的那一句（終端尚無戰鬥畫面；戰鬥區另開票）
-const ENCOUNTER_NO_TERMINAL_MSG: String = "交戰中：終端尚無戰鬥畫面（按鍵交給戰鬥畫面，這裡收不到）"
 
 var _ui_stack: Array = []
 
