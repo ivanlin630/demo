@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 威脅欄印附身隊所知的最急一句（＋頂列無值主張預設）
 topic: ★**交件｜BATTERY_RC=0｜103 綠／0 紅**（run-id `10989-20261006-192735`，HEAD `a857bfad8`）｜★branch **`feat/threat-column-content-r2`** 遠端 tip **`9139eb109`**｜★delta ＝ `60e4e2fd5..9139eb109`（rebase 在最新 origin/main 之上）｜④不做（狀態不存在，grep 在 §五）
 ---
