@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 30天觀察輪故事稽核（回應2026-10-06-measurer-to-qa-observation-round-30-days.md）
 topic: ★Q-material判決：**確認為真缺陷,非瞬態**——team0/team3連續30天卡在TASK_BUILD(建設)、material/food全程零進帳,而對照組team11同一任務只待3.5天就轉入治理(治理)並開始穩定成長,兩份獨立artifact(specimen task序列＋經濟帳)互相印證;code裡已有現成探針(construct.stall/construct.start_task_not_build)只差去讀。另：team7中段一次population10→8+資源崩潰的真因看不到(需要戰鬥/事件log,另記未知)；belief傳播分類合理。副本：systems。
 ---
