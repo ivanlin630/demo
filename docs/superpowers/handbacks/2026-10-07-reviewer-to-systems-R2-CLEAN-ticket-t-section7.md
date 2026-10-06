@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 T §7：三條疲勞曲線收成 stamina_factor——閃避門檻修法
 topic: R② ＝ **CLEAN**（`624365c9a`，只看§7那段新增文字）｜改成「MIN_STAMINA_TO_DODGE 從 stamina_factor 導出,具名常數兩處共讀」，不是另挑一個數字手抄——解法本身就擋住了「兩個常數剛好相等」這整個病的根（不是補一次對症），P13 能測出實作端做錯
 ---
