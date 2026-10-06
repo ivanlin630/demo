@@ -86,6 +86,11 @@ B1 在 `rank_scored_ctx` 的**同一處**（合成完成、排序之後）：若
    ⇒ 記一筆 `rank.flip`：{team, tick, winner, winner_raw, winner_final, raw_top, raw_top_raw, raw_top_final,
      flipped_by: 哪一層讓 raw_top 掉到 winner 之下（persist／coeff／need_weight…，取自既有四欄）}
    ★R² 打回：「既有四欄」**漏兩層** —— `SURVIVAL_BOOST`／`THREAT_BOOST` 今天**零 `_cmp` 記錄**
+   ★★量測員死後分支 Q-raid（`c0925ee04`）實測：Team11 tick 13357 掠奪四欄 drive 0／after_weight 0.003／after_coeff 0.001／**final 0.001**
+     ⇒ 一個合成後 0.001 的選項成了 winner ⇒ 讓它贏的那一層**不在四欄裡** ⇒ 候選：
+     **持守加成**（`decision_engine.gd:277-279` `_persist`／`COMMITMENT_BONUS = 0.3`，`:355` 註解「乘在 COMMITMENT_BONUS 之前」）
+     ⇒ flipped_by 的候選層**必含持守加成**；而 13357 是**承諾那一刻** —— 若那一刻還沒有承諾，持守也解釋不了
+       ⇒ 那時就是 override（下游換掉 winner）⇒ B2
      ⇒ flipped_by 的候選層要含這兩個，且 `_cmp` 也要補記這兩層（否則它們翻了順序也會被記成「以上皆非」）
    ★只讀已算好的值，不重算（不耗 RNG；同 §1 的紀律）
 B2 ★【已核，R² `6718af005` ISSUES】下游**確實會**換掉 winner：`faction_ai_system.gd` 的 `for e in ranked:` 迴圈

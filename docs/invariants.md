@@ -78,6 +78,7 @@
 - **tap-gap 假象**：SpecimenTracer tap 沒接 order 系統 → `decision_count=0` 假象 → **差點誤判「架構絕症」**（第一次量測結論，第二次同世界 reeval 才推翻）。
 - **thrash 只因 `[Survival]` 轉換有 log 才抓得到**（Team14 subteam `貿易↔idle` 抖 122 次餓死）；沒 log = 永久盲點，故事崩在哪永遠看不出。
 
+**已坐實的層（2026-10-06）**：隊伍資源層無不經 ResourceBank 的寫入 —— seed 1337、30 天 43199 tick 的 state 差 ＝ driver-ledger reason 和，零不吻合（量測員 `926488c8a`）；★tile 倉庫／自然池／person.coin 未坐實，由帳本守恆床來證（`2026-10-06-ledger-delta-must-sum-to-the-change-HOW.md`）。會靜止的狀態必須有理由欄（三分法見 progress 2026-10-06）。
 **現實校準（藍圖給，免落地做歪）**：「所有暫態每 tick 全 dump」爆 perf（fullprobe 已重）。可實作版＝
 - **tap 必須存在、零盲點**（可觀測性=不變量，不打折）。
 - **dump 可 scope**：specimen 鎖隊全量 / probe 抽樣，不必全世界每 tick 全記。
