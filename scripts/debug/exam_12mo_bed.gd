@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # ★12mo 大考 run harness（純觀測、零 production 行為改動）。
 # ★★本床跑的是【無玩家世界】：setup 後把 player 拆掉（見下方 _strip_player）。
 #   理由：warring_states.json 有 player 區塊 → 會建玩家隊；那隊 leader 一死且無 named 繼承人

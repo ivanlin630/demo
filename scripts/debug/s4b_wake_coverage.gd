@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # @observe-pure
 # ★★★S4b 驗收床：七支 cadence 的【事件瞬醒】覆蓋對帳（7 × all_kinds() 格，+ INDEP_INFRA/INTENT 共 9 支；★格數由宣告集導出不寫死）。
 #

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # @observe-pure
 # ★★★輪詢的【獨特貢獻率】（blueprint 判準，systems 轉述時寫死了邊界）：
 #   分母 = 【純 cadence 觸發】的重評次數（事件喚醒的不算 —— 要量的是【輪詢】的貢獻）

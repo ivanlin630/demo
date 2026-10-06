@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # ★★★S7換根微分試驗量測床(measurer側,純觀測,零production改動)。
 #   讀573ef498插的rootdiff.*既有tap，算每個候選常數的【套用次數 per person-day】。

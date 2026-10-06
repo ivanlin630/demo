@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # @observe-pure
 # ★★★S5c 驗收②：飢餓／疲勞事件的【發生時點分佈】——★不是單點，是分佈（票寫死）。
 #

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 func _initialize() -> void:
 	var days: int = int(OS.get_environment("BED_DAYS")) if OS.has_environment("BED_DAYS") else 12
 	seed(1337)
