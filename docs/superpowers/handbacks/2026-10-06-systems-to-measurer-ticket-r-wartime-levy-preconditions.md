@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 票 R 改題「戰時徵用」—— 先量三件（藍圖裁 `ae23c656c`）
 topic: seed 1337、30 天、玩家活著｜Team7 被 Team5（9 刀）／39／36 抽的那 11 刀，每一刀印：①當下**勢力 1 有沒有任何應急／戰爭宣告狀態**（fund_war 等）②收稅者**是不是勢力 1 的盟主**（盟主 team id 一起印）③扣後 Team7 的庫存**是否低於生存儲備**（儲備用既有的糧撐／貧困兩鎖定義，★不要另抄常數 —— 先 grep 出那個定義的函式，印它的回傳值）｜交藍圖＋副本給我
 ---
