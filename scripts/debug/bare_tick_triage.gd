@@ -110,6 +110,12 @@ func _run() -> void:
 		#   FACILITY_DEF 那八顆工期值本來靠上面第二條被【看見並判過】，
 		#   改名後它們不在 bare-tick 母體、也不在 const_time 母體（那邊只收 const）
 		#   ⇒ ★現在【沒有任何母體涵蓋它們】，★★而 S6 phase2 要改的正是這八顆。
+		# ── (c) 白名單：交玩那一行（2026-10-06）——【牆鐘毫秒】不是模擬 tick ──
+		# ★★刻意用**精確常數名**而不是 `const [A-Z_]+_MS` 那種寬規則：
+		#   寬規則會把「有人把一個模擬 tick 誤取名成 `_MS`」那種錯一起放過，
+		#   而那正是這支閘要抓的東西（分類保守 ⇒ 認不出來的照樣丟 NEEDS_HUMAN）。
+		_mk("const CONNECT_TIMEOUT_MS", "c_whitelist",
+			"★牆鐘軸：比對的是 Time.get_ticks_msec()（真實時間毫秒），不是 world tick ⇒ 不隨根旋鈕；它是 server 等 client 接上來的逾時（照 agent_repl.gd 那支的 15 秒）"),
 		# ── (c) 白名單：S2 重錨引入的兩顆新形狀 ──
 		_mk("const TICKS_PER_HOUR:", "c_whitelist", "★新的根常數本身（S2 把自由參數從 TICKS_PER_DAY 換成它）：其他時間量由它導出，改成 hours() 會循環定義"),
 		_mk("TICKS_PER_HOUR / 6", "c_whitelist", "★單位結構：遭遇動作＝10 分鐘＝1/6 小時。★★這個 6 不隨小時縮放——根怎麼改，一小時永遠是六個十分鐘"),

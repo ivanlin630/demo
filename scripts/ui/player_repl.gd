@@ -65,6 +65,31 @@ const NAMED_KEYS: Dictionary = {
 #   「我想在遊戲裡離開」會共用一個鍵，而那是本專案最常見的那個病（一個鍵兩個意思）。
 const QUIT_TOKEN: String = ":quit"
 
+# ══ ★★★★★★【框尾：一個整屏結束的明文標記】（spec §2 刀 0）════════════════════
+# ★為什麼需要它：客戶端從 socket 讀的是**位元流**，它不知道「這一屏印完了」——
+#   沒有框尾的話它只能用「等一下沒有新資料」猜，而那在慢機器上會把半屏當成整屏。
+# ★★而**約束不可選**（systems 定 2026-10-06）：框尾必須**構造上不可能出現在畫面內容裡**。
+#   ·`compose()` 吐的字串含**引擎給的任意一句話**（事件敘述、結果句…）而且**長度無界**
+#     ⇒ ★「挑一個看起來不會出現的字」**不是**構造上不可能，那只是今天剛好沒出現。
+#   ⇒ ★★★所以兩件一起做：①挑一個**不可列印**的位元組（EOT `0x04`，畫面永遠不會用它排版）
+#     ②**在送出點把那個位元組從內容裡剝掉** —— 於是「內容裡出現框尾」在結構上不可能發生。
+#   ⇒ ★而剝掉是**安全的**：那個位元組在畫面上本來就沒有任何意義（它不是中文、不是框線、
+#     不是空白）⇒ 剝它不會吃掉任何玩家該看到的東西。
+#   ★★★★而它與今天另一條的差別要寫清楚：`_pages_without_header()` 那裡的紀律是
+#     「**不認識就不要動**」，而這裡是「**認識而且必須剝**」—— 兩者不衝突：
+#     那裡剝的是**可能有意義的一整行**，這裡剝的是**一個在畫面上沒有意義的控制字元**。
+# ══ ★★★★★【server 自己退：連線逾時】（spec §2 刀 2，形狀照 `agent_repl.gd:53-60`）═══
+# ★為什麼要 server 做而不是 client：**client 被殺的時候只有 server 還在跑**（spec P2b 逐字）。
+# ★★沒有它的話：client 起了 Godot 然後死掉 ⇒ 那支 Godot 永遠等一個不會來的連線
+#   ⇒ 電池那條「開跑前 Godot 數必須 0」會卡住，而 `machine-busy` 只能說「去問」。
+# ★而 15 秒照 `agent_repl.gd` 那支的值（不另訂一個數）—— 它已經在用、而且沒出過事。
+# ★★單位是【牆鐘毫秒】（跟 `Time.get_ticks_msec()` 比），**不是模擬 tick** ——
+#   電池的 `bare-tick` 那支閘曾把它標成 NEEDS_HUMAN（形狀認不出來 ⇒ 交人判），
+#   ⇒ 判 (c) 白名單，規則寫在 `scripts/debug/bare_tick_triage.gd`（精確名，不開寬規則）。
+const CONNECT_TIMEOUT_MS: int = 15000
+const FRAME_END_BYTE: int = 4           # EOT（`0x04`）—— 不可列印
+const FRAME_END: String = "\u0004"
+
 var _node: Node = null
 var _tcp_server: TCPServer = null
 var _tcp_client: StreamPeerTCP = null
@@ -85,7 +110,17 @@ func _initialize() -> void:
 		quit(1)
 		return
 	_node._refresh()
-	_print_screen()
+	# ══ ★★★★★★【第一屏【不能】在 transport 起來之前畫】（實測抓到，2026-10-06）═══════
+	#   ★刀 0 把回程搬到 socket 之後，這一行原本是 `_send_screen()` ——
+	#     而它跑在 `_run_tcp_loop()` **之前** ⇒ 那時 `_tcp_client` 是 `null`
+	#     ⇒ `_send_screen()` 走它的 fallback ⇒ **第一屏跑到 stdout 去了**
+	#     ⇒ 客戶端接上來之後**什麼都收不到** ⇒ 它在 `recv` 上逾時。
+	#   ★★而症狀**不像**「第一屏送錯地方」：客戶端看到的是一個 `TimeoutError`
+	#     ⇒ 它與「server 根本沒起來」「server 當掉了」長得一樣。
+	#   ⇒ ★★★判準：**搬一個輸出的管道時要連它的【時機】一起搬** ——
+	#     管道換了之後，「什麼時候那個管道才存在」也變了，而舊的呼叫點不會自己移位。
+	#   ⇒ 所以這裡**不畫**：第一屏由**連上之後**那一刻送（見 `_run_tcp_loop`／`_run_stdin_loop`）。
+	# ~~_send_screen()~~
 	# ★探測-退路：沿用 `agent_repl.gd:13/41-45` 那個形狀（Windows 沒有 pipe://stdin）
 	var stdin: FileAccess = FileAccess.open("pipe://stdin", FileAccess.READ)
 	if stdin == null:
@@ -96,11 +131,24 @@ func _initialize() -> void:
 		_run_tcp_loop()
 
 
-func _print_screen() -> void:
-	# ★印的就是**合成後的那一屏**（`_screen_label.text`）——
-	#   ★★不另外呼 `TextUiView.compose()`：那會是第二個呼叫點，而 P-regions-1 在數那個。
-	print(String(_node._screen_label.text))
-	print("")   # 一個空行把每一屏分開（★給人讀的，不是斷言）
+# ══ ★★★★★★【回程走 socket，不走 stdout】（spec §2 刀 0 —— 它是後面兩刀的前提）══
+# ★為什麼搬：**sim 無條件灌 stdout**（`sim_runner.gd` 那些 `print`）
+#   ⇒ 客戶端讀 stdout 會**收到混著 log 的畫面** ⇒ ★而那時「印出東西了」與
+#     「印出一屏混著 log 的亂碼」在卷面上**都是綠的**（這就是 P1 要求端到端中文字面的理由）。
+# ★★而它**同時解掉 CP950 那個洞**：stdout 在 Windows 會被編碼弄花，socket 送的是位元組。
+# ★★★而**留在 stdout 的只有一行**：`port=` 那一行 —— 它**不是畫面**，
+#   它是客戶端要用來接上來的握手資訊（spec §2 刀 1② 逐字）。
+func _send_screen() -> void:
+	var screen: String = String(_node._screen_label.text)
+	# ★★★★★在**送出點**剝掉框尾位元組 ⇒ 「內容裡出現框尾」結構上不可能發生
+	#   （理由寫在 `FRAME_END` 旁邊：`compose()` 含引擎給的任意一句話、長度無界）
+	screen = screen.replace(FRAME_END, "")
+	if _tcp_client != null and _tcp_client.get_status() == StreamPeerTCP.STATUS_CONNECTED:
+		_tcp_client.put_data((screen + FRAME_END).to_utf8_buffer())
+		return
+	# ★stdin 模式沒有 socket ⇒ 回 stdout，而**那是誠實的**（那條路上沒有別的回程）。
+	#   ★★而它仍然印框尾：客戶端的解析方式**兩條路一致**（否則「同源」只是一句話）。
+	print(screen + FRAME_END)
 
 
 # 一行輸入 → 一個 keycode（`-1` ＝ 打不出來）
@@ -148,11 +196,12 @@ func _feed(token: String) -> void:
 	ev.pressed = true
 	_node._input(ev)
 	_node._refresh()
-	_print_screen()
+	_send_screen()
 
 
 func _run_stdin_loop(stdin: FileAccess) -> void:
 	print("[player-repl] 就緒（stdin）—— 一行一個鍵；`%s` 離開" % QUIT_TOKEN)
+	_send_screen()   # ★第一屏在【就緒之後】送（理由見 `_initialize()` 那一段）
 	while not stdin.eof_reached():
 		var line: String = stdin.get_line()
 		if line.strip_edges() == "":
@@ -172,14 +221,42 @@ func _run_tcp_loop() -> void:
 	print("[player-repl] 就緒（tcp）port=%d —— 一行一個鍵；`%s` 離開" % [
 		_tcp_server.get_local_port(), QUIT_TOKEN])
 	var buf: String = ""
+	# ══ ★★★★★★【斷線即退】（spec §2 刀 2，形狀照 `agent_repl.gd:68-69`／`:98`）═══════
+	#   ★舊版：client 斷線之後 `_tcp_client.get_status() != CONNECTED` ⇒ 回去**等下一個連線**
+	#     ⇒ ★而那個下一個連線**永遠不會來**（client 已經死了）⇒ 留一支 Godot 在背景。
+	#   ★★實測（負對照先紅，2026-10-06）：不送 `:quit`、直接關 socket
+	#     ⇒「關 socket 之後 30.1 秒：那一支 Godot 還活著 ＝ True」
+	#   ⇒ ★★★所以分兩個階段，而**兩個階段的出口不同**：
+	#     ·**還沒連上過** ⇒ 等，但最多 `CONNECT_TIMEOUT_MS`（逾時 ⇒ `quit(1)`：沒人來接）
+	#     ·**連上過、然後斷了** ⇒ **立刻退** `quit(0)`（那是 client 走了，不是異常）
+	#   ⇒ ★★★★而「連上過」要自己記（`had_client`）：只看 `_tcp_client` 是不是 null
+	#     分不出「還沒來」與「來了又走」—— 而那兩種情形要的出口相反。
+	var had_client: bool = false
+	var deadline: int = Time.get_ticks_msec() + CONNECT_TIMEOUT_MS
 	while true:
-		if _tcp_client == null or _tcp_client.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+		if _tcp_client == null:
 			if _tcp_server.is_connection_available():
 				_tcp_client = _tcp_server.take_connection()
+				_tcp_client.poll()
+				had_client = true
+				# ★★★★★【連上的那一刻送第一屏】—— 客戶端一接上就該看到畫面，
+				#   而不是「送一個鍵才看到第一屏」（那會讓玩家以為它沒反應）。
+				_send_screen()
+			elif Time.get_ticks_msec() > deadline:
+				print("[player-repl] ✗ %d 秒內沒有人接上來 ⇒ 自己退（不留一支孤兒）"
+					% (CONNECT_TIMEOUT_MS / 1000))
+				quit(1)
+				return
 			else:
 				await process_frame
 				continue
 		_tcp_client.poll()
+		var st: int = _tcp_client.get_status()
+		if st == StreamPeerTCP.STATUS_NONE or st == StreamPeerTCP.STATUS_ERROR:
+			# ★連上過、然後斷了 ⇒ client 走了 ⇒ 立刻退
+			print("[player-repl] client 斷線（status=%d）⇒ 自己退" % st)
+			quit(0)
+			return
 		var n: int = _tcp_client.get_available_bytes()
 		if n > 0:
 			buf += _tcp_client.get_utf8_string(n)

@@ -12,6 +12,13 @@ tools/telegram/*
 !tools/telegram/*.sh
 !tools/telegram/README.md
 tools/telegram/config.local.sh
+# ★交玩的那一行（spec 2026-10-06 `one-line-to-play`）：它們是【源碼】不是執行檔
+#   ⇒ 照上面 telegram 那一組的形狀用 `!` 例外。
+#   ★★而這兩行是【實測逼出來的】：沒有它們，`tools/*` 會讓這兩支檔【靜默不進 commit】
+#     ⇒ `git status` 不列它們、commit 照樣成功、而註冊表那一列（`python tools/play_selfcheck.py`）
+#       在任何別的 checkout 都會跑不起來 —— 而那個失敗只會出現在【別人的機器上】。
+!tools/play.py
+!tools/play_selfcheck.py
 
 # Claude Code local config
 # .claude：★harness 納入版控（2026-08-21）——改版前提「每步可獨立 revert」需要版控，
