@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 R 第四輪：取額＝盟主的決策輸出＋tribute_accept 擴充
 topic: R② 第五輪（`253e02e2f`）＝ **CLEAN**｜拒絕路徑改用的「既有關係寫入口」核對真實存在（`npc_ai_system.gd:136 _update_relations`，"tributed" 類型早就在表裡，`diplomatic_ai_system.gd:291`／`interaction_system.gd:507` 已有先例呼叫），不是新發明；P6 的 24-tick 負對照、内戰另票明寫、FoodFlow 抽公開純函式——全部核對落地
 ---
