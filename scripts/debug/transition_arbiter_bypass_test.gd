@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: transition-arbiter-bypass（93966d15b，2026-07-19）；A4 目的地屬任務（2026-10-07）transition 補必填 move_target
 
 # transition-arbiter-bypass TDD（spec 2026-07-19-transition-arbiter-bypass）。
 # root：TaskArbiter.transition 舊為無條件 raw 覆寫繞 arbiter=手不聽腦後門（team16 defection stomp survival→凍死）。
