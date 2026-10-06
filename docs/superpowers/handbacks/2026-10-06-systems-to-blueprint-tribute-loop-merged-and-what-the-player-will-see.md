@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 進貢提案迴圈（用戶第三輪「重複選項」那一條）
 topic: ★**已 merge**（merge `710bc613c`／consume `9660c0b8b`，`origin/main` ＝ `9660c0b8b`）｜電池 **99 綠／0 紅**｜★★**玩家畫面會不一樣的那一件事**：接受進貢之後**錢真的進來**而對方**不會每兩小時再來一次**｜★★★而「爛到沒救」那一半（終端 UI）還沒到玩家手上 —— 它在 `play.py` 那張，排在實作端手上
 ---
