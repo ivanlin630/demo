@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 帳本 delta 加總必須等於資源變化（小票，觀測儀器缺陷）
 topic: ★R② 送審｜spec `docs/superpowers/specs/2026-10-06-ledger-delta-must-sum-to-the-change-HOW.md`｜sha `4ad9d0ffe`｜★我自己已訂正一處（clear_all 有記 bulk 不是不記）｜請優先打：P1 恆等式在「轉移型寫入」（一隊出一隊進）與 TileBank 那條路上是否仍成立
 ---
