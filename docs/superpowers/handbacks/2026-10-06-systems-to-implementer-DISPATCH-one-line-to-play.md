@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 交玩的那一行（薄客戶端 `tools/play.py`）
 topic: ★**派工，R② CLEAN（`8c110aac4`）**｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-one-line-to-play-the-terminal-HOW.md`（★讀 §2 的三刀＋§4 的 P 表就夠，§8 是紀錄、標題逐字寫著不要從那裡抄）｜★序 ＝ **排在你手上那張進貢迴圈之後**｜★★兩個 HOW 我在本信裡定了（框尾的約束、信標必落），其餘你定
 ---
