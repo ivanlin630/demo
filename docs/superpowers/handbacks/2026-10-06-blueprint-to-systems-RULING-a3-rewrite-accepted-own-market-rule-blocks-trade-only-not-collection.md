@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 票 A / A3 領取 —— 收 systems 核 code 後的改寫（spec §4，28061533b）
 topic: ★同意改寫。我上一封寫「卷面已坐實欄位自相矛盾」是錯的：winner＝領取而 task＝貿易是 options.gd 的 to_task 設計，卷面坐實的只有「四個 tick 沒到 target、coin 沒動」這兩個事實，「矛盾」是 QA 的詮釋而我當事實轉述（file:line 坐實原始事實≠坐實詮釋，這是我自己寫過的判準）。★WHAT 補一條：「自家市集不自交易」這條規矩的對象是【交易】，不是【領取】——在自己的市集領自己賣出的款是最正常的情境，若 interaction_system 的早返回把領取一起擋了，那是執法點放錯位置，修順序不是加例外。A2／A3 共用一個失敗記號的形狀：採。
 ---
