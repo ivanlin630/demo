@@ -314,9 +314,12 @@ func _press(w: Dictionary, k: String) -> void:
 	var top: int = _screen_tick(scr)
 	var stt: int = _status_tick(scr)
 	w["p10_n"] = int(w["p10_n"]) + 1
-	if top != wt or (stt != -1 and stt != wt):
+	# ★★「畫面 tick ＝ 世界 tick」單獨沒有鑑別力（負對照實測：舊版 press_on 不等推進 ⇒ 回來時
+	#   畫面與世界**都還在推進前** ⇒ 1240 次按鍵 0 次不等、照綠）⇒ 再加一條：回來那一刻推進必須已消化完
+	var pending: bool = w["node"]._bridge.is_advancing()
+	if top != wt or (stt != -1 and stt != wt) or pending:
 		(w["p10_bad"] as Array).append({"label": String(w.get("label", "")),
-			"msg": "key=%s（%s）畫面頂列 %d／狀態列 %d／世界 %d" % [k, String(w.get("label", "")), top, stt, wt]})
+			"msg": "key=%s（%s）畫面頂列 %d／狀態列 %d／世界 %d／推進未消化 %s" % [k, String(w.get("label", "")), top, stt, wt, str(pending)]})
 
 
 func _press_all(w: Dictionary, keys: Array) -> void:
