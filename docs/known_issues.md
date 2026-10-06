@@ -5514,3 +5514,15 @@ A4 量測（30 天觀察世界 default seed 1337，origin/main 528e2daeb，臨�
 ```
 
 回訪：觸發事件 —— 帳本守恆床或量測看到 person 那一格不符；修法同 set_amt：記 實際後值 − 前值。
+
+## 註冊表裡 hook／python 類的「基線」有沒有藏著已知紅，沒逐支判過（不變量 #11 的盲區）
+
+狀態：已知未查
+
+```
+介面修正第一批（2026-10-07）照不變量 #11 掃了註冊表跑的 74 支 GDScript 床：把紅格登成已知的只有 terminal-e2e（已印「已知紅排除」）
+⇒ 另 33 列是 hook／python（live-team-ratchet、registry-axis-ratchet、fai-new-ratchet、bare-tick triage、single-writer…）
+⇒ 它們的 baseline 是「存量債」還是「本來會紅而被吸收的缺陷」，沒逐支判；若是後者，判決行也該印排除數
+```
+
+回訪：下一次有人動其中任一支 hook 的 baseline 時，順手判那一支；或量測員有空檔時逐支過一遍。
