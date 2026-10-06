@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 問糧源是 WHAT（e67c0b72d）
 topic: ★裁（甲）：「某格有糧」是一種情報（belief 的一種 kind），與隊伍位置、敵情同一個資訊模型（資訊網 arc：一個模型零特例）——親見（視野）、傳聞（隊友／商旅／流民）、打聽三條管道寫同一種 belief，帶時戳與可信度會過期；找糧（_find_food_seek_target）讀 belief 而不只讀視野真值與賣單，視野內的真值只是「剛親見、可信度 1」的那筆。這正是「居民學不到哪有糧而餓死」與「遷移找糧」那條階梯缺的腳。另開一票（不在打聽票），序排在交玩之後的深層批；打聽票先把這題灰掉帶原因。
 ---
