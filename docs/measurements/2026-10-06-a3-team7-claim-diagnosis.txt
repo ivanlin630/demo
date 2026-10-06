@@ -20,3 +20,80 @@
 ·t29340 站上 (3,7)：[Claim] Team7 於 (3,7) 領回 goods=15.0 ⇒ material 0 → 15 ⇒ 執行端是好的（③）
 ·⇒ 慢的是移動層（相鄰一格卡了 ~700 tick），照派工信：沒到場＝移動層，回報不在本票修
 ·★coin 87→96 的小幅變動與這筆待領無關（它是 material）——「coin 不動」不是失敗的證據（systems 已訂正）
+
+# 第二步：全世界有沒有「待領落在自家市集」（未修改的 code，每日邊界數）
+```
+[OWN] day 18：待領 6 筆｜落在自家市集 0 筆 []
+[OWN] day 19：待領 7 筆｜落在自家市集 0 筆 []
+[OWN] day 20：待領 11 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 21：待領 9 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 22：待領 9 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 23：待領 11 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 24：待領 12 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 25：待領 13 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 26：待領 13 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 27：待領 13 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 28：待領 14 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 29：待領 14 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+[OWN] day 30：待領 13 筆｜落在自家市集 1 筆 ["T14@(4, 6) goodsmaterial 5.0"]
+```
+·Team14 一筆 material 5.0 在自家市集 (4,6)，day 20 留到 day 30
+·「有那筆待領而 Team14 站在 (4,6)」的 tick ＝ 1440（首次 t36600）；那些 tick 的 current_option 全是 maintain_tools:resource
+
+# 第三步：修完再量同一個世界 ⇒ ★修法在這個世界零作用
+```
+[AFTER] day 20：待領 11｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 21：待領 9｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 22：待領 9｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 23：待領 11｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 24：待領 12｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 25：待領 13｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 26：待領 13｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 27：待領 13｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 28：待領 14｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 29：待領 14｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] day 30：待領 13｜自家市集 1 ["T14@(4, 6) material 5.0"]｜Team14 至今選領取的 tick ＝ 0
+[AFTER] Team14 material ＝ 66.0
+```
+·修改前後全世界 [Claim] 事件逐行相同（5 筆，diff 為空；兩輪都有「Team14 於 (4,6) 領回 goods=19.0」）
+·Team14 這 30 天選「領取」的 tick ＝ 0 ⇒ 那筆待領卡住**不是**早返回擋的：入口要 current_task＝TRADE＋本 tick 抵達，
+  它那一天在 maintain_tools ⇒ resolver 根本沒被呼到（我先前「站上去被早返回擋」的說法是錯的，已向 systems 更正）
+·結構洞仍真：承諾領取＋抵達自家市集 ⇒ 舊版兩道閘（入口 owner 閘＋resolver 早返回）都擋 ⇒ 由佈置床證（claim_at_own_market_bed）
+
+# 負對照（commit 80c623b92 之後跑、git checkout HEAD -- 還原）
+## NA 入口 owner 閘放回
+```
+   material 80.0 → 80.0｜待領剩 1 筆
+=== claim_at_own_market DONE === errors: 4
+ERROR: [FAIL] ★★★P1 material 必增 7.0（80.0 → 80.0）
+ERROR: [FAIL] ★★P1 那筆待領被清掉
+ERROR: [FAIL] ★★★P3(a) 承諾領取、到場落空  有那一筆失敗記憶
+ERROR: [FAIL] ★★★P3(a) 下輪對那一格的「領取」折價 < 1（1.000）
+```
+## NB resolver 裡「不自交易」早返回移回領取之前
+```
+   material 80.0 → 80.0｜待領剩 1 筆
+=== claim_at_own_market DONE === errors: 4
+ERROR: [FAIL] ★★★P1 material 必增 7.0（80.0 → 80.0）
+ERROR: [FAIL] ★★P1 那筆待領被清掉
+ERROR: [FAIL] ★★★P3(a) 承諾領取、到場落空  有那一筆失敗記憶
+ERROR: [FAIL] ★★★P3(a) 下輪對那一格的「領取」折價 < 1（1.000）
+```
+（P3(a) 也紅：它的佈置同樣在自家市集，落空記號在早返回之前判 ⇒ 兩道閘任一放回都看不到落空）
+
+# 母體表：哪些 TRADE 派工的目標可能是自家據點（systems 要的；拆入口閘後它們抵達會走 step3c 的 release）
+| 派工點 | 目標來源 | 會是自家據點？ |
+|---|---|---|
+| options.gd「貿易」 | _merchant_trade_target：套利單的市集（best_arbitrage_order 排除自己下的單）或 _nearest_market_outpost | 否 |
+| options.gd「領取」 | 本隊待領所在格（任何格） | **是**（唯一一個） |
+| options.gd「買糧」「囤貨」 | _nearest_market_outpost（`outpost_owner == team_id` ⇒ continue）；囤貨退路同「貿易」 | 否 |
+| options.gd「買料」 | _nearest_market_outpost_with（同上排除自家） | 否 |
+| goal_resolver.gd:1029/1086 | _nearest_market_outpost_with | 否 |
+| goal_resolver.gd:971/981 | 呼叫端傳入的 market_pos（同一支 _nearest_market_outpost_with 的結果） | 否 |
+| faction_ai_system.gd:3899/3912/4682 | 決策引擎選中選項的 to_task（＝上面那幾個） | 同上 |
+⇒ 拆閘後「抵達自家市集而被 release」的只有「領取」：領完就沒事做，釋放重評是對的
+⇒ ★駐村擺攤（options.gd「貿易」target (-1,-1)）**不受影響**：arrived 只收「這一 tick 真的移動並走到原 move_target」的隊（movement_system.gd:137-141），擺攤的隊不移動
+
+# 另一個結構洞（不修，回報）
+·arrived 只收「真的移動並抵達」⇒ 若隊**已經站在**待領那一格才承諾領取，它不會「抵達」⇒ resolver 永遠不被呼 ⇒ 那筆待領領不到
+  （Team14 若在 (4,6) 上選了領取，就會撞這個；它這 30 天沒選，所以這個世界沒走到）
