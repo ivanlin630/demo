@@ -20,13 +20,18 @@ Team3：無家（home_count＝0）⇒ 「建設」照樣可選（`applicable` �
 ## §1 做什麼
 
 ```
-①「建設」`applicable` ＝ **有自家據點**（`ctx.has_own_outpost` 或等價欄位 —— 先查 ctx 裡現成的名字）
+①「建設」`applicable` ＝ **有自家據點** ⇒ 欄位 ＝ **`ctx.has_home_outpost`**（`decision_context.gd:147／:617`，底層 `_find_own_outpost(state, team) != (-1,-1)`）
+  ★★R² 打回：~~`ctx.has_own_outpost`~~ 量的是**位置不是所有權** —— `:563` 算式是 `own_granary_tile(state, team)`，
+    而它（`resource_system.gd:627-631`）用 `team.tile_pos` 查「**腳下這格**是不是我的據點」⇒ Team0（人不在家）會被判「沒據點」
+    ⇒ applicable 恆假 ⇒ **本票對它要修的那隻隊完全沒效果**（名字騙人：has_own 聽起來是「擁有」）
   ⇒ 無家 ⇒ 不列（藍圖：列的條件＝做的條件）；票 B 落地後改成「列而帶 ineligible: 無據點」
   ★禁：「不在家就 skip」的盲閘（藍圖逐字 —— 那會讓 Team0 永遠不蓋）
 ②「建設」`to_task` ＝ **回自己的據點蓋**：target ＝ 自家據點格；task ＝ 抵達後會開工的那一種（UPGRADE／EXPAND／CONSTRUCT）
   ⇒ ★走**既有**的抵達開工管線（`movement_system.gd:400-401`），不新建第二條
-  ⇒ 選哪個據點、做哪一種：★**先查**基建評估層（`faction_ai_system.gd:6113` `_evaluate_independent_infrastructure`）有沒有
-    「選哪個設施／升級」的**純函式**可重用 —— 有就呼它（單一來源），沒有就回報我（不准在 to_task 裡另寫一套選址邏輯）
+  ⇒ 選哪個據點、做哪一種：★【已核，R²】重用兩支現成純函式（零 RNG，唯一副作用 Probe.bump，已在基建評估層裡跑著）：
+    `_find_own_outpost`（`faction_ai_system.gd:7440`，選哪個據點）／`_pick_facility`（`:6294`，選哪種工程）
+    ⇒ ★`_find_own_outpost` 一支函式答兩題（applicable 的「有沒有」與 to_task 的「哪一個」）—— 單一來源
+    ⇒ ★既有限制（非本票新 bug，交件提一句）：多據點時它選 `world.tiles` 迭代序第一個，不是最需要蓋的那個
   ⇒ 選不出任何可做的工程 ⇒ 不列（不是列了再空轉）
 ⑤「建設」那一項的註解帶標記 `A1-place-bound`（★defer `a1-upgrade-blocked-wrong-type-and-pop-min` 的回訪條件錨在它上面 —— 錨在程式碼不錨在文件，免得被自己寫的進度紀錄提早推真）
 ③無家的隊的立業驅力：**不在本票新建選項**；本票只要求證明它沒有被困 —— 見 P3

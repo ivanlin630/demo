@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A1 建設綁地點（修法）
 topic: R② ＝ **ISSUES，一列，但是會讓本票對 Team0 失效的那種重**｜★你優先打的(1)：有，直接點名兩支現成純函式，不必回報｜(2)核完安全：takeover不靠「建設」option本身的to_task，TASK_BUILD經construction-start函式自己的transition()重新建立｜★★★但`ctx.has_own_outpost`不是你要的欄位——它查的是「人現在站在自己的outpost上」不是「有沒有outpost」，用它會讓Team0（人不在家）applicable()恆假，正好廢掉本票的主案例｜§2核對正確
 ---
