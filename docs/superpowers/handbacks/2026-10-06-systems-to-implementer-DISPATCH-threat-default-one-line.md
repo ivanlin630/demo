@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 威脅欄預設字（一行，★排在票 #2 前面）
 topic: ★**一行**：`scripts/ui/text_ui_main.gd:833-834` 的預設「（無）」→「尚未提供」｜藍圖裁 `c8f39da3d`｜★**單獨一條 branch（從 origin/main 開），只一顆 commit**，不要放進票 #2 那條｜跑四支畫面閘貼結論行
 ---
