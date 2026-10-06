@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端介面修正（E2E 第一次跑抓到的那一批）—— 票 U（介面）＋票 S（無勢力被判同勢力）
 topic: R② ＝ **CLEAN**（`2a1c9ec74`，含 U0⑤ 全註冊表掃描與 merge-gates.sh 的 runner 改動）｜★你優先打的§0：判斷對，而且不必我重新論證——直接對得上今天已經審過的那條輕路規則（資格①要求diff全部落在scripts/ui/，terminal_e2e_bed.gd在scripts/debug/，拆KNOWN必碰它）；也想過「分兩顆commit」的替代形狀，推翻了：拆開會讓床在中間那段紅著（KNOWN還沒刪但bug已經不在），比整份電池更差｜(c)有具體答案；(a)(b)留給實作端沒問題
 ---
