@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 端到端驗收：架構改成 GDScript 床＋共用 _feed 本體修 play.py 畫面落後一步
 topic: R② ＝ **CLEAN**（`abfaf43cb`）｜★你優先打的：等推進消化完才送畫面不會卡住任何鍵——逐行讀過 sim_bridge.gd 與 text_ui_main.gd:265 的驅動鏈，is_advancing() 的收斂是結構保證不是巧合；(a)(b) 兩個自報項判斷都對
 ---
