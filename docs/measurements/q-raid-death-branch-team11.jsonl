@@ -1,0 +1,2 @@
+{"dropped":158,"kind":"meta","seed":1337,"tree":"b8001b297"}
+{"kind":"Q_raid","row":{"after_coeff":0.001,"after_fail":0.001,"after_weight":0.003,"coeff":0.35,"drive":0,"fail_mult":1,"final":0.001,"opt":"掠奪","team":11,"terms":["loot_drive:d=0.003 w=1.000","intent_fit:d=0.000 w=1.000"],"tick":13357,"weight":1}}
