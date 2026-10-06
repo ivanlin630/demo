@@ -5381,3 +5381,29 @@ docs/measurements/2026-09-10-c1-info-reconciliation.md
   ⇒ 但「威脅欄平常該印什麼」是 **WHAT**（威脅的定義：誰、多近、多強？用感知不用真值）
   ⇒ ★已問藍圖；在他裁之前**不要**讓實作端隨手補一個寫入者（那會是發明 WHAT）。
 **回訪條件**：藍圖裁「威脅欄要顯示什麼」之後開票；或有人決定**拿掉**這一欄（那也是一個答案）。
+
+---
+
+## `player_summary` 的 `food_days`／`starving` 在沒有隊時自己編值（死寫入者）＋另兩處值主張預設（2026-10-06 systems 登記，R² 指出）
+
+```
+寫入者：`scripts/simulation/player_api_mapper.gd:62-63`（`map_player_summary`）
+  "food_days": _food_days(t) if t != null else 0.0
+  "starving":  (_food_days(t) < 3.0) if t != null else false
+⇒ 沒有隊時寫 0.0 與 false —— ★兩欄互相矛盾（0 天糧卻沒在挨餓）
+★而它【零讀者】：UI 的 food_days／starving 讀者全讀 `ct`（`map_controlled_team`）不讀 `ps`
+  ⇒ 沒有玩家看得到這句謊 ⇒ 死寫入者，不是畫面缺陷
+⇒ 從威脅欄那張（spec `2026-10-06-threat-column-says-what-the-team-knows-HOW.md` §0b）拿掉，因為
+  它在那張票裡**沒有驗收列**（修不修都不會讓任何一格變色）
+```
+
+★同一族、在頂列**之外**的兩處讀者預設（值主張，`{}` 出口下會說話）：
+```
+`scripts/ui/text_ui_main.gd:1205`  float(ct.get("food_days", 99.0))   ⇒ 沒資料 ＝「糧很多」
+`scripts/ui/text_ui_main.gd:1206`  bool(ct.get("starving", false))    ⇒ 沒資料 ＝「沒在挨餓」
+`scripts/ui/text_ui_main.gd:1383`  float(ct.get("food_days", 99.0))   ⇒ 同上
+```
+★它們跟頂列那三欄是同一個判準（「預設值分佔位符與值主張」），但不在頂列 ⇒ 不在威脅欄那張的母體。
+**回訪條件**：①有人讀了 `ps` 的那兩鍵（那時它變成畫面缺陷）②或票 #2 merge 後「沒有隊」成為長時間狀態，
+那時開一張「讀者端值主張預設全清」的票，母體 ＝ `git grep -nE 'get\("[a-z_]+", *(0\.0|99\.0|false|"（無）")' -- scripts/ui`
+（★要印那一次掃描的數，不要只修這裡列的三處）。

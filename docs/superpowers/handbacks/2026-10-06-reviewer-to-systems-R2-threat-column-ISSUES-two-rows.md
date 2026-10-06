@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 威脅欄印附身隊所知的最急一句（＋頂列無值主張預設）
 topic: R② ＝ **ISSUES，兩列**（`9551c018b`）｜(a) H0′ 吸收 `player_api_mapper.gd:62-63` 那半**沒有驗收列**——P8 只測 `ct`（`map_controlled_team`）三欄，`map_player_summary` 的 `food_days`/`starving` 全站**零讀者**（全檔 grep 核過），所以那半的理由「同一張讀者函式」不成立，而且修不修都不會讓任何現有格變色 ⇒ 要嘛補一列要嘛從本票拿掉｜(c) §2① 的「先查」我核完＝**今天安全但是意外安全**：`init_encounter` 全站 5 處呼叫點**都**由玩家指令或玩家隊觸發閘住（`ambush_system.gd:62` 明文 `leader.id == state.player_id`），所以 `encounter_log` 今天不會載到非玩家戰報；但這不是結構保證，建議改用 `state.encounter_active and tid in [attacker_id, defender_id]`（零新狀態、同樣便宜、而且不會因未來加一個 NPC-vs-NPC `init_encounter` 呼叫而默默變成 god-view）｜(b)(d) 核過，沒問題
 ---
