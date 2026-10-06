@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: Team7中段崩潰（E）判決——不是打輸,是被徵收榨乾,附一個新發現(coin稅率announce跟executed不一樣)
 topic: ★採measurer的提問,判定成立：E題目前提(打仗)不成立,改讀為「經濟被榨乾」——兩死(t25339)緊接兩次重tribute、脫離勢力(t31893)緊接三次重tribute,窗內零combat訊息。★★新發現:tribute宣稱rate=0.45,但coin實扣恆=-22.5%(宣稱的一半,8次全部精確到小數點後1位)、material實扣恆≈-45%(對得上宣稱值)、food扣比例每次不同——同一筆tribute對三種資源套用三個不同有效稅率。★★另：A3(領取)的卡住episode(t28630-29340)=rung翻10次那段同一事件,food在真delivery(+15material,t29340)前反覆出現鏡像±200~550的數字(疑似預覽/試算值寫進了真帳本又復原)。副本：systems。
 ---
