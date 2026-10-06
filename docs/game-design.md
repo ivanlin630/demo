@@ -113,7 +113,7 @@
   - **候選 arc·軍民混编 / 民兵動員（2026-08-03 用戶定，待 B MVP 後、待 audit-first）**：軍民比**由團型分級**（非齊一混、非二元）——**專業軍團**（騎士團/貴族兵）=純軍拒屯兵、不算勞力；**後備/開墾團**=屯兵·半兵半農=部分勞力；**居民團**=**民兵制**（主力勞力 + 小武裝比，防禦才召）。機制=**團型設 `armed` 能力**（取代 faction_ai 自由設 `armed_anon_ratio`）；**平時民兵算勞力（農夫種田）**；**威脅→民兵動員抽離勞力池去打仗→產出掉（guns-vs-butter 真戰爭成本）**；和平解甲回田。涵蓋 systems 查出的三缺口（militarize/pop→軍 ABSENT、established 團 spread gated、recruit 非決策）。**★統一非補丁鐵律**：動手前**先 audit 現有散落機制**（`armed_anon_ratio`/`TAG_MILITARY`/`TAG_PRODUCE`/`TASK_TRAIN`/`equip_order`/belief→「全動員」/紮營 gate）→ **統一它們進一個模型**，禁再加平行補丁（同 [[統一矩陣]] / 整系統優先）。
     - **★audit 結論（2026-08-03，用戶怕點坐實）**：現況**三個各自為政的 pop-fraction 旋鈕**——`armed_anon_ratio`（武裝比，**由武器庫存**推 `equipment_system:62-73`）、`guard_ratio`（守衛比，威脅+tag 設 `faction_ai:2168-2180`，只影響夜哨/休息）、`captive_guard_ratio`（俘虜守衛比，自有決策 fn）——**三個不同 owner、不同規則、互不通**；加上**勞力池 `pool_of` 是二元 by-tag**（PRODUCE 全算/軍隊全不算，**無法表達民兵分數抽離**）。**arc 的真面目 = 把這些收斂成「一個團型驅動的 mobilizable 分數,威脅時把人力在勞力池↔戰力間搬」。** 約 **30% 統一現有 + 70% 新做**。建於 primitives（`armed_anon_ratio` 數值+戰鬥消費端 / `pool_of` / `AnonCohort` 守恆容器 / `TAG_*` 但需二元→光譜）；**折入** scattered（`equipment_system` 庫存推比、`equip_order`、`guard_ratio`、`captive_guard_ratio`、4 處分歧 tag-assign）；**新做**（mobilization 決策 pop→軍、team_type→ratio 表、belief→全動員、勞力池分數化 membership）。
 
-> **★主動升匿名 = 解 named-scarcity 的 genuine 出口（用戶 2026-08-11 提、parked 下一步、設計雛形已敲）**：named 不夠時領主可**主動提拔**匿名→記名（第 3 條 anon→named 路，另兩條=領隊死接班/不爽脫隊，皆湧現、機械誤升 bug 照除）。★genuine 決策非 crank：觸發=領主判斷需更多記名+有夠格匿名候選；人格加權（野心樂提/多疑吝嗇/絕境被迫）；★genuine 成本=被提者從此有身分（自己忠誠/慾望/目標）→脫離可替換勞力池 + **未來忠誠風險**（可能日後不滿/叛）=提拔是投資也是賭注；不可逆。named-scarcity 從硬牆→有壓力但領主有真出口且出口有真代價=湧現非 crank。★成本性質（賭注=未來可能叛）待用戶最終敲、及是否加別的（養成時間/他成員嫉妒）。★排序：大測試（scarcity 無出口 baseline，已在跑）→ spec 主動升匿名 → build → 同床再跑（有出口）前後對照。
+> **★主動升匿名 = 解 named-scarcity 的 genuine 出口（用戶 2026-08-11 提、parked 下一步、設計雛形已敲）**：named 不夠時領主可**主動提拔**匿名→記名（第 3 條 anon→named 路，另兩條=領隊死接班/不爽脫隊，皆湧現、機械誤升 bug 照除）。genuine 決策非 crank：觸發=領主判斷需更多記名+有夠格匿名候選；人格加權（野心樂提/多疑吝嗇/絕境被迫）；genuine 成本=被提者從此有身分（自己忠誠/慾望/目標）→脫離可替換勞力池 + **未來忠誠風險**（可能日後不滿/叛）=提拔是投資也是賭注；不可逆。named-scarcity 從硬牆→有壓力但領主有真出口且出口有真代價=湧現非 crank。成本性質（賭注=未來可能叛）待用戶最終敲、及是否加別的（養成時間/他成員嫉妒）。排序：大測試（scarcity 無出口 baseline，已在跑）→ spec 主動升匿名 → build → 同床再跑（有出口）前後對照。
 > **統一派遣模型 arc = CLOSED/MERGED(2026-08-11 `6b899d66`)**:匿名不落單/單獨必記名(入意圖帳)、機械升格 bug 結構性消除、全員歸隊;組成=重要性×可用記名×信任×人格(意圖帳「派遣組成」row)。過程逐版紀錄=git 史。
 > **★action util 死常數 audit 結果（2026-08-12 用戶要、systems 硬讀 26 option file:line）＝框架大半已 need-driven（驗證統一決策框架大半完成）**：絕大多數 option 已 need-driven（前 arc 修）。真 flat 死常數-病＝**1 主 `train_drive`=0.5**（tier-up 死根、A+B arc 正修）+ 3-4 minor（`camp_drive`/`beg_drive`/`settle_fit`＝多是 survival-floor 保底性質、arguably genuine 非病、未證明致錯）+ semi-flat（occupy/faction_duty/survival＝真 state-gated genuine）。∴ systematic need-oracle arc＝**小非大**（train 已在修、floor 們先留待證明致錯再針對修、免過度工程）。連 [[project_unification_matrix]] 統一 need oracle＝大半已完成再確認。
 > **named-scarcity 出口/晉升 refinement/军民混编動員 = 全 CLOSED/MERGED(2026-08-12)**:officer_need 真壓力→promote genuine 解;晉升初始心情忠誠湧現;charter×mobilization 正交 guns-vs-butter(意圖帳「軍民比」row)。細節=memory `project_*`+git 史。
@@ -234,7 +234,7 @@
 - **B 絕境遷移找糧**：當地求生選項全不可 fulfill → **移動去找糧**（最近野味/糧市/賣方）。**這是「奮力求生」核心**——困死選項＝坐著等死（否決）；奮力＝離開死市集找活路。絕境階梯：覓食→**遷移找糧**→乞食→掠奪→併入。
 - **C 連貫窮死**：真四方無糧才餓死（合法悲劇），但 **winner 必連貫**（拼命找糧四處落空 trace，非死守海市蜃樓）。
 - **D（defer 經濟 arc）**：餓世界食物不流通（無賣方）＝買糧本就該罕見；「要不要做食物市場供給」併 full-HD live 觀察 slice（先看糧怎麼流再決定），本修不解。
-- **★★餓世界大 pattern：「靠別人給」的求生路全是幻覺（血證 2026-07-15 逐一驗，中性世界坐實）**：買糧（無賣方）、乞食（無施捨者，但有 mercy 完成路＝非幻覺、只是情報門檻嚴到從不選＝死 rung）、投靠併入（無收留者，`_absorber_accepts` feed_ok≈0 恆拒、full-or-nothing 無漸進；中性世界 3 trace 累計 0 成功）——**根同：餓世界資源不流通，別人給不出**。相對「自己弄」的（覓食/遷移/掠奪）真能「動作生效」，**但掠奪有資源錯配陷阱**：掠奪成功搶到的是 material 不是 food（`material 13.6→20.2` 而 `food→0`）→ 對餓死的隊「動作成功卻救不了命」＝**掠奪該紓飢/搶糧（下個真根，一修解殘留 thrash＋餓死）**。∴ 餓世界真正可靠的自助只有覓食/遷移找糧。∴ coherence 修＝全「靠別人給」選項加 look-before-leap（不守幻覺→改自助）。但這揭示**餓世界絕境本質是孤立的**（各自互拒、孤獨餓死）。
+- **★餓世界大 pattern：「靠別人給」的求生路全是幻覺（血證 2026-07-15 逐一驗，中性世界坐實）**：買糧（無賣方）、乞食（無施捨者，但有 mercy 完成路＝非幻覺、只是情報門檻嚴到從不選＝死 rung）、投靠併入（無收留者，`_absorber_accepts` feed_ok≈0 恆拒、full-or-nothing 無漸進；中性世界 3 trace 累計 0 成功）——**根同：餓世界資源不流通，別人給不出**。相對「自己弄」的（覓食/遷移/掠奪）真能「動作生效」，**但掠奪有資源錯配陷阱**：掠奪成功搶到的是 material 不是 food（`material 13.6→20.2` 而 `food→0`）→ 對餓死的隊「動作成功卻救不了命」＝**掠奪該紓飢/搶糧（下個真根，一修解殘留 thrash＋餓死）**。∴ 餓世界真正可靠的自助只有覓食/遷移找糧。∴ coherence 修＝全「靠別人給」選項加 look-before-leap（不守幻覺→改自助）。但這揭示**餓世界絕境本質是孤立的**（各自互拒、孤獨餓死）。
   - **★抱團模型（用戶願景，經濟 arc 設計項，personality-gated 可選非強制）**：現行併入＝**收留模型**（承平邏輯 host 餵得起才收養）→ 餓世界全互拒＝難民孤立。用戶要**抱團模型**：兩絕境隊**共赴生死、湊資源**（湊人覓食/共享糧/湊人數佔村建據點），不問誰養誰。是絕境階梯一個**可選 rung，人格 gate 兩端**（求生欲/謙卑→求投靠；義氣/communal→願收；高野心/驕傲→獨撐或稱王）＝同絕境不同選擇＝性格。「難民真的會聚」的正面答案，讓絕境不只孤立。與 D（食物流通）同根，一起在 observe/經濟 arc 設計。**本 coherence 修先止血（收留 look-before-leap），抱團＝後續 arc。**
 - **執行鎖（原 thrash-fix 機制）廢**：治錯層（真根修好→買糧不選海市蜃樓→thrash 自然消）。觀測 infra（交易/威脅 tap）cherry-pick 進 main。
 
@@ -248,19 +248,19 @@
 
 > **★段落狀態(2026-08-21 瘦身註)**:本節=2026-07 設計成形+逐輪量測的**歷史紀錄**;公式/實測數字=當時值,以 code+`docs/measurements` 為準。**仍具效力的裁定**:多維發展人格化(archetype=湧現描述非硬類別)/material=開採模型+賽跑框架(意圖帳「木材」row)/貧困陷阱兩鎖判讀。進度現況以 2026-08-21 模型完工清單為準。
 
-**「富足」不能只看糧食（太薄）——糧食是生存地基（門檻），之上看綜合發展。** 現行 rung 階梯（`ambition_ladder`）只讀 糧盈餘+人口+勢力規模＝薄；我曾判「吃得飽=富」更薄。修為多維。
+**「富足」不能只看糧食（太薄）——糧食是生存地基（門檻），之上看綜合發展。** 現行 rung 階梯（`ambition_ladder`）只讀 糧盈餘+人口+勢力規模＝薄。修為多維。
 
 - **發展維度（目前 3 條＝現有系統只做這三個）**：**經濟 / 軍事 / 建設**（≈現有 商業/武力/定居 archetype）。**★不硬寫 3——接口留擴充**（未來加 技術/領土… = 加一項，非重寫）。
-- **★★用統一框架式做（用戶定 2026-07-15，接同一 arc 哲學）**：發展維度該像**決策一樣統一**——**一個統一「維度 registry」，每維由人格秤**（野心/貪婪→經濟、好戰→軍事、慎重→建設），隊追人格加權最高維。**加新維度＝registry 加 entry + 人格映射，不是各寫死一個系統。** 同 DecisionEngine option 一套、同 [[域專判斷器邊界原則]] 精神（穿人格秤非硬寫）。
+- **★用統一框架式做（用戶定 2026-07-15，接同一 arc 哲學）**：發展維度該像**決策一樣統一**——**一個統一「維度 registry」，每維由人格秤**（野心/貪婪→經濟、好戰→軍事、慎重→建設），隊追人格加權最高維。**加新維度＝registry 加 entry + 人格映射，不是各寫死一個系統。** 同 DecisionEngine option 一套、同 [[域專判斷器邊界原則]] 精神（穿人格秤非硬寫）。
 - **量測欄位（怎麼合成）**：**資源 / 錢 / 據點 / 人力**（4 個 measurables）——糧食＝門檻（沒糧免談），之上這 4 維體現發展度。
 - **★人格化多路（核心）**：**隊按人格走不同發展路**——**商隊追財（經濟：資源/錢）、軍閥追武（軍事：人力/戰力）、工匠追建設（據點/基建）**。同樣「食安之後」，不同人格追不同維度＝**多元文明類型的戲**（非單一「爬同一階梯」）。
-- **★★archetype = 湧現描述非硬類別（用戶重申 2026-07-23，憲法執行）**：商隊/軍閥/工匠**不是硬需求、不是被分到的盒子**——核心是**依人格自由發展、不設限**。archetype 是「一個人格驅動的隊最後長成什麼樣」的**事後描述**，非「你屬這類只能做這類」的規定。**∴ 人格 WEIGH 行為傾向、不 GATE 可用選項**——和平領袖掠奪 utility 趨近 0（幾乎不做，但情境夠 compelling 仍可、可被 utility 翻盤），非一道硬牆。差異化強度隨你調權重，但**不准變硬類別**。**★決策上任何硬 persona-gate（如 `AmbitionLadder` 擴張限 FORCE archetype、militancy 硬門檻、`persona>常數` OR-閘）= 補丁 = 違憲**（沙盒憲法「utility 餵 utility 非 scripted」的反面），一律 de-patch 成 soft 權重，**無 coherence 例外**（「這閘 personality-appropriate」是 rationalization，硬閘就是硬閘）。**邊界**：結構約束（outpost-type/terrain 限制）≠ 人格閘——那是**世界物理**（決策上物理能不能），留；憲法管的是**決策邏輯**（隊怎麼選），那裡不准 scripted 硬閘。結構稽核 = 憲法合規掃描（抓 scripted 決策閘，`constitution_gate.gd` 抓 scripted task 指派的姊妹）。
+- **★archetype = 湧現描述非硬類別（用戶重申 2026-07-23，憲法執行）**：商隊/軍閥/工匠**不是硬需求、不是被分到的盒子**——核心是**依人格自由發展、不設限**。archetype 是「一個人格驅動的隊最後長成什麼樣」的**事後描述**，非「你屬這類只能做這類」的規定。**∴ 人格 WEIGH 行為傾向、不 GATE 可用選項**——和平領袖掠奪 utility 趨近 0（幾乎不做，但情境夠 compelling 仍可、可被 utility 翻盤），非一道硬牆。差異化強度隨你調權重，但**不准變硬類別**。**決策上任何硬 persona-gate（如 `AmbitionLadder` 擴張限 FORCE archetype、militancy 硬門檻、`persona>常數` OR-閘）= 補丁 = 違憲**（沙盒憲法「utility 餵 utility 非 scripted」的反面），一律 de-patch 成 soft 權重，**無 coherence 例外**（「這閘 personality-appropriate」是 rationalization，硬閘就是硬閘）。**邊界**：結構約束（outpost-type/terrain 限制）≠ 人格閘——那是**世界物理**（決策上物理能不能），留；憲法管的是**決策邏輯**（隊怎麼選），那裡不准 scripted 硬閘。結構稽核 = 憲法合規掃描（抓 scripted 決策閘，`constitution_gate.gd` 抓 scripted task 指派的姊妹）。
 - **發展度驅動**：rung 爬升 / prosperity-prey 判（誰值得征服＝誰發展高）/ AI 食安後追什麼（人格定）。
 - **★連經濟通縮**：財富（錢）是發展一維，但發現 **coin 通縮排乾**（薪水 sink>賣貨 source，交易池乾涸）→ 經濟這維目前是**壞的**。∴ **經濟通縮修 + 發展模型多維化＝同一「經濟/發展 arc」**（coin census 找錢在哪＝第一塊實據）。世界現況＝「吃得飽的求生部落爬薄階梯」，目標＝「人格化發展的多元文明」。
 
 #### 貿易死因診斷(2026-07-15) → 診斷全文搬 `known_issues.md` §貿易死因診斷。**留規則**:修向=**流動偏摩擦市場**(用戶定)——willing 夥伴大多能成交;談不攏=少數且有理由(人格/情境的戲),非一道誰都過不了的死門檻。
 
-#### ★★方法翻轉：整個商業模型一次進框架，再量測（用戶定 2026-07-15）
+#### ★方法翻轉：整個商業模型一次進框架，再量測（用戶定 2026-07-15）
 **放棄 hole-by-hole（coin→co-loc→成交牆→A/B 逐洞補）。** 用戶裁：**先把整個商業框架做好、所有補釘融入,再跑量測。**
 - **理由（用戶）**：只融一點 → 後面又在抓「哪個補丁擋住」＝一路在打的地鼠。**補釘互相 confound 量測——全拆光才量得到乾淨模型。**
 - **與 measure-first 相容（非重蹈 accessor <3% 白工）**：那些是**還沒找到根就猜的大重構**;此處是**已知模型是補釘拼湊（靜態稽核坐實 file:line）,拆光補釘讓量測乾淨** → 量統一模型出不出 deals → 再磨。量測仍 gate 結果（統一模型 revive 市場否）,只是工作單位＝整個模型非單洞。
@@ -282,7 +282,7 @@
 
 #### 生產/牆移進度(2026-07-16~24) → 量測史全文搬 `known_issues.md` §生產/牆移進度。**留規則(仍具效力)**:①貧困陷阱=food+coin **兩把鎖**鎖建設層,afford 要兩鎖都解(用戶 2026-07-23;涉累積量的判斷靜態不可信必實測)。②**material=開採/地理資源非耕作**(用戶裁 2026-07-24):食=耕作永續放大、材=有限存量**賽跑**「誰先砍完誰優勢大」;地理張力=intended feature 不 flatten;伐木場=開採加速器,育林不 coherent;發展=競爭性非普世。③序:score 修好(地基進秤)才准拆 override;世界物理常數留 flat 只人格化決策常數。
 
-### ★★ 統一路線圖（2026-07-16 結構稽核）＋ 命運不看玩家臉色（已被零 LOD 取代）→ 全文搬 `docs/game-design-history.md`
+### ★ 統一路線圖（2026-07-16 結構稽核）＋ 命運不看玩家臉色（已被零 LOD 取代）→ 全文搬 `docs/game-design-history.md`
 
 > 2026-10-07 瘦身：兩節皆為歷史紀錄（統一矩陣 program 已竣工、命運段已被取代）。仍具效力的裁定已在意圖帳（`docs/mechanism-intents.md`）：threat-severity 人格分流、框架只管規則／思考驅動決策、同一概念單一 oracle。要前因後果開 history 檔。
 
@@ -299,10 +299,10 @@ A2c-1 揭 **merge/join food-blind**：整併/投靠選 absorber 只看 capacity/
   - **獨撐**：覓食硬撐（survival forage）
   - **變匪**：掠奪（絕境搶現有；職業搶需 loot util 人格化，見下）
   - → **絕境經濟 ≈ 把四條現有機制正確走引擎秤（非 bypass）＋ loot util 人格化**。人格塑選擇（驕者少乞多搶、義者施捨、貪者變匪）。乞討被拒/不足 → 升級投靠/變匪＝**絕望階梯**。
-- **★★絕望階梯「怎麼爬」intent 裁定（藍圖定 2026-07-18，code 揭階梯不會爬）**：measurer 坐實 `terms.gd` 絕境 option util **全與 famine_days 無關**（紮營=常數/乞食=常數/掠奪=看武裝/併入=看名聲），買糧觸底飽和 → **argmax 進危機就永久凍、失敗不升級**＝階梯有 rung 但不爬。裁定＝**與 threat-severity 同一結構（情境嚴重度放大、人格定方向）**：
+- **★絕望階梯「怎麼爬」intent 裁定（藍圖定 2026-07-18，code 揭階梯不會爬）**：measurer 坐實 `terms.gd` 絕境 option util **全與 famine_days 無關**（紮營=常數/乞食=常數/掠奪=看武裝/併入=看名聲），買糧觸底飽和 → **argmax 進危機就永久凍、失敗不升級**＝階梯有 rung 但不爬。裁定＝**與 threat-severity 同一結構（情境嚴重度放大、人格定方向）**：
   - **① famine 深度＝amplifier（缺的那塊）**：food_days→0 時，整個絕境 category 的 urgency **隨飢餓深化上升**。這是讓階梯「爬」的引擎——util 隨絕境重排，非 static。
   - **② 方向＝人格閘**（膽量/貪婪/榮譽/義氣/野心）：勇/貪/殘→**掠奪**、慎/榮→**乞討**、低野心/高求生→**投靠**、baseline→**覓食獨撐**。同 threat 的「severity 放大、人格定戰/逃」。
-  - **③ 失敗升級＝需失敗回饋（★原「不需計數器」被 QA raw trace 推翻，藍圖認錯 2026-07-18;★2026-08-21 升格:此案=「執行失敗反饋鐵律」先聲,通則已入意圖帳+invariants[連續折價/失效升 T0],survival 階梯=其一適用場）**：坐實=**famine-amp 只等比 scale 不換序**（camp/beg/join 各 static 人格 × 同 `famine_severity` → 深餓三格同比升 → 相對序不變 → 鎖人格偏好格更死、永不換）。∴「更絕境 option 自動蓋過」**假**——amplifier 是「人格選格器」非「階梯攀爬器」。**修=通用 action-stall 失敗回饋**：committed 到某 survival option 達 N 天仍無 food relief → 降該格權 → 次人格偏好格贏。= 推廣既有 `task_start_tick` timeout idiom（SCOUT/FLEE/STATION）到 survival，非新機制。**守框架**：N 天門檻由人格（耐性）+ relief-state 驅動、非全域死常數；降權後由人格選次格（軍閥卡紮營→改掠奪；農夫卡乞→改投靠）。[[feedback_symptom_vs_root_retry]] 此處**支持**回饋（X 卡著沒 relief=「X 現在做不成」→換格，非盲重試）。
+  - **③ 失敗升級＝需失敗回饋（2026-08-21 升格為「執行失敗反饋」通則，已入意圖帳＋invariants；survival 階梯是其一適用場）**：坐實=**famine-amp 只等比 scale 不換序**（camp/beg/join 各 static 人格 × 同 `famine_severity` → 深餓三格同比升 → 相對序不變 → 鎖人格偏好格更死、永不換）。∴「更絕境 option 自動蓋過」**假**——amplifier 是「人格選格器」非「階梯攀爬器」。**修=通用 action-stall 失敗回饋**：committed 到某 survival option 達 N 天仍無 food relief → 降該格權 → 次人格偏好格贏。= 推廣既有 `task_start_tick` timeout idiom（SCOUT/FLEE/STATION）到 survival，非新機制。**守框架**：N 天門檻由人格（耐性）+ relief-state 驅動、非全域死常數；降權後由人格選次格（軍閥卡紮營→改掠奪；農夫卡乞→改投靠）。[[feedback_symptom_vs_root_retry]] 此處**支持**回饋（X 卡著沒 relief=「X 現在做不成」→換格，非盲重試）。
   - **④ 無固定普適序**（駁系統選項 c 的固定 buy→loot→beg→join）：序本身**人格排**——驕傲軍閥「搶」在「乞」之前（寧搶不跪），怯懦農夫「乞/投靠」在「搶」之前。只有 baseline 物理序（覓食-自立恆在 < 買糧-需市場 < 社會/暴力-隨飢餓升）。
   - **★框架約束**：amplifier 讀 `famine_days`（第三家情境）× 人格（第一家），**禁全域 ramp 死常數**（框架清潔 arc，塞死常數=自我違憲）。
   - **★產出自限 attrition（我 acceptable 判準）**：每個 rung 都是**行動**（搶/乞/投靠/覓食）→ 解除或轉化飢餓（搶=得糧或戰死非餓死、投靠=被吸收、覓食=硬撐），**非被動站著餓死**。這正是餓死 attrition 從「傻站死」變「自限」的機制。
@@ -446,10 +446,10 @@ A2c-1 揭 **merge/join food-blind**：整併/投靠選 absorber 只看 capacity/
     - **①持久（抗 flicker/隱蔽）**：看過一次→進 belief（last-seen + confidence 逐漸 decay）；隱蔽/閃現（這 tick 看到下 tick 沒）**不瞬間忘**，belief 撐著→續對「剛那有敵」反應。殺 flicker-thrash（看到→反應→沒看到→忘→再看→再反應 抖動）；決策由持久 belief 驅動非瞬時可見性（連跨線才換道反 thrash 原則）。position-landmine 的極端版（belief 不 per-tick reset）。
     - **②恩仇永久記憶層（用戶定 2026-07-18，升級「不能忘」）**：決策考慮集＝**掃近隊（當下感知鄰隊）∪ 顯著記憶（世仇/恩人/已知大勢力/重要關係）**，後者**無視空間距離**——宿敵走出視線不從盤算刪。**兩層記憶**：短暫感知（路上隨瞥某隊）＝會 decay、有 cap；**重要記憶（恩仇/世仇/恩人/重要關係）＝永久，免疫 decay 與 cap 淘汰**（一輩子記得）。非「salience decay 慢」是「根本不淘汰」。
     - **perf 仍安全**：短暫感知 belief 有 cap（`MAX_CLAIMS_PER_OBSERVER=200`/`MEMORY_MAX`）+ decay；恩仇永久層 bounded（1-2 代世界、隊數有界→一個人結的「有意義恩仇」天生就少）→ 決策 iterate＝nearby(k)+永久恩仇(m) 皆 bounded，不退 O(N²)。**R① 加驗**：既有 belief 真有 persist+decay？恩仇永久層存在還是均勻 decay（會忘宿敵）？別假設。
-  - **★★冷啟動悖論 + 創世 god-view 違憲（用戶戳出，2026-07-18，此 arc 頭號主樑）**：嚴格憲法（無全知、訊息靠實體傳播）下創世人人全盲→「怎貿易/外交/探索」？grep 坐實**現行作弊**：`game_setup.gd:569-578` 創世把**每隊塞進每隊 `team_discovered`＝人人開局全知＝違憲**，短路掉「資訊碎裂（`line 63` 遊戲前提）→發現弧」全部核心戲。**正確機器已存在**（`vision_system.tick_discovery`：本地視野半徑3+偵查技能+地形+隱蔽 gated 發現鄰隊＝憲法正確 discovery），只被創世作弊蓋掉。
+  - **★冷啟動悖論 + 創世 god-view 違憲（用戶戳出，2026-07-18，此 arc 頭號主樑）**：嚴格憲法（無全知、訊息靠實體傳播）下創世人人全盲→「怎貿易/外交/探索」？grep 坐實**現行作弊**：`game_setup.gd:569-578` 創世把**每隊塞進每隊 `team_discovered`＝人人開局全知＝違憲**，短路掉「資訊碎裂（`line 63` 遊戲前提）→發現弧」全部核心戲。**正確機器已存在**（`vision_system.tick_discovery`：本地視野半徑3+偵查技能+地形+隱蔽 gated 發現鄰隊＝憲法正確 discovery），只被創世作弊蓋掉。
     - **修＝拔創世 god-view seeding，改創世知識＝②+③ 混（用戶定 2026-07-18）**：創世知道＝**自己派系 + 本地地理鄰居 + 有淵源對象（傳統盟友/世仇）**；陌生遠方一律未知，玩中發現。justify：派系＝你的人且互相 relay（channel ②）；本地＝你知道你山谷有誰；淵源＝接恩仇永久記憶。**保留碎裂（遠方未知→探索/傳播/資訊戰有得玩）+ 不凍死（政治+地理保底 bootstrap，避開沙盒最大 fail「凍死」）。** 選型棄①純湧現（孤立隊凍死盲風險）、棄現行全知作弊。
     - **bootstrap = 本地先行→擴張**：第一筆貿易/外交/戰在視野+創世知識內（`diplomatic_ai:132`、`_find_trade_target` 已讀 `team_discovered`）；探索（need-驅動移動→vision 揭鄰）+ 傳播延伸觸角。**make-or-break（systems R①）**：拔全知後 need-驅動移動夠不夠 bootstrap 不凍？不夠→補輕量探索/好奇驅動 or 收窄創世 seed 半徑。同「危險會傳播」make-or-break 家族（belief populate 必須冷啟動就 work）。
-    - **★★make-or-break 驗出反面：「派系互相 relay」的 discovery 假設不成立（2026-07-20，Slice B reviewer 異質載重坐實）**：`team_discovered` 寫入只經創世 + 直接視野（`vision_system`），**relay/message 從不寫 discovery，只傳已識隊的 belief 更新**——上面「派系＝你的人且互相 relay」「傳播延伸觸角」的 justify **機制不成立**，後-B discovery 曾是純 proximity-driven（永不經「聽說遠方有隊」而 discover）。**裁：(b) relay-discovery 需建**（非新願望，是兌現本段原有 justify + make-or-break 前置承諾）——relay/message 傳到且提及未識隊時，連帶觸發最小 discovery（`team_discovered=true`+初始粗糙 belief entry）。**範圍收窄**：只求這個最小閉環，不建含率/延遲/失真的完整情報網模型（那是「資訊操控維度」的活，見 `docs/notes/2026-07-19-info-warfare-verbs-brainstorm.md`，observe-gated 排後面）。併入 B 擴，非另開 arc。
+    - **★make-or-break 驗出反面：「派系互相 relay」的 discovery 假設不成立（2026-07-20，Slice B reviewer 異質載重坐實）**：`team_discovered` 寫入只經創世 + 直接視野（`vision_system`），**relay/message 從不寫 discovery，只傳已識隊的 belief 更新**——上面「派系＝你的人且互相 relay」「傳播延伸觸角」的 justify **機制不成立**，後-B discovery 曾是純 proximity-driven（永不經「聽說遠方有隊」而 discover）。**裁：(b) relay-discovery 需建**（非新願望，是兌現本段原有 justify + make-or-break 前置承諾）——relay/message 傳到且提及未識隊時，連帶觸發最小 discovery（`team_discovered=true`+初始粗糙 belief entry）。**範圍收窄**：只求這個最小閉環，不建含率/延遲/失真的完整情報網模型（那是「資訊操控維度」的活，見 `docs/notes/2026-07-19-info-warfare-verbs-brainstorm.md`，observe-gated 排後面）。併入 B 擴，非另開 arc。
   - **★世界特徵也 belief-gate（非只隊）+ 永遠要傳播、零豁免（用戶定 2026-07-19）**：「無全知」套所有東西——市場/糧點/資源/地形亦然。**一切知識只經傳播/發現進 belief，無「公開地標豁免」例外**（否決 invariants:186 舊裁）。
     - **市場（C 裁）**：現行 `has_food_market`/`_nearest_market_outpost` 掃全圖（見 known_issues「has_food_market god-view 既有債」條——不帶行號,標題錨不隨重排漂;原 `known_issues:35`/`invariants:186` 行號引=出生即指錯,2026-09-02 訂正）＝god-view 後門，堵。**市場存在/位置永遠經傳播習得**（去過 or 聽過），無豁免。**名市場≠豁免，是名聲高傳播率→自然廣傳進多數隊 belief**（與世隔絕沒聽到的隊就是不知道）。**「地標」只剩物理事實**：市場固定不會動→位置 belief 一旦習得就可靠（不像移動軍隊要重估）；但**取得永遠靠傳播**，且 STATE（還在營運?被毀?）可過期、待新傳播更新。
     - **∴ 系統改 `invariants:186`**：market 從「公開地標豁免 belief」→「belief-gate 如萬物，名聲高傳播率自然廣傳，位置固定故習得後穩定」。生存/經濟決策讀 belief 的已知市場，非全圖掃。
@@ -768,7 +768,7 @@ NPC 傳播資訊時可能：
 
 ## 情報操控接線現況 → 盤點搬 `known_issues.md` §情報操控接線現況(2026-07-06 快照)。**留定義**:缺=主動捏造+散播假訊息(缺捏造 option+「訊息可不綁真事件」的口);框架放得下(散播管路/後果反噬現成),路線圖項非急。
 
-## ★★ belief/知識 store 模型（brainstorm 定案 2026-07-19，awareness arc 地基）
+## ★ belief/知識 store 模型（brainstorm 定案 2026-07-19，awareness arc 地基）
 > 承「永遠要傳播、零豁免」+ 感知鐵律。決策讀 belief（會錯/舊/被騙的知識），非真值。此節定 belief store 怎麼組織。HOW（schema/migrate，**byte-identical refactor 驗**）＝系統。
 
 **1. 現況兩 store（泛化目標＝統一）**：訊息（`team_known`＝事件流，TTL 過期，carrier 相遇傳）+ 信念（`team_intel[obs][tgt]`＝對某隊 multi-claim 估計，可信度/失真/口碑成熟）。→ 泛化成**一個統一知識 store**，鍵 entity（隊/世界特徵/…），方便擴充（用戶定 #1：擴充性優先）。
@@ -1411,7 +1411,7 @@ NPC-vs-NPC 與玩家遭遇戰共用此模型；無「玩家專屬的不可殲滅
 
 ## 核心迴路（每天在玩的）
 
-> ★UI 讀取語意（blueprint 裁 2026-09-22）：畫面永遠呈現【上一顆完整 tick】的世界快照；玩家指令綁 tick 邊界（佇列，下一顆 tick 開頭套用）⇒ 延遲 ≤ 1 tick，屬設計非缺陷。★按鍵當下印「已排入：<動作>」，結果句在下一顆 tick 的畫面上回（拒絕含原因、禁靜默），頁腳常駐「待執行 N 道」；★2026-09-29 用戶裁改：每道令＝世界自動推一顆 tick（一分鐘），結果當場可見；X＝推進到下個整點、空白鍵＝到隔天開始（吸附格線）。09-23「下令不推時間」撤回。【現況 2026-09-22：指令仍直改 live state，佇列化＝待造票，前置於分片】此語意讓 sim 可在幀之間分片而畫面不半更新。
+> ★UI 讀取語意（用戶裁 2026-09-29）：按了就做——每道令＝世界推一顆 tick（一分鐘），回來的畫面＝結算後的世界，結果句當場可見（拒絕含原因、禁靜默）；X＝推進到下個整點、空白鍵＝到隔天開始（吸附格線）。歷史版本見 `docs/mechanism-intents-detail.md`「玩家指令回音」。
 
 1. 認知殘缺
 2. 蒐集 / 查證（斥候 / 問 NPC / 買地圖 / 酒館打聽 / 養線人；花時間 / 錢 / 風險）
@@ -1449,7 +1449,7 @@ NPC 同處迷霧（資訊系統）。玩家不特殊——同樣霧中一人，�
 附身即繼承:選一隊附身,他知道的你全知道(belief 面板開場攤出市場/鄰隊/威脅認知)。
 開場分階段:先由附身選擇畫面給張力(候選隊帶處境:快斷糧/在打仗),sim 事件密度夠了再開「隨機附身也有戲」。
 時間是玩家的:暫停下決定、快轉安靜期、事件跳停——時間控制是 UI 第一公民,不是外掛。
-咬要咬得明白,但**不畫箭頭**(第二輪用戶裁定,撤回「事件回溯 UI」):事件跳出零註解、結果零自動總結——
+咬要咬得明白,但**不畫箭頭**(用戶裁，第二輪玩測):事件跳出零註解、結果零自動總結——
 關聯玩家自己挖;系統的義務是**保證路徑**:任何結果事件,沿中性索引 ≤2 跳必能碰到它的因(介面票驗收判準,拿真 specimen 抽查)。
 延遲可以壓縮,歸因斷裂不行——但歸因是「可發掘」不是「被顯示」。
 
