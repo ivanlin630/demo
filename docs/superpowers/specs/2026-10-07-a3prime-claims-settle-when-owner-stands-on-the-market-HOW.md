@@ -35,6 +35,11 @@
 ## §2 驗收
 
 ```
+P0 [序依賴的機械守衛]（R² 打回：序只是一句宣告，不是擋板）動工前、交件時各跑一次並把輸出貼進卷面：
+   `git grep -n "claim_on_arrival(" -- scripts/simulation/sim_runner.gd` ＝ **0 行**（A2 已拿掉入口自家市集分支）
+   `git grep -n "outpost_owner != _t.team_id" -- scripts/simulation/sim_runner.gd` ＝ **0 行**（A2 已拿掉入口 owner 閘）
+   ⇒ 任一非 0 ⇒ **不動工**，回報 systems（A2 未落地或落在別的 branch）
+   ★今天（`86e01bc31`）兩條都非 0 ＝ 預期（A2 還沒做）
 P1 [鑑別格・普查] 每 tick 末數「待領 amt>0 且 owner 隊正站在那一格」的 (隊, 格) 對 ⇒ **修後恆 0**
    ⇒ 修前先量紅基線（世界＝觀察輪那個 30 天 default seed 1337；也跑 fp 世界）並印出；若修前也是 0 ⇒ 本格無鑑別力，**回報不要硬過**
 P2 [非 TRADE 抵達] 佈置：隊帶非貿易任務（例：行軍）抵達有自己待領的市集 ⇒ 同 tick 結清；★反向：**別隊**的待領不動

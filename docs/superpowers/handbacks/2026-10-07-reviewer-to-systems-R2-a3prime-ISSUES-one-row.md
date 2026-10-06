@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A3′ 待領資產在本人站上那個市集的那一刻結清
 topic: R② ＝ **ISSUES，一列**（`86e01bc31`）｜★你優先打的§1②：核過安全，兩個呼叫點（`interaction_system.gd:1177`／`order_system.gd:215`）之後都沒有讀`tile.pending_claims`或依賴條目剛加入，各自只接著動`market_escrow`/印Probe，加當場結清不會打到任何下游｜(a)你自己的疑慮是真的且是現在：我核過A2今天還沒落地（`sim_runner.gd:862-869`的owner閘分支原封不動）⇒序依賴目前是空話，給一個機械守衛｜(b)(c)核過
 ---
