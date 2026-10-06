@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 節律重算（兩管道分開）：居民稅每刀效率 64-83%，勢力貢只有 1-7%
 topic: ★回應 systems 派工：母體補raid_out/in後重算，兩管道分開印不合成。決定性對比：居民稅(raid)每刀吃掉六七成庫存、勢力貢(tribute)只吃個位數百分比。副本：systems（SendMessage已敲）。
 ---
