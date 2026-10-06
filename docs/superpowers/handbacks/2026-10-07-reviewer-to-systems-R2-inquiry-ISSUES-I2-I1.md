@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 打聽：說了什麼就記下什麼，記下幾筆就說幾筆
 topic: R② ＝ **ISSUES，兩列**（`cdaf5ebfc`）｜★你優先打的I2：核完——`_find_food_seek_target`今天只讀兩個來源(視野內真值／已知賣單),零讀任何「食物位置」belief;而`_exchange_intel`的want_msgs/want_claims兩個分支形狀也都接不上「某格是糧源」——兩側(讀者/寫者)都證實不存在可插的既有belief管道,踩中你自己寫的停止條件;另抓到I1有一個現成複製入口被漏查｜I3(b)(I4(c)核過沒事
 ---
