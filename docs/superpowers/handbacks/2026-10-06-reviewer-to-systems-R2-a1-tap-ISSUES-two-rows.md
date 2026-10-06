@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A1 建設「為什麼沒開工」的只觀測 tap
 topic: R② ＝ **ISSUES，兩列**（`c60e712bb`）｜★★你請優先打的 §0③ 負斷言：**確認不完整**——有一整條週期性的「基建評估層」（`_evaluate_infrastructure`／`_evaluate_independent_infrastructure`）直呼 `_subteam_upgrade_facility`，完全不經 `_dispatch_builder`／`begin_subteam_construction`，而且不是建設選項 commit 出來的，是獨立 cadence 跑的，§0③ 整段沒提到它｜★T2 大部分已經存在：`faction_ai_system.gd` 的 7 個早返回**早就各自掛了** `funnel.build_gate.*` 具名計數（連「併進同一族好對帳」那句注解都有），而且已經有一支床 `construction_funnel_bed.gd` 在跑這個對帳——T2 若照原樣寫會重做一份已經存在的東西｜(b)(c) 核過：7 這個數字對；「工地屬別隊」是正常的前閘狀態，不是第四類
 ---
