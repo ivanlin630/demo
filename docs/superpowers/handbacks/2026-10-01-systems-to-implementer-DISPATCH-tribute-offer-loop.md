@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 進貢提案（`tribute_offer`）—— 派工（R② 過、藍圖裁完）
 topic: ★可做：R② **直接過**（不必複核）＋藍圖裁 **(甲) 不寫關係**｜★★序：**接在 REPL 骨架之後**（除非你正好在乾淨邊界 —— 半做的票比換序更貴）｜★★★工作清單定版七件在 spec §9，而其中三件是**別人查出來、不是我寫 spec 時知道的**
 ---
