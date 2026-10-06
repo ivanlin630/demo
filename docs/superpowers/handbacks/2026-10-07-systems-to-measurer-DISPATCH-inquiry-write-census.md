@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 打聽到底有沒有記下東西（排在 S1 拆移除點之後）
 topic: ★派工｜樹＝當下 origin/main（印 sha）｜30 天觀察世界（default seed 1337）｜決定「打聽」是壞了（寫入恆 0 ⇒ 灰掉再修）還是好的（有 >0 ⇒ 只改文案）
 ---
