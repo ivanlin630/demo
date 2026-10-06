@@ -5,8 +5,12 @@ extends SceneTree
 #   → event_system game_over=true → sim_runner 凍結世界（H 不變量）。我們是在「有玩家的 config」
 #   上跑「無人值守的世界模擬」，結果那個沒人操作的玩家隊一死，整個世界就停
 #   （measurer 實測：warring leg day~70 凍結、床沒 guard 傻跑到 86400 次＝290 天 degenerate 假列）。
-#   ★若未來要量【真的有玩家】的情境，game_over 凍結是預期行為、不是 bug——那時別拆 player。
-#   ★禁改 sim_runner 的 game_over 語意（真有玩家時那條是對的）＝量測側修、不動 production。
+#   ~~★若未來要量【真的有玩家】的情境，game_over 凍結是預期行為、不是 bug——那時別拆 player。~~
+#   ~~★禁改 sim_runner 的 game_over 語意（真有玩家時那條是對的）＝量測側修、不動 production。~~
+#   ★★上兩句由**意圖帳 #43／#44** 推翻（game_over ＝ UI 層故事結束、非世界物理；世界不綁玩家），
+#     票 #2 刀 1（2026-10-06）已拿掉 sim_runner 的凍結。★不刪：它記著當時為什麼選量測側修，
+#     而那個理由在當時是對的（那時凍結還在，拆 player 是唯一不動 production 的路）。
+#   ★下面 `:73-75` 看到旗標就中止**照留**：它中止的依據是【旗標】不是【凍結】。
 # 動機：跨 run 比較被 CPU contention + config 差異污染 → k 值誠實 NULL；12mo 是【單一連續 run 內 N 自然
 # 成長】＝天然消掉那兩個 confound → 唯一能乾淨回答 O(N) vs O(N²) 的機會 → 必須一次抓齊（漏開＝重跑 12 月）。
 #

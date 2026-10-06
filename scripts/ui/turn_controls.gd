@@ -70,7 +70,8 @@ func _process(delta: float) -> void:
 	_timer += delta
 	while _timer >= _tick_interval and _advancing:
 		_timer -= _tick_interval
-		var events: Array = _bridge.advance_ticks(1)
+		var adv: Dictionary = _bridge.advance_ticks(1)   # ★回傳形狀見 `SimBridge.advance_ticks`
+		var events: Array = adv["events"]
 		_ticked_n += 1
 		tick_advanced.emit(events)
 		if events.size() > 0 or _ticked_n >= _target_n:
