@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # ★★★S3 驗收床：主判準是【觸發間隔】不是【事件率】。
 #   理由（systems 定）：間隔是【機制自身的性質】，不受世界分岔汙染——
 #   而七支全變慢會讓世界大幅分岔，分岔後聚合不可比是 S2 才立的規矩。
@@ -29,7 +30,10 @@ func _initialize() -> void:
 	var _nonadv_reason: String = ""
 	for _t in range(ticks):
 		var _r: String = runner.advance_tick(state, Vector2i(-1, -1))
-		if _first_nonadv == -1 and (_r == "game_over" or _r == "awaiting_heir"):
+		# ~~`… == "game_over" or`~~ 票 #2 刀 1（2026-10-06）劃掉：advance_tick **不再回** "game_over"
+		#   （意圖帳 #43：故事結束是 UI 旗標不是世界物理）⇒ 那一半恆假、留著會讓人以為它還在守什麼
+		#   ★等待繼承人那一半照守（它仍會凍）
+		if _first_nonadv == -1 and _r == "awaiting_heir":
 			_first_nonadv = state.world.current_tick; _nonadv_reason = _r
 	var day_t: float = float(WorldState.TICKS_PER_DAY)
 	print("=== s3_tier_interval === cfg=%s days=%d ticks=%d T3=%d tick (%.2f 天)"

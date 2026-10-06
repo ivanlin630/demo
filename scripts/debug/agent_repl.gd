@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 var _bridge: SimBridge = null
 
@@ -171,17 +172,25 @@ func _handle_advance(cmd: Dictionary) -> Dictionary:
 	var all_events: Array = []
 	var tick_before: int = _bridge.get_state().world.current_tick
 	var ticks_remaining: int = n
+	var stall_reason: String = ""
 
 	while ticks_remaining > 0:
 		if _bridge.get_state().encounter_active:
 			break
 		var batch: int = mini(WorldState.TICKS_PER_HOUR, ticks_remaining)
 		var batch_tick_before: int = _bridge.get_state().world.current_tick
-		var evts: Array = _bridge.advance_ticks(batch)
+		var adv: Dictionary = _bridge.advance_ticks(batch)
+		var evts: Array = adv["events"]
 		var actually_advanced: int = _bridge.get_state().world.current_tick - batch_tick_before
 		ticks_remaining -= actually_advanced
 		all_events.append_array(evts)
 		if evts.size() > 0:
+			break
+		# ★★★推不動 ⇒ 停（票 #2 刀 1 讀 code 時撈到的既有洞）：等待繼承人時
+		#   `actually_advanced == 0` ⇒ `ticks_remaining` 永遠不減 ⇒ **這個 while 不會結束**。
+		#   ⇒ 用 `SimBridge.advance_ticks` 新給的 `stall_reason` 判（不另造判準）。
+		if actually_advanced == 0 and String(adv["stall_reason"]) != "":
+			stall_reason = String(adv["stall_reason"])
 			break
 
 	var ticks_done: int = _bridge.get_state().world.current_tick - tick_before
@@ -189,6 +198,7 @@ func _handle_advance(cmd: Dictionary) -> Dictionary:
 		"ok": true,
 		"code": "ok",
 		"ticks_advanced": ticks_done,
+		"stall_reason": stall_reason,   # ★只加鍵：推不動時說為什麼（空 ＝ 沒卡）
 		"current_tick": _bridge.get_state().world.current_tick,
 		"events": all_events,
 	}

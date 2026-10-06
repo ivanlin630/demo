@@ -1,0 +1,133 @@
+# 故事結束票（#2）：負對照先紅 ＋ 綠的原文
+
+- 床：`scripts/debug/terminal_selfcheck_bed.gd`（刀 0 的 P0）／`scripts/debug/story_end_not_physics_bed.gd`（刀 1 的 P1／P2／P2′／P7）
+- 刀 0 ＝ `e730d1a5f`、刀 1 ＝ `f9b66426f`（branch `feat/game-over-story-end`，rebase 前的 sha）
+- 負對照一律在改動 **commit 之後**才跑（動工作區、跑完 `git checkout HEAD -- <檔>` 還原）
+
+## 刀 0：N1 拿掉 view 那一欄（`story_end` 固定空字串）⇒ 預期兩支已結束走法都紅
+```
+=== terminal_selfcheck DONE === errors: 2｜到場點名 9／9
+ERROR: [FAIL] ★★★★★(i) 已結束（旗標）：頂列含「故事已結束：」且其後是原因的非空前綴
+ERROR: [FAIL] ★★★★★(i) 已結束（戰死）：頂列含「故事已結束：」且其後是原因的非空前綴
+```
+
+## 刀 0：N2 拿掉 snapshot 失敗出口的兩鍵（回 `{}`）⇒ 預期**只有戰死那支**紅
+
+★這一格驗的是讀 code 的推論「玩家戰死 ⇒ persons.erase ⇒ snapshot 走失敗出口」——它真的只紅在戰死那支。
+```
+=== terminal_selfcheck DONE === errors: 1｜到場點名 9／9
+ERROR: [FAIL] ★★★★★(i) 已結束（戰死）：頂列含「故事已結束：」且其後是原因的非空前綴
+```
+
+## 刀 0 綠（含頂列原文與 display width）
+```
+── (i) 故事結束那一欄（P0）──
+  PASS: (i) 開場：頂列**不含**「故事已結束：」（故事沒結束  那一欄不出現）
+  PASS: (i) 開場·退化（0 coin）：頂列**不含**「故事已結束：」（故事沒結束  那一欄不出現）
+  PASS: (i) 互動（t）：頂列**不含**「故事已結束：」（故事沒結束  那一欄不出現）
+  PASS: (i) 互動·退化（0 coin）：頂列**不含**「故事已結束：」（故事沒結束  那一欄不出現）
+  PASS: (i) 分頁切換（.）：頂列**不含**「故事已結束：」（故事沒結束  那一欄不出現）
+  PASS: (i) 物品（i）：頂列**不含**「故事已結束：」（故事沒結束  那一欄不出現）
+   已結束（旗標） 頂列（display width 119）：
+     第 1 天 00:00 ｜ Team15（人口 10） ｜ 家：（無） ｜ 糧撐 6.3 天 ｜ 故事已結束：玩家絕後（Team15 無繼承人 ｜ 待執行 0 道
+   欄內容「玩家絕後（Team15 無繼承人」｜原因「玩家絕後（Team15 無繼承人）」｜被截 ＝ true
+  PASS: ★★★★★(i) 已結束（旗標）：頂列含「故事已結束：」且其後是原因的非空前綴
+   已結束（戰死） 頂列（display width 115）：
+     第 1 天 00:00 ｜ —（人口 —） ｜ 家：（無） ｜ 糧撐 0.0 天 ｜ 故事已結束：玩家絕後（Team15 無繼承人） ｜ 待執行 0 道
+   欄內容「玩家絕後（Team15 無繼承人）」｜原因「玩家絕後（Team15 無繼承人）」｜被截 ＝ false
+  PASS: ★★★★★(i) 已結束（戰死）：頂列含「故事已結束：」且其後是原因的非空前綴
+=== terminal_selfcheck DONE === errors: 0｜到場點名 9／9
+```
+
+## 刀 1：N3 把 `if state.game_over: return "game_over"` 加回 sim_runner ⇒ 預期 P1／P2 紅
+```
+  PASS: ★母體地板：開場有玩家隊（Team15）
+   game_over=true｜原因「玩家絕後（Team15 無繼承人）」
+  PASS: ★★母體地板：旗標**由真的寫入者**設成真（否則這一格在一個沒死的世界上恆綠）
+   current_tick 0 → 0（推 24 次；回傳分佈 { "game_over": 24 }）
+  PASS: ★P1：旗標推完之後**仍為真**（世界照跑 ≠ 故事復活）
+  PASS: ★母體地板：真的讀到 sim_runner.gd（1009 行）
+   非註解命中 2｜註解裡 2（允許）：["118: if state.game_over:  # NEG-CTRL N3", "119: return \"game_over\""]
+  PASS: ★★【反向對照】合成三行（1 行程式碼／2 行只在註解） 抽取器必須回 1（1）
+  PASS: ★母體地板：掃到的床檔數 498（> 100）
+   命中 0
+  PASS: ★★★★★P2′：床裡字串比較 game_over 回傳值的非註解命中 ＝ 0（0）
+  PASS: ★★【反向對照】合成三行（比較／dict 鍵／註解） 抽取器必須只回第 1 行（[1]）
+   推得動：{ "events": "0 筆", "advanced": 3, "requested": 3, "first_stall_tick": -1, "stall_reason": "" }
+  PASS: ★★【對照】推得動的世界  advanced > 0 而 stall_reason 空（3／「」）
+  PASS: ★★母體地板：真的處在等待繼承人（choose_heir）
+   卡住：{ "events": "0 筆", "advanced": 0, "requested": 5, "first_stall_tick": 3, "stall_reason": "awaiting_heir" }｜current_tick 3 → 3
+  PASS: ★★★★★P7：回傳分得出【一 tick 都沒推】（advanced ＝ 0）
+  PASS: ★★★★★P7：而且說出為什麼（stall_reason ＝「awaiting_heir」）
+  PASS: ★P7：first_stall_tick 有值（3）
+   PlayerCommandApi 鍵 ＝ ["advanced", "first_stall_tick", "requested", "stall_reason"]｜SimBridge 鍵（去 events）＝ ["advanced", "first_stall_tick", "requested", "stall_reason"]
+  PASS: ★母體地板：PlayerCommandApi 那一側真的有鍵（4）
+  PASS: ★★★★P7：兩條推進路徑回同一組鍵
+  PASS: ★★P7：兩邊在同一個卡住的世界上給同一個原因（api「awaiting_heir」）
+  PASS: ★到場點名：4／4（缺：[]）
+=== story_end_not_physics DONE === errors: 2
+ERROR: [FAIL] ★★★★★P1：game_over 之後 `current_tick` 真的 +24（0）
+ERROR: [FAIL] ★★★★★P2：sim_runner.gd 的 `game_over` 非註解命中 ＝ 0（2）
+```
+
+## 刀 1：N4 sim_bridge 改回忽略 `advance_tick` 回傳值 ⇒ 預期 P7 紅
+```
+  PASS: ★母體地板：開場有玩家隊（Team15）
+   game_over=true｜原因「玩家絕後（Team15 無繼承人）」
+  PASS: ★★母體地板：旗標**由真的寫入者**設成真（否則這一格在一個沒死的世界上恆綠）
+   current_tick 0 → 24（推 24 次；回傳分佈 { "": 24 }）
+  PASS: ★★★★★P1：game_over 之後 `current_tick` 真的 +24（24）
+  PASS: ★P1：旗標推完之後**仍為真**（世界照跑 ≠ 故事復活）
+  PASS: ★母體地板：真的讀到 sim_runner.gd（1007 行）
+   非註解命中 0｜註解裡 2（允許）
+  PASS: ★★★★★P2：sim_runner.gd 的 `game_over` 非註解命中 ＝ 0（0）
+  PASS: ★★【反向對照】合成三行（1 行程式碼／2 行只在註解） 抽取器必須回 1（1）
+  PASS: ★母體地板：掃到的床檔數 498（> 100）
+   命中 0
+  PASS: ★★★★★P2′：床裡字串比較 game_over 回傳值的非註解命中 ＝ 0（0）
+  PASS: ★★【反向對照】合成三行（比較／dict 鍵／註解） 抽取器必須只回第 1 行（[1]）
+   推得動：{ "events": "0 筆", "advanced": 3, "requested": 3, "first_stall_tick": -1, "stall_reason": "" }
+  PASS: ★★【對照】推得動的世界  advanced > 0 而 stall_reason 空（3／「」）
+  PASS: ★★母體地板：真的處在等待繼承人（choose_heir）
+   卡住：{ "events": "0 筆", "advanced": 0, "requested": 5, "first_stall_tick": -1, "stall_reason": "" }｜current_tick 3 → 3
+  PASS: ★★★★★P7：回傳分得出【一 tick 都沒推】（advanced ＝ 0）
+   PlayerCommandApi 鍵 ＝ ["advanced", "first_stall_tick", "requested", "stall_reason"]｜SimBridge 鍵（去 events）＝ ["advanced", "first_stall_tick", "requested", "stall_reason"]
+  PASS: ★母體地板：PlayerCommandApi 那一側真的有鍵（4）
+  PASS: ★★★★P7：兩條推進路徑回同一組鍵
+  PASS: ★到場點名：4／4（缺：[]）
+=== story_end_not_physics DONE === errors: 3
+ERROR: [FAIL] ★★★★★P7：而且說出為什麼（stall_reason ＝「」）
+ERROR: [FAIL] ★P7：first_stall_tick 有值（-1）
+ERROR: [FAIL] ★★P7：兩邊在同一個卡住的世界上給同一個原因（api「awaiting_heir」）
+```
+
+## 刀 1 綠
+```
+  PASS: ★母體地板：開場有玩家隊（Team15）
+   game_over=true｜原因「玩家絕後（Team15 無繼承人）」
+  PASS: ★★母體地板：旗標**由真的寫入者**設成真（否則這一格在一個沒死的世界上恆綠）
+   current_tick 0 → 24（推 24 次；回傳分佈 { "": 24 }）
+  PASS: ★★★★★P1：game_over 之後 `current_tick` 真的 +24（24）
+  PASS: ★P1：旗標推完之後**仍為真**（世界照跑 ≠ 故事復活）
+  PASS: ★母體地板：真的讀到 sim_runner.gd（1007 行）
+   非註解命中 0｜註解裡 2（允許）
+  PASS: ★★★★★P2：sim_runner.gd 的 `game_over` 非註解命中 ＝ 0（0）
+  PASS: ★★【反向對照】合成三行（1 行程式碼／2 行只在註解） 抽取器必須回 1（1）
+  PASS: ★母體地板：掃到的床檔數 498（> 100）
+   命中 0
+  PASS: ★★★★★P2′：床裡字串比較 game_over 回傳值的非註解命中 ＝ 0（0）
+  PASS: ★★【反向對照】合成三行（比較／dict 鍵／註解） 抽取器必須只回第 1 行（[1]）
+   推得動：{ "events": "0 筆", "advanced": 3, "requested": 3, "first_stall_tick": -1, "stall_reason": "" }
+  PASS: ★★【對照】推得動的世界  advanced > 0 而 stall_reason 空（3／「」）
+  PASS: ★★母體地板：真的處在等待繼承人（choose_heir）
+   卡住：{ "events": "0 筆", "advanced": 0, "requested": 5, "first_stall_tick": 3, "stall_reason": "awaiting_heir" }｜current_tick 3 → 3
+  PASS: ★★★★★P7：回傳分得出【一 tick 都沒推】（advanced ＝ 0）
+  PASS: ★★★★★P7：而且說出為什麼（stall_reason ＝「awaiting_heir」）
+  PASS: ★P7：first_stall_tick 有值（3）
+   PlayerCommandApi 鍵 ＝ ["advanced", "first_stall_tick", "requested", "stall_reason"]｜SimBridge 鍵（去 events）＝ ["advanced", "first_stall_tick", "requested", "stall_reason"]
+  PASS: ★母體地板：PlayerCommandApi 那一側真的有鍵（4）
+  PASS: ★★★★P7：兩條推進路徑回同一組鍵
+  PASS: ★★P7：兩邊在同一個卡住的世界上給同一個原因（api「awaiting_heir」）
+  PASS: ★到場點名：4／4（缺：[]）
+=== story_end_not_physics DONE === errors: 0
+```

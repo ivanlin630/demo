@@ -18,11 +18,15 @@ extends SceneTree
 # ★★而「走法」＝ 一串**鍵的 token**，餵進 `PlayerRepl.keycode_for()` ＋ `node._input()`
 #   ⇒ 與 REPL 走**同一條路**（不另造一條驅動方式），而那也順便驗了那個詞法器。
 
-const SPEC_WALKS_MIN: int = 6        # spec §3 要**六支玩家走法**（★含退化版本，見 WALKS）
-# ★★而 `WALKS` 共 7 支：六支玩家走法 ＋ **一支 debug 走法**（它是對照組不是玩家走法）
+# ★★票 #2 刀 0（2026-10-06）：6 → **8**＝多兩支「已結束」走法（故事結束 spec §5c 的 P0）
+#   ⇒ ★★它是**走法**不是一格：八條自驗規則（寬度／重複／英文／debug…）**全部**跑在那一屏上
+#     （只斷言「整屏含那個字面」會放過一列 130 cols 的頂列）
+const SPEC_WALKS_MIN: int = 8        # spec §3 要**六支玩家走法**（★含退化版本，見 WALKS）＋ 兩支已結束
+# ★★而 `WALKS` 共 9 支：八支玩家走法 ＋ **一支 debug 走法**（它是對照組不是玩家走法）
 #   ⇒ 下面每一條「玩家走法 ＝ 0」的斷言都**只看那六支**，而 debug 那一支要**必須 > 0**。
 var _errors: int = 0
 var _cells_ran: Array = []
+var _last_flags: Dictionary = {}   # ★`_screen_for()` 在 render 那一刻記下的事實（P0 母體地板讀它）
 
 const EXPECTED_CELLS: Array = [
 	"_test_a_regions_present_and_ordered",
@@ -33,6 +37,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_g_player_walk_has_no_debug_tokens",
 	"_test_c_printed_keys_are_typeable",
 	"_test_h_no_dev_notes",
+	"_test_i_story_end_column",
 ]
 
 # ══ 走法表（spec §3「六支走法」＋ R² 要的**退化版本**）════════════════════════════
@@ -45,6 +50,14 @@ const WALKS: Array = [
 	{"name": "互動·退化（0 coin）", "tokens": ["t"], "degenerate": true},
 	{"name": "分頁切換（.）", "tokens": [".", "."], "degenerate": false},
 	{"name": "物品（i）", "tokens": ["i"], "degenerate": false},
+	# ══ ★★★★★【已結束】兩支（故事結束 spec §5c 的 P0；骨架 spec §12「走法母體多一個已結束狀態」）══
+	#   ·「旗標」＝ spec 字面的 setup：`game_over=true` ＋ `game_over_reason`，**玩家還在**
+	#   ·★★「戰死」＝ **真的 game_over 的形狀**：玩家從 `persons` 消失
+	#     （`npc_combat_system.gd` 戰死那條最後一行是 `state.persons.erase(p.id)`）
+	#     ⇒ `get_player_snapshot` 走**失敗出口** ⇒ ★只有「旗標」那支的話，
+	#       「那一欄只在一個活世界上亮」與「玩家真的死了也看得到」在卷面上**分不開**
+	{"name": "已結束（旗標）", "tokens": [], "degenerate": false, "story_end": "flag"},
+	{"name": "已結束（戰死）", "tokens": [], "degenerate": false, "story_end": "dead"},
 	# ★★★【反向走法】debug 走法 —— 它**必須**印出那幾個識別字（見 (g)）
 	#   ⇒ 它不是第七支「玩家走法」，它是那條「＝ 0」斷言的**對照組**
 	{"name": "★debug 走法", "tokens": [], "degenerate": false, "debug_pane": true},
@@ -72,6 +85,7 @@ func _run() -> void:
 	await _test_g_player_walk_has_no_debug_tokens()
 	await _test_c_printed_keys_are_typeable()
 	await _test_h_no_dev_notes()
+	await _test_i_story_end_column()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(String(c)):
@@ -115,6 +129,20 @@ func _screen_for(walk: Dictionary) -> String:
 		var st: WorldState = node._bridge.get_state()
 		var pt: TeamData = st.teams.get(st.persons[st.player_id].team_id)
 		ResourceBank.set_amt(pt, "coin", 0.0, "bed_fixture")
+	var story: String = String(walk.get("story_end", ""))
+	if story != "":
+		var sw: WorldState = node._bridge.get_state()
+		var ptid: int = sw.persons[sw.player_id].team_id
+		if story == "dead":
+			# ★照戰死那條的兩步：出 named ＋ 從 persons 抹掉（`player_id` 不清 —— 戰死也不清它）
+			var pteam: TeamData = sw.teams.get(ptid)
+			if pteam != null:
+				sw.remove_member(pteam, sw.player_id, false)
+			sw.persons.erase(sw.player_id)
+		sw.game_over = true
+		# ★原因字串**逐字照** `event_system.gd` 那個寫入者的格式（寬度預算要量真的長度）
+		sw.game_over_reason = "玩家絕後（Team%d 無繼承人）" % ptid
+	_last_flags = {}
 	for t in walk.get("tokens", []):
 		var kc: int = PlayerRepl.keycode_for(String(t))
 		if kc == -1:
@@ -125,6 +153,10 @@ func _screen_for(walk: Dictionary) -> String:
 		node._input(ev)
 	node._refresh()
 	var s: String = String(node._screen_label.text)
+	# ★母體地板要讀的事實：**render 那一刻**的旗標與玩家在不在（同一時刻，不是事後重查）
+	var sf: WorldState = node._bridge.get_state()
+	_last_flags = {"game_over": sf.game_over, "game_over_reason": sf.game_over_reason,
+		"player_in_persons": sf.persons.has(sf.player_id)}
 	OS.set_environment(TextUiMain.TRUTH_PANE_ENV, prev_env)   # ★復原（不污染下一支走法）
 	node.queue_free()
 	await process_frame
@@ -136,6 +168,8 @@ func _all_screens() -> Array:
 	for w in WALKS:
 		var s: String = await _screen_for(w as Dictionary)
 		out.append({"name": String((w as Dictionary).get("name", "?")), "screen": s,
+			"story_end": String((w as Dictionary).get("story_end", "")),
+			"flags": _last_flags.duplicate(),
 			"degenerate": bool((w as Dictionary).get("degenerate", false)),
 			"debug_pane": bool((w as Dictionary).get("debug_pane", false))})
 	return out
@@ -637,3 +671,52 @@ func _test_c_printed_keys_are_typeable() -> void:
 	_check("★★【反向對照】一個假鍵名（`幽靈`）必須被判成打不出來",
 		PlayerRepl.keycode_for("幽靈") == -1)
 	_cell("_test_c_printed_keys_are_typeable")
+
+
+# ══ (i) ★★★★★【故事結束那一欄】（故事結束 spec §5c 的 P0；票 #2 刀 0）══════════════════
+# ★八條自驗規則已經跑在兩支「已結束」走法上（它們在 `WALKS` 裡）⇒ 這一格只管**那一欄本身**：
+#   ①已結束的兩支：頂列含 `故事已結束：<原因>`（★母體地板：render 那一刻旗標**真的為真**）
+#   ②其餘玩家走法：**不含**那個欄標（★條件①：那一欄只在 `game_over` 為真時出現）
+#   ③★「戰死」那一支：母體地板＝玩家**真的不在** `persons`（否則它退化成「旗標」那支）
+#   ⇒ ★★負對照（先紅再修）：把 view 那一欄拿掉 ⇒ ①必紅；把失敗出口的兩鍵拿掉 ⇒ **只有戰死那支**紅
+func _test_i_story_end_column() -> void:
+	print("\n── (i) 故事結束那一欄（P0）──")
+	var screens: Array = await _all_screens()
+	var label: String = TextUiView.STORY_END_LABEL
+	var ended: int = 0
+	for sc in _player_only(screens):
+		var d: Dictionary = sc as Dictionary
+		var name: String = String(d.get("name", ""))
+		var screen: String = String(d.get("screen", ""))
+		var top: String = String(screen.split("\n")[0]) if screen != "" else ""
+		var fl: Dictionary = d.get("flags", {})
+		var story: String = String(d.get("story_end", ""))
+		if story == "":
+			_check("(i)② %s：頂列**不含**「%s」（故事沒結束 ⇒ 那一欄不出現）" % [name, label],
+				not screen.contains(label))
+			continue
+		ended += 1
+		print("   %s 頂列（display width %d）：" % [name, TextUiLayout.display_width(top)])
+		print("     " + top)
+		_check("★母體地板 %s：render 那一刻 `game_over` 真的為真（%s）"
+			% [name, str(fl.get("game_over", null))], bool(fl.get("game_over", false)))
+		if story == "dead":
+			_check("★母體地板 %s：render 那一刻玩家真的不在 persons（在 ＝ %s）"
+				% [name, str(fl.get("player_in_persons", null))],
+				not bool(fl.get("player_in_persons", true)))
+		# ★★實測（2026-10-06 第一次跑）：「旗標」那支隊名人口欄比較寬 ⇒ 原因被 clip 掉末尾一個字
+		#   ⇒ 那是威脅欄的**寬度契約**（唯一無界欄、吃剩餘被 clip；spec §5c (甲) 已接受）不是缺陷。
+		#   ⇒ 判準：欄標之後到 ` ｜ 待執行` 那一段必須是原因的**非空前綴**（被截的話印出來）
+		var reason: String = String(fl.get("game_over_reason", "?"))
+		var at: int = top.find(label)
+		var tail_at: int = top.find(" ｜ 待執行")
+		var body: String = top.substr(at + label.length(), tail_at - at - label.length()) if at != -1 and tail_at > at else ""
+		print("   欄內容「%s」｜原因「%s」｜被截 ＝ %s" % [body, reason, str(body != reason)])
+		_check("★★★★★(i)① %s：頂列含「%s」且其後是原因的非空前綴" % [name, label],
+			at != -1 and body != "" and reason.begins_with(body))
+	_check("★母體地板：已結束走法數 ＝ 2（%d）" % ended, ended == 2)
+	# ★反向對照：同一個判準（contains 欄標）在乾淨合成字串上 0、塞進去之後 1
+	var clean: String = "第 1 天 00:00 ｜ 灰狼隊（人口 14） ｜ 威脅：（無）"
+	_check("★★【反向對照】乾淨輸入不含欄標", not clean.contains(label))
+	_check("★★★【反向對照】塞進欄標之後必須含", (clean + label).contains(label))
+	_cell("_test_i_story_end_column")

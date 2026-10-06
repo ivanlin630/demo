@@ -1,7 +1,11 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 觀察者世界永不凍結（deb051f61，2026-08-20）；②於故事結束票 #2 刀 1 翻極性（2026-10-06）
 # 觀察者世界永不凍結 TDD。
 # ①無玩家世界不凍：清 player_id 後殺該隊 leader 且 named 空 → 世界照常推進、game_over 保持 false
-# ②★有玩家仍凍、不得誤傷：player_id != -1 同款情境 → game_over=true、advance_tick 回 "game_over"
+# ~~②★有玩家仍凍、不得誤傷：player_id != -1 同款情境 → game_over=true、advance_tick 回 "game_over"~~
+# ②★★有玩家：同款情境 → game_over=true（不得誤傷：旗標照設）**而世界照跑**（票 #2 刀 1 翻極性，
+#   意圖帳 #43／#44：故事結束是 UI 旗標不是世界物理）
 # ④T4 守衛真的 print（故意不清 player_id、以 player_pos=(-1,-1) 跑三 tick）
 
 var _fail := 0
@@ -37,15 +41,21 @@ func _run() -> void:
 	_ok(not s.game_over, "★無玩家：leader 死 + named 空 → game_over 仍為 false（世界不凍）")
 	_ok(not ok1, "回傳 false（無 named 繼承人）＝語意保留")
 	var runner := SimRunner.new()
+	var tick_before1: int = s.world.current_tick
 	var r1: String = runner.advance_tick(s, Vector2i(-1, -1))
-	_ok(r1 != "game_over", "advance_tick 照常推進（回 %s）" % r1)
+	# ~~_ok(r1 != "game_over", …)~~ 刀 1 之後那個值不會再出現 ⇒ 恆真 ⇒ 改比【tick 真的動了】
+	_ok(s.world.current_tick == tick_before1 + 1,
+		"advance_tick 照常推進（tick %d → %d，回 '%s'）" % [tick_before1, s.world.current_tick, r1])
 	# ② 有玩家：player_id != -1 → 同款情境仍須凍（不得誤傷）
 	var w2 := _mk(); var s2: WorldState = w2[0]; var t2: TeamData = w2[1]
 	s2.player_id = 500   # 該隊 leader 就是玩家
 	EventSystem.new().handle_player_succession(s2, t2)
 	_ok(s2.game_over, "★有玩家：同款情境 game_over=true（H 不變量沒被誤傷）")
+	var tick_before2: int = s2.world.current_tick
 	var r2: String = SimRunner.new().advance_tick(s2, Vector2i(0, 0))
-	_ok(r2 == "game_over", "advance_tick 回 'game_over'（%s）" % r2)
+	# ~~_ok(r2 == "game_over", "advance_tick 回 'game_over'（%s）" % r2)~~ ⇒ 翻極性（見檔頭 ②）
+	_ok(s2.world.current_tick == tick_before2 + 1,
+		"★★有玩家而故事已結束：世界照跑（tick %d → %d，回 '%s'）" % [tick_before2, s2.world.current_tick, r2])
 	# ④ T4 守衛：宣稱無玩家但 state 有玩家 → print 一次（一次性旗標）
 	var w3 := _mk(); var s3: WorldState = w3[0]
 	s3.player_id = 500

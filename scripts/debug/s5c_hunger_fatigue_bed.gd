@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # @observe-pure
 # ★★★S5c 驗收②：飢餓／疲勞事件的【發生時點分佈】——★不是單點，是分佈（票寫死）。
 #
@@ -44,7 +45,10 @@ func _run() -> void:
 	var stop_reason: String = ""
 	for _t in range(ticks):
 		var r: String = runner.advance_tick(state, Vector2i(-1, -1))
-		if stopped_at == -1 and (r == "game_over" or r == "awaiting_heir"):
+		# ~~`… == "game_over" or`~~ 票 #2 刀 1（2026-10-06）劃掉：advance_tick **不再回** "game_over"
+		#   （意圖帳 #43：故事結束是 UI 旗標不是世界物理）⇒ 那一半恆假、留著會讓人以為它還在守什麼
+		#   ★等待繼承人那一半照守（它仍會凍）
+		if stopped_at == -1 and r == "awaiting_heir":
 			stopped_at = state.world.current_tick; stop_reason = r
 		var now: int = state.world.current_tick
 		for pid in state.persons:

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # ★★★S3 的 perf 主張要【量】不是宣稱（systems 定）：七支攤平之後，burst 是否真的變平。
 #   ★既有證據形狀（cadence_stagger.gd 檔頭）：burst tick dt 中位 14.9M vs non-burst 4.2M = 3.5×
 #   ⇒ ★★所以要看的是【分佈的尾巴】，不是平均 —— 攤平會讓 p99/中位 的比值下降。
@@ -57,7 +58,10 @@ func _initialize() -> void:
 		else:
 			idle_dts.append(dt)
 		_last_fire_n = now_n
-		if first_nonadv == -1 and (r == "game_over" or r == "awaiting_heir"):
+		# ~~`… == "game_over" or`~~ 票 #2 刀 1（2026-10-06）劃掉：advance_tick **不再回** "game_over"
+		#   （意圖帳 #43：故事結束是 UI 旗標不是世界物理）⇒ 那一半恆假、留著會讓人以為它還在守什麼
+		#   ★等待繼承人那一半照守（它仍會凍）
+		if first_nonadv == -1 and r == "awaiting_heir":
 			first_nonadv = state.world.current_tick
 	var sorted_dt: Array = dts.duplicate()
 	sorted_dt.sort()
