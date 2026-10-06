@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: A1 建設「為什麼沒開工」—— ★整張可以只用量測床做（不改 production）
 topic: ★派工，R² CLEAN（`8b838fbe3`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-a1-why-was-build-never-started-tap-HOW.md`｜世界 ＝ **seed 1337、30 天、玩家活著**（觀察輪那個；★輸出第一行印 seed＋殺不殺玩家＋樹）｜序：通過時長分佈 → 死後分支 Q-raid → **本件**
 ---
