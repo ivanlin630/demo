@@ -455,6 +455,10 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 				Probe.bump("uhist." + opt + "." + _ub)
 				Probe.add_amount("usum." + opt, u)
 				Probe.bump("un." + opt)
+			# ★★「掠奪」自己的桶（補領袖票 ②，藍圖裁 848e2aaea §4b②）：只把它加進 CMP_DUMP_OPTS 不夠 ——
+			#   `_cmp` 算了而**沒有桶就一筆都不會印**（沒接電）⇒ 量測員開了 Probe 也讀不到 Team11 那幾次掠奪
+			if opt == "掠奪":
+				Probe.bump_sample("raid.composition", _cmp, 150)
 			if opt == "收留":
 				Probe.bump_sample("shelter.composition", _cmp, 100)   # ★只收留（★攻擊有自己的桶，不要混母體）
 			Probe.add_amount("shelter.cmp.drive_sum", float(_cmp.get("drive", 0.0)))
