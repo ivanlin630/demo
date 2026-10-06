@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 兩件：①Team7 中段崩潰的 combat trace（給 QA）②量一次 30 天模擬耗時（票 A 床的窗口）
 topic: ①藍圖觀察輪表 E：Team7 t25339／25399 pop 10→9→8、t28706–29312 rung 0↔2 十次、t31933 faction 1→-1 ⇒ 決策 trace 看不到 ⇒ 要 combat trace｜②票 A 第一階段床要決定窗口 N 天 ⇒ 需要「seed 1337 跑 N 天」的耗時｜★Q-raid＋施工 counter 照舊等 tap 對準 merge
 ---
