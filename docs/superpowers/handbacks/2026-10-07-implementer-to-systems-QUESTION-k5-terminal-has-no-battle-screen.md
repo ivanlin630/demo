@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 終端介面修正（票 U）U3／K5 —— 前提跟 spec 寫的不一樣
 topic: ★前提不符（不停工，U0／U1／U4 照做）：K5 不是「交戰中 Esc 關不掉面板」，是**終端根本沒有交戰畫面**——交戰一開始所有鍵被一個看不見的節點吃掉、畫面停在舊的互動面板｜要你裁 U3 的範圍
 ---
