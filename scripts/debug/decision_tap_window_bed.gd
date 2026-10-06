@@ -2,7 +2,7 @@ extends SceneTree
 # @bed-kind: acceptance
 # slice: 決策 tap 能對準某一隊、某一段時間（spec 2026-10-06 decision-tap-can-target-a-team-and-window）
 # ══ 決策 tap 的取樣窗 ════════════════════════════════════════════════════════════════════
-# 世界 ＝ 照 `player_death_7day_specimen.gd` 的 `_run_pass`：default.json、seed 1337、setup 後 Probe.arm、
+# 世界 ＝ 照 `player_death_7day_specimen.gd` 的 `_run_pass`（★但 arm 改在 setup 之前，走 MeasureBedHelper）：default.json、seed 1337、
 #   暖身 3 天、照 story_end_not_physics_bed 殺玩家、再推到窗的尾端
 # 三輪同 seed：A ＝ Probe 關｜B ＝ Probe 開、不設窗｜C ＝ Probe 開、設窗
 # 格：P1 A／B／C 的決策序列 hash 與世界 fp 逐位元組相同｜P2 C 的 raid.composition 全在窗內且 ≥1 筆
@@ -85,12 +85,13 @@ static func _uniq(arr: Array) -> Array:
 func _run(probe_on: bool, windowed: bool) -> Dictionary:
 	var name: String = ("C（Probe 開、設窗）" if windowed else "B（Probe 開、不設窗）") if probe_on else "A（Probe 關）"
 	seed(SEED)
-	var ws := WorldState.new()
-	GameSetup.setup(ws, GameSetup.load_config("res://config/default.json"))
-	var runner := SimRunner.new()
 	Probe.sample_window = {}
+	# ★arm 順序照 bed-arm 閘：一律走 helper（arm → setup，順序寫死）；strip_player=false（要殺的就是玩家）
+	#   ★誠實限：A 輪也是 arm 之後才 setup，然後才把 Probe 關掉 ⇒ 三輪的 **setup 期** Probe 都是開的，
+	#     「Probe 關／開」的差別只在**模擬期**（P1 比的是模擬期有沒有被觀測改變）
+	var ws: WorldState = MeasureBedHelper.arm_and_setup("res://config/default.json", false)
+	var runner := SimRunner.new()
 	if probe_on:
-		Probe.arm()
 		if windowed:
 			Probe.sample_window = {"raid.composition": {"team": WIN_TEAM, "tick_min": WIN_MIN, "tick_max": WIN_MAX}}
 	else:
