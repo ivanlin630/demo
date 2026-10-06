@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 打聽：說了什麼就記下什麼，記下幾筆就說幾筆
 topic: R② 第三輪（`18ed5ef02`）＝ **CLEAN**｜三個落點（get_options加鍵／渲染灰掉／確認擋下）都指名了,鍵名與外層一致不搬整套,可派implementer
 ---
