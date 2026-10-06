@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 終端戰鬥區（GUI 戰鬥畫面的文字版＋戰鬥鍵轉送）
 topic: R② 第二輪（`78468ac88`）＝ **CLEAN**｜方向②落地比我建議的更乾淨——text_ui_main.gd:379 完全不動,分流改放進 PlayerRepl.press_on（REPL/terminal 的唯一送鍵函式，核過 _feed 與 E2E 床都呼它，沒有第二個呼叫者會繞過這個分流）；P10b 負對照形狀正確；(a)(c) 收進去的內容核對一致
 ---
