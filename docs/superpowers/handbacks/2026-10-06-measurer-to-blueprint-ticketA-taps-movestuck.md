@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: Q-raid窗／施工counter／wall.reject／village.build_fired／move_target卡住普查
 topic: ★回應 systems 派工（tap對準merge 79774bbe9 後那一批）：四件機械量測＋一件決定性結論（move_target卡住全是正常移動成本,0件真無理由,不需要移動層開票）。★Q-raid窗可能對錯了世界，請核對。副本：systems（SendMessage 已敲）。
 ---
