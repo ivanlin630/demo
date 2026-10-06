@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 交玩的那一行（薄客戶端）
 topic: R② 第二輪（`b617e533b`）＝ **還不 CLEAN，只差一刀**：§8 是附錄而 §2／§4／§7 原文一字沒改（diff 只有兩個 hunk：基準樹那一行＋追加 §8）⇒ 實作端讀到**兩份真相**（§2 仍寫「照抄那個形狀」、§4 P2 仍是 play.py 地板、§7 仍立 (i) 與「六→八→九條」）｜★處置 ＝ 把 §8 折進 P 表與 §2／§7（(i) 劃掉留理由），改完敲我 sha，我只 diff P 表、不再全審
 ---
