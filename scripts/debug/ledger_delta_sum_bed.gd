@@ -17,7 +17,7 @@ const ENTRY_POINTS: Array = ["team_set_amt", "team_clear_all", "tile_set_amt", "
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P1", "P2", "P3"]
+const EXPECTED_CELLS: Array = ["P1", "P1b", "P2", "P3"]
 
 
 func _initialize() -> void:
@@ -159,6 +159,7 @@ func _p1_p3() -> void:
 		_check("★母體地板：%s 被呼過（%d 次）—— 0 次 ＝ 那一支沒被驗" % [ep, int(calls[ep])], int(calls[ep]) >= 1)
 	_check("★★★P1 每一個 (實體,庫,資源)：Σ帳本 delta ＝ 結束 − 開始（不符 %d）" % bad.size(), bad.is_empty())
 	_cells_ran.append("P1")
+	_p1b_clear_all_on_living_team(st)
 	print("\n── P3 環形緩衝 ──")
 	var dropped: int = WorldState.driver_ledger_dropped - dropped0
 	print("   每 tick 清帳｜cap %d｜最早一筆 tick %d｜這一段丟棄 %d" % [WorldState.driver_ledger_cap, first_tick, dropped])
@@ -187,3 +188,48 @@ func _p2_fp_unchanged() -> void:
 	print("   關 %s｜開 %s" % [String(fps[0]).substr(0, 12), String(fps[1]).substr(0, 12)])
 	_check("P2 帳本開／關 fp 相同", String(fps[0]) == String(fps[1]))
 	_cells_ran.append("P2")
+
+
+# ══ P1b：clear_all 在**活著的**隊上 ══════════════════════════════════════════════════════════════════
+# ★為什麼要佈置（負對照實測）：把 clear_all 的逐資源記帳拿掉 ⇒ P1 照綠 ——
+#   自然跑出來的 clear_all（3 天 2 次）都發生在**要消失的隊**上 ⇒ 那支隊開始在、結束不在 ⇒ 被「中途生滅不判」排除
+#   ⇒ P1 的「team_clear_all 被呼過」地板是真的，但它驗不到 clear_all 的記帳
+# ⇒ 這一格直接對一支活著的隊呼一次（同一個世界、跑完之後），Σ帳本 delta 必須 ＝ −舊值（逐資源）
+func _p1b_clear_all_on_living_team(st: WorldState) -> void:
+	print("\n── P1b clear_all 在活著的隊上：每一種資源 Σdelta ＝ −舊值 ──")
+	var ids: Array = st.teams.keys()
+	ids.sort()
+	var t: TeamData = null
+	for tid in ids:
+		var c: TeamData = st.teams[tid]
+		var nz: int = 0
+		for r in c.resources:
+			if float(c.resources[r]) != 0.0:
+				nz += 1
+		if nz >= 2:
+			t = c
+			break
+	if t == null:
+		_check("★P1b 母體地板：找得到一支至少兩種資源非 0 的活隊", false)
+		_cells_ran.append("P1b")
+		return
+	var before: Dictionary = t.resources.duplicate()
+	WorldState.driver_ledger_enabled = true
+	WorldState.clear_driver_ledger()
+	ResourceBank.clear_all(t, "bed_clear_all")
+	var sums: Dictionary = {}
+	_drain(sums)
+	WorldState.driver_ledger_enabled = false
+	var bad: Array = []
+	var nonzero: int = 0
+	for r in before:
+		var old: float = float(before[r])
+		if old != 0.0:
+			nonzero += 1
+		var s: float = float(sums.get("%s|team|%s" % [_ekey(t), String(r)], 0.0))
+		if absf(s + old) > TOL * maxf(1.0, absf(old)):
+			bad.append("%s 舊 %.2f／帳本 Σ %.2f" % [String(r), old, s])
+	print("   Team%d：清掉 %d 種（非 0 的 %d 種）｜不符 %s" % [t.team_id, before.size(), nonzero, str(bad)])
+	_check("★P1b 母體地板：清掉的資源裡非 0 的 ≥ 2（%d）" % nonzero, nonzero >= 2)
+	_check("★★P1b clear_all：每一種資源 Σ帳本 delta ＝ −舊值（不符 %d）" % bad.size(), bad.is_empty())
+	_cells_ran.append("P1b")
