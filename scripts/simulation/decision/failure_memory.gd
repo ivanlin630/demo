@@ -47,6 +47,9 @@ const OPTION_FAIL_KEY: Dictionary = {
 	#   ★target 走 `ctx:` 前綴＝【決策當下 ctx 裡的那個欄位】——因為施主是逐次決定的，
 	#   寫死一個字串會變成「對任何人乞食失敗一次，就對所有人折價」（spec §5② 的「接太粗」）。
 	"乞食": ["乞食", "ctx:aid_target_id"],
+	# ★票 A3（2026-10-06）：領取到場落空。target 走 `ctx:` ＝【待領那一格】——同乞食的理由：
+	#   一格領不到不代表別格也領不到（接太粗會變成「一次落空就對所有待領折價」）
+	"領取": ["領取", "ctx:pending_claim_tile_id"],
 }
 
 # ★★★缺席清單（階段 1，2026-09-09）：`OPTION_FAIL_KEY` 的【互補且互斥】另一半。
@@ -93,7 +96,8 @@ const NO_FAILURE_FEEDBACK: Dictionary = {
 	"紮根": "已有等價機制: 同上 → ctx.settle_site_quality（decision_context:468）",
 	"擴點": "已有等價機制: 同上 → ctx.expand_site_marginal（decision_context:511）",
 	# ── 判準不成立（指名是哪一條）──
-	"領取": "②不成立: 沒有「領不到」的事件——pending_claims 只有增刪，到場落空不留記號 ⇒ 偵測不到。★補上 miss 記號時這格要改判",
+	# ~~"領取": "②不成立: 沒有「領不到」的事件——…★補上 miss 記號時這格要改判"~~
+	#   ⇒ ★票 A3 補上了（interaction_system `_resolve_market_at_outpost` 的 claim_arrived_nothing）⇒ 改判：移到 OPTION_FAIL_KEY
 	"生產": "①不成立: 沒有【生產被拒絕】的執行步驟；缺料是產出量的問題（效果不好），由 need/資源層處理",
 	"覓食": "①不成立: 採不到＝產量低，不是做不成",
 	"survival": "①不成立: 逃跑是做得成的動作；逃不掉是結果不是執行失敗",
