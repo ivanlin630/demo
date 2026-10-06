@@ -75,9 +75,8 @@ docs/
 本體：`docs/process/00_roles.md`（角色／owner／邊界／無斷點鏈／診斷通則）＋`07_mailbox_trigger.md`（信箱／看門狗）＋`08_machine_workflow_v2.md`（機器軌）。
 
 **啟動**（持久 session 平行開在 `A:\GDS\demo` / `main`）：`$env:SESSION_ROLE='<role>'; claude`
-★**只有藍圖那個終端多帶一個**：`$env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'`
-（用戶裁 2026-09-24「**會死掉的看門狗 不是合格的看門狗**」；★**shell 裡設無效，只能在啟動 claude 時設**
-⇒ 錯過了就只能重開終端，所以它留在這裡。理由與其餘三個選項 → `07_mailbox_trigger.md`）。
+★**藍圖＋實作端兩個終端啟動時多帶 `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1`**（用戶裁 2026-10-07 擴到實作端）
+⇒ 六個終端的逐字啟動指令在 **`README.md` §開六個角色終端**（開終端的是用戶，所以放用戶讀的那份）；理由 → `07_mailbox_trigger.md`。
 ★六個角色是誰、誰 owner 哪份檔、誰留 main dir 不 checkout ⇒ **`00_roles.md` §六角色**（那裡是唯一一份）。
 ★**worktree worker ＝ 實作**（唯一真在 worktree 的角色）：code 寫 worktree、**handback 寫唯一 main mailbox 的絕對路徑**。
 

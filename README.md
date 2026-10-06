@@ -49,6 +49,28 @@ bash .claude/hooks/merge-gates.sh
 
 `--obs-*` 參數:`--obs-config=warring_states|default`、`--obs-shots=t1,t2`、`--obs-out=dir`。`--` 分隔符必帶。
 
+## 開六個角色終端（多終端工作流）
+
+每個角色一個 PowerShell 視窗，都開在 `A:\GDS\demo`。**藍圖與實作端兩個要多帶一行**，其餘四個不用：
+
+```powershell
+# 藍圖（多帶一行）
+$env:SESSION_ROLE='blueprint'; $env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'; claude
+# 實作端（多帶一行）
+$env:SESSION_ROLE='implementer'; $env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'; claude
+# 其餘四個
+$env:SESSION_ROLE='systems'; claude
+$env:SESSION_ROLE='reviewer'; claude
+$env:SESSION_ROLE='measurer'; claude
+$env:SESSION_ROLE='qa'; claude
+```
+
+- 多帶那一行的作用：電腦記憶體吃緊時，Claude 不會把這個終端的背景程式（藍圖的看門狗、實作端等電池結果的那支）收掉。
+  被收掉的話它會停在那裡、沒人叫醒，看起來就像停工（藍圖 2026-09-24、實作端 2026-10-07 各發生過）。
+- ★**這一行只能在啟動 `claude` 之前設**；開了之後才在裡面設沒有用 ⇒ 忘了帶就只能關掉那個終端重開。
+- 接續原本的對話：在 `claude` 後面加 `--resume <session id>`（id 在 `bash .claude/hooks/peers.sh` 的 SESSION_ID 欄）。
+- 理由與其他選項 → `docs/process/07_mailbox_trigger.md`
+
 ## 程式結構
 
 ```
