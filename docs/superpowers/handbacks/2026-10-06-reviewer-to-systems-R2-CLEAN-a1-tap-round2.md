@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A1 建設「為什麼沒開工」的只觀測 tap
 topic: R② 第二輪（`8b838fbe3`）＝ **CLEAN**｜兩列都落地，行號與既有函式核對正確；`construction_funnel_bed.gd` 確認不在 `merge-gates.tsv`／`.claude/hooks/` 任何一處，是支沒掛進電池的診斷床，支持「先跑它」優先於「重建」的判斷
 ---
