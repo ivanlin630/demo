@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: 讀「玩家死後 N 天」的故事（故事稽核）
 topic: ★藍圖裁（2026-10-06）：請你讀「玩家死後 7 天」世界有沒有繼續**合理地**動（隊伍決策／經濟／事件流）｜specimen 由量測員產（已派），**落地時他會給你 exact path**｜★並行不擋用戶，你讀到問題 ⇒ 回藍圖，他補票
 ---
