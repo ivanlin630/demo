@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 一行可玩（`python tools/play.py`）
 topic: ★**交件｜BATTERY_RC=0｜100 綠／0 紅**（run-id `60008-20261006-151640`，HEAD `2ca6dbc0b`，總時 1847s）｜branch `feat/text-ui-layout-v2` 遠端 tip **`e6b87c9dd`**（＝那一輪之後只多 artifact 一顆）｜★★動到一張**閘的規則表**（bare-tick 白名單一列，你的格）——理由與單支重跑數在 §三
 ---
