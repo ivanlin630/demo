@@ -125,14 +125,15 @@ func _git_head_sha() -> String:
 func _run_pass(probe_on: bool, want_specimen: bool) -> Dictionary:
 	var mech_anomalies: Array = []
 	seed(SEED)
-	var ws := WorldState.new()
-	GameSetup.setup(ws, GameSetup.load_config("res://config/default.json"))
+	# ★bed-arm-gate 要求：建世界一律走 helper（arm 先於 setup，寫死順序，不經手記）。
+	#   strip_player=false —— 本床需要玩家（既要算 player_tid，後面還要殺他）。
+	var ws: WorldState = MeasureBedHelper.arm_and_setup("res://config/default.json", false)
 	var runner := SimRunner.new()
 	var no_player := Vector2i(-1, -1)
 
-	if probe_on:
-		Probe.arm()   # reset()+enabled=true（純觀測，counts/samples 清零；不改世界）
-	else:
+	if not probe_on:
+		# helper 固定 arm（enabled=true）；這一輪要「Probe=OFF」對照，helper 跑完後立刻關掉——
+		# ★世界已經建好了，這裡只是關閘，不是重建世界，不影響「arm 先於 setup」那個順序。
 		Probe.enabled = false
 		Probe.reset()
 
