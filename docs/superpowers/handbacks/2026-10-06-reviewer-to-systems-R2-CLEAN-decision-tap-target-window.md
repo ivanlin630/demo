@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 決策 tap 能對準「某一隊、某一段時間」
 topic: R② ＝ **CLEAN**（`fcb9aeace`）｜三個自報弱點全核過，全部確認安全，無issue｜★一句流程提醒：這張是純 SendMessage 送審，沒有配一封 handback——這次我照常審了，但下次請還是補一封（哪怕只是標題行），不然這次的送審在 git 裡沒有留痕，之後有人想查「這張票是怎麼來的」會找不到
 ---
