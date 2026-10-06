@@ -87,26 +87,48 @@ func tick_step() -> Dictionary:
 	if _ticks_remaining <= 0:
 		return { "events": [], "done": true }
 	var n: int = mini(STEP_TICK_BOUND, _ticks_remaining)
-	var events := advance_ticks(n)
+	var adv: Dictionary = advance_ticks(n)
+	var events: Array = adv["events"]
 	_ticks_remaining = maxi(0, _ticks_remaining - n)
 	if events.size() > 0:
 		_ticks_remaining = 0   # 重要事件 → 停止推進
-	return { "events": events, "done": _ticks_remaining <= 0 }
+	# ★只加鍵（`advanced`／`stall_reason`）：既有讀者只讀 events／done
+	return { "events": events, "done": _ticks_remaining <= 0,
+		"advanced": adv["advanced"], "stall_reason": adv["stall_reason"] }
 
 # Advance up to n world ticks (not encounter ticks).
 # Stops early if a player-relevant event fires.
-# Returns array of event dicts generated this call.
-func advance_ticks(n: int) -> Array:
+# ══ ★★★★★【推不動要說為什麼】（故事結束 spec §3③／P7，票 #2 刀 1，2026-10-06）═══════════
+#   ★舊版回 `Array`（只有事件）而**完全不看 `advance_tick` 的回傳值** ⇒ 等待繼承人時空轉 n 圈
+#     **而且安靜**（呼叫端分不出「推了 n tick 沒事件」與「一 tick 都沒推」）。
+#   ⇒ ★★正確的形狀**已經存在**：`PlayerCommandApi.advance_ticks` 回
+#     `advanced`／`requested`／`first_stall_tick`／`stall_reason` ⇒ 這裡**跟上同一組鍵**
+#     （＋本路徑特有的 `events`）。
+#   ⇒ ★★★`story_end_not_physics_bed` 的 P7 **直接比兩邊的鍵集**（兩邊能各自改 ⇒ 是真的比較）：
+#     有人改了其中一邊而沒改另一邊 ⇒ 紅。
+#   ★語意也照那一支：`r != ""` 的第一個 ⇒ `first_stall_tick`／`stall_reason`；**不提前 break**
+#     （那一支也不 break —— 兩條推進路徑不准再分岔）。
+func advance_ticks(n: int) -> Dictionary:
 	var events: Array = []
+	var before: int = _state.world.current_tick
+	var stalled_at: int = -1
+	var stall_reason: String = ""
 	for _i in range(n):
 		var snap := _snapshot()
 		var player_pos: Vector2i = _player_tile()
-		_runner.advance_tick(_state, player_pos)
+		var r: String = _runner.advance_tick(_state, player_pos)
+		if r != "" and stalled_at == -1:
+			stalled_at = _state.world.current_tick
+			stall_reason = r
 		var new_evts := _diff_events(snap)
 		events.append_array(new_evts)
 		if new_evts.size() > 0:
 			break
-	return events
+	return {
+		"events": events,
+		"advanced": _state.world.current_tick - before, "requested": n,
+		"first_stall_tick": stalled_at, "stall_reason": stall_reason,
+	}
 
 # Advance one encounter tick.
 # Returns "player_turn" when player unit timer == 0,

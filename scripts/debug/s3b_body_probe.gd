@@ -17,7 +17,10 @@ func _initialize() -> void:
 	var stop_reason: String = ""
 	for _t in range(ticks):
 		var r: String = runner.advance_tick(state, Vector2i(-1, -1))
-		if r != "" and r != "ok" and stopped_at == -1 and (r == "game_over" or r == "awaiting_heir"):
+		# ~~`… == "game_over" or`~~ 票 #2 刀 1（2026-10-06）劃掉：advance_tick **不再回** "game_over"
+		#   （意圖帳 #43：故事結束是 UI 旗標不是世界物理）⇒ 那一半恆假、留著會讓人以為它還在守什麼
+		#   ★等待繼承人那一半照守（它仍會凍）
+		if r != "" and r != "ok" and stopped_at == -1 and r == "awaiting_heir":
 			stopped_at = state.world.current_tick
 			stop_reason = r
 	print("★advance_tick 首次回傳非推進值：tick=%d reason=%s（-1 = 從未）" % [stopped_at, stop_reason])

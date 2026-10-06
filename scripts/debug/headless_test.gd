@@ -8678,17 +8678,21 @@ func _test_forced_options_label_no_drift() -> void:
 			assert(not str(resp["label"]).is_empty(), "[%s] response %s label 不可空" % [c["name"], resp["response_id"]])
 	print("Q7 drift 防護 OK")
 
+# ★★票 #2 刀 1（2026-10-06）**翻極性**：原本守「game_over ⇒ 凍結、回 "game_over"」，
+#   而意圖帳 #43／#44 裁 game_over 是 UI 旗標不是世界物理 ⇒ 同一格改守「game_over ⇒ 世界照跑」。
+#   ★函式名不改（`_initialize` 的呼叫點與其他人的記憶都指著它），語意寫在這裡。
 func _test_advance_tick_game_over_freeze() -> void:
-	print("--- Death Task4: advance_tick game_over 凍結 ---")
+	print("--- Death Task4: advance_tick game_over **不**凍結（故事結束 ≠ 世界停止）---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	state.game_over = true
 	var runner := SimRunner.new()
 	var saved_tick: int = state.world.current_tick
 	var r: String = runner.advance_tick(state, Vector2i(0, 0))
-	assert(r == "game_over", "應回 game_over，實際=%s" % r)
-	assert(state.world.current_tick == saved_tick, "tick 不應推進")
-	print("Death Task4 OK")
+	assert(state.game_over, "母體地板：旗標真的為真")
+	# ~~assert(r != "game_over", …)~~ 刀 1 之後 advance_tick 不會回那個值 ⇒ 恆真（story_end_not_physics_bed 的 P2′ 抓到）⇒ 真的判準是下一行的 tick
+	assert(state.world.current_tick == saved_tick + 1, "tick 應推進 1（%d → %d）" % [saved_tick, state.world.current_tick])
+	print("Death Task4 OK（tick %d → %d，回 '%s'）" % [saved_tick, state.world.current_tick, r])
 
 func _test_advance_tick_awaiting_heir_freeze() -> void:
 	print("--- Death Task4b: 等繼承人 awaiting_heir 凍結 ---")

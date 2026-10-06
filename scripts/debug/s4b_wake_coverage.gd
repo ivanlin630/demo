@@ -68,7 +68,10 @@ func _run() -> void:
 	var dead: bool = false
 	for _t in range(warm):
 		var r: String = runner.advance_tick(state, Vector2i(-1, -1))
-		if r == "game_over" or r == "awaiting_heir":
+		# ~~`… == "game_over" or`~~ 票 #2 刀 1（2026-10-06）劃掉：advance_tick **不再回** "game_over"
+		#   （意圖帳 #43：故事結束是 UI 旗標不是世界物理）⇒ 那一半恆假、留著會讓人以為它還在守什麼
+		#   ★等待繼承人那一半照守（它仍會凍）
+		if r == "awaiting_heir":
 			dead = true; break
 	var colA: Dictionary = {}
 	for s in SUPPORTS:
