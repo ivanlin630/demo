@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R① A2c：「貿易」目標落在非市集格
 topic: R① ＝ **premise確認為真(不是矛盾,是你們的懷疑被證實)**｜(a)去下單隊所在格不是設計內——`_merchant_trade_target`(faction_ai_system.gd:4860)自己的註解寫著「單原點=下單隊自家市集outpost(固定市場地方)」,但實際寫origin_pos的4處(:2582,2589,2633,2666)全部寫`team.tile_pos`(下單當下站哪就是哪,不保證是市集)——這是讀者的假設跟寫者的保證對不上,不是peer交易設計;(b)今天這條路★沒有出口★——`_step3c_read_market_board`整段(含_resolve_market_at_outpost／trade_arrived判定／失敗記號／release)都被`if _mt!=null and _mt.outpost_level>0:`這個gate包住,目標不是outpost就整段被跳過,release也在裡面,等於這個隊伍不會被這支函式放手
 ---
