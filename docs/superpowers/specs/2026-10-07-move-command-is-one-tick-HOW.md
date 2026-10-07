@@ -29,6 +29,15 @@ E2E：M 一鍵後世界 tick ＋1（不是到抵達）｜新鍵一路到抵達�
   ⇒ 做法：推進迴圈每步後問一支「這一步有沒有玩家相關事件」（讀事件匯流排，條件＝事件涉及玩家隊或其相鄰格），有 ⇒ 停、結果行印「停下：<事件句>」
   ⇒ ★Team20 那件的真因＝M 自動推進跳過 00:00 的找上門 ⇒ 本票的 M 一顆 tick＋停點一起治
   ⇒ 「敵對隊進入相鄰」沒有既有事件類型時 ⇒ 先查；沒有就新增一個 kind 進 WorldEvents（單一真值），不在推進迴圈裡手算
+  ★R² 核（第一輪）：
+    ·既有 kind：找上門＝forced_event_arrived｜被攻擊／遭遇＝combat_engaged／combat_start（同格 pre_encounter 含在內）｜成員死亡離隊＝member_died／member_left
+    ·沒有：敵對進相鄰（距離 1）⇒ **新增 kind**，寫入點放**模擬層**算位置之後（只算玩家隊的相鄰格、敵對＝既有 player_hostile_teams），不搬到 UI 逐 tick 重算
+    ·抵達：設計上走 §1④ 的狀態邊緣偵測，不走 kind（不是漏）
+    ·★結構矛盾：實作端已落地的共用停點 `_advance_stop_reason`（text_ui_main.gd，Space／X／G／L 共用）讀的是 `sim_bridge.gd:_diff_events` 的**手刻快照差分**，
+      不讀 `WorldEvents.player_events` 的 kind ⇒ 與「禁手抄」矛盾（成員死亡離隊已有 kind 且事件流在顯示，停點卻沒讀）
+  ⇒ 裁：停點判斷改讀 `WorldEvents.player_events` 的 kind（與事件流 UI 同源）——停點 kind 清單＝一個具名集合放 world_events.gd，`_advance_stop_reason` 只查它
+    ⇒ 實作端已加的兩個停點（強制事件到達、pre_encounter）一併改成讀 kind，_diff_events 那兩段退場
+    ⇒ 抵達仍走 §1④；休息也接同一支 `_advance_stop_reason`
 ②【休息＝玩家主導、兩段確認】旁邊（同格或相鄰）有敵對隊時按休息：第一次印「Team11 在 1 格外，確定要休息？再按一次休息」，第二次才執行
   ⇒ 引擎不得以「有更急的事」替玩家取消休息（玩家下的令，PRIO_PLAYER）；休息中敵對逼近 ⇒ 依①停下，結果句有主詞（哪一隊、幾格），不自動取消休息
 E2E：每種停點各佈置一次 ⇒ X／Space／走到抵達都停在事件那一 tick｜無事件時照原長度｜休息兩段確認（第一次只有警告、tick 不動；第二次執行）｜休息中敵對逼近 ⇒ 停下帶主詞

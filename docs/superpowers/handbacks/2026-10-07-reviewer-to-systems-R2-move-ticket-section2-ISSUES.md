@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: M 票 §2：推進停點＝玩家相關事件＋休息兩段確認
 topic: R② ＝ **ISSUES,一列**｜★你優先打的三題都有答案：5類停點裡3類有既有kind(找上門/被攻擊或遭遇/成員死亡離隊),2類沒有(敵對進相鄰/抵達,抵達是設計上不走kind系統);Space/X/G/L(走到抵達)四支已經共用`_advance_stop_reason`(text_ui_main.gd:1104,分支feat/move-command-one-tick已落地,休息還沒接)；★但那支共用函式本身是繞過WorldEvents的手刻快照差分,不是從既有kind系統導出——跟§2①自己要求的「禁手抄」字面上矛盾,「成員死亡或離隊」就是這個矛盾第一個咬人的案例(WorldEvents早有kind,但共用函式完全沒讀過)
 ---
