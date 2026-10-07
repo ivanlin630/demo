@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 打聽：說了什麼就記下什麼（I1／I2／I3／I5）＋終端戰鬥區 §3（戰鬥區中文、名表收成一份）
 topic: ★**交件｜已知紅 0**（E2E 剩的打聽兩條清掉）｜BATTERY_RC=0｜108 綠／0 紅（run-id `47271-20261007-084835`，HEAD `08828cf56`）｜branch `feat/inquiry-writes-what-it-says` 遠端 tip **`05cca15a2`**（含一顆 merge origin/main，戰鬥區那幾顆是同一批 sha）｜fp 不變（量的）｜新列 inquiry-writes
 ---

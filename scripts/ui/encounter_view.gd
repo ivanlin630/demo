@@ -148,14 +148,16 @@ func _refresh_ui() -> void:
 		body = player_unit.get("body_parts", {})
 	for part in body:
 		var s: String = body[part].get("status", "healthy")
-		lines.append("%s: %s" % [part, s])
+		# ★戰鬥區 §3：只在顯示層換中文（儲存值 part／status 一個字都不動）
+		lines.append("%s：%s" % [TeamUiHelper.part_name(String(part)), TeamUiHelper.status_name(s)])
 	_lbl_health.text = "\n".join(lines)
 
 	# equip
 	var eq: Dictionary = player_unit.get("equipment", {})
 	var rh: Dictionary = eq.get("hand_1", {})
 	var lh: Dictionary = eq.get("hand_2", {})
-	_lbl_equip.text = "右手: %s\n左手: %s" % [rh.get("grade", "空") if rh.get("type","none") != "none" else "空", lh.get("grade", "空") if lh.get("type","none") != "none" else "空"]
+	_lbl_equip.text = "右手：%s\n左手：%s" % [TeamUiHelper.item_name(String(rh.get("grade", "空"))) if rh.get("type","none") != "none" else "空",
+		TeamUiHelper.item_name(String(lh.get("grade", "空"))) if lh.get("type","none") != "none" else "空"]   # ★§3 顯示層換中文
 
 	# action hints
 	var state_ui: WorldState = _bridge.get_state()
@@ -166,7 +168,7 @@ func _refresh_ui() -> void:
 
 	if _mode == "attack_select":
 		_lbl_actions.text     = _attack_select_hint(_selected_part)
-		_lbl_cursor_info.text = "攻擊部位 ↑↓: %s" % _selected_part
+		_lbl_cursor_info.text = "攻擊部位 ↑↓：%s" % TeamUiHelper.part_name(_selected_part)
 
 func _find_player_unit(state: WorldState) -> Dictionary:
 	for unit in state.encounter_units:
@@ -714,7 +716,7 @@ func _log(msg: String) -> void:
 
 # attack_select 操作提示組字（static → 可單元測）
 static func _attack_select_hint(part: String) -> String:
-	return "↑↓選部位:%s  移游標瞄敵  Enter攻擊  Esc取消" % part
+	return "↑↓選部位:%s  移游標瞄敵  Enter攻擊  Esc取消" % TeamUiHelper.part_name(part)
 
 # U10: 戰後提示組字（static → 可單元測）
 static func _post_combat_hint(res: Dictionary) -> String:

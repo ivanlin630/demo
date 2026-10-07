@@ -32,19 +32,40 @@ static func _hp_bar(current: float, maximum: float, bar_len: int = 10) -> String
 	var bar: String = "█".repeat(filled) + "░".repeat(empty)
 	return "%s %d/%d" % [bar, int(current), int(maximum)]
 
+# ══ ★★★中文名表的**唯一一份**（終端戰鬥區 spec 2026-10-07 §3，systems 裁）══════════════════════════════
+# ★收自三份既有的表（措辭照既有、逐字）：
+#   ①本檔 `_body_summary` 的 slot_names／status_short ②text_ui_main `ITEM_DISPLAY` ③text_ui_main `_build_inv_str` 的 SLOT_NAMES
+#   ⇒ ①③的部位名六個逐字相同（③多 hand_1／hand_2 兩格）；三份之間**沒有分歧**
+# ★★只在**顯示層**用：部位名與 healthy／wounded／critical／severed 是 `PersonData.body_parts` 的實際儲存值（十餘處 `==` 字面讀）
+#   ⇒ 儲存值一個字都不動，寫 Label／畫面那一刻查這裡換字（同 text_ui_main TASK_DISPLAY 那條教訓）
+const BODY_PART_NAME: Dictionary = {
+	"hand_1": "右手", "hand_2": "左手",
+	"head": "頭", "torso": "胸",
+	"right_arm": "右臂", "left_arm": "左臂",
+	"right_leg": "右腿", "left_leg": "左腿",
+}
+const BODY_STATUS_SHORT: Dictionary = {"healthy": "健", "wounded": "傷", "critical": "重", "severed": "截"}
+const ITEM_NAME: Dictionary = {
+	"weapon_melee_low": "低階近戰武器", "weapon_melee_high": "高階近戰武器",
+	"weapon_ranged_low": "低階遠程武器", "weapon_ranged_high": "高階遠程武器",
+	"armor_low": "低階護具", "armor_high": "高階護具",
+	"medicine": "藥品", "tools": "工具",
+}
+# 查不到就原樣回（★而「查不到」會被終端自驗 (d) 咬到 —— 新增一個 id 的人會被床擋下來，不是靜默印英文）
+static func part_name(raw: String) -> String:
+	return String(BODY_PART_NAME.get(raw, raw))
+static func status_name(raw: String) -> String:
+	return String(BODY_STATUS_SHORT.get(raw, raw))
+static func item_name(raw: String) -> String:
+	return String(ITEM_NAME.get(raw, raw))
+
 # Body parts condensed: e.g. "頭:重 胸:健 右臂:健 左臂:健 右腿:健 左腿:健"
 static func _body_summary(body_parts: Dictionary) -> String:
-	var slot_names: Dictionary = {
-		"head": "頭", "torso": "胸",
-		"right_arm": "右臂", "left_arm": "左臂",
-		"right_leg": "右腿", "left_leg": "左腿",
-	}
-	var status_short: Dictionary = {"healthy": "健", "wounded": "傷", "critical": "重", "severed": "截"}
 	var parts: Array = []
 	for slot in ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]:
 		var bp: Dictionary = body_parts.get(slot, {})
-		var st: String = status_short.get(bp.get("status", "healthy"), "?")
-		parts.append("%s:%s" % [slot_names.get(slot, slot), st])
+		var st: String = String(BODY_STATUS_SHORT.get(bp.get("status", "healthy"), "?"))
+		parts.append("%s:%s" % [part_name(slot), st])
 	return " ".join(parts)
 
 # Equipment condensed: slot → grade (show only non-empty slots)
