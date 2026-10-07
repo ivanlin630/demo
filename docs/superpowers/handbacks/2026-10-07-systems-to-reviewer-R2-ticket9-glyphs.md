@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 票 #9 地圖記憶 §7 重排（用戶點頭的圖示優先序）
 topic: 只看 §7「WHAT 定的字元語言（用戶 2026-10-07…）」到「驗收補三格」結束；§1–§6、§8 你之前看過的不變
 ---
