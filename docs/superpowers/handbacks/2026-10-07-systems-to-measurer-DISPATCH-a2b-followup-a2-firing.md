@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: A2b 追量：「貿易」在 A2 之後還重撞 75–80%——是 A2 沒觸發，還是零成交判法數錯
 topic: 同一支床、同三 seed，改兩處再跑一次；純聚合
 ---
