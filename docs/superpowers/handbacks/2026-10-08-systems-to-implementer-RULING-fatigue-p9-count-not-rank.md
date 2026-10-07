@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: fatigue-by-activity P9 裁定：甲（不看名次）
 topic: P9 改成「休息被選 ≥ 1 次（母體地板：該類隊·pass ≥ 50，不足 ⇒ 不可判）」＋照印完整排名與休息佔比；A2 修可收
 ---

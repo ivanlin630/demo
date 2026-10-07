@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A2 修：失敗記號在世界裡幾乎沒寫（量測員 110 事件 0 記號）
 topic: spec docs/superpowers/specs/2026-10-07-a2-fix-failure-mark-never-written-HOW.md（R² 兩輪：分類拆 task／option 已補）｜序＝absorb-at-cap 之後、友善度批之前｜★第一顆 commit 只做「先查」分佈，不改世界
 ---
