@@ -113,3 +113,34 @@ P8f grep：MIN_DIST_／_check_distance／「山地無法紮營」在 scripts/ �
 P8g world-fp 會變 ⇒ 先量、換基準同 commit；回報 30 天 seed 1337 改前改後：camp.built／settlement.l0_to_l1_start／山地立營數／據點兩兩最近距離分佈
     ★報告逐字印一行 `mountain_camp_survived_days: <山地營地存活最大天數>`（defer mountain-build-time-by-terrain 的 met_check 讀它；落在 docs/measurements/）
 ```
+
+## F9′ NPC 選址讀【已知】敵友據點（用戶裁 (C)，藍圖 `c2ed35c05`；與 F8 同批 merge，不等覓食範圍物理）
+
+```
+前提（逐字）：faction_ai_system.gd:6047 _enemy_outpost_positions 已讀 BeliefSystem.known_outposts（親見才有、owner＝最後所見）✓
+  但「敵」＝「非自家且不在我勢力名冊」⇒ 陌生人一律當敵；:5978-5981 `if min_enemy_dist < 5: score -= (5 - d) * 10`
+  ⇒ 只看【最近一座】、只有扣分、不分敵友
+改：
+①_enemy_outpost_positions 改名改形 ⇒ _known_outpost_relations(state, leader_team) -> Array：每筆 {tile_pos, owner_id, g}
+   g（關係，[-1, 1]）：
+     owner 在我勢力名冊（自知，合法）⇒ +1
+     否則 ⇒ clampf(grat − feud, -1, 1)；grat／feud ＝ DiplomaticAiSystem._edge_intensity_to(我隊 leader.relation_edges, "gratitude"/"feud", owner 隊 leader_id)（同外交那支，不另寫）
+     沒有邊 ⇒ 0（中立；★今天陌生人被當敵 ⇒ 改後陌生人不再被避開——這是裁定要的行為變化，不是回歸）
+   自家據點不進本表（既有 centers／離家近那兩項保留）
+②分數項：score += Σ_每筆 g × maxf(0, 5 − d) × 10 × w
+   f(d)＝maxf(0, 5 − d) × 10 ⇒ 搬 :5981 既有的 5 與 10（不新增常數；從「最近一座」改成「每一座都算」）
+   w（人格，連續）＝ 慎重 + (1 − 好戰)；預設 0.5／0.5 ⇒ w = 1 ⇒ 對敵對據點與今天同量級
+   ★不知道的據點不在 known_outposts ⇒ 自然不進分（不另寫判斷）
+③tap：Probe.note 候選格該項；[Site] 那行印贏家的這一項值＋用到的據點清單（tile_pos／owner／g）
+   ★觀測不耗 RNG
+④玩家面：F7 游標處的「已知據點／擁有者／關係」讀同一支 _known_outpost_relations 的資料（玩家隊當觀察者）——★同一份資料兩個讀者，不另寫
+```
+```
+P9a belief 有敵對（feud 邊）據點在候選格 2 格外 vs 同位置但 belief 沒有那座 ⇒ 前者分數低、後者與無據點同分
+P9b 同勢力據點 2 格外 ⇒ 分數比沒有時高
+P9c 陌生人（無邊、非同勢力）據點 2 格外 ⇒ 分數與沒有時相同（★改前會扣，這格改前紅）
+P9d 慎重 0.9／好戰 0.1 vs 慎重 0.1／好戰 0.9 ⇒ 同一敵對據點的扣分前者大
+P9e 負對照：拿掉該項 ⇒ P9a 兩者同分
+P9f grep `_enemy_outpost_positions` 在 scripts/ 出現次數＝0（改名後舊名不得殘留）
+P9g world-fp 會變（與 F8 同一顆量）⇒ 先量、換基準同 commit
+```
