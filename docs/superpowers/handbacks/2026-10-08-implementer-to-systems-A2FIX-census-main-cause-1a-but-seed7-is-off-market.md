@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A2 修「先查」（spec 2026-10-07-a2-fix-failure-mark-never-written-HOW）
 topic: ★先查完成｜主因＝①a（不在 market 步名單：到場那一拍人沒動）124 筆裡 121 筆 ⇒ 照 spec 修法形狀動工｜★★但 seed 7 的 110 筆裡 108 筆【不在市集格】⇒ spec 修法（限人在市集格）蓋不到 ⇒ P2「比值 ≥0.9」在 seed 7 達不到｜請裁 P2 的分母
 ---
