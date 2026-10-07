@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: infonet_scout_test 首次入Tier2就紅——逐格分類
 topic: ★只有1個FAIL格（④斥候帶need回領主，got=2非預期的1）。分類＝③以上皆非（不是①床過期、不是②世界回歸）：原本的行為(order_id=700的真買單)仍然正確觸發，紅是因為後來新增的「firsthand catastrophe-care合成訊息」(order_id=2000000002)也滿足測試的計數條件，而測試fixture裡那支子民隊population=0剛好踩到那個新機制的門檻。②桶=0格，不附fp計數。
 ---

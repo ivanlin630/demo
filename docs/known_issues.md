@@ -5575,14 +5575,17 @@ A4 量測（30 天觀察世界 default seed 1337，origin/main 528e2daeb，臨�
 
 回訪：觸發事件 —— 誤報類別清零且有一週零誤報的卷面 ⇒ 刪 `docs/process/watchdog.off` 重啟。
 
-## 資訊網 S-scout 舊 TDD 床 infonet_scout_test 首次入 Tier2 表就是紅（未判是床過期還是回歸）
+## 資訊網 S-scout 舊 TDD 床 infonet_scout_test 首次入 Tier2 表就是紅——床的計數謂詞過寬，世界沒退步
 
-狀態：未確認
+狀態：已確認未修（低優先，床的問題）
 
 ```
-2026-10-08 Tier2 全掃（41444bd92）首次收錄 scripts/debug/infonet_scout_test.gd ⇒ red；它不在註冊表、最後動是 ea8d4dbd7（偵察脫主 argmax → side-dispatch）
-⇒ 床檔頭自己寫「②applicable REGISTRY 測移除」——機制換過一次；其餘三格（①人格術式 ③領主 gather 的 scout 欄位 ④斥候帶 need 回）是床過期還是世界回歸，未判
-⇒ 不是綠→紅（之前不在表裡），所以不是本週任何 merge 造成的證據
+2026-10-08 Tier2 全掃（41444bd92）首次收錄 ⇒ red；量測員分類（fe62c6333）：3 PASS 1 FAIL，屬「以上皆非」
+FAIL 格④「斥候帶 need 回領主」數到 2 筆、預期 1：
+  order_id 700＝fixture 那張真買單（_deposit_help_need 照舊觸發，行為沒退化）
+  2000000002＝faction_ai_system.gd:2613-2638 後加的 care-loop firsthand 合成 distress 訊息——fixture 的子民隊 population＝0 踩到 DESPERATION_DAYS 門檻
+⇒ 斷言寫在那段機制之前，同一個計數謂詞現在對到兩種成因
+修法（床，不動世界）：fixture 給子民隊一個正常 population，或斷言改成只數那張買單的 order_id（擇一，並把另一種成因寫進檔頭）
 ```
 
-回訪：觸發事件 —— 量測員跑一次並逐格分類（床讀的符號還在不在／世界行為變了沒），或資訊網偵察那條再有人改動。
+回訪：觸發事件 —— 實作端佇列空檔或有人改資訊網偵察／care-loop 那段時順手修這支床。
