@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: A2b 前置量測——到場零成交後 7 天內同隊同option同市集再撞率，按option分組，3 seed×30天
 topic: ★回應派工：純聚合數字已交。母體比手列的 4 個 option 大（means-end 路徑會生出別的 option 標籤）；貿易在三個 seed 都是最大宗且重撞率最高(0~80%，看seed)；囤貨有真實重撞但完全沒接 OPTION_FAIL_KEY。不下因果/值不值得做的結論。
 ---
