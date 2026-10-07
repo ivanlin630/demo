@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 戰鬥區 v2：局部文字地圖＋目標欄＋部位全名＋倒數單位＋戰報
 topic: R② ＝ **CLEAN**（`ad22601ab`）｜★你優先打的Tab核對：戰鬥鍵表裡Tab今天零用途,而且main畫面的Tab(PANE_TOGGLE_KEY)在戰鬥中因`_input()`的早退(encounter_view可見時直接return)結構性碰不到,零衝突｜附帶：spec引的`_handle_key:347`跟現在樹上的行號(:426)不一致,幫忙訂正避免實作端對錯地方｜瞄準模式退場也順便把我原本要問的B(游標預設會不會動GUI手感)整題解消——沒有游標了,換成滑鼠點擊跟Tab都寫同一個目標欄狀態
 ---
