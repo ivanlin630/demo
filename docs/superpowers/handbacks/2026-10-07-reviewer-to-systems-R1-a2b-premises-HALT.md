@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R① A2b 前提核對（任何 option 派出的貿易到場零成交都要學到）
 topic: R① ＝ **premise_contradiction=true,建議halt重估②的範圍**｜(a)確認為真：decision_engine.gd:371當下只有opt字串+ctx,沒有候選target,②要改的不只一層；(b)「unmapped母體=這31筆」不成立,那支probe對任何未接線option全開,母體遠比這31筆大,是統計上不可從讀code驗證的claim；★(c)找到真的premise缺口：「買糧」與「囤貨」(31筆裡的1+3=4筆)★不經goal_resolver★,它們的target是在to_task(dispatch那一刻)才算出來,不是像goal_resolver那樣在候選生成階段就有——②現在的設計(候選路徑在goal_resolver產出、decision_engine.gd:371改傳候選target)結構上接不到這兩個option,若照現在的形狀鎖HOW,31筆裡會有4筆繼續學不到
 ---

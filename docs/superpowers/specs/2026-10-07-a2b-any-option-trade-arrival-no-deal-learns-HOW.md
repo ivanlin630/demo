@@ -37,3 +37,16 @@ P2 佈置：maintain_food 撞空同一市集兩次 ⇒ 該 option 對該市集�
 P3 反向：把 ① 改回只記「貿易」⇒ P2 必紅
 P4 world-fp 會變 ⇒ 先量、同 commit 換基準
 ```
+
+## ★R① 結果（366881451）：premise_contradiction ⇒ HALT，「做什麼」那節作廢待重寫
+```
+(a) 成立：decision_engine.gd:310 `_applicable` 是純 String 陣列，:371 只有 opt＋ctx ⇒ 拿候選 target 要改不只一層
+(b) 不成立：failure.unmapped.* 對所有未接線 option 都數 ⇒ 母體比 31 大，讀碼答不出
+(c) 致命：「買糧」options.gd:477-493、「囤貨」:534-556 不經 goal_resolver，target 在 to_task（派出那一刻）才算 ⇒「候選帶 target」那條路接不到它們 ⇒ 違反票名「任何 option」
+⇒ 重寫前先決定學在哪一層（兩案，都要先量）：
+   (甲) 學在 option 的 util（今天 A2 的做法）：每個派 TRADE 的 option 都要能在評估時說出「我會去哪個市集」——買糧／囤貨要把 target 計算從 to_task 前移成純函式（先驗它無副作用、評估與派出算出同一格）
+   (乙) 學在選市集那一步：失敗記號 key＝(用途, 市集)；所有挑 market_pos 的地方（goal_resolver 三處、options 五處）都經同一支「挑市集」函式並讀折價 ⇒ 撞空的市集排到後面；沒有別的市集時 option util 才折價
+   我傾向 (乙)：一支挑市集函式收掉八處各自挑（今天就是八份），而失敗學習本來就該讓人換地方，不是讓人放棄目的
+下一步：量測員量 (b)＋各 option 派出貿易到場零成交的次數與「同一市集重撞」比例（多 seed）——重撞率低就不值得做
+序：深層批（不擋第五輪）
+```
