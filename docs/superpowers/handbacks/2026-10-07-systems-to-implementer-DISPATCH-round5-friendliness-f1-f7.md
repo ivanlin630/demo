@@ -31,3 +31,10 @@ F7b 選中區塊同游標處規則（視野內真值／記得的格只印地形�
 F8 玩家紮營＝L0（呼 establish_crude_camp）、紮根＝新動作（共用 NPC 紮根落地段、施工中不可重按）、四寫入點同呼 _distance_blockers(tier)、營地欄（家欄不動）＋P8a–g
 ⇒ 上面「不做：據點間距規則」那條作廢；F8 照 spec 做
 ```
+
+# ★追加二（2026-10-07，R² CLEAN ed7b0c0be）：F8 換成第三版
+```
+用戶裁：據點間距（2／11，含 NPC 選址 faction_ai:5960 min_dist）與山地禁紮整條退場，只留「同格已有」
+⇒ F8 照 spec 現行全文做（整節改寫過）；F7 的 _distance_blockers／known_outposts 比對作廢；「追加」那段裡「四寫入點同呼 _distance_blockers(tier)」作廢
+P8g 報告逐字印 mountain_camp_survived_days: <最大天數>（defer 讀它）
+```

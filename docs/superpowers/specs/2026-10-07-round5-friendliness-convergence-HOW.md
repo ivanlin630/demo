@@ -88,7 +88,7 @@ P7c 選一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反�
    faction_ai:5960 的 min_dist（候選格本來就 `outpost_level > 0 ⇒ continue`，同格已排除 ⇒ min_dist 改成無；max_dist 是搜尋半徑不是間距，留）、
    兩處山地禁紮；礦村豁免（outpost_system.gd:936-941、faction_ai:5957-5960 的 is_ore_mountain 對 min_dist 那半）隨之消失
    ★不新增 _distance_blockers：同格檢查四處已在，再包一支只會變成第二份
-   qa_probe.gd／ui_flow_test.gd:208 引用 _check_distance 的註解與呼叫一起改
+   qa_probe.gd／ui_flow_test.gd:208／★註解例句 player_command_system.gd:500,506,773、player_query_api.gd:360（R² ed7b0c0be）引用 _check_distance 的一起改（P8f grep 會算到它們）
    player_command_system.gd:1041 原因句「資源不足或距離限制」⇒ 去掉「或距離限制」
 ②兩步結構（保留）：
    玩家紮營：_action_camp 改呼 establish_crude_camp（同一支，不准第二份 L0 寫法）；precheck_camp 加「此地已有營地」（camp_level>0）

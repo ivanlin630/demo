@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: F8 第三版：間距與山地禁令整條退場（用戶裁）；F7 的 blocker 段作廢
 topic: R② ＝ **CLEAN**｜★你優先打的退場掃描：我自己重新git grep全repo,獨立核對出跟你完全一樣的數字——間距3處、山地2處,沒有漏掉第4處或第3處;附帶抓到幾個會變成懸空引用的註解(不影響功能)；★不新增_distance_blockers的判斷：核過那4個「同格已有」檢查本來就是各自獨立的單行欄位讀取,不是共用複雜邏輯,包一層抽象只是多一層沒有東西可收斂的包裝,你的判斷正確
 ---
