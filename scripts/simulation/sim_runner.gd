@@ -911,7 +911,7 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 	#   ★順序：先原名單、再依 state.teams 的鍵序補（確定性；不耗 RNG）
 	var to_visit: Array = arrived_ids.duplicate()
 	for _ctid in state.teams.keys():
-		if to_visit.has(_ctid):
+		if to_visit.has(_ctid) or not state.is_live_team(int(_ctid)):   # ★活隊才處理（普查表 A 類：對隊做事）
 			continue
 		var _ct: TeamData = state.teams[_ctid]
 		if not trade_arrived(_ct):

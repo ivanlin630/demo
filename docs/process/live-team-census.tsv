@@ -79,3 +79,4 @@ scripts/simulation/manpower_system.gd:272	tick_all	C	兵役/人力逐隊 tick：
 scripts/simulation/population_system.gd:82	_mature_minors	C	讓一支這 tick 會被 erase 的隊的小孩成年——多半無害，★但「無害」是猜的
 scripts/simulation/resource_system.gd:348	flush_forage_episodes	C	R² 初判 [A]?；★我覆核後降成 C：清暫存/發覓食訊息對死者的後果我讀不出來
 scripts/simulation/faction_ai_system.gd:7467	tick_solo_think	A	★錯開票新增的思考迴圈（每 tick 到期才想）——已有 null 守衛，★★而 null 看不見 pending_erase：死判定但未清除的隊仍會進來想一次⇒ on-touch 轉 live_team()
+scripts/simulation/sim_runner.gd:913	_step3c_read_market_board	A	A2 修：補 market 步名單（TRADE、trade_arrived、人在市集格）＝對隊解算市集／記失敗／放手 ⇒ 要活著的（迴圈內 is_live_team 已濾）
