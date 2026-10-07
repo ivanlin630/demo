@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 用戶問「Team19 跑去哪」—— 滿上限接受求投靠的下場
 topic: ★派工（藍圖轉用戶問題）｜樹＝當下 origin/main（印 sha）｜在床裡重現：玩家隊人口已滿、Team19 類求投靠強制事件、按 [A] 接受
 ---
