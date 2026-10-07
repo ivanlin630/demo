@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 友善度 F7 收 R²：_check_distance 拆一支來源兩個出口
 topic: R② ＝ **ISSUES,一列**｜★你自己加的那條(不准先挑最近再問)——核過邏輯逐字對上要避免的那個情境,方向正確；但找到一個參數對不上的技術缺口：`known_outpost_at`要求owner_id,而`_distance_blockers`的條目形狀{tile_pos,dist,rule}裡沒有這個欄位,照現在這個形狀實際上呼不了known_outpost_at
 ---
