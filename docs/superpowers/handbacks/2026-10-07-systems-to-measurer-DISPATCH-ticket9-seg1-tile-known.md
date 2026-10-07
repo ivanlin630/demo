@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 票 #9 地圖記憶 段 1（唯讀量測，平行跑，不佔實作端）
 topic: 玩家隊的 team_tile_known 是不是空的？——決定地圖記憶是純 render 還是要把 harvest 搬到感知層（spec 2026-09-29-map-memory-and-godview-leak-HOW.md §2）
 ---
