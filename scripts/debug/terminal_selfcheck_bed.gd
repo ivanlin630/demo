@@ -772,7 +772,7 @@ func _test_j_fatigue_column_and_rest_key() -> void:
 		if String(d.get("story_end", "")) != "":
 			continue
 		var re := RegEx.new()
-		re.compile("疲勞: \\d+%（([^）]+)）")
+		re.compile("疲勞: \\d+%[^\\n]*\\n[^\\n]*體力：([^\\s│|]+)")   # ★級距在狀態列的下一行（狀態列那行是 ui-flow 零損失的舊行，不動）
 		var m := re.search(screen)
 		if screen.contains("狀態: "):
 			open_n += 1
@@ -785,7 +785,7 @@ func _test_j_fatigue_column_and_rest_key() -> void:
 		print("   %s：疲勞欄 %s｜自家隊動作區 %s／休息鍵 %s" % [String(d.get("name", "")), m.get_string(0) if m != null else "（無）",
 			str(screen.contains("── 自家隊動作（")), str(screen.contains("]" + rest_label))])
 	_check("★母體地板：有狀態列的走法 ≥ 1（%d）、有自家隊動作區的走法 ≥ 1（%d）" % [open_n, inter_n], open_n >= 1 and inter_n >= 1)
-	_check("(j)① 每一支有狀態列的走法都印「疲勞: N%%（級距）」（%d／%d）" % [with_col, open_n], with_col == open_n)
+	_check("(j)① 每一支有狀態列的走法都印「疲勞: N%%」＋下一行「體力：級距」（%d／%d）" % [with_col, open_n], with_col == open_n)
 	_check("(j)② 每一支有自家隊動作區的走法都列出「%s」那一鍵（%d／%d）" % [rest_label, with_rest, inter_n], with_rest == inter_n)
 	# ★反向：級距真的會隨數值變（四段各給一個值 ⇒ 四個不同的字）
 	var seen: Array = [0, 30, 70, 100].map(func(x): return TextUiMain.fatigue_level_text(x))

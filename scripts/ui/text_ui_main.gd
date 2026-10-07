@@ -1097,9 +1097,10 @@ func _build_state_str() -> String:
 		ct.get("id", _player_tid),
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
-	lines.append("狀態: %s  疲勞: %d%%（%s）" % [
-		human(TASK_DISPLAY, ct.get("task_summary", "")), ct.get("fatigue_pct", 0),
-		fatigue_level_text(int(ct.get("fatigue_pct", 0)))])
+	lines.append("狀態: %s  疲勞: %d%%" % [
+		human(TASK_DISPLAY, ct.get("task_summary", "")), ct.get("fatigue_pct", 0)])
+	# ★票 T §1③ 文字級距【另起一行】：上面那一行是 ui-flow 零損失比對的舊行，一個字都不動（改它＝那一格紅）
+	lines.append("  體力：%s" % fatigue_level_text(int(ct.get("fatigue_pct", 0))))
 
 	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
 	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。

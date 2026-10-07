@@ -37,7 +37,8 @@ const EXPECT_CELLS: Array = [
 #   ★而處置是【重量】不是【放寬】：我把數字改成實測的 68，而不是把斷言拿掉。
 #   ★★這一族今天第四次（一張票改的就是閘）—— 而抓到它的是
 #     「改完之後要重跑那支床本身」那條紀律，不是我想起來。
-const SPEC_SUCCESS_RETURNS: int = 70
+# ★70 → 71（2026-10-07 票T §2）：新增玩家動作「休息」（_action_rest）多一條成功回傳 ⇒ 重量非放寬
+const SPEC_SUCCESS_RETURNS: int = 71
 # ★★★★★68 → 70（2026-10-06，進貢提案那張票）——【基準更新】，而它是我造的：
 #   那張票在 `player_command_system` 新增**兩句成功結果句**
 #     ·接受：「收下 Team%d 的貢品（+%.0f 錢）」（還有一條「對方身上沒有錢可以給」）
@@ -56,7 +57,8 @@ const SPEC_SUCCESS_RETURNS: int = 70
 #   ★★★排除三件缺一不可：①宣告在一處（下面這個前綴）②判準錨在**函式體**
 #     （不裸掃整檔）③**反向掃**（長得像前置檢查而不在那個前綴下的 ⇒ 紅並指名）。
 const SPEC_PRECHECK_PREFIX: String = "precheck_"
-const SPEC_REGISTRY_ACTIONS: int = 50
+# ★50 → 51（2026-10-07 票T §2）：註冊表新增動作 rest（休息）
+const SPEC_REGISTRY_ACTIONS: int = 51
 # ★★★★★51 → 50（2026-10-01，「直接成交」那條路線退場 ⇒ registry 少一列）——
 #   ★這個數是從**床自己的輸出**抄的（它紅在「50／51」那一行），不是推算的。
 #   ★★而本處值得記：退場票的 spec 用的是【指名清單】（§3 逐一列出要改哪幾處），
