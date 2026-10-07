@@ -123,13 +123,9 @@ Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-
     fi
     CTX="${CTX}
 
-★★blueprint 專屬（★2026-09-23 用戶裁定的四件事，全部走背景 role-watch，★不要用 Monitor）：
+★★blueprint 專屬：
 ${_WD_LINE}
-② Telegram 進站（★用戶第 3 點；★★只 blueprint 一支，兩支並存會互搶 offset ⇒ 訊息靜默遺失）：
-Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\" tg\", run_in_background=true, description=\"Telegram 進站\")
-★★★而三支都【閒置零輸出、永久跑】—— 實測背景任務閒置 10 分鐘以上仍活、輸出檔 0 bytes，
-  且不受它自己的 timeout 參數綁。★有事才結束並喚醒你，那一次重掛夾在你本來就要處理它的那一輪裡。
-出站回用戶:Write UTF-8 檔 → \`bash tools/telegram/send.sh --file <檔>\`（中文走檔避 CP950）。**只在真需用戶裁時推**（WHAT fork/授權/QA 綠/喬不攏），role-to-role 不推。詳 \`tools/telegram/README.md\`。
+出站回用戶（只在真需用戶裁時推）：見 tools/telegram/README.md（Telegram 進站 2026-09-23 已退役，改 Remote Control）。
 ※arm 語意（v3，2026-08-26 更新）：★**一律換血接手（不問前任死活）** —— 新的 arm 一定當家，前任印 \`⛔ 讓位\` 後自退。compact 後照 arm，安全。★理由：**「前任還活著」證明不了「它送得到」** —— compact 會保住 session_id 與 bash pid、**卻可能同時弄斷它的 stdout 管道**（實測 6 個孤兒 watcher）。**管道活著的唯一證明是【成功寫過 stdout】。**"
   fi
 fi
