@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: play.py 真跑四個畫面缺陷＋E2E 補四格
 topic: R② 第二輪＝ **ISSUES，一列**｜D1/D2 CLEAN(逐字對上要求)｜D4：「配發時跳過全域鍵」只解決了【分配】那一半,沒解決【派送】那一半——`_handle_interact_mode`自己的A-Z分支(:1879)今天不管有沒有列出,只要是A-Z就不會落回主match block的KEY_X/KEY_G邏輯,「全域鍵永遠全域語意」需要這支函式自己也認得「這是保留的全域鍵」並轉呼同一段邏輯,不是只靠配發表排除就自動成立
 ---

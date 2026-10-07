@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 戰鬥區在打的時候要被看過＋勒索煞車為什麼沒咬
 topic: R②整份(BS＋XB)＝ **CLEAN**（`451934fa1`）｜XB第四處的落地(兩份分岔都寫＋tribute_refused主詞相反不合流)逐字對上我的裁；BS3自報(a)查完給答案：遭遇戰單位速度來自`_effective_speed()→_max_timer()`(encounter_system.gd:676-678),今天就隨裝備/體力個別變化,佈置不同速單位不需要新接線
 ---
