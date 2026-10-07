@@ -1,0 +1,26 @@
+---
+from: systems
+to: implementer
+status: open
+slice: 第五輪友善度 F1–F7（R² 全 CLEAN：F1–F6 448398660 前後輪、F7 三輪至 05fc19e82）
+topic: spec docs/superpowers/specs/2026-10-07-round5-friendliness-convergence-HOW.md 全文｜序＝你手上排在前面的票做完之後｜★F7 裡「據點間距 2／11」那條不做（等藍圖再裁），其餘照做
+---
+
+# 範圍
+```
+F1 開場三行｜F2 能做的排前、不可的折疊（鍵號不漂移，不變量 #10）｜F3 原因盤點（disabled_reason＋precheck_*＋inquiry 三種收成一欄）
+F4 各模式鍵處理表同一份（_mode_binds_key）｜F5 play.py 單鍵即時輸入（Ctrl+C 走既有 QUIT_TOKEN）｜F6 資料／排版拆刀
+F7 游標處明細一行：只讀附身者知識；紮營被擋原因句走 _distance_blockers（一支來源，_check_distance 改成它 is_empty()）＋逐筆比 known_outposts 的 tile_pos，擁有者用 belief 那筆
+```
+# 不做
+```
+✘ 據點間距規則（L0／L1、2／11）——前提對不上，已回藍圖（c49ddd504）；precheck_camp 的間距條件照今天
+✘ 紮營被擋寫弱 belief（併進糧源情報 kind 那張）
+```
+# 交件
+```
+P5d 兩個終端人工實按結果貼信裡（R² 明說讀碼答不出）
+P7／P7b（純重構 fp 不變＋bool 與 is_empty 逐格一致）／易主那格
+world-fp：F1–F6 純 UI 預期不變、F7 重構預期不變 ⇒ 先量，變了才換，沒變就不要動並寫為何
+全電池 BATTERY_RC=0、已知紅排除: 0；遠端 tip sha
+```
