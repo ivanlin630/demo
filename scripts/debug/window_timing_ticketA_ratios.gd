@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # ★量測員派工（systems 2026-10-06）②：
 # docs/superpowers/handbacks/2026-10-06-systems-to-measurer-team7-combat-trace-and-30day-cost.md ②
 #
