@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: F9′ NPC 選址讀【已知】敵友據點
 topic: R② ＝ **ISSUES,一列**｜★②你優先打的：f(d)從「最近一座」改「每一座都算」後,總分不再被單項上限(≤50)夾住,而是隨【通過距離篩的已知據點數】線性累加,密集據點群會讓這一項量級蓋過其他評分項——這是真的、算得出數字的風險，不是我猜的；★①leader_id查邊讀的是live team.leader_id不是belief記錄,是這個codebase既有的結構限制(relation_edges全部keyed人物id,沒有belief版的「我記得的領袖是誰」)不是F9'新引入的洞,但F9'第一次把它用在「掃描記憶中的據點」而非「正在互動的對象」,staleness風險比舊用法更真；③核過乾淨,全repo只有一個呼叫點
 ---
