@@ -714,7 +714,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 		if int(pt.anon_tiers.get(tier, 0)) > 0:
 			target_tier = tier; break
 	if target_tier == "":
-		return { "ok": true, "msg": "訓練（-%.0f coin,無可升階對象）" % TRAIN_COST_COIN }
+		return { "ok": true, "msg": "訓練（-%.0f 幣,無可升階對象）" % TRAIN_COST_COIN }
 	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN, "train_player")
 	var promoted: int = 0
 	for tier in AnonTierSystem.TIER_ORDER:
@@ -722,7 +722,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 		var n: int = int(pt.anon_tiers.get(tier, 0))
 		if n > 0:
 			promoted += AnonTierSystem.try_promote(state, pt, tier, n)
-	var msg: String = "訓練（-%.0f coin → %s +exp" % [TRAIN_COST_COIN, target_tier]
+	var msg: String = "訓練（-%.0f 幣 → %s +經驗" % [TRAIN_COST_COIN, target_tier]
 	if promoted > 0:
 		msg += "，升階 %d 人" % promoted
 	msg += "）"
@@ -846,9 +846,14 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 		# ★恩怨那一段已經搬進共用解算點（`DiplomaticAiSystem.apply_tribute_accept`）
 		#   ⇒ 這裡不再有第二份；NPC↔NPC 那條路因此**自動**也有煞車（藍圖要的那一句）。
 		print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
-		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
+		return { "ok": true, "msg": "索貢成功（獲得%.0f 幣）" % amount }
 	else:
 		UnrestBank.add(tgt, 2, "player")
+		# ★XB③：typed 那一筆走與 NPC↔NPC 同一處寫入（寫在索貢方＝玩家，進關係帳）
+		DiplomaticAiSystem.record_tribute_refused(state, pt, tgt)
+		# ★舊格式這一筆【保留】：它不是關係帳，而是有讀者的 —— player_trade_system `evaluate`
+		#   的 memory_mod 掃被索方領袖的 reaction（"tribute_refused" ⇒ 交易門檻 +0.10）
+		#   ⇒ 拿掉它＝靜默改玩家交易行為（不在本票範圍）；要不要遷移已回報 systems
 		var leader_p: PersonData = state.persons.get(tgt.leader_id)
 		if leader_p:
 			leader_p.memory.append({
@@ -1907,7 +1912,7 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		pt_id, target_id, moved_n, RECRUIT_COST_ANON, pt.population])
 	# ★把 moved 印出來 —— ★★玩家從此分辨得出「招到 0 人」與「沒招成」，
 	#   而今天這兩者在畫面上是【同一句話】。
-	return { "ok": true, "msg": "招到 %d 人（花費%d coin，新人口%d）" % [
+	return { "ok": true, "msg": "招到 %d 人（花費%d 幣，新人口%d）" % [
 		moved_n, int(RECRUIT_COST_ANON), pt.population],
 		"payload": {"has_willing_named": false, "refresh_required": true, "moved": moved_n} }
 
@@ -2094,6 +2099,6 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	state.player_pending_targets.erase(from_team_id)
 	print("[Recruit] Named P%d (%s) Team%d→%d" % [
 		person_id, p.person_name, from_team_id, pt_id])
-	return { "ok": true, "msg": "招募 %s 成功（花費%d coin）" % [
+	return { "ok": true, "msg": "招募 %s 成功（花費%d 幣）" % [
 		p.person_name, int(RECRUIT_COST_NAMED)],
 		"payload": {"refresh_required": true} }

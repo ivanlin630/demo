@@ -17,7 +17,22 @@ extends SceneTree
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE"]
+const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
+	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART"]
+
+# ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
+# ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
+const SELFCHECK: Script = preload("res://scripts/debug/terminal_selfcheck_bed.gd")
+# ★格 b：玩家走法的每一屏不得出現的佔位句／內部備註（字表只在這裡一處）
+const PLACEHOLDER_WORDS: Array = ["尚未提供", "尚未分頁", "Tick:"]
+# ★格 b 反向：debug 走法下，同一批欄位的 debug 寫法必須出現（儀器不是被刪掉，只是不在玩家那條路上）
+const DEBUG_COUNTERPART_WORDS: Array = ["未接出（票B）", "Tick:"]
+# ★格 d：全域推進鍵 × 每一種從主畫面一鍵打得開的面板
+const GLOBAL_ADVANCE_TOKENS: Array = ["x", "space", "g"]
+const PANEL_OPEN_TOKENS: Array = ["t", "i", "p", "f", "o", "k", "u", "v"]
+var _scan_a: Dictionary = {}   # 英文識別字 → 第一次看到它的那一行
+var _scan_b: Dictionary = {}   # 佔位字 → 第一次看到它的那一行
+var _scan_n: int = 0
 
 const SEED_A: int = 1337
 const SEED_B: int = 4242
@@ -55,6 +70,8 @@ func _initialize() -> void:
 	var r1: Dictionary = await _walk(SEED_A, -1, true)
 	_cells_ran.append("WALK")
 	_judge(r1)
+	_d1a_d2b_d3c(r1)
+	await _d2b_reverse_and_boundary()
 	print("\n── P5 確定性：同 seed 再走一次 ⇒ 逐字相同；換 seed ⇒ 必須不同 ──")
 	var r2: Dictionary = await _walk(SEED_A, int(r1["n"]), false)
 	var same: bool = (r1["lines"] as Array) == (r2["lines"] as Array)
@@ -73,6 +90,8 @@ func _initialize() -> void:
 	await _e2_no_faction_alliance()
 	await _e4_forced_label_marks(r1)
 	await _battle_cells()
+	await _d4d_global_keys_in_panels()
+	await _bs_cells()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -313,6 +332,7 @@ func _press(w: Dictionary, k: String) -> void:
 	await PlayerRepl.press_on(w["node"], kc)
 	(w["keys"] as Array).append(k)
 	var scr: String = _screen(w["node"])
+	_scan_screen(scr)
 	var wt: int = w["node"]._bridge.get_current_tick()
 	var top: int = _screen_tick(scr)
 	var stt: int = _status_tick(scr)
@@ -323,6 +343,27 @@ func _press(w: Dictionary, k: String) -> void:
 	if top != wt or (stt != -1 and stt != wt) or pending:
 		(w["p10_bad"] as Array).append({"label": String(w.get("label", "")),
 			"msg": "key=%s（%s）畫面頂列 %d／狀態列 %d／世界 %d／推進未消化 %s" % [k, String(w.get("label", "")), top, stt, wt, str(pending)]})
+
+
+# ★格 a／b：每一次按鍵回來的那一屏都掃（玩家走法；debug 走法下不判）
+func _scan_screen(scr: String) -> void:
+	if TextUiMain.truth_pane_enabled():
+		return
+	_scan_n += 1
+	var ev: Array = _event_lines(scr)
+	for x in SELFCHECK._bad_english("\n".join(PackedStringArray(ev))):
+		if not _scan_a.has(String(x)):
+			for l in ev:
+				if String(l).contains(String(x)):
+					_scan_a[String(x)] = String(l)
+					break
+	for wd in PLACEHOLDER_WORDS:
+		if _scan_b.has(wd) or not scr.contains(String(wd)):
+			continue
+		for l in scr.split("\n"):
+			if String(l).contains(String(wd)):
+				_scan_b[wd] = String(l).strip_edges()
+				break
 
 
 func _press_all(w: Dictionary, keys: Array) -> void:
@@ -434,6 +475,8 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 	var p6_bad: Array = []
 	var p10_n: int = 0
 	var p10_bad: Array = []
+	var d3_n: int = 0
+	var d3_bad: Array = []
 	var n: int = n_fixed
 	var step: int = 0
 	var dead_end: String = ""
@@ -524,6 +567,18 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		var ev0: Array = _event_lines(scr0)
 		var new_ev: Array = _event_lines(scr1).filter(func(e): return not ev0.has(e))
 		var result: String = _result_line(scr1)
+		# ★格 c（D3 press-is-do）：這一屏若有這一道令的「指令」事件 ⇒ 結果行必須是同一句（不是「已排入」）
+		# ★介面自己入列的令（SimBridge.UI_INTERNAL_COMMANDS，同一份表）不是玩家下的 ⇒ 不拿它比
+		var internal_heads: Array = SimBridge.UI_INTERNAL_COMMANDS.map(func(nm): return "｜指令｜" + PlayerCommandApi.describe(String(nm), {}))
+		var cmd_rows: Array = new_ev.filter(func(e): return String(e).contains("｜指令｜") \
+			and internal_heads.filter(func(h): return String(e).contains(String(h))).is_empty())
+		if not cmd_rows.is_empty():
+			var ev_txt: String = String(cmd_rows[-1]).split("｜指令｜")[1].strip_edges()
+			var res_txt: String = result.trim_prefix("✓ ").strip_edges()
+			d3_n += 1
+			# ★事件列被版面截到寬度（clip_to 不加記號）⇒ 比「結果行以那一截開頭」
+			if ev_txt == "" or not res_txt.begins_with(ev_txt):
+				d3_bad.append("step %d %s：結果行「%s」／事件流「%s」" % [step, label, result, ev_txt])
 		var said: String = result
 		if not new_ev.is_empty():
 			said += "｜" + "｜".join(PackedStringArray(new_ev))
@@ -603,7 +658,8 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 	await _drop(wz["node"])
 	return {"lines": lines, "n": n, "keys": prefix, "fp_end": fp_end, "steps": steps, "offered": offered,
 		"pressed": pressed, "p10_n": p10_n, "p10_bad": p10_bad, "aborts": aborts, "p6_bad": p6_bad,
-		"p6_n": steps.size(), "unbound": unbound, "dead_end": dead_end, "dead_end_said": dead_end_said}
+		"p6_n": steps.size(), "unbound": unbound, "dead_end": dead_end, "dead_end_said": dead_end_said,
+		"d3_n": d3_n, "d3_bad": d3_bad}
 
 
 # ══ 判 ══════════════════════════════════════════════════════════════════════════════════════════
@@ -792,6 +848,323 @@ func _footer_keys_do_what_they_say() -> void:
 	_cells_ran.append("FOOTER")
 
 
+# ══ 四缺陷 a／b／c（spec §1）══════════════════════════════════════════════════════════════════════
+func _d1a_d2b_d3c(r: Dictionary) -> void:
+	print("\n── D1a 事件流區沒有英文識別字（自驗 (d) 同一支抽取器）｜掃了 %d 屏 ──" % _scan_n)
+	for x in _scan_a:
+		print("   ✗ %s ⇐ %s" % [x, _scan_a[x]])
+	_check("★母體地板：格 a／b 掃過的屏數 ≥ 1（%d）" % _scan_n, _scan_n >= 1)
+	_check("D1a 事件流區沒有英文識別字（命中 %d：%s）" % [_scan_a.size(), str(_scan_a.keys())], _scan_a.is_empty())
+	# ★走法只碰得到一部分 kind ⇒ 全母體（WorldEvents.all_kinds()）逐一驗都有玩家短名（沒有的會被藏掉＝玩家少看一件事）
+	var no_label: Array = WorldEvents.all_kinds().filter(func(k): return WorldEvents.kind_label(String(k)) == "")
+	_check("D1a 事件 kind 全母體（%d 個）都有玩家短名（缺：%s）" % [WorldEvents.all_kinds().size(), str(no_label)], no_label.is_empty())
+	_cells_ran.append("D1A")
+	print("\n── D2b 玩家走法沒有佔位句（字表 %s）──" % str(PLACEHOLDER_WORDS))
+	for wd in _scan_b:
+		print("   ✗ %s ⇐ %s" % [wd, _scan_b[wd]])
+	_check("D2b 玩家走法的每一屏都沒有佔位句（命中 %d：%s）" % [_scan_b.size(), str(_scan_b.keys())], _scan_b.is_empty())
+	print("\n── D3c 結果行 ＝ 那一道令的完成句／被拒句（逐字比同屏事件流「指令」那一筆）──")
+	for b in r["d3_bad"]:
+		print("   ✗ " + String(b))
+	_check("★母體地板：走法裡有令回來的屏 ≥ 1（%d）" % int(r["d3_n"]), int(r["d3_n"]) >= 1)
+	_check("D3c 每一道令回來那一屏，結果行＝事件流那一句（%d／%d 不同）" % [(r["d3_bad"] as Array).size(), int(r["d3_n"])],
+		(r["d3_bad"] as Array).is_empty())
+	_cells_ran.append("D3C")
+
+
+# ★格 b 反向＋邊界：①debug 走法下內部備註的 debug 寫法必須出現 ②有寫入者而值為 0 的欄（已知情報 0 個）玩家走法照印
+func _d2b_reverse_and_boundary() -> void:
+	OS.set_environment(TextUiMain.TRUTH_PANE_ENV, "1")
+	var wd: Dictionary = _new_w(await _build(SEED_A))
+	var seen: String = ""
+	for _i in range(UiPages.PAGE_ORDER.size()):
+		seen += _screen(wd["node"]) + "\n"
+		await _press(wd, ".")
+	await _drop(wd["node"])
+	OS.set_environment(TextUiMain.TRUTH_PANE_ENV, "")
+	var miss: Array = DEBUG_COUNTERPART_WORDS.filter(func(x): return not seen.contains(String(x)))
+	print("\n── D2b【反向】debug 走法翻遍 %d 頁：debug 寫法 %s 缺 %s ──" % [UiPages.PAGE_ORDER.size(), str(DEBUG_COUNTERPART_WORDS), str(miss)])
+	_check("D2b【反向】debug 走法下內部備註仍在（缺：%s）" % str(miss), miss.is_empty())
+	# 邊界：記憶頁「已知情報：0 個對象」——有寫入者（_build_memory_lines）而值為 0 ⇒ 玩家走法必須照印
+	var wp: Dictionary = _new_w(await _build(SEED_A))
+	var pages: String = ""
+	for _j in range(UiPages.PAGE_ORDER.size()):
+		pages += _screen(wp["node"]) + "\n"
+		await _press(wp, ".")
+	await _drop(wp["node"])
+	var zero_line: bool = pages.contains("已知情報：0 個對象")
+	print("   邊界：玩家走法翻遍各頁，「已知情報：0 個對象」%s" % ("有印" if zero_line else "沒印"))
+	_check("D2b【邊界】有寫入者而值為 0 的欄（已知情報 0 個）玩家走法照印", zero_line)
+	_cells_ran.append("D2B")
+
+
+# ══ 格 d：面板開著時按全域推進鍵 ⇒ 全域語意的句子，不是事件回應的句子（spec §1 D4）══════════════════
+#   ★母體 ＝ 從主畫面一鍵打得開的每一種面板 × 每一個全域鍵；面板鍵列上【有列出】那個鍵 ⇒ 歸面板語意，不判
+func _d4d_global_keys_in_panels() -> void:
+	print("\n── D4d 面板 × 全域推進鍵 ──")
+	var bad: Array = []
+	var n: int = 0
+	for op in PANEL_OPEN_TOKENS:
+		for gk in GLOBAL_ADVANCE_TOKENS:
+			var w: Dictionary = _new_w(await _build(SEED_A))
+			await _press(w, String(op))
+			var mode: String = String(w["node"]._current_mode_name())
+			if mode == "main":
+				await _drop(w["node"])
+				continue
+			var listed: String = "[%s]" % ("Space" if gk == "space" else String(gk).to_upper())
+			if _hint(w["node"]).contains(listed):
+				print("   %s 面板（%s）：鍵列有列出 %s ⇒ 面板語意，不判" % [op, mode, listed])
+				await _drop(w["node"])
+				continue
+			var t0: int = _tick(w["node"])
+			await _press(w, String(gk))
+			var res: String = _result_line(_screen(w["node"]))
+			var t1: int = _tick(w["node"])
+			n += 1
+			var ok: bool = res.contains(TextUiMain.GLOBAL_KEY_IN_PANEL_MSG) or t1 > t0
+			print("   %s 面板（%s）按 %s ⇒ 結果「%s」｜tick %d→%d" % [op, mode, gk, res, t0, t1])
+			if not ok:
+				bad.append("%s／%s／%s：%s" % [op, mode, gk, res])
+			await _drop(w["node"])
+	_check("★母體地板：面板 × 全域鍵 至少判了 1 格（%d）" % n, n >= 1)
+	_check("D4d 面板開著時按全域鍵 ⇒ 照推進或印「%s」（不得是事件回應／無作用句；錯 %d：%s）" % [
+		TextUiMain.GLOBAL_KEY_IN_PANEL_MSG, bad.size(), str(bad)], bad.is_empty())
+	_cells_ran.append("D4D")
+
+
+# ══ BS：戰鬥區在打的時候要被看過（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §票 BS）══════
+const BS_BEATS: Array = ["space", "w", "space"]        # 進戰後 ≥3 拍不投降：待機／移動／待機
+const BS_SIX: Array = ["兵力：", "── 主角狀態 ──", "── 裝備 ──", "── 目標 ──", "── 單位（", "── 戰報 ──", "── 戰場（"]
+const BS_FIGHT_MAX: int = 120
+
+# 主動攻擊同格的 NPC_ID（同 BATTLE① 的路）⇒ 回傳 w；進不了戰鬥 ⇒ {}
+#   ★BS3 佈置：玩家 體力 1.0、對方領袖 體力 0.0 ⇒ 兩邊速度不同（encounter_system `_base_speed`）⇒ 計時不會同步重置
+func _bs_enter(sd: int, uneven_speed: bool) -> Dictionary:
+	var w: Dictionary = _new_w(await _build(sd))
+	var node: Node = w["node"]
+	if uneven_speed:
+		var st: WorldState = node._bridge._state
+		var pp: PersonData = st.persons.get(st.player_id)
+		if pp != null:
+			pp.attributes["體力"] = 1.0
+		var nt: TeamData = st.teams.get(NPC_ID)
+		if nt != null and st.persons.has(nt.leader_id):
+			(st.persons[nt.leader_id] as PersonData).attributes["體力"] = 0.0
+		# ★BS v2 Tab 格要 ≥ 2 個敵方單位：對方 4 個平民、武裝比例 0 ⇒ 只出領袖一個 ⇒ 比例 0.5 ⇒ 多 2 個匿名兵
+		if nt != null:
+			nt.armed_anon_ratio = 0.5
+	await _press(w, "t")
+	if not bool(parse_screen(_screen(node))["targets_active"]):
+		await _press(w, "tab")
+	await _press(w, "1")
+	var atk_key: String = ""
+	for a in parse_screen(_screen(node))["actions"]:
+		if String(a["label"]) == PlayerApiMapper.action_label("attack") and bool(a["enabled"]):
+			atk_key = String(a["key"])
+	if atk_key == "":
+		await _drop(node)
+		return {}
+	await _press(w, atk_key)
+	if not _screen(node).contains(TextUiView.BATTLE_TITLE):
+		await _drop(node)
+		return {}
+	return w
+
+
+static func _bs_timers(scr: String) -> Array:
+	var re := RegEx.new()
+	re.compile("(\\d+) 分鐘後行動")   # ★BS v2 C
+	return re.search_all(scr).map(func(m): return int(m.get_string(1)))
+
+
+# ══ BS v2（spec §票 BS v2）：地圖代號／目標欄／R 一鍵／Tab／部位全名 ═══════════════════════════════
+static func _battle_region(scr: String) -> String:
+	return scr.split(TextUiView.BATTLE_TITLE)[-1].split("─ 事件（")[0]
+
+static func _section(region: String, head: String) -> Array:
+	var out: Array = []
+	var on: bool = false
+	for l in region.split("\n"):
+		if String(l).begins_with(head):
+			on = true
+			continue
+		if on and (String(l).begins_with("── ") or String(l).begins_with("─ ")):
+			break
+		if on:
+			out.append(String(l))
+	return out
+
+
+func _bs_v2_cells(w: Dictionary) -> void:
+	var node: Node = w["node"]
+	var view = node._encounter_view
+	var st: WorldState = node._bridge._state
+	print("\n── BS v2 戰鬥區要能玩 ──")
+	# V2MAP：地圖上的代號數 ＝ 列表行數 ＝ state 看得到的單位數
+	var reg: String = _battle_region(_screen(node))
+	var map_lines: Array = _section(reg, "── 戰場（")
+	var map_codes: Array = []
+	var re_c := RegEx.new()
+	re_c.compile("[A-Za-z@]")
+	for l in map_lines:
+		for m in re_c.search_all(String(l)):
+			map_codes.append(m.get_string(0))
+	var list_codes: Array = _section(reg, "── 單位（").filter(func(l): return RegEx.create_from_string("^[A-Za-z@] (我方|敵方) ").search(String(l)) != null) \
+		.map(func(l): return String(l).substr(0, 1))
+	var n_vis: int = view.visible_unit_indices(st).size()
+	map_codes.sort(); list_codes.sort()
+	print("   地圖代號 %s｜列表代號 %s｜state 看得到 %d 個" % [str(map_codes), str(list_codes), n_vis])
+	print("   地圖：\n      " + "\n      ".join(PackedStringArray(map_lines)))
+	_check("V2MAP 地圖代號 ＝ 列表代號 ＝ state 看得到的單位數（%d／%d／%d）" % [map_codes.size(), list_codes.size(), n_vis],
+		map_codes == list_codes and map_codes.size() == n_vis and n_vis >= 1)
+	_cells_ran.append("V2MAP")
+	# 佈置：把敵人（最多兩個）搬到主角旁邊（看得到、在射程內）⇒ 目標欄／R／Tab 都有鑑別力
+	var me: Dictionary = view._find_player_unit(st)
+	var my_pos: Vector2i = me.get("pos", Vector2i.ZERO)
+	var foes: Array = []
+	for i in range(st.encounter_units.size()):
+		var u: Dictionary = st.encounter_units[i]
+		if int(u.get("team_id", -1)) != view._player_team_id(st) and view._unit_present(u, st):
+			foes.append(i)
+	var spots: Array = [my_pos + Vector2i(1, 0), my_pos + Vector2i(0, 1), my_pos + Vector2i(-1, 1)]
+	for k in range(mini(foes.size(), 2)):
+		(st.encounter_units[foes[k]] as Dictionary)["pos"] = spots[k]
+	view._refresh_ui()
+	await _press(w, "up")   # 一個不推進世界的鍵（換部位）⇒ 畫面重組
+	var reg2: String = _battle_region(_screen(node))
+	var tgt1: String = "\n".join(PackedStringArray(_section(reg2, "── 目標 ──")))
+	print("   佈置後目標欄：%s" % tgt1.replace("\n", "｜"))
+	_check("V2TGT 看得到敵人時目標欄非空（有代號、距離、瞄準部位）",
+		RegEx.create_from_string("目標：[A-Z]（").search(tgt1) != null and tgt1.contains("距離") and tgt1.contains("瞄準："))
+	_cells_ran.append("V2TGT")
+	# V2TAB：Tab 換目標後目標欄改變（母體：看得到的敵人 ≥ 2）
+	var n_foe_vis: int = view._visible_enemies(st).size()
+	await _press(w, "tab")
+	var tgt2: String = "\n".join(PackedStringArray(_section(_battle_region(_screen(node)), "── 目標 ──")))
+	print("   看得到的敵人 %d 個｜Tab 之後目標欄：%s" % [n_foe_vis, tgt2.replace("\n", "｜")])
+	_check("★V2TAB 母體地板：看得到的敵人 ≥ 2（%d）" % n_foe_vis, n_foe_vis >= 2)
+	_check("V2TAB Tab 之後目標欄改變", tgt2 != tgt1 and tgt2.split("\n")[0] != tgt1.split("\n")[0])
+	_cells_ran.append("V2TAB")
+	# V2R：R 一鍵 ⇒ 戰報有一句含目標代號
+	var code_m := RegEx.create_from_string("目標：([A-Z])（").search(tgt2)
+	var tcode: String = code_m.get_string(1) if code_m != null else "?"
+	var log0: Array = _section(_battle_region(_screen(node)), "── 戰報 ──")
+	await _press(w, "r")
+	var scr_r: String = _screen(node)
+	var log1: Array = _section(_battle_region(scr_r), "── 戰報 ──") if scr_r.contains(TextUiView.BATTLE_TITLE) else []
+	var new_lines: Array = log1.filter(func(l): return not log0.has(l))
+	print("   R 打 %s ⇒ 戰報新增：%s" % [tcode, str(new_lines)])
+	_check("V2R R 一鍵之後戰報有一句含目標代號 %s（新增 %d 句）" % [tcode, new_lines.size()],
+		new_lines.any(func(l): return String(l).contains(tcode + "（")))
+	_cells_ran.append("V2R")
+	# V2PART：主角狀態每一行 ＝「部位全名：狀態全名」（逐字比名表；不截字）
+	var bad: Array = []
+	var body: Array = _section(_battle_region(_screen(node)), "── 主角狀態 ──").filter(func(l): return String(l).strip_edges() != "")
+	var parts: Array = TeamUiHelper.BODY_PART_NAME.values()
+	var stats: Array = TeamUiHelper.BODY_STATUS_NAME.values()
+	for l in body:
+		var kv: PackedStringArray = String(l).strip_edges().split("：")
+		if kv.size() != 2 or not parts.has(kv[0]) or not stats.has(kv[1]):
+			bad.append(String(l))
+	print("   主角狀態 %d 行：%s" % [body.size(), str(body)])
+	_check("V2PART 主角狀態每行逐字＝名表的部位全名：狀態全名（錯：%s）" % str(bad), body.size() >= 6 and bad.is_empty())
+	_cells_ran.append("V2PART")
+
+
+func _bs_cells() -> void:
+	print("\n── BS1／BS3 進戰後 %d 拍不投降：每拍六欄＋單位列表＋畫面 tick＝世界 tick｜計時會變 ──" % BS_BEATS.size())
+	var w: Dictionary = await _bs_enter(SEED_A, true)
+	_check("★BS 母體地板：進得了戰鬥（主動攻擊同格隊）", not w.is_empty())
+	if w.is_empty():
+		_cells_ran.append_array(["BS1", "BS2", "BS3"])
+		return
+	var node: Node = w["node"]
+	var bad1: Array = []
+	var timer_sets: Dictionary = {str(_bs_timers(_screen(node))): true}
+	var beats: int = 0
+	var p10_before: int = (w["p10_bad"] as Array).size()
+	for k in BS_BEATS:
+		await _press(w, String(k))
+		var scr: String = _screen(node)
+		if not scr.contains(TextUiView.BATTLE_TITLE):
+			bad1.append("第 %d 拍（%s）之後戰鬥區不見了" % [beats + 1, k])
+			break
+		beats += 1
+		var miss: Array = BS_SIX.filter(func(x): return not scr.contains(String(x)))
+		var units: int = _bs_timers(scr).size()
+		var keys_ok: bool = _hint(node).replace(" ", "").contains(String(node._encounter_view.terminal_keys()).replace(" ", ""))
+		print("   第 %d 拍（%s）：六欄缺 %s｜單位 %d 行｜鍵列 %s｜計時 %s｜tick %d" % [beats, k, str(miss), units,
+			"對" if keys_ok else "錯", str(_bs_timers(scr)), _tick(node)])
+		if not miss.is_empty() or units < 2 or not keys_ok:
+			bad1.append("第 %d 拍：六欄缺 %s／單位 %d 行／鍵列 %s" % [beats, str(miss), units, str(keys_ok)])
+		timer_sets[str(_bs_timers(scr))] = true
+	var p10_new: Array = (w["p10_bad"] as Array).slice(p10_before)
+	_check("★BS1 母體地板：戰鬥中按了 %d 拍（%d）" % [BS_BEATS.size(), beats], beats == BS_BEATS.size())
+	_check("BS1 每拍六欄齊＋單位列表 ≥ 2 行＋鍵列＝戰鬥鍵（錯：%s）" % str(bad1), bad1.is_empty())
+	_check("BS1 每拍回來那一屏的時間 ＝ 世界 tick（不同 %d：%s）" % [p10_new.size(), str(p10_new)], p10_new.is_empty())
+	_cells_ran.append("BS1")
+	print("   BS3 每次輪到玩家時看到的計時組合：%s" % str(timer_sets.keys()))
+	_check("BS3 不同速的單位 ⇒ %d 拍內單位計時至少變一次（看到 %d 種組合）" % [BS_BEATS.size(), timer_sets.size()], timer_sets.size() >= 2)
+	_cells_ran.append("BS3")
+	await _bs_v2_cells(w)
+	await _drop(node)
+
+	print("\n── BS2 三種結束各一步：打完／撤出／投降 ⇒ 回到主畫面、結果句說出是哪一種 ──")
+	var ends: Array = []
+	# ①打完：一直待機（敵方會打過來）直到分出勝負
+	var wf: Dictionary = await _bs_enter(SEED_A, false)
+	if not wf.is_empty():
+		var st_f: WorldState = wf["node"]._bridge._state
+		var n_f: int = 0
+		var en_battle: Dictionary = {}
+		while st_f.encounter_active and n_f < BS_FIGHT_MAX and _screen(wf["node"]).contains(TextUiView.BATTLE_TITLE):
+			await _press(wf, "space")
+			n_f += 1
+			# ★打到底的那一段有命中／落空 ⇒ 戰報真的有字 ⇒ 戰鬥區也掃英文識別字（自驗 (d) 同一支抽取器）
+			for x in SELFCHECK._bad_english(_screen(wf["node"]).split(TextUiView.BATTLE_TITLE)[-1].split("─ 事件（")[0]):
+				en_battle[String(x)] = true
+		print("   ①打完：戰鬥區英文識別字 %s" % str(en_battle.keys()))
+		_check("BS 打到底那一段的戰鬥區沒有英文識別字（命中：%s）" % str(en_battle.keys()), en_battle.is_empty())
+		var back_f: bool = await _to_main(wf)
+		var res_f: String = _result_line(_screen(wf["node"]))
+		print("   ①打完：待機 %d 拍｜回主畫面 %s｜結果「%s」" % [n_f, str(back_f), res_f])
+		ends.append({"kind": "打完", "ok": back_f and res_f.contains("戰鬥結束"), "res": res_f})
+		await _drop(wf["node"])
+	# ②撤出：被伏擊 ⇒ 往邊界外走（同 BATTLE② 的路）
+	var we: Dictionary = _new_w(await _build(SEED_A))
+	var st_e: WorldState = we["node"]._bridge._state
+	EncounterSystem.new().init_encounter(st_e, NPC_ID, st_e.get_player_team_id(), "ambush")
+	await _press(we, "x")
+	var dir_key: String = ""
+	for k in ["w", "q", "e", "a", "s", "d"]:
+		if _hint(we["node"]).to_lower().contains(k):
+			dir_key = k
+			break
+	for _i in range(30):
+		if not _screen(we["node"]).contains(TextUiView.BATTLE_TITLE) or not st_e.encounter_active:
+			break
+		await _press(we, dir_key)
+	var back_e: bool = await _to_main(we)
+	var res_e: String = _result_line(_screen(we["node"]))
+	print("   ②撤出：回主畫面 %s｜結果「%s」" % [str(back_e), res_e])
+	ends.append({"kind": "撤出", "ok": back_e and res_e.contains("撤出"), "res": res_e})
+	await _drop(we["node"])
+	# ③投降：戰鬥區印的 F
+	var ws: Dictionary = await _bs_enter(SEED_A, false)
+	if not ws.is_empty():
+		await _press(ws, "f")
+		var back_s: bool = await _to_main(ws)
+		var res_s: String = _result_line(_screen(ws["node"]))
+		print("   ③投降：回主畫面 %s｜結果「%s」" % [str(back_s), res_s])
+		ends.append({"kind": "投降", "ok": back_s and res_s.contains("投降"), "res": res_s})
+		await _drop(ws["node"])
+	var bad2: Array = ends.filter(func(e): return not bool(e["ok"])).map(func(e): return "%s：%s" % [e["kind"], e["res"]])
+	_check("★BS2 母體地板：三種結束都走到（%d）" % ends.size(), ends.size() == 3)
+	_check("BS2 每種結束都回到主畫面、結果句說出是哪一種（錯：%s）" % str(bad2), bad2.is_empty())
+	_cells_ran.append("BS2")
+
+
 # ══ E2：兩支都沒有勢力的隊，「提議同盟」不得因「同一個勢力」而不可 ══════════════════════════════
 # ★舊版：faction_id −1 == −1 被當成同勢力（S1）
 func _e2_no_faction_alliance() -> void:
@@ -933,7 +1306,7 @@ func _battle_cells() -> void:
 	_check("BATTLE③ 戰鬥區六欄逐字 ＝ 那六個 Label 的 .text（缺 %d 行），鍵列 ＝ _lbl_actions" % bad3.size(), bad3.is_empty() and keys_ok)
 	# ⑤單位行動倒數
 	var re_t := RegEx.new()
-	re_t.compile("行動倒數 (\\d+)")
+	re_t.compile("(\\d+) 分鐘後行動")   # ★BS v2 C：倒數帶單位
 	var t0: Array = re_t.search_all(scr).map(func(m): return m.get_string(1))
 	# ④無作用鍵（主畫面的數字鍵）⇒ 說為什麼
 	await _press(w, "1")
@@ -951,8 +1324,9 @@ func _battle_cells() -> void:
 	#   ⇒ 這一格判的是：倒數印在畫面上、且**逐單位 ＝ state 的 action_timer**（畫面沒有自己編一個數）
 	var want: Array = []
 	if _screen(node).contains(TextUiView.BATTLE_TITLE):
-		for u in node._bridge._state.encounter_units:
-			want.append(str(int(u.get("action_timer", 0))))
+		# ★BS v2：列表只列看得到的單位（感知鐵律）⇒ state 那一側取同一個母體（view.visible_unit_indices）
+		for _vi in view.visible_unit_indices(node._bridge._state):
+			want.append(str(int((node._bridge._state.encounter_units[_vi] as Dictionary).get("action_timer", 0))))
 	var shown: Array = re_t.search_all(_screen(node)).map(func(m): return m.get_string(1)) if _screen(node).contains(TextUiView.BATTLE_TITLE) else []
 	print("   ⑤行動倒數（每次輪到玩家時看過的組合）：%s｜此刻畫面 %s／state %s" % [str(seen.keys()), str(shown), str(want)])
 	_check("BATTLE⑤ 單位行動倒數印在畫面上（%d 個）且逐單位 ＝ state 的 action_timer" % t0.size(), t0.size() >= 2 and shown == want and not shown.is_empty())

@@ -228,6 +228,10 @@ func _enter_encounter() -> void:
 
 func _on_encounter_ended() -> void:
 	_vbox.visible = true
+	# ★BS2：回到主畫面那一刻，結果行說出這一場怎麼結束的（打完／撤出）；投降那句已由指令結果寫上，不蓋
+	var _end: String = _encounter_view.end_sentence()
+	if _end != "":
+		_set_feedback(true, _end)
 	_refresh_snapshot()
 	_refresh()
 
@@ -279,13 +283,21 @@ func _process(_delta: float) -> void:
 		if sq <= _last_world_event_seq:
 			continue
 		_last_world_event_seq = sq
+		# ★D1（spec 2026-10-07 四缺陷）：來源欄經 WorldEvents.kind_label（唯一一份）；沒有對照的 kind
+		#   ⇒ 玩家走法不印（debug 走法印原名）—— 舊版直讀 kind ⇒ intel_arrived 等識別字上了玩家畫面
+		var _kind: String = String(we.get("kind", ""))
+		var _src: String = WorldEvents.kind_label(_kind)
+		if _src == "" or String(we.get("text", "")) == "":
+			if not truth_pane_enabled():
+				continue
+			_src = _kind
 		_events.append({"type": "world", "msg": String(we.get("text", ""))})
 		# ★★帶時間與來源的那一份（spec §2④ 要求逐條帶「第N天 HH:MM」）——
 		#   ★時間來自事件自己的 `tick`，**不是「現在」**：補一個現在的時間會讓 P6 恆綠
 		#   而畫面在說謊（一件三小時前的事印成剛剛）。
 		_feed_rows.append({
 			"when": "第 " + PlayerApiMapper.tick_clock(int(we.get("tick", 0))),
-			"source": String(we.get("kind", "世界")),
+			"source": _src,
 			"text": String(we.get("text", "")),
 		})
 	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
@@ -318,9 +330,11 @@ func _process(_delta: float) -> void:
 			"source": "指令",
 			"text": "%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))],
 		})
-		if not bool(r.get("ok", false)):
-			_feedback_line.text = _feedback_text(false, String(r.get("text", "")))
-			_feedback_line.modulate = _feedback_color(false)
+		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
+		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
+		if not SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
+			_feedback_line.text = _feedback_text(bool(r.get("ok", false)), String(r.get("text", "")))
+			_feedback_line.modulate = _feedback_color(bool(r.get("ok", false)))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 	if _feed_rows.size() > 100:
@@ -386,6 +400,13 @@ func _input(event: InputEvent) -> void:
 		return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
+		return
+	# ★D4：面板開著、按的是全域推進鍵、而那個面板【沒有宣告】這個鍵 ⇒ 全域語意（共用函式），
+	#   不落進面板的「此鍵在此模式無作用」也不落進事件回應那支
+	#   ★面板有宣告的（物品／勢力的 [G]、互動面板的字母空間）⇒ 照舊交給面板（互動面板在 A-Z 分支自己轉呼）
+	if GLOBAL_ADVANCE_KEYS.has(event.keycode) and _current_mode_name() != "main" \
+			and not _mode_binds_key(_current_mode_name(), event.keycode):
+		_global_advance_key(event.keycode)
 		return
 	if _pre_encounter_mode:
 		_handle_pre_encounter_mode(event.keycode)
@@ -463,7 +484,7 @@ func _input(event: InputEvent) -> void:
 			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_refresh()
 		KEY_SPACE:
-			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_DAY))
+			_global_advance_key(KEY_SPACE)
 		# ★★★推進一小時（spec §4b，用戶裁 #6）——★【不新開推進路徑】：照上面 SPACE 那一支的
 		#   寫法呼叫【既有的】 `request_advance()`。理由是 2026-09-24 剛踩過的那條：
 		#   兩個推進路徑其中一個沒跟上 ⇒ 我們不再製造第三條。
@@ -472,12 +493,9 @@ func _input(event: InputEvent) -> void:
 		#   而複製出來的那一份【不會跟著轉】。
 		# ★Esc 中斷沿用 SPACE 那一支已經有的行為（`:422` 的 `cancel_advance()`），不另外做。
 		KEY_X:
-			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_HOUR))
+			_global_advance_key(KEY_X)
 		KEY_G:
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "跳過 tick 數: "
-			_input_buffer = ""
+			_global_advance_key(KEY_G)
 			_input_mode_callback = Callable()   # 無 callback → 使用舊有行為
 			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
@@ -840,6 +858,28 @@ func _pages_without_header(body: String) -> String:
 	return body
 
 
+# ══ ★D2（spec 2026-10-07 四缺陷 §1）：玩家走法不印【沒有寫入者的欄】與內部備註 ══════════════════════════
+# ★「沒有寫入者」是【宣告】的（`_page_skylight_fields()` 那份清單），不是看值是不是空：
+#   有寫入者而此刻值為 0 ⇒ 照印（例「已知情報：0 個對象」）；哨兵值的教訓見那個函式裡的註解
+# ★只在合成側剝（同 `_pages_without_header` 的先例）：載體 `_state_label` 照印 ⇒ 讀載體的斷言（ui-flow 天窗／零損失）零遷移
+#   ⇒ 而合成畫面是唯一顯示面（`_render_screen` 把載體全設 invisible）⇒ 玩家看不到的就是這裡剝掉的
+# ★debug 走法（TEXTUI_DEBUG_PANE=1）原樣保留 ⇒ 儀器沒被刪，只是不在玩家那條路上（E2E 格 b 反向）
+const UNCLASSIFIED_PLAYER_HEADER: String = "── 其他（尚未分頁） ──"
+const TICK_FOOTER_PREFIX: String = "Tick: "
+func _player_pages(body: String) -> String:
+	if truth_pane_enabled():
+		return body
+	var drop: Dictionary = {UNCLASSIFIED_PLAYER_HEADER: true}
+	for f in _page_skylight_fields(_page_idx):
+		drop[UiPages.skylight(String(f))] = true
+	var out: Array = []
+	for l in body.split("\n"):
+		if drop.has(String(l)) or String(l).begins_with(TICK_FOOTER_PREFIX):
+			continue
+		out.append(l)
+	return "\n".join(out)
+
+
 # ★故事結束那一欄的內容：`game_over` 為假 ⇒ 空字串（view 據此**不印**那一欄）
 #   ★原因字串為空時仍要印**某個字** —— 否則「故事已結束：」後面一片空白像是 bug
 func _story_end_text() -> String:
@@ -886,7 +926,7 @@ func build_regions(pend_txt: String) -> Dictionary:
 		#     ⇒ ★那是刻意的：**它寧可紅，也不要悄悄吃掉一行它不認識的字**。
 		#   ★★★而抬頭的**產生者仍然只有一個**（`UiPages.header()`）——
 		#     這裡不是第二份字，是**同一份字的去重**。
-		"pages": _pages_without_header(_state_label.text),
+		"pages": _player_pages(_pages_without_header(_state_label.text)),
 		# ★★★子模式面板（BLOCKER-2）：`_event_label` 載著 12 個子模式面板，
 		#   而它 `visible = false` ⇒ 不傳進來的話那 12 個面板【玩家一個都看不到】
 		#   —— 而「選目標」也在裡面 ⇒ 新版面的整條入口會是黑的。
@@ -1019,6 +1059,54 @@ const UI_STACK_LAYERS: Array = [LAYER_RECRUIT, LAYER_INTEL]
 #     當【外部期望】—— ★★那不是重複：床拿產品的常數來比＝同源恆真
 #     （寫什麼都綠），所以那一份字面**必須**住在床裡。
 const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
+
+# ══ ★D4（spec 2026-10-07 四缺陷 §1）：全域推進鍵 —— 一份字表、一支處理函式 ════════════════════════════
+# ★主畫面 ⇒ 推進（Space 到隔日／X 到整點／G 跳 tick）；面板開著 ⇒ 印一句、不推進、不改狀態
+#   （面板鍵列上【有列出】的同一個鍵歸面板語意 —— 那由各面板自己的 binds_key 宣告，不走這裡）
+# ★強制回應的字母配發【跳過】這裡的字母（`response_letter_keys()`）⇒ X／G 永遠不會是某個回應
+#   ⇒ 鍵的意思不隨強制事件出現而變（不變量 #10）
+const GLOBAL_ADVANCE_KEYS: Array = [KEY_SPACE, KEY_X, KEY_G]
+const GLOBAL_KEY_IN_PANEL_MSG: String = "面板開著時不能推進（Esc 關閉）"
+
+func _global_advance_key(keycode: int) -> void:
+	if _current_mode_name() != "main":
+		_set_feedback(false, GLOBAL_KEY_IN_PANEL_MSG)
+		return
+	match keycode:
+		KEY_SPACE:
+			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_DAY))
+		KEY_X:
+			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_HOUR))
+		KEY_G:
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "跳過 tick 數: "
+			_input_buffer = ""
+
+# 各面板的鍵空間宣告（靜態謂詞）—— 一處對照，D4 的分派與各 handler 頂端的守衛讀同一組謂詞
+func _mode_binds_key(mode: String, keycode: int) -> bool:
+	match mode:
+		"pre_encounter": return _pre_encounter_mode_binds_key(keycode)
+		"trade":         return _trade_mode_binds_key(keycode)
+		"intel":         return _intel_mode_binds_key(keycode)
+		"recruit":       return _recruit_mode_binds_key(keycode)
+		"inv":           return _inv_mode_binds_key(keycode)
+		"interact":      return _interact_mode_binds_key(keycode)
+		"member":        return _member_mode_binds_key(keycode)
+		"faction":       return _faction_mode_binds_key(keycode)
+		"outpost":       return _outpost_mode_binds_key(keycode)
+		"subteam":       return _subteam_mode_binds_key(keycode)
+		"advisor":       return _advisor_mode_binds_key(keycode)
+		"storage":       return _storage_mode_binds_key(keycode)
+	return false
+
+# 強制回應可用的字母（A..Z 去掉全域鍵）——面板印的字母與 handler 的對照都讀這一份
+static func response_letter_keys() -> Array:
+	var out: Array = []
+	for k in range(KEY_A, KEY_Z + 1):
+		if not GLOBAL_ADVANCE_KEYS.has(k):
+			out.append(k)
+	return out
 
 var _ui_stack: Array = []
 
@@ -1877,10 +1965,14 @@ func _handle_interact_mode(keycode: int) -> void:
 	#     且 `unbound_key_bed` P8 的四桶把它算進【有句子】那一桶（`_set_feedback`
 	#     在**兄弟分支**裡）⇒ 一個分類器的假綠。現在兩條路都有話說。
 	if keycode >= KEY_A and keycode <= KEY_Z:
+		# ★D4：全域鍵的字母不是回應鍵（配發時跳過）⇒ 轉給共用函式（面板開著 ⇒ 印一句、不推進）
+		if GLOBAL_ADVANCE_KEYS.has(keycode):
+			_global_advance_key(keycode)
+			return
 		var fi_k: Dictionary = _cached_snapshot.get("forced_interaction", {})
 		var fr_k: Array = fi_k.get("responses", [])
-		var li: int = keycode - KEY_A
-		if not String(fi_k.get("interaction_id", "")).is_empty() and li < fr_k.size():
+		var li: int = response_letter_keys().find(keycode)
+		if not String(fi_k.get("interaction_id", "")).is_empty() and li >= 0 and li < fr_k.size():
 			var ra: Dictionary = fr_k[li].get("command_args", {})
 			var rr: Dictionary = _bridge.command_player("respond_to_forced", ra)
 			_set_feedback(rr.get("ok", true), rr.get("message", ""))
@@ -2110,7 +2202,7 @@ func _build_interact_str() -> String:
 		#   ⇒ 玩家的「1」永遠是自家隊動作的第一項，面板在不在都一樣。
 		var _ri: int = 0
 		for r in fi.get("responses", []):
-			lines.append("   [%s] %s" % [String.chr(65 + _ri), r.get("label", "?")])
+			lines.append("   [%s] %s" % [OS.get_keycode_string(int(response_letter_keys()[_ri])), r.get("label", "?")])
 			_ri += 1
 	# ══ ★★★★★【自家隊那一側】自己的編號與頁（不再與目標清單共用一個號碼空間）══════
 	var self_all: Array = _interact_action_split()["self"]
@@ -3105,7 +3197,7 @@ func _handle_intel_mode(keycode: int) -> void:
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "confirm_gather_intel",
 				 "target": {"kind": "none", "team_id": _intel_target_id, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-			_log_event("[Inquiry] %s" % r.get("message", ""))
+			_log_event(String(r.get("message", "")))   # ★D1：舊版前綴 [Inquiry] 是開發標籤，玩家事件流不印
 			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_intel_mode = false
 			_intel_options = []
@@ -3193,11 +3285,11 @@ func _build_recruit_str() -> String:
 		lines.append("（無願投靠的記名成員）")
 	for i in range(_recruit_members.size()):
 		var m: Dictionary = _recruit_members[i]
-		lines.append("[%d] %s 忠誠%.2f %s（記名 %d coin）" % [
+		lines.append("[%d] %s 忠誠%.2f %s（記名 %d 幣）" % [
 			i + 1, m.get("name", "?"), float(m.get("loyalty", 0.0)),
 			m.get("top_skill", "—"), _recruit_named_cost])
 	if _recruit_anon_available:
-		lines.append("[A] 招募匿名人口（%d coin）" % _recruit_anon_cost)
+		lines.append("[A] 招募匿名人口（%d 幣）" % _recruit_anon_cost)
 	else:
 		lines.append("[A] 匿名招募（不可用：金幣不足或無匿名人口）")
 	lines.append("[1~9]記名  [A]匿名  [Esc]取消")

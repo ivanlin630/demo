@@ -433,6 +433,9 @@ func player_event_count() -> int:
 # ★★★改成【入列】（spec §3-3b）：它寫 `player_pending_targets` ＝ 世界狀態
 #   ⇒ 不入列的話「玩家何時打開選單」會改變世界 ⇒ 重播不可重現。
 #   ★它回 void ⇒ 沒有任何呼叫端讀得到結果 ⇒ 這一改【不牽動任何呼叫端】（我逐處查過：活的 5 處全不讀）。
+# ★D3（spec 2026-10-07 四缺陷）：介面自己入列、不是玩家下的令 ⇒ 它的結果句不蓋結果行（照進事件流）
+#   ⇒ 舊版按「招募」開子選單後，結果行被同一屏結算的這道令蓋成「重掃同格對象：已重掃…」
+const UI_INTERNAL_COMMANDS: Array = ["refresh_targets"]
 func refresh_interaction_targets() -> void:
 	command_player("refresh_targets", {})
 

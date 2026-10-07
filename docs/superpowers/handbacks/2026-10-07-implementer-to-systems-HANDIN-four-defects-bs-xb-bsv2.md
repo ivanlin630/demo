@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 四個畫面缺陷（D1–D4）＋BS 戰鬥區被看過＋XB 勒索煞車（①′③④＋§2 怨累積）＋BS v2 戰鬥區要能玩
 topic: ★**交件｜已知紅 0**｜BATTERY_RC=0｜109 綠／0 紅（run-id `22173-20261007-125410`，HEAD `f4c12820d`）｜branch `feat/battle-asserted-extortion-brake` 遠端 tip **`911502ad5`**（含 merge origin/main 兩顆＋artifact 一顆）｜world-fp b64512c8 → **3bdfeb3a**（XB 改模擬＋指紋多讀兩欄）｜新列 extortion-brake
 ---

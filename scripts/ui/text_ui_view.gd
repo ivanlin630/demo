@@ -314,6 +314,21 @@ static func panel_block(panel_body: String) -> String:
 
 
 const BATTLE_TITLE: String = "─ 戰鬥（接管畫面）"
+
+# ★BS v2 A：戰鬥區的局部地圖 —— 沿用世界地圖（TextMapRenderer）的格線語彙：一格 4 個字元、
+#   每往下一列右移 2 個字元、菱形外留白；資料由 encounter_view.local_map_data() 供（這裡不讀世界）
+static func render_battle_map(data: Dictionary) -> String:
+	var center: Vector2i = data.get("center", Vector2i.ZERO)
+	var r: int = int(data.get("radius", 0))
+	var cells: Dictionary = data.get("cells", {})
+	var lines: Array = []
+	for dr in range(-r, r + 1):
+		var line: String = "  ".repeat(dr + r)
+		for dq in range(-r, r + 1):
+			var h: Vector2i = center + Vector2i(dq, dr)
+			line += ("%s   " % String(cells[h])) if cells.has(h) else "    "
+		lines.append(line.rstrip(" "))
+	return "\n".join(lines)
 static func battle_block(body: String) -> String:
 	var lines: Array = []
 	lines.append(_fill_to(BATTLE_TITLE, TextUiLayout.COLS, "─"))
