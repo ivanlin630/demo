@@ -18,7 +18,8 @@ extends SceneTree
 var _errors: int = 0
 var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
-	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3", "S1", "S2", "S3", "S4"]
+	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3", "S1", "S2", "S3", "S4",
+	"FR1", "FR2", "FO", "FO2", "RS2", "RC3"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -33,6 +34,9 @@ const PANEL_OPEN_TOKENS: Array = ["t", "i", "p", "f", "o", "k", "u", "v"]
 var _scan_a: Dictionary = {}   # 英文識別字 → 第一次看到它的那一行
 var _scan_b: Dictionary = {}   # 佔位字 → 第一次看到它的那一行
 var _scan_n: int = 0
+# ★格 FO（spec 2026-10-07 absorb-at-cap ③）：每一次按鍵回來的那一屏，事件區的時間單調不減
+var _fo_n: int = 0
+var _fo_bad: Array = []
 
 const SEED_A: int = 1337
 const SEED_B: int = 4242
@@ -96,6 +100,10 @@ func _initialize() -> void:
 	await _f_cells()
 	await _m_cells()
 	await _s_cells()
+	await _fr_cells()
+	await _rs_cells()
+	await _fo2_same_pass()
+	_fo_judge()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -161,9 +169,16 @@ static func parse_screen(screen: String) -> Dictionary:
 		if region == "self":
 			for m in re_self.search_all(l):
 				var lab: String = m.get_string(2).strip_edges()
-				var en: bool = not lab.ends_with("（不可）")
+				# ★reasons ②（spec 2026-10-07 invite-whole-team-inline-reasons）：不可的項帶原因「（不可：原因）」
+				#   ⇒ 舊格式「（不可）」也認（修前那一屏），原因欄空
+				var cut: int = lab.find("（不可")
+				var en: bool = cut < 0
+				var why: String = ""
+				if not en:
+					why = lab.substr(cut).trim_prefix("（不可").trim_prefix("：").trim_suffix("）")
+					lab = lab.substr(0, cut)
 				out["self"].append({"space": "self", "key": m.get_string(1),
-					"label": lab.trim_suffix("（不可）"), "enabled": en})
+					"label": lab, "enabled": en, "why": why})
 		elif region == "action":
 			var ma := re_act.search(l)
 			if ma != null:
@@ -337,6 +352,7 @@ func _press(w: Dictionary, k: String) -> void:
 	(w["keys"] as Array).append(k)
 	var scr: String = _screen(w["node"])
 	_scan_screen(scr)
+	_fo_scan(scr, k)
 	var wt: int = w["node"]._bridge.get_current_tick()
 	var top: int = _screen_tick(scr)
 	var stt: int = _status_tick(scr)
@@ -570,8 +586,7 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		if _hint(wa["node"]).contains(SUBMENU_INTEL_HINT):
 			# ★選第一個**可選**的題目（打聽票 I2 之後問糧源灰掉帶原因 ⇒ 按它是被拒、不是打聽）
 			var _tk: String = "1"
-			for _ln in _screen(wa["node"]).split("
-"):
+			for _ln in _screen(wa["node"]).split("\n"):
 				var _mo := RegEx.create_from_string("^\\[(\\d)\\] ").search(_ln)
 				if _mo != null and not _ln.contains("（不可："):
 					_tk = _mo.get_string(1)
@@ -1224,6 +1239,230 @@ func _s_cells() -> void:
 	else:
 		_cells_ran.append_array(["S3", "S4"])
 	await _drop(wc["node"])
+
+
+# ══ 用戶第二手（spec 2026-10-07 absorb-at-cap）③：事件流按 tick 排序（同 tick 照寫入序）═════════════════
+# ★事件區每一行「第 D 天 HH:MM｜來源｜句子」⇒ 由上到下時間不得倒退
+static func _feed_ticks(screen: String) -> Array:
+	var re := RegEx.create_from_string("^第 (\\d+) 天 (\\d\\d):(\\d\\d)｜")
+	var out: Array = []
+	for l in _event_lines(screen):
+		var m := re.search(String(l))
+		if m != null:
+			out.append((int(m.get_string(1)) - 1) * WorldState.TICKS_PER_DAY 				+ int(m.get_string(2)) * WorldState.TICKS_PER_HOUR + int(m.get_string(3)) * WorldState.TICKS_PER_HOUR / PlayerApiMapper.MINUTES_PER_HOUR)
+	return out
+
+
+func _fo_scan(screen: String, k: String) -> void:
+	var ts: Array = _feed_ticks(screen)
+	if ts.size() < 2:
+		return
+	_fo_n += 1
+	for i in range(1, ts.size()):
+		if int(ts[i]) < int(ts[i - 1]):
+			if _fo_bad.size() < 5:
+				_fo_bad.append("key=%s：%s" % [k, "／".join(PackedStringArray(_event_lines(screen)))])
+			else:
+				_fo_bad.append("…")
+			return
+
+
+func _fo_judge() -> void:
+	print("\n── FO 事件流時間單調不減（每一次按鍵回來的那一屏；事件區 ≥2 行才算）──")
+	for b in _fo_bad.slice(0, 5):
+		print("   倒退：" + String(b))
+	_check("★FO 母體地板：驗過的屏數 > 0（%d）" % _fo_n, _fo_n > 0)
+	_check("FO 事件區由上到下時間不倒退（%d 屏倒退／%d 屏）" % [_fo_bad.size(), _fo_n], _fo_bad.is_empty())
+	_cells_ran.append("FO")
+
+
+# ★FO2：用戶那一屏的形狀 ——「13:00 找上門」排在「12:08 移動到」前面
+#   ★機制：一次推進步（tick_step）最多吃一小時 ⇒ 同一個讀取回合裡，世界事件先寫、指令結果後寫；
+#     指令結果的 tick＝它被消費的那一顆（較早）⇒ 照寫入順序排就倒退
+#   ★走法每道令只推一顆 ⇒ 走不到這個形狀（FO 修前 7040 屏 0 倒退）⇒ 這一格在【讀者層】佈置：
+#     放一筆「較早被消費、還沒被讀」的指令結果 ＋ 一筆現在的世界事件，按 X 讓同一個讀取回合讀到兩者
+func _fo2_same_pass() -> void:
+	print("\n── FO2 同一個讀取回合讀到「較早的指令結果」與「較晚的世界事件」⇒ 事件區仍按時間排 ──")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var node: Node = w["node"]
+	var st: WorldState = node._bridge._state
+	st.set_player_forced_event({}, "")
+	var ptid: int = st.get_player_team_id()
+	await _press(w, "x")   # 先推一點時間，讓「較早」有地方放
+	var t: int = st.world.current_tick
+	st.command_results.append({"tick": t - 1, "seq": 1 << 30, "ok": true, "name": "move_to",
+		"text": "FO2 較早被消費的指令結果"})
+	WorldEvents.emit(st, "hostile_adjacent", [NPC_ID, ptid], false, {"dist": 1})
+	# ★推 5 顆（G 5）不推整點：結果句壽命 RESULT_TTL_TICKS（60）⇒ 推滿一小時的話 t−1 那一筆在讀到之前就過期被清掉
+	await _press_all(w, ["g", "5", "enter"])
+	var ev: Array = _event_lines(_screen(node))
+	var ts: Array = _feed_ticks(_screen(node))
+	var mono: bool = true
+	for i in range(1, ts.size()):
+		if int(ts[i]) < int(ts[i - 1]):
+			mono = false
+	print("   事件區：\n      " + "\n      ".join(PackedStringArray(ev)))
+	var both: bool = "\n".join(PackedStringArray(ev)).contains("FO2 較早") and "\n".join(PackedStringArray(ev)).contains("逼近")
+	_check("★FO2 母體地板：兩筆都上了事件區", both)
+	_check("FO2 事件區由上到下時間不倒退", mono and both)
+	_cells_ran.append("FO2")
+	await _drop(node)
+
+
+# ══ 用戶第二手 ①（藍圖 fda4636f1：只留驗證格）：強制事件回應結算後結果行＝真結果句 ═══════════════════
+# ★每一種強制事件 × 畫面上印的每一個回應字母：按下 ⇒ 結果行＝這一道令在 command_results 的那一句（含被拒原因），不是「已排入」
+const FR_KINDS: Array = ["diplomacy", "extort", "join_request", "aid_request"]
+
+func _fr_arm(st: WorldState, kind: String) -> void:
+	var pt: TeamData = st.teams[st.get_player_team_id()]
+	var evt: Dictionary = {"action": kind, "from_id": NPC_ID, "team_id": pt.team_id}
+	match kind:
+		"diplomacy": evt["proposal"] = FORCED_PROPOSAL
+		"extort": evt["amount"] = 10.0
+		"aid_request": evt["amount"] = 5.0
+	st.set_player_forced_event(evt, "fr_%s" % kind)
+
+
+# 開互動面板、回傳畫面上的強制回應清單
+func _fr_open(w: Dictionary) -> Array:
+	await _press(w, "t")
+	return parse_screen(_screen(w["node"]))["forced"]
+
+
+# 按那一個字母 ⇒ 回 [結果行, 這一道令的真結果句]
+func _fr_press(w: Dictionary, key: String) -> Array:
+	var st: WorldState = w["node"]._bridge._state
+	var seq0: int = 0
+	for row in st.command_results:
+		seq0 = maxi(seq0, int(row.get("seq", 0)))
+	await _press(w, key)
+	var truth: String = ""
+	for row in st.command_results:
+		if int(row.get("seq", 0)) > seq0 and String(row.get("name", "")) == "respond_to_forced":
+			truth = String(row.get("text", ""))
+	return [_result_line(_screen(w["node"])), truth]
+
+
+static func _fr_same(res: String, truth: String) -> bool:
+	var r: String = res.trim_prefix("✓ ").trim_prefix("✗ ").strip_edges()
+	if r == "" or truth == "" or r.begins_with("已排入"):
+		return false
+	return r == truth or truth.begins_with(r.trim_suffix("…"))
+
+
+func _fr_cells() -> void:
+	print("\n── FR1 每一種強制事件 × 每一個回應：按下之後結果行＝那一道令的真結果句（不是「已排入」）──")
+	var total: int = 0
+	var bad: Array = []
+	for kind in FR_KINDS:
+		var w0: Dictionary = _new_w(await _build(SEED_A))
+		_fr_arm(w0["node"]._bridge._state, String(kind))
+		var opts: Array = await _fr_open(w0)
+		await _drop(w0["node"])
+		for i in range(opts.size()):
+			var w: Dictionary = _new_w(await _build(SEED_A))
+			_fr_arm(w["node"]._bridge._state, String(kind))
+			var fs: Array = await _fr_open(w)
+			var pair: Array = await _fr_press(w, String(fs[i]["key"]))
+			total += 1
+			print("   %s [%s]%s ⇒ 結果行「%s」｜真結果「%s」" % [kind, fs[i]["key"], fs[i]["label"], pair[0], pair[1]])
+			if not _fr_same(String(pair[0]), String(pair[1])):
+				bad.append("%s [%s]%s" % [kind, fs[i]["key"], fs[i]["label"]])
+			await _drop(w["node"])
+	_check("★FR1 母體地板：四種強制事件都有回應可按（共 %d 個）" % total, total >= FR_KINDS.size() * 2)
+	_check("FR1 每一個回應按下之後結果行＝真結果句（不對：%s）" % str(bad), bad.is_empty() and total > 0)
+	_cells_ran.append("FR1")
+	print("\n── FR2 人口滿上限、接受求投靠 ⇒ 結果行說「隊伍已滿，無法收留」、人口不變 ──")
+	var wf: Dictionary = _new_w(await _build(SEED_A))
+	var stf: WorldState = wf["node"]._bridge._state
+	var ptf: TeamData = stf.teams[stf.get_player_team_id()]
+	var cap: int = FactionAISystem.effective_pop_cap(stf, ptf)
+	if cap - ptf.population + 1 > 0:
+		AnonTierSystem.add_anon(ptf, AnonCohort.TIER_PLEB, cap - ptf.population + 1)
+	var pop0: int = ptf.population
+	_check("★FR2 母體地板：隊伍真的滿了（%d／%d）" % [pop0, FactionAISystem.effective_pop_cap(stf, ptf)], pop0 >= FactionAISystem.effective_pop_cap(stf, ptf))
+	_fr_arm(stf, "join_request")
+	var ff: Array = await _fr_open(wf)
+	var acc: String = ""
+	for f in ff:
+		if String(f["label"]).contains("收留"):
+			acc = String(f["key"])
+			break
+	_check("★FR2 母體地板：畫面有「收留」那個回應（鍵 %s）" % acc, acc != "")
+	if acc != "":
+		var pr: Array = await _fr_press(wf, acc)
+		print("   按收留 ⇒ 結果行「%s」｜人口 %d → %d" % [pr[0], pop0, ptf.population])
+		_check("FR2 結果行說「隊伍已滿，無法收留」、人口不變", String(pr[0]).contains("隊伍已滿") and ptf.population == pop0)
+	_cells_ran.append("FR2")
+	await _drop(wf["node"])
+
+
+# ══ reasons ②（spec 2026-10-07 invite-whole-team-inline-reasons-stress-visible）：動作清單（不可）後印引擎短原因 ══════
+# ★原因逐字＝引擎 disabled_reason（放不下時以「…」結尾、是它的前綴）；按下去結果行印完整原因
+static func _why_ok(why: String, reason: String) -> bool:
+	if why == "" or reason == "":
+		return false
+	return why == reason or (why.ends_with("…") and reason.begins_with(why.trim_suffix("…")))
+
+
+func _rs_cells() -> void:
+	print("\n── RS2 自家隊動作每一個（不可）都帶引擎原因；按下去結果行印完整原因 ──")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var node: Node = w["node"]
+	await _press(w, "t")
+	var p: Dictionary = parse_screen(_screen(node))
+	var eng: Dictionary = {}
+	for sa in node._interact_action_split()["self"]:
+		eng[String(sa.get("label", sa.get("action_id", "")))] = String(sa.get("disabled_reason", ""))
+	var dis: Array = (p["self"] as Array).filter(func(x): return not bool(x["enabled"]))
+	var bad: Array = []
+	for d in dis:
+		var reason: String = String(eng.get(String(d["label"]), ""))
+		print("   [%s]%s ⇒ 畫面原因「%s」｜引擎「%s」" % [d["key"], d["label"], d["why"], reason])
+		if not _why_ok(String(d["why"]), reason):
+			bad.append(String(d["label"]))
+	_check("★RS2 母體地板：自家隊動作有（不可）的項（%d）" % dis.size(), dis.size() > 0)
+	_check("RS2 每一個（不可）都帶原因、逐字＝引擎 disabled_reason（不對：%s）" % str(bad), bad.is_empty() and dis.size() > 0)
+	if dis.size() > 0:
+		if not bool(p["self_active"]):
+			await _press(w, "tab")
+		var d0: Dictionary = dis[0]
+		await _press(w, String(d0["key"]))
+		var res: String = _result_line(_screen(node))
+		var full: String = String(eng.get(String(d0["label"]), ""))
+		print("   按 [%s]%s ⇒ 結果行「%s」" % [d0["key"], d0["label"], res])
+		_check("RS2 按下（不可）的項 ⇒ 結果行印完整原因", full != "" and res.contains(full))
+	_cells_ran.append("RS2")
+	await _drop(node)
+	print("\n── RC3 招募空集合說為什麼：對象只有領袖一人 ⇒「TeamN 只有領袖一人，招募挖不到人」──")
+	var wr: Dictionary = _new_w(await _build(SEED_A))
+	var str_: WorldState = wr["node"]._bridge._state
+	str_.set_player_forced_event({}, "")
+	var npc: TeamData = str_.teams[NPC_ID]
+	AnonTierSystem.remove_anon(npc, AnonCohort.TIER_PLEB, AnonTierSystem.tier_count(npc, AnonCohort.TIER_PLEB))
+	print("   佈置：Team%d 人口 %d" % [NPC_ID, npc.population])
+	await _press(wr, "t")
+	var pr: Dictionary = parse_screen(_screen(wr["node"]))
+	var tk: String = ""
+	for t in pr["targets"]:
+		if String(t["label"]).contains("Team%d" % NPC_ID):
+			tk = String(t["key"])
+	_check("★RC3 母體地板：可互動目標有 Team%d（鍵 %s），人口 1" % [NPC_ID, tk], tk != "" and npc.population == 1)
+	if tk != "":
+		if not bool(pr["targets_active"]):
+			await _press(wr, "tab")
+		await _press(wr, tk)
+		await _press(wr, TextUiView.key_for("recruit"))
+		var scr: String = _screen(wr["node"])
+		var hit: String = ""
+		for l in scr.split("\n"):
+			if String(l).contains("招募"):
+				hit += String(l).strip_edges() + "／"
+		print("   按招募 ⇒ %s" % hit)
+		_check("RC3 畫面說出對象與原因（Team%d 只有領袖一人）、不是「無可招募對象」" % NPC_ID,
+			scr.contains("Team%d 只有領袖一人" % NPC_ID) and not scr.contains("無可招募對象"))
+	_cells_ran.append("RC3")
+	await _drop(wr["node"])
 
 
 func _m_cells() -> void:
