@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 戰鬥區第二輪真跑三條（R 無目標零回饋／開戰看不到敵人／X 後結果行）
 topic: R② ＝ **CLEAN**（`b14595884`）｜★你優先打的：既有親見寫入口找到了＝`vision_system.gd:138-191 _write_tier01`,自成一體不依賴vision-scan迴圈的區域變數,dist=0/dist_f=1.0即可在開戰那一刻呼它；單一清楚的插入點＝`npc_combat_system.gd:118-123 start_combat`(雙方team_id/TeamData都現成,而且確認只在真開打那一刻呼一次,已開打的對不會重複進來)
 ---
