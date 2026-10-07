@@ -2416,7 +2416,9 @@ func _test_p18_unbounded_sentinel_is_named() -> void:
 	var used: int = ui.count("SimBridge.ADVANCE_UNTIL_EVENT")
 	var clamp: int = ui.count("SimBridge.ADVANCE_MAX_REQUEST")
 	print("   UI：哨兵 %d 處、夾具 %d 處" % [used, clamp])
-	_check("★★母體地板：UI 用到哨兵 2 處（實測 %d）" % used, used == 2)
+	# ★M 票（2026-10-07 move-command-is-one-tick）：M 不再自動推到事件、「移動中 ⇒ 再推一次」拿掉 ⇒ 那兩處哨兵退場；
+	#   走到抵達鍵（L）用一處 ⇒ 地板照意圖改成「至少一處」（意圖＝哨兵這種用法真的在 UI 裡，不是釘次數）
+	_check("★★母體地板：UI 用到哨兵 ≥ 1 處（實測 %d）" % used, used >= 1)
 	_check("★★母體地板：UI 用到夾具 1 處（實測 %d）" % clamp, clamp == 1)
 	_check("★★★UI 沒有裸的 99999", not ui.contains("99999"))
 	_cell("_test_p18_unbounded_sentinel_is_named")
