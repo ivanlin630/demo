@@ -5577,7 +5577,7 @@ A4 量測（30 天觀察世界 default seed 1337，origin/main 528e2daeb，臨�
 
 ## 資訊網 S-scout 舊 TDD 床 infonet_scout_test 首次入 Tier2 表就是紅——床的計數謂詞過寬，世界沒退步
 
-狀態：已確認未修（低優先，床的問題）
+狀態：已知未修
 
 ```
 2026-10-08 Tier2 全掃（41444bd92）首次收錄 ⇒ red；量測員分類（fe62c6333）：3 PASS 1 FAIL，屬「以上皆非」
