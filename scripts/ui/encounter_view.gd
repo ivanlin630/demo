@@ -39,9 +39,12 @@ var _cmd_popup: PopupMenu = null
 var _player_exited: bool = false
 # ★BS v2 B：目標欄（目前目標＝encounter_units 的索引；-1 ＝ 還沒有）—— R 打它、Tab 換它、↑↓ 換它的部位
 var _target_idx: int = -1
-# ★F2（spec 2026-10-07 battle-start-visibility）：敵方單位【最後看到的位置】—— 開戰那一刻全員記一次（同格對峙＝互見）；
-#   之後在我方視野內才更新 ⇒ 看得到 ＝ 在視野內，或還站在最後看到的那一格（走動過而沒被看到 ⇒ 入霧）
-var _last_seen_pos: Dictionary = {}
+# ★F2（spec 2026-10-07 battle-start-visibility）：開戰那一刻雙方陣列互見；★【走出過我方視野】之後才入霧
+#   ⇒ 「走出過」＝ 進過我方視野、之後又不在 ⇒ 記在 _left_view；還沒進過視野的照互見處理（地圖、目標欄都算）
+#   ★第一版用「還站在最後看到的那一格」：真打（play.py seed 2，野獸伏擊）抓到 —— 輪到玩家之前戰鬥已推進幾 tick，
+#     敵人一動就入霧 ⇒ 開戰第一屏「看不到敵人」，而它根本還沒進過視野（那不是「走出視野」）
+var _was_in_view: Dictionary = {}
+var _left_view: Dictionary = {}
 # ★F1：戰鬥中每一鍵的回應只有一個出口（結果行）—— 這一鍵的原因句，或這一鍵之後戰報的第一句
 var _reply: String = ""
 var _reply_refused: bool = false
@@ -67,14 +70,8 @@ func show_encounter() -> void:
 	_reply = ""
 	_log_mark_size = 0
 	_log_mark_last = ""
-	_last_seen_pos.clear()
-	if _bridge != null:
-		var st0: WorldState = _bridge.get_state()
-		var ptid0: int = _player_team_id(st0)
-		for i in range(st0.encounter_units.size()):
-			var u0: Dictionary = st0.encounter_units[i]
-			if int(u0.get("team_id", -1)) != ptid0:
-				_last_seen_pos[i] = u0.get("pos", Vector2i(-99, -99))
+	_was_in_view.clear()
+	_left_view.clear()
 	_result_at_start = _bridge.get_state().last_encounter_outcome if _bridge != null else null
 	# Center camera so axial (0,0) appears at viewport center.
 	var vp_size: Vector2 = get_viewport_rect().size
@@ -241,14 +238,19 @@ func _player_team_id(state: WorldState) -> int:
 func _unit_present(u: Dictionary, state: WorldState) -> bool:
 	return not _is_unit_dead(u, state) and not bool(u.get("has_exited", false))
 
-# ★F2：視野內的敵人更新「最後看到的位置」（只在刷新時寫；查詢函式不寫）
+# ★F2：進過視野、之後又不在 ⇒ 走出過視野（只在刷新時寫；查詢函式不寫）
 func _update_sightings(state: WorldState) -> void:
 	var ptid: int = _player_team_id(state)
 	var vis: Dictionary = _player_visible_hexes(state, ptid)
 	for i in range(state.encounter_units.size()):
 		var u: Dictionary = state.encounter_units[i]
-		if int(u.get("team_id", -1)) != ptid and vis.has(u.get("pos", Vector2i(-99, -99))):
-			_last_seen_pos[i] = u.get("pos")
+		if int(u.get("team_id", -1)) == ptid:
+			continue
+		if vis.has(u.get("pos", Vector2i(-99, -99))):
+			_was_in_view[i] = true
+			_left_view.erase(i)
+		elif _was_in_view.has(i):
+			_left_view[i] = true
 
 # ★F1：結果行要印的那一句（"" ＝ 這一鍵沒有回應 ⇒ 結果行照舊）
 func key_reply() -> String:
@@ -327,7 +329,7 @@ func visible_unit_indices(state: WorldState) -> Array:
 		if not _unit_present(u, state):
 			continue
 		var upos: Vector2i = u.get("pos", Vector2i(-99, -99))
-		if int(u.get("team_id", -1)) == ptid or vis.has(upos) or (_last_seen_pos.has(i) and _last_seen_pos[i] == upos):
+		if int(u.get("team_id", -1)) == ptid or vis.has(upos) or not _left_view.has(i):
 			out.append(i)
 	return out
 
@@ -402,7 +404,7 @@ func local_map_data(state: WorldState) -> Dictionary:
 	for i in visible_unit_indices(state):
 		var p: Vector2i = (state.encounter_units[i] as Dictionary).get("pos", Vector2i.ZERO)
 		if cells.has(p):
-			cells[p] = String(codes[i])   # ★F2：視野外但還站在最後看到那一格的敵人，也畫在那一格
+			cells[p] = String(codes[i])   # ★F2：還沒走出過視野的敵人（開戰互見）在霧裡也畫
 		else:
 			off.append("%s（%s 方向 %d 格）" % [String(codes[i]), _dir_key_name(p - center), _hex_dist(center, p)])
 	return {"center": center, "radius": LOCAL_MAP_RADIUS, "cells": cells, "off_map": off}

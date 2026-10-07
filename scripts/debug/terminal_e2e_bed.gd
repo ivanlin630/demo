@@ -443,7 +443,9 @@ static func _snap(node: Node) -> Dictionary:
 		"res_others": str(others_res),
 		# ★票 T（2026-10-07）：再加 last_encounter_outcome —— 這一場若在這一步裡就打完，encounter_active 已回 false，
 		#   而對象早就在 player_hostile_teams 裡（前面的步打過）⇒ 兩欄都分不出；結算記錄（BS2 唯一寫入點）分得出
-		"encounter": "%s|%d|%s|%s" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams), str(st.last_encounter_outcome)],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
+		# ★戰鬥區第二輪（2026-10-07）：再加 encounter_initial_pop —— 對方【接受投降】時仗走 cleanup、不經結算（沒有 outcome），
+		#   而 init_encounter 開打那一刻在雙方隊上寫了它 ⇒ 「這一步真的開過戰」的持久痕跡
+		"encounter": "%s|%d|%s|%s|%d" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams), str(st.last_encounter_outcome), pt.encounter_initial_pop],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
 		"encounter_result": str(st.last_encounter_result),
 		"roster_self": "%d|%s|%d" % [pt.leader_id, str(pt.named_members), pt.population],
 		"roster_others": str(others_roster),
@@ -1139,8 +1141,6 @@ func _f_cells() -> void:
 		var ti: int = int(view._target_idx)
 		if ti >= 0:
 			(st.encounter_units[ti] as Dictionary)["pos"] = me + Vector2i(1, 0)
-			if "_last_seen_pos" in view:
-				view._last_seen_pos[ti] = me + Vector2i(1, 0)
 		await _press(w, "up")
 		await _press(w, "r")
 		var res2: String = _result_line(_screen(node)) if _screen(node).contains(TextUiView.BATTLE_TITLE) else ""
@@ -1164,6 +1164,9 @@ func _f_cells() -> void:
 				var h := Vector2i(q, r)
 				if view._is_in_map(h) and not vis.has(h) and far == Vector2i(-99, -99):
 					far = h
+		# ★「走出視野」＝先進過視野、再離開：先搬到主角旁邊刷新一次，再搬到看不到的格
+		(st.encounter_units[hide_i] as Dictionary)["pos"] = me + Vector2i(0, 1)
+		await _press(w, "up")
 		(st.encounter_units[hide_i] as Dictionary)["pos"] = far
 		await _press(w, "up")
 		var reg3: String = _battle_region(_screen(node))
