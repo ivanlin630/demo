@@ -2200,7 +2200,8 @@ func _test_p8s_x_uses_the_constant() -> void:
 		var body: String = src.substr(at, (nxt - at) if nxt != -1 else 300)
 		var ln: String = ""
 		for l in body.split("\n"):
-			if l.contains("request_advance("):
+			# ★戰鬥區第二輪 F3：推進改走 _request_key_advance（記目標 tick 給結果行）⇒ 那一行也認（主詞不變：X 寫的是 TICKS_PER_HOUR）
+			if l.contains("request_advance(") or l.contains("_request_key_advance("):
 				ln = l
 				break
 		_check("★母體地板：那一段裡找得到 request_advance( 那一行", ln != "")

@@ -135,6 +135,14 @@ func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x; var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
+# ★公開包裝（spec 2026-10-07 battle-start-visibility F2，藍圖裁）：開戰那一幀＝親見 ⇒ 走既有的親見寫入口（dist 0、dist_f 1.0）
+#   ★不另寫一份：跨檔呼這一支，不直接呼底線私有的 _write_tier01
+func write_sighting(state: WorldState, obs_id: int, tgt_id: int) -> void:
+	var tgt: TeamData = state.live_team(tgt_id)
+	if tgt == null or state.live_team(obs_id) == null or obs_id == tgt_id:
+		return
+	_write_tier01(state, obs_id, tgt_id, tgt, 0, 1.0)
+
 func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 		tgt: TeamData, dist: int, dist_f: float) -> void:
 	# G3c-2 觀察吃技能：距離噪疊觀察者偵查殘留噪（低偵查 → 親見也誤判，cred 仍 1.0）

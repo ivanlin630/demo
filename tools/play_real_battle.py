@@ -106,7 +106,7 @@ def main() -> int:
         else:
             n = 0
             # ★BS v2：照畫面打 —— 目標欄寫「本拍打得到：<代號>」⇒ 按 R（立刻攻擊目標欄的目標）；否則先移動一拍再待機
-            for k in ["space", "w", "space"] + ["auto"] * MAX_BATTLE_KEYS:
+            for k in ["r", "space", "w", "space"] + ["auto"] * MAX_BATTLE_KEYS:   # ★第二輪：開戰先按一次 R（多半打不到 ⇒ 結果行說為什麼）
                 if BATTLE_TITLE not in scr:
                     break
                 if k == "auto":

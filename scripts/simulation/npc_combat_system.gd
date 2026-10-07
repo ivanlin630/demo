@@ -121,6 +121,10 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	var def: TeamData = state.teams[def_id]
 	state.set_combat_target(atk, def_id)
 	state.set_combat_target(def, atk_id)
+	# ★F2（藍圖裁）：遭遇＝同格對峙 ⇒ 開戰那一幀雙方互見＝親見，照資訊模型零特例寫 belief（雙方都寫）
+	var _vs := VisionSystem.new()
+	_vs.write_sighting(state, atk_id, def_id)
+	_vs.write_sighting(state, def_id, atk_id)
 	# ★★★果事件帶因（2026-09-10）：★只印【產生端此刻已經讀到】的量 —— 零新讀取、零新機制。
 	#   ★這裡手上有的是攻方的 task／task_reason／雙方 readiness ⇒ 因就寫這些。
 	#   ★★因附在【同一行】的括號裡，★★★不另發一則「因事件」（另發＝ticker 刷屏＝更看不到戲）。
