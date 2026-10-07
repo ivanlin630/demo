@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: A2b 前置量測：貿易到場零成交的「同一市集重撞」率（決定值不值得做、學在哪一層）
 topic: 樹＝當下 origin/main（印 sha）；seed 1337／2024／7，30 天；純讀不改世界、觀測不耗 RNG
 ---
