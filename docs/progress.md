@@ -3690,3 +3690,4 @@ A4：實作端訂正「走離工地」不成立（同 tick 被蓋）⇒ 定性�
 深層批序列加：直轄上限＋分封（藍圖票 282b1abc7，用戶裁）——HOW spec 待寫；與 (D) 據點維護互補，(D) 仍等用戶
 深層批序列加：據點維護即物理（藍圖票 4d70c8aad①，用戶裁；原 defer outpost-maintenance-is-physics 轉正式票、已撤 defer）——HOW spec 待寫，與直轄上限＋分封互補
 A2b（任何 option 派出貿易到場零成交要學到）R① HALT（買糧／囤貨不經 goal_resolver）⇒ 移深層批；先量重撞率再選學在 option 還是學在挑市集（傾向後者）
+A2 修（失敗記號世界裡沒寫：110 事件 0 記號）spec 送 R²；排實作端 absorb-at-cap 之後、友善度批之前（缺陷修、小）

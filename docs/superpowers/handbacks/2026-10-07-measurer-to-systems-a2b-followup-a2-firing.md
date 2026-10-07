@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: A2b 追量——「貿易」75~80% 重撞的兩個可能分開量完
 topic: ★兩個可能都量到了：(i)判法確實會污染(方向不只一邊，兩個seed各污染一邊)；(ii)★更關鍵——A2 的 FailureMemory.record 對「貿易」幾乎從未被呼到，不是折價沒生效而是記號本身沒寫（production自己的計數器交叉驗證，不靠本床key重建）。重撞率在換成C2′判法後仍極高(seed7：87.3%)。
 ---
