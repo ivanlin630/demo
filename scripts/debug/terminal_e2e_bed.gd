@@ -1019,9 +1019,15 @@ func _bs_cells() -> void:
 	if not wf.is_empty():
 		var st_f: WorldState = wf["node"]._bridge._state
 		var n_f: int = 0
+		var en_battle: Dictionary = {}
 		while st_f.encounter_active and n_f < BS_FIGHT_MAX and _screen(wf["node"]).contains(TextUiView.BATTLE_TITLE):
 			await _press(wf, "space")
 			n_f += 1
+			# ★打到底的那一段有命中／落空 ⇒ 戰報真的有字 ⇒ 戰鬥區也掃英文識別字（自驗 (d) 同一支抽取器）
+			for x in SELFCHECK._bad_english(_screen(wf["node"]).split(TextUiView.BATTLE_TITLE)[-1].split("─ 事件（")[0]):
+				en_battle[String(x)] = true
+		print("   ①打完：戰鬥區英文識別字 %s" % str(en_battle.keys()))
+		_check("BS 打到底那一段的戰鬥區沒有英文識別字（命中：%s）" % str(en_battle.keys()), en_battle.is_empty())
 		var back_f: bool = await _to_main(wf)
 		var res_f: String = _result_line(_screen(wf["node"]))
 		print("   ①打完：待機 %d 拍｜回主畫面 %s｜結果「%s」" % [n_f, str(back_f), res_f])

@@ -34,7 +34,7 @@ var _cmd_items: Array = []           # Z 命令選單的項目 [[id, 標籤], �
 var _cmd_popup: PopupMenu = null
 # ★BS2（spec 2026-10-07 battle-screen-asserted §BS）：戰鬥怎麼結束的 —— 回主畫面那一刻結果行要說出是哪一種
 #   ·撤出：玩家單位在場上被標 has_exited（每次刷新時記，因為結算後 encounter_units 會被清）
-#   ·打完：這一場真的結算了（last_encounter_result 換了一份 ⇒ is_same 判「是不是這一場的」）
+#   ·打完：這一場真的結算了（last_encounter_outcome 換了一份 ⇒ is_same 判「是不是這一場的」；野獸戰／平手也有）
 #   ·投降：走指令佇列，結果句（「…投降被接受」）已由 D3 上了結果行 ⇒ 這裡不蓋它
 var _player_exited: bool = false
 var _result_at_start = null
@@ -53,7 +53,7 @@ func show_encounter() -> void:
 	visible = true
 	_post_combat = false
 	_player_exited = false
-	_result_at_start = _bridge.get_state().last_encounter_result if _bridge != null else null
+	_result_at_start = _bridge.get_state().last_encounter_outcome if _bridge != null else null
 	# Center camera so axial (0,0) appears at viewport center.
 	var vp_size: Vector2 = get_viewport_rect().size
 	_camera = vp_size * 0.5 - _hex_center(Vector2i.ZERO) * _zoom
@@ -122,7 +122,10 @@ func _refresh_ui() -> void:
 		_player_exited = true
 	# U11: 戰報（命中/傷害）每次刷新顯示，戰前/戰後皆可
 	if _lbl_log != null:
-		_lbl_log.text = "\n".join(_bridge.query_encounter_log(6))
+		var _log_lines: PackedStringArray = []
+		for _l in _bridge.query_encounter_log(6):
+			_log_lines.append(_log_line_for_display(String(_l), state))
+		_lbl_log.text = "\n".join(_log_lines)
 	# U10: 戰後 / 無玩家單位 → 顯戰果 + 離開提示（不可 early-return 成空白凍結畫面）
 	if _post_combat or not state.encounter_active:
 		var res: Dictionary = state.last_encounter_result
@@ -180,6 +183,18 @@ func _refresh_ui() -> void:
 		_lbl_actions.text     = _attack_select_hint(_selected_part)
 		_lbl_cursor_info.text = "攻擊部位 ↑↓：%s" % TeamUiHelper.part_name(_selected_part)
 
+# ★真打（play.py）抓到：戰報印原始部位「擊中 P41 torso -12」、玩家自己叫「P41」而單位列表叫「你」
+#   ⇒ 同 §3 的規則：儲存值（戰報字串）不動，寫 Label 那一刻換字（部位名走 TeamUiHelper 那一份；玩家的 P 號換成「你」）
+static func _log_line_for_display(line: String, state: WorldState) -> String:
+	var out: String = line
+	for raw in TeamUiHelper.BODY_PART_NAME:
+		out = out.replace(" %s " % String(raw), " %s " % TeamUiHelper.part_name(String(raw)))
+	if state != null and state.player_id >= 0:
+		var re := RegEx.new()
+		re.compile("\\bP%d\\b" % state.player_id)
+		out = re.sub(out, "你", true)
+	return out
+
 # ★BS2：結束種類的一句話（"" ＝ 不蓋結果行：投降那句已經在上面）
 func end_sentence() -> String:
 	if _bridge == null:
@@ -187,14 +202,19 @@ func end_sentence() -> String:
 	if _player_exited:
 		return "你撤出了戰場"
 	var state: WorldState = _bridge.get_state()
-	var res = state.last_encounter_result
-	if res == null or is_same(res, _result_at_start) or (res as Dictionary).is_empty():
+	var oc: Dictionary = state.last_encounter_outcome
+	if oc.is_empty() or is_same(oc, _result_at_start):
 		return ""
 	var pp: PersonData = state.persons.get(state.player_id)
 	var ptid: int = pp.team_id if pp != null else -1
-	if int(res.get("winner_id", -1)) == ptid:
+	var r: String = String(oc.get("result", ""))
+	if r == "draw":
+		return "戰鬥結束：不分勝負"
+	var win_id: int = int(oc.get("attacker_id", -1)) if r == "attacker_win" else int(oc.get("defender_id", -1))
+	var lose_id: int = int(oc.get("defender_id", -1)) if r == "attacker_win" else int(oc.get("attacker_id", -1))
+	if win_id == ptid:
 		return "戰鬥結束：你們打贏了"
-	if int(res.get("loser_id", -1)) == ptid:
+	if lose_id == ptid:
 		return "戰鬥結束：你們打輸了"
 	return "戰鬥結束"
 

@@ -1185,6 +1185,8 @@ func _apply_reserve_casualty(state: WorldState, team_id: int, onfield_anon: int,
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id
 	var def_id: int = state.encounter_defender_id
+	state.last_encounter_outcome = {"result": result, "attacker_id": atk_id, "defender_id": def_id,
+		"tick": state.world.current_tick}   # ★BS2：三條結算路（一般／野獸／平手）都經過這一行
 
 	_return_pool_equipment(state)
 
