@@ -79,7 +79,8 @@ func _test_attack_select_hint() -> void:
 	_check("含 ↑↓選部位", h.contains("↑") and h.contains("部位"))
 	_check("含 Enter 攻擊", h.contains("Enter") and h.contains("攻擊"))
 	_check("含 Esc 取消", h.contains("Esc"))
-	_check("顯當前部位", h.contains("torso"))
+	# ★戰鬥區 §3：部位名在顯示層換中文（儲存值仍是 "torso"）⇒ 提示印的是中文名，而且不再印英文
+	_check("顯當前部位（中文名，非原文）", h.contains(TeamUiHelper.part_name("torso")) and not h.contains("torso"))
 
 # U17: 遭遇戰旗色（玩家藍/自家綠/敵紅，防再反）
 	_cell("_test_attack_select_hint")
