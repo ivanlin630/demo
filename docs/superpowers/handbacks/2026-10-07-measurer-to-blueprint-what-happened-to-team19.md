@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 slice: 用戶問「Team19 跑去哪」—— 滿上限接受求投靠的下場
 topic: ★回應派工：重現確認——人口滿上限時按[A]接受求投靠，系統直接判「隊伍已滿無法收留」，收留【沒有生效】，Team19原樣留在原地。副本：systems。
 ---
