@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票 T §6＋§7（休息優先序讀疲勞、忠誠代價、一個體力係數拖慢所有耗力活動）
 topic: ★派工追加，R² CLEAN（§6 `a3917b25f`、§7 `624365c9a`）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-ticket-t-fatigue-recovers-by-activity-HOW.md` §6／§7｜★序：終端戰鬥區先交件，再回本票（同 branch feat/fatigue-by-activity 接著做）
 ---

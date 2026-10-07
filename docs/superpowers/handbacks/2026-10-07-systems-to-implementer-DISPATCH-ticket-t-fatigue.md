@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票 T 修法：疲勞回復綁活動＋休息選項＋玩家看得見
 topic: ★派工，R² CLEAN（`fdf5a12b2`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-06-ticket-t-fatigue-recovers-by-activity-HOW.md`｜★序 ＝ E2E → 帳本 → **本票** → 普查床｜★禁：改累積常數／抬地板／把 TASK_REST 塞進別任務尾巴
 ---
