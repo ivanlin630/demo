@@ -269,14 +269,25 @@ const TRIBUTE_TAKE_RATIO: float = 0.1   # TEST VALUE（藍圖明文留給平衡�
 # ★`_state` 底線前綴 ＝ **刻意不用**（轉帳不需要世界；簽章與 `apply_tribute_accept` 對齊
 #   是為了讓兩支在呼叫端長得一樣 —— 而「長得一樣」在這裡是刻意的：它讓
 #   「我該呼哪一支」只取決於**情境是強制還是自願**，不取決於參數湊不湊得出來）。
-static func apply_tribute_transfer(_state: WorldState, payer: TeamData, taker: TeamData) -> float:
-	if payer == null or taker == null:
+# ★進貢金額的【唯一一份】（spec 2026-10-07 absorb-at-cap ④）：轉帳用它，提案端「有沒有東西可給」也用它
+#   ⇒ 列的條件＝做的條件（舊版提案端不看 ⇒ 用戶看到「要進貢，但它身上沒有錢可以給」）
+#   ★只算 coin：轉帳只轉 coin ⇒「可給的東西」就是 coin（食物等不在這條路上，列進來就是列了做不到的）
+static func tribute_amount(payer: TeamData) -> float:
+	if payer == null:
 		return 0.0
 	var coin_before: float = float(payer.resources.get("coin", 0))
 	# ★`coin_before <= 0` ⇒ 什麼都不做：拿走 0 不是一件被記得住的事，而 0/0 算不出比例。
 	if coin_before <= 0.0:
 		return 0.0
-	var amount: float = coin_before * TRIBUTE_TAKE_RATIO
+	return coin_before * TRIBUTE_TAKE_RATIO
+
+
+static func apply_tribute_transfer(_state: WorldState, payer: TeamData, taker: TeamData) -> float:
+	if payer == null or taker == null:
+		return 0.0
+	var amount: float = tribute_amount(payer)
+	if amount <= 0.0:
+		return 0.0
 	ResourceBank.add(payer, "coin", -amount, "demand_tribute_out")
 	ResourceBank.add(taker, "coin", amount, "demand_tribute_in")
 	return amount

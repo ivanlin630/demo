@@ -570,7 +570,9 @@ static var REGISTRY: Dictionary = {
 		"terms": [["pacify_drive", "pacify"]],
 		# ★求和 target(threat_id) 未在 reject_cooldown 內才候選（被拒不再纏 loop，diplomacy grounded）。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.threat_react >= ctx.threat_threshold and not ctx.pacify_target_on_cooldown,
+			# ★沒有東西可給 ⇒ 不列（列的條件＝做的條件；spec 2026-10-07 absorb-at-cap ④）
+			return ctx.threat_react >= ctx.threat_threshold and not ctx.pacify_target_on_cooldown \
+				and ctx.has_tribute_to_give,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var _pc: DecisionContext = DecisionContext.gather(state, team)
 			if _pc.threat_id == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}

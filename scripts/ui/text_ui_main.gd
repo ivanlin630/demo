@@ -295,11 +295,7 @@ func _process(_delta: float) -> void:
 		# ★★帶時間與來源的那一份（spec §2④ 要求逐條帶「第N天 HH:MM」）——
 		#   ★時間來自事件自己的 `tick`，**不是「現在」**：補一個現在的時間會讓 P6 恆綠
 		#   而畫面在說謊（一件三小時前的事印成剛剛）。
-		_feed_rows.append({
-			"when": "第 " + PlayerApiMapper.tick_clock(int(we.get("tick", 0))),
-			"source": _src,
-			"text": String(we.get("text", "")),
-		})
+		_feed_push(int(we.get("tick", 0)), _src, String(we.get("text", "")))
 	# ★★★指令結果句排空（spec §3-5②）——★在【這裡】不在 `_refresh()`：
 	#   在 render 裡排空就是 render 又在寫 state，而那是「render 不得寫 state」那張票剛還掉的債。
 	#   ★★拒絕禁靜默 ⇒ 成功與失敗【都】進事件流；失敗另外推上 feedback 行，因為
@@ -325,11 +321,8 @@ func _process(_delta: float) -> void:
 		#   ★形狀照 `_log_event`（介面自己講的話）的慣例，來源具名「指令」；成功失敗同一處
 		#   ★時間用結果自己的 tick（同上面世界事件那一份的理由：補「現在」會讓畫面說謊）
 		#   ★不改成讓事件區讀 `_events`（:876 註解：那是另一個區的料，傳了會印兩份）
-		_feed_rows.append({
-			"when": "第 " + PlayerApiMapper.tick_clock(int(r.get("tick", _bridge.get_current_tick()))),
-			"source": "指令",
-			"text": "%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))],
-		})
+		_feed_push(int(r.get("tick", _bridge.get_current_tick())), "指令",
+			"%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
 		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
 		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
 		if not SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
@@ -1075,6 +1068,8 @@ const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
 # ★M ②：走到抵達（ARRIVE_KEY）與 Space／X／G 同族 ⇒ 進同一份字表（強制回應字母配發同步跳過它）
 const ARRIVE_KEY: int = KEY_L
 const GLOBAL_ADVANCE_KEYS: Array = [KEY_SPACE, KEY_X, KEY_G, ARRIVE_KEY]
+# ★自家隊動作一列三項（項間兩格空白）⇒ 每項的寬度預算（reasons ②：原因放不下就截在這裡、以「…」結尾）
+const SELF_ITEM_COLS: int = (TextUiLayout.COLS - 2 * 2) / 3
 const GLOBAL_KEY_IN_PANEL_MSG: String = "面板開著時不能推進（Esc 關閉）"
 
 func _global_advance_key(keycode: int) -> void:
@@ -1955,13 +1950,22 @@ func _build_inv_str() -> String:
 	lines.append("── [1-9]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
 	return "\n".join(lines)
 
+# ★事件區的唯一寫入點（spec 2026-10-07 absorb-at-cap ③）：按 tick 排序、同 tick 照寫入序（穩定插入）
+#   ★舊版三個寫入點各自 append ⇒ 列的順序＝寫入順序：世界事件帶它自己的（較早的）tick、介面句帶「現在」，
+#     同一屏就會時間倒退（用戶試玩：事件流時序亂）
+#   ★不改時間本身：每一列仍帶它自己的 tick（補「現在」會讓畫面說謊，見世界事件那一段的註解）
+func _feed_push(tick: int, source: String, text: String) -> void:
+	var row: Dictionary = {"tick": tick, "when": "第 " + PlayerApiMapper.tick_clock(tick), "source": source, "text": text}
+	var at: int = _feed_rows.size()
+	while at > 0 and int((_feed_rows[at - 1] as Dictionary).get("tick", 0)) > tick:
+		at -= 1
+	_feed_rows.insert(at, row)
+
+
 func _log_event(msg: String) -> void:
 	_events.append({ "type": "ui", "msg": msg })
 	# ★介面自己講的話：來源具名為「介面」而不是假裝它是世界事件
-	_feed_rows.append({
-		"when": "第 " + PlayerApiMapper.tick_clock(_bridge.get_current_tick()),
-		"source": "介面", "text": msg,
-	})
+	_feed_push(_bridge.get_current_tick(), "介面", msg)
 	if _feed_rows.size() > 100:
 		_feed_rows = _feed_rows.slice(_feed_rows.size() - 100)
 	if _events.size() > 100:
@@ -2152,7 +2156,10 @@ func _handle_interact_mode(keycode: int) -> void:
 					_recruit_anon_cost      = int(rp.get("anon_cost", 0))
 					_recruit_named_cost     = int(rp.get("named_cost", 0))
 					if _recruit_members.is_empty() and not _recruit_anon_available:
-						_log_event("[招募] 無可招募對象")
+						# ★reasons ③：原因由引擎給（招募那支的空集合原因），不在這裡自寫
+						var _why_r: String = String(rp.get("empty_reason", ""))
+						_log_event("[招募] %s" % (_why_r if _why_r != "" else "無可招募對象"))
+						_set_feedback(false, "招募：" + (_why_r if _why_r != "" else "無可招募對象"))
 					else:
 						_recruit_target_id = _interact_target
 						_recruit_mode = true
@@ -2331,8 +2338,14 @@ func _build_interact_str() -> String:
 			s_shown += 1
 			var sa2: Dictionary = self_all[si]
 			var en2: bool = bool(sa2.get("enabled", true))
-			s_row += "[%d]%s%s  " % [s_shown, sa2.get("label", sa2.get("action_id", "")),
-				"" if en2 else "（不可）"]
+			# ★reasons ②（spec 2026-10-07 invite-whole-team-inline-reasons）：（不可）後印引擎的 disabled_reason（排版層不自寫原因）
+			#   ★寬度預算：一列三項 ⇒ 每項 SELF_ITEM_COLS 格；原因放不下截在那裡、以「…」結尾；完整原因按下去結果行印（:2211 那支）
+			var _head2: String = "[%d]%s" % [s_shown, sa2.get("label", sa2.get("action_id", ""))]
+			var _tail2: String = ""
+			if not en2:
+				var _room2: int = SELF_ITEM_COLS - TextUiLayout.display_width(_head2 + "（不可：）")
+				_tail2 = "（不可：%s）" % TextUiLayout.clip_mark(String(sa2.get("disabled_reason", "")), _room2)
+			s_row += _head2 + _tail2 + "  "
 			if s_shown % 3 == 0:
 				lines.append(s_row.strip_edges()); s_row = ""
 		if s_row != "":
