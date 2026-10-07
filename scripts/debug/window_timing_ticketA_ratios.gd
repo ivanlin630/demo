@@ -12,7 +12,12 @@ extends SceneTree
 #         b 待領未結清 1、d 混了非貿易任務 6 不是這一格的病；真正想抓的「宣稱貿易而什麼都沒發生」（e）只有 2
 #   C2′：隊·日，當日 task 全是貿易 ＋ 某一刻在市集且已抵達（SimRunner.trade_arrived，A2 的抵達判法）
 #       ＋ 當日零成交（團隊帳 12 個 reason，見 C2P_DEAL_REASONS）＋ 零待領結清（claim_coin／claim_goods）
-#       ★基準：樹 713c86bd6、seed 1337、30 天 ＝ 2（第 9 天 Team20、第 10 天 Team5，與量測員 e 類兩筆同一批）
+#       ★範圍＝task（systems 裁 2026-10-07 甲，RULING-c2prime-task-scope-41）：派出貿易 task 的 option 不只「貿易」
+#         （maintain_*:resource／build_workshop／囤貨／買糧 也派 TASK_TRADE）—— 人到市集承諾貿易而什麼都沒發生就是那個病，不因 option 不同而不算
+#       ★基準：樹 713c86bd6、seed 1337、30 天 ＝ 41 ＝ option 只有「貿易」10 ＋ 其他 option 派出貿易 task 31（逐筆帶 option 印）
+#       ★spec 原寫「應給 2（量測員 e 類）」＝預測不是授權：那 2 是量測員分類床兩條定義的產物——
+#         路過＝日終 move_target≠(-1,-1)（A2 判法把 move_target＝所在格算抵達）、換貨＝貨物淨額≠0（帳本 in/out 相抵就看不到）
+#         ⇒ 量測員 e 的 day=9 Team20 帳本上有 trade_goods_*／trade_coin_*（與 Team7 對手成交、淨額 0）⇒ C2′ 正確不計
 #       ★舊 C2 照印（棘輪讀的仍是它）；C2′ 印在旁邊
 #   C3："領取" 剛被 commit（current_option 從別的值變成"領取"）的次數，其中那一 tick coin
 #       瞬時無變化的次數（分母=commit 次數，分子=瞬時 coin 不動的次數）
@@ -29,7 +34,7 @@ const C2P_DEAL_REASONS: Array = [
 	"market_inv_coin_out", "market_owner_coin_in", "trade_coin_in", "trade_coin_out",
 	"market_buy_in", "market_inv_in", "trade_goods_in", "trade_goods_out"]
 const C2P_CLAIM_REASONS: Array = ["claim_coin", "claim_goods"]
-const C2P_BASELINE_30D: int = 2   # 樹 713c86bd6（spec 指定的修前樹）量得
+const C2P_BASELINE_30D: int = 41   # 樹 713c86bd6（spec 指定的修前樹）量得：option＝貿易 10＋其他 option 31
 const WINDOWS_DAYS: Array = [7, 10, 15, 30]
 const CLAIM_BUILDING_OPTS: Array = ["建設", "紮根"]
 const FACILITY_LEVEL_FIELDS: Array = ["outpost_level", "camp_level", "farming_level",
@@ -48,10 +53,20 @@ func _initialize() -> void:
 		print("\n########## N=%d 天 ##########" % n)
 		var r: Dictionary = _run_window(int(n))
 		results.append(r)
-		print("[N=%d] 耗時=%.2fs｜C1=%d/%d｜C2=%d/%d｜C3=%d/%d｜C2′=%d %s" % [
+		print("[N=%d] 耗時=%.2fs｜C1=%d/%d｜C2=%d/%d｜C3=%d/%d｜C2′=%d" % [
 			int(n), float(r["seconds"]), int(r["c1_num"]), int(r["c1_den"]),
-			int(r["c2_num"]), int(r["c2_den"]), int(r["c3_num"]), int(r["c3_den"]),
-			int(r["c2p"]), str(r["c2p_rows"])])
+			int(r["c2_num"]), int(r["c2_den"]), int(r["c3_num"]), int(r["c3_den"]), int(r["c2p"])])
+		# ★C2′ 拆兩行（systems 裁甲：母體＝task；拆行＝option 的資訊不丟），逐筆帶 option
+		for want_trade in [true, false]:
+			var part: Array = []
+			for row in r["c2p_rows"]:
+				if bool(row["trade_option_only"]) == want_trade:
+					part.append("day=%d team=%d %s" % [int(row["day"]), int(row["team"]), str(row["options"])])
+			print("[N=%d] C2′ %s＝%d：%s" % [int(n), "option 只有「貿易」" if want_trade else "其他 option 派出貿易 task",
+				part.size(), "｜".join(PackedStringArray(part))])
+		if int(n) == 30:
+			print("[N=30] C2′＝%d｜基準（樹 713c86bd6）＝%d｜%s" % [int(r["c2p"]), C2P_BASELINE_30D,
+				"同" if int(r["c2p"]) == C2P_BASELINE_30D else "★不同"])
 
 	print("\n========== 彙總（seed 1337，同機） ==========")
 	print("N天｜耗時(s)｜C1分子/分母｜C2分子/分母｜C3分子/分母")
@@ -97,6 +112,7 @@ func _run_window(days: int) -> Dictionary:
 	var c2p_tasks: Dictionary = {}           # team_id → {task: true}（今天出現過的 task）
 	var c2p_arrived: Dictionary = {}         # team_id → 今天某一刻在市集且已抵達
 	var c2p_reasons: Dictionary = {}         # team_id → [今天團隊帳上的 reason]
+	var c2p_opts: Dictionary = {}            # team_id → {current_option: true}（今天出現過的 option；逐筆印、拆兩行用）
 	WorldState.driver_ledger_enabled = true
 	WorldState.clear_driver_ledger()
 
@@ -118,6 +134,9 @@ func _run_window(days: int) -> Dictionary:
 				var ts: Dictionary = c2p_tasks.get(int(tid), {})
 				ts[String(t.current_task)] = true
 				c2p_tasks[int(tid)] = ts
+				var os_: Dictionary = c2p_opts.get(int(tid), {})
+				os_[String(t.current_option)] = true
+				c2p_opts[int(tid)] = os_
 				if at_market and SimRunner.trade_arrived(t):
 					c2p_arrived[int(tid)] = true
 
@@ -168,8 +187,12 @@ func _run_window(days: int) -> Dictionary:
 		c2p_ids.sort()
 		for tid5 in c2p_ids:
 			if c2p_is_stall(c2p_tasks[tid5], bool(c2p_arrived.get(tid5, false)), c2p_reasons.get(tid5, [])):
-				c2p_rows.append("day=%d team=%d" % [day, int(tid5)])
+				var ok5: Array = (c2p_opts.get(tid5, {}) as Dictionary).keys()
+				ok5.sort()
+				c2p_rows.append({"day": day, "team": int(tid5), "options": ok5,
+					"trade_option_only": ok5 == ["貿易"]})
 		c2p_tasks.clear()
+		c2p_opts.clear()
 		c2p_arrived.clear()
 		c2p_reasons.clear()
 
