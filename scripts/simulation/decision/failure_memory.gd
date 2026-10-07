@@ -50,6 +50,9 @@ const OPTION_FAIL_KEY: Dictionary = {
 	# ★票 A3（2026-10-06）：領取到場落空。target 走 `ctx:` ＝【待領那一格】——同乞食的理由：
 	#   一格領不到不代表別格也領不到（接太粗會變成「一次落空就對所有待領折價」）
 	"領取": ["領取", "ctx:pending_claim_tile_id"],
+	# ★票 A2（2026-10-07）：貿易到場沒有可成交的單 ＝ 失敗（sim_runner._step3c_read_market_board，reason trade_arrived_no_deal）
+	#   target 走 `ctx:` ＝ 這一次要去的那個市集（同乞食／領取的理由：一個市集撞空不代表別的也空）
+	"貿易": ["貿易", "ctx:trade_target_tile_id"],
 }
 
 # ★★★缺席清單（階段 1，2026-09-09）：`OPTION_FAIL_KEY` 的【互補且互斥】另一半。
@@ -64,7 +67,7 @@ const OPTION_FAIL_KEY: Dictionary = {
 #   我用 `已有等價機制:` 前綴標它們，並已回報 systems（分類表不完整，不是這幾格不對）。
 const NO_FAILURE_FEEDBACK: Dictionary = {
 	# ── 該接，等階段 2（三條全成立；理由後面是【它已經存在的失敗訊號】）──
-	"貿易": "TODO:%s ── trade.market_bail.<reason>（interaction_system:930 等）可偵測；同一市集重撞" % TODO_TICKET,
+	# ~~"貿易": "TODO … trade.market_bail 可偵測；同一市集重撞"~~ ⇒ ★票 A2 補上了（到場無單＝失敗記號）⇒ 移到 OPTION_FAIL_KEY
 	"建設": "TODO:%s ── construction_abandoned 事件（faction_ai_system:6426）；同一工地重試" % TODO_TICKET,
 	"自救建田": "TODO:%s ── 同「建設」，走同一條 construction_abandoned" % TODO_TICKET,
 	"返家補給": "TODO:%s ── 路不通＝失效（movement_system 的 stuck 偵測）；法條指定這類升 T0" % TODO_TICKET,

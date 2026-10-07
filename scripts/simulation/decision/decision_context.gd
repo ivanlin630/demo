@@ -128,7 +128,11 @@ var feud_target_id: int = -1
 #     ⇒ 只有額沒有位置的話，「一筆很大但在天邊」與「一筆很小但就在腳下」會秤成一樣。
 var pending_claim_amt: float = 0.0        # 全部待領（款＋貨折值）的總額
 var pending_claim_pos: Vector2i = Vector2i(-1, -1)   # 最近一筆的所在（sentinel = 沒有；★to_task 的旅行目標）
-var pending_claim_tile_id: int = -1   # ★同一格的 tile_id（票 A3）：FailureMemory 的 `ctx:` 目標只吃 int ⇒ 「領取」的失敗記憶靠它對準那一格
+var pending_claim_tile_id: int = -1
+# ★票 A2：這一次「貿易」要去的那個市集（FailureMemory「貿易」的 ctx: 目標）——
+#   跟 options.gd「貿易」to_task 的 _merchant_trade_target 同一套：商人有套利單 ⇒ 那張單的市集；否則最近的已知市集
+#   ★兩個值 gather 裡本來就算了（best_arbitrage_order、_nearest_market_outpost）⇒ 零新呼叫
+var trade_target_tile_id: int = -1   # ★同一格的 tile_id（票 A3）：FailureMemory 的 `ctx:` 目標只吃 int ⇒ 「領取」的失敗記憶靠它對準那一格
 # ★★★距離【在 gather 時就算好】放進 ctx，而不是讓 term 自己算幾何 ——
 #   ★DecisionContext 沒有 `self_pos`（我原本假設有，實測沒有）⇒ term 層算不出距離。
 #   ★★而就算有，讓 term 層做幾何也是錯的分工：term 是【秤】，它該吃現成的輸入。
@@ -1007,6 +1011,9 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	c.has_food_market = _mkt != Vector2i(-1, -1)
 	c.food_market_pos = _mkt
 	c.food_market_dist = FactionAISystem._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1   # ★perf cut1 A：static
+	var _tt: Vector2i = _arb.get("pos", _mkt) if (team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE and not _arb.is_empty()) else _mkt
+	var _tt_tile: HexTileData = state.world.tiles.get(_tt.x * 1000 + _tt.y) if _tt != Vector2i(-1, -1) else null
+	c.trade_target_tile_id = _tt_tile.tile_id if _tt_tile != null else -1
 	# ★買料信號（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口（need_keep 含 construction need）。
 	c.has_material_market = _fa._nearest_market_outpost_with(state, team, "material", true) != Vector2i(-1, -1)
 	# ★★★分子分母【同一次呼叫】（2026-09-09，②標度化票）：need_total 存進 ctx 一起帶走。

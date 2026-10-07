@@ -873,6 +873,10 @@ func _step3b_exchange_intel(state: WorldState, arrived_ids: Array, all_team_ids:
 
 # WS-2b：抵達某 tile 的隊，若該 tile 是市集 outpost → 親讀看板（firsthand honest，破訂單可見性死鎖）。
 # 站在市集才讀得到（read_market_board 內守 outpost_level>0 = 無在場可見）；轉述他隊仍走既有 propagate。
+# ★A2：「帶貿易抵達了」的唯一判法（隔壁既有寫法抽出來；抵達時 move_target 可能已被移動系統清成 (-1,-1)）
+static func trade_arrived(t: TeamData) -> bool:
+	return t.current_task == TeamData.TASK_TRADE and (t.move_target == Vector2i(-1, -1) or t.tile_pos == t.move_target)
+
 func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 	var os := OrderSystem.new()
 	for tid in arrived_ids:
@@ -886,23 +890,19 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 		# unified-commerce M2：TRADE 隊到市集 outpost → market-as-place 到場 resolver（owner-mediated，免賣方在場）。
 		if _t.current_task == TeamData.TASK_TRADE:
 			var _mt: HexTileData = state.world.tiles.get(_t.tile_pos.x * 1000 + _t.tile_pos.y)
-			# ══ ★★★票 A3：自家市集另開一個分支 —— 只做「領取＋落空記號」，不進交易 resolver（systems 裁 (B)）══════
-			#   ★舊版自家市集被這裡的 owner 閘整個擋掉 ⇒ 待領在自己市集的隊**永遠領不到**（resolver 裡搬順序也進不來）
-			#   ★★為什麼不直接拆閘：拆了會讓**任何**帶 TRADE 抵達自家市集的隊都走到下面的 release
-			#     （實測 world-fp 變：唯一實例是 Team40——逃跑換貿易時 move_target 沒重設、沿用了自家目的地；跟領取無關）
-			#   ★★★只有承諾「領取」才 release：它的目的就是到這裡領，到了就是完成
-			#     ⇒ 否則它領完還卡在 TASK_TRADE（latch）；其他 option 照舊不碰
-			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner == _t.team_id:
-				InteractionSystem.claim_on_arrival(state, _t, _mt)
-				if String(_t.current_option) == "領取" \
-						and (_t.move_target == Vector2i(-1, -1) or _t.tile_pos == _t.move_target):
-					Probe.bump("trade.release_at_dest.claim_own")
-					TaskArbiter.release(_t)
-			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner != _t.team_id:
-				_interaction_system._resolve_market_at_outpost(state, _t, _mt)
+			# ══ ★票 A2（藍圖裁 eeca99661）：自家市集規則只禁【自己的單】，不禁【地點】══════════════════════════
+			#   ⇒ 舊版這裡兩道入口閘（自家市集另開 A3 的領取分支／別人市集才進 resolver）拿掉 ⇒ 只留 resolver 一條路
+			#     （領取在 resolver 的「跳過自己的單」之前就做了；兩個入口做同一件事會漂）
+			if _mt != null and _mt.outpost_level > 0:
+				var _dealt: bool = _interaction_system._resolve_market_at_outpost(state, _t, _mt)
 				# 到市場（arrived＝到 dest）→ 交易畢 release 重評（避免 TASK_TRADE latch 卡死市集不再 fire）。
 				# 續有需求→下輪 re-dispatch 再赴市場＝連續交易循環（非一次凍結）。
-				if _t.move_target == Vector2i(-1, -1) or _t.tile_pos == _t.move_target:
+				if trade_arrived(_t):
+					# ★A2 ②：承諾「貿易」而來、到場沒有可成交的單 ⇒ 失敗記號（同一市集重撞會折價）＋當場放手
+					#   ★只記 option「貿易」：領取有自己的落空記號（A3）；路過的 TRADE 隊（目的地不是這格）不會走到這裡
+					if not _dealt and String(_t.current_option) == "貿易":
+						FailureMemory.record(state, _t, "貿易", str(_mt.tile_id), OrderSystem.ORDER_LIFETIME, "trade_arrived_no_deal")
+						Probe.bump("trade.arrived_no_deal")
 					Probe.bump("trade.release_at_dest")
 					TaskArbiter.release(_t)
 
