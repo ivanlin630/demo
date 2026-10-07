@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: M＝設目標＋一顆 tick；走到抵達另給明確鍵
 topic: R② 第二輪（`c3f38266d`）＝ **CLEAN**，④收完｜改讀move_target邊緣(上一幀!=目前且目前==(-1,-1))配合「人此刻就在那格」兩個條件同時成立才印抵達,脫離文字前綴耦合,取消/換任務時人多半還沒到那格,天然不誤判
 ---
