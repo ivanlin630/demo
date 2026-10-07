@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # @observe-pure
 # ══ XB② 勒索煞車量測（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §票 XB）══════════════════
 # ★量測卷面，不是閘：同一隊連勒索 10 次，逐次印

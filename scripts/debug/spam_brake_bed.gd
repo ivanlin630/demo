@@ -218,6 +218,7 @@ func _test_p2_spam_sequence_flips_to_refuse() -> void:
 	var refuses: Array = []
 	var first_refuse: int = -1
 	var aff_seq: Array = []
+	var feud_seq: Array = []
 	var base_score: float = 0.0
 	var per_press_delta: float = 0.0
 	var coin_floor_ok: bool = true
@@ -251,21 +252,27 @@ func _test_p2_spam_sequence_flips_to_refuse() -> void:
 			if first_refuse == -1:
 				first_refuse = i + 1
 		aff_seq.append(aff)
+		feud_seq.append(feud_i)
 		prev_aff = aff
 		prev_sum = sum_now
 		prev_n = n_now
 	# ★理論上第幾次翻：常數從 code 讀、base 與 delta 是量出來的（★不手抄物理）
 	var w: float = DiplomaticAiSystem.RELATION_W_AFFINITY
 	var thresh: float = DiplomaticAiSystem.TRIBUTE_ACCEPT_THRESHOLD
+	# ★XB §2（2026-10-07，藍圖 324b9041f 怨要累積）：同一施加者一季內的 tributed 加總過門檻 ⇒ 結成 feud 邊，
+	#   而 tribute_accept 會扣 feud_i × TRIBUTE_W_FEUD ⇒ 理論式要把【量到的】feud 強度一起算進來
+	#   （第 k 次評估時讀到的 feud ＝ 第 k−1 次之後量到的那個值）；權重照舊從 code 讀，不手抄
+	var w_feud: float = DiplomaticAiSystem.TRIBUTE_W_FEUD
 	var theory: int = -1
 	for k in range(1, SPAM_PRESSES + 1):
-		if base_score + per_press_delta * float(k - 1) * w <= thresh:
+		var f_k: float = float(feud_seq[k - 2]) if k >= 2 else 0.0
+		if base_score + per_press_delta * float(k - 1) * w - f_k * w_feud <= thresh:
 			theory = k
 			break
 	print("   ★★理論：base %+.4f（第 1 次量到的 score_no_edge）／每次好感 delta %+.4f" % [
 		base_score, per_press_delta])
-	print("     ／權重 %.3f（code 常數）／門檻 %.3f（code 常數）⇒ 理論上第 %s 次翻" % [
-		w, thresh, str(theory)])
+	print("     ／權重 %.3f（code 常數）／怨邊權重 %.3f（code 常數，乘量到的 feud_i）／門檻 %.3f（code 常數）⇒ 理論上第 %s 次翻" % [
+		w, w_feud, thresh, str(theory)])
 	print("   實測：accept %d 次、refuse %d 次｜第一次 refuse ＝ %s" % [
 		accepts.size(), refuses.size(), str(first_refuse)])
 	_check("★母體地板 (a)：coin_before 每一次都 > 0（拒絕不是因為沒錢可拿）", coin_floor_ok)
