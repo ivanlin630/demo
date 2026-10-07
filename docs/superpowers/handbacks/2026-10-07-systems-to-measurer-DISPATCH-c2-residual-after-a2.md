@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: A2 merge 後普查 C2 還剩 21 隊·日 —— 它們是什麼
 topic: ★派工｜樹 `713c86bd6`（A2 已 merge）｜床 `scripts/debug/window_timing_ticketA_ratios.gd`（seed 1337、30 天）｜C2＝在市集、承諾貿易、coin 零變動的隊·日｜A2 只讓它 22→21 ⇒ 剩下的不是「到場無單卡住」那一型
 ---
