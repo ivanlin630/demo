@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 勒索煞車量完（XB）：修前永遠接受、照你裁的修後第一次就結仇永遠拒絕 —— 兩個極端，中間那段沒有機制
 topic: ★實作端卷面（`docs/superpowers/handbacks/2026-10-07-implementer-to-systems-XB-measure-sheet.md`）｜修前：好感封底 −1 只扣 0.15，分數停在門檻上，30 次全接受｜修後（被威脅基底＝勒索方 readiness，玩家恆 1.0）：第 1 次就過 FEUD_MIN 結仇，之後全拒＝一次鎖死（撞「不是一次就鎖死」）｜★根因：怨是【單筆事件】過門檻才成形，不會【累積】｜兩題 WHAT＋兩題我直接修
 ---
