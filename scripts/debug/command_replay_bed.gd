@@ -541,7 +541,9 @@ func _test_p13b_confirm_has_a_landing_point() -> void:
 	for tid in st.teams.keys():
 		if int(tid) == ptid: continue
 		var q: Dictionary = bridge.query_inquiry_options(int(tid))
-		var opts: Array = q.get("data", {}).get("inquiry_options", [])
+		# ★只挑**可選**的題目（打聽票 I2 之後問糧源灰掉帶原因 ⇒ 確認它是被拒，「那 5 次真的執行成功」會沒有主詞）
+		var opts: Array = (q.get("data", {}).get("inquiry_options", []) as Array).filter(
+			func(o): return bool((o as Dictionary).get("enabled", true)))
 		if bool(q.get("ok", false)) and not opts.is_empty():
 			target = int(tid)
 			choice = String((opts[0] as Dictionary).get("id", ""))

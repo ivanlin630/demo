@@ -1355,12 +1355,8 @@ const TASK_DISPLAY: Dictionary = {
 }
 # ★道具 id → 人話（母體 ＝ `_get_team_takeable_items()` 回的那八個）
 #   ★★而它與 `:1127` 那一行的「低武／高武」措辭刻意一致（同一個東西在兩處不要兩種叫法）
-const ITEM_DISPLAY: Dictionary = {
-	"weapon_melee_low": "低階近戰武器", "weapon_melee_high": "高階近戰武器",
-	"weapon_ranged_low": "低階遠程武器", "weapon_ranged_high": "高階遠程武器",
-	"armor_low": "低階護具", "armor_high": "高階護具",
-	"medicine": "藥品", "tools": "工具",
-}
+# ★表本身收進 TeamUiHelper.ITEM_NAME（中文名表唯一一份，戰鬥區 §3）；這裡只是同一份的別名，讀者不用改
+const ITEM_DISPLAY: Dictionary = TeamUiHelper.ITEM_NAME
 
 # 把一個可能是英文識別字的值換成人話（查不到就原樣回 —— ★而「查不到」會被自驗 (d) 咬到，
 # 那正是我們要的：**新增一個 id 的人會被床擋下來**，而不是靜默印一個英文字給玩家）
@@ -1738,10 +1734,7 @@ func _build_inv_str() -> String:
 	var inv_state: Dictionary = _cached_snapshot.get("inventory_state", {})
 	if ct.is_empty() or inv_state.is_empty(): return "（無資料）"
 	var lines: Array = []
-	const SLOT_NAMES: Dictionary = {
-		"hand_1": "右手", "hand_2": "左手", "head": "頭", "torso": "胸",
-		"right_arm": "右臂", "left_arm": "左臂", "right_leg": "右腿", "left_leg": "左腿"
-	}
+	const SLOT_NAMES: Dictionary = TeamUiHelper.BODY_PART_NAME   # ★中文名表唯一一份（戰鬥區 §3）
 
 	# ── 已裝備（可選取 → [U]卸下） ──
 	var eq: Array = _inv_equipped_slots()
@@ -3111,7 +3104,10 @@ func _handle_intel_mode(keycode: int) -> void:
 		return
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		var idx: int = keycode - KEY_1
-		if idx < _intel_options.size():
+		if idx < _intel_options.size() and not bool(_intel_options[idx].get("enabled", true)):
+			# ★打聽票 I2：灰掉的題目 ⇒ 說原因、不下令（零寫入）
+			_set_feedback(false, String(_intel_options[idx].get("disabled_reason", "現在問不了")))
+		elif idx < _intel_options.size():
 			var choice: String = _intel_options[idx].get("id", "")
 			_bridge.set_player_input("gather_intel_npc_id", _intel_target_id)
 			_bridge.set_player_input("gather_intel_choice", choice)
@@ -3130,7 +3126,12 @@ func _build_intel_str() -> String:
 	if _intel_options.is_empty():
 		lines.append("（無可用問題）")
 	for i in range(_intel_options.size()):
-		lines.append("[%d] %s" % [i + 1, _intel_options[i].get("label", "?")])
+		var _io: Dictionary = _intel_options[i]
+		if bool(_io.get("enabled", true)):
+			lines.append("[%d] %s" % [i + 1, _io.get("label", "?")])
+		else:
+			# ★打聽票 I2：同外層動作區的視覺語彙（「（不可：原因）」）
+			lines.append("[%d] %s（不可：%s）" % [i + 1, _io.get("label", "?"), _io.get("disabled_reason", "")])
 	lines.append("[1~5]選題  [Esc]取消")
 	return "\n".join(lines)
 

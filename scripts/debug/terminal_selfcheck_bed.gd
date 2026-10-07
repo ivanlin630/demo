@@ -21,7 +21,7 @@ extends SceneTree
 # ★★票 #2 刀 0（2026-10-06）：6 → **8**＝多兩支「已結束」走法（故事結束 spec §5c 的 P0）
 #   ⇒ ★★它是**走法**不是一格：八條自驗規則（寬度／重複／英文／debug…）**全部**跑在那一屏上
 #     （只斷言「整屏含那個字面」會放過一列 130 cols 的頂列）
-const SPEC_WALKS_MIN: int = 8        # spec §3 要**六支玩家走法**（★含退化版本，見 WALKS）＋ 兩支已結束
+const SPEC_WALKS_MIN: int = 9        # spec §3 要**六支玩家走法**（★含退化版本，見 WALKS）＋ 兩支已結束 ＋ 一支戰鬥（終端戰鬥區 spec 2026-10-07 §3）
 # ★★而 `WALKS` 共 9 支：八支玩家走法 ＋ **一支 debug 走法**（它是對照組不是玩家走法）
 #   ⇒ 下面每一條「玩家走法 ＝ 0」的斷言都**只看那六支**，而 debug 那一支要**必須 > 0**。
 var _errors: int = 0
@@ -59,6 +59,9 @@ const WALKS: Array = [
 	#       「那一欄只在一個活世界上亮」與「玩家真的死了也看得到」在卷面上**分不開**
 	{"name": "已結束（旗標）", "tokens": [], "degenerate": false, "story_end": "flag"},
 	{"name": "已結束（戰死）", "tokens": [], "degenerate": false, "story_end": "dead"},
+	# ★戰鬥區 §3：進戰鬥那一步（同格佈置一支隊 → T → 切到目標 → 選它 → 畫面上「攻擊」那一鍵）⇒ 戰鬥區也被 (d) 等格掃
+	#   ★修前：主角狀態「head: healthy」、裝備「weapon_melee_low」是 GUI Label 原文 ⇒ (d) 紅
+	{"name": "戰鬥（攻擊同格隊）", "tokens": [], "degenerate": false, "battle": true},
 	# ★★★【反向走法】debug 走法 —— 它**必須**印出那幾個識別字（見 (g)）
 	#   ⇒ 它不是第七支「玩家走法」，它是那條「＝ 0」斷言的**對照組**
 	{"name": "★debug 走法", "tokens": [], "degenerate": false, "debug_pane": true},
@@ -145,6 +148,24 @@ func _screen_for(walk: Dictionary) -> String:
 		# ★原因字串**逐字照** `event_system.gd` 那個寫入者的格式（寬度預算要量真的長度）
 		sw.game_over_reason = "玩家絕後（Team%d 無繼承人）" % ptid
 	_last_flags = {}
+	if bool(walk.get("battle", false)):
+		var sb: WorldState = node._bridge.get_state()
+		var bptid: int = sb.persons[sb.player_id].team_id
+		var foe := TeamData.new()
+		foe.team_id = 7320
+		foe.faction_id = -1
+		foe.tile_pos = sb.teams[bptid].tile_pos
+		AnonTierSystem.add_anon(foe, AnonCohort.TIER_PLEB, 2)
+		var fl := PersonData.new()
+		fl.id = 73201
+		fl.team_id = 7320
+		sb.persons[fl.id] = fl
+		foe.leader_id = fl.id
+		sb.teams[7320] = foe
+		node._refresh()
+		# ★送鍵走玩家那一條（PlayerRepl.press_on：戰鬥中分流到戰鬥畫面、等到輪到玩家才回）；攻擊鍵讀綁定表不手寫
+		for tk in ["t", "tab", "1", TextUiView.key_for("attack")]:
+			await PlayerRepl.press_on(node, PlayerRepl.keycode_for(String(tk)))
 	for t in walk.get("tokens", []):
 		var kc: int = PlayerRepl.keycode_for(String(t))
 		if kc == -1:
@@ -203,10 +224,14 @@ static func _debug_only(screens: Array) -> Array:
 static func _bad_regions(screen: String) -> Array:
 	var bad: Array = []
 	var has_panel: bool = screen.contains(TextUiView.A_PANEL)
+	# ★戰鬥區（終端戰鬥區 spec §1②）：戰鬥中取代 map+pages 那一框，主畫面的動作區也不印（那些鍵不歸它）
+	var has_battle: bool = screen.contains(TextUiView.BATTLE_TITLE)
 	var want: Array = []
 	for a in TextUiView.REGION_ANCHORS:
 		var an: String = String(a)
 		if has_panel and (an == TextUiView.A_MAP or an == TextUiView.A_PAGES):
+			continue
+		if has_battle and (an == TextUiView.A_MAP or an == TextUiView.A_PAGES or an == TextUiView.A_ACTION):
 			continue
 		want.append(an)
 	var last: int = -1
@@ -397,6 +422,12 @@ func _test_a_regions_present_and_ordered() -> void:
 		_player_only(screens).size() == SPEC_WALKS_MIN)
 	_check("★★母體地板：**debug 走法**剛好 1 支（0 ⇒ 下面那條「＝ 0」沒有對照組）",
 		_debug_only(screens).size() == 1)
+	# ★戰鬥那一支真的進了戰鬥（否則 (d) 等格對戰鬥區的「＝ 0」沒有主詞）
+	var battle_n: int = 0
+	for sc in _player_only(screens):
+		if String((sc as Dictionary).get("screen", "")).contains(TextUiView.BATTLE_TITLE):
+			battle_n += 1
+	_check("★★母體地板：有一支走法的畫面真的是戰鬥區（%d）" % battle_n, battle_n == 1)
 	var all_bad: Array = []
 	for s in _player_only(screens):
 		var d: Dictionary = s as Dictionary

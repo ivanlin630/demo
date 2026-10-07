@@ -130,7 +130,7 @@ func _exchange_one_way(state: WorldState, from_id: int, to_id: int, carrier: Per
 		Probe.bump("msg.prop_candidate")
 		var age: int = state.world.current_tick - msg.origin_tick
 		var time_factor: float = maxf(1.0 - float(age) * TIME_DECAY_PER_TICK, 0.1)
-		var copy := _copy_message(msg)
+		var copy := MessageData.copy_of(msg)
 		copy.strength = msg.strength * (1.0 - HOP_DECAY) * time_factor
 		if copy.strength <= 0.05:
 			continue
@@ -264,7 +264,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 		for existing in state.team_known[receiver_id]:
 			if existing.id == msg.id: already = true; break
 		if already: continue
-		var copy: MessageData = _copy_message(msg)
+		var copy: MessageData = MessageData.copy_of(msg)
 		if mode in ["unintentional", "malicious"]:
 			copy.is_distorted = true
 			copy.strength *= 0.8
@@ -272,6 +272,9 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 			# 原此處 unintentional 也走 malicious 級 _distort_content = fork 差異，統一後收斂
 			DistortionEngine.distort_message(state, copy, mode)
 		state.team_known[receiver_id].append(copy)
+		# ★打聽票 I3：訊息也是記下來的東西 ⇒ 每複製一則新訊息 +1（已知的上面就 continue 掉了，不算）
+		#   ★舊版只在 claims 那段 +1 ⇒「近期事件」真的複製進 team_known，結果句卻印「記下 0 筆」
+		out["written"] = int(out.get("written", 0)) + 1
 
 	var rep2: float = float(giver.known_reputations.get(receiver_id, 0.5))
 	if rep2 < 0.3 and (giver.faction_id == -1 or giver.faction_id != receiver.faction_id):
@@ -322,18 +325,7 @@ func process_pending(_state: WorldState) -> void:
 	# 未來：處理 pending delivery queue（據點同步、信使到達）
 	pass
 
-func _copy_message(original: MessageData) -> MessageData:
-	var copy := MessageData.new()
-	copy.id = original.id
-	copy.type = original.type
-	copy.description = original.description
-	copy.source_pos = original.source_pos
-	copy.origin_team_id = original.origin_team_id
-	copy.origin_tick = original.origin_tick
-	copy.strength = original.strength
-	copy.is_distorted = original.is_distorted
-	copy.params = original.params.duplicate()
-	return copy
+# ★打聽票 I1：`_copy_message` 搬到 `MessageData.copy_of`（三個呼叫點同呼那一支）
 
 func prune_old_messages(state: WorldState, current_tick: int) -> void:
 	# Prune global_messages

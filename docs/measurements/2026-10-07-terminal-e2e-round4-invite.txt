@@ -1,0 +1,2210 @@
+# 終端 E2E 自驗卷面（第四輪邀請前，藍圖自跑）
+# tree=85b0914c1 2026-10-07 09:33  跑法: tools/godot.ps1 --headless --script scripts/debug/terminal_e2e_bed.gd
+
+[TREE] path=A:\GDS\demo commit=85b0914c1 clean=code-yes (docs-dirty=3, does not affect this run)
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=14.6GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== terminal_e2e：從畫面挑動作、按它印的鍵、驗世界真的照那句話變了 ===
+
+── P0 解析器（三個鍵位空間）──
+   自家隊 9 項（可做 ["3建立勢力", "7拔擢匿名→記名"]）｜目標動作 [["1", "貿易", true], ["2", "提議結盟", true], ["6", "攻擊", false]]｜強制 ["A接受", "B拒絕"]｜數字鍵在自家隊 ＝ true
+  PASS: P0 自家隊 9 項、可做的是 [3]建立勢力 與 [7]拔擢匿名→記名
+  PASS: P0 自家隊那一側吃數字鍵
+  PASS: P0 強制事件兩個字母鍵 [A]接受 [B]拒絕
+  PASS: P0 目標動作 3 列：[1]貿易 可、[2]提議結盟 可、[6]攻擊 不可
+  PASS: P0【反向】空畫面  三個空間都是 0
+
+── P10 畫面不落後：送 x  回來那一屏 ＝ 推進後 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] forced_event 超時自動拒絕: 你沒有回應Team7320 的「提議與你結盟」 視同拒絕
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+   Esc：等了 0 幀｜x：等了 1 幀、畫面頂列「第 1 天 01:00 」＝ tick 60／世界 60
+  PASS: P10 x 回來那一屏 ＝ 推進後（畫面 tick 60 ＝ TICKS_PER_HOUR ＝ 世界 60）
+  PASS: P10【反向】Esc（不推進） 立刻回、一幀都不等（0）
+
+── WALK seed=1337 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+   N ＝ 自家隊動作 10 項 × 2 ＝ 20 步
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+   step 00｜數字 建立勢力｜A t 3 esc（t2）｜B t esc g 1 enter（t2）｜結果： 已排入：行動：建立勢力｜第 1 天 00:02｜指令｜行動：建立勢力：完成｜差異：["faction"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+   step 01｜字母 接受｜A t A esc（t4）｜B t esc g 1 enter（t4）｜結果： 已排入：回應事件｜第 1 天 00:04｜forced_event_resolved｜你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2｜第 1 天 00:04｜指令｜回應事件：接受同盟，加入勢力2｜差異：["roster_others"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+   step 02｜目標動作 貿易｜A t tab 1 1 esc（t7）｜B t tab 1 esc esc g 2 enter（t7）｜結果： 已排入：行動：貿易｜第 1 天 00:06｜指令｜行動：貿易：等待確認｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+   step 03｜數字 拔擢匿名→記名｜A t tab 7 esc（t9）｜B t tab esc g 1 enter（t9）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:09｜指令｜行動：拔擢匿名→記名：拔擢 褚仁 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+   step 04｜目標動作 要求納貢｜A t tab 1 3 esc（t11）｜B t tab 1 esc esc g 1 enter（t11）｜結果： 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）｜第 1 天 00:11｜指令｜ 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）｜第 1 天 00:11｜指令｜重掃同格對象：已重掃同格對象｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+   step 05｜數字 拔擢匿名→記名｜A t tab 7 esc（t13）｜B t tab esc g 1 enter（t13）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:13｜指令｜行動：拔擢匿名→記名：拔擢 秦雲 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+   step 06｜目標動作 招募匿名｜A t tab 1 8 esc（t15）｜B t tab 1 esc esc g 1 enter（t15）｜結果： 已排入：行動：招募匿名｜第 1 天 00:15｜member_joined｜Team15：招到 1 人｜第 1 天 00:15｜指令｜行動：招募匿名：招到 1 人（花費50 coin，新人口11）｜第 1 天 00:15｜指令｜重掃同格對象：已重掃同格對象｜差異：["res_others", "res_self", "roster_others", "roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+   step 07｜數字 拔擢匿名→記名｜A t tab 7 esc（t17）｜B t tab esc g 1 enter（t17）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:17｜指令｜行動：拔擢匿名→記名：拔擢 鄭平 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+   step 08｜目標動作 招募｜A t tab 1 4 esc（t20）｜B t tab 1 esc esc g 2 enter（t20）｜結果： 招募 Team7320：選記名成員或 [A] 匿名，[Esc] 取消｜第 1 天 00:19｜指令｜重掃同格對象：已重掃同格對象｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+   step 09｜數字 拔擢匿名→記名｜A t tab 7 esc（t22）｜B t tab esc g 1 enter（t22）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:22｜指令｜行動：拔擢匿名→記名：拔擢 呂強 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+   step 10｜目標動作 勒索｜A t tab 1 7 esc（t24）｜B t tab 1 esc esc g 1 enter（t24）｜結果： 已排入：行動：勒索｜第 1 天 00:24｜extortion｜Team15：extortion｜第 1 天 00:24｜指令｜行動：勒索：勒索完成（coin+12）｜第 1 天 00:24｜指令｜重掃同格對象：已重掃同格對象｜差異：["res_others", "res_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+   step 11｜數字 拔擢匿名→記名｜A t tab 7 esc（t26）｜B t tab esc g 1 enter（t26）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:26｜指令｜行動：拔擢匿名→記名：拔擢 沈誠 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+   step 12｜目標動作 打聽情報｜A t tab 1 5 2（t29）｜B t tab 1 esc esc g 2 enter（t29）｜結果： 已排入：行動：確認打聽｜第 1 天 00:28｜指令｜重掃同格對象：已重掃同格對象｜第 1 天 00:28｜介面｜[Inquiry] 已排入：行動：確認打聽｜第 1 天 00:29｜指令｜行動：確認打聽：你確認了自家勢力的狀況｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+   step 13｜數字 確認打聽｜A t tab 2 esc（t31）｜B t tab esc g 1 enter（t31）｜結果： 已排入：行動：確認打聽｜第 1 天 00:31｜指令｜行動：確認打聽：你確認了自家勢力的狀況｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+   step 14｜數字 確認打聽｜A t 2 esc（t33）｜B t esc g 1 enter（t33）｜結果： 已排入：行動：確認打聽｜第 1 天 00:33｜指令｜行動：確認打聽：你確認了自家勢力的狀況｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+   step 15｜目標動作 攻擊｜A t tab 1 6 f space esc（t46）｜B t tab 1 esc esc g 1 2 enter（t46）｜結果： 已排入：行動：攻擊｜第 1 天 00:35｜指令｜行動：攻擊：發起攻擊｜第 1 天 00:35｜指令｜重掃同格對象：已重掃同格對象｜差異：["encounter", "res_others", "res_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+   step 16｜數字 拔擢匿名→記名｜A t tab 7 esc（t48）｜B t tab esc g 1 enter（t48）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:48｜指令｜行動：拔擢匿名→記名：拔擢 鄭智 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+   step 17｜數字 確認打聽｜A t 2 esc（t50）｜B t esc g 1 enter（t50）｜結果： 已排入：行動：確認打聽｜第 1 天 00:50｜指令｜行動：確認打聽：你確認了自家勢力的狀況｜差異：[]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+   step 18｜目標動作 招募匿名｜A t tab 1 8 esc（t52）｜B t tab 1 esc esc g 1 enter（t52）｜結果： 已排入：行動：招募匿名｜第 1 天 00:52｜member_joined｜Team15：招到 1 人｜第 1 天 00:52｜指令｜行動：招募匿名：招到 1 人（花費50 coin，新人口12）｜第 1 天 00:52｜指令｜重掃同格對象：已重掃同格對象｜差異：["res_others", "res_self", "roster_others", "roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+   step 19｜數字 拔擢匿名→記名｜A t tab 7 esc（t54）｜B t tab esc g 1 enter（t54）｜結果： 已排入：行動：拔擢匿名→記名｜第 1 天 00:54｜指令｜行動：拔擢匿名→記名：拔擢 尤海 為記名成員｜差異：["roster_self"]
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+
+── ABORT／不可判 ──
+  PASS: 走法沒有 ABORT（0 條）
+
+── P1 母體地板 ──
+   步數 20（N ＝ 20）｜數字鍵：自家隊 11 步、目標動作 8 步｜字母鍵 1 步
+   畫面提供過 20 種／本輪按過 12 種
+   提供過而沒按到（含不可做的）：["字母:拒絕", "數字:紮營", "數字:狩獵", "數字:獵猛獸", "數字:放棄戰利品", "數字:收編敗者", "數字:收割戰利品", "目標動作:邀請定居", "目標動作:提議同盟"]
+   列出卻沒綁鍵（不判，回報）：["乞討", "忽略", "投降請和"]
+  PASS: P1 走滿 N 步或停在已知死路（20／20）
+  PASS: P1 字母鍵  1（1）—— 否則 §0 那個鍵位空間沒被走過
+  PASS: P1 自家隊數字鍵  1（11）
+  PASS: P1 目標動作數字鍵  1（8）
+
+── P6 每次分叉兩份 fp 相同 ──
+  PASS: P6 分叉點 fp 相同（20 次分叉，不同 0）
+
+── P10 常駐：每一鍵回來的那一屏 ＝ 結算後的世界 ──
+  PASS: P10 常駐：1821 次按鍵，畫面時間 ≠ 世界 tick 的 0 次（已知以外 0）
+
+── P2 紅一／P3 紅二／P4 紅三（逐步）──
+   step 12「打聽情報」問的是自知題（ask_faction_status） 不寫 belief、紅二不適用
+   step 13「確認打聽」問的是自知題（ask_faction_status） 不寫 belief、紅二不適用
+   step 14「確認打聽」問的是自知題（ask_faction_status） 不寫 belief、紅二不適用
+   step 17「確認打聽」問的是自知題（ask_faction_status） 不寫 belief、紅二不適用
+  PASS: P2 紅一：0 步錯（0）
+  PASS: P3 紅二：判了 12 步、0 步錯（0）
+  PASS: P3 母體地板：至少判過 1 步（12）
+  PASS: P4 紅三：0 步錯（0）
+   P11 沒被拒、而畫面只有「已排入」回音、沒有完成句：[]（已知以外 []）
+  PASS: P11 每一道沒被拒的令都有完成句（已知以外缺 0）
+
+── P5 確定性：同 seed 再走一次  逐字相同；換 seed  必須不同 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+  PASS: P5 同 seed（1337）兩次走法輸出逐字相同（20 行／20 行）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Encounter] Team15 spawn: 6具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=8
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_enemy_movement mode=unintentional 寫入=0 結果筆數=1
+  PASS: P5【反向】換 seed（4242） 輸出必須不同（否則正規化器過寬、恆穩）
+
+── P7 觀測不改物 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[PlayerCmd] 玩家建立勢力2
+[Diplomacy] Team7320 與 Team15 結盟
+[PlayerCmd] forced_event 回應: 你對Team7320 的「提議與你結盟」回應了「接受」：接受同盟，加入勢力2
+[PlayerCmd] 索貢遭拒 Team7320 unrest+2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=11
+[Extort] Team15 勒索 Team7320，Team7320 妥協給付
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Encounter] Team15 spawn: 7具名 + 1匿名（武裝率0%，人口11）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口4）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=9
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+[PlayerCmd] gather_intel choice=ask_faction_status mode=n/a 寫入=0 結果筆數=2
+[Recruit] 匿名 Team15←7320, 招到 1 人, 花50 coin, 新人口=12
+   觀測過的走法 fp fe9a9690ea84｜不觀測重放 fp fe9a9690ea84（86 鍵）
+  PASS: P7 跑不跑 E2E 的觀測，同 seed 同按鍵  fp 相同
+
+── FOOTER 面板頁腳寫的鍵 ＝ 按下去會做的事 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+   互動面板頁腳：「── [Esc]關閉 ──」 鍵 ["Esc"]
+  PASS: ★母體地板：互動面板印得出頁腳、至少一個鍵（1）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+   按 Esc：面板 開 → 關
+  PASS: FOOTER 頁腳寫的每一個鍵都真的關掉互動面板（沒做到：[]）
+
+── E2 無勢力 vs 無勢力：提議同盟不得被判「同一個勢力」──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+   玩家勢力 -1｜NPC 勢力 -1｜「提議同盟」列：{ "space": "action", "key": "2", "label": "提議同盟", "enabled": true, "why": "" }
+  PASS: ★母體地板：兩邊都是 1、且畫面上有「提議同盟」那一列
+  PASS: E2「提議同盟」沒有因「同一個勢力」被判不可（）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+   【反向】兩邊都設成勢力 0 「提議同盟」列：{ "space": "action", "key": "2", "label": "提議同盟", "enabled": false, "why": "（不可：對方已經和你同一個勢力）" }
+  PASS: E2【反向】真的同勢力 「提議同盟」不可且原因是同一個勢力（（不可：對方已經和你同一個勢力））
+   S1 母體：裸比較剩 39 行（非註解）｜TeamData.same_faction( 呼叫 12 處
+   裸比較清單：["simulation/belief_system.gd:130", "simulation/belief_system.gd:184", "simulation/diplomatic_ai_system.gd:162", "simulation/diplomatic_ai_system.gd:496", "simulation/faction_ai_system.gd:269", "simulation/faction_ai_system.gd:833", "simulation/faction_ai_system.gd:852", "simulation/faction_ai_system.gd:3553", "simulation/faction_ai_system.gd:3770", "simulation/faction_ai_system.gd:3773", "simulation/faction_ai_system.gd:4112", "simulation/faction_ai_system.gd:4787", "simulation/faction_ai_system.gd:5030", "simulation/faction_ai_system.gd:5638", "simulation/faction_ai_system.gd:5935", "simulation/faction_ai_system.gd:6106", "simulation/faction_ai_system.gd:6227", "simulation/faction_ai_system.gd:7518", "simulation/faction_ai_system.gd:7630", "simulation/faction_ai_system.gd:7713", "simulation/faction_ai_system.gd:7778", "simulation/interaction_system.gd:285", "simulation/interaction_system.gd:391", "simulation/interaction_system.gd:413", "simulation/interaction_system.gd:419", "simulation/interaction_system.gd:542", "simulation/labor_system.gd:83", "simulation/labor_system.gd:85", "simulation/manufacturing_system.gd:238", "simulation/message_system.gd:193", "simulation/message_system.gd:210", "simulation/message_system.gd:280", "simulation/outpost_system.gd:819", "simulation/outpost_system.gd:868", "simulation/strategic_ai_system.gd:221", "simulation/strategic_ai_system.gd:267", "simulation/decision/decision_context.gd:1514", "simulation/decision/goal_resolver.gd:414", "simulation/decision/goal_resolver.gd:415"]
+  PASS: ★S1 母體地板：共用函式真的被呼（12）
+
+── E4 強制回應標籤不帶 ／ 記號 ──
+   走法看過的強制回應標籤：["接受", "拒絕"]｜帶記號：[]
+  PASS: ★母體地板：走法看過  1 個強制回應標籤（2）
+  PASS: E4 強制回應標籤不帶 ／（[]）
+
+── BATTLE 終端戰鬥區 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+  PASS: ★BATTLE 母體地板：畫面上有可按的「攻擊」（鍵 6）
+[Encounter] Team15 spawn: 2具名 + 1匿名（武裝率0%，人口10）
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口5）
+[Encounter] 遭遇戰開始 Team15 vs Team7320 (type=normal) units=4
+[PlayerCmd] 玩家發起攻擊 Team15 → Team7320
+   按攻擊  戰鬥區 true｜世界 tick 12｜交戰中 true
+  PASS: BATTLE 按攻擊之後畫面是戰鬥區（終端看得到戰鬥）
+   六欄裡畫面上找不到的行：[]｜鍵列含 _lbl_actions 第一行 true
+  PASS: BATTLE 戰鬥區六欄逐字 ＝ 那六個 Label 的 .text（缺 0 行），鍵列 ＝ _lbl_actions
+[EncounterView] 此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊／Z 命令／F 投降／Space 待機）
+  PASS: BATTLE 戰鬥中按無作用的鍵  戰鬥區印為什麼（「無作用」）
+   行動倒數（每次輪到玩家時看過的組合）：["[\"0\", \"1\", \"1\", \"1\"]"]｜此刻畫面 ["0", "1", "1", "1"]／state ["0", "1", "1", "1"]
+  PASS: BATTLE 單位行動倒數印在畫面上（4 個）且逐單位 ＝ state 的 action_timer
+[EncounterView] 此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊／Z 命令／F 投降／Space 待機）
+   GUI 廣播一次按鍵（主節點 _input ＋ encounter_view _input） _handle_key 被呼 1 次
+  PASS: BATTLE GUI 一次按鍵  戰鬥分派只被呼一次（1）
+[EncounterView] 命令選單已取消
+   Z  選單印出或說明 true｜Esc 後收起 true
+  PASS: BATTLE Z 命令選單：項目印進戰鬥區（或說明沒有隊友），Esc 收起
+[EncounterView] 已排入：行動：戰中投降
+[PlayerCmd] 玩家戰中投降，Team7320 接受
+[EncounterView] 戰鬥已結束
+   打完之後回主畫面 true｜交戰中 false
+  PASS: BATTLE 用畫面上印的鍵打到結束並回到主畫面
+  PASS: BATTLE P6【反向】回到主畫面後沒有戰鬥區
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7320 找上門：提議與你結盟
+[Encounter] Team7320 spawn: 1具名 + 0匿名（武裝率0%，人口5）
+[Encounter] Team15 spawn: 2具名 + 1匿名（武裝率0%，人口10）
+[Encounter] 遭遇戰開始 Team7320 vs Team15 (type=ambush) units=4
+[Hit] part=torso dmg=5.0
+[Hit] part=torso dmg=5.0
+[EncounterView] 離開戰場…
+[Hit] part=torso dmg=10.0
+[Hit] part=torso dmg=5.0
+[Hit] part=torso dmg=10.0
+[Hit] part=torso dmg=5.0
+[Miss]
+[Miss]
+[Hit] part=torso dmg=10.0
+[Miss]
+[Hit] part=torso dmg=10.0
+[Encounter] 遭遇戰結算完成 result=defender_win
+[Encounter] 戰鬥結束 winner=Team15 loser=Team7320 loot={  }
+[AttackDefeat] Team7320 戰敗 loss=0.00 loyalty_d=-0.050 stress_d=0.100
+   伏擊  戰鬥區 true｜撤出方向鍵 w｜畫面說離開戰場 true｜交戰中 false
+  PASS: BATTLE 被伏擊進戰鬥、用 QWEASD 往邊界外走  撤出（畫面說「離開戰場」、戰鬥結束）
+  PASS: BATTLE 撤出之後回到主畫面
+  PASS: ★到場點名：15／15（缺：[]）
+
+=== terminal_e2e DONE === errors: 0｜已知紅排除: 0（）
+
+[godot.ps1] child exit=0
