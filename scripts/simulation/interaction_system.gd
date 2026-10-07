@@ -1523,9 +1523,11 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 		return { "ok": true, "accepted": true, "msg": "勒索完成（對方資源耗盡，無所得）" }
 	var parts: Array = []
 	for res in gained:
-		var amount: int = int(gained[res])
-		if amount > 0:
-			parts.append("%s+%d" % [TeamUiHelper.resource_name(String(res)), amount])   # ★D1：結果句進事件流，不印資源鍵
+		# ★BS v2 D：取整後為 0 的那一份改印一位小數（舊版全部取整為 0 ⇒ 落到「少量資源」，玩家不知道拿了多少）
+		var amt: float = float(gained[res])
+		if amt > 0.0:
+			parts.append("%s+%s" % [TeamUiHelper.resource_name(String(res)),
+				("%d" % int(amt)) if amt >= 1.0 else ("%.1f" % amt)])   # ★D1：結果句進事件流，不印資源鍵
 	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
 	return { "ok": true, "accepted": true, "msg": "勒索完成（%s）" % detail }
 

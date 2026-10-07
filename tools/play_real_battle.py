@@ -105,9 +105,13 @@ def main() -> int:
             log.append("\n★%d 小時內沒有遇到可以打的對象，也沒有被伏擊" % MAX_HOURS)
         else:
             n = 0
-            for k in ["space", "w", "space"] + ["space"] * MAX_BATTLE_KEYS:
+            # ★BS v2：照畫面打 —— 目標欄寫「本拍打得到：<代號>」⇒ 按 R（立刻攻擊目標欄的目標）；否則先移動一拍再待機
+            for k in ["space", "w", "space"] + ["auto"] * MAX_BATTLE_KEYS:
                 if BATTLE_TITLE not in scr:
                     break
+                if k == "auto":
+                    m_hit = re.search(r"本拍打得到：([A-Z])", scr)
+                    k = "r" if m_hit else "space"
                 scr = press(k)
                 n += 1
             if BATTLE_TITLE in scr:

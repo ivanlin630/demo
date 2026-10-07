@@ -45,6 +45,10 @@ const BODY_PART_NAME: Dictionary = {
 	"right_leg": "右腿", "left_leg": "左腿",
 }
 const BODY_STATUS_SHORT: Dictionary = {"healthy": "健", "wounded": "傷", "critical": "重", "severed": "截"}
+# ★BS v2 C：戰鬥區印【全名】（用戶讀「頭：健」像被截字）；短字仍給成員列表那種擠一行的地方用
+const BODY_STATUS_NAME: Dictionary = {"healthy": "健康", "wounded": "受傷", "critical": "重傷", "severed": "斷肢"}
+static func status_full_name(raw: String) -> String:
+	return String(BODY_STATUS_NAME.get(raw, raw))
 const ITEM_NAME: Dictionary = {
 	"weapon_melee_low": "低階近戰武器", "weapon_melee_high": "高階近戰武器",
 	"weapon_ranged_low": "低階遠程武器", "weapon_ranged_high": "高階遠程武器",
