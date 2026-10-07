@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 #9 地圖記憶 §7 第二輪：_belief_overlay 拆出，_cell 去掉 live tile
 topic: R② ＝ **CLEAN**｜比我建議的更徹底——不是加一支只給belief查詢結果的姊妹函式,是直接把HexTileData從_cell()的參數簽名拿掉,「看不到live tile」變成型別層的結構保證；P9b的grep守衛+負對照(加一行讀tile.outpost_level必紅)證明這個保證有牙齒
 ---
