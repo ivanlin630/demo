@@ -1136,6 +1136,7 @@ func _s_hostile_next_to_player(sd: int) -> Dictionary:
 	var ptid: int = st.get_player_team_id()
 	var pt: TeamData = st.teams[ptid]
 	st.set_player_forced_event({}, "")
+	pt.fatigue = 0.6   # ★休息有前置檢查（不累就不給休息）⇒ 佈置一點疲勞
 	var npc: TeamData = st.teams.get(NPC_ID)
 	npc.tile_pos = pt.tile_pos + Vector2i(1, 0)
 	npc.move_target = Vector2i(-1, -1)
@@ -1259,11 +1260,12 @@ func _m_cells() -> void:
 	_check("M2 一路走到抵達、結果行「抵達 (q,r)」", pt.tile_pos == tgt and res2.contains("抵達 (%d,%d)" % [tgt.x, tgt.y]))
 	# 停點來源：強制事件【到達】是推進的停點（快照 → 到達 → 比對出 forced_event_arrived）
 	#   ★不在床裡從按鍵佈置：按鍵之前佈置的事件已經在快照裡（不是「途中到達」），而一步 60 tick 內它會逾時
-	var br = node._bridge
-	var snap: Dictionary = br._snapshot()
+	# ★M §2：停點改讀玩家事件匯流排（_diff_events 那兩段已退場）⇒ 強制事件經 setter 寫入匯流排 ⇒ stop_event_since 認得
+	var seq_m2: int = st.player_event_seq
 	st.set_player_forced_event({"action": "diplomacy", "from_id": NPC_ID, "proposal": FORCED_PROPOSAL}, "fe_m2")
-	var evs: Array = br._diff_events(snap).map(func(e): return String(e.get("type", "")))
-	print("   快照之後強制事件到達 ⇒ 推進停點比對出 %s" % str(evs))
+	var hit_m2: Dictionary = WorldEvents.stop_event_since(st, seq_m2)
+	var evs: Array = [String(hit_m2.get("kind", ""))] if not hit_m2.is_empty() else []
+	print("   強制事件到達之後 ⇒ 推進停點認出 %s" % str(evs))
 	_check("M2【途中事件】強制事件到達是推進的停點（forced_event_arrived）", evs.has("forced_event_arrived"))
 	_cells_ran.append("M2")
 	await _drop(node)

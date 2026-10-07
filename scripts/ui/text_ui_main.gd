@@ -1101,15 +1101,37 @@ func _global_advance_key(keycode: int) -> void:
 			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
 
 # 推進為什麼停下（推進鍵的結果句共用這一份；事件型別來自 SimBridge._diff_events）
+#   ★M §2：停點事件帶事件句（WorldEvents.describe 那一句，與事件流同源）⇒ 結果行「停下：<事件句>」
 static func _advance_stop_reason(result: Dictionary) -> String:
 	var why: String = String(result.get("stall_reason", ""))
 	for e in result.get("events", []):
 		match String((e as Dictionary).get("type", "")):
 			"encounter_triggered": why = "遭遇戰"
-			"pre_encounter": why = "有人來犯"
-			"forced_event_arrived": why = "有事找上門"
-			"new_team_spotted": why = "看到新的隊伍"
+			"stop_event": return String((e as Dictionary).get("text", ""))
 	return why
+
+static func _has_stop_event(result: Dictionary) -> bool:
+	for e in result.get("events", []):
+		if String((e as Dictionary).get("type", "")) == "stop_event":
+			return true
+	return false
+
+# ══ ★M 票 §2②：休息兩段確認 ═══════════════════════════════════════════════════════════════════════
+#   ★第一次：印「TeamN 在 d 格外，確定要休息？再按一次休息」並記下；第二次（下一個按的仍是休息）才真的下令
+#   ★引擎不替玩家取消休息（PRIO_PLAYER）；休息中敵對逼近 ⇒ 推進停點（hostile_adjacent）停下、句子有主詞
+var _rest_confirm_armed: bool = false
+func _rest_needs_confirm(act: Dictionary) -> bool:
+	var aid: String = String(act.get("command_args", {}).get("action_id", act.get("action_id", "")))
+	if aid != "rest":
+		_rest_confirm_armed = false
+		return false
+	var near: Dictionary = _bridge.nearest_hostile_within(1)
+	if near.is_empty() or _rest_confirm_armed:
+		_rest_confirm_armed = false
+		return false
+	_rest_confirm_armed = true
+	_set_feedback(false, "Team%d 在 %d 格外，確定要休息？再按一次休息" % [int(near["id"]), int(near["dist"])])
+	return true
 
 # ══ ★M ②：走到抵達那一鍵的結果句 —— 推進停下的那一刻寫（抵達／途中事件）══════════════════════════════
 var _arrive_target: Vector2i = Vector2i(-1, -1)
@@ -1133,7 +1155,7 @@ func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
 				why = "有事找上門"
 			else:
 				why = "推進停了"
-		_set_feedback(true, "途中：%s，停在 (%d,%d)" % [why, pos.x, pos.y])
+		_set_feedback(true, ("停下：%s（停在 (%d,%d)）" if _has_stop_event(result) else "途中：%s，停在 (%d,%d)") % [why, pos.x, pos.y])
 	_arrive_target = Vector2i(-1, -1)
 
 # 各面板的鍵空間宣告（靜態謂詞）—— 一處對照，D4 的分派與各 handler 頂端的守衛讀同一組謂詞
@@ -1170,7 +1192,10 @@ func _report_key_advance(result: Dictionary) -> void:
 		_set_feedback(true, "推進到 %s" % clk)
 	else:
 		var why: String = _advance_stop_reason(result)
-		_set_feedback(true, "推進停在 %s（%s）" % [clk, why if why != "" else "有事發生"])
+		if _has_stop_event(result):
+			_set_feedback(true, "停下：%s（%s）" % [why, clk])
+		else:
+			_set_feedback(true, "推進停在 %s（%s）" % [clk, why if why != "" else "有事發生"])
 	_key_advance_target = -1
 
 # 強制回應可用的字母（A..Z 去掉全域鍵）——面板印的字母與 handler 的對照都讀這一份
@@ -2184,6 +2209,9 @@ func _handle_interact_mode(keycode: int) -> void:
 		var sa: Dictionary = self_acts[self_idx]
 		if not sa.get("enabled", true):
 			_set_feedback(false, sa.get("disabled_reason", "不可執行"))
+			_refresh(); return
+		# ★M 票 §2②：休息＝玩家主導、兩段確認 —— 旁邊（同格或相鄰）有敵對隊時，第一次只警告、不下令（時間不動）
+		if _rest_needs_confirm(sa):
 			_refresh(); return
 		var sr: Dictionary = _bridge.command_player(
 			sa.get("command_name", "execute_action"), sa.get("command_args", {}))

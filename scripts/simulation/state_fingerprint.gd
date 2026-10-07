@@ -260,6 +260,8 @@ static func _emit_player(state: WorldState, buf: PackedStringArray) -> void:
 	buf.append("P|id=%d|possess_prev=%d|fe_id=%s" % [
 		state.player_id, state.player_possess_prev, state.player_forced_event_id])
 	buf.append("P|hostile=%s" % str(state.player_hostile_teams))
+	if not state.player_adjacent_hostiles.is_empty():
+		buf.append("P|adjacent_hostile=%s" % str(state.player_adjacent_hostiles))
 	buf.append("P|pending_targets=%s" % str(state.player_pending_targets))
 	buf.append("P|alerts=%d" % state.player_alerts.size())
 	# ★★★玩家事件佇列（spec 2026-09-25 §2④）：★另起一行，舊有每一行【逐字不變】

@@ -90,8 +90,8 @@ func tick_step() -> Dictionary:
 	var adv: Dictionary = advance_ticks(n)
 	var events: Array = adv["events"]
 	_ticks_remaining = maxi(0, _ticks_remaining - n)
-	if events.size() > 0:
-		_ticks_remaining = 0   # 重要事件 → 停止推進
+	if _any_stop(events):
+		_ticks_remaining = 0   # 停點事件 → 停止推進（★M §2：看到新的隊伍不再停）
 	# ★只加鍵（`advanced`／`stall_reason`）：既有讀者只讀 events／done
 	return { "events": events, "done": _ticks_remaining <= 0,
 		"advanced": adv["advanced"], "stall_reason": adv["stall_reason"] }
@@ -115,14 +115,19 @@ func advance_ticks(n: int) -> Dictionary:
 	var stall_reason: String = ""
 	for _i in range(n):
 		var snap := _snapshot()
+		var seq0: int = _state.player_event_seq
 		var player_pos: Vector2i = _player_tile()
 		var r: String = _runner.advance_tick(_state, player_pos)
 		if r != "" and stalled_at == -1:
 			stalled_at = _state.world.current_tick
 			stall_reason = r
 		var new_evts := _diff_events(snap)
+		# ★M §2：停點讀玩家事件匯流排（與事件流 UI 同源），不手刻快照差分
+		var stop: Dictionary = WorldEvents.stop_event_since(_state, seq0)
+		if not stop.is_empty():
+			new_evts.append({ "type": "stop_event", "kind": String(stop.get("kind", "")), "text": String(stop.get("text", "")) })
 		events.append_array(new_evts)
-		if new_evts.size() > 0:
+		if _any_stop(new_evts):
 			break
 	return {
 		"events": events,
@@ -293,10 +298,6 @@ func _snapshot() -> Dictionary:
 	return {
 		"encounter_active":  _state.encounter_active,
 		"discovered_count":  _state.team_discovered.get(ptid, []).size() if ptid >= 0 else 0,
-		# ★M（spec 2026-10-07 move-command-is-one-tick ②「事件必停」）：強制事件到達／有人來犯也是停點
-		#   ★舊版不在停點裡 ⇒ 一步最多推 60 tick，而強制事件「下一個整點視同拒絕」⇒ 可能在同一步裡到達又逾時，玩家連面板都沒看到
-		"forced_id": _state.player_forced_event_id if not _state.player_forced_event.is_empty() else "",
-		"pre_encounter": not _state.player_pre_encounter.is_empty(),
 	}
 
 func _diff_events(snap: Dictionary) -> Array:
@@ -308,11 +309,37 @@ func _diff_events(snap: Dictionary) -> Array:
 		var now: int = _state.team_discovered.get(ptid, []).size()
 		if now > snap["discovered_count"]:
 			evts.append({ "type": "new_team_spotted" })
-	if not _state.player_forced_event.is_empty() and _state.player_forced_event_id != String(snap.get("forced_id", "")):
-		evts.append({ "type": "forced_event_arrived" })
-	if not _state.player_pre_encounter.is_empty() and not bool(snap.get("pre_encounter", false)):
-		evts.append({ "type": "pre_encounter" })
 	return evts
+
+# ★M §2（藍圖 fda4636f1，R² 裁）：推進要停在哪一刻 ＝ 這幾種事件（停點的 kind 集合在 WorldEvents，這裡不抄）
+#   ·stop_event：這一 tick 玩家事件匯流排上出現了停點 kind（找上門、被攻擊／遭遇、敵對逼近、成員死亡離隊…）
+#   ·encounter_triggered：戰鬥畫面要接管（既有）
+#   ★new_team_spotted 不是停點（照舊記進事件、不打斷推進）
+static func _is_stop(e: Dictionary) -> bool:
+	return String(e.get("type", "")) in ["stop_event", "encounter_triggered"]
+
+# ★不用 lambda：lambda 裡呼 static 在 4.2 解不到（「in base 'Nil'」）
+static func _any_stop(evts: Array) -> bool:
+	for e in evts:
+		if _is_stop(e):
+			return true
+	return false
+
+# ★M 票 §2②：玩家隊同格或相鄰的敵對隊（最近那一支）{id, dist}；沒有 ⇒ {}（敵對＝player_hostile_teams；旁邊一格在視野內）
+func nearest_hostile_within(max_dist: int) -> Dictionary:
+	var ptid: int = get_player_team_id()
+	var pt: TeamData = _state.live_team(ptid) if ptid >= 0 else null
+	if pt == null:
+		return {}
+	var best: Dictionary = {}
+	for hid in _state.player_hostile_teams:
+		var h: TeamData = _state.live_team(int(hid))
+		if h == null:
+			continue
+		var d: int = FactionAISystem._hex_dist(pt.tile_pos, h.tile_pos)
+		if d <= max_dist and (best.is_empty() or d < int(best["dist"])):
+			best = {"id": int(hid), "dist": d}
+	return best
 
 # ── Player API (query / command) ───────────────────────────────────────────────
 
