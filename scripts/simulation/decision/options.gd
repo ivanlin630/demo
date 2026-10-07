@@ -288,6 +288,21 @@ static var REGISTRY: Dictionary = {
 			if prey_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_MERGE, "target": prey_pos, "order_target": prey},
 	},
+	# ★票 T（spec 2026-10-06 ticket-t-fatigue §1②）：「休息」—— TASK_REST 的**第一個寫入者**
+	#   ★意義是「主動停下來」：選了它就原地不動 ⇒ 疲勞分類落「不耗力」⇒ 回復（崗哨照舊折回復）
+	#   ★util ＝ 疲勞 × 人格（求生欲／慎重）；★禁「疲勞 > X 強制休息」硬門檻 —— 累不累由秤決定
+	#   ★求生層：體力是活下去的那一層（affinity 主層＝求生）
+	"休息": {
+		"affinity": [0.9, 0.1, 0.0, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
+		"terms": [["rest_drive", "rest"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.fatigue > 0.0,
+		# ★target ＝ 自己腳下（不是 (-1,-1)）：派工迴圈把 (-1,-1) 當「不可派、試次佳」（faction_ai_system.gd 三處
+		#   `if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE: continue`）
+		#   ⇒ 第一版回 (-1,-1) ⇒ 秤贏了 50 次、一次都沒派出去（床 P9 贏家有它、P6 轉換 0 次）
+		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
+			return {"task": TeamData.TASK_REST, "target": team.tile_pos},
+	},
 	"紮營": {
 		"affinity": [0.6, 0.1, 0.0, 0.1, 0.2], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["camp_drive", "camp"]],
@@ -659,6 +674,12 @@ static func priority_for_need(state: WorldState, team: TeamData, opt: String) ->
 	var base: int = priority_for(opt)
 	if base != TaskArbiter.PRIO_SURVIVAL: return base   # 顯式 "priority" 欄／threat／預設一律不碰
 	if opt == "survival": return base                   # 威脅軸：不由糖食導出
+	# ★票 T §6①：休息的需求軸是**體力**不是糧 —— 累垮（≥ FATIGUE_EXHAUSTED，忠誠懲罰的同一條線）⇒ 求生優先序，否則派工
+	#   ★舊版走下面的糧撐軸 ⇒ 吃飽的累隊休息一律降成 50 ⇒ 搶不下 80 的覓食（實測被擋 130 次）
+	if opt == "休息":
+		var _rp: int = TaskArbiter.PRIO_SURVIVAL if team.fatigue >= SimRunner.FATIGUE_EXHAUSTED else TaskArbiter.PRIO_DISPATCH
+		if Probe.enabled: Probe.bump("commitprio.%s.%d" % [opt, _rp])
+		return _rp
 	var pop: int = team.population
 	if pop <= 0: return base
 	var _need: float = maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)

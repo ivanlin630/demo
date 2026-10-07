@@ -72,7 +72,8 @@ const DODGE_SURVIVAL_WEIGHT: float = 0.4
 const DODGE_BODY_HALF:       float = 0.5   # body weight factor inside dodge formula
 const DODGE_MAX:             float = 0.80
 const DODGE_STAMINA_COST:    float = 0.1
-const MIN_STAMINA_TO_DODGE:  float = 0.1
+# ★票 T §7：閃避門檻從體力係數導出 —— 累垮時的係數（嚴格大於 ⇒ 累垮仍不能閃避，語意同舊的 0.1＝舊曲線下限）
+const MIN_STAMINA_TO_DODGE:  float = SimRunner.STAMINA_AT_EXHAUSTED
 const AUTO_BLOCK_MIN:        float = 0.3   # minimum threshold for auto-block selection
 
 const WORLD_DIR_TO_EDGE: Dictionary = {
@@ -137,14 +138,12 @@ func _default_body_parts() -> Dictionary:
 
 func _create_named_unit(pid: int, team_id: int, pos: Vector2i,
 		state: WorldState) -> Dictionary:
-	var fatigue: float = 0.0
 	var t: TeamData = state.teams.get(team_id)
-	if t: fatigue = t.fatigue
 	return {
 		"person_id":    pid,
 		"team_id":      team_id,
 		"pos":          pos,
-		"stamina":      clampf(1.0 - fatigue, 0.1, 1.0),
+		"stamina":      SimRunner.stamina_factor(t),   # ★票 T §7（原本 clamp(1−f, 0.1, 1)）
 		"is_messenger": false,
 		"has_exited":   false,
 		"escort_target": -1,
@@ -160,7 +159,7 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"person_id":    -1,
 		"team_id":      team.team_id,
 		"pos":          pos,
-		"stamina":      clampf(1.0 - team.fatigue, 0.1, 1.0),
+		"stamina":      SimRunner.stamina_factor(team),   # ★票 T §7
 		"is_messenger": false,
 		"has_exited":   false,
 		"escort_target": -1,

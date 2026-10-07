@@ -45,6 +45,7 @@ const MAIN_HINT: String = "[T]互動"   # MODE_KEYMAP["main"] 的一段 ⇒ 判�
 const SUBMENU_INTEL_HINT: String = "選題"   # MODE_KEYMAP["intel"] ⇒ 打聽要走完子選單（systems 裁 2026-10-07）
 const TO_MAIN_MAX_ESC: int = 6
 const BATTLE_MAX_KEYS: int = 6
+const BATTLE_FIGHT_KEYS: int = 120   # ★投降被拒之後待機打到分出勝負的上限（BS2 打完那一段實測 12 拍）
 const PANEL_HEADER: String = "─ 面板（接管畫面）"
 # ★effect → 快照裡要變的那幾塊（單一來源是 ACTION_SHAPE 的 effect 值；這裡只是「那個值讀哪幾欄」）
 const EFFECT_FIELDS: Dictionary = {
@@ -384,13 +385,23 @@ static func _at_main(node: Node) -> bool:
 
 
 func _to_main(w: Dictionary) -> bool:
-	for _i in range(TO_MAIN_MAX_ESC + BATTLE_MAX_KEYS):
+	var battle_keys: int = 0
+	for _i in range(TO_MAIN_MAX_ESC + BATTLE_MAX_KEYS + BATTLE_FIGHT_KEYS):
 		if _at_main(w["node"]):
 			return true
 		if _screen(w["node"]).contains(TextUiView.BATTLE_TITLE):
 			# ★戰鬥中（終端戰鬥區）：照**畫面上印的**鍵把仗打完 —— 鍵列有「F:投降」就投降，戰後「按任意鍵離開」就按 Space
+			# ★票 T（2026-10-07）：多了「休息」⇒ N 21 → 22 ⇒ 走法第一次走到「攻擊」那一步 ⇒ 對方【拒絕投降】時仗還在打
+			#   ⇒ 舊版一直按 F 直到鍵數用完 ⇒「按完 攻擊 之後回不到主畫面」ABORT
+			#   ⇒ 投降被拒過一次之後改按待機（Space）讓仗分出勝負；鍵數預算放大到 BATTLE_FIGHT_KEYS
 			var keys: String = _hint(w["node"])
-			await _press(w, "f" if keys.contains("F:投降") else "space")
+			var refused: bool = bool(w.get("surrender_refused", false)) or _screen(w["node"]).contains("對方拒絕")
+			if refused:
+				w["surrender_refused"] = true
+			await _press(w, "f" if keys.contains("F:投降") and not refused else "space")
+			battle_keys += 1
+			if battle_keys > BATTLE_FIGHT_KEYS:
+				break
 			continue
 		await _press(w, "esc")
 	return _at_main(w["node"])
@@ -422,7 +433,7 @@ static func _snap(node: Node) -> Dictionary:
 		others_roster.append("%d:%d/%d/%d@%s" % [int(tid), t.population, t.named_members.size(), t.faction_id, str(t.tile_pos)])
 	if pt == null:
 		return {"task": "dead", "belief": "", "faction": "", "res_self": "", "res_others": str(others_res),
-			"encounter": "%s|%d" % [str(st.encounter_active), st.teams.size()],
+			"encounter": "%s|%d|%s" % [str(st.encounter_active), st.teams.size(), str(st.last_encounter_outcome)],
 			"encounter_result": str(st.last_encounter_result), "roster_self": "", "roster_others": str(others_roster)}
 	return {
 		"task": "%s|%s" % [pt.current_task, str(pt.move_target)],
@@ -430,7 +441,9 @@ static func _snap(node: Node) -> Dictionary:
 		"faction": "%d|%d" % [pt.faction_id, st.factions.size()],
 		"res_self": str(pt.resources),
 		"res_others": str(others_res),
-		"encounter": "%s|%d|%s" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams)],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
+		# ★票 T（2026-10-07）：再加 last_encounter_outcome —— 這一場若在這一步裡就打完，encounter_active 已回 false，
+		#   而對象早就在 player_hostile_teams 裡（前面的步打過）⇒ 兩欄都分不出；結算記錄（BS2 唯一寫入點）分得出
+		"encounter": "%s|%d|%s|%s" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams), str(st.last_encounter_outcome)],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
 		"encounter_result": str(st.last_encounter_result),
 		"roster_self": "%d|%s|%d" % [pt.leader_id, str(pt.named_members), pt.population],
 		"roster_others": str(others_roster),
@@ -622,12 +635,20 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		#   關子選單本身也可能是一道令（實測：交易子選單按 Esc ＝ 取消貿易，+1 tick）
 		#   ⇒ 第一版只補 adv ⇒ A t7／B t6 ⇒ ABORT。補齊之後兩邊 tick 仍不同（B 已經超過 A）⇒ 照舊 ABORT
 		var need: int = tick_a - _tick(wb["node"])
-		if need > 0:
+		# ★票 T（2026-10-07）：G 跳 tick 會被事件截斷（實測：攻擊那一步 A 打到 t181，B 按 G 124 停在 t60）
+		#   ⇒ 照畫面再按，直到追上（或不再前進 ⇒ 交給下面 tick 不同的 ABORT 判）
+		var tries: int = 0
+		while need > 0 and tries < 8:
 			var gk: Array = ["g"]
 			for ch in str(need):
 				gk.append(ch)
 			gk.append("enter")
+			var before_b: int = _tick(wb["node"])
 			await _press_all(wb, gk)
+			tries += 1
+			if _tick(wb["node"]) == before_b:
+				break
+			need = tick_a - _tick(wb["node"])
 		var b_keys: Array = (wb["keys"] as Array).slice(prefix.size())
 		var snap_b: Dictionary = _snap(wb["node"])
 		var tick_b: int = _tick(wb["node"])

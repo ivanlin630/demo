@@ -219,7 +219,10 @@ func _goal_task_delta(goal_type: String, task: String) -> float:
 			if task in [TeamData.TASK_TRADE, TeamData.TASK_PRODUCE, TeamData.TASK_MANUFACTURE, TeamData.TASK_LOOT]: return 0.005
 		"escape_war":
 			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return -0.015
-			if task in [TeamData.TASK_FLEE, TeamData.TASK_REST, TeamData.TASK_TRADE]: return 0.005
+			if task in [TeamData.TASK_FLEE, TeamData.TASK_REST, TeamData.TASK_TRADE]:
+				# ★票 T P8：TASK_REST 有了第一個寫入者 ⇒ 這一支第一次被啟用 ⇒ 不能在沒人看的情況下發生
+				if Probe.enabled and task == TeamData.TASK_REST: Probe.bump("goal.escape_war.rest_plus")
+				return 0.005
 		"domination":
 			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return 0.005
 		"merit":

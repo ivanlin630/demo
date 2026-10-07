@@ -61,6 +61,7 @@ scripts/simulation/outpost_system.gd::start_build::taskarbiter  # gate-ok: task 
 scripts/simulation/outpost_system.gd::start_demolish::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/outpost_system.gd::start_upgrade_level::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/player_command_system.gd::_action_camp::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
+scripts/simulation/player_command_system.gd::_action_rest::taskarbiter  # gate-ok: 玩家指令 PRIO_PLAYER（票 T 休息，同 _action_camp；交件信呈報 systems）
 scripts/simulation/player_command_system.gd::_action_order_subteam::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/player_command_system.gd::_action_respond_aid_request::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/sim_runner.gd::_advance_tick_body::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)

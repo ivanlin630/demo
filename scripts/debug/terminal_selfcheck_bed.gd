@@ -38,6 +38,7 @@ const EXPECTED_CELLS: Array = [
 	"_test_c_printed_keys_are_typeable",
 	"_test_h_no_dev_notes",
 	"_test_i_story_end_column",
+	"_test_j_fatigue_column_and_rest_key",
 ]
 
 # ══ 走法表（spec §3「六支走法」＋ R² 要的**退化版本**）════════════════════════════
@@ -89,6 +90,7 @@ func _run() -> void:
 	await _test_c_printed_keys_are_typeable()
 	await _test_h_no_dev_notes()
 	await _test_i_story_end_column()
+	await _test_j_fatigue_column_and_rest_key()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
 		if not _cells_ran.has(String(c)):
@@ -751,3 +753,42 @@ func _test_i_story_end_column() -> void:
 	_check("★★【反向對照】乾淨輸入不含欄標", not clean.contains(label))
 	_check("★★★【反向對照】塞進欄標之後必須含", (clean + label).contains(label))
 	_cell("_test_i_story_end_column")
+
+
+# ══ (j) 票 T §1③：玩家看得見疲勞（數值＋文字級距），也找得到「休息」那一鍵 ══════════════════════════════
+func _test_j_fatigue_column_and_rest_key() -> void:
+	print("
+── (j) 疲勞欄（數值＋級距）與休息鍵（票 T）──")
+	var screens: Array = _player_only(await _all_screens())
+	var levels: Array = ["精神好", "有點累", "疲憊，走得慢", "累垮了，只剩三成速度"]
+	var rest_label: String = PlayerApiMapper.action_label("rest")
+	var open_n: int = 0
+	var with_col: int = 0
+	var inter_n: int = 0
+	var with_rest: int = 0
+	for sc in screens:
+		var d: Dictionary = sc as Dictionary
+		var screen: String = String(d.get("screen", ""))
+		if String(d.get("story_end", "")) != "":
+			continue
+		var re := RegEx.new()
+		re.compile("疲勞: \\d+%[^\\n]*\\n[^\\n]*體力：([^\\s│|]+)")   # ★級距在狀態列的下一行（狀態列那行是 ui-flow 零損失的舊行，不動）
+		var m := re.search(screen)
+		if screen.contains("狀態: "):
+			open_n += 1
+			if m != null and levels.has(m.get_string(1)):
+				with_col += 1
+		if screen.contains("── 自家隊動作（"):
+			inter_n += 1
+			if screen.contains("]" + rest_label):
+				with_rest += 1
+		print("   %s：疲勞欄 %s｜自家隊動作區 %s／休息鍵 %s" % [String(d.get("name", "")), m.get_string(0) if m != null else "（無）",
+			str(screen.contains("── 自家隊動作（")), str(screen.contains("]" + rest_label))])
+	_check("★母體地板：有狀態列的走法 ≥ 1（%d）、有自家隊動作區的走法 ≥ 1（%d）" % [open_n, inter_n], open_n >= 1 and inter_n >= 1)
+	_check("(j)① 每一支有狀態列的走法都印「疲勞: N%%」＋下一行「體力：級距」（%d／%d）" % [with_col, open_n], with_col == open_n)
+	_check("(j)② 每一支有自家隊動作區的走法都列出「%s」那一鍵（%d／%d）" % [rest_label, with_rest, inter_n], with_rest == inter_n)
+	# ★反向：級距真的會隨數值變（四段各給一個值 ⇒ 四個不同的字）
+	var seen: Array = [0, 30, 70, 100].map(func(x): return TextUiMain.fatigue_level_text(x))
+	print("   級距 0／30／70／100 ％ ⇒ %s" % str(seen))
+	_check("(j)③【反向】級距隨數值變（四段四個字）", seen == levels)
+	_cells_ran.append("_test_j_fatigue_column_and_rest_key")

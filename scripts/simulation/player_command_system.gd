@@ -244,6 +244,7 @@ func _setup_registry() -> void:
 		"train":                  _action_train,
 		"camp":                   _action_camp,
 		"promote_anon":           _action_promote_anon,
+		"rest":                   _action_rest,
 	}
 
 # 執行玩家主動行動
@@ -434,6 +435,7 @@ const ACTION_SHAPE: Dictionary = {
 	"order_faction_member":    {"target": "none", "listed": false},
 	"order_subteam":           {"target": "none", "listed": false},
 	"promote_anon":            {"target": "none", "listed": true, "effect": "roster"},
+	"rest":                    {"target": "none", "listed": true, "effect": "task"},   # 票 T：`_action_rest` → 仲裁器設 TASK_REST（原地）
 	"propose_alliance":        {"target": "team", "listed": false, "effect": "faction"},
 	"recall_subteam":          {"target": "none", "listed": false},
 	"recruit":                 {"target": "team", "listed": false, "effect": "menu"},
@@ -609,6 +611,14 @@ func precheck_promote_anon(_state: WorldState, pt: TeamData) -> Dictionary:
 		return { "ok": false, "reason": "無匿名兵可拔擢" }
 	return { "ok": true, "reason": "" }
 
+# ★票 T：玩家「休息」—— 前置只問「累不累」（不累休息沒有東西可回復，說出來而不是吞掉）
+func precheck_rest(_state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	if pt.fatigue <= 0.0:
+		return { "ok": false, "reason": "隊伍不累，不需要休息" }
+	return { "ok": true, "reason": "" }
+
 # ★★★★★【前置檢查的派發表】—— 全列版的迴圈靠它，而**床用它做第四條反向掃**：
 #   每一個 `target=="none" and listed` 的動作都要在這裡有一支 ⇒ 漏一個紅並指名。
 func _precheck_for(action: String) -> Callable:
@@ -624,6 +634,7 @@ func _precheck_for(action: String) -> Callable:
 		"camp":                  return precheck_camp
 		"train":                 return precheck_train
 		"promote_anon":          return precheck_promote_anon
+		"rest":                  return precheck_rest
 	return Callable()
 
 # 同格閘的本體。★回空字典 ＝ 放行（★不回 bool：呼叫端要的是【那句人話】，
@@ -742,6 +753,16 @@ func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_
 		return { "ok": false, "msg": "拔擢失敗（無可拔擢 anon）" }
 	state.add_member(pt, p.id)   # 拔擢 anon→named（leader 不變,新增 named 成員）
 	return { "ok": true, "msg": "拔擢 %s 為記名成員" % p.person_name }
+
+# ★票 T（spec 2026-10-06 ticket-t-fatigue §1③）：玩家下令休息 ⇒ 原地停下（TASK_REST）
+#   ⇒ 疲勞分類落「不耗力」⇒ 回復；★不移動（move_target 清空）——休息就是停下來
+func _action_rest(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var pre_r: Dictionary = precheck_rest(state, pt)
+	if not bool(pre_r.get("ok", false)):
+		return { "ok": false, "msg": String(pre_r.get("reason", "")) }
+	if not TaskArbiter.try_set(state, pt, TeamData.TASK_REST, Vector2i(-1, -1), TaskArbiter.PRIO_PLAYER, "player_rest"):   # gate-ok：玩家指令（PRIO_PLAYER 權威，同 _action_camp 那一行）
+		return { "ok": false, "msg": "現在停不下來（有更急的事）" }
+	return { "ok": true, "msg": "原地休息（疲勞 %d%%）" % int(round(pt.fatigue * 100.0)) }
 
 # 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
 # 玩家發起的限時建造令（設玩家隊 task=建設,PRIO_PLAYER）→ construction 推進 → 完工釋放回 idle。

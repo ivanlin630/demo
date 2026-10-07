@@ -110,6 +110,8 @@ const NO_FAILURE_FEEDBACK: Dictionary = {
 	"徵收": "①不成立: 本地動作，沒有對手方會拒絕",
 	"迎戰": "①不成立: 接戰是做得成的；勝負是結果",
 	"訓練": "①不成立: 本地動作，沒有會失敗的執行步驟",
+	# ★票 T §2（2026-10-07 新 option）：休息＝原地 TASK_REST，疲勞 pass 照「沒出力」回復 ⇒ 沒有被拒絕的步驟
+	"休息": "①不成立: 本地動作（目的地＝自己所在格），沒有會失敗的執行步驟；回不回得了疲勞是結果",
 }
 
 static func key(option: String, target: String = "-") -> String:
