@@ -911,13 +911,21 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 	#   ★順序：先原名單、再依 state.teams 的鍵序補（確定性；不耗 RNG）
 	var to_visit: Array = arrived_ids.duplicate()
 	for _ctid in state.teams.keys():
-		if to_visit.has(_ctid) or not state.is_live_team(int(_ctid)):   # ★活隊才處理（普查表 A 類：對隊做事）
+		if not state.is_live_team(int(_ctid)):   # ★活隊才處理（普查表 A 類：對隊做事）
 			continue
 		var _ct: TeamData = state.teams[_ctid]
-		if not trade_arrived(_ct):
+		if _ct.current_task != TeamData.TASK_TRADE:
 			continue
 		var _ctile: HexTileData = state.world.tiles.get(_ct.tile_pos.x * 1000 + _ct.tile_pos.y)
-		if _ctile != null and _ctile.outpost_level > 0:
+		var _on_market: bool = _ctile != null and _ctile.outpost_level > 0
+		# ══ ★A2c ②（spec 2026-10-08 a2c）：有具體目標格、站在上面、腳下不是 outpost ⇒ 放手（不記失敗：錯的是目標不是市集）
+		#   ★只對【具體目標格】：move_target＝(-1,-1) 是 resident 擺攤的合法形狀（options.gd「貿易」to_task），
+		#     而登記居民可以人不在家 ⇒ 用 trade_arrived（含 (-1,-1)）會每小時放手、再選、再放手＝抖動（R² 021989e7e）
+		if not _on_market and _ct.move_target != Vector2i(-1, -1) and _ct.tile_pos == _ct.move_target:
+			Probe.bump("trade.arrived_off_market")
+			TaskArbiter.release(_ct)
+			continue
+		if _on_market and not to_visit.has(_ctid) and trade_arrived(_ct):
 			to_visit.append(_ctid)
 	for tid in to_visit:
 		if not state.teams.has(tid):

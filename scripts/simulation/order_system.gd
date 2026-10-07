@@ -478,6 +478,14 @@ func _deposit_known_orders_to_board(state: WorldState, team: TeamData, tile: Hex
 			kept.append(e)
 		tile.market_orders = kept
 
+# ★A2c（spec 2026-10-08 a2c-trade-target-lands-on-non-market-tile）：套利只考慮 pos 在【商人自己已知市集】裡的單
+#   ★病：一般買賣單的 origin_pos＝_market_pos（沒有自家 outpost ⇒ 下單隊當下站的格）——那是給同格碰面傳播用的位置快照，
+#     套利卻拿它當市集去導航 ⇒ 商人走到空地站著（那支漫遊隊早就走了）
+#   ★讀的是 belief（team_market_known，同 _nearest_market_outpost 那一份），不讀 live tile
+#   ★漫遊隊的單照樣傳播、照樣在同格碰面時成交（interaction 那條不動）；只是不再被當成導航目的地
+static func _pos_is_known_market(state: WorldState, merchant: TeamData, pos: Vector2i) -> bool:
+	return (state.team_market_known.get(merchant.team_id, {}) as Dictionary).has(pos.x * 1000 + pos.y)
+
 # 套利挑單：sell盤(便宜買)/buy單(高價賣) 取 local_value 差最大者（殘缺情報，讀 received）。
 func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 	Probe.bump("trade.arb_call")   # 漏斗站3：呼叫次數（含 DecisionContext has_arb 建構）
@@ -488,6 +496,9 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		Probe.bump("trade.arb_sell_seen")
 		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE:
 			Probe.bump("trade.arb_kill_range")
+			continue
+		if not _pos_is_known_market(state, merchant, o["pos"]):
+			Probe.bump("trade.arb_kill_not_market")
 			continue
 		# M5：廢 arb ×0.1 硬碼（相對排序不變，argmax 無關）。M4：估值讀 effective_holding。
 		# ★§0：套利的正解＝【捕獲剩餘】，不是【自評值高】。
@@ -546,6 +557,9 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		Probe.bump("trade.arb_buy_seen")
 		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE:
 			Probe.bump("trade.arb_kill_range")
+			continue
+		if not _pos_is_known_market(state, merchant, o["pos"]):
+			Probe.bump("trade.arb_kill_not_market")
 			continue
 		var stock: float = ResourceSystem.effective_holding(state, merchant, o["res"])
 		if stock <= 0.0:
