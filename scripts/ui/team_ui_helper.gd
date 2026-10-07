@@ -51,6 +51,10 @@ const ITEM_NAME: Dictionary = {
 	"armor_low": "低階護具", "armor_high": "高階護具",
 	"medicine": "藥品", "tools": "工具",
 }
+# ★D1（spec 2026-10-07 四缺陷）：資源鍵 → 玩家畫面的字（與狀態列「食:… 幣:… 材:…」同一套單字）
+const RESOURCE_NAME: Dictionary = {"food": "食", "coin": "幣", "material": "材", "goods": "貨"}
+static func resource_name(raw: String) -> String:
+	return String(RESOURCE_NAME.get(raw, raw))
 # 查不到就原樣回（★而「查不到」會被終端自驗 (d) 咬到 —— 新增一個 id 的人會被床擋下來，不是靜默印英文）
 static func part_name(raw: String) -> String:
 	return String(BODY_PART_NAME.get(raw, raw))

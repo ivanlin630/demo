@@ -33,7 +33,6 @@ const PANEL_OPEN_TOKENS: Array = ["t", "i", "p", "f", "o", "k", "u", "v"]
 var _scan_a: Dictionary = {}   # 英文識別字 → 第一次看到它的那一行
 var _scan_b: Dictionary = {}   # 佔位字 → 第一次看到它的那一行
 var _scan_n: int = 0
-const GLOBAL_KEY_IN_PANEL_WORDS: String = "面板開著時不能推進"
 
 const SEED_A: int = 1337
 const SEED_B: int = 4242
@@ -568,7 +567,10 @@ func _walk(sd: int, n_fixed: int, verbose: bool) -> Dictionary:
 		var new_ev: Array = _event_lines(scr1).filter(func(e): return not ev0.has(e))
 		var result: String = _result_line(scr1)
 		# ★格 c（D3 press-is-do）：這一屏若有這一道令的「指令」事件 ⇒ 結果行必須是同一句（不是「已排入」）
-		var cmd_rows: Array = new_ev.filter(func(e): return String(e).contains("｜指令｜"))
+		# ★介面自己入列的令（SimBridge.UI_INTERNAL_COMMANDS，同一份表）不是玩家下的 ⇒ 不拿它比
+		var internal_heads: Array = SimBridge.UI_INTERNAL_COMMANDS.map(func(nm): return "｜指令｜" + PlayerCommandApi.describe(String(nm), {}))
+		var cmd_rows: Array = new_ev.filter(func(e): return String(e).contains("｜指令｜") \
+			and internal_heads.filter(func(h): return String(e).contains(String(h))).is_empty())
 		if not cmd_rows.is_empty():
 			var ev_txt: String = String(cmd_rows[-1]).split("｜指令｜")[1].strip_edges()
 			var res_txt: String = result.trim_prefix("✓ ").strip_edges()
@@ -852,6 +854,9 @@ func _d1a_d2b_d3c(r: Dictionary) -> void:
 		print("   ✗ %s ⇐ %s" % [x, _scan_a[x]])
 	_check("★母體地板：格 a／b 掃過的屏數 ≥ 1（%d）" % _scan_n, _scan_n >= 1)
 	_check("D1a 事件流區沒有英文識別字（命中 %d：%s）" % [_scan_a.size(), str(_scan_a.keys())], _scan_a.is_empty())
+	# ★走法只碰得到一部分 kind ⇒ 全母體（WorldEvents.all_kinds()）逐一驗都有玩家短名（沒有的會被藏掉＝玩家少看一件事）
+	var no_label: Array = WorldEvents.all_kinds().filter(func(k): return WorldEvents.kind_label(String(k)) == "")
+	_check("D1a 事件 kind 全母體（%d 個）都有玩家短名（缺：%s）" % [WorldEvents.all_kinds().size(), str(no_label)], no_label.is_empty())
 	_cells_ran.append("D1A")
 	print("\n── D2b 玩家走法沒有佔位句（字表 %s）──" % str(PLACEHOLDER_WORDS))
 	for wd in _scan_b:
@@ -916,14 +921,14 @@ func _d4d_global_keys_in_panels() -> void:
 			var res: String = _result_line(_screen(w["node"]))
 			var t1: int = _tick(w["node"])
 			n += 1
-			var ok: bool = res.contains(GLOBAL_KEY_IN_PANEL_WORDS) or t1 > t0
+			var ok: bool = res.contains(TextUiMain.GLOBAL_KEY_IN_PANEL_MSG) or t1 > t0
 			print("   %s 面板（%s）按 %s ⇒ 結果「%s」｜tick %d→%d" % [op, mode, gk, res, t0, t1])
 			if not ok:
 				bad.append("%s／%s／%s：%s" % [op, mode, gk, res])
 			await _drop(w["node"])
 	_check("★母體地板：面板 × 全域鍵 至少判了 1 格（%d）" % n, n >= 1)
 	_check("D4d 面板開著時按全域鍵 ⇒ 照推進或印「%s」（不得是事件回應／無作用句；錯 %d：%s）" % [
-		GLOBAL_KEY_IN_PANEL_WORDS, bad.size(), str(bad)], bad.is_empty())
+		TextUiMain.GLOBAL_KEY_IN_PANEL_MSG, bad.size(), str(bad)], bad.is_empty())
 	_cells_ran.append("D4D")
 
 

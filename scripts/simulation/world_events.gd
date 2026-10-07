@@ -82,6 +82,26 @@ const STATE_KINDS: Array = [
 static func all_kinds() -> Array:
 	return MESSAGE_KINDS + FUNC_KINDS + STATE_KINDS
 
+# ══ ★D1（spec 2026-10-07 play-py-real-run-four-screen-defects §1）：kind → 玩家看得懂的短名【唯一一份】══════
+# ★事件流的「來源」欄與 describe() 沒有專屬句子時的那一句，都從這裡取 ⇒ 識別字不會再漏到玩家畫面
+# ★母體 ＝ all_kinds()（三張清單）；E2E 格 a 逐一驗每個 kind 都有短名（新增 kind 的人會被擋下來）
+const KIND_LABEL: Dictionary = {
+	"combat_start": "開戰", "combat_end": "戰鬥結束", "famine_warning": "饑荒警訊",
+	"faction_defect": "叛離勢力", "faction_establish": "建立勢力", "diplomacy": "外交",
+	"extortion": "勒索", "subjugate": "臣服", "tribute": "進貢", "aid_given": "援助",
+	"aid_refused": "拒絕援助", "trade_done": "成交", "order_buy": "收購單", "order_sell": "出售單",
+	"order_delivered": "交貨", "outpost_built": "建成據點", "split": "分裂", "replace": "換人領導",
+	"combat_engaged": "戰鬥", "leader_death": "領袖身亡", "team_extinct": "全滅", "teams_erased": "消失",
+	"betrayed": "背叛", "convoy_stranded": "運輸隊", "construction_stalled": "工地",
+	"construction_abandoned": "工地", "plan_invalidated": "計畫", "rung_changed": "野心",
+	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
+	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
+	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報",
+}
+# 查不到 ⇒ ""（呼叫端據此【不印給玩家】；debug 走法印原名）
+static func kind_label(kind: String) -> String:
+	return String(KIND_LABEL.get(kind, ""))
+
 # 標記：subjects 內每一隊在【本 tick】可立即重新思考。
 # ★★★`wake_thinking` 預設 **true**（票 §10.1）：
 #   ⇒ **任何未來新增的 emit 都會自動維持瞬醒** ＝ 構造保證。
@@ -330,7 +350,10 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"construction_abandoned":return "%s 放棄了工地" % who
 		"plan_invalidated":      return "%s 的計畫行不通了" % who
 		"rung_changed":          return "%s 的野心變了" % who
-		_:                       return "%s：%s" % [who, kind]
+		# ★D1：沒有專屬句子的 kind（訊息型那一批）⇒ 「誰：短名」；短名也沒有 ⇒ ""（不把識別字當句子）
+		_:
+			var lb: String = kind_label(kind)
+			return "%s：%s" % [who, lb] if lb != "" else ""
 
 # ★`from_id` 可以是 -1（choose_heir 沒有對方）⇒ 三句各自有自己的框,不硬套同一個前綴。
 #   ★★這一格是實測抓到的：第一版印出「Team-1 找上門」。

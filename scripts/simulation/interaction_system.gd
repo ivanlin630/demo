@@ -1523,7 +1523,7 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 	for res in gained:
 		var amount: int = int(gained[res])
 		if amount > 0:
-			parts.append("%s+%d" % [res, amount])
+			parts.append("%s+%d" % [TeamUiHelper.resource_name(String(res)), amount])   # ★D1：結果句進事件流，不印資源鍵
 	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
 	return { "ok": true, "accepted": true, "msg": "勒索完成（%s）" % detail }
 

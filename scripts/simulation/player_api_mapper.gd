@@ -433,7 +433,7 @@ static func action_label(action_id: String) -> String:
 		"establish_faction":     return "建立勢力"
 		"hunt":                  return "狩獵"
 		"hunt_beast":            return "獵猛獸"
-		"train":                 return "訓練（-%d coin）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
+		"train":                 return "訓練（-%d 幣）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
 		"promote_anon":          return "拔擢匿名→記名"
 		"camp":                  return "紮營"
 		# ★`cancel_move` 補進來（2026-10-01）：查詢面原本**手寫**「取消移動」
