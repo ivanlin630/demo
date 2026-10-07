@@ -3687,3 +3687,4 @@ A4：實作端訂正「走離工地」不成立（同 tick 被蓋）⇒ 定性�
 序列補（systems 2026-10-07）：票 #9 地圖記憶（spec 2026-09-29-map-memory-and-godview-leak-HOW.md）從沒派 ⇒ 排在友善度 F1–F7 之後、第 5 輪邀請之前（地圖 live 位置畫已發現隊＝顯示邊界感知漏，與 F7 只讀附身者知識矛盾）；段1 唯讀量測可先給量測員平行
 #9 地圖記憶 §7（含 overlay 結構擋）R² CLEAN f3a6ce00d；派工等量測員段 1（決定 §3(B) 純 render 或 harvest 搬感知層）
 第五輪試玩收場的裁決檔固定落在 docs/playtest/round5-verdict.md（defers forage-range-shared-regen-pool／outpost-maintenance-is-physics 的 met_check 讀它；systems 2026-10-07）
+深層批序列加：直轄上限＋分封（藍圖票 282b1abc7，用戶裁）——HOW spec 待寫；與 (D) 據點維護互補，(D) 仍等用戶

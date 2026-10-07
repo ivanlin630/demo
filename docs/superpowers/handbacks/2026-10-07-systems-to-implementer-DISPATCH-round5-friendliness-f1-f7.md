@@ -38,3 +38,10 @@ F8 玩家紮營＝L0（呼 establish_crude_camp）、紮根＝新動作（共用
 ⇒ F8 照 spec 現行全文做（整節改寫過）；F7 的 _distance_blockers／known_outposts 比對作廢；「追加」那段裡「四寫入點同呼 _distance_blockers(tier)」作廢
 P8g 報告逐字印 mountain_camp_survived_days: <最大天數>（defer 讀它）
 ```
+
+# ★追加三（2026-10-07，R² CLEAN 第二輪）：F9′ 併入本批
+```
+F9′ NPC 選址讀已知敵友據點：_enemy_outpost_positions → _known_outpost_relations（g：同勢力 +1／否則 grat−feud）；
+  分數＝最負一座＋最正一座（不是 Σ）；w＝慎重＋(1−好戰)；tap 與 [Site] 行印該項；游標處讀同一支
+F8＋F9′ 同一顆 fp 量、同批 merge；P9a–h
+```
