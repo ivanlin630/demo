@@ -104,8 +104,7 @@ P7 游標移到三種格各一次（已知據點旁／未知據點旁／空地�
    玩家紮根：新動作「紮根」——★只在【自己的 L0 營地】上列出（tile.camp_level==1 且 camp_team_id==玩家隊）；
             執行＝把 NPC 紮根落地那段（:7140-7161：設 crude_camp 工程、settle 工期、construction_team_id、corvee_site）抽成一支共用函式，玩家與 NPC 同呼；type 參數化（NPC 照 leader 價值、玩家照 build_type）
             precheck_settle：tier "L1"；原因句走 F7 那套（已知據點給距離與門檻、未知只說太近）
-③成本：玩家紮根＝NPC 紮根今天的成本（settle 工期、免材料）——★藍圖信寫「工期材料照 L1」，而 NPC 紮根今天不扣材料
-   ⇒ 照「同一支」先做成一樣；要扣材料是 WHAT，兩邊一起改（已回藍圖）
+③成本：玩家紮根＝NPC 紮根今天的成本：settle 工期、免材料（藍圖定：成本就是時間，材料留給之後蓋設施）
 ④家欄：紮營後頂列「家」印營地 ⇒ _home_pos/_home_kind 在無據點時退到 state.own_camp_tile(玩家隊)，kind＝「營地」（仍守三欄同給或同 null）
 ⑤動作鍵：紮根是新 action id（不變量 #10 靜態 id）；不讓「紮營」在自己營地上變成紮根（同一鍵兩個意思）
 ```
