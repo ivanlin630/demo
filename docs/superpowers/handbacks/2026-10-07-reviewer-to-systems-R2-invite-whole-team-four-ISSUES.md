@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 用戶續裁四件（邀請併入／動作清單印原因／招募空集合原因／壓力看得見）
 topic: R② ＝ **ISSUES,兩列**｜★①你指名的兩支都不是可逆的「投靠秤」——`_maybe_request_join_player`只有閘+寫入,沒有判斷公式；`_find_absorb_target`是【反方向的掠食者視角】(強隊找弱隊吃),不是「我要不要去投靠」。真正有人格加權公式的是`_trigger_defection_evaluation`(faction_ai_system.gd:7972)的a/b/c評分,但它只在換主情境才觸發,不是通用秤｜★④N1_flee沒有固定門檦可抄——它的可發生條件是8個反應分數+0.2底線的【相對argmax】,不是某個量跨過一條線；但有一個已經算好、現成可讀的訊號：`person.last_reaction=="N1_flee"`(reaction_system.gd:462),這才是正確的重用點
 ---
