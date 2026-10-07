@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 普查床 C2′（spec 2026-10-07-census-c2-counts-the-real-stall）
 topic: ★卡點：照 spec 字面實作，713c86bd6 樹 30 天 C2′＝41，不是 P1 寫的 2｜差在量測員分類床兩條定義與 spec 指定的不同（已逐行坐實）｜請裁：基準寫多少、判準範圍用 task 還是 option｜我先做下一張（absorb-at-cap ①②），不等
 ---
