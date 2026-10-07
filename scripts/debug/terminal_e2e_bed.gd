@@ -18,7 +18,7 @@ extends SceneTree
 var _errors: int = 0
 var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
-	"D1A", "D2B", "D3C", "D4D"]
+	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -91,6 +91,7 @@ func _initialize() -> void:
 	await _e4_forced_label_marks(r1)
 	await _battle_cells()
 	await _d4d_global_keys_in_panels()
+	await _bs_cells()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -930,6 +931,134 @@ func _d4d_global_keys_in_panels() -> void:
 	_check("D4d 面板開著時按全域鍵 ⇒ 照推進或印「%s」（不得是事件回應／無作用句；錯 %d：%s）" % [
 		TextUiMain.GLOBAL_KEY_IN_PANEL_MSG, bad.size(), str(bad)], bad.is_empty())
 	_cells_ran.append("D4D")
+
+
+# ══ BS：戰鬥區在打的時候要被看過（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §票 BS）══════
+const BS_BEATS: Array = ["space", "w", "space"]        # 進戰後 ≥3 拍不投降：待機／移動／待機
+const BS_SIX: Array = ["兵力：", "── 主角狀態 ──", "── 裝備 ──", "── 游標 ──", "── 單位（", "── 戰報 ──"]
+const BS_FIGHT_MAX: int = 120
+
+# 主動攻擊同格的 NPC_ID（同 BATTLE① 的路）⇒ 回傳 w；進不了戰鬥 ⇒ {}
+#   ★BS3 佈置：玩家 體力 1.0、對方領袖 體力 0.0 ⇒ 兩邊速度不同（encounter_system `_base_speed`）⇒ 計時不會同步重置
+func _bs_enter(sd: int, uneven_speed: bool) -> Dictionary:
+	var w: Dictionary = _new_w(await _build(sd))
+	var node: Node = w["node"]
+	if uneven_speed:
+		var st: WorldState = node._bridge._state
+		var pp: PersonData = st.persons.get(st.player_id)
+		if pp != null:
+			pp.attributes["體力"] = 1.0
+		var nt: TeamData = st.teams.get(NPC_ID)
+		if nt != null and st.persons.has(nt.leader_id):
+			(st.persons[nt.leader_id] as PersonData).attributes["體力"] = 0.0
+	await _press(w, "t")
+	if not bool(parse_screen(_screen(node))["targets_active"]):
+		await _press(w, "tab")
+	await _press(w, "1")
+	var atk_key: String = ""
+	for a in parse_screen(_screen(node))["actions"]:
+		if String(a["label"]) == PlayerApiMapper.action_label("attack") and bool(a["enabled"]):
+			atk_key = String(a["key"])
+	if atk_key == "":
+		await _drop(node)
+		return {}
+	await _press(w, atk_key)
+	if not _screen(node).contains(TextUiView.BATTLE_TITLE):
+		await _drop(node)
+		return {}
+	return w
+
+
+static func _bs_timers(scr: String) -> Array:
+	var re := RegEx.new()
+	re.compile("行動倒數 (\\d+)")
+	return re.search_all(scr).map(func(m): return int(m.get_string(1)))
+
+
+func _bs_cells() -> void:
+	print("\n── BS1／BS3 進戰後 %d 拍不投降：每拍六欄＋單位列表＋畫面 tick＝世界 tick｜計時會變 ──" % BS_BEATS.size())
+	var w: Dictionary = await _bs_enter(SEED_A, true)
+	_check("★BS 母體地板：進得了戰鬥（主動攻擊同格隊）", not w.is_empty())
+	if w.is_empty():
+		_cells_ran.append_array(["BS1", "BS2", "BS3"])
+		return
+	var node: Node = w["node"]
+	var bad1: Array = []
+	var timer_sets: Dictionary = {str(_bs_timers(_screen(node))): true}
+	var beats: int = 0
+	var p10_before: int = (w["p10_bad"] as Array).size()
+	for k in BS_BEATS:
+		await _press(w, String(k))
+		var scr: String = _screen(node)
+		if not scr.contains(TextUiView.BATTLE_TITLE):
+			bad1.append("第 %d 拍（%s）之後戰鬥區不見了" % [beats + 1, k])
+			break
+		beats += 1
+		var miss: Array = BS_SIX.filter(func(x): return not scr.contains(String(x)))
+		var units: int = _bs_timers(scr).size()
+		var keys_ok: bool = _hint(node).replace(" ", "").contains(String(node._encounter_view.terminal_keys()).replace(" ", ""))
+		print("   第 %d 拍（%s）：六欄缺 %s｜單位 %d 行｜鍵列 %s｜計時 %s｜tick %d" % [beats, k, str(miss), units,
+			"對" if keys_ok else "錯", str(_bs_timers(scr)), _tick(node)])
+		if not miss.is_empty() or units < 2 or not keys_ok:
+			bad1.append("第 %d 拍：六欄缺 %s／單位 %d 行／鍵列 %s" % [beats, str(miss), units, str(keys_ok)])
+		timer_sets[str(_bs_timers(scr))] = true
+	var p10_new: Array = (w["p10_bad"] as Array).slice(p10_before)
+	_check("★BS1 母體地板：戰鬥中按了 %d 拍（%d）" % [BS_BEATS.size(), beats], beats == BS_BEATS.size())
+	_check("BS1 每拍六欄齊＋單位列表 ≥ 2 行＋鍵列＝戰鬥鍵（錯：%s）" % str(bad1), bad1.is_empty())
+	_check("BS1 每拍回來那一屏的時間 ＝ 世界 tick（不同 %d：%s）" % [p10_new.size(), str(p10_new)], p10_new.is_empty())
+	_cells_ran.append("BS1")
+	print("   BS3 每次輪到玩家時看到的計時組合：%s" % str(timer_sets.keys()))
+	_check("BS3 不同速的單位 ⇒ %d 拍內單位計時至少變一次（看到 %d 種組合）" % [BS_BEATS.size(), timer_sets.size()], timer_sets.size() >= 2)
+	_cells_ran.append("BS3")
+	await _drop(node)
+
+	print("\n── BS2 三種結束各一步：打完／撤出／投降 ⇒ 回到主畫面、結果句說出是哪一種 ──")
+	var ends: Array = []
+	# ①打完：一直待機（敵方會打過來）直到分出勝負
+	var wf: Dictionary = await _bs_enter(SEED_A, false)
+	if not wf.is_empty():
+		var st_f: WorldState = wf["node"]._bridge._state
+		var n_f: int = 0
+		while st_f.encounter_active and n_f < BS_FIGHT_MAX and _screen(wf["node"]).contains(TextUiView.BATTLE_TITLE):
+			await _press(wf, "space")
+			n_f += 1
+		var back_f: bool = await _to_main(wf)
+		var res_f: String = _result_line(_screen(wf["node"]))
+		print("   ①打完：待機 %d 拍｜回主畫面 %s｜結果「%s」" % [n_f, str(back_f), res_f])
+		ends.append({"kind": "打完", "ok": back_f and res_f.contains("戰鬥結束"), "res": res_f})
+		await _drop(wf["node"])
+	# ②撤出：被伏擊 ⇒ 往邊界外走（同 BATTLE② 的路）
+	var we: Dictionary = _new_w(await _build(SEED_A))
+	var st_e: WorldState = we["node"]._bridge._state
+	EncounterSystem.new().init_encounter(st_e, NPC_ID, st_e.get_player_team_id(), "ambush")
+	await _press(we, "x")
+	var dir_key: String = ""
+	for k in ["w", "q", "e", "a", "s", "d"]:
+		if _hint(we["node"]).to_lower().contains(k):
+			dir_key = k
+			break
+	for _i in range(30):
+		if not _screen(we["node"]).contains(TextUiView.BATTLE_TITLE) or not st_e.encounter_active:
+			break
+		await _press(we, dir_key)
+	var back_e: bool = await _to_main(we)
+	var res_e: String = _result_line(_screen(we["node"]))
+	print("   ②撤出：回主畫面 %s｜結果「%s」" % [str(back_e), res_e])
+	ends.append({"kind": "撤出", "ok": back_e and res_e.contains("撤出"), "res": res_e})
+	await _drop(we["node"])
+	# ③投降：戰鬥區印的 F
+	var ws: Dictionary = await _bs_enter(SEED_A, false)
+	if not ws.is_empty():
+		await _press(ws, "f")
+		var back_s: bool = await _to_main(ws)
+		var res_s: String = _result_line(_screen(ws["node"]))
+		print("   ③投降：回主畫面 %s｜結果「%s」" % [str(back_s), res_s])
+		ends.append({"kind": "投降", "ok": back_s and res_s.contains("投降"), "res": res_s})
+		await _drop(ws["node"])
+	var bad2: Array = ends.filter(func(e): return not bool(e["ok"])).map(func(e): return "%s：%s" % [e["kind"], e["res"]])
+	_check("★BS2 母體地板：三種結束都走到（%d）" % ends.size(), ends.size() == 3)
+	_check("BS2 每種結束都回到主畫面、結果句說出是哪一種（錯：%s）" % str(bad2), bad2.is_empty())
+	_cells_ran.append("BS2")
 
 
 # ══ E2：兩支都沒有勢力的隊，「提議同盟」不得因「同一個勢力」而不可 ══════════════════════════════

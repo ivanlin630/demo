@@ -228,6 +228,10 @@ func _enter_encounter() -> void:
 
 func _on_encounter_ended() -> void:
 	_vbox.visible = true
+	# ★BS2：回到主畫面那一刻，結果行說出這一場怎麼結束的（打完／撤出）；投降那句已由指令結果寫上，不蓋
+	var _end: String = _encounter_view.end_sentence()
+	if _end != "":
+		_set_feedback(true, _end)
 	_refresh_snapshot()
 	_refresh()
 

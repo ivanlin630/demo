@@ -32,6 +32,12 @@ var _post_combat: bool = false   # 遭遇戰結束後，等待玩家按 [J] 收�
 var _last_msg: String = ""           # `_log` 的最後一句（GUI 印到 stdout；終端把它放進戰鬥區）
 var _cmd_items: Array = []           # Z 命令選單的項目 [[id, 標籤], …]（空 ＝ 選單沒開）
 var _cmd_popup: PopupMenu = null
+# ★BS2（spec 2026-10-07 battle-screen-asserted §BS）：戰鬥怎麼結束的 —— 回主畫面那一刻結果行要說出是哪一種
+#   ·撤出：玩家單位在場上被標 has_exited（每次刷新時記，因為結算後 encounter_units 會被清）
+#   ·打完：這一場真的結算了（last_encounter_result 換了一份 ⇒ is_same 判「是不是這一場的」）
+#   ·投降：走指令佇列，結果句（「…投降被接受」）已由 D3 上了結果行 ⇒ 這裡不蓋它
+var _player_exited: bool = false
+var _result_at_start = null
 var handle_key_calls: int = 0        # ★P10b：`_handle_key` 被呼了幾次（GUI 廣播一次按鍵 ⇒ 只能 +1）
 var _selected_part: String = "torso"   # attack target body part, chosen in attack_select mode
 
@@ -46,6 +52,8 @@ func setup(bridge: SimBridge) -> void:
 func show_encounter() -> void:
 	visible = true
 	_post_combat = false
+	_player_exited = false
+	_result_at_start = _bridge.get_state().last_encounter_result if _bridge != null else null
 	# Center camera so axial (0,0) appears at viewport center.
 	var vp_size: Vector2 = get_viewport_rect().size
 	_camera = vp_size * 0.5 - _hex_center(Vector2i.ZERO) * _zoom
@@ -110,6 +118,8 @@ func _make_section_label(text: String) -> Label:
 func _refresh_ui() -> void:
 	if _bridge == null: return
 	var state: WorldState = _bridge.get_state()
+	if bool(_find_player_unit(state).get("has_exited", false)):
+		_player_exited = true
 	# U11: 戰報（命中/傷害）每次刷新顯示，戰前/戰後皆可
 	if _lbl_log != null:
 		_lbl_log.text = "\n".join(_bridge.query_encounter_log(6))
@@ -169,6 +179,24 @@ func _refresh_ui() -> void:
 	if _mode == "attack_select":
 		_lbl_actions.text     = _attack_select_hint(_selected_part)
 		_lbl_cursor_info.text = "攻擊部位 ↑↓：%s" % TeamUiHelper.part_name(_selected_part)
+
+# ★BS2：結束種類的一句話（"" ＝ 不蓋結果行：投降那句已經在上面）
+func end_sentence() -> String:
+	if _bridge == null:
+		return ""
+	if _player_exited:
+		return "你撤出了戰場"
+	var state: WorldState = _bridge.get_state()
+	var res = state.last_encounter_result
+	if res == null or is_same(res, _result_at_start) or (res as Dictionary).is_empty():
+		return ""
+	var pp: PersonData = state.persons.get(state.player_id)
+	var ptid: int = pp.team_id if pp != null else -1
+	if int(res.get("winner_id", -1)) == ptid:
+		return "戰鬥結束：你們打贏了"
+	if int(res.get("loser_id", -1)) == ptid:
+		return "戰鬥結束：你們打輸了"
+	return "戰鬥結束"
 
 func _find_player_unit(state: WorldState) -> Dictionary:
 	for unit in state.encounter_units:
