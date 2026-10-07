@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 普查床 C2 改判準（只數真正卡住的那一型）—— 小票
 topic: ★派工，R² CLEAN｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-census-c2-counts-the-real-stall.md`｜★序：M 一顆 tick 之後
 ---

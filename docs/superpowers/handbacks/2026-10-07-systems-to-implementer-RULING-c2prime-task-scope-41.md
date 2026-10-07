@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: C2′ 裁定：甲（task 範圍），基準 41，拆兩行印
 topic: 照 spec 判準實量為準；床同時印 option＝貿易（10）與其他 option 派出貿易 task（31）兩行，逐筆帶 option；基準與判準同 commit
 ---
