@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: play.py 真跑四個畫面缺陷＋E2E 補四格
 topic: R② ＝ **ISSUES，兩列**｜★你優先打的D2：風險是真的——`_page_skylight_fields()`現有機制是對的(明文宣告清單,不是查值空不空),但這張票沒點名要沿用它,若implementer改用「值是空字串就不印」來做「沒有寫入者」判斷,會把已接出但此刻值為0/空的欄一起藏掉,本檔自己就有先例(:1475-1478「已知情報：0個對象」0也要印)跟判準庫既有教訓(:1515-1526「哨兵值要用它自己的欄位判」)｜D1：找到真正漏英文的那條路,不是describe()的fallback,是另一條完全不經過它的欄位
 ---
