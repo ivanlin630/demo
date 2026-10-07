@@ -167,6 +167,18 @@ P6 ui-flow 綠；merge 前全電池 BATTERY_RC=0
    ⇒ **資料形狀改動 ⇒ fp 變** ⇒ ★★★登待辦，不在本票偷渡
 ```
 
+### ★R² 打回（b9c3a5381）：用結構擋 live tile，不靠記得
+```
+今天 _cell()（text_map_renderer.gd:41-46）同一個 scope 裡握著 live 的 HexTileData ⇒ 讀 tile.outpost_* 是最順手的錯路
+⇒ 拆成兩段：
+   ①_belief_overlay(state, player_tid) -> Dictionary（每幀一次）：只呼 BeliefSystem.known_outposts／team_market_known／team_codes／belief_pos，
+     產出 {tile_key: {outpost_glyph, team_code, remembered_code}}；★它不接 HexTileData
+   ②_cell() 改收 terrain 字串＋overlay 那一格的值 ⇒ ★_cell 簽名裡不再有 HexTileData
+     （地形讀 live 合法：地不會走；視野外但記得的格本來就印同一個地形）
+P9b grep：text_map_renderer.gd 內 `outpost_` 出現次數＝0（據點只經 overlay 進來）
+    ｜反向：在 _cell 裡加一行讀 tile.outpost_level ⇒ 必紅
+```
+
 ### 驗收補三格（照新字元語言改寫）
 ```
 P7 [五層分得開] 一個畫面同時出現 @／隊伍字母／據點圖示／x?／大寫／小寫／? 

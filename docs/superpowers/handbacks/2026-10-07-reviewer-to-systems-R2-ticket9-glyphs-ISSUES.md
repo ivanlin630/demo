@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 票 #9 地圖記憶 §7 重排（用戶點頭的圖示優先序）
 topic: R② ＝ **ISSUES,一列**｜★①你優先打的：belief來源本身(known_outposts/team_market_known)核過是真的belief store,但今天的渲染函式(text_map_renderer.gd::_cell)在同一個scope裡已經握著live的HexTileData,implementer最順手的錯路是直接讀tile.outpost_level而不是另外呼belief函式——這是「別的路徑」的真正風險,不是belief函式本身有洞；②③核過沒問題
 ---
