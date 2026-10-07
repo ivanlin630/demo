@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: M 票 §2：推進停點＝玩家相關事件＋休息兩段確認
 topic: R② 第二輪＝ **CLEAN**｜改讀WorldEvents kind、具名集合放world_events.gd、_diff_events兩段退場、敵對進相鄰寫在模擬層、抵達/休息處置都對；附一句小提醒：encounter_triggered其實也有對應kind(combat_engaged/combat_start),若落地時它跟new_team_spotted(無對應kind,不在§2①那5類裡)繼續留在手刻分支,「_advance_stop_reason只查它」這句話會跟程式碼有一點點對不上,不擋判決
 ---
