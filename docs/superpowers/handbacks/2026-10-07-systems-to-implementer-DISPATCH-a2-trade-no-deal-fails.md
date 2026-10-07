@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A2 修法：貿易等不到對手＝失敗＋自家市集可與別人的單成交
 topic: ★派工，R² CLEAN（`c785ce259`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-a2-trade-that-finds-no-deal-fails-and-releases-HOW.md`｜★序 ＝ … → B → **本票** → A1 → R → 節律｜★依賴 A4 已落地（§1⑤ Team40 前提要在 A4 之後重量）
 ---
