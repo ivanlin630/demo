@@ -18,7 +18,7 @@ extends SceneTree
 var _errors: int = 0
 var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
-	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART"]
+	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -93,6 +93,7 @@ func _initialize() -> void:
 	await _battle_cells()
 	await _d4d_global_keys_in_panels()
 	await _bs_cells()
+	await _f_cells()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -442,7 +443,9 @@ static func _snap(node: Node) -> Dictionary:
 		"res_others": str(others_res),
 		# ★票 T（2026-10-07）：再加 last_encounter_outcome —— 這一場若在這一步裡就打完，encounter_active 已回 false，
 		#   而對象早就在 player_hostile_teams 裡（前面的步打過）⇒ 兩欄都分不出；結算記錄（BS2 唯一寫入點）分得出
-		"encounter": "%s|%d|%s|%s" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams), str(st.last_encounter_outcome)],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
+		# ★戰鬥區第二輪（2026-10-07）：再加 encounter_initial_pop —— 對方【接受投降】時仗走 cleanup、不經結算（沒有 outcome），
+		#   而 init_encounter 開打那一刻在雙方隊上寫了它 ⇒ 「這一步真的開過戰」的持久痕跡
+		"encounter": "%s|%d|%s|%s|%d" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams), str(st.last_encounter_outcome), pt.encounter_initial_pop],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
 		"encounter_result": str(st.last_encounter_result),
 		"roster_self": "%d|%s|%d" % [pt.leader_id, str(pt.named_members), pt.population],
 		"roster_others": str(others_roster),
@@ -1029,6 +1032,11 @@ func _bs_v2_cells(w: Dictionary) -> void:
 	var re_c := RegEx.new()
 	re_c.compile("[A-Za-z@]")
 	for l in map_lines:
+		# ★畫面外那一行帶方向鍵（「a（W 方向 8 格）」）⇒ 只取「代號（」；格線那幾行才逐字取
+		if String(l).begins_with("畫面外："):
+			for m in RegEx.create_from_string("([A-Za-z@])（").search_all(String(l)):
+				map_codes.append(m.get_string(1))
+			continue
 		for m in re_c.search_all(String(l)):
 			map_codes.append(m.get_string(0))
 	var list_codes: Array = _section(reg, "── 單位（").filter(func(l): return RegEx.create_from_string("^[A-Za-z@] (我方|敵方) ").search(String(l)) != null) \
@@ -1091,6 +1099,100 @@ func _bs_v2_cells(w: Dictionary) -> void:
 	print("   主角狀態 %d 行：%s" % [body.size(), str(body)])
 	_check("V2PART 主角狀態每行逐字＝名表的部位全名：狀態全名（錯：%s）" % str(bad), body.size() >= 6 and bad.is_empty())
 	_cells_ran.append("V2PART")
+
+
+# ══ 戰鬥區第二輪（spec 2026-10-07 battle-start-visibility-and-r-feedback §1）══════════════════════════
+static func _top_clock(scr: String) -> String:
+	return String(scr.split("\n")[0]).split(" ｜ ")[0].strip_edges()
+
+
+func _f_cells() -> void:
+	print("\n── F1／F2 開戰那一屏：看得到敵人＋R 的回應只有一個出口（結果行）──")
+	var w: Dictionary = await _bs_enter(SEED_A, false)
+	_check("★F 母體地板：進得了戰鬥", not w.is_empty())
+	if w.is_empty():
+		_cells_ran.append_array(["F1", "F2"])
+	else:
+		var node: Node = w["node"]
+		var view = node._encounter_view
+		var st: WorldState = node._bridge._state
+		var reg: String = _battle_region(_screen(node))
+		var tgt: String = "\n".join(PackedStringArray(_section(reg, "── 目標 ──")))
+		var codes: Dictionary = view.unit_codes(st)
+		var enemy_codes: Array = []
+		for i in codes:
+			if int((st.encounter_units[i] as Dictionary).get("team_id", -1)) != view._player_team_id(st):
+				enemy_codes.append(String(codes[i]))
+		var map_txt: String = "\n".join(PackedStringArray(_section(reg, "── 戰場（")))
+		var placed: Array = enemy_codes.filter(func(c): return RegEx.create_from_string("(^|\\s)%s(\\s|$)" % c).search(map_txt) != null \
+			or RegEx.create_from_string("%s（[QWEASD] 方向 \\d+ 格）" % c).search(map_txt) != null)
+		print("   開戰第一屏目標欄：%s｜敵方代號 %s，在地圖或畫面外（帶方向距離）的 %s" % [tgt.replace("\n", "｜"), str(enemy_codes), str(placed)])
+		_check("F2 開戰第一屏目標欄非空（遭遇＝同格對峙，雙方互見）", RegEx.create_from_string("目標：[A-Z]（").search(tgt) != null)
+		_check("F2 每一個敵方代號都在地圖上或畫面外清單（帶方向＋格數）（%d／%d）" % [placed.size(), enemy_codes.size()],
+			not enemy_codes.is_empty() and placed.size() == enemy_codes.size())
+		# F1：打不到（開戰時彼此相距遠）⇒ R 的原因句出現在結果行
+		await _press(w, "r")
+		var res1: String = _result_line(_screen(node))
+		print("   R（打不到）⇒ 結果行「%s」" % res1)
+		_check("F1 R 打不到 ⇒ 結果行出現原因句「%s」" % view.NO_TARGET_IN_RANGE_MSG, res1.contains(view.NO_TARGET_IN_RANGE_MSG))
+		# F1 反向：把目標搬到旁邊 ⇒ R ⇒ 結果行是攻擊結果句（含目標代號）
+		var me: Vector2i = view._find_player_unit(st).get("pos", Vector2i.ZERO)
+		view._ensure_target(st)
+		var ti: int = int(view._target_idx)
+		if ti >= 0:
+			(st.encounter_units[ti] as Dictionary)["pos"] = me + Vector2i(1, 0)
+		await _press(w, "up")
+		await _press(w, "r")
+		var res2: String = _result_line(_screen(node)) if _screen(node).contains(TextUiView.BATTLE_TITLE) else ""
+		var tcode: String = String(codes.get(ti, "?"))
+		print("   R（目標 %s 在旁邊）⇒ 結果行「%s」" % [tcode, res2])
+		_check("F1【反向】打得到 ⇒ 結果行是攻擊結果句（含 %s（）" % tcode, res2.contains(tcode + "（") and res2.contains("@（你）"))
+		_cells_ran.append("F1")
+		# F2 反向：一個敵人走出視野（搬到看不到的格）⇒ 之後不在地圖／目標欄
+		var vis: Dictionary = view._player_visible_hexes(st, view._player_team_id(st))
+		var hide_i: int = -1
+		for i in codes:
+			var u: Dictionary = st.encounter_units[i]
+			if int(u.get("team_id", -1)) != view._player_team_id(st) and view._unit_present(u, st) and i != ti:
+				hide_i = i
+				break
+		if hide_i == -1:
+			hide_i = ti
+		var far: Vector2i = Vector2i(-99, -99)
+		for q in range(-12, 13):
+			for r in range(-12, 13):
+				var h := Vector2i(q, r)
+				if view._is_in_map(h) and not vis.has(h) and far == Vector2i(-99, -99):
+					far = h
+		# ★「走出視野」＝先進過視野、再離開：先搬到主角旁邊刷新一次，再搬到看不到的格
+		(st.encounter_units[hide_i] as Dictionary)["pos"] = me + Vector2i(0, 1)
+		await _press(w, "up")
+		(st.encounter_units[hide_i] as Dictionary)["pos"] = far
+		await _press(w, "up")
+		var reg3: String = _battle_region(_screen(node))
+		var hc: String = String(codes[hide_i])
+		var map3: String = "\n".join(PackedStringArray(_section(reg3, "── 戰場（")))
+		var tgt3: String = "\n".join(PackedStringArray(_section(reg3, "── 目標 ──")))
+		var still: bool = RegEx.create_from_string("(^|\\s)%s(\\s|（)" % hc).search(map3) != null or tgt3.contains(hc + "（")
+		print("   %s 走到看不到的格 %s ⇒ 地圖／目標欄還有它：%s" % [hc, str(far), str(still)])
+		_check("F2【反向】走出視野的敵人 %s 不再出現在地圖／目標欄" % hc, far != Vector2i(-99, -99) and not still)
+		_cells_ran.append("F2")
+		await _drop(node)
+	print("\n── F3 推進鍵之後結果行＝推進句（時間與頂列一致）──")
+	var wx: Dictionary = _new_w(await _build(SEED_A))
+	var bad3: Array = []
+	for k in ["x", "x", "space", "x"]:
+		await _press(wx, k)
+		var scr: String = _screen(wx["node"])
+		var res: String = _result_line(scr)
+		var clk: String = _top_clock(scr)
+		var ok: bool = (res.contains("推進到 " + clk)) or res.contains("推進停在 " + clk)
+		print("   按 %s ⇒ 頂列「%s」｜結果「%s」" % [k, clk, res])
+		if not ok:
+			bad3.append("%s：%s／%s" % [k, clk, res])
+	_check("F3 每一次推進鍵之後結果行是推進句、時間＝頂列（錯：%s）" % str(bad3), bad3.is_empty())
+	_cells_ran.append("F3")
+	await _drop(wx["node"])
 
 
 func _bs_cells() -> void:

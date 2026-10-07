@@ -1006,6 +1006,9 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 		if exert == "":
 			# ★不耗力 ⇒ 照現行回復算式（常數不動；崗哨比例照舊折回復）
 			var before: float = team.fatigue
+			# ★疲勞床 P1 的母體：疲勞 > 0 時有過【不出力】的 pass 的隊（一刻都沒停過的隊照機制本來就不會降）
+			if Probe.enabled and before > 0.0:
+				Probe.bump("fatigue.restpass_pos.byteam.%04d" % int(tid))
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
 			team.fatigue -= FATIGUE_RECOVERY_PER_DAY * day_fraction * rest_mult
 			team.fatigue = maxf(team.fatigue, 0.0)

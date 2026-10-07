@@ -348,6 +348,7 @@ func _process(_delta: float) -> void:
 		_log_event("Team%d 到達 (%d,%d)" % [_player_tid, pos.x, pos.y])
 
 	if result.get("done", false):
+		_report_key_advance(result)
 		var mt2: Vector2i = _bridge.get_player_move_target()
 		if _input_bar.text.begins_with("移動中") and mt2 != Vector2i(-1, -1):
 			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
@@ -671,7 +672,7 @@ func _handle_input_mode(keycode: int) -> void:
 					var n: int = mini(int(_input_buffer), SimBridge.ADVANCE_MAX_REQUEST)
 					_input_mode = false
 					_input_bar.text = ""
-					_bridge.request_advance(n)
+					_request_key_advance(n)
 					_input_buffer = ""
 					_refresh()
 		KEY_ESCAPE:
@@ -935,7 +936,8 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"panel": _event_label.text if _current_mode_name() != "main" else "",
 		"action": rows,
 		"feed": _feed_rows,
-		"result": _feedback_line.text,
+		# ★F1：戰鬥中每一鍵的回應只有一個出口 ＝ 結果行（encounter_view.key_reply；這一鍵沒有回應 ⇒ 照舊）
+		"result": _encounter_view.key_reply() if _in_battle() and _encounter_view.key_reply() != "" else _feedback_line.text,
 		"keymap": _hint_line.text,
 		# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1②）：戰鬥中才非空；內容與鍵提示都從 encounter_view 讀
 		"battle": _encounter_view.terminal_block() if _in_battle() else "",
@@ -1074,9 +1076,9 @@ func _global_advance_key(keycode: int) -> void:
 		return
 	match keycode:
 		KEY_SPACE:
-			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_DAY))
+			_request_key_advance(_snap_to(WorldState.TICKS_PER_DAY))
 		KEY_X:
-			_bridge.request_advance(_snap_to(WorldState.TICKS_PER_HOUR))
+			_request_key_advance(_snap_to(WorldState.TICKS_PER_HOUR))
 		KEY_G:
 			_input_mode = true
 			_input_mode_type = "numeric"
@@ -1099,6 +1101,30 @@ func _mode_binds_key(mode: String, keycode: int) -> bool:
 		"advisor":       return _advisor_mode_binds_key(keycode)
 		"storage":       return _storage_mode_binds_key(keycode)
 	return false
+
+# ══ ★F3（spec 2026-10-07 battle-start-visibility）：推進鍵之後結果行 ＝ 推進句 ══════════════════════════
+# ★舊版：連按 X，結果行停在上一道令（「✓ 移動到 (9,0)」）⇒ 玩家不知道推進了沒、到幾點
+# ★推進結束那一刻寫（不是按下那一刻：走多少是世界的權利，可能被事件截斷）
+var _key_advance_target: int = -1
+func _request_key_advance(n: int) -> void:
+	_key_advance_target = _bridge.get_current_tick() + n
+	_bridge.request_advance(n)
+
+func _report_key_advance(result: Dictionary) -> void:
+	if _key_advance_target < 0:
+		return
+	var now: int = _bridge.get_current_tick()
+	var clk: String = "第 " + PlayerApiMapper.tick_clock(now)
+	if now >= _key_advance_target:
+		_set_feedback(true, "推進到 %s" % clk)
+	else:
+		var why: String = String(result.get("stall_reason", ""))
+		for e in result.get("events", []):
+			match String((e as Dictionary).get("type", "")):
+				"encounter_triggered": why = "遭遇戰"
+				"new_team_spotted": why = "看到新的隊伍"
+		_set_feedback(true, "推進停在 %s（%s）" % [clk, why if why != "" else "有事發生"])
+	_key_advance_target = -1
 
 # 強制回應可用的字母（A..Z 去掉全域鍵）——面板印的字母與 handler 的對照都讀這一份
 static func response_letter_keys() -> Array:

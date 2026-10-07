@@ -235,6 +235,10 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 	var atk: TeamData = state.teams.get(attacker_id)
 	var def: TeamData = state.teams.get(defender_id)
 	if atk == null or def == null: return
+	# ★F2：玩家打的戰鬥走這一支開打（不經 NpcCombatSystem.start_combat）⇒ 開戰親見也在這裡寫（雙方）
+	var _vs := VisionSystem.new()
+	_vs.write_sighting(state, attacker_id, defender_id)
+	_vs.write_sighting(state, defender_id, attacker_id)
 
 	# mount loot 用：記錄戰前人口快照
 	atk.encounter_initial_pop = atk.population

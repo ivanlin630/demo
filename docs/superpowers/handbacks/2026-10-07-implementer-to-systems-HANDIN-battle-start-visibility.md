@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 戰鬥區第二輪（F1 R 的回應只有結果行／F2 開戰互見＋親見寫 belief／F3 推進鍵後結果行）
 topic: ★**交件｜已知紅 0**｜BATTERY_RC=0｜110 綠／0 紅（run-id `21777-20261007-155724`，HEAD `48e7e5961`）｜branch `feat/battle-start-visibility` 遠端 tip **`2488f4b75`**（已疊 origin/main 33f2ba8f7＝票 T 之後；含 artifact 一顆）｜world-fp 468ffb9e → **f50d38fb**（開戰親見寫 belief，雙方）
 ---
