@@ -8,6 +8,7 @@ extends SceneTree
 # 格：P1 每隊都會降｜P2 地板（疲勞 ≥ 1.0，速度 ×0.3）隊·小時比例 ≤ 修前紅基線｜P3 移動過的 pass 不得回復
 #     P4 駐守一夜必降（佈置）＋反向（同一隊標成移動過 ⇒ 必升）｜P5 分類窮盡｜P6 休息被選過＋驅力隨疲勞升｜P8 新啟用讀者的 tap
 
+const P9_FLOOR: int = 50   # P9 母體地板（systems 裁 2026-10-08）
 const CFG: String = "res://config/default.json"
 const SEED: int = 1337
 const DAYS: int = 30
@@ -233,17 +234,23 @@ func _p_world() -> void:
 	_cells_ran.append("P8")
 	# ── P9（spec §5）
 	print("
-── P9 疲勞 ≥ 0.8 且糧撐 > 5 天的隊·pass：贏家前 5 名 ──")
+── P9 疲勞 ≥ 0.8 且糧撐 > 5 天的隊·pass：休息有在競爭（被選 ≥ 1 次）──")
 	var p9n: int = int(Probe.counts.get("fatigue.tired_fed.n", 0))
 	var wins: Array = []
 	for k in Probe.counts:
 		if String(k).begins_with("fatigue.tired_fed.winner."):
 			wins.append([String(k).trim_prefix("fatigue.tired_fed.winner."), int(Probe.counts[k])])
 	wins.sort_custom(func(a, b): return int(a[1]) > int(b[1]))
-	print("   隊·pass %d｜前 5：%s" % [p9n, str(wins.slice(0, 5))])
-	var top5: Array = wins.slice(0, 5).map(func(x): return String(x[0]))
-	_check("★P9 母體地板：疲勞高而吃飽的隊·pass ≥ 1（%d）" % p9n, p9n >= 1)
-	_check("P9 「休息」進前 5（%s）" % str(top5), top5.has("休息"))
+	# ★P9 判準改「休息被選 ≥ 1 次」（systems 裁甲 2026-10-08，RULING-fatigue-p9-count-not-rank）：
+	#   原意是「休息有在競爭」；舊判準看【名次】⇒ 休息次數不變（5）而母體 85→153、別的選項變多就被擠出前 5（A2 修實測）
+	#   ⇒ 名次量的是競爭者多寡，不是休息本身 ⇒ 改看次數；母體地板 ≥ P9_FLOOR（不足 ⇒ 不可判，紅）；照印完整排名與佔比
+	var rest_n: int = 0
+	for w in wins:
+		if String(w[0]) == "休息":
+			rest_n = int(w[1])
+	print("   隊·pass %d｜完整排名：%s｜休息 %d 次（佔 %.1f%%）" % [p9n, str(wins), rest_n, 100.0 * rest_n / float(maxi(1, p9n))])
+	_check("★P9 母體地板：疲勞高而吃飽的隊·pass ≥ %d（%d；不足 ⇒ 不可判）" % [P9_FLOOR, p9n], p9n >= P9_FLOOR)
+	_check("P9 「休息」被選 ≥ 1 次（%d）" % rest_n, rest_n >= 1)
 	_cells_ran.append("P9")
 
 

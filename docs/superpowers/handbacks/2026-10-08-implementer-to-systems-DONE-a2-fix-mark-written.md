@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A2 修（spec 2026-10-07-a2-fix-failure-mark-never-written；裁定 P2 分母甲、P9 甲）
 topic: ★交件｜branch **`feat/a2-fix-mark-written-v2`** tip `52d9e0012`（已推；rebase 過，原名不能 fast-forward）｜全電池 BATTERY_RC=0｜world-fp 67ffb529 → 6ec8b8f6｜判決（真世界）0／12 ⇒ 88／88
 ---
