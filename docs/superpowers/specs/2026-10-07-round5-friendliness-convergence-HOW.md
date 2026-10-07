@@ -85,3 +85,36 @@ P7 游標移到三種格各一次（已知據點旁／未知據點旁／空地�
    ★今天的 belief 是「觀察者 → 目標**隊伍**」的 claim（`belief_system.gd::record_claim(obs, tgt_team, …)`）——「某一帶有據點、主人與位置不明」沒有目標隊可掛
    ⇒ 它需要「地點類 belief kind」——正是交玩後深層批「糧源情報 kind」那張要造的基礎（親見／傳聞／打聽寫同一種、帶時戳與可信度）
    ⇒ 本批不做；併進糧源情報那張當第二個 kind（「附近有據點」），那張 spec 寫時列為驗收一格
+
+## F8 玩家紮營＝L0、紮根＝第二步；四個寫入點同守間距（藍圖裁 (i) `7d10ddb4a`；同批）
+
+```
+前提（git grep，systems c49ddd504）：間距檢查 production 呼叫點＝2（outpost_system.gd:571 start_build｜player_command_system.gd:592 precheck_camp）
+  玩家「紮營」今天＝crude_camp 工程，完工即 L1（outpost_system.gd:472-492）＝一鍵直達 L1 免材料
+  NPC 立 L0（faction_ai_system.gd:6935 establish_crude_camp，呼叫點 :3019／:3033／:6791）不查間距；NPC 紮根（:7151 設 crude_camp 工程）不查間距
+
+①間距一支來源兩層：_distance_blockers(state, pos, type, tier)
+   tier "L0"：只比據點（outpost_level>0）d < MIN_DIST_ANY｜tier "L1"：今天的兩條（ANY＋同類 SAME）
+   礦村豁免照今天（只在 type=="civilian"、礦山格；L0 本來就不准立在山上 ⇒ 對 L0 不會發生）
+   _check_distance(state,pos,type) ＝ _distance_blockers(…, "L1").is_empty()（start_build 照舊走它）
+②四個寫入點同呼：
+   NPC 立 L0：establish_crude_camp 開頭加 L0 檢查（有 blocker ⇒ return false；三個呼叫點不用改）
+   NPC 紮根：:7151 前加 L1 檢查（type 用那裡已算出的 camp_type；擋 ⇒ Probe "root.commit_drop.spacing"、不落地，同 :7137 那支的形狀）
+   玩家紮營：_action_camp 改呼 establish_crude_camp（★同一支，不准第二份 L0 寫法）；precheck_camp 改 tier "L0"、加「此地已有營地」（camp_level>0）
+   玩家紮根：新動作「紮根」——★只在【自己的 L0 營地】上列出（tile.camp_level==1 且 camp_team_id==玩家隊）；
+            執行＝把 NPC 紮根落地那段（:7140-7161：設 crude_camp 工程、settle 工期、construction_team_id、corvee_site）抽成一支共用函式，玩家與 NPC 同呼；type 參數化（NPC 照 leader 價值、玩家照 build_type）
+            precheck_settle：tier "L1"；原因句走 F7 那套（已知據點給距離與門檻、未知只說太近）
+③成本：玩家紮根＝NPC 紮根今天的成本（settle 工期、免材料）——★藍圖信寫「工期材料照 L1」，而 NPC 紮根今天不扣材料
+   ⇒ 照「同一支」先做成一樣；要扣材料是 WHAT，兩邊一起改（已回藍圖）
+④家欄：紮營後頂列「家」印營地 ⇒ _home_pos/_home_kind 在無據點時退到 state.own_camp_tile(玩家隊)，kind＝「營地」（仍守三欄同給或同 null）
+⑤動作鍵：紮根是新 action id（不變量 #10 靜態 id）；不讓「紮營」在自己營地上變成紮根（同一鍵兩個意思）
+```
+```
+P8a 距最近村 3 格平地 ⇒ 紮營可；距 1 格 ⇒ 不可，原因「離據點太近（需 ≥2）」（據點已知時帶距離）
+P8b 同 3 格處先紮營、再紮根 ⇒ 不可，原因「距最近同類據點 3 格，需 ≥11」（已知才給數字）
+P8c NPC 在距村 1 格處 establish_crude_camp ⇒ false｜NPC 紮根在距同類 3 格處 ⇒ 不落地且 Probe root.commit_drop.spacing +1
+P8d 紮營後頂列家欄＝營地（不是「無」）
+P8e 站在自己營地上 ⇒ 動作清單有「紮根」；站在別人營地／空地 ⇒ 沒有
+P8f 反向：把 L0 檢查拿掉 ⇒ P8a 距 1 格那格必紅；把共用紮根函式換回各自一份 ⇒ grep 兩份 crude_camp 工程設點必紅（只准一處）
+P8g world-fp 會變（NPC 多兩道檢查）⇒ 先量；變了才換基準（同 commit）；回報 Probe camp.built／settlement.l0_to_l1_start 改前改後（30 天 seed 1337），觀察輪重跑再看
+```
