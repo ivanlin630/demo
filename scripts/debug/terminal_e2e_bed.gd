@@ -17,7 +17,7 @@ extends SceneTree
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4"]
+const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE"]
 
 const SEED_A: int = 1337
 const SEED_B: int = 4242
@@ -29,6 +29,7 @@ const FORCED_PROPOSAL: String = "propose_alliance"   # diplomatic_ai_system 真�
 const MAIN_HINT: String = "[T]互動"   # MODE_KEYMAP["main"] 的一段 ⇒ 判「回到主畫面了」
 const SUBMENU_INTEL_HINT: String = "選題"   # MODE_KEYMAP["intel"] ⇒ 打聽要走完子選單（systems 裁 2026-10-07）
 const TO_MAIN_MAX_ESC: int = 6
+const BATTLE_MAX_KEYS: int = 6
 const PANEL_HEADER: String = "─ 面板（接管畫面）"
 # ★effect → 快照裡要變的那幾塊（單一來源是 ACTION_SHAPE 的 effect 值；這裡只是「那個值讀哪幾欄」）
 const EFFECT_FIELDS: Dictionary = {
@@ -46,8 +47,6 @@ var KNOWN: Dictionary = {
 	"P3|打聽情報": "走完選題（ask_food_source）⇒ 畫面只有「已排入：行動：確認打聽」，belief 沒變；"
 		+ "handler 回 ok:true（『他說了些事情（記下 0 筆…）』／『他也不知道』）而那句完成句不上畫面",
 	"P3|確認打聽": "同上（自家隊動作區的「確認打聽」重送上一次的選題）：ok:true、belief 不變、畫面只有回音",
-	"P10|攻擊": "按「攻擊」回來那一屏的頂列時間比世界慢 1 tick（實測畫面 35／世界 36）",
-	"STUCK|攻擊": "攻擊之後（交戰中）互動面板 Esc 關不掉：連按 6 次仍在面板、世界還被推了 1 tick",
 }
 var _known_hit: Dictionary = {}
 
@@ -77,6 +76,7 @@ func _initialize() -> void:
 	await _footer_keys_do_what_they_say()
 	await _e2_no_faction_alliance()
 	await _e4_forced_label_marks(r1)
+	await _battle_cells()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -346,9 +346,14 @@ static func _at_main(node: Node) -> bool:
 
 
 func _to_main(w: Dictionary) -> bool:
-	for _i in range(TO_MAIN_MAX_ESC):
+	for _i in range(TO_MAIN_MAX_ESC + BATTLE_MAX_KEYS):
 		if _at_main(w["node"]):
 			return true
+		if _screen(w["node"]).contains(TextUiView.BATTLE_TITLE):
+			# ★戰鬥中（終端戰鬥區）：照**畫面上印的**鍵把仗打完 —— 鍵列有「F:投降」就投降，戰後「按任意鍵離開」就按 Space
+			var keys: String = _hint(w["node"])
+			await _press(w, "f" if keys.contains("F:投降") else "space")
+			continue
 		await _press(w, "esc")
 	return _at_main(w["node"])
 
@@ -387,7 +392,7 @@ static func _snap(node: Node) -> Dictionary:
 		"faction": "%d|%d" % [pt.faction_id, st.factions.size()],
 		"res_self": str(pt.resources),
 		"res_others": str(others_res),
-		"encounter": "%s|%d" % [str(st.encounter_active), st.teams.size()],
+		"encounter": "%s|%d|%s" % [str(st.encounter_active), st.teams.size(), str(st.player_hostile_teams)],   # ★攻擊 handler 寫 player_hostile_teams（打完之後 encounter_active 已回 false，這一欄才分得出有沒有打過）
 		"encounter_result": str(st.last_encounter_result),
 		"roster_self": "%d|%s|%d" % [pt.leader_id, str(pt.named_members), pt.population],
 		"roster_others": str(others_roster),
@@ -623,9 +628,6 @@ func _judge(r: Dictionary) -> void:
 	if String(r["dead_end"]) != "":
 		_known("STUCK", String(r["dead_end"]))
 		print("   ★走法在已知死路結束（%s）⇒ 只走了 %d／%d 步｜那時結果行：%s" % [String(r["dead_end"]), steps.size(), int(r["n"]), String(r["dead_end_said"])])
-		# ★K5（systems 裁 (乙)）：死路可以存在（終端戰鬥區另開票），但**不准靜默** ⇒ 結果行要說為什麼
-		_check("K5 交戰中按鍵不靜默：結果行說「%s」（實際：%s）" % [TextUiMain.ENCOUNTER_NO_TERMINAL_MSG, String(r["dead_end_said"])],
-			String(r["dead_end_said"]).contains(TextUiMain.ENCOUNTER_NO_TERMINAL_MSG))
 	_check("P1 走滿 N 步或停在已知死路（%d／%d）" % [steps.size(), int(r["n"])],
 		int(r["n"]) > 0 and (steps.size() == int(r["n"]) or String(r["dead_end"]) != ""))
 	_check("P1 字母鍵 ≥ 1（%d）—— 否則 §0 那個鍵位空間沒被走過" % n_letter, n_letter >= 1)
@@ -877,3 +879,120 @@ func _e4_forced_label_marks(r: Dictionary) -> void:
 	else:
 		_check("E4 強制回應標籤不帶 ✓／✗（%s）" % str(marked), marked.is_empty())
 	_cells_ran.append("E4")
+
+
+# ══ BATTLE（終端戰鬥區 spec 2026-10-07 terminal-battle-screen §2）════════════════════════════════════
+#   ①主動攻擊 ⇒ 進戰鬥 ⇒ 用畫面印的鍵打到結束 ⇒ 回主畫面（P1）
+#   ②被伏擊 ⇒ 進戰鬥 ⇒ 用 QWEASD 往邊界外走 ⇒ 撤出（P2）
+#   ③戰鬥區六欄逐字 ＝ 那六個 Label 的 .text（P3）④無作用鍵說為什麼（P4）⑤單位行動倒數可見且會變（P5）
+#   ⑥GUI 廣播一次按鍵 ⇒ _handle_key 只被呼一次（P10b）
+func _battle_cells() -> void:
+	print("\n── BATTLE 終端戰鬥區 ──")
+	# ── ①主動攻擊：t → (tab) → 目標 → 攻擊鍵
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var node: Node = w["node"]
+	var view = node._encounter_view
+	await _press(w, "t")
+	var p: Dictionary = parse_screen(_screen(node))
+	if not bool(p["targets_active"]):
+		await _press(w, "tab")
+	await _press(w, "1")
+	var atk_key: String = ""
+	for a in parse_screen(_screen(node))["actions"]:
+		if String(a["label"]) == PlayerApiMapper.action_label("attack") and bool(a["enabled"]):
+			atk_key = String(a["key"])
+	_check("★BATTLE 母體地板：畫面上有可按的「攻擊」（鍵 %s）" % atk_key, atk_key != "")
+	if atk_key == "":
+		await _drop(node)
+		_cells_ran.append("BATTLE")
+		return
+	await _press(w, atk_key)
+	var scr: String = _screen(node)
+	var in_battle: bool = scr.contains(TextUiView.BATTLE_TITLE)
+	print("   ①按攻擊 ⇒ 戰鬥區 %s｜世界 tick %d｜交戰中 %s" % [str(in_battle), _tick(node), str(node._bridge._state.encounter_active)])
+	_check("BATTLE① 按攻擊之後畫面是戰鬥區（終端看得到戰鬥）", in_battle)
+	# ③六欄逐字
+	var bad3: Array = []
+	for lbl in [view._lbl_count, view._lbl_health, view._lbl_equip, view._lbl_cursor_info, view._lbl_log]:
+		for line in String(lbl.text).split("\n"):
+			if String(line).strip_edges() != "" and not scr.contains(String(line)):
+				bad3.append(String(line))
+	# ★比對前去掉空白：頁腳折行／併空白會改空白數，字不會變
+	var keys_ok: bool = _hint(node).replace(" ", "").contains(String(view._lbl_actions.text).replace(" ", "").replace("\n", ""))
+	print("   ③六欄裡畫面上找不到的行：%s｜鍵列含 _lbl_actions 第一行 %s" % [str(bad3), str(keys_ok)])
+	_check("BATTLE③ 戰鬥區六欄逐字 ＝ 那六個 Label 的 .text（缺 %d 行），鍵列 ＝ _lbl_actions" % bad3.size(), bad3.is_empty() and keys_ok)
+	# ⑤單位行動倒數
+	var re_t := RegEx.new()
+	re_t.compile("行動倒數 (\\d+)")
+	var t0: Array = re_t.search_all(scr).map(func(m): return m.get_string(1))
+	# ④無作用鍵（主畫面的數字鍵）⇒ 說為什麼
+	await _press(w, "1")
+	var said4: String = _screen(node)
+	_check("BATTLE④ 戰鬥中按無作用的鍵 ⇒ 戰鬥區印為什麼（「無作用」）", said4.contains("無作用"))
+	# 推進幾步 ⇒ 收集每次輪到玩家時的倒數（★只在輪到玩家時看得到：press_on 等到那一刻才回畫面）
+	var seen: Dictionary = {str(t0): true}
+	for k in ["space", "w", "space", "d"]:
+		await _press(w, k)
+		if not _screen(node).contains(TextUiView.BATTLE_TITLE):
+			break
+		seen[str(re_t.search_all(_screen(node)).map(func(m): return m.get_string(1)))] = true
+	# ★「推進後會變」在這一場看不到：全部單位同速 ⇒ 計時同步重置，每次輪到玩家都讀到同一組（玩家 0、其他 1 ——
+	#   encounter_system 的單位迴圈裡玩家排第一，一到 0 就回 player_turn，其他單位那一 tick 還沒減）⇒ 回報，不硬判
+	#   ⇒ 這一格判的是：倒數印在畫面上、且**逐單位 ＝ state 的 action_timer**（畫面沒有自己編一個數）
+	var want: Array = []
+	if _screen(node).contains(TextUiView.BATTLE_TITLE):
+		for u in node._bridge._state.encounter_units:
+			want.append(str(int(u.get("action_timer", 0))))
+	var shown: Array = re_t.search_all(_screen(node)).map(func(m): return m.get_string(1)) if _screen(node).contains(TextUiView.BATTLE_TITLE) else []
+	print("   ⑤行動倒數（每次輪到玩家時看過的組合）：%s｜此刻畫面 %s／state %s" % [str(seen.keys()), str(shown), str(want)])
+	_check("BATTLE⑤ 單位行動倒數印在畫面上（%d 個）且逐單位 ＝ state 的 action_timer" % t0.size(), t0.size() >= 2 and shown == want and not shown.is_empty())
+	# ⑥P10b：模擬引擎廣播一次按鍵 ⇒ _handle_key 只被呼一次
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_X
+	ev.pressed = true
+	var c0: int = int(view.handle_key_calls)
+	node._input(ev)
+	view._input(ev)
+	var c1: int = int(view.handle_key_calls)
+	print("   ⑥GUI 廣播一次按鍵（主節點 _input ＋ encounter_view _input）⇒ _handle_key 被呼 %d 次" % (c1 - c0))
+	_check("BATTLE⑥ GUI 一次按鍵 ⇒ 戰鬥分派只被呼一次（%d）" % (c1 - c0), c1 - c0 == 1)
+	# ⑦Z 命令選單（spec §1④）：終端看不到 GUI 彈窗 ⇒ 項目要印進戰鬥區（或說出「沒有可下令的隊友」），Esc 收起
+	if _screen(node).contains(TextUiView.BATTLE_TITLE):
+		await _press(w, "z")
+		var zs: String = _screen(node)
+		var z_ok: bool = zs.contains("── 命令（按數字選；Esc 取消）──") or zs.contains("沒有可下令的隊友")
+		await _press(w, "esc")
+		var z_closed: bool = not _screen(node).contains("── 命令（按數字選；Esc 取消）──")
+		print("   ⑦Z ⇒ 選單印出或說明 %s｜Esc 後收起 %s" % [str(z_ok), str(z_closed)])
+		_check("BATTLE⑦ Z 命令選單：項目印進戰鬥區（或說明沒有隊友），Esc 收起", z_ok and z_closed)
+	# ①續：用畫面印的鍵打完 ⇒ 回主畫面
+	var back: bool = await _to_main(w)
+	print("   ①打完之後回主畫面 %s｜交戰中 %s" % [str(back), str(node._bridge._state.encounter_active)])
+	_check("BATTLE① 用畫面上印的鍵打到結束並回到主畫面", back and not node._bridge._state.encounter_active)
+	_check("BATTLE P6【反向】回到主畫面後沒有戰鬥區", not _screen(node).contains(TextUiView.BATTLE_TITLE))
+	await _drop(node)
+	# ── ②被伏擊 ⇒ 往邊界外撤出
+	var w2: Dictionary = _new_w(await _build(SEED_A))
+	var n2: Node = w2["node"]
+	var st2: WorldState = n2._bridge._state
+	EncounterSystem.new().init_encounter(st2, NPC_ID, st2.get_player_team_id(), "ambush")
+	await _press(w2, "x")   # 推進一步 ⇒ _process 進戰鬥（同真實被伏擊：世界推進時發生）
+	var in2: bool = _screen(n2).contains(TextUiView.BATTLE_TITLE)
+	var dir_key: String = ""
+	for k in ["w", "q", "e", "a", "s", "d"]:
+		if _hint(n2).to_lower().contains(k):
+			dir_key = k
+			break
+	var exited: bool = false
+	for _i in range(30):
+		if not _screen(n2).contains(TextUiView.BATTLE_TITLE) or not st2.encounter_active:
+			break
+		await _press(w2, dir_key)
+		if _screen(n2).contains("離開戰場"):
+			exited = true
+	print("   ②伏擊 ⇒ 戰鬥區 %s｜撤出方向鍵 %s｜畫面說離開戰場 %s｜交戰中 %s" % [str(in2), dir_key, str(exited), str(st2.encounter_active)])
+	_check("BATTLE② 被伏擊進戰鬥、用 QWEASD 往邊界外走 ⇒ 撤出（畫面說「離開戰場」、戰鬥結束）", in2 and exited and not st2.encounter_active)
+	var back2: bool = await _to_main(w2)
+	_check("BATTLE② 撤出之後回到主畫面", back2)
+	await _drop(n2)
+	_cells_ran.append("BATTLE")

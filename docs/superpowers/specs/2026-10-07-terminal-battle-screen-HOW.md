@@ -21,14 +21,17 @@ GUI 戰鬥的六欄＝`encounter_view.gd:22-27` 六個 Label，內容由 `_refre
 ## §1 做什麼
 
 ```
-①【鍵送得進去】戰鬥中（encounter_view.visible）主節點把鍵轉給 `encounter_view._handle_key(kc)` —— ★唯一分派，不另寫一份
-  ⇒ 改 `text_ui_main.gd:379`：從「return」改成「轉送」；press_on 不必改（它本來就呼主節點 _input）
+①【鍵送得進去】★R² 打回（第一版「改 :379 成轉送」會讓真 GUI 玩家一鍵被處理兩次：引擎本來就把同一次按鍵廣播給 `encounter_view._input:333`）
+  ⇒ 裁 R² 方向②：**`text_ui_main.gd:379` 的 return 不動**（GUI 路照舊由引擎廣播給 encounter_view）
+  ⇒ 終端路在送鍵的唯一函式 `PlayerRepl.press_on` 分流：戰鬥中（`encounter_view.visible`）⇒ 呼 `encounter_view._handle_key(kc)`；否則照舊呼主節點 `_input`
+  ⇒ ★戰鬥按鍵分派仍只有一份（`_handle_key`）；兩種呼叫者各走各的入口，不讓 `_input(event)` 同時服務引擎廣播與直呼
+  ⇒ P10b：GUI 路負對照——模擬引擎廣播一次按鍵（同時送主節點與 encounter_view 的 _input），`_handle_key` 只被呼一次
 ②【畫面】compose 在戰鬥中加一區「── 戰鬥 ──」：
   ·六欄＝直接讀 `encounter_view` 那六個 Label 的 `.text`（★同一份字串，不重算、不手抄）
-  ·單位座標列表：我方／敵方每個單位一行（名、座標、血量、★下一次行動的時間 —— 藍圖：遭遇戰時間尺 1:1、單位計時要看得到；欄位名先查 encounter state）
+  ·單位座標列表：我方／敵方每個單位一行（名、座標、血量、★下一次行動的時間＝單位的 `action_timer`（R² 核過）—— 藍圖：單位計時要看得到）
   ·鍵提示＝`_lbl_actions.text`（GUI 顯示的那一句就是綁定的說明，從同一處讀）
   ⇒ 戰鬥中其他區照常（頂列、事件區），主畫面的動作區不顯示（那些鍵現在不歸它）
-③【畫面＝結算後】press_on 的等待條件加一條：戰鬥中等到 `_waiting_for_player` 或戰鬥結束（不只 is_advancing）
+③【畫面＝結算後】press_on 的等待條件加一條：戰鬥中等到「輪到玩家」或戰鬥結束（不只 is_advancing）⇒ encounter_view 加一支公開查詢（例 `is_waiting_for_player()`），不讀私有 `_waiting_for_player`
 ④【Z 命令選單】`_open_command_menu:532` 開的是 GUI 彈出選單 ⇒ 終端看不到 ⇒ 把選單項目印進戰鬥區（編號），數字鍵轉 `_on_command_selected(id)`
   ★若這一步改動超過「印出＋轉送」⇒ 回報、Z 先標「終端未支援」（不准靜默無反應）
 ⑤滑鼠功能（點格、縮放）不做：終端用 QWEASD 移游標已能瞄準
@@ -46,4 +49,21 @@ P5 [計時可見] 單位列表每行有下一次行動時間，且隨推進變�
 P6 [反向] 非戰鬥時戰鬥區不出現；主畫面動作照舊（既有 E2E 走法全綠）
 P7 KNOWN K4／K5 刪除後 E2E 綠、已知紅數下降；已知問題清單「遭遇戰卡住」那列標已修
 P8 fp 量（應不變：只動 UI）；走整份電池
+```
+
+## §3 交件後兩件（2026-10-07，systems）
+
+```
+①P5「倒數隨推進變化」這一場看不到（全員同速、計時同步）⇒ 格改成「單位列表的計時 ＝ state 的 action_timer」—— 採
+  ★缺口登記：變化本身沒被驗；下次有床佈置不同速的單位時補「會變」那一格（不擋交玩）
+②戰鬥區主角狀態是 GUI Label 原文英文（例 `head: healthy`、`weapon_melee_low`）—— 玩家面不得有英文識別字（終端自驗 (d)），
+  而 (d) 只掃非戰鬥走法 ⇒ 兩件一起做：
+  a. 翻在**產生那串字的地方**（`encounter_view.gd _refresh_ui` 寫 Label 那幾行用到的部位／狀態／裝備名稱），GUI 與終端同時受益；
+     名稱對照表放一處（先找專案既有的中文名表：部位、裝備等級若已有就用，沒有才建，建在 encounter_view 旁）
+     ★R² 打回兩件：①部位名與 healthy／wounded／critical／severed 是 `PersonData.body_parts` 的**實際儲存值**，十餘處用 `==` 字面讀
+       ⇒ **翻譯只准在顯示層**（寫 Label 那一刻查表換字），儲存值一個字都不動（同 `text_ui_main.gd:1337-1341` TASK_IDLE 那條教訓）
+       ②專案已有 3 份中文名表（`team_ui_helper.gd:37-42`、`text_ui_main.gd:1349-1354`、`:1732-1734`；weapon_melee_low→低階近戰武器已在）
+       ⇒ 不建第 4 份：收成一份（放 team_ui_helper，那三處與戰鬥區都呼它），措辭以既有為準；三份若有分歧，印出分歧由你判、不靜默挑一個
+  b. 終端自驗 (d) 的走法加一步「進戰鬥」⇒ 戰鬥區也被掃（修前必紅，修後綠）
+  ⇒ 併進打聽那一批（交玩前），R² 只看本節
 ```

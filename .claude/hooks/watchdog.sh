@@ -443,6 +443,12 @@ while true; do
 
   newest_hb="$(ls -t "$HB"/*.md 2>/dev/null | head -1)"
   hb_ct=$(stat -c %Y "$newest_hb" 2>/dev/null || echo 0)
+  # ★COMMIT-NO-LETTER 要比的是【兩個 commit 時間】，不是「信檔 mtime vs commit 時間」（2026-10-07 藍圖報：
+  #   派工信本身就是最後一顆 commit，而信檔是在 commit 之前寫的 ⇒ mtime 必然早於 commit ⇒ 恆判「出貨沒推鏈」）
+  #   ⇒ 最後一顆【在信箱新增一封信（--diff-filter=A）】的 main commit 時間（★只改 status 的消費 commit 不算寄信）；它 ≥ main 最後一顆 ⇒ 最後出貨的就是信 ⇒ 不是鏈斷
+  #   ⇒ 之後收件人有沒有在做，交給 UNRESPONSIVE 的產出窗判（藍圖要的那條路）
+  hb_commit_ct=$(git -C "$ROOT" log -1 --diff-filter=A --format=%ct main -- "docs/superpowers/handbacks" 2>/dev/null || echo 0)
+  case "${hb_commit_ct:-0}" in (*[!0-9]*|'') hb_commit_ct=0 ;; esac
   hb_age=$(( now - hb_ct ))
 
   class="OK"; via=""; detail=""
@@ -466,7 +472,7 @@ while true; do
   #   ★判準同 DEAD-ROLE：「出貨了沒推鏈」是【已完成的事實】，跟他現在忙不忙無關。
   #   （T_IDLE 門檻保留 ⇒ 跑 job 期間剛 commit 還沒寫信的正常中間態不會誤報。）
   if [ "$class" = "OK" ] && [ "$main_ct" -gt 0 ] \
-     && [ "$hb_ct" -le "$main_ct" ] && [ $(( now - main_ct )) -ge "$T_IDLE" ]; then
+     && [ "$hb_commit_ct" -lt "$main_ct" ] && [ $(( now - main_ct )) -ge "$T_IDLE" ]; then
     class="COMMIT-NO-LETTER"; via="pre-RUNNING"
     detail="  main 已落地 $(dur $(( now - main_ct )))，之後沒有任何新 handback
   最後 commit：${main_subj}

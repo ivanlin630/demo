@@ -197,10 +197,18 @@ static func press_on(node, kc: int) -> void:
 	var ev: InputEventKey = InputEventKey.new()
 	ev.keycode = kc
 	ev.pressed = true
-	node._input(ev)
+	# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1①）：戰鬥中鍵送 encounter_view 的終端入口
+	#   （text_ui_main._input 戰鬥中照舊 return —— GUI 那次按鍵由引擎廣播給 encounter_view；這裡是終端路）
+	var bv = node.get("_encounter_view")
+	if bv != null and bv.visible:
+		bv.terminal_handle_key(kc)
+	else:
+		node._input(ev)
 	node._refresh()
-	while node._bridge.is_advancing():
+	# ★等推進消化完：世界推進（is_advancing）＋戰鬥推進（還沒輪到玩家，§1③）
+	while node._bridge.is_advancing() or (bv != null and not bv.is_settled_for_terminal()):
 		await node.get_tree().process_frame
+	node._refresh()
 
 
 func _feed(token: String) -> void:
