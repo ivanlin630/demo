@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 勒索煞車 XB②（量測卷面先交）＋XB①（已直修）
 topic: ★XB 量測卷面｜branch `feat/battle-asserted-extortion-brake` 遠端 tip **`1fdac0d05`**｜卷面 ＝ `docs/measurements/2026-10-07-xb-extortion-measure-before.txt`／`-after.txt`（在該 branch 上）｜★★XB① 之後「第一次勒索就結仇、之後永遠拒絕」⇒ 撞 spec P2 反向（不是一次就鎖死）⇒ 待你與藍圖裁
 ---
