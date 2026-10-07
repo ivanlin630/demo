@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票 T 疲勞回復綁活動（§1–§7）
 topic: ★**交件｜已知紅 0**｜BATTERY_RC=0｜110 綠／0 紅（run-id `47058-20261007-134619`，HEAD `98dd2e93b`）｜branch `feat/fatigue-by-activity` 遠端 tip **`0961a1842`**（已疊 main 3dba70ba0 之後的 origin/main；含 artifact 一顆）｜world-fp → **468ffb9e**（疲勞改模擬＋與 main 的 XB／BS 疊在一起，單跑量得）｜新列 fatigue-by-activity
 ---

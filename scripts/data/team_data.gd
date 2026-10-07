@@ -233,6 +233,11 @@ var expand_eval_next_tick: int = 0
 var expand_site_cached: Vector2i = Vector2i(-1, -1)
 var last_tile_pos: Vector2i = Vector2i(-999, -999)   # 上一移動步位置（observe_velocity 用）
 var move_tick_acc: int = 0
+# ★票 T（疲勞回復綁活動）：上一次疲勞 pass 之後，這隊有沒有真的移動過
+#   ★為什麼要一個旗而不是直接讀 `_run_systems` 的 `moved`：move 是整點組（每小時一次），fatigue 是錯開組
+#     （每隊在自己的錯開 tick 跑）⇒ 疲勞 pass 那一顆 tick 的 `moved` 通常是空的（move 那一顆沒跑）
+#   ⇒ move 寫 true、fatigue 讀完清 false ⇒ 「兩次疲勞 pass 之間有沒有走過」，跟兩組的相對時序無關
+var moved_since_fatigue: bool = false
 var combat_target: int = -1
 # 社交互動目標（投靠/乞食），語意 ≠ combat_target（戰鬥中 flag）。
 # BEG/JOIN dispatch 設此、interaction resolver 讀此；_try_interact:197 早退只看 combat_target

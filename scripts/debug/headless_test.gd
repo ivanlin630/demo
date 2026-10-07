@@ -3669,8 +3669,14 @@ func _run_sim_test() -> void:
 		print("[TeamAI] split_leader loyalty=1.0 未找到（分裂事件可能未觸發，屬正常）")
 	var _ft: TeamData = state.teams.get(0)
 	if _ft:
-		print("[TeamAI] Team0 fatigue=%.4f（預期 > 0）" % _ft.fatigue)
-		assert(_ft.fatigue > 0.0, "移動 team 應有疲勞累積")
+		# ★票T §1（2026-10-07）：疲勞只在有出力（移動／戰鬥／出力任務）的 pass 累積
+		#   ⇒ Team0 不一定動過 ⇒ 主詞改成「世界裡至少一支隊累積了疲勞」（全 0 ＝ 累積管線斷了）
+		var _fat_n: int = 0
+		for _fid in state.teams:
+			if (state.teams[_fid] as TeamData).fatigue > 0.0:
+				_fat_n += 1
+		print("[TeamAI] Team0 fatigue=%.4f｜疲勞 > 0 的隊 %d／%d" % [_ft.fatigue, _fat_n, state.teams.size()])
+		assert(_fat_n > 0, "有出力的隊應有疲勞累積（全世界 0 支）")
 	var _ms: Object = load("res://scripts/simulation/movement_system.gd").new()
 	var _wt: TeamData = state.teams.get(0)
 	if _wt:
@@ -6364,6 +6370,9 @@ func _test_fatigue_accumulation() -> void:
 		# ★S2：這個 10 是【舊根下的 NEAR_CADENCE】（＝1 小時），寫死在測試裡。
 		#   ★重錨後 NEAR_CADENCE = 60，而這裡仍傳 10 ⇒ 每次呼叫只代表 1/6 個小時
 		#     ⇒ 實測 0.0096 vs 預期 0.048。★★行為沒變，是【測試自己拿錯尺】。
+		# ★票T §1（2026-10-07）：疲勞只在【有出力】的 pass 累積；行軍＝這一小時真的移動過
+		#   ⇒ 移動步驟會設這個旗標、疲勞 pass 讀完清掉 ⇒ 測試每次呼叫前代替移動步驟設一次
+		team.moved_since_fatigue = true
 		sr._step6d_fatigue(state, [0], SimRunner.NEAR_CADENCE)
 	# ★S5c（2026-09-01）：FATIGUE_PER_DAY 0.048 → 0.096 ⇒ 期望值跟著 ×2。
 	#   ★推導寫在這裡，而【不從常數算】——★★從常數算會變恆真式（管線壞了也會過）。
@@ -9280,7 +9289,9 @@ func _test_eta_ticks() -> void:
 	# A1：BASE_MOVE_TICKS = 48（×5 留）, speed_mult = 1.0 → eta = 5 * 48 = 240（A2 ×5→1 後 = 1200）
 	assert(eta == 5 * TimeScale.MOVE_TICKS_PER_HEX,
 		"eta 應 = 5 格 × 每格 %d tick = %d，實際=%d" % [TimeScale.MOVE_TICKS_PER_HEX, 5 * TimeScale.MOVE_TICKS_PER_HEX, eta])
-	team.fatigue = 0.5   # speed reduced
+	# ★票T §7（2026-10-07）：路徑估算改讀 SimRunner.stamina_factor（與移動同一條曲線：>0.5 才變慢）
+	#   ⇒ 舊值 0.5 落在曲線的不降速段（舊 path 用 1−fatigue 另一條曲線）⇒ 改取 0.8
+	team.fatigue = 0.8   # speed reduced
 	var eta2 = PathSystem.eta_ticks(team, 5.0)
 	assert(eta2 > eta, "fatigue 應延長 ETA")
 	print("Path Task3 OK")
@@ -14297,6 +14308,7 @@ func _test_action_ui_coverage() -> void:
 		"train": "interact-self", "camp": "interact-self", "promote_anon": "interact-self",
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
+		"rest": "interact-self",   # ★票T §1③ 休息（自家隊動作區）
 		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",
 		"upgrade_farming": "outpost-panel", "upgrade_manufacturing": "outpost-panel",
 		"demolish_outpost": "outpost-panel", "abandon_outpost": "outpost-panel", "build_facility": "outpost-panel",

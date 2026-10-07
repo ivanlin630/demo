@@ -88,6 +88,8 @@ static func _pc_reset() -> void:
 var leader_values: Dictionary = {}
 var desperation_entry_threshold: float = DecisionTerms.DESPERATION_DAYS   # ★F1 靶A：人格化 survival-entry 門檻（單一計算點、5+ applicable 共讀）
 var food_days: float = 0.0
+var fatigue: float = 0.0   # ★票 T：自己的疲勞（自身狀態，不是別隊真值）——「休息」選項的驅力
+var named_n: int = 0        # ★票 T §6②：自己的具名成員數（累垮時每人扣忠誠 ⇒ 休息秤裡「避免的忠誠損失」）
 var can_rescue_build: bool = false      # ★復甦 R2 §2B.1：料備妥產糧設施自救建設 viable（build-as-survival）
 var rescue_build_util: float = 0.0      # ★同上 genuine util（食安價值 frac × P(survive_to_harvest)）
 var population: int = 0
@@ -541,6 +543,8 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	#   分開算才會 drift（血證：本票之前 :265 與家糧那段各算了一次同樣的東西）。
 	var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	c.food_days = ef / maxf(_burn, 0.001)
+	c.fatigue = team.fatigue
+	c.named_n = team.named_members.size()
 	c.population = team.population
 	c.team_id = team.team_id
 	c.tick = state.world.current_tick

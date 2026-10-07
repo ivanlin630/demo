@@ -19,6 +19,30 @@ const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更
 const FATIGUE_PER_DAY: float          = 0.096   # ★S5c ×2 — 約 10.4 天疲勞滿（mult=1）
 const FATIGUE_RECOVERY_PER_DAY: float = 0.48    # ★S5c ×2 — 約 2.1 天回滿（mult=1）
 const FATIGUE_LOYALTY_PENALTY: float = 0.005   # TEST VALUE
+# ★「累垮」的那一條線（具名既有值，不是新旋鈕）：忠誠懲罰、休息的承諾優先序、休息秤裡「避免的忠誠損失」三處讀同一個符號
+#   ★票 T §6：休息秤的忠誠那一項照搬懲罰的**同一個條件**（≥ 這條線才有、以下 ＝ 0）—— 世界沒有漸增，秤也不准有
+const FATIGUE_EXHAUSTED: float = 1.0
+
+# ══ ★★★票 T §7（藍圖裁（甲）`32db81600`）：體力係數 —— 所有耗力活動吃**同一條**疲勞曲線 ══════════════════════
+# ★式子 ＝ 移動原本那一條（movement_system 疲勞懲罰），藍圖逐字「移動已在用的那條、禁另抄」：
+#   累垮（≥ FATIGUE_EXHAUSTED）⇒ STAMINA_AT_EXHAUSTED｜> 0.5 ⇒ 1 − 0.4·f｜否則 1
+# ★取代了三條曲線：真實移速（movement_system）／路徑估算（path_system：原本 clamp(1−f, 0.1, 1)，估算器跟物理不同式）
+#   ／戰鬥開場體力（encounter_system 兩處：原本 clamp(1−f, 0.1, 1)）
+# ★讀它的產出寫入點（執行即耗力那一組，逐項；表同 FATIGUE_EXERT_TASKS）：
+#   建造／建設／升級／擴建  outpost_system.gd 施工進度（construction_ticks_left -= 人數 × 係數）
+#   訓練                    training_system.gd 匿名兵經驗（add_exp × 係數）
+#   覓食                    無任務專屬寫入點 —— 產出走 collect（resource_system 營地採集）對所有隊跑、不分任務 ⇒ 不乘
+#   製造                    無任務專屬寫入點 —— manufacturing_system 已去掉任務閘（de-patch 2026-08-03）、不分任務 ⇒ 不乘
+#   運輸                    無產出寫入點 —— 運量在派工時定；速度已經吃這個係數（移動）
+const STAMINA_AT_EXHAUSTED: float = 0.3   # 累垮時的係數（移動原本的 ×0.3）；戰鬥閃避門檻也讀它（累垮不能閃避）
+static func stamina_factor(team: TeamData) -> float:
+	if team == null:
+		return 1.0
+	if team.fatigue >= FATIGUE_EXHAUSTED:
+		return STAMINA_AT_EXHAUSTED
+	if team.fatigue > 0.5:
+		return 1.0 - team.fatigue * 0.4
+	return 1.0
 
 const TERRAIN_FATIGUE_MULT: Dictionary = {
 	"plains": 1.0, "forest": 1.2, "mountain": 1.4
@@ -470,6 +494,9 @@ func _run_systems(state: WorldState, teams: Array, due_teams: Array, due_faction
 				state.rebuild_team_tile_index()   # ★BOTH post-move rebuild（near+far 各一次；下游 co-location/hostile 查 post-move 位）
 				arrived = mv["arrived"]
 				moved = mv["moved"]
+				for _mtid in moved:   # ★票 T：疲勞要知道「上次疲勞 pass 之後有沒有走過」（理由在 TeamData.moved_since_fatigue）
+					var _mteam: TeamData = state.teams.get(_mtid)
+					if _mteam != null: _mteam.moved_since_fatigue = true
 				if _get_player_tile_pos(state) != player_old:
 					_player_cmd.clear_pending_targets(state)
 		if Probe.enabled:
@@ -932,6 +959,36 @@ func _step6_resolve_consumption(state: WorldState, team_ids: Array, cadence_tick
 func _step6c_salary(state: WorldState, team_ids: Array) -> void:
 	_salary_system.tick(state, team_ids)
 
+# ══ ★★★票 T：這一個疲勞 pass，這隊有沒有【耗力】—— 唯一一支分類（`_step6d_fatigue` 與床都呼它）════════════
+# spec：`docs/superpowers/specs/2026-10-06-ticket-t-fatigue-recovers-by-activity-HOW.md` §1①
+# ★舊版：`current_task == TASK_REST` 才回復，其餘一律累積 —— 而 TASK_REST 全站零寫入者
+#   ⇒ 回復路結構上不可達，51 隊 30 天疲勞單調到 1.0（量測員坐實）
+# ⇒ 回傳「為什麼耗力」（"" ＝ 不耗力）：
+#   "moved"  上次疲勞 pass 之後真的移動過（TeamData.moved_since_fatigue）
+#   "combat" 戰鬥中（combat_target ≠ −1，或是當前遭遇戰的攻／守方）
+#   "task"   當下任務屬「執行即耗力」那一組（下表）
+# ★不耗力的：駐守、紮營、idle、生產（常駐的村落作息）、在市集交易而沒走、夜裡沒移動、休息
+const FATIGUE_EXERT_TASKS: Array = [
+	TeamData.TASK_CONSTRUCT,    # 建造（施工）
+	TeamData.TASK_BUILD,        # 建設（施工）
+	TeamData.TASK_UPGRADE,      # 升級（施工）
+	TeamData.TASK_EXPAND,       # 擴建（施工）
+	TeamData.TASK_MANUFACTURE,  # 製造（作坊勞動）
+	TeamData.TASK_FORAGE,       # 覓食（採集）
+	TeamData.TASK_CONVOY,       # 運輸（搬運）
+	TeamData.TASK_TRAIN,        # 訓練（操練）
+]
+static func fatigue_exertion(state: WorldState, team: TeamData) -> String:
+	if team.moved_since_fatigue:
+		return "moved"
+	if team.combat_target != -1:
+		return "combat"
+	if state.encounter_active and (team.team_id == state.encounter_attacker_id or team.team_id == state.encounter_defender_id):
+		return "combat"
+	if FATIGUE_EXERT_TASKS.has(team.current_task):
+		return "task"
+	return ""
+
 func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
 	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
 	var time_mult: float = _get_time_fatigue_mult(state)
@@ -940,11 +997,20 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 		if team == null: continue
 		if Probe.enabled:
 			Probe.bump("sysexec.fatigue.byteam.%04d" % int(tid))   # ★驗收②：第三個系統
-		if team.current_task == TeamData.TASK_REST:
-			# 紮營休息
+		var exert: String = fatigue_exertion(state, team)
+		team.moved_since_fatigue = false
+		if Probe.enabled:
+			# ★票 T P5：每隊每 pass 恰落一類（耗力分三個理由／不耗力），Σ ＝ 處理的隊數
+			Probe.bump("fatigue.pass.n")
+			Probe.bump("fatigue.class." + (exert if exert != "" else "rest"))
+		if exert == "":
+			# ★不耗力 ⇒ 照現行回復算式（常數不動；崗哨比例照舊折回復）
+			var before: float = team.fatigue
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
 			team.fatigue -= FATIGUE_RECOVERY_PER_DAY * day_fraction * rest_mult
 			team.fatigue = maxf(team.fatigue, 0.0)
+			if Probe.enabled and team.fatigue < before:
+				Probe.bump("fatigue.recovered.byteam.%04d" % int(tid))
 		else:
 			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 			var tile = state.world.tiles.get(tile_id)
@@ -952,7 +1018,7 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 			var terrain_mult: float = TERRAIN_FATIGUE_MULT.get(terrain, 1.0)
 			team.fatigue += FATIGUE_PER_DAY * day_fraction * terrain_mult * time_mult
 			team.fatigue = minf(team.fatigue, 1.0)
-		if team.fatigue >= 1.0:
+		if team.fatigue >= FATIGUE_EXHAUSTED:
 			for pid in team.named_members:
 				var p: PersonData = state.persons.get(pid)
 				if p: LoyaltyBank.adjust(p, -FATIGUE_LOYALTY_PENALTY, "fatigue")

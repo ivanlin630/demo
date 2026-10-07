@@ -1187,6 +1187,8 @@ func _build_state_str() -> String:
 		ct.get("faction_display", "?")])
 	lines.append("狀態: %s  疲勞: %d%%" % [
 		human(TASK_DISPLAY, ct.get("task_summary", "")), ct.get("fatigue_pct", 0)])
+	# ★票 T §1③ 文字級距【另起一行】：上面那一行是 ui-flow 零損失比對的舊行，一個字都不動（改它＝那一格紅）
+	lines.append("  體力：%s" % fatigue_level_text(int(ct.get("fatigue_pct", 0))))
 
 	# ★★★五分頁（spec §2-3b，票A）：狀態列（頁外常駐）已經在上面兩行印完，
 	#   底下是【分頁區】—— 而 :680-738 那一段【一個字都沒改】，只是搬到第 1 頁下面。
@@ -1427,6 +1429,14 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 #   是**另一個命名空間**（單位的 `pending_action.type`）⇒ **同字不同義**
 #   ⇒ 動它會讓兩件不同的事一起變，而那是最難查的那種。
 # ⇒ ★★★所以映射發生在**顯示層**，而「資料層那三個英文值」逐一指名在這裡。
+# ★票 T §1③：疲勞的文字級距 —— 級距照 `movement_system.gd` 的速度懲罰分段（> 50% 開始變慢、100% 只剩三成速）
+#   ⇒ 玩家看到的字跟「走得快不快」對得上；數字照印
+static func fatigue_level_text(pct: int) -> String:
+	if pct >= 100: return "累垮了，只剩三成速度"
+	if pct > 50:   return "疲憊，走得慢"
+	if pct > 0:    return "有點累"
+	return "精神好"
+
 const TASK_DISPLAY: Dictionary = {
 	"idle": "閒置",          # TeamData.TASK_IDLE
 	"return_home": "返家",   # TeamData.TASK_RETURN_HOME
