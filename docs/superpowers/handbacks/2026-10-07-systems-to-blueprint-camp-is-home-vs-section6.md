@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: F8④「家欄印營地」撞到既有裁定「營地不是家（blueprint §6）」——要你明確裁
 topic: player_api_mapper.gd:71 逐字「★★★營地不是家（blueprint §6）：這裡只認 outpost_level > 0，不認 L0 營地」；你 (i) 信說「L0 就是家：頂列家欄印營地」＝推翻 §6
 ---
