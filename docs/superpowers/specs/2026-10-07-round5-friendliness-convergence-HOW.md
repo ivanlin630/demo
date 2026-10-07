@@ -111,4 +111,5 @@ P8d 紮營後營地欄＝座標、家欄不變；紮根完工 ⇒ 家欄＝那�
 P8e 站在自己營地上 ⇒ 動作清單有「紮根」；別人營地／空地 ⇒ 沒有｜紮根施工中再按 ⇒ 不可、工期不變
 P8f grep：MIN_DIST_／_check_distance／「山地無法紮營」在 scripts/ 出現次數＝0｜crude_camp 工程設點只准一處（共用函式）
 P8g world-fp 會變 ⇒ 先量、換基準同 commit；回報 30 天 seed 1337 改前改後：camp.built／settlement.l0_to_l1_start／山地立營數／據點兩兩最近距離分佈
+    ★報告逐字印一行 `mountain_camp_survived_days: <山地營地存活最大天數>`（defer mountain-build-time-by-terrain 的 met_check 讀它；落在 docs/measurements/）
 ```
