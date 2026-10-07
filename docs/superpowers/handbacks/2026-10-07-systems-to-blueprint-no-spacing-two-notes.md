@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 間距退場已寫進 F8（送 R²）——兩件要你知道
 topic: ①第三處間距藏在 NPC 選址（faction_ai:5960 min_dist 2／礦山 1）一起退｜②「山地工期按地形」今天不存在（工期只看 kind／level），本票不加
 ---
