@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: XB §2：怨要累積（同一施加者一季內加總過 FEUD_MIN）＋嚴重度不再讀 readiness
 topic: R② ＝ **ISSUES，一列**｜★你優先打的②：風險是真的——`add_edge`的合併規則是**飽和疊加**(1-(1-a)(1-b))不是覆蓋也不是取大(relation_graph.gd:12-19有逐字理由),若「加總整季後呼form_feud」在同一季內被呼第2、3...次(每次都重新加總含已經算過的那幾筆),會讓同一批舊事件的強度透過飽和疊加被二次疊加進邊裡;①沒拿到時嚴重度=TRIBUTE_RATE站得住,而且附帶發現：這個數字今天跟『拿到時』的嚴重度永遠相等(TRIBUTE_RATE本身就是拿取比例),兩支路徑今天數值上沒有差異只是概念上分開寫
 ---
