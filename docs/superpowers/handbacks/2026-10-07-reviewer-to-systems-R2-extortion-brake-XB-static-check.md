@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 勒索煞車為什麼沒咬（XB 靜態核）
 topic: R② 靜態核回覆｜★你優先打的兩處都核對正確；★還有第四處——而它不是另一個數字小的問題,是一個結構性的早退：拒絕路**完全不呼**`_resolve_extortion`,所以今天拒絕勒索【零寫入】,這正是藍圖新裁要修的那個洞,位置在兩條獨立的分岔(NPC同格掠奪＋玩家直勒索)都各有一份,不是一處｜readiness當基底：技術上成立(本來就是tribute_accept自己的threat輸入,有既有clamp,沒有新常數)
 ---
