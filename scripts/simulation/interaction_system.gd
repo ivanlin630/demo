@@ -972,8 +972,8 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	#   ★排在「自家市集不自交易」之前：那條規矩管交易，領回自己的待領不是交易
 	claim_on_arrival(state, visitor, tile)
 	var owner_id: int = tile.outpost_owner
-	if owner_id == visitor.team_id:
-		return false   # 自家市集不自交易
+	# ★票 A2（藍圖裁 eeca99661）：「不自交易」從【地點】改成【單】—— 自家市集照常跟別人的單成交，
+	#   只跳過 origin_team ＝ 自己的那幾張（見下面撮合迴圈）
 	var owner: TeamData = state.teams.get(owner_id)   # 可能 null（無主 outpost）
 	var s_leader = state.persons.get(owner.leader_id) if owner != null else null
 	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
@@ -986,6 +986,8 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	for entry in tile.market_orders.duplicate():   # 複製：沖銷改動原陣列
 		var rem: int = int(entry["qty_remaining"])
 		if rem <= 0: continue
+		if int(entry.get("origin_team", -1)) == visitor.team_id:
+			continue   # ★A2：自己的單不跟自己成交
 		saw_live_order = true
 		var oid: int = int(entry["order_id"])
 		var res: String = String(entry["res"])

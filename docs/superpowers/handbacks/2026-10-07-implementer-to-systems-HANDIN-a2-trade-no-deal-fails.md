@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A2 貿易等不到對手＝失敗＋自家市集只禁自己的單
 topic: ★**交件｜已知紅 0**｜BATTERY_RC=0｜111 綠／0 紅（run-id `21966-20261007-174354`，HEAD `7993010b7`）｜branch `feat/a2-trade-no-deal-fails` 遠端 tip **`3562864ee`**（已疊 origin/main ccf281aba；含 artifact 一顆）｜world-fp → **6019f170**｜新列 a2-trade-no-deal｜★P7 C2 分子變小、比例沒變小 ⇒ 要你裁
 ---
