@@ -13,6 +13,9 @@ F2【能做的排前、不可的折疊】動作清單：enabled 在前；不可�
 F3【拒絕句帶主詞與下一步】每個被拒／不可的句子＝「誰／什麼不行：原因；可以先做 X」
    ⇒ 「下一步」由引擎給（disabled_reason 旁加一個 hint 欄位：能解除這個條件的動作 id），排版層禁自寫
    ⇒ 先盤點：今天有幾個 disabled_reason，各自能不能指出一個解除動作（印清單；指不出的寫「—」不硬湊）
+   ★R² 打回：盤點要照**語意**找（所有印在玩家面上的「不可／為什麼不可」句），不照欄位名 —— 第三種產生者 `precheck_*` 系列 12 支
+     （`player_command_system.gd:515-615`）欄位叫 "reason" 不叫 "disabled_reason"，而用戶最早抱怨的「紮營（離據點太近）」就在這裡
+     ⇒ 盤點母體＝disabled_reason 產生者＋precheck_* 的 reason＋inquiry 的 DISABLED_REASON；三者在區塊資料層統一成同一欄（F6）
 F4【鍵列只印當下有效的鍵】頁腳鍵列依當下模式與狀態過濾（面板開著只印面板鍵＋全域鍵；戰鬥中只印戰鬥鍵）
    ⇒ 來源＝各模式的鍵處理表（同一份），不另抄字串
 E2E 加四格：F1 首屏三行存在且每個鍵按下有效｜F2 enabled 全排在不可之前、折疊行數正確、展開後原因齊｜F3 每個拒絕句含主詞與（有則）下一步｜F4 鍵列每個鍵在當下按下都不是「此鍵無作用」
@@ -25,7 +28,7 @@ E2E 加四格：F1 首屏三行存在且每個鍵按下有效｜F2 enabled 全�
 ⇒ stdin 是 tty（且 Windows）：用 `msvcrt.getwch()` 讀原始按鍵，**按一鍵送一個 token**，不打字不按 Enter
    對照（一支純函式 `key_token(chars) -> str`，放 play.py）：
      一般可印字元 ⇒ 該字元｜\x1b ⇒ esc｜\r ⇒ enter｜\t ⇒ tab｜空白 ⇒ space｜\x08 ⇒ backspace
-     方向鍵（\xe0 或 \x00 前綴＋H/P/K/M）⇒ up／down／left／right｜Ctrl+C（\x03）⇒ 離開
+     方向鍵（\xe0 或 \x00 前綴＋H/P/K/M）⇒ up／down／left／right｜Ctrl+C（\x03）⇒ 離開 ——★走既有離開路（送 QUIT_TOKEN \":quit\"，同 q 那支），不另開一條
    ★token 名稱＝`player_repl.gd:51 NAMED_KEYS` 的鍵名（同一份；play.py 不另發明名字）
    ★q 照舊＝離開 harness（現行語意不變）
 ⇒ stdin **不是** tty（管道、床、藍圖餵鍵）⇒ 自動退回逐行模式（現行行為逐字不變）
@@ -33,6 +36,8 @@ E2E 加四格：F1 首屏三行存在且每個鍵按下有效｜F2 enabled 全�
 ⇒ G「跳 N tick」要先按 G 再按數字再 Enter：單鍵模式下照樣是一鍵一 token，不需特例
 P5a `python tools/play.py --selfcheck`（不起 Godot）：key_token 對照表逐項斷言（含方向鍵兩種前綴、Ctrl+C）
 P5b 既有 play-selfcheck（管道）照綠＝逐行模式沒壞
+P5d ★人工驗證（讀碼答不出、R² 不能放行）：在 VS Code 整合終端與 Windows Terminal 各實按一次（x、Esc、Tab、方向鍵、Ctrl+C），確認是單鍵模式、不是退回逐行
+    ⇒ 交件信貼兩個終端的實按結果；任一環境判不成 tty ⇒ 回報（可能要加 --raw 強制旗）
 P5c 藍圖第五輪真跑前，用戶面的操作說明（README「開六個角色終端」旁或 play.py 開場一行）寫「直接按鍵，不用 Enter」
 ```
 
