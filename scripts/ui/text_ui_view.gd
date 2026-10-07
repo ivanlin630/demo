@@ -202,7 +202,7 @@ static func action_block(rows: Array) -> String:
 		var line: String = " %s %s %s" % [head, String(r2.get("label", "")), mark]
 		if not bool(r2.get("enabled", false)):
 			# ★原因放不下時截在欄寬、以「…」結尾（spec 2026-10-07 reasons ②）；完整原因按下去結果行印
-			var room: int = TextUiLayout.COLS - TextUiLayout.display_width(line + "（不可：）")
+			var room: int = TextUiLayout.COLS - TextUiLayout.display_width(line + "（不可：%s）" % "")
 			line += "（不可：%s）" % TextUiLayout.clip_mark(String(r2.get("disabled_reason", "")), room)
 		lines.append(TextUiLayout.clip_to(line, TextUiLayout.COLS))
 	return "\n".join(lines)
