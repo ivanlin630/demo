@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 據點間距裁 (a) —— 前提對不上：玩家的「紮營」在世界裡是 L1，不是 L0；NPC 兩層都不查間距
 topic: ★要你（或用戶）再裁一件 WHAT：玩家「紮營」要不要改成跟 NPC 一樣先立 L0 營地。HOW 推薦 (i)。友善度批其餘照走，間距這格等你
 ---
