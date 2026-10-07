@@ -1118,6 +1118,9 @@ func _m_start(sd: int) -> Dictionary:
 	var st: WorldState = node._bridge._state
 	var pt: TeamData = st.teams[st.get_player_team_id()]
 	var start: Vector2i = pt.tile_pos
+	# ★_arrange 佈置了一個強制事件 ⇒ 第一顆 tick 之後互動面板會自動接管（那是對的行為），之後的推進鍵都會被擋成「面板開著」
+	#   ⇒ 移動這幾格量的是「沒有事的時候」：先清掉；「途中有事」那一格自己再佈置一個
+	st.set_player_forced_event({}, "")
 	await _press(w, "d")
 	var t0: int = _tick(node)
 	await _press(w, "m")
@@ -1140,28 +1143,32 @@ func _m_cells() -> void:
 	_cells_ran.append("M1")
 	print("\n── M2 新鍵（%s）一路走到抵達；★途中有強制事件 ⇒ 停在事件那一刻 ──" % ARRIVE_TOKEN.to_upper())
 	var keys_listed: bool = _hint(node).contains("[%s]" % ARRIVE_TOKEN.to_upper())
-	await _press(w, ARRIVE_TOKEN)
-	var res2: String = _result_line(_screen(node))
 	var tgt: Vector2i = a["target"]
-	print("   按 %s ⇒ 人在 %s（目標 %s）｜結果「%s」｜鍵列有 [%s]：%s" % [ARRIVE_TOKEN.to_upper(), str(pt.tile_pos), str(tgt), res2,
-		ARRIVE_TOKEN.to_upper(), str(keys_listed)])
+	# ★途中遇到既有的停點（看到新的隊伍／事件）就停 ⇒ 每一次停都要說原因（「途中：…」）；再按一次繼續，直到抵達
+	var mid_bad: Array = []
+	var res2: String = ""
+	for _k in range(8):
+		await _press(w, ARRIVE_TOKEN)
+		res2 = _result_line(_screen(node))
+		print("   按 %s ⇒ 人在 %s（目標 %s）｜結果「%s」" % [ARRIVE_TOKEN.to_upper(), str(pt.tile_pos), str(tgt), res2])
+		if pt.tile_pos == tgt:
+			break
+		if not res2.contains("途中："):
+			mid_bad.append(res2)
+	print("   鍵列有 [%s]：%s" % [ARRIVE_TOKEN.to_upper(), str(keys_listed)])
 	_check("M2 鍵位說明列出走到抵達那一鍵 [%s]" % ARRIVE_TOKEN.to_upper(), keys_listed)
+	_check("M2 途中每一次停下都說原因（「途中：…」；錯 %s）" % str(mid_bad), mid_bad.is_empty())
 	_check("M2 一路走到抵達、結果行「抵達 (q,r)」", pt.tile_pos == tgt and res2.contains("抵達 (%d,%d)" % [tgt.x, tgt.y]))
-	await _drop(node)
-	# 途中強制事件
-	var b: Dictionary = await _m_start(SEED_A)
-	var wb: Dictionary = b["w"]
-	var stb: WorldState = wb["node"]._bridge._state
-	var ptb: TeamData = stb.teams[stb.get_player_team_id()]
-	stb.set_player_forced_event({"action": "diplomacy", "from_id": NPC_ID, "proposal": FORCED_PROPOSAL}, "fe_m2")
-	var tb0: int = _tick(wb["node"])
-	await _press(wb, ARRIVE_TOKEN)
-	var res3: String = _result_line(_screen(wb["node"]))
-	var stopped: bool = ptb.tile_pos != b["target"]
-	print("   佈置強制事件後按 %s ⇒ 前進 %d tick｜到了沒 %s｜結果「%s」" % [ARRIVE_TOKEN.to_upper(), _tick(wb["node"]) - tb0, str(not stopped), res3])
-	_check("M2【途中事件】停在事件那一刻（沒走到）、結果行說途中發生什麼", stopped and res3.contains("途中"))
+	# 停點來源：強制事件【到達】是推進的停點（快照 → 到達 → 比對出 forced_event_arrived）
+	#   ★不在床裡從按鍵佈置：按鍵之前佈置的事件已經在快照裡（不是「途中到達」），而一步 60 tick 內它會逾時
+	var br = node._bridge
+	var snap: Dictionary = br._snapshot()
+	st.set_player_forced_event({"action": "diplomacy", "from_id": NPC_ID, "proposal": FORCED_PROPOSAL}, "fe_m2")
+	var evs: Array = br._diff_events(snap).map(func(e): return String(e.get("type", "")))
+	print("   快照之後強制事件到達 ⇒ 推進停點比對出 %s" % str(evs))
+	_check("M2【途中事件】強制事件到達是推進的停點（forced_event_arrived）", evs.has("forced_event_arrived"))
 	_cells_ran.append("M2")
-	await _drop(wb["node"])
+	await _drop(node)
 	print("\n── M3 用 X 推到抵達 ⇒ 抵達那一 tick 出現抵達句；★取消目標 ⇒ 不出現 ──")
 	var c: Dictionary = await _m_start(SEED_A)
 	var wc: Dictionary = c["w"]

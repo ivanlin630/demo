@@ -293,6 +293,10 @@ func _snapshot() -> Dictionary:
 	return {
 		"encounter_active":  _state.encounter_active,
 		"discovered_count":  _state.team_discovered.get(ptid, []).size() if ptid >= 0 else 0,
+		# ★M（spec 2026-10-07 move-command-is-one-tick ②「事件必停」）：強制事件到達／有人來犯也是停點
+		#   ★舊版不在停點裡 ⇒ 一步最多推 60 tick，而強制事件「下一個整點視同拒絕」⇒ 可能在同一步裡到達又逾時，玩家連面板都沒看到
+		"forced_id": _state.player_forced_event_id if not _state.player_forced_event.is_empty() else "",
+		"pre_encounter": not _state.player_pre_encounter.is_empty(),
 	}
 
 func _diff_events(snap: Dictionary) -> Array:
@@ -304,6 +308,10 @@ func _diff_events(snap: Dictionary) -> Array:
 		var now: int = _state.team_discovered.get(ptid, []).size()
 		if now > snap["discovered_count"]:
 			evts.append({ "type": "new_team_spotted" })
+	if not _state.player_forced_event.is_empty() and _state.player_forced_event_id != String(snap.get("forced_id", "")):
+		evts.append({ "type": "forced_event_arrived" })
+	if not _state.player_pre_encounter.is_empty() and not bool(snap.get("pre_encounter", false)):
+		evts.append({ "type": "pre_encounter" })
 	return evts
 
 # ── Player API (query / command) ───────────────────────────────────────────────
