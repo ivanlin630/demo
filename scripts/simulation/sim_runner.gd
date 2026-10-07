@@ -903,7 +903,23 @@ static func trade_arrived(t: TeamData) -> bool:
 
 func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 	var os := OrderSystem.new()
-	for tid in arrived_ids:
+	# ══ ★A2 修（spec 2026-10-07 a2-fix-failure-mark-never-written）：到場判定不掛在「本拍移動抵達」名單上 ══════
+	#   ★真因（先查床 a2_fix_census_bed，三 seed 124 筆裡 121 筆）：`arrived` 只收這一小時【有移動且走到原目標】的隊
+	#     ⇒ 派「貿易」時目標就是腳下那格的隊從沒「移動抵達」過 ⇒ 永遠走不到下面的失敗記號與放手
+	#   ⇒ 名單補上：task＝TRADE、trade_arrived 為真、人在市集格（outpost）的隊（不論這一拍有沒有移動）
+	#   ★只補市集格：目標落在非市集格是另一個病（A2c），不在錯的目標上記失敗（systems 裁甲 2026-10-08）
+	#   ★順序：先原名單、再依 state.teams 的鍵序補（確定性；不耗 RNG）
+	var to_visit: Array = arrived_ids.duplicate()
+	for _ctid in state.teams.keys():
+		if to_visit.has(_ctid):
+			continue
+		var _ct: TeamData = state.teams[_ctid]
+		if not trade_arrived(_ct):
+			continue
+		var _ctile: HexTileData = state.world.tiles.get(_ct.tile_pos.x * 1000 + _ct.tile_pos.y)
+		if _ctile != null and _ctile.outpost_level > 0:
+			to_visit.append(_ctid)
+	for tid in to_visit:
 		if not state.teams.has(tid):
 			continue
 		# 漏斗站5探針（純觀測）：TRADE 隊走到 move_target（arrived = 本 tick 到點）
@@ -924,7 +940,10 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 				if trade_arrived(_t):
 					# ★A2 ②：承諾「貿易」而來、到場沒有可成交的單 ⇒ 失敗記號（同一市集重撞會折價）＋當場放手
 					#   ★只記 option「貿易」：領取有自己的落空記號（A3）；路過的 TRADE 隊（目的地不是這格）不會走到這裡
-					if not _dealt and String(_t.current_option) == "貿易":
+					# ★同一隊同一市集同一拍只記一次（防禦：trade_arrived 為真即放手，結構上已只評一次）
+					var _fk: Dictionary = _t.recent_failures.get("貿易|%d" % _mt.tile_id, {})
+					if not _dealt and String(_t.current_option) == "貿易" \
+							and int(_fk.get("tick", -1)) != state.world.current_tick:
 						FailureMemory.record(state, _t, "貿易", str(_mt.tile_id), OrderSystem.ORDER_LIFETIME, "trade_arrived_no_deal")
 						Probe.bump("trade.arrived_no_deal")
 					Probe.bump("trade.release_at_dest")
