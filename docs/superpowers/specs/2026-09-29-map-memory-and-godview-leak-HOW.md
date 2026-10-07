@@ -61,6 +61,14 @@ owner: systems ｜ 2026-09-29 ｜ **player_reachable: yes**
 段2：依段1結果做（見 §3）
 ```
 
+## ★段 1 結果（量測員 afaf2bea1，2026-10-07）
+```
+玩家隊 team_tile_known 第 1／3／7 天＝33／73／114（走過格數 5／12／22，地板非 0）⇒ 非空 ⇒ §3(B) 走【純 render】那一支
+★我 §2 的預測錯了一半：玩家隊確實被餵到，但餵的不是 SoloAI，是 faction_ai_system.gd:1526 _evaluate_loop3_teams 對每一隊（含玩家）IDLE 時跑的 gather（:1732）→ _find_occupy_target → harvest
+⇒ 玩家的地圖記憶只在【閒著的那些 tick】長：一路移動中經過的格可能沒記住
+⇒ P3（走過一格再離開 ⇒ 小寫）改成【全程移動不停】的走法：綠 ⇒ 純 render 夠；紅 ⇒ 地圖有洞，回 §2 那條（harvest 搬到感知層對全隊跑，藍圖已預裁 8edefa413），我改 spec 再派
+```
+
 ## §3 做什麼
 
 ```

@@ -80,6 +80,12 @@ P7b 純重構守衛：world-fp 不變（_check_distance 語意零改）｜反向
 P7 游標移到三種格各一次（已知據點旁／未知據點旁／空地）⇒ 明細內容正確；★未知據點旁的原因句不得含距離或座標
 ```
 
+F7b【「選中」區塊同一條規則】（量測員旁證 afaf2bea1 → systems 追到）：text_ui_main.gd:1553-1560 選中格印 `query_tile`（sim_bridge.gd:189 直讀 state.world.tiles）的
+   農產比例與糧量 ⇒ 選一個從沒去過的遠格也印得出它的糧 ＝ 顯示邊界 god-view
+   ⇒ 選中區塊與游標處那行同源（走 F6 區塊資料層、只讀附身者知識）：視野內 ⇒ 真值；記得的格 ⇒ 地形＋「糧量：不知道（上次見到時 …）」或只印地形；沒去過 ⇒ 「沒去過」
+   ★debug pane（:1494 `_build_hover_truth_lines`）照舊讀 query_tile，那是合法的真值區
+P7c 選一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反向：走過去看見 ⇒ 出現
+
 （據點間距 2／11 的規則改不改＝藍圖待用戶裁，本票不動）
 ⇒ 藍圖補（同精神）：紮營被擋＝一次觀察 ⇒ 寫弱 belief「附近（≤11 格）有據點，位置不明」，進情報頁，游標處可印「聽說附近有據點」
    ★今天的 belief 是「觀察者 → 目標**隊伍**」的 claim（`belief_system.gd::record_claim(obs, tgt_team, …)`）——「某一帶有據點、主人與位置不明」沒有目標隊可掛
@@ -104,15 +110,16 @@ P7 游標移到三種格各一次（已知據點旁／未知據點旁／空地�
    玩家紮根：新動作「紮根」——★只在【自己的 L0 營地】上列出（tile.camp_level==1 且 camp_team_id==玩家隊）；
             執行＝把 NPC 紮根落地那段（:7140-7161：設 crude_camp 工程、settle 工期、construction_team_id、corvee_site）抽成一支共用函式，玩家與 NPC 同呼；type 參數化（NPC 照 leader 價值、玩家照 build_type）
             precheck_settle：tier "L1"；原因句走 F7 那套（已知據點給距離與門檻、未知只說太近）
+            ★R² 打回：precheck_settle 另查 tile.construction_team_id == -1（紮根施工中 camp_level 仍是 1 ⇒ 不查就能重按、把工期重置成滿值）；不可時原因「紮根施工中（剩 N 人時）」
 ③成本：玩家紮根＝NPC 紮根今天的成本：settle 工期、免材料（藍圖定：成本就是時間，材料留給之後蓋設施）
-④家欄：紮營後頂列「家」印營地 ⇒ _home_pos/_home_kind 在無據點時退到 state.own_camp_tile(玩家隊)，kind＝「營地」（仍守三欄同給或同 null）
+④家欄：★待藍圖裁（R² 抓到）——player_api_mapper.gd:71「營地不是家（blueprint §6）」是既有裁定；退到 own_camp_tile 等於推翻它 ⇒ 實作端此條先不做，裁完我改這一行
 ⑤動作鍵：紮根是新 action id（不變量 #10 靜態 id）；不讓「紮營」在自己營地上變成紮根（同一鍵兩個意思）
 ```
 ```
 P8a 距最近村 3 格平地 ⇒ 紮營可；距 1 格 ⇒ 不可，原因「離據點太近（需 ≥2）」（據點已知時帶距離）
 P8b 同 3 格處先紮營、再紮根 ⇒ 不可，原因「距最近同類據點 3 格，需 ≥11」（已知才給數字）
 P8c NPC 在距村 1 格處 establish_crude_camp ⇒ false｜NPC 紮根在距同類 3 格處 ⇒ 不落地且 Probe root.commit_drop.spacing +1
-P8d 紮營後頂列家欄＝營地（不是「無」）
+P8d （隨④的裁定）
 P8e 站在自己營地上 ⇒ 動作清單有「紮根」；站在別人營地／空地 ⇒ 沒有
 P8f 反向：把 L0 檢查拿掉 ⇒ P8a 距 1 格那格必紅；把共用紮根函式換回各自一份 ⇒ grep 兩份 crude_camp 工程設點必紅（只准一處）
 P8g world-fp 會變（NPC 多兩道檢查）⇒ 先量；變了才換基準（同 commit）；回報 Probe camp.built／settlement.l0_to_l1_start 改前改後（30 天 seed 1337），觀察輪重跑再看

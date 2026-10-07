@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 票 #9 地圖記憶 段1——玩家隊 team_tile_known 是不是空的
 topic: ★回應派工：不是空的，①>0（33/73/114）。而讀碼第一版預測的「玩家隊走 SoloAI 會被排除 ⇒ harvest 從沒被呼」被實測推翻——真正讓玩家隊也被 harvest 到的是另一條路（loop3 ambient G2c），不是 SoloAI。
 ---
