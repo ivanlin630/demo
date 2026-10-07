@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 友善度 F7 收 R²：_check_distance 拆一支來源兩個出口
 topic: 只看 F7 新增那段（spec「R² 打回（2026-10-07）」起、P7b 止）；F1–F6 你已 CLEAN
 ---
