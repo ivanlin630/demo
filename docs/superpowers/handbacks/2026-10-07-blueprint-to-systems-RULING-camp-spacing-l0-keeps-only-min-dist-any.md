@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 據點間距 —— 用戶 2026-10-07 裁 (a)
 topic: ★用戶裁 (a)：L0 紮營（臨時營地，玩家與 NPC 同規則）只守「離任何據點 ≥ MIN_DIST_ANY（2 格）」；L1 紮根／建村仍守同類型 ≥11（MIN_DIST_SAME）。理由：11 是村落密度尺（世界生成與建村），不是「能不能在這裡過夜」的尺；套在紮營上讓玩家整輪沒家。礦村免距離那條照舊。
 ---
