@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 用戶第二手四件（強制事件回應的真結果上畫面＋上限可見＋事件流時序＋沒錢不提進貢）
 topic: ★派工，R² CLEAN（兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-absorb-at-cap-cap-shown-feed-order-tribute-offer-HOW.md`｜★序：①② 最前、③④ 同批；排在你手上 M、C2 之後、深層批之前（試玩中玩家看得到）
 ---
