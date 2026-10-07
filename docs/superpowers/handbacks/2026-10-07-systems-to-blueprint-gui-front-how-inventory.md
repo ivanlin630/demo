@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: GUI 前端回歸 —— HOW 盤點（你出版面稿之前要知道的骨架）
 topic: ★文字模型的三個資料口今天已經是資料（不是字串）：快照 `get_player_snapshot`、動作清單 `get_available_actions`（每項 action_id／label／enabled／disabled_reason／command）、事件 `read_player_events`，都經 SimBridge ⇒ GUI 掛同三支即可｜★要拆的一處：終端的 compose 吃的是「已排好的字串區塊」，GUI 不能吃那個，要吃區塊之前的資料｜版面稿出來我寫 spec
 ---
