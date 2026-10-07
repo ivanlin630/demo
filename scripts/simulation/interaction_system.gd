@@ -446,20 +446,24 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		if DiplomaticAiSystem.tribute_accept(state, b, a, a.readiness):
 			_probe_raid(state, a, b, "extort")
 			_resolve_extortion(state, id_a, id_b)
-		elif _should_attack(state, id_a, id_b):
-			_probe_raid(state, a, b, "combat")
-			_combat.start_combat(state, id_a, id_b)
 		else:
-			_probe_raid(state, a, b, "noop")
+			_record_extorted(state, b, a, 0.0)   # ★XB①：拒絕也是被勒索過（寫入收一處）
+			if _should_attack(state, id_a, id_b):
+				_probe_raid(state, a, b, "combat")
+				_combat.start_combat(state, id_a, id_b)
+			else:
+				_probe_raid(state, a, b, "noop")
 	elif b.current_task == TeamData.TASK_LOOT and b.readiness >= COMBAT_THRESHOLD:
 		if DiplomaticAiSystem.tribute_accept(state, a, b, b.readiness):
 			_probe_raid(state, b, a, "extort")
 			_resolve_extortion(state, id_b, id_a)
-		elif _should_attack(state, id_b, id_a):
-			_probe_raid(state, b, a, "combat")
-			_combat.start_combat(state, id_b, id_a)
 		else:
-			_probe_raid(state, b, a, "noop")
+			_record_extorted(state, a, b, 0.0)   # ★XB①：拒絕也是被勒索過（寫入收一處）
+			if _should_attack(state, id_b, id_a):
+				_probe_raid(state, b, a, "combat")
+				_combat.start_combat(state, id_b, id_a)
+			else:
+				_probe_raid(state, b, a, "noop")
 
 # ──────── 決策函式 ────────
 
@@ -497,20 +501,32 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 			gained[res] = tribute
 	# ★★★同格勒索的那一半煞車（同一條路，玩家零特殊物理）：
 	#   這一支是 (乙) 玩家發起與 (丙) NPC↔NPC 的【共用】解算點 ⇒ 掛在這裡兩邊都有。
-	#   intensity＝coin 拿走幾成＝TRIBUTE_RATE 0.25 ⇒ 好感 -0.125；
-	#   記憶層 0.25 × 人格乘子要 ≥ 1.2 才過 FEUD_MIN ⇒ 幾乎只有義氣＋好戰都近 1.0 的領袖會結仇。
-	#   ★只看 coin 那一項：比例要有一個分母，而四資源各自的比例不是同一件事
-	#     （拿走糧與拿走錢的「幾成」混算會生出一個沒有意義的數）。
-	if coin_before > 0.0 and atk.leader_id != -1:
-		var def_leader_p: PersonData = state.persons.get(def.leader_id)
-		if def_leader_p != null:
-			_npc_ai.write_memory(def_leader_p, "tributed", atk.leader_id,
-				state.world.current_tick, float(gained.get("coin", 0.0)) / coin_before)
+	#   ★只看 coin 那一項當「拿走比例」：比例要有一個分母，而四資源各自的比例不是同一件事。
+	#   ★XB①（2026-10-07 藍圖裁）：寫入改走 `_record_extorted`（接受與拒絕共呼）；
+	#     coin 光了 ⇒ 拿走比例 0，但被威脅基底照算 ⇒ 照樣記一筆（被勒索本身就是怨）
+	var taken_ratio: float = float(gained.get("coin", 0.0)) / coin_before if coin_before > 0.0 else 0.0
+	_record_extorted(state, def, atk, taken_ratio)
 	_msg.emit_message(state, "extortion",
 		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Extort] Team%d 勒索 Team%d，Team%d 妥協給付" % [atk_id, def_id, def_id])
 	return gained
+
+# ══ ★XB①（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §票 XB，藍圖裁）══════════════════
+# 勒索【到達對方】就寫一筆 "tributed"（接受或拒絕都算）——被勒索本身就是怨，跟拿不拿得到錢無關。
+#   嚴重度 ＝ max(拿走比例, 勒索方 readiness clamp 0..1)：後者已是 tribute_accept 的 threat 輸入，零新常數
+# ★寫入點只有這一處：接受支（`_resolve_extortion`）與兩份 if-accept 分岔的拒絕支（同格互動、玩家直接勒索）共呼
+# ★主詞：寫在【被勒索方】的領袖身上（`tribute_refused` 是寫在索貢方，主詞相反、不合流）
+func _record_extorted(state: WorldState, victim: TeamData, aggressor: TeamData, taken_ratio: float) -> void:
+	if victim == null or aggressor == null or aggressor.leader_id == -1:
+		return
+	var vl: PersonData = state.persons.get(victim.leader_id)
+	if vl == null:
+		return
+	var severity: float = maxf(taken_ratio, clampf(aggressor.readiness, 0.0, 1.0))
+	_npc_ai.write_memory(vl, "tributed", aggressor.leader_id, state.world.current_tick, severity)
+	if Probe.enabled:
+		Probe.bump("extort.recorded.%s" % ("taken" if taken_ratio > 0.0 else "nothing_taken"))
 
 # Task1 measure（純觀測，佔村 spec）：raid（TASK_LOOT）解決分佈探針。
 # extort（無戰）/ combat_at_outpost（落點村格 → capture 可翻）/ combat_open_field（開闊地 → capture no-op）/ noop（想搶未成）。
@@ -1480,6 +1496,7 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 	if aggressor_id == player_team_id:
 		# F-I2 統一公式（同格勒索=兵臨城下 threat=aggressor readiness）
 		if not DiplomaticAiSystem.tribute_accept(state, to_t, from_t, from_t.readiness):
+			_record_extorted(state, to_t, from_t, 0.0)   # ★XB①：拒絕也是被勒索過（寫入收一處）
 			print("[Extort] Team%d 拒絕勒索" % target_id)
 			return { "ok": true, "accepted": false, "msg": "對方拒絕勒索" }
 

@@ -48,9 +48,17 @@ const TRIBUTE_W_FLEE: float = 0.25   # de-patch 閘5 TEST VALUE：逃跑絕境�
 
 static func tribute_accept(state: WorldState, defender: TeamData, aggressor: TeamData,
 		threat: float) -> bool:
+	return bool(tribute_eval(state, defender, aggressor, threat).get("accept", false))
+
+
+# ★XB（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §XB②）：同一支秤，把分數各項交出來
+#   ⇒ 量測床讀這裡（不手抄公式）；`tribute_accept` 只是取 accept 那一欄 ⇒ 判決與量測同一份算式
+#   ★無 leader ⇒ {accept:false, no_leader:true}（與舊行為同：沒人拍板就不屈服）
+static func tribute_eval(state: WorldState, defender: TeamData, aggressor: TeamData,
+		threat: float) -> Dictionary:
 	var leader: PersonData = state.persons.get(defender.leader_id) if defender.leader_id != -1 else null
 	if leader == null:
-		return false
+		return {"accept": false, "no_leader": true}
 	# de-patch 閘5：拆「逃跑=必屈服」硬 override → 逃跑=絕境屈服傾向(加分)，但義氣/膽識高仍可邊逃邊拒(絕境戲)。
 	var flee_desperation: float = TRIBUTE_W_FLEE if defender.current_task == TeamData.TASK_FLEE else 0.0
 	var caution: float  = float(leader.values.get("慎重", 0.5))
@@ -78,9 +86,11 @@ static func tribute_accept(state: WorldState, defender: TeamData, aggressor: Tea
 	#   好感不是邊，而下面那個 edge_flipped 探針要量的正是「邊翻不翻得動」這一件事。
 	var score_no_edge: float = score
 	var had_edge: bool = false
+	var feud_i: float = 0.0
+	var grat_i: float = 0.0
 	if aggressor.leader_id != -1:
-		var feud_i: float = _edge_intensity_to(leader.relation_edges, "feud", aggressor.leader_id)
-		var grat_i: float = _edge_intensity_to(leader.relation_edges, "gratitude", aggressor.leader_id)
+		feud_i = _edge_intensity_to(leader.relation_edges, "feud", aggressor.leader_id)
+		grat_i = _edge_intensity_to(leader.relation_edges, "gratitude", aggressor.leader_id)
 		score -= feud_i * TRIBUTE_W_FEUD
 		score += grat_i * TRIBUTE_W_GRATITUDE
 		had_edge = feud_i > 0.0 or grat_i > 0.0
@@ -97,7 +107,8 @@ static func tribute_accept(state: WorldState, defender: TeamData, aggressor: Tea
 			Probe.bump("rel.tribute_with_edge")
 			if (score > TRIBUTE_ACCEPT_THRESHOLD) != (score_no_edge > TRIBUTE_ACCEPT_THRESHOLD):
 				Probe.bump("rel.tribute_edge_flipped")
-	return score > TRIBUTE_ACCEPT_THRESHOLD
+	return {"accept": score > TRIBUTE_ACCEPT_THRESHOLD, "score": score, "score_no_edge": score_no_edge,
+		"affinity": affinity, "feud": feud_i, "gratitude": grat_i, "threshold": TRIBUTE_ACCEPT_THRESHOLD}
 
 # typed 邊 reader（指定 type+target 最強 intensity；無邊 0）。加 reader 不改 RelationGraph 核心。
 static func _edge_intensity_to(edges: Array, type: String, target: int) -> float:
