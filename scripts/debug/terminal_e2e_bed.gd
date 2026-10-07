@@ -18,7 +18,7 @@ extends SceneTree
 var _errors: int = 0
 var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
-	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3"]
+	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -94,6 +94,7 @@ func _initialize() -> void:
 	await _d4d_global_keys_in_panels()
 	await _bs_cells()
 	await _f_cells()
+	await _m_cells()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -1104,6 +1105,97 @@ func _bs_v2_cells(w: Dictionary) -> void:
 # ══ 戰鬥區第二輪（spec 2026-10-07 battle-start-visibility-and-r-feedback §1）══════════════════════════
 static func _top_clock(scr: String) -> String:
 	return String(scr.split("\n")[0]).split(" ｜ ")[0].strip_edges()
+
+
+# ══ 移動指令（spec 2026-10-07 move-command-is-one-tick）══════════════════════════════════════════════
+#   M ＝ 設目標＋一顆 tick；「走到抵達」另給一個明確的推進鍵（ARRIVE_TOKEN）
+const ARRIVE_TOKEN: String = "l"
+
+# 主畫面把游標往右移一格、按 M ⇒ 回傳 {w, target}
+func _m_start(sd: int) -> Dictionary:
+	var w: Dictionary = _new_w(await _build(sd))
+	var node: Node = w["node"]
+	var st: WorldState = node._bridge._state
+	var pt: TeamData = st.teams[st.get_player_team_id()]
+	var start: Vector2i = pt.tile_pos
+	await _press(w, "d")
+	var t0: int = _tick(node)
+	await _press(w, "m")
+	return {"w": w, "start": start, "target": pt.move_target, "t0": t0}
+
+
+func _m_cells() -> void:
+	print("\n── M1 M ＝ 設目標＋一顆 tick（不是一路推到抵達）──")
+	var a: Dictionary = await _m_start(SEED_A)
+	var w: Dictionary = a["w"]
+	var node: Node = w["node"]
+	var st: WorldState = node._bridge._state
+	var pt: TeamData = st.teams[st.get_player_team_id()]
+	var adv: int = _tick(node) - int(a["t0"])
+	var res: String = _result_line(_screen(node))
+	print("   目標 %s｜按 M 之後世界前進 %d tick｜人在 %s｜結果「%s」" % [str(a["target"]), adv, str(pt.tile_pos), res])
+	_check("★M 母體地板：按 M 之後真的有目標（%s）" % str(a["target"]), a["target"] != Vector2i(-1, -1))
+	_check("M1 按 M 世界只前進 1 tick（%d）" % adv, adv == 1)
+	_check("M1 結果行說預計多久（「預計 N 分鐘」）", res.contains("預計") and res.contains("分鐘"))
+	_cells_ran.append("M1")
+	print("\n── M2 新鍵（%s）一路走到抵達；★途中有強制事件 ⇒ 停在事件那一刻 ──" % ARRIVE_TOKEN.to_upper())
+	var keys_listed: bool = _hint(node).contains("[%s]" % ARRIVE_TOKEN.to_upper())
+	await _press(w, ARRIVE_TOKEN)
+	var res2: String = _result_line(_screen(node))
+	var tgt: Vector2i = a["target"]
+	print("   按 %s ⇒ 人在 %s（目標 %s）｜結果「%s」｜鍵列有 [%s]：%s" % [ARRIVE_TOKEN.to_upper(), str(pt.tile_pos), str(tgt), res2,
+		ARRIVE_TOKEN.to_upper(), str(keys_listed)])
+	_check("M2 鍵位說明列出走到抵達那一鍵 [%s]" % ARRIVE_TOKEN.to_upper(), keys_listed)
+	_check("M2 一路走到抵達、結果行「抵達 (q,r)」", pt.tile_pos == tgt and res2.contains("抵達 (%d,%d)" % [tgt.x, tgt.y]))
+	await _drop(node)
+	# 途中強制事件
+	var b: Dictionary = await _m_start(SEED_A)
+	var wb: Dictionary = b["w"]
+	var stb: WorldState = wb["node"]._bridge._state
+	var ptb: TeamData = stb.teams[stb.get_player_team_id()]
+	stb.set_player_forced_event({"action": "diplomacy", "from_id": NPC_ID, "proposal": FORCED_PROPOSAL}, "fe_m2")
+	var tb0: int = _tick(wb["node"])
+	await _press(wb, ARRIVE_TOKEN)
+	var res3: String = _result_line(_screen(wb["node"]))
+	var stopped: bool = ptb.tile_pos != b["target"]
+	print("   佈置強制事件後按 %s ⇒ 前進 %d tick｜到了沒 %s｜結果「%s」" % [ARRIVE_TOKEN.to_upper(), _tick(wb["node"]) - tb0, str(not stopped), res3])
+	_check("M2【途中事件】停在事件那一刻（沒走到）、結果行說途中發生什麼", stopped and res3.contains("途中"))
+	_cells_ran.append("M2")
+	await _drop(wb["node"])
+	print("\n── M3 用 X 推到抵達 ⇒ 抵達那一 tick 出現抵達句；★取消目標 ⇒ 不出現 ──")
+	var c: Dictionary = await _m_start(SEED_A)
+	var wc: Dictionary = c["w"]
+	var stc: WorldState = wc["node"]._bridge._state
+	var ptc: TeamData = stc.teams[stc.get_player_team_id()]
+	var tgt_c: Vector2i = c["target"]
+	var said_at: int = -1
+	var arrived_at: int = -1
+	for _i in range(12):
+		await _press(wc, "x")
+		var scr: String = _screen(wc["node"])
+		if arrived_at == -1 and ptc.tile_pos == tgt_c:
+			arrived_at = _i
+		if said_at == -1 and scr.contains("抵達 (%d,%d)" % [tgt_c.x, tgt_c.y]):
+			said_at = _i
+		if arrived_at != -1:
+			break
+	print("   第幾次 X 到了：%d｜第幾次 X 畫面出現抵達句：%d" % [arrived_at, said_at])
+	_check("M3 用 X 推到抵達 ⇒ 抵達句出現在抵達那一次", arrived_at != -1 and said_at == arrived_at)
+	await _drop(wc["node"])
+	var d: Dictionary = await _m_start(SEED_A)
+	var wd: Dictionary = d["w"]
+	var std: WorldState = wd["node"]._bridge._state
+	var ptd: TeamData = std.teams[std.get_player_team_id()]
+	ptd.move_target = Vector2i(-1, -1)   # 換任務／取消 ⇒ 目標被清掉而人不在那格
+	var any_said: bool = false
+	for _j in range(6):
+		await _press(wd, "x")
+		if _screen(wd["node"]).contains("抵達 ("):
+			any_said = true
+	print("   取消目標後推 6 小時 ⇒ 出現抵達句：%s（人在 %s）" % [str(any_said), str(ptd.tile_pos)])
+	_check("M3【反向】目標被取消、人不在那格 ⇒ 不出現抵達句", not any_said)
+	_cells_ran.append("M3")
+	await _drop(wd["node"])
 
 
 func _f_cells() -> void:
