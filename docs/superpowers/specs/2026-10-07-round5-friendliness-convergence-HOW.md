@@ -112,14 +112,16 @@ P7c 選一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反�
             precheck_settle：tier "L1"；原因句走 F7 那套（已知據點給距離與門檻、未知只說太近）
             ★R² 打回：precheck_settle 另查 tile.construction_team_id == -1（紮根施工中 camp_level 仍是 1 ⇒ 不查就能重按、把工期重置成滿值）；不可時原因「紮根施工中（剩 N 人時）」
 ③成本：玩家紮根＝NPC 紮根今天的成本：settle 工期、免材料（藍圖定：成本就是時間，材料留給之後蓋設施）
-④家欄：★待藍圖裁（R² 抓到）——player_api_mapper.gd:71「營地不是家（blueprint §6）」是既有裁定；退到 own_camp_tile 等於推翻它 ⇒ 實作端此條先不做，裁完我改這一行
+④營地欄（藍圖裁（乙）`68cd9883d`：§6「營地不是家」保留，家＝歸屬／居民身分／稅軌）：家欄與 _home_tile 一行不動
+   mapper 新增兩欄 camp_pos／camp_distance（同一支 state.own_camp_tile(玩家隊) 取值，兩欄同給或同 null）
+   頂列加「營地：(x,y) 離 N」；null ⇒「營地：無」——★「無」只在 mapper 那一欄【有寫入者】時印（欄位缺席 ⇒ 印「營地：？」不是「無」，同家欄的值主張規則）
 ⑤動作鍵：紮根是新 action id（不變量 #10 靜態 id）；不讓「紮營」在自己營地上變成紮根（同一鍵兩個意思）
 ```
 ```
 P8a 距最近村 3 格平地 ⇒ 紮營可；距 1 格 ⇒ 不可，原因「離據點太近（需 ≥2）」（據點已知時帶距離）
 P8b 同 3 格處先紮營、再紮根 ⇒ 不可，原因「距最近同類據點 3 格，需 ≥11」（已知才給數字）
 P8c NPC 在距村 1 格處 establish_crude_camp ⇒ false｜NPC 紮根在距同類 3 格處 ⇒ 不落地且 Probe root.commit_drop.spacing +1
-P8d （隨④的裁定）
+P8d 紮營後營地欄＝座標、家欄不變；紮根完工 ⇒ 家欄變成那座據點、營地欄＝無｜反向：快照拿掉 camp_pos 鍵 ⇒ 印「？」不印「無」
 P8e 站在自己營地上 ⇒ 動作清單有「紮根」；站在別人營地／空地 ⇒ 沒有
 P8f 反向：把 L0 檢查拿掉 ⇒ P8a 距 1 格那格必紅；把共用紮根函式換回各自一份 ⇒ grep 兩份 crude_camp 工程設點必紅（只准一處）
 P8g world-fp 會變（NPC 多兩道檢查）⇒ 先量；變了才換基準（同 commit）；回報 Probe camp.built／settlement.l0_to_l1_start 改前改後（30 天 seed 1337），觀察輪重跑再看
