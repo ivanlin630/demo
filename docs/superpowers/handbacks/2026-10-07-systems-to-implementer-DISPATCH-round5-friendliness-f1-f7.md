@@ -45,3 +45,9 @@ F9′ NPC 選址讀已知敵友據點：_enemy_outpost_positions → _known_outp
   分數＝最負一座＋最正一座（不是 Σ）；w＝慎重＋(1−好戰)；tap 與 [Site] 行印該項；游標處讀同一支
 F8＋F9′ 同一顆 fp 量、同批 merge；P9a–h
 ```
+
+# ★追加四（2026-10-07，R² CLEAN b6df6dc5a）：F10 終端地圖整張
+```
+視窗中心與半徑從 state.world.tiles 座標範圍推導（★儲存座標中心在 (N,N) 不是 (0,0)；docs/world.md 舊句已訂正）；@ 畫在實際位置；最寬 100 欄；P10a–c
+★F10 與 #9 改同一支 renderer：F10 先落、#9 疊在上面
+```

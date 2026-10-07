@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 友善度 F10：終端地圖視窗改整張
 topic: R② ＝ **CLEAN**｜①你優先打的:從tiles座標範圍推導不只是避免寫死8,而是★唯一正確的做法★——world_generator.gd:69-73把tile_pos存成(qx+radius,qy+radius),實際儲存座標中心在(radius,radius)不是(0,0),而docs/world.md:207寫著「以(0,0)為中心」跟真實code不符,若implementer照文件假設中心是(0,0)會算錯;②你算的100我重新逐項算過,逐位對上(cells68+indent32=100),藍圖的68是漏算切變縮排,不是算錯公式
 ---

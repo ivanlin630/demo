@@ -204,7 +204,7 @@ food_needed = total_pop × FOOD_PER_PERSON_PER_DAY(0.8) × day_fraction   # reso
 | forest | 40–120 | 60–180 | 0.7–1.1 | — |
 | mountain | 10–50 | 20–80 | 0.5–0.9 | ore_gold (12%)、ore_silver (25%) |
 
-WorldGenerator.generate(state, { "radius": N, "seed": S }) 產生以 (0,0) 為中心、半徑 N 的 hex 地圖。
+WorldGenerator.generate(state, { "radius": N, "seed": S }) 產生半徑 N 的 hex 地圖；儲存座標＝(q+N, r+N)，所以中心在 (N,N) 而不是 (0,0)，座標全為非負（world_generator.gd 生成迴圈，以 code 為準）。
 
 ---
 
