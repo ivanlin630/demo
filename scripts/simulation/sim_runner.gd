@@ -833,7 +833,31 @@ func _step1_advance_time(state: WorldState) -> void:
 
 func _step2_move_teams(state: WorldState, team_ids: Array,
 		time_speed_mult: float = 1.0, elapsed_ticks: int = WorldState.TICKS_PER_HOUR) -> Dictionary:
-	return _movement_system.process(state, team_ids, time_speed_mult, elapsed_ticks)
+	var moved: Dictionary = _movement_system.process(state, team_ids, time_speed_mult, elapsed_ticks)
+	_note_hostile_adjacent(state)
+	return moved
+
+# ★M 票 §2（藍圖 fda4636f1，R² 裁）：敵對隊進到玩家隊同格或相鄰（距離 ≤ 1）⇒ 事件 hostile_adjacent（推進停點之一）
+#   ★寫入點在模擬層、算完位置之後（不在 UI 逐 tick 重算）；只看玩家隊的相鄰、敵對＝既有 player_hostile_teams
+#   ★邊緣觸發：上一次已經在旁邊的不重發（player_adjacent_hostiles 記那份名單）；沒有玩家 ⇒ 什麼都不做
+static func _note_hostile_adjacent(state: WorldState) -> void:
+	var ptid: int = state.get_player_team_id()
+	if ptid == -1:
+		return
+	var pt: TeamData = state.live_team(ptid)
+	if pt == null:
+		return
+	var now_adj: Array = []
+	for hid in state.player_hostile_teams:
+		var h: TeamData = state.live_team(int(hid))
+		if h == null:
+			continue
+		var d: int = FactionAISystem._hex_dist(pt.tile_pos, h.tile_pos)
+		if d <= 1:
+			now_adj.append(int(hid))
+			if not state.player_adjacent_hostiles.has(int(hid)):
+				WorldEvents.emit(state, "hostile_adjacent", [int(hid), ptid], false, {"dist": d})
+	state.player_adjacent_hostiles = now_adj
 
 # A2c-2 折入（候選 C）：戰略移動 move_target 設值——從舊 movement:66-77 直讀 bypass 搬來，
 # 於 movement 前跑（byte-identical：同 read-point、同 gate、同突圍優先 tie-break、同 sa_pos 值）。

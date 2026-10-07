@@ -214,6 +214,8 @@ var command_results: Array = []
 #     ⇒ 不製造第三種機制（那是「兩個推進路徑其中一個沒跟上」的預防版）。
 var player_events: Array = []
 var player_event_seq: int = 0
+# ★M 票 §2：此刻在玩家隊同格或相鄰的敵對隊（SimRunner._note_hostile_adjacent 維護；邊緣觸發 hostile_adjacent 用）
+var player_adjacent_hostiles: Array = []
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
 var player_pending_targets: Array = []
 # Array[int] — 同格、無敵意 NPC team_ids，等玩家選擇互動類型或忽略

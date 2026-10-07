@@ -340,26 +340,27 @@ func _process(_delta: float) -> void:
 	if _feed_rows.size() > 100:
 		_feed_rows = _feed_rows.slice(_feed_rows.size() - 100)
 
+	# ★④ 抵達偵測讀【狀態本身】（R² 裁 (A)）：上一幀的目標 → 這一幀被清成 (-1,-1) 而人就站在那一格 ⇒ 抵達
+	#   ★舊版的閘是輸入列文字「移動中」——M 改成一顆 tick 之後那段文字下一顆就沒了、遠早於真正抵達
+	#   ★目標因取消／換任務被清掉而人不在那格 ⇒ 不印
 	var move_target: Vector2i = _bridge.get_player_move_target()
-	if move_target == Vector2i(-1, -1) and _input_bar.text.begins_with("移動中"):
-		_bridge.cancel_advance()
-		_input_bar.text = ""
-		var pos: Vector2i = _bridge.get_player_tile_pos()
-		_log_event("Team%d 到達 (%d,%d)" % [_player_tid, pos.x, pos.y])
+	if _last_move_target != Vector2i(-1, -1) and move_target == Vector2i(-1, -1) \
+			and _bridge.get_player_tile_pos() == _last_move_target:
+		_log_event("抵達 (%d,%d)" % [_last_move_target.x, _last_move_target.y])
+		if _arrive_target != Vector2i(-1, -1):
+			_bridge.cancel_advance()   # ★走到抵達那一鍵：到了就停
+	_last_move_target = move_target
 
 	if result.get("done", false):
 		_report_key_advance(result)
-		var mt2: Vector2i = _bridge.get_player_move_target()
-		if _input_bar.text.begins_with("移動中") and mt2 != Vector2i(-1, -1):
-			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
-		else:
-			_input_bar.text = ""
-	elif not _input_bar.text.begins_with("移動中"):
+		_input_bar.text = ""
+	else:
 		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _bridge.get_current_tick()
 	if _encounter_view != null and _encounter_view.visible:
 		_encounter_view.sync_with_world()   # ★戰鬥在世界那一 tick 裡結算（例：投降令）⇒ 戰鬥畫面跟上
 	_refresh()
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
+	_report_arrive_advance(ps, result)
 	if ps.get("pre_encounter_pending", false) and not _pre_encounter_mode:
 		_bridge.cancel_advance()
 		_pre_encounter_mode = true
@@ -473,8 +474,10 @@ func _input(event: InputEvent) -> void:
 				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
 				#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
 				#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
-				_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
-				_input_bar.text = "移動中 [Esc]停止"
+				# ★M 一顆 tick（spec 2026-10-07 move-command-is-one-tick ①）：舊版這裡 request_advance(ADVANCE_UNTIL_EVENT)＋「移動中」
+				#   ⇒ 一路推到抵達（早於 press-is-do 裁定的 headless-play 架構）⇒ 拿掉；入列那一刻 command_player 已推 1 顆
+				#   ⇒ 走到抵達是另一個明確的推進鍵（ARRIVE_KEY，全域鍵字表那一份）
+				pass
 			else:
 				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
 				#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
@@ -497,6 +500,8 @@ func _input(event: InputEvent) -> void:
 			_global_advance_key(KEY_X)
 		KEY_G:
 			_global_advance_key(KEY_G)
+		ARRIVE_KEY:
+			_global_advance_key(ARRIVE_KEY)   # ★M ②：走到抵達（同族推進鍵，同一支處理函式）
 			_input_mode_callback = Callable()   # 無 callback → 使用舊有行為
 			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
@@ -1006,7 +1011,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -1067,7 +1072,9 @@ const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
 #   （面板鍵列上【有列出】的同一個鍵歸面板語意 —— 那由各面板自己的 binds_key 宣告，不走這裡）
 # ★強制回應的字母配發【跳過】這裡的字母（`response_letter_keys()`）⇒ X／G 永遠不會是某個回應
 #   ⇒ 鍵的意思不隨強制事件出現而變（不變量 #10）
-const GLOBAL_ADVANCE_KEYS: Array = [KEY_SPACE, KEY_X, KEY_G]
+# ★M ②：走到抵達（ARRIVE_KEY）與 Space／X／G 同族 ⇒ 進同一份字表（強制回應字母配發同步跳過它）
+const ARRIVE_KEY: int = KEY_L
+const GLOBAL_ADVANCE_KEYS: Array = [KEY_SPACE, KEY_X, KEY_G, ARRIVE_KEY]
 const GLOBAL_KEY_IN_PANEL_MSG: String = "面板開著時不能推進（Esc 關閉）"
 
 func _global_advance_key(keycode: int) -> void:
@@ -1084,6 +1091,72 @@ func _global_advance_key(keycode: int) -> void:
 			_input_mode_type = "numeric"
 			_input_mode_prompt = "跳過 tick 數: "
 			_input_buffer = ""
+		ARRIVE_KEY:
+			var mt: Vector2i = _bridge.get_player_move_target()
+			if mt == Vector2i(-1, -1):
+				_set_feedback(false, "沒有在移動（先用游標選一格按 M）")
+				return
+			# ★推到抵達或任何事件（ADVANCE_UNTIL_EVENT 既有的停點）；抵達那一刻由上面的邊緣偵測停下
+			_arrive_target = mt
+			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
+
+# 推進為什麼停下（推進鍵的結果句共用這一份；事件型別來自 SimBridge._diff_events）
+#   ★M §2：停點事件帶事件句（WorldEvents.describe 那一句，與事件流同源）⇒ 結果行「停下：<事件句>」
+static func _advance_stop_reason(result: Dictionary) -> String:
+	var why: String = String(result.get("stall_reason", ""))
+	for e in result.get("events", []):
+		match String((e as Dictionary).get("type", "")):
+			"encounter_triggered": why = "遭遇戰"
+			"stop_event": return String((e as Dictionary).get("text", ""))
+	return why
+
+static func _has_stop_event(result: Dictionary) -> bool:
+	for e in result.get("events", []):
+		if String((e as Dictionary).get("type", "")) == "stop_event":
+			return true
+	return false
+
+# ══ ★M 票 §2②：休息兩段確認 ═══════════════════════════════════════════════════════════════════════
+#   ★第一次：印「TeamN 在 d 格外，確定要休息？再按一次休息」並記下；第二次（下一個按的仍是休息）才真的下令
+#   ★引擎不替玩家取消休息（PRIO_PLAYER）；休息中敵對逼近 ⇒ 推進停點（hostile_adjacent）停下、句子有主詞
+var _rest_confirm_armed: bool = false
+func _rest_needs_confirm(act: Dictionary) -> bool:
+	var aid: String = String(act.get("command_args", {}).get("action_id", act.get("action_id", "")))
+	if aid != "rest":
+		_rest_confirm_armed = false
+		return false
+	var near: Dictionary = _bridge.nearest_hostile_within(1)
+	if near.is_empty() or _rest_confirm_armed:
+		_rest_confirm_armed = false
+		return false
+	_rest_confirm_armed = true
+	_set_feedback(false, "Team%d 在 %d 格外，確定要休息？再按一次休息" % [int(near["id"]), int(near["dist"])])
+	return true
+
+# ══ ★M ②：走到抵達那一鍵的結果句 —— 推進停下的那一刻寫（抵達／途中事件）══════════════════════════════
+var _arrive_target: Vector2i = Vector2i(-1, -1)
+var _last_move_target: Vector2i = Vector2i(-1, -1)
+func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
+	if _arrive_target == Vector2i(-1, -1):
+		return
+	var stopping: bool = not _bridge.is_advancing() or ps.get("pre_encounter_pending", false) or ps.get("encounter_active", false) \
+		or not String(_cached_snapshot.get("forced_interaction", {}).get("interaction_id", "")).is_empty()
+	if not stopping:
+		return
+	var pos: Vector2i = _bridge.get_player_tile_pos()
+	if pos == _arrive_target:
+		_set_feedback(true, "抵達 (%d,%d)" % [pos.x, pos.y])
+	else:
+		var why: String = _advance_stop_reason(result)
+		if why == "":
+			if ps.get("encounter_active", false) or ps.get("pre_encounter_pending", false):
+				why = "遭遇戰"
+			elif not String(_cached_snapshot.get("forced_interaction", {}).get("interaction_id", "")).is_empty():
+				why = "有事找上門"
+			else:
+				why = "推進停了"
+		_set_feedback(true, ("停下：%s（停在 (%d,%d)）" if _has_stop_event(result) else "途中：%s，停在 (%d,%d)") % [why, pos.x, pos.y])
+	_arrive_target = Vector2i(-1, -1)
 
 # 各面板的鍵空間宣告（靜態謂詞）—— 一處對照，D4 的分派與各 handler 頂端的守衛讀同一組謂詞
 func _mode_binds_key(mode: String, keycode: int) -> bool:
@@ -1118,12 +1191,11 @@ func _report_key_advance(result: Dictionary) -> void:
 	if now >= _key_advance_target:
 		_set_feedback(true, "推進到 %s" % clk)
 	else:
-		var why: String = String(result.get("stall_reason", ""))
-		for e in result.get("events", []):
-			match String((e as Dictionary).get("type", "")):
-				"encounter_triggered": why = "遭遇戰"
-				"new_team_spotted": why = "看到新的隊伍"
-		_set_feedback(true, "推進停在 %s（%s）" % [clk, why if why != "" else "有事發生"])
+		var why: String = _advance_stop_reason(result)
+		if _has_stop_event(result):
+			_set_feedback(true, "停下：%s（%s）" % [why, clk])
+		else:
+			_set_feedback(true, "推進停在 %s（%s）" % [clk, why if why != "" else "有事發生"])
 	_key_advance_target = -1
 
 # 強制回應可用的字母（A..Z 去掉全域鍵）——面板印的字母與 handler 的對照都讀這一份
@@ -2137,6 +2209,9 @@ func _handle_interact_mode(keycode: int) -> void:
 		var sa: Dictionary = self_acts[self_idx]
 		if not sa.get("enabled", true):
 			_set_feedback(false, sa.get("disabled_reason", "不可執行"))
+			_refresh(); return
+		# ★M 票 §2②：休息＝玩家主導、兩段確認 —— 旁邊（同格或相鄰）有敵對隊時，第一次只警告、不下令（時間不動）
+		if _rest_needs_confirm(sa):
 			_refresh(); return
 		var sr: Dictionary = _bridge.command_player(
 			sa.get("command_name", "execute_action"), sa.get("command_args", {}))

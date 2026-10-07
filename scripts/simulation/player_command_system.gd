@@ -1991,7 +1991,9 @@ func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 	if pt.tile_pos == target_pos:
 		return { "ok": true, "msg": "已在目標格" }
 	pt.move_target = target_pos
-	return { "ok": true, "msg": "設定目標 (%d,%d)" % [target_pos.x, target_pos.y] }
+	# ★M ①：結果句說預計多久（讀既有移動成本 PathSystem.eta_ticks；1 tick ＝ 1 分鐘）
+	var eta: int = PathSystem.eta_ticks(pt, float(FactionAISystem._hex_dist(pt.tile_pos, target_pos)))
+	return { "ok": true, "msg": "開始走向 (%d,%d)，預計 %d 分鐘" % [target_pos.x, target_pos.y, eta] }
 
 func cancel_move(state: WorldState) -> Dictionary:
 	var pt: TeamData = get_player_team(state)

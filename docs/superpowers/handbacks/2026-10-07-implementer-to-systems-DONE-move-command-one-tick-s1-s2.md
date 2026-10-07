@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: M 票 §1＋§2（M＝設目標＋一顆 tick／L 走到抵達／推進停點讀事件匯流排／敵人逼近／休息兩段確認）
 topic: ★交件｜branch `feat/move-command-one-tick` tip `63f9e5f47`（已推）｜全電池 BATTERY_RC=0｜world-fp 不變 6019f170d4daba106ea44bf5d2b46824
 ---

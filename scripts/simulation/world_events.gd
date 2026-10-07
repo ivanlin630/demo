@@ -70,6 +70,8 @@ const FUNC_KINDS: Array = [
 	"forced_event_arrived",   # ★WorldState.set_player_forced_event（唯一寫入口,8 個產生端都經過）
 	"forced_event_resolved",  # ★PlayerCommandSystem.respond_to_forced（★帶 handler 自己回的 msg）
 	"forced_event_timeout",   # ★SimRunner hour-tick 自動拒絕
+	# ══ M 票 §2（藍圖 fda4636f1）：敵對隊進到玩家隊同格或相鄰 —— 寫入點在模擬層算完位置之後（SimRunner._note_hostile_adjacent）══
+	"hostile_adjacent",
 ]
 
 # ③狀態跨線型（本刀新增偵測點）
@@ -96,8 +98,27 @@ const KIND_LABEL: Dictionary = {
 	"construction_abandoned": "工地", "plan_invalidated": "計畫", "rung_changed": "野心",
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
-	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報",
+	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "hostile_adjacent": "敵人逼近",
 }
+# ══ ★M 票 §2：推進的停點（具名集合，唯一一份）—— 推進碰到這幾種【涉及玩家隊】的事件就停在那一 tick ══════════════
+#   找上門／提案到達（強制事件）、被攻擊或遭遇開始、敵對隊進入同格或相鄰格、成員死亡或離隊
+#   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
+const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "hostile_adjacent",
+	"member_died", "member_left"]
+
+# 玩家事件匯流排上 seq0 之後第一筆停點事件（kind ∈ ADVANCE_STOP_KINDS 且主體含玩家隊）；沒有 ⇒ {}
+static func stop_event_since(state: WorldState, seq0: int) -> Dictionary:
+	var ptid: int = state.get_player_team_id()
+	if ptid == -1:
+		return {}
+	for e in state.player_events:
+		var d: Dictionary = e
+		if int(d.get("seq", 0)) <= seq0:
+			continue
+		if ADVANCE_STOP_KINDS.has(String(d.get("kind", ""))) and (d.get("subjects", []) as Array).has(ptid):
+			return d
+	return {}
+
 # 查不到 ⇒ ""（呼叫端據此【不印給玩家】；debug 走法印原名）
 static func kind_label(kind: String) -> String:
 	return String(KIND_LABEL.get(kind, ""))
@@ -350,6 +371,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"construction_abandoned":return "%s 放棄了工地" % who
 		"plan_invalidated":      return "%s 的計畫行不通了" % who
 		"rung_changed":          return "%s 的野心變了" % who
+		"hostile_adjacent":      return "%s 逼近到你旁邊（%d 格）" % [who, int(info.get("dist", 1))]
 		# ★D1：沒有專屬句子的 kind（訊息型那一批）⇒ 「誰：短名」；短名也沒有 ⇒ ""（不把識別字當句子）
 		_:
 			var lb: String = kind_label(kind)
