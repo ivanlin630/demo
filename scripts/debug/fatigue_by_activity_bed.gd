@@ -150,9 +150,15 @@ func _p_world() -> void:
 		var fdays: float = ResourceSystem.effective_food(st, tx) / maxf(float(tx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 		print("   沒降過 Team%d：疲勞 %.2f｜曾移動或戰鬥 %s｜糧撐 %.1f 天｜任務小時數 %s" % [x, tx.fatigue, str(moved_or_fought.has(x)), fdays, str(task_hist.get(x, {}))])
 	# ★§6③：只判「會移動或會戰鬥」的隊；整月原地（施工／覓食持求生優先序）的隊印出、不判（等 WHAT）
-	var judged_never: Array = never.filter(func(x): return moved_or_fought.has(x))
+	# ★2026-10-07（戰鬥區第二輪改了 RNG ⇒ 世界變了）：Team34（流亡隊、活 65 小時都在覓食走動）、Team35（運輸子隊、53 小時都在運輸）
+	#   在世上的每一個 pass 都在出力 ⇒ 照機制本來就不會降 ⇒ 母體再收一刀：疲勞 > 0 時有過不出力 pass 的隊
+	#   （探針 fatigue.restpass_pos.byteam；而「真的降了沒」照舊由本床逐 tick 取樣判，不讀探針）
+	var had_rest: Callable = func(x): return int(Probe.counts.get("fatigue.restpass_pos.byteam.%04d" % int(x), 0)) > 0
+	var judged_never: Array = never.filter(func(x): return moved_or_fought.has(x) and had_rest.call(x))
 	var spared: Array = never.filter(func(x): return not moved_or_fought.has(x))
-	print("   判（曾移動或戰鬥）而沒降過：%s｜印出不判（整月原地）：%s" % [str(judged_never), str(spared)])
+	var never_rested: Array = never.filter(func(x): return moved_or_fought.has(x) and not had_rest.call(x))
+	print("   判（曾移動或戰鬥、且疲勞 > 0 時停下來過）而沒降過：%s｜印出不判（整月原地）：%s｜印出不判（一刻都沒停過）：%s" % [
+		str(judged_never), str(spared), str(never_rested)])
 	for x in [0, 1, 3]:
 		if st.teams.has(x):
 			print("   §7 施工隊 Team%d：休息被選 %d 次" % [x, rest_choices.filter(func(r): return int(r[0]) == x).size()])
