@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: M＝設目標＋一顆 tick；「走到抵達」另給明確鍵（試玩期間玩家看得到 ⇒ 排在深層批之前）
 topic: ★派工，R² CLEAN（`c3f38266d`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-move-command-is-one-tick-HOW.md`｜★序：你手上那張做到乾淨點後下一個｜走整份電池
 ---

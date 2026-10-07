@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: M 票 §2：推進停點＝玩家相關事件（讀 WorldEvents kind）＋休息兩段確認
 topic: ★派工追加，R² CLEAN（兩輪）｜spec §2 ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-move-command-is-one-tick-HOW.md`｜同 branch feat/move-command-one-tick，跟 §1 一起交
 ---
