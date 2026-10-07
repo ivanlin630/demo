@@ -514,7 +514,9 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 
 # ══ ★XB①（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §票 XB，藍圖裁）══════════════════
 # 勒索【到達對方】就寫一筆 "tributed"（接受或拒絕都算）——被勒索本身就是怨，跟拿不拿得到錢無關。
-#   嚴重度 ＝ max(拿走比例, 勒索方 readiness clamp 0..1)：後者已是 tribute_accept 的 threat 輸入，零新常數
+#   ★XB①′（藍圖 324b9041f）：嚴重度 ＝ 被拿走的 coin 比例；什麼都沒拿到 ⇒ TRIBUTE_RATE（對方向你索要的那一份）
+#   ★不再讀 readiness（XB① 第一版用 max(比例, readiness)：玩家 readiness 恆 1.0 ⇒ 第一次就結仇，它不是真量）
+#   ★怨的累積（同一施加者一季加總）在 NpcAiSystem._write_relation_edge 的 "tributed" 那一支
 # ★寫入點只有這一處：接受支（`_resolve_extortion`）與兩份 if-accept 分岔的拒絕支（同格互動、玩家直接勒索）共呼
 # ★主詞：寫在【被勒索方】的領袖身上（`tribute_refused` 是寫在索貢方，主詞相反、不合流）
 func _record_extorted(state: WorldState, victim: TeamData, aggressor: TeamData, taken_ratio: float) -> void:
@@ -523,7 +525,7 @@ func _record_extorted(state: WorldState, victim: TeamData, aggressor: TeamData, 
 	var vl: PersonData = state.persons.get(victim.leader_id)
 	if vl == null:
 		return
-	var severity: float = maxf(taken_ratio, clampf(aggressor.readiness, 0.0, 1.0))
+	var severity: float = taken_ratio if taken_ratio > 0.0 else TRIBUTE_RATE
 	_npc_ai.write_memory(vl, "tributed", aggressor.leader_id, state.world.current_tick, severity)
 	if Probe.enabled:
 		Probe.bump("extort.recorded.%s" % ("taken" if taken_ratio > 0.0 else "nothing_taken"))
