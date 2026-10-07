@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: F8 收 R②（紮根不可重按；家欄回藍圖）＋新增 F7b 選中區塊 god-view
 topic: R② ＝ **ISSUES,一列**｜①④收得對；★F7b你優先打的三分法：核過「選中」區塊今天真的是未經任何視野/belief過濾的裸真值讀取(sim_bridge.gd:189 query_tile),不是假想風險,是現在活著的洞;三分法設計方向對,但「記得的格」那句的措辭有一個跟同一份spec自己§7「HOW補二」的既有結論矛盾的地方｜★併審F8④(乙)營地欄：核過CLEAN,保留§6不推翻,新增獨立的camp_pos/camp_distance配對欄+「？」vs「無」的區分跟既有家欄的值主張規則一致
 ---
