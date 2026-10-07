@@ -18,7 +18,7 @@ extends SceneTree
 var _errors: int = 0
 var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
-	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3"]
+	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3", "S1", "S2", "S3", "S4"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -95,6 +95,7 @@ func _initialize() -> void:
 	await _bs_cells()
 	await _f_cells()
 	await _m_cells()
+	await _s_cells()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
 	var missing: Array = []
@@ -1125,6 +1126,101 @@ func _m_start(sd: int) -> Dictionary:
 	var t0: int = _tick(node)
 	await _press(w, "m")
 	return {"w": w, "start": start, "target": pt.move_target, "t0": t0}
+
+
+# ══ M 票 §2（藍圖 fda4636f1）：推進停點＝玩家相關事件（讀 WorldEvents 具名集合）＋休息兩段確認 ══════════════
+# 佈置：E2E 那支 NPC 隊放到玩家旁邊一格、列進玩家的敵對名單、清掉強制事件
+func _s_hostile_next_to_player(sd: int) -> Dictionary:
+	var w: Dictionary = _new_w(await _build(sd))
+	var st: WorldState = w["node"]._bridge._state
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	st.set_player_forced_event({}, "")
+	var npc: TeamData = st.teams.get(NPC_ID)
+	npc.tile_pos = pt.tile_pos + Vector2i(1, 0)
+	npc.move_target = Vector2i(-1, -1)
+	if not st.player_hostile_teams.has(NPC_ID):
+		st.player_hostile_teams.append(NPC_ID)
+	return {"w": w, "st": st, "pt": pt}
+
+
+func _s_cells() -> void:
+	print("\n── S1 停點清單裡每一種 kind 都會讓推進停下（讀 WorldEvents 具名集合，不手抄）──")
+	var w0: Dictionary = _new_w(await _build(SEED_A))
+	var st0: WorldState = w0["node"]._bridge._state
+	var ptid0: int = st0.get_player_team_id()
+	var kinds: Array = WorldEvents.get("ADVANCE_STOP_KINDS") if WorldEvents.get("ADVANCE_STOP_KINDS") != null else []
+	var missed: Array = []
+	for k in kinds:
+		var seq0: int = st0.player_event_seq
+		WorldEvents.emit(st0, String(k), [ptid0], false, {})
+		var hit: Dictionary = WorldEvents.stop_event_since(st0, seq0) if WorldEvents.has_method("stop_event_since") else {}
+		if hit.is_empty():
+			missed.append(String(k))
+	print("   停點 kind %s｜沒停的 %s" % [str(kinds), str(missed)])
+	_check("★S1 母體地板：停點清單非空且含敵對逼近（%d）" % kinds.size(), kinds.size() >= 5 and kinds.has("hostile_adjacent"))
+	_check("S1 清單裡每一種 kind 寫進玩家事件 ⇒ 推進停點認得（沒認得：%s）" % str(missed), missed.is_empty() and not kinds.is_empty())
+	_check("S1【反向】看到新的隊伍不是停點", not kinds.has("new_team_spotted"))
+	await _drop(w0["node"])
+	# 整合：敵對隊就在旁邊 ⇒ Space 停在牠逼近那一刻、結果句有主詞
+	var a: Dictionary = await _s_hostile_next_to_player(SEED_A)
+	var wa: Dictionary = a["w"]
+	var t0: int = _tick(wa["node"])
+	await _press(wa, "space")
+	var adv: int = _tick(wa["node"]) - t0
+	var res: String = _result_line(_screen(wa["node"]))
+	print("   敵對 Team%d 在旁邊、按 Space ⇒ 前進 %d tick（到隔日要 %d）｜結果「%s」" % [NPC_ID, adv, WorldState.TICKS_PER_DAY - t0 % WorldState.TICKS_PER_DAY, res])
+	_check("S1 Space 停在敵對逼近那一刻（沒推到隔日）、結果句「停下：」有主詞（Team%d、格）" % NPC_ID,
+		adv < WorldState.TICKS_PER_DAY - t0 % WorldState.TICKS_PER_DAY and res.contains("停下：") and res.contains("Team%d" % NPC_ID) and res.contains("格"))
+	_cells_ran.append("S1")
+	await _drop(wa["node"])
+	print("\n── S2 沒有事件 ⇒ 推進照原長度 ──")
+	var wb: Dictionary = _new_w(await _build(SEED_A))
+	wb["node"]._bridge._state.set_player_forced_event({}, "")
+	var tb0: int = _tick(wb["node"])
+	await _press(wb, "x")
+	var advb: int = _tick(wb["node"]) - tb0
+	var want: int = WorldState.TICKS_PER_HOUR - tb0 % WorldState.TICKS_PER_HOUR
+	print("   按 X ⇒ 前進 %d tick（到整點要 %d）" % [advb, want])
+	_check("S2 沒有玩家相關事件 ⇒ X 推滿到整點（%d／%d）" % [advb, want], advb == want)
+	_cells_ran.append("S2")
+	await _drop(wb["node"])
+	print("\n── S3 旁邊有敵對時按休息：第一次只警告、時間不動；第二次才執行 ──")
+	var c: Dictionary = await _s_hostile_next_to_player(SEED_A)
+	var wc: Dictionary = c["w"]
+	var ptc: TeamData = c["pt"]
+	await _press(wc, "t")
+	var p: Dictionary = parse_screen(_screen(wc["node"]))
+	if not bool(p["self_active"]):
+		await _press(wc, "tab")
+		p = parse_screen(_screen(wc["node"]))
+	var rest_key: String = ""
+	for s0 in p["self"]:
+		if String(s0["label"]) == PlayerApiMapper.action_label("rest"):
+			rest_key = String(s0["key"])
+	_check("★S3 母體地板：自家隊動作區有「休息」（鍵 %s）" % rest_key, rest_key != "")
+	if rest_key != "":
+		var tc0: int = _tick(wc["node"])
+		await _press(wc, rest_key)
+		var r1: String = _result_line(_screen(wc["node"]))
+		var tc1: int = _tick(wc["node"])
+		await _press(wc, rest_key)
+		var tc2: int = _tick(wc["node"])
+		print("   第一次按休息 ⇒ 結果「%s」｜tick %d→%d｜第二次 ⇒ tick %d｜task %s" % [r1, tc0, tc1, tc2, ptc.current_task])
+		_check("S3 第一次只有警告（「確定要休息」、帶主詞）、時間不動", r1.contains("確定要休息") and r1.contains("Team%d" % NPC_ID) and tc1 == tc0)
+		_check("S3 第二次才執行（時間前進、隊伍在休息）", tc2 > tc1 and ptc.current_task == TeamData.TASK_REST)
+		_cells_ran.append("S3")
+		print("\n── S4 休息中敵對逼近 ⇒ 推進停下、結果句有主詞、不自動取消休息 ──")
+		await _to_main(wc)
+		var td0: int = _tick(wc["node"])
+		await _press(wc, "space")
+		var r4: String = _result_line(_screen(wc["node"]))
+		print("   休息中按 Space ⇒ 前進 %d tick｜結果「%s」｜task %s" % [_tick(wc["node"]) - td0, r4, ptc.current_task])
+		_check("S4 休息中敵對逼近 ⇒ 停下帶主詞、休息沒被取消", r4.contains("停下：") and r4.contains("Team%d" % NPC_ID) and ptc.current_task == TeamData.TASK_REST)
+		_cells_ran.append("S4")
+	else:
+		_cells_ran.append_array(["S3", "S4"])
+	await _drop(wc["node"])
 
 
 func _m_cells() -> void:
