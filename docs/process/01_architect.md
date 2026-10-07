@@ -175,7 +175,7 @@
 | ★**驗 merge 候選的刪除那一半要用看的**（`git diff main...<branch>` 篩出 `^-` 行），不是看數字：誤刪只會變成一個數字。〔詳 detail#arch-deletions〕 | systems 2026-09-22 |
 | ★**驗收表每格帶「由什麼判」一欄**（註冊表 id／哪支床／手動一次性）；否則會有沒有閘的格——它不是恆綠，是不出現在任何卷面上。〔詳 detail#arch-judged-by〕 | systems 2026-09-22 |
 | ★**降級／刪除一格時，先查【誰把它當成目標或前提】** —— **驗收表是一張圖，不是一張清單**；血證 2026-09-22：systems 把 B2 降成構造保證，**而 B6（它的陽性對照）的目標就消失了**，是 implementer 發現的；修法 ＝ **讓對照跟著被測項一起換層**（B6 跟著 B2 進構造層）。 |
-| ★**每寫一條驗收判準就問：機制關掉它還綠嗎？** 至少一條「機制關掉就會紅」；守恆式對「有沒有做事」不敏感（零流量也守恆）。〔詳 detail#arch-discrimination〕 | systems 2026-09-05 |
+| ★**每寫一條驗收判準就問：機制關掉它還綠嗎？** 至少一條「機制關掉就會紅」；守恆式對「有沒有做事」不敏感（零流量也守恆）。★「X 發生時必寫 Y」的票，至少一格判決格要讓 X 從真路徑發生（佈置結果態只能補充）〔詳 detail#arch-discrimination；界限第 24 條〕 | systems 2026-09-05 |
 | ★**branch 上跑的閘是自檢、不是 merge gate**：真 merge gate＝systems 對已合 main 的結果跑的那一輪。〔詳 detail#arch-branch-gate〕 | systems 2026-09-07 |
 | ★**merge 閘紅了先比較再判斷**：紅點名的檔／符號在不在這次 diff 裡？不在 ⇒ 先重量 main 基線（基線紅數＝0 時，紅 ≥1 就是這票帶進來的）。〔詳 detail#arch-red-attribution〕 | reviewer 2026-09-18 |
 | ★**staleness 閘判會自己長大的量，不判時戳**；只能判戳時，戳要帶工作量（否則一輪 no-op 滿足得了它）。〔詳 detail#arch-staleness〕 | systems 2026-09-29 |
