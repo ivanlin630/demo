@@ -84,6 +84,10 @@ done <<EOF_WT
 $(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{ $1=""; sub(/^ /,""); print }')
 EOF_WT
 
+_mb_same_proc() {   # $1 pid、$2 信標 since（本地時間 YYYY-MM-DDTHH:MM:SS）⇒ 名字是 Godot 且啟動時間對得上才回 0
+  [ -n "${2:-}" ] || return 1
+  powershell -NoProfile -Command "\$p = Get-Process -Id $1 -ErrorAction SilentlyContinue; if (-not \$p -or \$p.ProcessName -notlike 'godot*') { exit 1 }; if ([math]::Abs((\$p.StartTime - [datetime]'$2').TotalSeconds) -le 120) { exit 0 } else { exit 1 }" >/dev/null 2>&1
+}
 n=$(powershell -NoProfile -Command '@(Get-Process godot* -ErrorAction SilentlyContinue).Count' 2>/dev/null | tr -dc '0-9')
 if [ "${n:-0}" != "0" ]; then
   echo "[machine] ⛔ BUSY：Godot 行程數 = $n"
@@ -98,7 +102,9 @@ if [ "${n:-0}" != "0" ]; then
     for _bf in "$_mb_bdir"/*.txt; do
       [ -f "$_bf" ] || continue
       _bp=$(basename "$_bf" .txt)
-      if _mb_alive "$_bp"; then
+      # ★pid 會被系統重用（2026-10-07 實作端揭：信標 10352 是 6 小時前那支 Godot，而那個號碼此刻是我自己的 bash）
+      #   ⇒ 「pid 還活著」不等於「是同一個行程」：再核【行程名是 Godot】且【StartTime 與信標 since= 相差 ≤120 秒】
+      if _mb_alive "$_bp" && _mb_same_proc "$_bp" "$(sed -nE 's/.*since=([0-9T:+-]+).*/\1/p' "$_bf" | head -1)"; then
         _mb_ours=$((_mb_ours+1))
         echo "[machine]     ・我們的：$(head -1 "$_bf")"
       else
