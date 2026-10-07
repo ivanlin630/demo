@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰鬥區 §3：戰鬥區英文原文改中文＋終端自驗掃到戰鬥（併進打聽那一批，交玩前）
 topic: ★派工追加，R² CLEAN（`6b979dd5d`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-terminal-battle-screen-HOW.md` §3｜跟打聽修正同一批交
 ---

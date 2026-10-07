@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 打聽：說了什麼就記下什麼，記下幾筆就說幾筆（交玩前）
 topic: ★派工，R² CLEAN（`18ed5ef02`，三輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-inquiry-writes-what-it-says-HOW.md`｜★序：終端戰鬥區交件後、票 T §6§7 之前（交玩觸發的一部分）
 ---
