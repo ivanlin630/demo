@@ -64,6 +64,14 @@ P6 一格：同一個世界狀態，區塊資料 → 字串 的輸出與拆刀�
 ⇒ ★感知邊界（我先標，請 R² 打）：紮營的間距檢查讀的是**真實**據點位置（世界物理，合法），但原因句若寫「距最近同類據點 4 格」而那個據點玩家不知道
    ⇒ 原因句洩露了一個他不知道的據點的存在與距離 ⇒ 擋住的據點不在玩家 belief 裡時，原因句只說「這裡離某個據點太近」（不給距離與位置）；在 belief 裡才給數字與名字
 ⇒ debug pane（TEXTUI_DEBUG_PANE=1）印真值那支照舊，不混進這一行
+⇒ ★R² 打回（2026-10-07）：`OutpostSystem._check_distance`（outpost_system.gd:932-952）只回 bool ⇒ 呼叫端不知道【誰】擋的，無從跟 belief 核對
+   ⇒ 拆成一支來源、兩個出口：新 `_distance_blockers(state, pos, type) -> Array`（每筆 {tile_pos, dist, rule:"any"|"same"}；礦村豁免 ⇒ 空陣列；掃法與比較符號逐字搬）
+     `_check_distance` 改成 `return _distance_blockers(...).is_empty()` ——★不准留第二份掃描（兩份會漂開）；呼叫點 :571／player_command_system:592／qa_probe 不用改
+   ⇒ precheck_camp 拿 blockers，逐筆問 `BeliefSystem.known_outpost_at(state, 玩家隊, b.tile_pos, …)`：
+     有任一筆已知 ⇒ 原因句用【已知那幾筆裡最近的一筆】給名字與距離＋規則門檻（例「距 X 的據點 3 格；同類須 ≥ 11」）
+     全部未知 ⇒ 只說「這裡離某個據點太近」——不給距離、方向、座標、類別
+     ★不准挑「最近的那筆」再問知不知道：最近那筆未知而次近那筆已知時，那樣寫會丟掉玩家本來有權知道的原因
+P7b 純重構守衛：world-fp 不變（_check_distance 語意零改）｜反向：在 fp 世界挑 3 格被擋的格，bool 與 blockers.is_empty() 逐格相反為零
 P7 游標移到三種格各一次（已知據點旁／未知據點旁／空地）⇒ 明細內容正確；★未知據點旁的原因句不得含距離或座標
 ```
 

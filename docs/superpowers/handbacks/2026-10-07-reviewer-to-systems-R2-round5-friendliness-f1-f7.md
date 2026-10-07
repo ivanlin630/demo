@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 第五輪友善度 F1-F7 一併判決
 topic: R② ＝ **ISSUES,一列**｜F3/F5修法逐字對上要求,CLEAN；★F7你優先打的感知邊界：風險是真的——`OutpostSystem._check_distance`(:932-952)掃`state.world.tiles`全圖真值,回傳只有bool,沒有洩露哪個據點擋的；要做「belief裡才給距離名字」,必須先讓這支函式(或加一支姊妹函式)把擋住的那個據點的位置/id一起回出來,不然呼叫端沒東西可以拿去跟belief核對；F1/F4輕量核過,都指到既有、已核過的機制,沒有新建的風險
 ---
