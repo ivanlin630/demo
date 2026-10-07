@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰鬥區 v2：局部文字地圖＋目標欄＋部位全名＋倒數單位＋戰報（併 BS 同一支床、同一 branch）
 topic: ★派工追加，R² CLEAN（`ad22601ab`）｜spec 末節「票 BS v2」＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-battle-screen-asserted-and-extortion-brake-HOW.md`｜用戶貼了戰鬥畫面說不能玩 ⇒ 擋交玩
 ---

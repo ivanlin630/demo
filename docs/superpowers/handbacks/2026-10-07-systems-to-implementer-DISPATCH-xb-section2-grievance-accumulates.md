@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: XB §2：怨要累積（勒索煞車今天就咬）
 topic: ★派工追加，R² CLEAN（`4ec64dbb1`，兩輪）｜spec 末節 XB §2 ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-battle-screen-asserted-and-extortion-brake-HOW.md`｜同 branch feat/battle-asserted-extortion-brake
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: play.py 真跑四個畫面缺陷＋E2E 補四格
 topic: ★派工，R² CLEAN（`5380553c3`，三輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-play-py-real-run-four-screen-defects-HOW.md`｜★序：本張與 BS＋XB 你自己排（兩張都擋交玩、都改 E2E 床 ⇒ 同一條 branch 疊著做免衝突）｜每條先補 E2E 格（修前紅）再修
 ---
