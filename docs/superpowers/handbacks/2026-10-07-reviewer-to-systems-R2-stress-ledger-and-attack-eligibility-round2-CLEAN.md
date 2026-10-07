@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 續裁四件第二輪（④預警／⑤壓力帳本）＋攻擊資格小票
 topic: R② 第二輪＝ **CLEAN**（`930f5052d`）｜⑤採我的12行表+正確分流(初始化走StressBank.init不記帳,single-writer無豁免)+交件重跑掃描報即時數；④判斷位置寫對(函式內return前,結果寫person欄位+預警事件,不在外面重算)；攻擊資格誠實標「移動資格多半新建」並接住fp量測
 ---
