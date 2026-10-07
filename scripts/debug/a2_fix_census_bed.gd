@@ -1,5 +1,5 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: invariant
 # A2 修「先查」（spec 2026-10-07-a2-fix-failure-mark-never-written-HOW，唯讀、不改世界）
 #
 # 問題：option＝貿易、到場、當日零成交的事件，同拍寫進 recent_failures「貿易|市集」的幾乎是 0。
@@ -24,6 +24,9 @@ extends SceneTree
 
 const SEEDS: Array = [1337, 7, 2024]
 const TOTAL_DAYS: int = 30
+const WRITTEN_RATIO_MIN: float = 0.9   # spec P2：分母＝人在市集格的那部分（systems 裁甲 2026-10-08）
+var _written_m: int = 0
+var _pop_m: int = 0
 
 
 class SpyRunner extends SimRunner:
@@ -59,8 +62,12 @@ func _initialize() -> void:
 	print("[TREE] HEAD=%s" % _git_head_sha())
 	for sd in SEEDS:
 		_run(int(sd))
-	print("\n=== a2_fix_census DONE ===")
-	quit(0)
+	var ratio: float = float(_written_m) / float(maxi(1, _pop_m))
+	var ok: bool = _pop_m > 0 and ratio >= WRITTEN_RATIO_MIN
+	print("\n[A2FIX] 判決：人在市集格的「貿易」到場零成交，失敗記號寫進去 %d／%d ＝ %.2f（門檻 %.2f）⇒ %s" % [
+		_written_m, _pop_m, ratio, WRITTEN_RATIO_MIN, "綠" if ok else "★紅"])
+	print("\n=== a2_fix_census DONE === errors: %d" % (0 if ok else 1))
+	quit(0 if ok else 1)
 
 
 func _run(seed_val: int) -> void:
@@ -98,6 +105,9 @@ func _run(seed_val: int) -> void:
 				var ev = open_ep.get(int(c["team"]))
 				if ev != null and (ev as Dictionary).get("call", {}).is_empty():
 					(ev as Dictionary)["call"] = c
+			# ★判決格（spec P2，走真世界）：還開著的事件 ⇒ 這一拍有沒有寫進「貿易|<那一格>」
+			for evw in open_ep.values():
+				_mark_written(ws, evw)
 			for tid in ws.teams.keys():
 				var t: TeamData = ws.teams[tid]
 				var now_arr: bool = t.current_task == TeamData.TASK_TRADE and SimRunner.trade_arrived(t)
@@ -113,6 +123,8 @@ func _run(seed_val: int) -> void:
 						if int(c2["team"]) == int(tid):
 							ev2["call"] = c2
 							break
+					ev2["written"] = false
+					_mark_written(ws, ev2)
 					open_ep[int(tid)] = ev2
 					today_events.append(ev2)
 				elif not now_arr and prev:
@@ -124,6 +136,18 @@ func _run(seed_val: int) -> void:
 	WorldState.driver_ledger_enabled = false
 	WorldState.clear_driver_ledger()
 	_report(events)
+
+
+# 那一格的「貿易」失敗記號，tick 不早於事件那一拍 ⇒ 寫進去了
+static func _mark_written(ws: WorldState, ev: Dictionary) -> void:
+	if bool(ev.get("written", false)):
+		return
+	var t: TeamData = ws.teams.get(int(ev["team"]))
+	if t == null:
+		return
+	var en: Dictionary = t.recent_failures.get("貿易|%d" % int(ev["market"]), {})
+	if not en.is_empty() and int(en.get("tick", -1)) >= int(ev["tick"]):
+		ev["written"] = true
 
 
 static func classify(ev: Dictionary) -> String:
@@ -166,6 +190,12 @@ func _report(events: Array) -> void:
 	for e2 in pop:
 		if not bool(e2["at_market"]) and bool(e2["mt_cleared"]):
 			nm_cleared += 1
+	var at_m: Array = pop.filter(func(e): return bool(e["at_market"]))
+	var w_all: int = pop.filter(func(e): return bool(e.get("written", false))).size()
+	var w_m: int = at_m.filter(func(e): return bool(e.get("written", false))).size()
+	print("  [A2FIX] 失敗記號真的寫進去：全母體 %d／%d｜人在市集格 %d／%d｜非市集格（供 A2c）%d 筆" % [w_all, pop.size(), w_m, at_m.size(), pop.size() - at_m.size()])
+	_written_m += w_m
+	_pop_m += at_m.size()
 	print("  不在市集格的 %d 筆裡，到場那一拍 move_target＝(-1,-1)（trade_arrived 的「目標已清」那一支）＝ %d 筆" % [not_market, nm_cleared])
 	print("  ★三數相加：%d ＝ 母體 %d ⇒ %s" % [total, pop.size(), "對" if total == pop.size() else "★不對"])
 
