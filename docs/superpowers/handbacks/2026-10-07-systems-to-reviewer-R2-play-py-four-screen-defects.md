@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: play.py 真跑四個畫面缺陷＋E2E 補四格
 topic: ★R² 送審｜spec `docs/superpowers/specs/2026-10-07-play-py-real-run-four-screen-defects-HOW.md`｜★請優先打 D2：「玩家走法不印沒有寫入者的欄」會不會把某個**其實有寫入者、只是這一刻值是空**的欄也藏掉（佔位句與空值要分得開）
 ---
