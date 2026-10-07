@@ -20,9 +20,14 @@
    ⇒ 原因由引擎給（招募那支的空集合原因）；P：單人隊被選為招募對象 ⇒ 印該句
 ④【壓力看得見】★R² 核：N1_flee 沒有固定門檻——它是 8 個反應分數＋0.2 底線的**相對 argmax**
    ⇒ 「高壓／可能離隊」＝這一輪反應評估裡 **N1_flee 的分數已過 0.2 底線、但沒贏 argmax**（可以發生、這次沒發生）—— 讀同一次評估的分數，不另抄門檻
+   ★R² 核：scores 是 `reaction_system.gd::_evaluate_person`（:159-186）的區域變數、只回傳贏家字串 ⇒ **判斷寫在 _evaluate_person 內部、return 之前**（用它手上的 scores），結果寫到 person 一個欄位（例 flee_risk: bool）與預警事件；不在呼叫端或 UI 重算
    ⇒ 生存頁成員行加「高壓 N 人（名字…）」（N＝上面那個條件成立的人）；預警事件「<名> 壓力很高，可能離隊」：條件由否轉是時每人一次
    ⇒ `person.last_reaction == "N1_flee"`（`reaction_system.gd:462`）是已離隊的訊號，不是預警
-⑤【壓力帳本帶原因】（藍圖 `75b2f7aa1`，與④同票）壓力的每一次寫入（今天 11 個寫入點，先列全）收成一支 `StressBank.adjust(person, delta, reason)`，
+⑤【壓力帳本帶原因】（藍圖 `75b2f7aa1`，與④同票）壓力的每一次寫入收成一支 `StressBank.adjust(person, delta, reason)`，
+   ★R² 逐行核：**12 個**（我寫的 11 少算一個）——動態 10：`coin_treasury.gd:40`／`faction_ai_system.gd:2824`／`interaction_system.gd:755、1802`／
+     `reaction_system.gd:127、418`／`resource_system.gd:588、609、611`／`task_arbiter.gd:253`；初始化 2：`game_setup.gd:790`／`person_generator.gd:55`
+   ⇒ 初始化也走 StressBank（`StressBank.init(person, value)`：設起點、**不記帳**——起點不是 delta），single-writer 閘只准 StressBank 寫 person.stress，**無豁免**
+   ⇒ 交件時重跑同一個掃描印命中數（樹會動，報掃描的數不報本表）
    內部 `record_driver(person, "stress", delta, reason, …)`（同資源帳本那套 driver ledger）
    ⇒ 成員頁每人印「壓力來源最近三筆」（讀帳本，不另存）；離隊事件句引主因（最近一段時間累積最多的 reason 的玩家可讀名，例「稅太重」），不再印「受不了壓力」
    ⇒ 單一寫者閘（single-writer）把 person.stress 列入：只准 StressBank 寫

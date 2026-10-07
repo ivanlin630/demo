@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 續裁四件第二輪（④預警／⑤壓力帳本）＋攻擊資格小票
 topic: R② ＝ **ISSUES,兩列**｜★⑤你優先打的：git grep全repo逐一核對,算出來是**12個**不是11個(10個動態調整+2個初始化賦值),列出逐行證據請你對一次是哪一個沒被算進去｜★④你優先打的：「過0.2底線但沒贏」今天**拿不到**——`_evaluate_person`只回傳贏家的字串,算出來的scores字典是函式內的區域變數,呼叫端(:82)看不到;要拿到的話必須把判斷寫進函式內部(return之前),不能在外面讀
 ---
