@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰鬥區第二輪真跑三條（R 無目標回饋／開戰互見＋畫面外方向距離／推進後結果行）
 topic: ★派工（插隊：擋交玩），R² CLEAN（`b14595884`）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-battle-start-visibility-and-r-feedback-HOW.md`｜★票 T 再停到乾淨點｜每條先補 E2E 格再修｜走整份電池
 ---
