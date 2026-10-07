@@ -14,8 +14,9 @@
  ①不在當拍 arrived_ids（例：派出時目標就是腳下那格 ⇒ 從沒「移動抵達」過；或遠程 LOD pass 的到場沒進 step3c 那份名單）
  ②在 arrived_ids，但 trade_arrived(_t) 為假
  ③_dealt 為真（當拍有成交，但當日帳本判準說沒有——判準落差）
- ④current_option 在那一拍已不是「貿易」
- ⑤以上皆非（並數它多大）
+ ④current_task 在那一拍已不是 TRADE（被更早的事打斷；sim_runner.gd:915 那道）——★R² 補：與⑤分開數
+ ⑤current_task 仍是 TRADE，但 current_option 已不是「貿易」（:927 那道）
+ ⑥以上皆非（並數它多大）
 ⇒ 修法依分佈定；不准先改再量
 ```
 
@@ -23,7 +24,7 @@
 ```
 失敗記號不要掛在「本拍移動抵達的名單」上，掛在【到場判定成立且市集解算回 false】那一個唯一出口：
   sim_runner.gd:904-930 _step3c_read_market_board 的條件改成對【所有 current_task＝TRADE 且 trade_arrived 為真、人在市集格】的隊跑（不只 arrived_ids）
-  ★同一隊同一市集同一拍只記一次（record 前查 recent_failures 該 key 的 last_tick ≠ now）
+  ★同一隊同一市集同一拍只記一次（record 前查 recent_failures 該 key 的 last_tick ≠ now）——R² 核：trade_arrived 為真即無條件 release（:929-931），結構上已只評一次；去重是防禦，留
   ★放手照舊（A2 已有）
 不改：OPTION_FAIL_KEY 形狀、折價曲線、只記 option「貿易」（其他 option 是 A2b 的事）
 ```

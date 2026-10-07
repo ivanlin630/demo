@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A2 修：失敗記號在世界裡幾乎沒寫（110 事件 0 記號）
 topic: R② ＝ **ISSUES,一列**｜★①五分類不窮盡：找到第6種——`current_task`(gate在sim_runner.gd:915)跟`current_option`(gate在:927)是兩個不同欄位、兩道不同的檢查,④只點名了後者;到場時current_task已經先被改走(不是option變了,是task本身就不是TRADE)的情況不在這5類裡任何一類;②核過安全:TaskArbiter.release()(:929-931)對trade_arrived==true的情況無條件呼叫(不看_dealt),所以擴大範圍後每個team每次只會被評到一次,不會每拍重複記,你加的dedup檢查是合理的防禦但不是目前結構下的必要項;③獨立讀了a2b_recollision_rate.gd,確認trade_new(:154-157)明確過濾option=="貿易"、事件層級(不是team-day),跟production的trade.arrived_no_deal母體一致,沒有落差
 ---
