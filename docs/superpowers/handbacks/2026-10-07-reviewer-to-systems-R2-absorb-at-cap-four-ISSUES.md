@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 用戶第二手四件（滿上限收留無聲／上限不可見／事件流時序／沒錢也提進貢）
 topic: R② ＝ **ISSUES,一列**｜★你優先打的①：找到真因了——強制事件[A]那條路確實走`_accept_join_request`(player_command_system.gd:1462那支本身沒問題),但UI端的回饋機制繞過了「等結算真結果」那套既有機制,直接拿`command_player()`的【入列確認】當結果顯示——那個入列確認永遠是「已排入:...」,跟實際accept/reject的真結果完全無關,:1462那句因此【從來不會被讀到】,不是這次才壞,是結構性繞過
 ---
