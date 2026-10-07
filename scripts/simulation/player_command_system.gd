@@ -849,6 +849,11 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
 	else:
 		UnrestBank.add(tgt, 2, "player")
+		# ★XB③：typed 那一筆走與 NPC↔NPC 同一處寫入（寫在索貢方＝玩家，進關係帳）
+		DiplomaticAiSystem.record_tribute_refused(state, pt, tgt)
+		# ★舊格式這一筆【保留】：它不是關係帳，而是有讀者的 —— player_trade_system `evaluate`
+		#   的 memory_mod 掃被索方領袖的 reaction（"tribute_refused" ⇒ 交易門檻 +0.10）
+		#   ⇒ 拿掉它＝靜默改玩家交易行為（不在本票範圍）；要不要遷移已回報 systems
 		var leader_p: PersonData = state.persons.get(tgt.leader_id)
 		if leader_p:
 			leader_p.memory.append({

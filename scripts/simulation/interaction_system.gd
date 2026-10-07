@@ -447,7 +447,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 			_probe_raid(state, a, b, "extort")
 			_resolve_extortion(state, id_a, id_b)
 		else:
-			_record_extorted(state, b, a, 0.0)   # ★XB①：拒絕也是被勒索過（寫入收一處）
+			_record_extorted_on_contact(state, b, a)   # ★XB①④：拒絕也是被勒索過；同格停留＝一次接觸一筆
 			if _should_attack(state, id_a, id_b):
 				_probe_raid(state, a, b, "combat")
 				_combat.start_combat(state, id_a, id_b)
@@ -458,7 +458,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 			_probe_raid(state, b, a, "extort")
 			_resolve_extortion(state, id_b, id_a)
 		else:
-			_record_extorted(state, a, b, 0.0)   # ★XB①：拒絕也是被勒索過（寫入收一處）
+			_record_extorted_on_contact(state, a, b)   # ★XB①④：拒絕也是被勒索過；同格停留＝一次接觸一筆
 			if _should_attack(state, id_b, id_a):
 				_probe_raid(state, b, a, "combat")
 				_combat.start_combat(state, id_b, id_a)
@@ -527,6 +527,21 @@ func _record_extorted(state: WorldState, victim: TeamData, aggressor: TeamData, 
 	_npc_ai.write_memory(vl, "tributed", aggressor.leader_id, state.world.current_tick, severity)
 	if Probe.enabled:
 		Probe.bump("extort.recorded.%s" % ("taken" if taken_ratio > 0.0 else "nothing_taken"))
+
+# ★XB④：同格互動的拒絕支 ⇒ 同一對連續同格只算一次接觸（不是每 tick 一筆）
+#   ★「連續」＝ 兩次同格被勒索的間隔 ≤ EXTORT_CONTACT_GAP：駐留路徑每支隊一個 T1 週期評一次、
+#     而打散的 offset 讓同一對相鄰兩次的間隔 < 2 個週期（cadence_stagger.next_tick）⇒ 取 2×T1
+#   ★接受支不走這裡：每一次接受都真的拿走東西，是各自一件事
+const EXTORT_CONTACT_GAP: int = 2 * DecisionTier.T1_OPERATIONAL
+func _record_extorted_on_contact(state: WorldState, victim: TeamData, aggressor: TeamData) -> void:
+	var now: int = state.world.current_tick
+	var last: int = int(victim.extort_contact_tick.get(aggressor.team_id, -EXTORT_CONTACT_GAP - 1))
+	victim.extort_contact_tick[aggressor.team_id] = now
+	if now - last <= EXTORT_CONTACT_GAP:
+		if Probe.enabled:
+			Probe.bump("extort.recorded.same_contact_skip")
+		return
+	_record_extorted(state, victim, aggressor, 0.0)
 
 # Task1 measure（純觀測，佔村 spec）：raid（TASK_LOOT）解決分佈探針。
 # extort（無戰）/ combat_at_outpost（落點村格 → capture 可翻）/ combat_open_field（開闊地 → capture no-op）/ noop（想搶未成）。

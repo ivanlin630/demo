@@ -231,11 +231,7 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 			sender.team_id, target.team_id, amount])
 	# Tribute refusal consequence: write memory + reputation penalty
 	if action == "demand_tribute" and response == "refuse":
-		var sender_leader: PersonData = state.persons.get(sender.leader_id) if sender.leader_id >= 0 else null
-		if sender_leader != null:
-			# F-I6：走 write_memory 統一 schema（type 欄 → type-scan counter 可見）。0.2 TEST VALUE
-			NpcAiSystem.new().write_memory(sender_leader, "tribute_refused",
-				target.leader_id, state.world.current_tick, 0.2)
+		record_tribute_refused(state, sender, target)
 		sender.update_reputation(target.team_id, -0.1)
 		target.update_reputation(sender.team_id, -0.05)
 		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
@@ -291,6 +287,21 @@ static func apply_tribute_transfer(_state: WorldState, payer: TeamData, taker: T
 #   `player_command_system` 的 `demand_tribute`（玩家向對方索貢）
 #   ⇒ ★★而 `tribute_offer`（對方主動送）**不呼這一支**，它呼上面那一支
 #     —— 那一條差別就是本票的全部內容。
+# ★XB③（systems 2026-10-07）：索貢被拒的記憶【唯一寫入點】——NPC↔NPC（上面 demand_tribute 那支）與
+#   玩家遠程索貢（player_command_system `_action_demand_tribute`）共呼
+#   ★寫在【索貢方】領袖身上（記得被誰拒過），typed ⇒ 進關係帳；`tributed` 寫在被勒索方，主詞相反、不合流
+const TRIBUTE_REFUSED_INTENSITY: float = 0.2   # TEST VALUE（原 NPC 那支的字面，搬來共用，不改值）
+static func record_tribute_refused(state: WorldState, demander: TeamData, refuser: TeamData) -> void:
+	if demander == null or refuser == null or demander.leader_id < 0:
+		return
+	var dl: PersonData = state.persons.get(demander.leader_id)
+	if dl == null:
+		return
+	# F-I6：走 write_memory 統一 schema（type 欄 → type-scan counter 可見）
+	NpcAiSystem.new().write_memory(dl, "tribute_refused", refuser.leader_id, state.world.current_tick,
+		TRIBUTE_REFUSED_INTENSITY)
+
+
 static func apply_tribute_accept(state: WorldState, payer: TeamData, taker: TeamData) -> float:
 	var coin_before: float = float(payer.resources.get("coin", 0)) if payer != null else 0.0
 	var amount: float = apply_tribute_transfer(state, payer, taker)

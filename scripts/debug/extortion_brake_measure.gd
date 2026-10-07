@@ -80,6 +80,17 @@ func _cands(st: WorldState, vic: TeamData) -> String:
 	return "（%d）%s" % [scored.size(), "｜".join(PackedStringArray(parts))]
 
 
+func _typed_count(st: WorldState, t: TeamData, typ: String) -> int:
+	var l: PersonData = st.persons.get(t.leader_id)
+	if l == null:
+		return 0
+	var n: int = 0
+	for m in l.memory:
+		if String((m as Dictionary).get("type", "")) == typ:
+			n += 1
+	return n
+
+
 func _tributed_count(st: WorldState, vic: TeamData) -> int:
 	var l: PersonData = st.persons.get(vic.leader_id)
 	if l == null:
@@ -142,14 +153,17 @@ func _path_b_npc_same_tile() -> void:
 	vic.tile_pos = agg.tile_pos
 	print("  勒索方 Team%d readiness=%.2f｜對象 Team%d｜%s" % [agg.team_id, agg.readiness, vic.team_id, _leader_line(st, vic)])
 	var isys := InteractionSystem.new()
-	for i in range(1, N + 1):
+	# ★XB④：前 N 次每次隔 EXTORT_CONTACT_GAP＋1（＝每次都是新的接觸）；之後 3 次每次只隔 1 tick（同一次接觸）
+	for i in range(1, N + 4):
 		agg.current_task = TeamData.TASK_LOOT
 		agg.readiness = 0.9
 		vic.current_task = TeamData.TASK_IDLE
 		vic.tile_pos = agg.tile_pos
 		agg.combat_target = -1   # ★上一次拒絕若開了戰，同格互動會早返回（:350）⇒ 每次量的是「再來勒索一次」
 		vic.combat_target = -1
-		st.world.current_tick += 1   # ★_pair_seen 同 tick 去重 ⇒ 每次往前一 tick
+		st.world.current_tick += (InteractionSystem.EXTORT_CONTACT_GAP + 1) if i <= N else 1
+		if i == N + 1:
+			print("  ── 以下 3 次＝同一次接觸（每次只隔 1 tick；拒絕支應不再寫）──")
 		var coin_before: float = float(vic.resources.get("coin", 0))
 		var mem_before: int = _tributed_count(st, vic)
 		var ev: Dictionary = _eval(st, vic, agg, agg.readiness)
@@ -181,5 +195,6 @@ func _path_c_player_demand_tribute() -> void:
 		var ev: Dictionary = _eval(st, v, pt, 0.0)
 		var cands: String = _cands(st, v)
 		var res: Dictionary = pcs._action_demand_tribute(st, v.team_id, pt, ptid)
-		_row(i, st, v, ev, coin_before, mem_before, String(res.get("msg", "")))
+		_row(i, st, v, ev, coin_before, mem_before, "%s｜索貢方（玩家領袖）typed tribute_refused %d 筆" % [
+			String(res.get("msg", "")), _typed_count(st, pt, "tribute_refused")])
 		print("       對方候選集 %s" % cands)
