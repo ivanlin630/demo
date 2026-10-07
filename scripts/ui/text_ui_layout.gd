@@ -72,6 +72,15 @@ static func pad_to(s: String, width: int) -> String:
 
 # 依【顯示寬度】截到不超過 `width` 格（需要截的地方才呼它，例如一欄放不下的長名字）
 #   ★回傳的寬度保證 <= width；★★而它不補齊（補齊是 `pad_to` 的事）
+# ★放不下就截、並以「…」結尾（spec 2026-10-07 reasons ②：不得截字無標記）；放得下原樣回
+#   ★回傳寬度保證 <= width（「…」本身的寬度也算進去）
+const CLIP_MARK: String = "…"
+static func clip_mark(s: String, width: int) -> String:
+	if display_width(s) <= width:
+		return s
+	return clip_to(s, maxi(0, width - display_width(CLIP_MARK))) + CLIP_MARK
+
+
 static func clip_to(s: String, width: int) -> String:
 	var out: String = ""
 	var w: int = 0

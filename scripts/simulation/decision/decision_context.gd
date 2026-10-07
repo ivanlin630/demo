@@ -283,6 +283,9 @@ var faction_diplo_target: int = -1
 # diplomacy grounded look-before-leap：求和 target(threat_id)/外交 target(faction_diplo_target) 在
 # team.diplomacy_reject_cooldown 內 → 不當慾望目標（被拒不再纏 loop，鏡射 A-2 rejection-learning）。
 var pacify_target_on_cooldown: bool = false
+# ★求和（order_task＝tribute_offer）提案端：自己身上有沒有東西可給（讀 DiplomaticAiSystem.tribute_amount，同轉帳那一份；
+#   自隊資源＝自知，非 god-view）—— spec 2026-10-07 absorb-at-cap ④
+var has_tribute_to_give: bool = false
 var diplo_target_on_cooldown: bool = false
 var leader_loyalty: float = 0.5
 # means-end 戰術層（2026-07-01）：team 自己戰略 intent 進 ctx（mirror faction_stakes）。
@@ -1139,6 +1142,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _now: int = state.world.current_tick
 	c.pacify_target_on_cooldown = c.threat_id != -1 \
 		and int(team.diplomacy_reject_cooldown.get(c.threat_id, 0)) > _now
+	c.has_tribute_to_give = DiplomaticAiSystem.tribute_amount(team) > 0.0
 	c.diplo_target_on_cooldown = c.faction_diplo_target != -1 \
 		and int(team.diplomacy_reject_cooldown.get(c.faction_diplo_target, 0)) > _now
 	# team 自己戰略 intent（means-end 戰術層）：獨立=solo_intent / faction leader=f.intent。

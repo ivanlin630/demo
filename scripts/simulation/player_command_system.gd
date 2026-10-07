@@ -925,8 +925,18 @@ func _action_recruit(state: WorldState, target_id: int, pt: TeamData, _pt_id: in
 	var willing_dto: Array = []
 	if not willing.is_empty():
 		willing_dto = PlayerApiMapper.map_willing_members(state, willing)
+	# ★reasons ③（spec 2026-10-07 invite-whole-team-inline-reasons）：空集合的原因由【這裡】給（判準就在上面兩行），
+	#   UI 只印 —— 舊版 UI 自寫「無可招募對象」⇒ 玩家不知道是對象的問題還是自己的問題
+	var empty_reason: String = ""
+	if willing.is_empty() and not anon_ok:
+		if tgt.population <= 1:
+			empty_reason = "Team%d 只有領袖一人，招募挖不到人" % target_id
+		elif coin < RECRUIT_COST_ANON:
+			empty_reason = "Team%d 沒有願意跟你走的記名成員；招募一般成員要 %d 錢（你有 %.0f）" % [
+				target_id, int(RECRUIT_COST_ANON), coin]
 	return { "ok": true, "msg": "選擇招募方式",
 			 "payload": {
+				 "empty_reason":        empty_reason,
 				 "has_willing_named":   not willing.is_empty(),
 				 "willing_members":     willing_dto,
 				 "anon_available":      anon_ok,

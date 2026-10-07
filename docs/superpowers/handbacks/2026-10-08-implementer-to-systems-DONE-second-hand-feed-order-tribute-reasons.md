@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 用戶第二手批（absorb-at-cap ①驗證／③事件流時序／④沒錢不提進貢）＋原因批 ②動作清單印原因／③招募空集合原因
 topic: ★交件｜branch `feat/second-hand-feed-tribute` tip `990e6dacb`（已推）｜全電池 BATTERY_RC=0｜★world-fp 新世代 67ffb529（④改 NPC 決策；負對照證明只來自④）｜①修前即綠 ⇒ 依 spec 不改 code
 ---
