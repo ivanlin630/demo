@@ -17,3 +17,21 @@ F4【鍵列只印當下有效的鍵】頁腳鍵列依當下模式與狀態過濾
    ⇒ 來源＝各模式的鍵處理表（同一份），不另抄字串
 E2E 加四格：F1 首屏三行存在且每個鍵按下有效｜F2 enabled 全排在不可之前、折疊行數正確、展開後原因齊｜F3 每個拒絕句含主詞與（有則）下一步｜F4 鍵列每個鍵在當下按下都不是「此鍵無作用」
 ```
+
+## F5 play.py 單鍵即時輸入（藍圖 `4fa3388c2`，用戶：「什麼都要打字，連 Esc 都要打 e-s-c 加 Enter」；與 F1–F4 同批）
+
+```
+現況：`tools/play.py:216` main 迴圈 `input("> ")` 逐行讀 ⇒ 按一個鍵要打字＋Enter
+⇒ stdin 是 tty（且 Windows）：用 `msvcrt.getwch()` 讀原始按鍵，**按一鍵送一個 token**，不打字不按 Enter
+   對照（一支純函式 `key_token(chars) -> str`，放 play.py）：
+     一般可印字元 ⇒ 該字元｜\x1b ⇒ esc｜\r ⇒ enter｜\t ⇒ tab｜空白 ⇒ space｜\x08 ⇒ backspace
+     方向鍵（\xe0 或 \x00 前綴＋H/P/K/M）⇒ up／down／left／right｜Ctrl+C（\x03）⇒ 離開
+   ★token 名稱＝`player_repl.gd:51 NAMED_KEYS` 的鍵名（同一份；play.py 不另發明名字）
+   ★q 照舊＝離開 harness（現行語意不變）
+⇒ stdin **不是** tty（管道、床、藍圖餵鍵）⇒ 自動退回逐行模式（現行行為逐字不變）
+⇒ 每次收到新畫面先清屏再印（ANSI 清屏），畫面不往上捲
+⇒ G「跳 N tick」要先按 G 再按數字再 Enter：單鍵模式下照樣是一鍵一 token，不需特例
+P5a `python tools/play.py --selfcheck`（不起 Godot）：key_token 對照表逐項斷言（含方向鍵兩種前綴、Ctrl+C）
+P5b 既有 play-selfcheck（管道）照綠＝逐行模式沒壞
+P5c 藍圖第五輪真跑前，用戶面的操作說明（README「開六個角色終端」旁或 play.py 開場一行）寫「直接按鍵，不用 Enter」
+```
