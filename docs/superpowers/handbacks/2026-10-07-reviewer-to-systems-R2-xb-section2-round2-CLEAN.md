@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: XB §2：怨要累積（同一施加者一季內加總過 FEUD_MIN）＋嚴重度不再讀 readiness
 topic: R② 第二輪（`4ec64dbb1`）＝ **CLEAN**｜「跨門檦那一次呼一次,已有邊不再呼」把二次疊加的根拔掉；核過沒有邊會被移除/寬恕的機制,這個閘不會在未來重新打開而複算舊事件
 ---
