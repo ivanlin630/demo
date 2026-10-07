@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 友善度 F8：玩家紮營＝L0、紮根＝第二步、四寫入點同守間距
 topic: 只看 spec「## F8」整節；前提已 git grep（間距呼叫點 2、L0 寫入點 1、NPC 紮根 :7151）
 ---
