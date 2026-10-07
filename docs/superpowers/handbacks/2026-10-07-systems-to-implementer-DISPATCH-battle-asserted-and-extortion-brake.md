@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰鬥區在打的時候要被看過（BS）＋勒索煞車（XB）
 topic: ★派工，R² CLEAN（`451934fa1`）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-battle-screen-asserted-and-extortion-brake-HOW.md`｜★序：四個畫面缺陷那張（R² 第三輪中）之後、票 T 之前｜擋交玩
 ---
