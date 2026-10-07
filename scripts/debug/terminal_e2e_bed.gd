@@ -1149,12 +1149,14 @@ func _s_cells() -> void:
 	var w0: Dictionary = _new_w(await _build(SEED_A))
 	var st0: WorldState = w0["node"]._bridge._state
 	var ptid0: int = st0.get_player_team_id()
-	var kinds: Array = WorldEvents.get("ADVANCE_STOP_KINDS") if WorldEvents.get("ADVANCE_STOP_KINDS") != null else []
+	# ★動態讀（修前那個常數／函式還不存在 ⇒ 靜態引用會讓整支床 parse 失敗，紅就不是紅在這一格）
+	var we_sc: Script = load("res://scripts/simulation/world_events.gd")
+	var kinds: Array = we_sc.get_script_constant_map().get("ADVANCE_STOP_KINDS", [])
 	var missed: Array = []
 	for k in kinds:
 		var seq0: int = st0.player_event_seq
 		WorldEvents.emit(st0, String(k), [ptid0], false, {})
-		var hit: Dictionary = WorldEvents.stop_event_since(st0, seq0) if WorldEvents.has_method("stop_event_since") else {}
+		var hit: Dictionary = we_sc.call("stop_event_since", st0, seq0)
 		if hit.is_empty():
 			missed.append(String(k))
 	print("   停點 kind %s｜沒停的 %s" % [str(kinds), str(missed)])
