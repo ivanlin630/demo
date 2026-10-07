@@ -398,6 +398,10 @@ static func _emit_teams(state: WorldState, buf: PackedStringArray) -> void:
 			# ★登記錨 ④a：`work_outpost` 是【持久決策態】（居民身分由它答）⇒ 必入 fp
 			#   ⇒ ★fp 會變，而那是預期的（spec 驗收⑤）：附歸因、同 seed 兩跑仍須相同。
 			_dict_canon(t.recent_failures), _vec(t.work_outpost)])
+		# ★XB④（2026-10-07）：同格勒索「同一次接觸」的判定讀它 ⇒ 直接因果態 ⇒ 入 fp
+		#   ★另起一行、只在非空時印 ⇒ 沒被勒索過的隊，既有每一行逐字不變
+		if not t.extort_contact_tick.is_empty():
+			buf.append("TX|%d|extort_contact=%s" % [t.team_id, _dict_canon(t.extort_contact_tick)])
 		buf.append(_derived_line(t, "TD", "TeamData"))
 
 static func _emit_persons(state: WorldState, buf: PackedStringArray) -> void:
@@ -463,4 +467,8 @@ static func _emit_world(state: WorldState, buf: PackedStringArray) -> void:
 			ls.append("%s:%d:%s:%s" % [str(l.get("kind","")), int(l.get("origin_team_id",-1)), _vec(l.get("target_pos", Vector2i(-1,-1))), _vec(l.get("relocate_to", Vector2i(-1,-1)))])
 	ls.sort()
 	for e in ls: buf.append("L|" + e)
+	# ★BS2（2026-10-07）：每一場遭遇戰的結算結果（唯一寫入點 EncounterSystem.resolve_encounter_end）
+	#   ★入 fp 而不是加進盲區（盲區棘輪只准變小）；另起一行、只在打過仗之後才印
+	if not state.last_encounter_outcome.is_empty():
+		buf.append("W|enc_outcome=%s" % _dict_canon(state.last_encounter_outcome))
 	buf.append(_derived_line(state.world, "WD", "WorldData"))

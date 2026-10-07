@@ -502,6 +502,13 @@ while true; do
       #   ★★★而要用**同一個窗口**（T_UNRESP）比，否則只是把不對齊換了一個地方。
       _to_ct=$(git -C "$ROOT" log -1 --format=%ct --all -- "docs/superpowers/handbacks/*-${to}-to-*" 2>/dev/null)
       case "${_to_ct:-0}" in (*[!0-9]*|'') _to_ct=0 ;; esac
+      # ★實作端的產出不只信：它在 feat/* 分支上的 commit 也是產出（藍圖 2026-10-07 報：實作端連做兩張、分支 4 分鐘前才推，
+      #   而這裡只看信 ⇒ 判 1h26m 無產出）。歸屬是結構的：只有實作端在 worktree／feat 分支上寫 code（00_roles）。
+      if [ "$to" = "implementer" ]; then
+        _lane_ct=$(git -C "$ROOT" for-each-ref --sort=-committerdate --count=1 --format='%(committerdate:unix)' refs/remotes/origin/feat refs/heads/feat 2>/dev/null)
+        case "${_lane_ct:-0}" in (*[!0-9]*|'') _lane_ct=0 ;; esac
+        [ "$_lane_ct" -gt "$_to_ct" ] && _to_ct=$_lane_ct
+      fi
       _to_age=$(( now - _to_ct ))
       if [ "$_to_ct" -gt 0 ] && [ "$_to_age" -lt "$T_UNRESP" ]; then
         :   # ★該角色在同一個窗口內有產出 ⇒ **不判停工**（他在做別的章）

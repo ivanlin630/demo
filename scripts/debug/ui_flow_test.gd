@@ -2189,7 +2189,11 @@ func _test_p8s_x_uses_the_constant() -> void:
 	print("\n── P8s X 那一行的單位（靜態孿生）──")
 	var src: String = _code_only(FileAccess.get_file_as_string("res://scripts/ui/text_ui_main.gd"))
 	_check("撈得到原始碼（剝掉整行註解後 %d 字元）" % src.length(), src.length() > 1000)
-	var at: int = src.find("KEY_X:")
+	# ★D4（四缺陷 2026-10-07）：全域推進鍵抽成 `_global_advance_key`（主 match 的 KEY_X 只轉呼它）
+	#   ⇒ 真正推進的那一行在那支函式裡 ⇒ 錨從那支函式開始找（主詞不變：X 推進寫的是 TICKS_PER_HOUR）
+	var fn_at: int = src.find("func _global_advance_key")
+	_check("★母體地板：找得到 _global_advance_key（全域推進鍵的唯一處理函式）", fn_at != -1)
+	var at: int = src.find("KEY_X:", fn_at) if fn_at != -1 else -1
 	_check("★母體地板：找得到 KEY_X 那一支（找不到＝不可判，不是綠）", at != -1)
 	if at != -1:
 		var nxt: int = src.find("KEY_", at + 6)

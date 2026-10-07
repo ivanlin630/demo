@@ -114,7 +114,24 @@ func _write_relation_edge(p: PersonData, type: String, subject_id: int,
 		tick: int, intensity: float) -> void:
 	# G2a additive：對齊 _trigger_goals 映射，填 typed 邊。reader 在 G2b/G2d。
 	match type:
-		"betrayal", "looted", "special_taxed", "rejected_aid", "tributed":
+		"tributed":
+			# ★★★XB④（藍圖 324b9041f「怨要累積」）：小事堆成大事 —— 加總【同一施加者】一季內的 tributed 強度
+			#   （本筆已在 write_memory 開頭 append 進 memory ⇒ 加總含本筆）⇒ 以總和呼 form_feud
+			#   ★唯一形成點不變（form_feud）、FEUD_MIN 不變、人格 factor 不變（都在 form_feud 裡）
+			#   ★★已有 feud 邊 ⇒ 不呼：add_edge 是飽和疊加（relation_graph），再呼會把同一季的舊事件二次計入
+			#     ⇒ 成怨之後的勒索只扣好感（_update_relations 那一列），不再動邊
+			#   ★單筆就過門檻 ⇒ 總和 ≥ 單筆 ⇒ 同一次呼叫就成形（「單筆過門檻」那條入口仍在，不另寫一支）
+			#   ★誠實限：memory 有上限（MEMORY_MAX）⇒ 被擠掉的舊筆不在加總裡
+			if DiplomaticAiSystem._edge_intensity_to(p.relation_edges, "feud", subject_id) <= 0.0:
+				var sum_i: float = 0.0
+				for m in p.memory:
+					var md: Dictionary = m as Dictionary
+					if String(md.get("type", "")) == "tributed" and int(md.get("subject_id", -1)) == subject_id \
+							and tick - int(md.get("tick", -WorldState.TICKS_PER_SEASON - 1)) <= WorldState.TICKS_PER_SEASON:
+						sum_i += float(md.get("intensity", 0.0))
+				if NpcAiSystem.form_feud(p, subject_id, sum_i, tick) and Probe.enabled:
+					Probe.bump("grudge.form.feud.tributed_%s" % ("single" if is_equal_approx(sum_i, intensity) else "accumulated"))
+		"betrayal", "looted", "special_taxed", "rejected_aid":
 			# A feud：改走 form_feud（severity×個性 gate）。bump 移進 form_feud（不雙計）。
 			# ★★★"tributed" 刻意【不在 FEUD_SEVERITY 表裡】——下面那個 `.get(type, intensity)`
 			#   在表裡找不到名字時會用【傳進來的 intensity】＝這一次真的拿走幾成

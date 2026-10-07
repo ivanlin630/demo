@@ -306,6 +306,9 @@ var salary_eval_next_tick: int = 0       # ★下次發薪 tick（⑦：取代 `
 var extraction_eval_next_tick: int = 0   # ★下次公庫徵用評估 tick（⑦：取代 `tick % TICKS_PER_MONTH == 0`）
 var info_eval_next_tick: int = 0          # ★資訊網 Part2 side-action:下次求援/偵察 side-dispatch 評估 tick（cadence-gate,per-team 錯開,herald/scout 慢策略不需每 tick）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
+# ★XB④（systems 2026-10-07）：同格勒索被拒那一支「每次接觸一筆」——{ 勒索方 team_id: 最後一次同格被勒索的 tick }
+#   同一對連續同格＝一次接觸（間隔 ≤ InteractionSystem.EXTORT_CONTACT_GAP）；離開再碰面＝新的接觸
+var extort_contact_tick: Dictionary = {}
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
 # ② 絕境階梯失敗回饋（stall→硬排除換格）。committed=_trigger_survival 蓋章真 option 字串(分辨掠奪/佔村皆TASK_ATTACK)。
 # ★承諾停滯偵測 baseline（convoy-return-task-authority v2 建設版 stall-detector 2026-08-25）：

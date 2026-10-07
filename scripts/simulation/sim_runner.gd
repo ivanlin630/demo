@@ -616,7 +616,7 @@ func _consume_player_commands(state: WorldState) -> void:
 			say = "%s：%s（%s）" % [PlayerCommandApi.describe(name, args), PlayerApiMapper.DECLINED_WORD,
 				why if why != "" else "沒有給原因"]
 		state.command_results.append({
-			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok,
+			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok, "name": name,
 			"text": say if ok
 				else _refused_text(name, args, why)})
 

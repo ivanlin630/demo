@@ -446,20 +446,24 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		if DiplomaticAiSystem.tribute_accept(state, b, a, a.readiness):
 			_probe_raid(state, a, b, "extort")
 			_resolve_extortion(state, id_a, id_b)
-		elif _should_attack(state, id_a, id_b):
-			_probe_raid(state, a, b, "combat")
-			_combat.start_combat(state, id_a, id_b)
 		else:
-			_probe_raid(state, a, b, "noop")
+			_record_extorted_on_contact(state, b, a)   # ★XB①④：拒絕也是被勒索過；同格停留＝一次接觸一筆
+			if _should_attack(state, id_a, id_b):
+				_probe_raid(state, a, b, "combat")
+				_combat.start_combat(state, id_a, id_b)
+			else:
+				_probe_raid(state, a, b, "noop")
 	elif b.current_task == TeamData.TASK_LOOT and b.readiness >= COMBAT_THRESHOLD:
 		if DiplomaticAiSystem.tribute_accept(state, a, b, b.readiness):
 			_probe_raid(state, b, a, "extort")
 			_resolve_extortion(state, id_b, id_a)
-		elif _should_attack(state, id_b, id_a):
-			_probe_raid(state, b, a, "combat")
-			_combat.start_combat(state, id_b, id_a)
 		else:
-			_probe_raid(state, b, a, "noop")
+			_record_extorted_on_contact(state, a, b)   # ★XB①④：拒絕也是被勒索過；同格停留＝一次接觸一筆
+			if _should_attack(state, id_b, id_a):
+				_probe_raid(state, b, a, "combat")
+				_combat.start_combat(state, id_b, id_a)
+			else:
+				_probe_raid(state, b, a, "noop")
 
 # ──────── 決策函式 ────────
 
@@ -497,20 +501,49 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 			gained[res] = tribute
 	# ★★★同格勒索的那一半煞車（同一條路，玩家零特殊物理）：
 	#   這一支是 (乙) 玩家發起與 (丙) NPC↔NPC 的【共用】解算點 ⇒ 掛在這裡兩邊都有。
-	#   intensity＝coin 拿走幾成＝TRIBUTE_RATE 0.25 ⇒ 好感 -0.125；
-	#   記憶層 0.25 × 人格乘子要 ≥ 1.2 才過 FEUD_MIN ⇒ 幾乎只有義氣＋好戰都近 1.0 的領袖會結仇。
-	#   ★只看 coin 那一項：比例要有一個分母，而四資源各自的比例不是同一件事
-	#     （拿走糧與拿走錢的「幾成」混算會生出一個沒有意義的數）。
-	if coin_before > 0.0 and atk.leader_id != -1:
-		var def_leader_p: PersonData = state.persons.get(def.leader_id)
-		if def_leader_p != null:
-			_npc_ai.write_memory(def_leader_p, "tributed", atk.leader_id,
-				state.world.current_tick, float(gained.get("coin", 0.0)) / coin_before)
+	#   ★只看 coin 那一項當「拿走比例」：比例要有一個分母，而四資源各自的比例不是同一件事。
+	#   ★XB①（2026-10-07 藍圖裁）：寫入改走 `_record_extorted`（接受與拒絕共呼）；
+	#     coin 光了 ⇒ 拿走比例 0，但被威脅基底照算 ⇒ 照樣記一筆（被勒索本身就是怨）
+	var taken_ratio: float = float(gained.get("coin", 0.0)) / coin_before if coin_before > 0.0 else 0.0
+	_record_extorted(state, def, atk, taken_ratio)
 	_msg.emit_message(state, "extortion",
 		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Extort] Team%d 勒索 Team%d，Team%d 妥協給付" % [atk_id, def_id, def_id])
 	return gained
+
+# ══ ★XB①（spec 2026-10-07 battle-screen-asserted-and-extortion-brake §票 XB，藍圖裁）══════════════════
+# 勒索【到達對方】就寫一筆 "tributed"（接受或拒絕都算）——被勒索本身就是怨，跟拿不拿得到錢無關。
+#   ★XB①′（藍圖 324b9041f）：嚴重度 ＝ 被拿走的 coin 比例；什麼都沒拿到 ⇒ TRIBUTE_RATE（對方向你索要的那一份）
+#   ★不再讀 readiness（XB① 第一版用 max(比例, readiness)：玩家 readiness 恆 1.0 ⇒ 第一次就結仇，它不是真量）
+#   ★怨的累積（同一施加者一季加總）在 NpcAiSystem._write_relation_edge 的 "tributed" 那一支
+# ★寫入點只有這一處：接受支（`_resolve_extortion`）與兩份 if-accept 分岔的拒絕支（同格互動、玩家直接勒索）共呼
+# ★主詞：寫在【被勒索方】的領袖身上（`tribute_refused` 是寫在索貢方，主詞相反、不合流）
+func _record_extorted(state: WorldState, victim: TeamData, aggressor: TeamData, taken_ratio: float) -> void:
+	if victim == null or aggressor == null or aggressor.leader_id == -1:
+		return
+	var vl: PersonData = state.persons.get(victim.leader_id)
+	if vl == null:
+		return
+	var severity: float = taken_ratio if taken_ratio > 0.0 else TRIBUTE_RATE
+	_npc_ai.write_memory(vl, "tributed", aggressor.leader_id, state.world.current_tick, severity)
+	if Probe.enabled:
+		Probe.bump("extort.recorded.%s" % ("taken" if taken_ratio > 0.0 else "nothing_taken"))
+
+# ★XB④：同格互動的拒絕支 ⇒ 同一對連續同格只算一次接觸（不是每 tick 一筆）
+#   ★「連續」＝ 兩次同格被勒索的間隔 ≤ EXTORT_CONTACT_GAP：駐留路徑每支隊一個 T1 週期評一次、
+#     而打散的 offset 讓同一對相鄰兩次的間隔 < 2 個週期（cadence_stagger.next_tick）⇒ 取 2×T1
+#   ★接受支不走這裡：每一次接受都真的拿走東西，是各自一件事
+const EXTORT_CONTACT_GAP: int = 2 * DecisionTier.T1_OPERATIONAL
+func _record_extorted_on_contact(state: WorldState, victim: TeamData, aggressor: TeamData) -> void:
+	var now: int = state.world.current_tick
+	var last: int = int(victim.extort_contact_tick.get(aggressor.team_id, -EXTORT_CONTACT_GAP - 1))
+	victim.extort_contact_tick[aggressor.team_id] = now
+	if now - last <= EXTORT_CONTACT_GAP:
+		if Probe.enabled:
+			Probe.bump("extort.recorded.same_contact_skip")
+		return
+	_record_extorted(state, victim, aggressor, 0.0)
 
 # Task1 measure（純觀測，佔村 spec）：raid（TASK_LOOT）解決分佈探針。
 # extort（無戰）/ combat_at_outpost（落點村格 → capture 可翻）/ combat_open_field（開闊地 → capture no-op）/ noop（想搶未成）。
@@ -1480,6 +1513,7 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 	if aggressor_id == player_team_id:
 		# F-I2 統一公式（同格勒索=兵臨城下 threat=aggressor readiness）
 		if not DiplomaticAiSystem.tribute_accept(state, to_t, from_t, from_t.readiness):
+			_record_extorted(state, to_t, from_t, 0.0)   # ★XB①：拒絕也是被勒索過（寫入收一處）
 			print("[Extort] Team%d 拒絕勒索" % target_id)
 			return { "ok": true, "accepted": false, "msg": "對方拒絕勒索" }
 
@@ -1489,9 +1523,11 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 		return { "ok": true, "accepted": true, "msg": "勒索完成（對方資源耗盡，無所得）" }
 	var parts: Array = []
 	for res in gained:
-		var amount: int = int(gained[res])
-		if amount > 0:
-			parts.append("%s+%d" % [res, amount])
+		# ★BS v2 D：取整後為 0 的那一份改印一位小數（舊版全部取整為 0 ⇒ 落到「少量資源」，玩家不知道拿了多少）
+		var amt: float = float(gained[res])
+		if amt > 0.0:
+			parts.append("%s+%s" % [TeamUiHelper.resource_name(String(res)),
+				("%d" % int(amt)) if amt >= 1.0 else ("%.1f" % amt)])   # ★D1：結果句進事件流，不印資源鍵
 	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
 	return { "ok": true, "accepted": true, "msg": "勒索完成（%s）" % detail }
 

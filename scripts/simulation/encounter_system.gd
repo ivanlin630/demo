@@ -676,7 +676,8 @@ func _max_timer(unit: Dictionary, state: WorldState) -> int:
 	var spd: float = maxf(_effective_speed(unit, state), 0.0001)
 	return clamp(roundi(float(BASE_ACTION_TICKS) / spd), 1, BASE_ACTION_TICKS * 5)
 
-func _get_weapon_grade(unit: Dictionary, _state: WorldState) -> String:
+# ★static（BS v2）：戰鬥區目標欄要用同一支判「射程內」，不在 view 抄一份
+static func _get_weapon_grade(unit: Dictionary, _state: WorldState) -> String:
 	var equip: Dictionary = unit.get("equipment", {})
 	var h1: Dictionary    = equip.get("hand_1", {})
 	if h1.get("type", "none") not in ["none", "2h_ref", ""]:
@@ -774,8 +775,8 @@ func resolve_attack(attacker: Dictionary, target: Dictionary,
 	var weapon: String  = _get_weapon_grade(attacker, state)
 	var is_ranged: bool = weapon.contains("ranged")
 	if is_ranged and not _check_range(attacker, target, state): return
-	var atk_name: String = _unit_label(attacker)   # U11: 戰報用
-	var tgt_name: String = _unit_label(target)
+	var atk_name: String = _unit_ref(attacker, state)   # U11: 戰報用（★BS v2：存單位索引記號，顯示時換成代號）
+	var tgt_name: String = _unit_ref(target, state)
 	if target.get("pending_dodge", false):
 		target["pending_dodge"] = false
 		if _resolve_block(target, state, "dodge"):
@@ -817,11 +818,21 @@ func resolve_attack(attacker: Dictionary, target: Dictionary,
 	_enc_log(state, "%s 擊中 %s %s -%.0f" % [atk_name, tgt_name, target_part, final_dmg])
 
 # U11: 戰報 helper ───────────────────────────────────────────
+# ★BS v2（spec 2026-10-07 §票 BS v2 C）：戰報存【單位索引記號】{uN}，顯示層換成地圖／列表同一套代號
+#   ⇒ 舊版存「P41／匿名兵／野獸」：匿名兵全叫同一個名字，玩家讀不出是誰打誰；而玩家自己被叫成 P41
+static func _unit_ref(unit: Dictionary, state: WorldState) -> String:
+	return "{u%d}" % state.encounter_units.find(unit)
+
 func _unit_label(unit: Dictionary) -> String:
 	var pid: int = int(unit.get("person_id", -1))
 	if pid >= 0: return "P%d" % pid
 	if unit.get("is_beast", false): return "野獸"
 	return "匿名兵"
+
+# 這個單位是不是玩家那一隊的
+static func is_player_side_unit(unit: Dictionary, state: WorldState) -> bool:
+	var pp: PersonData = state.persons.get(state.player_id)
+	return pp != null and int(unit.get("team_id", -1)) == pp.team_id
 
 func _enc_log(state: WorldState, msg: String) -> void:
 	state.encounter_log.append(msg)
@@ -885,10 +896,20 @@ func advance_encounter_tick(state: WorldState) -> String:
 				unit["stamina"] = maxf(float(unit.get("stamina", 1.0)) - 0.03, 0.0)
 				if hex_dist(Vector2i.ZERO, unit["pos"]) > MAP_RADIUS:
 					unit["has_exited"] = true
+					_enc_log(state, "%s 撤出戰場" % _unit_ref(unit, state))
 					if action["type"] == "messenger_exit":
 						var parent: TeamData = state.teams.get(unit["team_id"])
 						if parent: _messenger_exit(state, unit, parent)
 
+		# ★BS v2「戰報每拍一句」：玩家那一隊的移動與玩家的待機也記（攻擊那幾句在 resolve_attack）
+		#   ★只記我方：敵方的移動看得到的已畫在地圖上，看不到的不能寫進戰報（感知鐵律）
+		if state.player_id != -1 and is_player_side_unit(unit, state):
+			match String(action["type"]):
+				"move":
+					_enc_log(state, "%s 移動到 (%d,%d)" % [_unit_ref(unit, state), unit["pos"].x, unit["pos"].y])
+				"idle":
+					if unit.get("person_id", -1) == state.player_id:
+						_enc_log(state, "%s 待機" % _unit_ref(unit, state))
 		# After processing player action, clear pending_action
 		if state.player_id != -1 and unit.get("person_id", -1) == state.player_id:
 			unit.erase("pending_action")
@@ -1184,6 +1205,8 @@ func _apply_reserve_casualty(state: WorldState, team_id: int, onfield_anon: int,
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id
 	var def_id: int = state.encounter_defender_id
+	state.last_encounter_outcome = {"result": result, "attacker_id": atk_id, "defender_id": def_id,
+		"tick": state.world.current_tick}   # ★BS2：三條結算路（一般／野獸／平手）都經過這一行
 
 	_return_pool_equipment(state)
 

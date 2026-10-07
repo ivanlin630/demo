@@ -32,6 +32,14 @@ var _post_combat: bool = false   # 遭遇戰結束後，等待玩家按 [J] 收�
 var _last_msg: String = ""           # `_log` 的最後一句（GUI 印到 stdout；終端把它放進戰鬥區）
 var _cmd_items: Array = []           # Z 命令選單的項目 [[id, 標籤], …]（空 ＝ 選單沒開）
 var _cmd_popup: PopupMenu = null
+# ★BS2（spec 2026-10-07 battle-screen-asserted §BS）：戰鬥怎麼結束的 —— 回主畫面那一刻結果行要說出是哪一種
+#   ·撤出：玩家單位在場上被標 has_exited（每次刷新時記，因為結算後 encounter_units 會被清）
+#   ·打完：這一場真的結算了（last_encounter_outcome 換了一份 ⇒ is_same 判「是不是這一場的」；野獸戰／平手也有）
+#   ·投降：走指令佇列，結果句（「…投降被接受」）已由 D3 上了結果行 ⇒ 這裡不蓋它
+var _player_exited: bool = false
+# ★BS v2 B：目標欄（目前目標＝encounter_units 的索引；-1 ＝ 還沒有）—— R 打它、Tab 換它、↑↓ 換它的部位
+var _target_idx: int = -1
+var _result_at_start = null
 var handle_key_calls: int = 0        # ★P10b：`_handle_key` 被呼了幾次（GUI 廣播一次按鍵 ⇒ 只能 +1）
 var _selected_part: String = "torso"   # attack target body part, chosen in attack_select mode
 
@@ -46,6 +54,9 @@ func setup(bridge: SimBridge) -> void:
 func show_encounter() -> void:
 	visible = true
 	_post_combat = false
+	_player_exited = false
+	_target_idx = -1
+	_result_at_start = _bridge.get_state().last_encounter_outcome if _bridge != null else null
 	# Center camera so axial (0,0) appears at viewport center.
 	var vp_size: Vector2 = get_viewport_rect().size
 	_camera = vp_size * 0.5 - _hex_center(Vector2i.ZERO) * _zoom
@@ -110,9 +121,14 @@ func _make_section_label(text: String) -> Label:
 func _refresh_ui() -> void:
 	if _bridge == null: return
 	var state: WorldState = _bridge.get_state()
+	if bool(_find_player_unit(state).get("has_exited", false)):
+		_player_exited = true
 	# U11: 戰報（命中/傷害）每次刷新顯示，戰前/戰後皆可
 	if _lbl_log != null:
-		_lbl_log.text = "\n".join(_bridge.query_encounter_log(6))
+		var _log_lines: PackedStringArray = []
+		for _l in _bridge.query_encounter_log(6):
+			_log_lines.append(_log_line_for_display(String(_l), state))
+		_lbl_log.text = "\n".join(_log_lines)
 	# U10: 戰後 / 無玩家單位 → 顯戰果 + 離開提示（不可 early-return 成空白凍結畫面）
 	if _post_combat or not state.encounter_active:
 		var res: Dictionary = state.last_encounter_result
@@ -149,7 +165,8 @@ func _refresh_ui() -> void:
 	for part in body:
 		var s: String = body[part].get("status", "healthy")
 		# ★戰鬥區 §3：只在顯示層換中文（儲存值 part／status 一個字都不動）
-		lines.append("%s：%s" % [TeamUiHelper.part_name(String(part)), TeamUiHelper.status_name(s)])
+		# ★BS v2 C：狀態印全名（「健」讀起來像被截字）
+		lines.append("%s：%s" % [TeamUiHelper.part_name(String(part)), TeamUiHelper.status_full_name(s)])
 	_lbl_health.text = "\n".join(lines)
 
 	# equip
@@ -161,14 +178,188 @@ func _refresh_ui() -> void:
 
 	# action hints
 	var state_ui: WorldState = _bridge.get_state()
-	var action_hints: String = "QWEASD:移動(邊界→離場)  R:攻擊\nZ:命令  F:投降  Space:待機"
+	var action_hints: String = ACTION_HINTS
 	if not state_ui.encounter_active and state_ui.last_encounter_result.get("can_subjugate", false):
 		action_hints += "\nJ:收編敗者"
 	_lbl_actions.text = action_hints
+	# ★BS v2 B：目標欄（GUI 的那一格與終端的「── 目標 ──」同一份字）
+	_ensure_target(state)
+	_lbl_cursor_info.text = target_text(state)
+	_cursor = (state.encounter_units[_target_idx] as Dictionary).get("pos", Vector2i(-1, -1)) if _target_idx >= 0 else Vector2i(-1, -1)
 
-	if _mode == "attack_select":
-		_lbl_actions.text     = _attack_select_hint(_selected_part)
-		_lbl_cursor_info.text = "攻擊部位 ↑↓：%s" % TeamUiHelper.part_name(_selected_part)
+# ★真打（play.py）抓到：戰報印原始部位「擊中 P41 torso -12」、玩家自己叫「P41」而單位列表叫「你」
+#   ⇒ 同 §3 的規則：儲存值（戰報字串）不動，寫 Label 那一刻換字（部位名走 TeamUiHelper 那一份；玩家的 P 號換成「你」）
+func _log_line_for_display(line: String, state: WorldState) -> String:
+	var out: String = line
+	for raw in TeamUiHelper.BODY_PART_NAME:
+		out = out.replace(" %s " % String(raw), " %s " % TeamUiHelper.part_name(String(raw)))
+	# ★BS v2：戰報存的是單位索引記號 {uN}（EncounterSystem._unit_ref）⇒ 換成地圖／列表同一套代號＋名字
+	if state != null:
+		var codes: Dictionary = unit_codes(state)
+		var re := RegEx.new()
+		re.compile("\\{u(\\d+)\\}")
+		for m in re.search_all(out):
+			var i: int = int(m.get_string(1))
+			var tag: String = "%s（%s）" % [String(codes.get(i, "?")), _unit_name(i, state)] if i >= 0 and i < state.encounter_units.size() else "?"
+			out = out.replace(m.get_string(0), tag)
+	return out
+
+# ══ ★BS v2（spec 2026-10-07 §票 BS v2，藍圖 27960078b）：戰鬥區要能玩 ══════════════════════════════════
+# 鍵（press-is-do）：R＝立刻攻擊目標欄上的目標；Tab＝換目標；↑↓＝換瞄準部位；QWEASD 只做移動（瞄準模式退場）
+const ACTION_HINTS: String = "QWEASD:移動(邊界→離場)  R:攻擊目標  Tab:換目標  ↑↓:換部位\nZ:命令  F:投降  Space:待機"
+const NO_TARGET_IN_RANGE_MSG: String = "沒有在攻擊範圍內的敵人"
+# 局部地圖的半徑（以主角為中心）：視野 5＋偵查 ⇒ 多一圈讓霧／邊界看得到
+const LOCAL_MAP_RADIUS: int = 6
+const MAP_FOG: String = "~"
+const MAP_EMPTY: String = "."
+const MAP_EDGE: String = "#"
+
+func _player_team_id(state: WorldState) -> int:
+	var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+	return pp.team_id if pp != null else -1
+
+func _unit_present(u: Dictionary, state: WorldState) -> bool:
+	return not _is_unit_dead(u, state) and not bool(u.get("has_exited", false))
+
+# 單位代號（整場固定，依 encounter_units 的順序）：你＝@、我方＝a b c…、敵方＝A B C…
+#   ★地圖、單位列表、目標欄、戰報四處都讀這一份
+func unit_codes(state: WorldState) -> Dictionary:
+	var ptid: int = _player_team_id(state)
+	var codes: Dictionary = {}
+	var own_n: int = 0
+	var foe_n: int = 0
+	for i in range(state.encounter_units.size()):
+		var u: Dictionary = state.encounter_units[i]
+		if int(u.get("person_id", -1)) == state.player_id and state.player_id != -1:
+			codes[i] = "@"
+		elif int(u.get("team_id", -1)) == ptid:
+			codes[i] = String.chr(97 + own_n % 26)
+			own_n += 1
+		else:
+			codes[i] = String.chr(65 + foe_n % 26)
+			foe_n += 1
+	return codes
+
+func _unit_name(i: int, state: WorldState) -> String:
+	var u: Dictionary = state.encounter_units[i]
+	var pid: int = int(u.get("person_id", -1))
+	if pid == state.player_id and pid != -1:
+		return "你"
+	if bool(u.get("is_beast", false)):
+		return "野獸"
+	return "P%d" % pid if pid >= 0 else "匿名兵"
+
+# ★感知鐵律：看得到的單位 ＝ 在場、且（我方 或 站在我方視野內的格）
+func visible_unit_indices(state: WorldState) -> Array:
+	var ptid: int = _player_team_id(state)
+	var vis: Dictionary = _player_visible_hexes(state, ptid)
+	var out: Array = []
+	for i in range(state.encounter_units.size()):
+		var u: Dictionary = state.encounter_units[i]
+		if not _unit_present(u, state):
+			continue
+		if int(u.get("team_id", -1)) == ptid or vis.has(u.get("pos", Vector2i(-99, -99))):
+			out.append(i)
+	return out
+
+# 看得到的敵人（由近到遠，同距離照索引）
+func _visible_enemies(state: WorldState) -> Array:
+	var ptid: int = _player_team_id(state)
+	var pu: Dictionary = _find_player_unit(state)
+	var me: Vector2i = pu.get("pos", Vector2i.ZERO)
+	var out: Array = visible_unit_indices(state).filter(func(i): return int((state.encounter_units[i] as Dictionary).get("team_id", -1)) != ptid)
+	out.sort_custom(func(a, b):
+		var da: int = _hex_dist(me, (state.encounter_units[a] as Dictionary).get("pos", Vector2i.ZERO))
+		var db: int = _hex_dist(me, (state.encounter_units[b] as Dictionary).get("pos", Vector2i.ZERO))
+		return da < db if da != db else a < b)
+	return out
+
+# 射程：與 EncounterSystem 同一支武器等級＋ItemAttributes 射程（近戰 1）
+func _attack_range(state: WorldState) -> int:
+	return ItemAttributes.get_range(EncounterSystem._get_weapon_grade(_find_player_unit(state), state))
+
+func _in_range(state: WorldState, i: int) -> bool:
+	var me: Vector2i = _find_player_unit(state).get("pos", Vector2i.ZERO)
+	return _hex_dist(me, (state.encounter_units[i] as Dictionary).get("pos", Vector2i.ZERO)) <= _attack_range(state)
+
+# 目前目標失效（倒下／離場／看不到）⇒ 換成最近的「射程內」敵人；沒有射程內的 ⇒ 最近看得到的；都沒有 ⇒ -1
+func _ensure_target(state: WorldState) -> void:
+	var foes: Array = _visible_enemies(state)
+	if foes.has(_target_idx):
+		return
+	_target_idx = -1
+	for i in foes:
+		if _in_range(state, i):
+			_target_idx = i
+			return
+	if not foes.is_empty():
+		_target_idx = foes[0]
+
+func target_text(state: WorldState) -> String:
+	var codes: Dictionary = unit_codes(state)
+	var foes: Array = _visible_enemies(state)
+	if _target_idx < 0:
+		return "目標：（看不到敵人）｜瞄準：%s" % TeamUiHelper.part_name(_selected_part)
+	var me: Vector2i = _find_player_unit(state).get("pos", Vector2i.ZERO)
+	var tp: Vector2i = (state.encounter_units[_target_idx] as Dictionary).get("pos", Vector2i.ZERO)
+	var d: int = _hex_dist(me, tp)
+	var reach: String = "射程內" if d <= _attack_range(state) else "射程外（射程 %d 格）" % _attack_range(state)
+	var hit: Array = foes.filter(func(i): return _in_range(state, i)).map(func(i): return String(codes[i]))
+	return "目標：%s（%s）距離 %d 格 %s｜瞄準：%s\n本拍打得到：%s" % [String(codes[_target_idx]), _unit_name(_target_idx, state),
+		d, reach, TeamUiHelper.part_name(_selected_part), "、".join(PackedStringArray(hit)) if not hit.is_empty() else "（無）"]
+
+# 局部地圖的資料（renderer 在 TextUiView.render_battle_map）：{center, radius, cells: {Vector2i: 一個字}}
+#   看得到的空格「.」、看不到「~」（霧）、場外「#」（邊界）；單位畫代號（看不到的敵人不畫 ⇒ 是霧）
+func local_map_data(state: WorldState) -> Dictionary:
+	var ptid: int = _player_team_id(state)
+	var vis: Dictionary = _player_visible_hexes(state, ptid)
+	var codes: Dictionary = unit_codes(state)
+	var center: Vector2i = _find_player_unit(state).get("pos", Vector2i.ZERO)
+	var cells: Dictionary = {}
+	for dr in range(-LOCAL_MAP_RADIUS, LOCAL_MAP_RADIUS + 1):
+		for dq in range(-LOCAL_MAP_RADIUS, LOCAL_MAP_RADIUS + 1):
+			var h: Vector2i = center + Vector2i(dq, dr)
+			if _hex_dist(h, center) > LOCAL_MAP_RADIUS:
+				continue
+			if not _is_in_map(h):
+				cells[h] = MAP_EDGE
+			elif vis.has(h):
+				cells[h] = MAP_EMPTY
+			else:
+				cells[h] = MAP_FOG
+	# ★看得到、但在局部地圖半徑外的單位（多半是自己人：他們的視野是視野來源）⇒ 列進「畫面外」那一行，
+	#   不默默消失（地圖上的代號＝列表的代號，反之亦然）
+	var off: Array = []
+	for i in visible_unit_indices(state):
+		var p: Vector2i = (state.encounter_units[i] as Dictionary).get("pos", Vector2i.ZERO)
+		if cells.has(p):
+			cells[p] = String(codes[i])
+		else:
+			off.append("%s（%d 格）" % [String(codes[i]), _hex_dist(center, p)])
+	return {"center": center, "radius": LOCAL_MAP_RADIUS, "cells": cells, "off_map": off}
+
+# ★BS2：結束種類的一句話（"" ＝ 不蓋結果行：投降那句已經在上面）
+func end_sentence() -> String:
+	if _bridge == null:
+		return ""
+	if _player_exited:
+		return "你撤出了戰場"
+	var state: WorldState = _bridge.get_state()
+	var oc: Dictionary = state.last_encounter_outcome
+	if oc.is_empty() or is_same(oc, _result_at_start):
+		return ""
+	var pp: PersonData = state.persons.get(state.player_id)
+	var ptid: int = pp.team_id if pp != null else -1
+	var r: String = String(oc.get("result", ""))
+	if r == "draw":
+		return "戰鬥結束：不分勝負"
+	var win_id: int = int(oc.get("attacker_id", -1)) if r == "attacker_win" else int(oc.get("defender_id", -1))
+	var lose_id: int = int(oc.get("defender_id", -1)) if r == "attacker_win" else int(oc.get("attacker_id", -1))
+	if win_id == ptid:
+		return "戰鬥結束：你們打贏了"
+	if lose_id == ptid:
+		return "戰鬥結束：你們打輸了"
+	return "戰鬥結束"
 
 func _find_player_unit(state: WorldState) -> Dictionary:
 	for unit in state.encounter_units:
@@ -395,18 +586,35 @@ func terminal_block() -> String:
 	lines.append_array((_lbl_health.text if _lbl_health != null else "").split("\n"))
 	lines.append("── 裝備 ──")
 	lines.append_array((_lbl_equip.text if _lbl_equip != null else "").split("\n"))
-	lines.append("── 游標 ──")
-	lines.append(_lbl_cursor_info.text if _lbl_cursor_info != null else "")
-	lines.append("── 單位（下一次行動：剩幾格時間）──")
-	var ptid: int = _find_player_unit(state).get("team_id", -1)
-	for i in range(state.encounter_units.size()):
+	if state.encounter_active and not _find_player_unit(state).is_empty():
+		lines.append("── 戰場（@你 小寫我方 大寫敵方 .空地 ~看不到 #場外）──")
+		var _md: Dictionary = local_map_data(state)
+		lines.append_array(TextUiView.render_battle_map(_md).split("\n"))
+		if not (_md["off_map"] as Array).is_empty():
+			lines.append("畫面外：" + "、".join(PackedStringArray(_md["off_map"])))
+	lines.append("── 目標 ──")
+	lines.append_array((_lbl_cursor_info.text if _lbl_cursor_info != null else "").split("\n"))
+	# ★單位列表只列看得到的（地圖上的代號＝列表的代號）；倒下／離場另一行
+	lines.append("── 單位（一格時間＝1 分鐘）──")
+	var ptid: int = _player_team_id(state)
+	var codes: Dictionary = unit_codes(state)
+	for i in visible_unit_indices(state):
 		var u: Dictionary = state.encounter_units[i]
-		var pid: int = int(u.get("person_id", -1))
-		var nm: String = ("你" if pid == state.player_id else ("P%d" % pid if pid >= 0 else "匿名%d" % i))
 		var side: String = "我方" if int(u.get("team_id", -1)) == ptid else "敵方"
-		var st: String = "倒下" if _is_unit_dead(u, state) else ("離場" if bool(u.get("has_exited", false)) else "可戰")
 		var pos: Vector2i = u.get("pos", Vector2i.ZERO)
-		lines.append("%s %s @(%d,%d) %s 行動倒數 %d" % [side, nm, pos.x, pos.y, st, int(u.get("action_timer", 0))])
+		lines.append("%s %s %s @(%d,%d) %d 分鐘後行動" % [String(codes[i]), side, _unit_name(i, state), pos.x, pos.y,
+			int(u.get("action_timer", 0))])
+	var gone: Array = []
+	for i in range(state.encounter_units.size()):
+		var u2: Dictionary = state.encounter_units[i]
+		if int(u2.get("team_id", -1)) != ptid and not _unit_present(u2, state):
+			continue   # ★敵方倒下／離場：只有看得到時才知道 ⇒ 不列（感知鐵律）
+		if _is_unit_dead(u2, state):
+			gone.append("%s倒下" % String(codes[i]))
+		elif bool(u2.get("has_exited", false)):
+			gone.append("%s離場" % String(codes[i]))
+	if not gone.is_empty():
+		lines.append("（%s）" % "、".join(PackedStringArray(gone)))
 	if not _cmd_items.is_empty():
 		lines.append("── 命令（按數字選；Esc 取消）──")
 		for k in range(_cmd_items.size()):
@@ -507,45 +715,38 @@ func _handle_key(keycode: int) -> void:
 				else:
 					_do_exit(player_unit, target)   # E-3:邊界往場外 = 離場
 			elif keycode == KEY_R:
-				_mode = "attack_select"
-				_selected_part = "torso"   # reset to default each time
-				_cursor = player_unit.get("pos", Vector2i.ZERO)
+				# ★BS v2 B（press-is-do）：R ＝ 立刻攻擊目標欄上的目標；打不到 ⇒ 說為什麼（不靜默、不開瞄準模式）
+				_ensure_target(state)
+				if _target_idx >= 0 and _in_range(state, _target_idx):
+					var tpos: Vector2i = (state.encounter_units[_target_idx] as Dictionary).get("pos", Vector2i.ZERO)
+					_do_attack_with_part(player_unit, tpos, state, _selected_part)
+				else:
+					_log(NO_TARGET_IN_RANGE_MSG + ("（目標 %s 距離 %d 格，射程 %d 格）" % [String(unit_codes(state)[_target_idx]),
+						_hex_dist(player_unit.get("pos", Vector2i.ZERO), (state.encounter_units[_target_idx] as Dictionary).get("pos", Vector2i.ZERO)),
+						_attack_range(state)] if _target_idx >= 0 else ""))
+					_refresh_ui()
+			elif keycode == KEY_TAB:
+				var foes: Array = _visible_enemies(state)
+				if foes.is_empty():
+					_log("看不到敵人，沒有目標可換")
+				else:
+					_target_idx = foes[(foes.find(_target_idx) + 1) % foes.size()]
+					_log("目標換成 %s" % String(unit_codes(state)[_target_idx]))
+				_refresh_ui(); queue_redraw()
+			elif keycode == KEY_UP or keycode == KEY_DOWN:
+				var idx: int = BODY_PARTS.find(_selected_part)
+				_selected_part = BODY_PARTS[(idx + (-1 if keycode == KEY_UP else 1) + BODY_PARTS.size()) % BODY_PARTS.size()]
+				_log("瞄準部位換成 %s" % TeamUiHelper.part_name(_selected_part))
 				_refresh_ui()
-				queue_redraw()
 			elif keycode == KEY_SPACE:
 				_do_wait(player_unit)
 			elif keycode == KEY_Z:
 				_open_command_menu(player_unit, state)
 			elif keycode != KEY_F:
 				# ★按鍵三態（spec P4）：無作用的鍵說出為什麼，不靜默
-				_log("此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊／Z 命令／F 投降／Space 待機）")
+				_log("此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊目標／Tab 換目標／↑↓ 換部位／Z 命令／F 投降／Space 待機）")
 				_refresh_ui()
-		"attack_select":
-			if keycode == KEY_UP:
-				var idx: int = BODY_PARTS.find(_selected_part)
-				_selected_part = BODY_PARTS[(idx - 1 + BODY_PARTS.size()) % BODY_PARTS.size()]
-				_refresh_ui()
-			elif keycode == KEY_DOWN:
-				var idx: int = BODY_PARTS.find(_selected_part)
-				_selected_part = BODY_PARTS[(idx + 1) % BODY_PARTS.size()]
-				_refresh_ui()
-			elif HEX_DIRS.has(keycode):
-				var nc: Vector2i = _hex_neighbor(_cursor, keycode)
-				if _is_in_map(nc):   # P4-4:瞄準游標邊界 clamp,不走出戰場
-					_cursor = nc
-					queue_redraw()
-					_lbl_cursor_info.text = _describe_hex(_cursor, state)
-			elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
-				_do_attack_with_part(player_unit, _cursor, state, _selected_part)
-				_mode = "idle"; _cursor = Vector2i(-1, -1)
-				_selected_part = "torso"   # reset after use
-			elif keycode == KEY_ESCAPE:
-				_mode = "idle"; _cursor = Vector2i(-1, -1)
-				_selected_part = "torso"
-				_refresh_ui(); queue_redraw()
-			else:
-				_log("瞄準中：↑↓ 選部位、QWEASD 移游標、Enter 攻擊、Esc 取消")
-				_refresh_ui()
+		# ★BS v2：瞄準模式（attack_select）退場 —— R 直接打目標欄的目標、↑↓ 在 idle 換部位
 
 func _handle_click(screen_pos: Vector2) -> void:
 	var state: WorldState = _bridge.get_state()
@@ -553,12 +754,13 @@ func _handle_click(screen_pos: Vector2) -> void:
 	if player_unit.is_empty(): return
 	var world: Vector2 = _screen_to_world(screen_pos)
 	var clicked: Vector2i = _world_to_axial(world)
-	match _mode:
-		"idle":
-			_lbl_cursor_info.text = _describe_hex(clicked, state)
-		"attack_select":
-			_do_attack(player_unit, clicked, state)
-			_mode = "idle"; _cursor = Vector2i(-1, -1)
+	# ★BS v2：點到看得到的敵人 ⇒ 設成目標欄的目標（不直接攻擊；攻擊一律 R）
+	for i in _visible_enemies(state):
+		if (state.encounter_units[i] as Dictionary).get("pos", Vector2i(-99, -99)) == clicked:
+			_target_idx = i
+			_refresh_ui(); queue_redraw()
+			return
+	_lbl_cursor_info.text = _describe_hex(clicked, state)
 
 func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
 	if not _is_in_map(target): return        # BUG-5a: out of bounds

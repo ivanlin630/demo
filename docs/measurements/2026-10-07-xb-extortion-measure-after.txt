@@ -1,0 +1,122 @@
+# XB② 勒索煞車量測卷面（after XB①′③④，XB§2 累積）｜bed scripts/debug/extortion_brake_measure.gd｜cfg default seed 1337
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== extortion_brake 量測（XB）｜cfg=res://config/default.json seed=1337 每隊 10 次 ===
+── A 玩家直接勒索（resolve_extortion_direct）──
+  玩家 Team15 readiness=1.00（＝threat）pop 10
+   對象 Team0｜慎重 0.54 義氣 0.62 求生欲 0.52 恐懼 0.00｜pop 10 coin 2086 food 500
+  #01 accept=true score=+0.281 no_edge=+0.281 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=true（tributed 0→1）｜勒索完成（食+125, 材+20, 幣+521）
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #02 accept=true score=+0.263 no_edge=+0.263 門檻 0.10｜affinity=-0.125 feud=0.000 grat=0.000｜coin_before=1564｜寫記憶=true（tributed 1→2）｜勒索完成（食+93, 材+15, 幣+391）
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #03 accept=true score=+0.125 no_edge=+0.244 門檻 0.10｜affinity=-0.250 feud=0.397 grat=0.000｜coin_before=1173｜寫記憶=true（tributed 2→3）｜勒索完成（食+70, 材+11, 幣+293）
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #04 accept=true score=+0.106 no_edge=+0.225 門檻 0.10｜affinity=-0.375 feud=0.397 grat=0.000｜coin_before=880｜寫記憶=true（tributed 3→4）｜勒索完成（食+52, 材+8, 幣+219）
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #05 accept=false score=+0.087 no_edge=+0.206 門檻 0.10｜affinity=-0.500 feud=0.397 grat=0.000｜coin_before=660｜寫記憶=true（tributed 4→5）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #06 accept=false score=+0.069 no_edge=+0.188 門檻 0.10｜affinity=-0.625 feud=0.397 grat=0.000｜coin_before=660｜寫記憶=true（tributed 5→6）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #07 accept=false score=+0.050 no_edge=+0.169 門檻 0.10｜affinity=-0.750 feud=0.397 grat=0.000｜coin_before=660｜寫記憶=true（tributed 6→7）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #08 accept=false score=+0.031 no_edge=+0.150 門檻 0.10｜affinity=-0.875 feud=0.397 grat=0.000｜coin_before=660｜寫記憶=true（tributed 7→8）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #09 accept=false score=+0.012 no_edge=+0.131 門檻 0.10｜affinity=-1.000 feud=0.397 grat=0.000｜coin_before=660｜寫記憶=true（tributed 8→9）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+  #10 accept=false score=+0.012 no_edge=+0.131 門檻 0.10｜affinity=-1.000 feud=0.397 grat=0.000｜coin_before=660｜寫記憶=true（tributed 9→10）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.500｜紮營 0.245｜建設 0.116
+   對象 Team1｜慎重 0.49 義氣 0.43 求生欲 0.47 恐懼 0.00｜pop 8 coin 556 food 250
+  #01 accept=true score=+0.313 no_edge=+0.313 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=556｜寫記憶=true（tributed 0→1）｜勒索完成（食+62, 材+7, 幣+139）
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #02 accept=true score=+0.294 no_edge=+0.294 門檻 0.10｜affinity=-0.125 feud=0.000 grat=0.000｜coin_before=417｜寫記憶=true（tributed 1→2）｜勒索完成（食+46, 材+5, 幣+104）
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #03 accept=true score=+0.162 no_edge=+0.275 門檻 0.10｜affinity=-0.250 feud=0.378 grat=0.000｜coin_before=313｜寫記憶=true（tributed 2→3）｜勒索完成（食+35, 材+4, 幣+78）
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #04 accept=true score=+0.143 no_edge=+0.257 門檻 0.10｜affinity=-0.375 feud=0.378 grat=0.000｜coin_before=235｜寫記憶=true（tributed 3→4）｜勒索完成（食+26, 材+3, 幣+58）
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #05 accept=true score=+0.125 no_edge=+0.238 門檻 0.10｜affinity=-0.500 feud=0.378 grat=0.000｜coin_before=176｜寫記憶=true（tributed 4→5）｜勒索完成（食+19, 材+2, 幣+43）
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #06 accept=true score=+0.106 no_edge=+0.219 門檻 0.10｜affinity=-0.625 feud=0.378 grat=0.000｜coin_before=132｜寫記憶=true（tributed 5→6）｜勒索完成（食+14, 材+1, 幣+32）
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #07 accept=false score=+0.087 no_edge=+0.200 門檻 0.10｜affinity=-0.750 feud=0.378 grat=0.000｜coin_before=99｜寫記憶=true（tributed 6→7）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #08 accept=false score=+0.068 no_edge=+0.182 門檻 0.10｜affinity=-0.875 feud=0.378 grat=0.000｜coin_before=99｜寫記憶=true（tributed 7→8）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #09 accept=false score=+0.050 no_edge=+0.163 門檻 0.10｜affinity=-1.000 feud=0.378 grat=0.000｜coin_before=99｜寫記憶=true（tributed 8→9）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+  #10 accept=false score=+0.050 no_edge=+0.163 門檻 0.10｜affinity=-1.000 feud=0.378 grat=0.000｜coin_before=99｜寫記憶=true（tributed 9→10）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.519｜建設 0.096｜紮營 0.055
+   對象 Team2｜慎重 0.53 義氣 0.51 求生欲 0.55 恐懼 0.00｜pop 10 coin 695 food 250
+  #01 accept=true score=+0.315 no_edge=+0.315 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=695｜寫記憶=true（tributed 0→1）｜勒索完成（食+62, 材+7, 幣+173）
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #02 accept=true score=+0.297 no_edge=+0.297 門檻 0.10｜affinity=-0.125 feud=0.000 grat=0.000｜coin_before=521｜寫記憶=true（tributed 1→2）｜勒索完成（食+46, 材+5, 幣+130）
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #03 accept=true score=+0.139 no_edge=+0.278 門檻 0.10｜affinity=-0.250 feud=0.464 grat=0.000｜coin_before=391｜寫記憶=true（tributed 2→3）｜勒索完成（食+35, 材+4, 幣+97）
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #04 accept=true score=+0.120 no_edge=+0.259 門檻 0.10｜affinity=-0.375 feud=0.464 grat=0.000｜coin_before=293｜寫記憶=true（tributed 3→4）｜勒索完成（食+26, 材+3, 幣+73）
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #05 accept=true score=+0.101 no_edge=+0.240 門檻 0.10｜affinity=-0.500 feud=0.464 grat=0.000｜coin_before=220｜寫記憶=true（tributed 4→5）｜勒索完成（食+19, 材+2, 幣+54）
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #06 accept=false score=+0.083 no_edge=+0.222 門檻 0.10｜affinity=-0.625 feud=0.464 grat=0.000｜coin_before=165｜寫記憶=true（tributed 5→6）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #07 accept=false score=+0.064 no_edge=+0.203 門檻 0.10｜affinity=-0.750 feud=0.464 grat=0.000｜coin_before=165｜寫記憶=true（tributed 6→7）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #08 accept=false score=+0.045 no_edge=+0.184 門檻 0.10｜affinity=-0.875 feud=0.464 grat=0.000｜coin_before=165｜寫記憶=true（tributed 7→8）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #09 accept=false score=+0.026 no_edge=+0.165 門檻 0.10｜affinity=-1.000 feud=0.464 grat=0.000｜coin_before=165｜寫記憶=true（tributed 8→9）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+  #10 accept=false score=+0.026 no_edge=+0.165 門檻 0.10｜affinity=-1.000 feud=0.464 grat=0.000｜coin_before=165｜寫記憶=true（tributed 9→10）｜對方拒絕勒索
+       對方候選集 （3）覓食 0.423｜建設 0.088｜紮營 0.035
+── B NPC 同格掠奪（_try_interact：LOOT＋readiness  0.7）──
+  勢力：勒索方 0／對象 1（同勢力＝false）
+  勒索方 Team0 readiness=0.90｜對象 Team4｜慎重 0.42 義氣 0.51 求生欲 0.54 恐懼 0.00｜pop 8 coin 1668 food 500
+  #01 accept=true score=+0.263 no_edge=+0.263 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=1668｜寫記憶=true（tributed 0→1）｜對方 coin 417｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （4）覓食 0.500｜訓練 0.211｜紮營 0.209｜建設 0.093
+  #02 accept=true score=+0.345 no_edge=+0.345 門檻 0.10｜affinity=-0.125 feud=0.000 grat=0.000｜coin_before=1251｜寫記憶=true（tributed 1→2）｜對方 coin 313｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000｜攻擊 0.000
+  #03 accept=true score=+0.205 no_edge=+0.326 門檻 0.10｜affinity=-0.250 feud=0.404 grat=0.000｜coin_before=938｜寫記憶=true（tributed 2→3）｜對方 coin 235｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #04 accept=true score=+0.186 no_edge=+0.307 門檻 0.10｜affinity=-0.375 feud=0.404 grat=0.000｜coin_before=704｜寫記憶=true（tributed 3→4）｜對方 coin 176｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #05 accept=true score=+0.167 no_edge=+0.288 門檻 0.10｜affinity=-0.500 feud=0.404 grat=0.000｜coin_before=528｜寫記憶=true（tributed 4→5）｜對方 coin 132｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #06 accept=true score=+0.149 no_edge=+0.270 門檻 0.10｜affinity=-0.625 feud=0.404 grat=0.000｜coin_before=396｜寫記憶=true（tributed 5→6）｜對方 coin 99｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #07 accept=true score=+0.130 no_edge=+0.251 門檻 0.10｜affinity=-0.750 feud=0.404 grat=0.000｜coin_before=297｜寫記憶=true（tributed 6→7）｜對方 coin 74｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #08 accept=true score=+0.111 no_edge=+0.232 門檻 0.10｜affinity=-0.875 feud=0.404 grat=0.000｜coin_before=223｜寫記憶=true（tributed 7→8）｜對方 coin 56｜勒索方 task=掠奪 交戰中=false
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #09 accept=false score=+0.092 no_edge=+0.213 門檻 0.10｜affinity=-1.000 feud=0.404 grat=0.000｜coin_before=167｜寫記憶=true（tributed 8→9）｜對方 coin 0｜勒索方 task=掠奪 交戰中=true
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #10 accept=false score=+0.092 no_edge=+0.213 門檻 0.10｜affinity=-1.000 feud=0.404 grat=0.000｜coin_before=167｜寫記憶=true（tributed 9→10）｜對方 coin 0｜勒索方 task=掠奪 交戰中=true
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  ── 以下 3 次＝同一次接觸（每次只隔 1 tick；拒絕支應不再寫）──
+  #11 accept=false score=+0.092 no_edge=+0.213 門檻 0.10｜affinity=-1.000 feud=0.404 grat=0.000｜coin_before=167｜寫記憶=false（tributed 10→10）｜對方 coin 0｜勒索方 task=掠奪 交戰中=true
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #12 accept=false score=+0.092 no_edge=+0.213 門檻 0.10｜affinity=-1.000 feud=0.404 grat=0.000｜coin_before=167｜寫記憶=false（tributed 10→10）｜對方 coin 0｜勒索方 task=掠奪 交戰中=true
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+  #13 accept=false score=+0.092 no_edge=+0.213 門檻 0.10｜affinity=-1.000 feud=0.404 grat=0.000｜coin_before=167｜寫記憶=false（tributed 10→10）｜對方 coin 0｜勒索方 task=掠奪 交戰中=true
+       對方候選集 （8）覓食 0.500｜訓練 0.211｜紮營 0.209｜攻擊 0.124｜建設 0.093｜迎戰 0.068｜求和 0.042｜survival 0.000
+── C 玩家遠程索貢（_action_demand_tribute，threat＝0）──
+   對象 Team0｜慎重 0.54 義氣 0.62 求生欲 0.52 恐懼 0.00｜pop 10 coin 2086 food 500
+  #01 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 1 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #02 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 2 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #03 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 3 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #04 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 4 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #05 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 5 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #06 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 6 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #07 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 7 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #08 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 8 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #09 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 9 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+  #10 accept=false score=+0.081 no_edge=+0.081 門檻 0.10｜affinity=+0.000 feud=0.000 grat=0.000｜coin_before=2086｜寫記憶=false（tributed 0→0）｜索貢遭拒，關係惡化｜索貢方（玩家領袖）typed tribute_refused 10 筆
+       對方候選集 （3）駐守 0.262｜覓食 0.235｜建設 0.116
+=== extortion_brake_measure DONE ===
