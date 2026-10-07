@@ -674,6 +674,12 @@ static func priority_for_need(state: WorldState, team: TeamData, opt: String) ->
 	var base: int = priority_for(opt)
 	if base != TaskArbiter.PRIO_SURVIVAL: return base   # 顯式 "priority" 欄／threat／預設一律不碰
 	if opt == "survival": return base                   # 威脅軸：不由糖食導出
+	# ★票 T §6①：休息的需求軸是**體力**不是糧 —— 累垮（≥ FATIGUE_EXHAUSTED，忠誠懲罰的同一條線）⇒ 求生優先序，否則派工
+	#   ★舊版走下面的糧撐軸 ⇒ 吃飽的累隊休息一律降成 50 ⇒ 搶不下 80 的覓食（實測被擋 130 次）
+	if opt == "休息":
+		var _rp: int = TaskArbiter.PRIO_SURVIVAL if team.fatigue >= SimRunner.FATIGUE_EXHAUSTED else TaskArbiter.PRIO_DISPATCH
+		if Probe.enabled: Probe.bump("commitprio.%s.%d" % [opt, _rp])
+		return _rp
 	var pop: int = team.population
 	if pop <= 0: return base
 	var _need: float = maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)

@@ -406,7 +406,8 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	#   ★取【真的有工人推進的第一個 tick】而不是 dispatch 當下 —— 派工的隊未必是施工的隊。
 	if not tile.construction_target.has("start_pop"):
 		tile.construction_target["start_pop"] = maxi(active_team.population, 1)
-	tile.construction_ticks_left -= maxi(active_team.population, 1)
+	# ★票 T §7：施工進度 × 體力係數（累了做得慢；四捨五入、至少 1）
+	tile.construction_ticks_left -= maxi(roundi(float(maxi(active_team.population, 1)) * SimRunner.stamina_factor(active_team)), 1)
 	# ★持守統一 Slice 2 新鮮度：construction 進度變 → 即重算施工隊 persist_strength（sunk 升），
 	# 執行層(Slice 3)讀時是當下進度值（非決策 cadence 舊值）。純算術零 RNG。
 	if tile.construction_ticks_left > 0:

@@ -188,7 +188,7 @@ static func eta_ticks(team: TeamData, path_cost: float) -> int:
 
 static func _team_speed_mult(team: TeamData) -> float:
 	var mult: float = 1.0
-	mult *= clampf(1.0 - team.fatigue, 0.1, 1.0)
+	mult *= SimRunner.stamina_factor(team)   # ★票 T §7：估算器讀物理那一條（原本 clamp(1−f, 0.1, 1)，跟真實移速不同式）
 	# Hook 預留 speed_class（未實作）
 	return mult
 

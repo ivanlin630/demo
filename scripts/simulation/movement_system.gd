@@ -245,11 +245,8 @@ static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, 
 		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
 		if bumps != null: bumps.append("rootdiff.TERRAIN_SPEED_MULT")
 		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
-	# 疲勞懲罰
-	if team.fatigue >= 1.0:
-		speed *= 0.3
-	elif team.fatigue > 0.5:
-		speed *= (1.0 - team.fatigue * 0.4)
+	# 疲勞懲罰（★票 T §7：唯一一條曲線在 SimRunner.stamina_factor）
+	speed *= SimRunner.stamina_factor(team)
 	# 超載懲罰
 	var cap: float = get_carry_capacity_pure(team)
 	var weight: float = calc_total_weight_pure(team)

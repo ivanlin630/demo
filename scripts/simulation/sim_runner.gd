@@ -19,6 +19,30 @@ const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更
 const FATIGUE_PER_DAY: float          = 0.096   # ★S5c ×2 — 約 10.4 天疲勞滿（mult=1）
 const FATIGUE_RECOVERY_PER_DAY: float = 0.48    # ★S5c ×2 — 約 2.1 天回滿（mult=1）
 const FATIGUE_LOYALTY_PENALTY: float = 0.005   # TEST VALUE
+# ★「累垮」的那一條線（具名既有值，不是新旋鈕）：忠誠懲罰、休息的承諾優先序、休息秤裡「避免的忠誠損失」三處讀同一個符號
+#   ★票 T §6：休息秤的忠誠那一項照搬懲罰的**同一個條件**（≥ 這條線才有、以下 ＝ 0）—— 世界沒有漸增，秤也不准有
+const FATIGUE_EXHAUSTED: float = 1.0
+
+# ══ ★★★票 T §7（藍圖裁（甲）`32db81600`）：體力係數 —— 所有耗力活動吃**同一條**疲勞曲線 ══════════════════════
+# ★式子 ＝ 移動原本那一條（movement_system 疲勞懲罰），藍圖逐字「移動已在用的那條、禁另抄」：
+#   累垮（≥ FATIGUE_EXHAUSTED）⇒ STAMINA_AT_EXHAUSTED｜> 0.5 ⇒ 1 − 0.4·f｜否則 1
+# ★取代了三條曲線：真實移速（movement_system）／路徑估算（path_system：原本 clamp(1−f, 0.1, 1)，估算器跟物理不同式）
+#   ／戰鬥開場體力（encounter_system 兩處：原本 clamp(1−f, 0.1, 1)）
+# ★讀它的產出寫入點（執行即耗力那一組，逐項；表同 FATIGUE_EXERT_TASKS）：
+#   建造／建設／升級／擴建  outpost_system.gd 施工進度（construction_ticks_left -= 人數 × 係數）
+#   訓練                    training_system.gd 匿名兵經驗（add_exp × 係數）
+#   覓食                    無任務專屬寫入點 —— 產出走 collect（resource_system 營地採集）對所有隊跑、不分任務 ⇒ 不乘
+#   製造                    無任務專屬寫入點 —— manufacturing_system 已去掉任務閘（de-patch 2026-08-03）、不分任務 ⇒ 不乘
+#   運輸                    無產出寫入點 —— 運量在派工時定；速度已經吃這個係數（移動）
+const STAMINA_AT_EXHAUSTED: float = 0.3   # 累垮時的係數（移動原本的 ×0.3）；戰鬥閃避門檻也讀它（累垮不能閃避）
+static func stamina_factor(team: TeamData) -> float:
+	if team == null:
+		return 1.0
+	if team.fatigue >= FATIGUE_EXHAUSTED:
+		return STAMINA_AT_EXHAUSTED
+	if team.fatigue > 0.5:
+		return 1.0 - team.fatigue * 0.4
+	return 1.0
 
 const TERRAIN_FATIGUE_MULT: Dictionary = {
 	"plains": 1.0, "forest": 1.2, "mountain": 1.4
@@ -994,7 +1018,7 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 			var terrain_mult: float = TERRAIN_FATIGUE_MULT.get(terrain, 1.0)
 			team.fatigue += FATIGUE_PER_DAY * day_fraction * terrain_mult * time_mult
 			team.fatigue = minf(team.fatigue, 1.0)
-		if team.fatigue >= 1.0:
+		if team.fatigue >= FATIGUE_EXHAUSTED:
 			for pid in team.named_members:
 				var p: PersonData = state.persons.get(pid)
 				if p: LoyaltyBank.adjust(p, -FATIGUE_LOYALTY_PENALTY, "fatigue")

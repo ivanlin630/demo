@@ -518,7 +518,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# ★票 T：「休息」的驅力 ＝ 自己的疲勞（0..1）—— 累了才想停；不設「疲勞 > X 強制休息」門檻（util 秤，不 override）
 			if opt != "休息":
 				return 0.0
-			return clampf(ctx.fatigue, 0.0, 1.0)
+			# ★票 T §6②：＋避免的忠誠損失 ＝ FATIGUE_LOYALTY_PENALTY × 具名成員數，★只在累垮（≥ FATIGUE_EXHAUSTED）時
+			#   ——照搬 sim_runner 懲罰的同一個條件；未累垮 ＝ 0（世界沒有漸增的懲罰，秤也不准有）
+			var _loy: float = SimRunner.FATIGUE_LOYALTY_PENALTY * float(ctx.named_n) \
+				if ctx.fatigue >= SimRunner.FATIGUE_EXHAUSTED else 0.0
+			return clampf(ctx.fatigue, 0.0, 1.0) + _loy
 		"camp_drive":
 			# ★A1：紮營價值=MarginalEconomy 真帳（term 非 gate）。無靶/無可耕地 → 0（保守）。
 			if opt != "紮營" or not ctx.has_farmable_tile or ctx.camp_target_est == null:

@@ -17,12 +17,15 @@ const FLOOR_RATIO_BASELINE: float = 0.6225   # 修前實測：地板 9909／全�
 
 var _errors: int = 0
 var _cells_ran: Array = []
-const EXPECTED_CELLS: Array = ["P1", "P2", "P3", "P4", "P5", "P6", "P8", "P9"]
+const EXPECTED_CELLS: Array = ["P1", "P2", "P3", "P4", "P5", "P6", "P8", "P9", "P10", "P11", "P13"]
 
 
 func _initialize() -> void:
 	print("=== fatigue_by_activity：疲勞回復綁活動＋休息選項 ===")
 	_p4_garrison_night()
+	_p10_construction_by_stamina()
+	_p11_one_curve()
+	_p13_dodge()
 	_p_world()
 	var missing: Array = []
 	for c in EXPECTED_CELLS:
@@ -85,6 +88,8 @@ func _p_world() -> void:
 	var p3_bad: Array = []
 	var rest_choices: Array = []   # [tid, tick, fatigue]
 	var task_hist: Dictionary = {}   # tid → {task: 小時數}
+	var moved_or_fought: Dictionary = {}   # ★§6③：曾移動或曾戰鬥的隊（P1 只判這些）
+	var last_pos: Dictionary = {}
 	var ever_pos: Dictionary = {}    # 疲勞曾經 > 0 的隊
 	var floor_n: int = 0
 	var all_n: int = 0
@@ -101,6 +106,9 @@ func _p_world() -> void:
 			var f: float = t.fatigue
 			if f > 0.0:
 				ever_pos[tid] = true
+			if (last_pos.has(tid) and last_pos[tid] != t.tile_pos) or t.combat_target != -1:
+				moved_or_fought[tid] = true
+			last_pos[tid] = t.tile_pos
 			if last_f.has(tid) and f < float(last_f[tid]):
 				decreased[tid] = true
 			# ★P3 以【疲勞 pass】為單位（不是以「疲勞有變」為單位）：
@@ -138,9 +146,18 @@ func _p_world() -> void:
 	var never: Array = pop.filter(func(x): return not decreased.has(x))
 	print("   母體（活到最後、在場 ≥ 1 天、非野獸）%d 隊｜降過 %d｜沒降過 %s" % [pop.size(), pop.size() - never.size(), str(never)])
 	for x in never:
-		print("   沒降過 Team%d：疲勞 %.2f｜任務小時數 %s" % [x, st.teams[x].fatigue, str(task_hist.get(x, {}))])
+		var tx: TeamData = st.teams[x]
+		var fdays: float = ResourceSystem.effective_food(st, tx) / maxf(float(tx.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		print("   沒降過 Team%d：疲勞 %.2f｜曾移動或戰鬥 %s｜糧撐 %.1f 天｜任務小時數 %s" % [x, tx.fatigue, str(moved_or_fought.has(x)), fdays, str(task_hist.get(x, {}))])
+	# ★§6③：只判「會移動或會戰鬥」的隊；整月原地（施工／覓食持求生優先序）的隊印出、不判（等 WHAT）
+	var judged_never: Array = never.filter(func(x): return moved_or_fought.has(x))
+	var spared: Array = never.filter(func(x): return not moved_or_fought.has(x))
+	print("   判（曾移動或戰鬥）而沒降過：%s｜印出不判（整月原地）：%s" % [str(judged_never), str(spared)])
+	for x in [0, 1, 3]:
+		if st.teams.has(x):
+			print("   §7 施工隊 Team%d：休息被選 %d 次" % [x, rest_choices.filter(func(r): return int(r[0]) == x).size()])
 	_check("★母體地板：≥ 1 隊（%d）" % pop.size(), pop.size() >= 1)
-	_check("P1 %d／%d 隊至少降過一次" % [pop.size() - never.size(), pop.size()], never.is_empty())
+	_check("P1 會移動或戰鬥的隊都至少降過一次（沒降過 %d：%s）" % [judged_never.size(), str(judged_never)], judged_never.is_empty())
 	_cells_ran.append("P1")
 	# ── P2
 	print("\n── P2 地板（疲勞 ≥ 1.0）隊·小時比例 ──")
@@ -222,3 +239,95 @@ func _p_world() -> void:
 	_check("★P9 母體地板：疲勞高而吃飽的隊·pass ≥ 1（%d）" % p9n, p9n >= 1)
 	_check("P9 「休息」進前 5（%s）" % str(top5), top5.has("休息"))
 	_cells_ran.append("P9")
+
+
+# ══ P10（§7，藍圖點名）：同一支隊、同一件工程 —— 疲勞 0 vs 1.0 施工一天的進度差；休息到疲勞降下後進度回升 ════════
+func _p10_construction_by_stamina() -> void:
+	print("\n── P10 施工進度 × 體力係數（同隊同工程，一天 24 個施工 pass）──")
+	seed(SEED)
+	var st: WorldState = MeasureBedHelper.arm_and_setup(CFG, true)
+	var ids: Array = st.teams.keys()
+	ids.sort()
+	var t: TeamData = st.teams[ids[0]]
+	var tile: HexTileData = st.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+	var os := OutpostSystem.new()
+	var runner := SimRunner.new()
+	var out: Array = []
+	for f in [0.0, 1.0, -1.0]:
+		if f >= 0.0:
+			t.fatigue = f
+		else:
+			# 休息：從累垮開始、只走不耗力的疲勞 pass（同一支 _step6d_fatigue）直到降到 0.5 以下
+			t.fatigue = 1.0
+			t.current_task = TeamData.TASK_REST
+			var n_rest: int = 0
+			while t.fatigue > 0.5 and n_rest < 200:
+				t.moved_since_fatigue = false
+				runner._step6d_fatigue(st, [t.team_id], WorldState.TICKS_PER_HOUR)
+				n_rest += 1
+			print("   休息 %d 個 pass ⇒ 疲勞 %.3f" % [n_rest, t.fatigue])
+		t.current_task = TeamData.TASK_BUILD
+		tile.construction_target = {}
+		tile.construction_ticks_left = 1000000
+		var before: int = tile.construction_ticks_left
+		for _i in range(24):
+			os._tick_construction(st, tile)
+		out.append([t.fatigue, before - tile.construction_ticks_left])
+	print("   Team%d（人口 %d）：疲勞 %.2f ⇒ 一天進度 %d｜疲勞 %.2f ⇒ %d｜休息後疲勞 %.2f ⇒ %d" % [t.team_id, t.population,
+		out[0][0], out[0][1], out[1][0], out[1][1], out[2][0], out[2][1]])
+	_check("P10 累垮施工一天的進度 < 精神好時（%d < %d）" % [out[1][1], out[0][1]], int(out[1][1]) < int(out[0][1]))
+	_check("P10 休息到疲勞降下後進度回升（%d > %d）" % [out[2][1], out[1][1]], int(out[2][1]) > int(out[1][1]))
+	_cells_ran.append("P10")
+
+
+# ══ P11（§7）：三條疲勞曲線收成一條 ⇒ simulation 裡疲勞的乘式只剩 stamina_factor 一處定義 ═════════════════════
+func _p11_one_curve() -> void:
+	print("\n── P11 疲勞乘式只剩一處定義 ──")
+	var re := RegEx.new()
+	re.compile("1\\.0 - [a-z_.]*fatigue|fatigue \\* 0\\.4")
+	var hits: Array = []
+	for f in _gd_files("res://scripts/simulation"):
+		var i: int = 0
+		for l in FileAccess.get_file_as_string(f).split("\n"):
+			i += 1
+			var code: String = String(l).split("#")[0]
+			if re.search(code) != null:
+				hits.append("%s:%d" % [String(f).trim_prefix("res://scripts/"), i])
+	print("   命中 %s" % str(hits))
+	_check("P11 疲勞乘式只剩一處、而且在 sim_runner.gd（%d 處）" % hits.size(), hits.size() == 1 and String(hits[0]).begins_with("simulation/sim_runner.gd"))
+	_cells_ran.append("P11")
+
+
+static func _gd_files(root: String) -> Array:
+	var out: Array = []
+	var d := DirAccess.open(root)
+	if d == null:
+		return out
+	for f in d.get_files():
+		if String(f).ends_with(".gd"):
+			out.append(root + "/" + String(f))
+	for sub in d.get_directories():
+		out.append_array(_gd_files(root + "/" + String(sub)))
+	return out
+
+
+# ══ P13（§7）：累垮的單位開戰不能閃避；疲勞 0.5 的單位能 ══════════════════════════════════════════════════
+func _p13_dodge() -> void:
+	print("\n── P13 閃避門檻從體力係數導出 ──")
+	seed(SEED)
+	var st: WorldState = MeasureBedHelper.arm_and_setup(CFG, true)
+	var ids: Array = st.teams.keys()
+	ids.sort()
+	var t: TeamData = st.teams[ids[0]]
+	var es := EncounterSystem.new()
+	var rows: Array = []
+	for f in [1.0, 0.5]:
+		t.fatigue = f
+		var u: Dictionary = es._create_anon_unit(t, Vector2i.ZERO)
+		var stam: float = float(u.get("stamina", 0.0))
+		# ★同 encounter_system 閃避那一行的判斷式（嚴格大於門檻）
+		rows.append([f, stam, stam > EncounterSystem.MIN_STAMINA_TO_DODGE])
+	print("   門檻 %.2f｜疲勞 1.0 ⇒ 開場體力 %.2f、能閃避 %s｜疲勞 0.5 ⇒ %.2f、能閃避 %s" % [EncounterSystem.MIN_STAMINA_TO_DODGE,
+		rows[0][1], str(rows[0][2]), rows[1][1], str(rows[1][2])])
+	_check("P13 累垮不能閃避、疲勞 0.5 能", not bool(rows[0][2]) and bool(rows[1][2]))
+	_cells_ran.append("P13")
