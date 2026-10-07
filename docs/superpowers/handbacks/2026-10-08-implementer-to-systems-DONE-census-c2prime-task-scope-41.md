@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 普查床 C2′（spec 2026-10-07-census-c2-counts-the-real-stall；裁定 RULING-c2prime-task-scope-41 甲）
 topic: ★交件｜branch `feat/census-c2-real-stall` tip `741d44f0b`（★推送見下：GitHub 回 500，背景重試中）｜全電池 BATTERY_RC=0｜只動一支 diagnostic 床，世界 code 零改動
 ---
