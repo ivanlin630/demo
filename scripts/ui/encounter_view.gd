@@ -39,6 +39,14 @@ var _cmd_popup: PopupMenu = null
 var _player_exited: bool = false
 # ★BS v2 B：目標欄（目前目標＝encounter_units 的索引；-1 ＝ 還沒有）—— R 打它、Tab 換它、↑↓ 換它的部位
 var _target_idx: int = -1
+# ★F2（spec 2026-10-07 battle-start-visibility）：敵方單位【最後看到的位置】—— 開戰那一刻全員記一次（同格對峙＝互見）；
+#   之後在我方視野內才更新 ⇒ 看得到 ＝ 在視野內，或還站在最後看到的那一格（走動過而沒被看到 ⇒ 入霧）
+var _last_seen_pos: Dictionary = {}
+# ★F1：戰鬥中每一鍵的回應只有一個出口（結果行）—— 這一鍵的原因句，或這一鍵之後戰報的第一句
+var _reply: String = ""
+var _reply_refused: bool = false
+var _log_mark_size: int = 0
+var _log_mark_last: String = ""
 var _result_at_start = null
 var handle_key_calls: int = 0        # ★P10b：`_handle_key` 被呼了幾次（GUI 廣播一次按鍵 ⇒ 只能 +1）
 var _selected_part: String = "torso"   # attack target body part, chosen in attack_select mode
@@ -56,6 +64,17 @@ func show_encounter() -> void:
 	_post_combat = false
 	_player_exited = false
 	_target_idx = -1
+	_reply = ""
+	_log_mark_size = 0
+	_log_mark_last = ""
+	_last_seen_pos.clear()
+	if _bridge != null:
+		var st0: WorldState = _bridge.get_state()
+		var ptid0: int = _player_team_id(st0)
+		for i in range(st0.encounter_units.size()):
+			var u0: Dictionary = st0.encounter_units[i]
+			if int(u0.get("team_id", -1)) != ptid0:
+				_last_seen_pos[i] = u0.get("pos", Vector2i(-99, -99))
 	_result_at_start = _bridge.get_state().last_encounter_outcome if _bridge != null else null
 	# Center camera so axial (0,0) appears at viewport center.
 	var vp_size: Vector2 = get_viewport_rect().size
@@ -123,6 +142,7 @@ func _refresh_ui() -> void:
 	var state: WorldState = _bridge.get_state()
 	if bool(_find_player_unit(state).get("has_exited", false)):
 		_player_exited = true
+	_update_sightings(state)
 	# U11: 戰報（命中/傷害）每次刷新顯示，戰前/戰後皆可
 	if _lbl_log != null:
 		var _log_lines: PackedStringArray = []
@@ -221,6 +241,54 @@ func _player_team_id(state: WorldState) -> int:
 func _unit_present(u: Dictionary, state: WorldState) -> bool:
 	return not _is_unit_dead(u, state) and not bool(u.get("has_exited", false))
 
+# ★F2：視野內的敵人更新「最後看到的位置」（只在刷新時寫；查詢函式不寫）
+func _update_sightings(state: WorldState) -> void:
+	var ptid: int = _player_team_id(state)
+	var vis: Dictionary = _player_visible_hexes(state, ptid)
+	for i in range(state.encounter_units.size()):
+		var u: Dictionary = state.encounter_units[i]
+		if int(u.get("team_id", -1)) != ptid and vis.has(u.get("pos", Vector2i(-99, -99))):
+			_last_seen_pos[i] = u.get("pos")
+
+# ★F1：結果行要印的那一句（"" ＝ 這一鍵沒有回應 ⇒ 結果行照舊）
+func key_reply() -> String:
+	if _reply != "":
+		return ("✗ " if _reply_refused else "✓ ") + _reply
+	if _bridge == null:
+		return ""
+	var state: WorldState = _bridge.get_state()
+	var log: Array = state.encounter_log
+	var start: int = _log_mark_size
+	if start > log.size() or (start > 0 and String(log[start - 1]) != _log_mark_last):
+		start = log.rfind(_log_mark_last) + 1 if _log_mark_last != "" else 0
+	if start >= log.size():
+		return ""
+	var first: String = ""
+	for k in range(start, log.size()):
+		var line: String = _log_line_for_display(String(log[k]), state)
+		if first == "":
+			first = line
+		if line.begins_with("@（"):
+			return "✓ " + line
+	return "✓ " + first
+
+# 六向的方向鍵（與 QWEASD 移動同一套；畫面外單位印「W 方向 12 格」⇒ 玩家照那個鍵走就是朝它）
+static func _dir_key_name(delta: Vector2i) -> String:
+	var px: float = sqrt(3.0) * (delta.x + delta.y / 2.0)
+	var py: float = 1.5 * delta.y
+	var best: String = "?"
+	var best_dot: float = -INF
+	for k in [["Q", Vector2i(-1, 0)], ["W", Vector2i(0, -1)], ["E", Vector2i(1, -1)],
+			["A", Vector2i(-1, 1)], ["S", Vector2i(0, 1)], ["D", Vector2i(1, 0)]]:
+		var v: Vector2i = k[1]
+		var vx: float = sqrt(3.0) * (v.x + v.y / 2.0)
+		var vy: float = 1.5 * v.y
+		var dot: float = (px * vx + py * vy) / maxf(sqrt(vx * vx + vy * vy), 0.0001)
+		if dot > best_dot:
+			best_dot = dot
+			best = String(k[0])
+	return best
+
 # 單位代號（整場固定，依 encounter_units 的順序）：你＝@、我方＝a b c…、敵方＝A B C…
 #   ★地圖、單位列表、目標欄、戰報四處都讀這一份
 func unit_codes(state: WorldState) -> Dictionary:
@@ -258,7 +326,8 @@ func visible_unit_indices(state: WorldState) -> Array:
 		var u: Dictionary = state.encounter_units[i]
 		if not _unit_present(u, state):
 			continue
-		if int(u.get("team_id", -1)) == ptid or vis.has(u.get("pos", Vector2i(-99, -99))):
+		var upos: Vector2i = u.get("pos", Vector2i(-99, -99))
+		if int(u.get("team_id", -1)) == ptid or vis.has(upos) or (_last_seen_pos.has(i) and _last_seen_pos[i] == upos):
 			out.append(i)
 	return out
 
@@ -333,9 +402,9 @@ func local_map_data(state: WorldState) -> Dictionary:
 	for i in visible_unit_indices(state):
 		var p: Vector2i = (state.encounter_units[i] as Dictionary).get("pos", Vector2i.ZERO)
 		if cells.has(p):
-			cells[p] = String(codes[i])
+			cells[p] = String(codes[i])   # ★F2：視野外但還站在最後看到那一格的敵人，也畫在那一格
 		else:
-			off.append("%s（%d 格）" % [String(codes[i]), _hex_dist(center, p)])
+			off.append("%s（%s 方向 %d 格）" % [String(codes[i]), _dir_key_name(p - center), _hex_dist(center, p)])
 	return {"center": center, "radius": LOCAL_MAP_RADIUS, "cells": cells, "off_map": off}
 
 # ★BS2：結束種類的一句話（"" ＝ 不蓋結果行：投降那句已經在上面）
@@ -549,7 +618,7 @@ func terminal_handle_key(keycode: int) -> void:
 	if not visible:
 		return
 	if not _waiting_for_player:
-		_log("戰鬥推進中，還沒輪到你")
+		_log("戰鬥推進中，還沒輪到你", true)
 		return
 	_handle_key(keycode)
 
@@ -621,8 +690,7 @@ func terminal_block() -> String:
 			lines.append("[%d] %s" % [k + 1, String(_cmd_items[k][1])])
 	lines.append("── 戰報 ──")
 	lines.append_array((_lbl_log.text if _lbl_log != null else "").split("\n"))
-	if _last_msg != "":
-		lines.append("訊息：" + _last_msg)
+	# ★F1：「訊息：」那一行拿掉 —— 每一鍵的回應只有結果行一個出口（key_reply）
 	return "\n".join(lines)
 
 # 鍵提示 ＝ `_lbl_actions.text`（GUI 顯示的那一句就是綁定的說明，從同一處讀）
@@ -633,6 +701,12 @@ func terminal_keys() -> String:
 
 func _handle_key(keycode: int) -> void:
 	handle_key_calls += 1
+	_reply = ""
+	_reply_refused = false
+	if _bridge != null:
+		var _lg: Array = _bridge.get_state().encounter_log
+		_log_mark_size = _lg.size()
+		_log_mark_last = String(_lg.back()) if not _lg.is_empty() else ""
 	# ★終端命令選單（spec §1④）：選單開著時數字選項、Esc 取消；其他鍵說明為什麼
 	if not _cmd_items.is_empty():
 		if keycode == KEY_ESCAPE:
@@ -644,7 +718,7 @@ func _handle_key(keycode: int) -> void:
 			_close_command_menu()
 			_on_command_selected(cid, _find_player_unit(st0), st0)
 		else:
-			_log("命令選單開著：按數字選一項，或 Esc 取消")
+			_log("命令選單開著：按數字選一項，或 Esc 取消", true)
 		_refresh_ui()
 		return
 	# 戰後階段：[J]收編、[K]拿戰利品、[L]留下戰利品（皆留在畫面、刷新提示）；其餘任意鍵離開
@@ -686,7 +760,7 @@ func _handle_key(keycode: int) -> void:
 		return
 	var player_unit: Dictionary = _find_player_unit(state)
 	if player_unit.is_empty():
-		_log("你不在戰場上（已離場或倒下），等戰鬥結算")
+		_log("你不在戰場上（已離場或倒下），等戰鬥結算", true)
 		return
 
 	match _mode:
@@ -723,12 +797,12 @@ func _handle_key(keycode: int) -> void:
 				else:
 					_log(NO_TARGET_IN_RANGE_MSG + ("（目標 %s 距離 %d 格，射程 %d 格）" % [String(unit_codes(state)[_target_idx]),
 						_hex_dist(player_unit.get("pos", Vector2i.ZERO), (state.encounter_units[_target_idx] as Dictionary).get("pos", Vector2i.ZERO)),
-						_attack_range(state)] if _target_idx >= 0 else ""))
+						_attack_range(state)] if _target_idx >= 0 else ""), true)
 					_refresh_ui()
 			elif keycode == KEY_TAB:
 				var foes: Array = _visible_enemies(state)
 				if foes.is_empty():
-					_log("看不到敵人，沒有目標可換")
+					_log("看不到敵人，沒有目標可換", true)
 				else:
 					_target_idx = foes[(foes.find(_target_idx) + 1) % foes.size()]
 					_log("目標換成 %s" % String(unit_codes(state)[_target_idx]))
@@ -744,7 +818,7 @@ func _handle_key(keycode: int) -> void:
 				_open_command_menu(player_unit, state)
 			elif keycode != KEY_F:
 				# ★按鍵三態（spec P4）：無作用的鍵說出為什麼，不靜默
-				_log("此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊目標／Tab 換目標／↑↓ 換部位／Z 命令／F 投降／Space 待機）")
+				_log("此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊目標／Tab 換目標／↑↓ 換部位／Z 命令／F 投降／Space 待機）", true)
 				_refresh_ui()
 		# ★BS v2：瞄準模式（attack_select）退場 —— R 直接打目標欄的目標、↑↓ 在 idle 換部位
 
@@ -912,8 +986,10 @@ func _open_sub_command(unit_idx: int, player_unit: Dictionary, state: WorldState
 	target_unit["current_order"] = { "type": "follow_player", "target": -1 }
 	print("[Encounter] 命令 unit%d 跟隨" % unit_idx)
 
-func _log(msg: String) -> void:
+func _log(msg: String, refused: bool = false) -> void:
 	_last_msg = msg
+	_reply = msg
+	_reply_refused = refused
 	print("[EncounterView] ", msg)
 
 # attack_select 操作提示組字（static → 可單元測）

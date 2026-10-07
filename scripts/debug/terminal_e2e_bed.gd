@@ -1009,6 +1009,11 @@ func _bs_v2_cells(w: Dictionary) -> void:
 	var re_c := RegEx.new()
 	re_c.compile("[A-Za-z@]")
 	for l in map_lines:
+		# ★畫面外那一行帶方向鍵（「a（W 方向 8 格）」）⇒ 只取「代號（」；格線那幾行才逐字取
+		if String(l).begins_with("畫面外："):
+			for m in RegEx.create_from_string("([A-Za-z@])（").search_all(String(l)):
+				map_codes.append(m.get_string(1))
+			continue
 		for m in re_c.search_all(String(l)):
 			map_codes.append(m.get_string(0))
 	var list_codes: Array = _section(reg, "── 單位（").filter(func(l): return RegEx.create_from_string("^[A-Za-z@] (我方|敵方) ").search(String(l)) != null) \
