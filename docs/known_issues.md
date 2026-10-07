@@ -5574,3 +5574,15 @@ A4 量測（30 天觀察世界 default seed 1337，origin/main 528e2daeb，臨�
 ```
 
 回訪：觸發事件 —— 誤報類別清零且有一週零誤報的卷面 ⇒ 刪 `docs/process/watchdog.off` 重啟。
+
+## 資訊網 S-scout 舊 TDD 床 infonet_scout_test 首次入 Tier2 表就是紅（未判是床過期還是回歸）
+
+狀態：未確認
+
+```
+2026-10-08 Tier2 全掃（41444bd92）首次收錄 scripts/debug/infonet_scout_test.gd ⇒ red；它不在註冊表、最後動是 ea8d4dbd7（偵察脫主 argmax → side-dispatch）
+⇒ 床檔頭自己寫「②applicable REGISTRY 測移除」——機制換過一次；其餘三格（①人格術式 ③領主 gather 的 scout 欄位 ④斥候帶 need 回）是床過期還是世界回歸，未判
+⇒ 不是綠→紅（之前不在表裡），所以不是本週任何 merge 造成的證據
+```
+
+回訪：觸發事件 —— 量測員跑一次並逐格分類（床讀的符號還在不在／世界行為變了沒），或資訊網偵察那條再有人改動。
