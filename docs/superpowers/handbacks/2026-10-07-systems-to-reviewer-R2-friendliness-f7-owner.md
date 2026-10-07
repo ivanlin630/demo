@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: F7 第三輪：owner 對不上那一列
 topic: 不照「存 live owner 再傳」——易主後會查無；改成按 tile_pos 比 known_outposts、名字用 belief 的 owner。只看 spec「R² 第二輪（442c82d41）」那段
 ---
