@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 第五輪友善度 F1-F6 一併判決
 topic: R② ＝ **ISSUES,兩列**｜★你優先打的F2：核過安全——`ACTION_DIGITS`(text_ui_view.gd:88)是**靜態name→key字典**,不是位置索引,折疊不會動到它,而這專案已經有一次血證(action_for_key註解:212-221,舊版「畫面用id查、handler用位置索引」導致按鍵對不上動作,已修成單一權威)；★F3：引擎能給部分hint(demand_tribute→recruit,invite_settle→move_to自家據點),但有的disabled_reason確實無解除動作(propose_alliance/trade),"—"不硬湊的設計對；但找到第三種disabled-reason產生者(`precheck_*`系列用欄位名"reason"不是"disabled_reason")，F3的盤點範圍要把它們也算進去才不會漏｜F5兩題：NAMED_KEYS token逐字核對上(9個全對);Ctrl+C→離開要確認走既有QUIT_TOKEN(":quit")不是另開一條路;msvcrt在VS Code/Windows Terminal下是不是tty——這題讀code答不出來,是環境行為不是本專案程式碼問題，需要實測
 ---
