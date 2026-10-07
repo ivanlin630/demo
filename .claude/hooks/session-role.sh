@@ -114,11 +114,17 @@ ${UNREAD}"
 
   # ★blueprint 專屬:信箱 Monitor 之外,再 arm 兩個常駐 Monitor(重開/compact 都必 arm,單 session poll 免互搶)。
   if [ "$ROLE_KEY" = "blueprint" ]; then
+    # ★看門狗停用旗（用戶 2026-10-07）：docs/process/watchdog.off 存在 ⇒ 開場不提示 arm（刪檔即恢復原句）
+    if [ -f "${_MAIN_REPO}/docs/process/watchdog.off" ]; then
+      _WD_LINE="① 看門狗【停用中】（用戶 2026-10-07 裁，誤報太多）——不要 arm；重啟＝刪 docs/process/watchdog.off"
+    else
+      _WD_LINE="① 看門狗（★用戶第 2 點：「真停工一段時間才叫」）——閒置不叫，只在判出 STALL 時喚醒你：
+Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\" watchdog\", run_in_background=true, description=\"watchdog\")"
+    fi
     CTX="${CTX}
 
 ★★blueprint 專屬（★2026-09-23 用戶裁定的四件事，全部走背景 role-watch，★不要用 Monitor）：
-① 看門狗（★用戶第 2 點：「真停工一段時間才叫」）——閒置不叫，只在判出 STALL 時喚醒你：
-Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\" watchdog\", run_in_background=true, description=\"watchdog\")
+${_WD_LINE}
 ② Telegram 進站（★用戶第 3 點；★★只 blueprint 一支，兩支並存會互搶 offset ⇒ 訊息靜默遺失）：
 Bash(command=\"SESSION_ROLE=blueprint bash \\\"${_MAIN_REPO}/.claude/hooks/role-watch.sh\\\" tg\", run_in_background=true, description=\"Telegram 進站\")
 ★★★而三支都【閒置零輸出、永久跑】—— 實測背景任務閒置 10 分鐘以上仍活、輸出檔 0 bytes，

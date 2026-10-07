@@ -5561,3 +5561,16 @@ A4 量測（30 天觀察世界 default seed 1337，origin/main 528e2daeb，臨�
 ```
 
 回訪：觸發事件 —— 有人動 player_trade_system 的 memory_mod，或「被勒索方回應進引擎」那張框架票（屆時讀者遷到 typed）。
+
+## 看門狗停用中（用戶 2026-10-07 裁）
+
+狀態：已知未修
+
+```
+一天誤報五次（派工 open≠停工／電池在 worktree 跑／產出只算信／COMMIT-NO-LETTER 拿 mtime 比 commit／merge 後走敲門沒寫信），每次藍圖都要查一輪才判出虛驚
+⇒ 停用旗 `docs/process/watchdog.off`：藍圖開場不再提示 arm、收信 hook 不再提醒重掛；`watchdog.sh` 留著（它抓到過兩次真停工）
+⇒ 停用期間不另裝輪詢：靠角色敲門；真停工靠用戶看到或藍圖收信時對照時間
+⇒ 已修的誤報類別：COMMIT-NO-LETTER 比對（dd148345f）、實作端產出含 feat 分支 commit（97800fa20）
+```
+
+回訪：觸發事件 —— 誤報類別清零且有一週零誤報的卷面 ⇒ 刪 `docs/process/watchdog.off` 重啟。

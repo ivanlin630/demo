@@ -44,7 +44,8 @@ GATE=""
 #   ①只警告絕不阻擋 ②fail-open（讀不到一律不報警；讀不到 ≠ 壞了）
 #   ③★**只在 blueprint 那個 session 講** —— 看門狗只有它掛一支，對別人說＝對不負責的人報警＝噪音。
 # ★★而這一格【不是恆真】：lock 新鮮就完全不出聲；它只在真的停掉時亮，而那是一個有人能處置的狀態。
-if [ "$ROLE_KEY" = "blueprint" ]; then
+# ★停用旗（用戶 2026-10-07）：docs/process/watchdog.off 存在 ⇒ 不提醒重掛（刪檔即恢復）
+if [ "$ROLE_KEY" = "blueprint" ] && [ ! -f "${HANDBACK_DIR%/docs/*}/docs/process/watchdog.off" ]; then
   _WLOCK="${HANDBACK_DIR%/docs/*}/.claude/hooks/.watchdog.lock"
   # 門檻 ＝ 看門狗的 poll（預設 900s）＋ 300s 餘裕：★寧可晚 5 分鐘講，不要在它正常的兩次心跳之間誤報
   _WSTALE="${WATCHDOG_STALE_S:-1200}"
