@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: M＝設目標＋一顆 tick；走到抵達另給明確鍵
 topic: R② ＝ **ISSUES，一列**｜★你優先打的：Esc停止核過安全(直呼cancel_advance,不讀文字狀態)；★但【到點偵測】真的依賴同一個文字前綴狀態——`text_ui_main.gd:343-348`那段「到達」log是靠`_input_bar.text.begins_with("移動中")`當閘,而§③拿掉自動續推之後,這個閘會在每次M按下後的下一個tick就被清空,不是等到真正抵達才清空
 ---
