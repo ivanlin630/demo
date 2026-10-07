@@ -3691,3 +3691,4 @@ A4：實作端訂正「走離工地」不成立（同 tick 被蓋）⇒ 定性�
 深層批序列加：據點維護即物理（藍圖票 4d70c8aad①，用戶裁；原 defer outpost-maintenance-is-physics 轉正式票、已撤 defer）——HOW spec 待寫，與直轄上限＋分封互補
 A2b（任何 option 派出貿易到場零成交要學到）R① HALT（買糧／囤貨不經 goal_resolver）⇒ 移深層批；先量重撞率再選學在 option 還是學在挑市集（傾向後者）
 A2 修（失敗記號世界裡沒寫：110 事件 0 記號）spec 送 R²；排實作端 absorb-at-cap 之後、友善度批之前（缺陷修、小）
+深層批小票（藍圖 2026-10-08 登、不派）：進貢標的＝提案方有的東西（coin 或 food，HOW 可含 material）；收下端 apply_tribute_transfer 兩種都收、守恆兩 tag；沒錢有糧可用糧進貢（接「主動進貢＝買保險」）；訊息印標的與量。★連動：tribute_amount／has_tribute_to_give（列的條件＝做的條件）要跟著擴
