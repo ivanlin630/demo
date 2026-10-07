@@ -13,8 +13,9 @@ extends SceneTree
 #     P2 別人的市集：照舊領得到（不被這次搬動弄壞）
 #     P3 失敗記號：承諾領取、到場落空 ⇒ recent_failures 有「領取|<tile_id>」且對那一格折價 < 1；
 #        ★反向：領到了 ⇒ 沒有那一筆；★反向二：沒承諾領取（路過）⇒ 落空也不記
-#     P4 ★非領取的 option 帶 TRADE 抵達自家市集 ⇒ **不** release、任務照舊（systems 裁 (B)：
-#        拆閘會讓它們全被 release —— world-fp 實測唯一實例 Team40，逃跑換貿易時沿用了自家目的地）
+#     P4 ~~非領取的 option 帶 TRADE 抵達自家市集 ⇒ 不 release（systems 裁 (B)）~~
+#        ★票 A2（藍圖裁 eeca99661，2026-10-07）推翻：自家市集規則只禁自己的單、入口兩道閘拿掉、只留一條路
+#        ⇒ 任何 option 帶 TRADE 抵達市集（含自家）都照抵達規則放手；不是承諾領取 ⇒ 不記「領取」落空
 
 var _errors: int = 0
 var _cells_ran: Array = []
@@ -184,7 +185,7 @@ func _p3_failure_marker() -> void:
 
 
 func _p4_non_claim_option_not_released() -> void:
-	print("\n── P4 非領取的 option 帶 TRADE 抵達自家市集 ⇒ 不 release ──")
+	print("\n── P4 非領取的 option 帶 TRADE 抵達自家市集 ⇒ 照抵達規則放手（票 A2 改判）──")
 	var ws: WorldState = _mk_world()
 	var pick: Array = _pick(ws, true)
 	if pick.is_empty():
@@ -196,6 +197,6 @@ func _p4_non_claim_option_not_released() -> void:
 	_stage(team, tile, "survival")   # ★Team40 的形狀：option 是 survival 標籤、task 是 TRADE、站在自家市集
 	SimRunner.new()._step3c_read_market_board(ws, [team.team_id])
 	print("   option＝survival、task＝TRADE 抵達自家市集之後 task ＝ %s" % str(team.current_task))
-	_check("★★★P4 不 release（task 仍是 TRADE）", team.current_task == TeamData.TASK_TRADE)
+	_check("★★★P4 抵達即放手（task 不再是 TRADE；票 A2 之前這一格斷言的是相反）", team.current_task != TeamData.TASK_TRADE)
 	_check("★★P4 也沒記落空（不是承諾領取）", not team.recent_failures.has(FailureMemory.key("領取", str(tile.tile_id))))
 	_cells_ran.append("P4")
