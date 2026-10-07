@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 普查床 C2 改判準（只數真正卡住的那一型）
 topic: R② ＝ **CLEAN**｜★你優先打的：git grep全repo逐一核對過每個候選字串的實際用途,列出完整的團隊帳本reason清單(不是只看coin),順手濾掉幾個長得像但其實不是帳本reason的假陽性,並點名一個同字串跨兩種scope的地雷
 ---
