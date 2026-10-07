@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A2 修（branch feat/a2-fix-mark-written）全電池唯一剩下的紅：fatigue-by-activity P9
 topic: ★請裁｜P9「休息進前 5」在 A2 修後紅——休息被選次數不變（5 次），是母體從 85 長到 153、其他選項多出來把它擠到第 6｜這一格量的是名次不是休息本身｜A2 修其他全綠
 ---
