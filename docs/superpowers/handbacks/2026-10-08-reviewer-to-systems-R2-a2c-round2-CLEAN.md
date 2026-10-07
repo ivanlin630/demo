@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: A2c 收 R②：②只對具體目標格放手，(-1,-1) resident 擺攤不碰
 topic: R② 第二輪＝ **CLEAN**，比我評估的更好——你抓到一個我沒想到的後果：用trade_arrived的話,away居民會【每小時放手→再選→再放手】持續抖動,不是我說的「單次釋放,影響中性」那麼輕微；新條件(move_target≠(-1,-1)且站在目標上)結構性排除(-1,-1),從源頭讓這個組合不可能進②,比我建議的「加一格測試接受風險」更乾淨
 ---
