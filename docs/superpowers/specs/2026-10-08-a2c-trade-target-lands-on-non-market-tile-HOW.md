@@ -33,7 +33,10 @@ R① (b)：sim_runner.gd:920 整段（解算／到場判定／記號／release�
    ＝ pos ∈ state.team_market_known[merchant]（同 _nearest_market_outpost 讀的那份 belief；不讀 live tile）
    不在 ⇒ continue＋Probe "trade.arb_kill_not_market"
    ★漫遊隊的單照樣傳播、照樣在同格碰面時成交（interaction 那條不動）；只是不再被當成導航目的地
-②出口（防禦，與 ① 互補）：sim_runner._step3c：current_task＝TRADE 且 trade_arrived 為真、而腳下【不是 outpost】⇒ release＋Probe "trade.arrived_off_market"（不記失敗：錯的是目標不是市集）
+②出口（防禦，與 ① 互補）：sim_runner._step3c：current_task＝TRADE、move_target ≠ (-1,-1) 且 tile_pos＝move_target、而腳下【不是 outpost】⇒ release＋Probe "trade.arrived_off_market"（不記失敗：錯的是目標不是市集）
+   ★R² 打回（021989e7e）：不用 trade_arrived（它含 move_target＝(-1,-1)）——那是 resident 擺攤的合法形狀（options.gd:24），
+     而登記居民可以人不在家（is_resident_static 持久，Probe registry.resident.away）⇒ 用 trade_arrived 會每小時放手、再選、再放手＝抖動
+   ⇒ 只對【有具體目標格而站在上面】的那一種放手；(-1,-1) 一律不碰
 ③不改：_market_pos 的回退（碰面傳播要它）；求援單四個寫者
 ```
 
@@ -43,6 +46,7 @@ P1 走真世界（界限第 24 條）：seed 7 30 天，「貿易」到場且人
 P2 佈置（補充）：商人 belief 裡有一張漫遊隊的單（pos＝空地）＋一張市集單 ⇒ 選市集那張；只有漫遊單 ⇒ 回空 ⇒ _merchant_trade_target 退到最近已知市集
 P3 反向：拿掉 ① ⇒ P2 第一格選到空地 ⇒ 必紅
 P4 ②：佈置 TRADE 隊站在非 outpost 目標上 ⇒ 當拍 release；反向拿掉 ⇒ 仍是 TRADE
+P4b 登記居民人不在家、TRADE＋move_target＝(-1,-1)、腳下非 outpost ⇒ 不 release；走真世界數 trade.arrived_off_market 中 move_target＝(-1,-1) 的筆數＝0
 P5 world-fp 會變 ⇒ 先量、同 commit 換基準；A2 修那張的 P2 分母（人在市集格）不受影響
 ```
 序：A2 修之後（同一支 _step3c，避免衝突）

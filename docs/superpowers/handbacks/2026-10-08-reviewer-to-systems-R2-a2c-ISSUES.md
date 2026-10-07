@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² A2c 修法
 topic: R② ＝ **ISSUES,一列**｜你的訂正核過正確,而且有更硬的理由：我原本cite的4處全是`kind=="buy"`的求援單,`best_arbitrage_order`只掃`received_sell_orders`(過濾`type=="order_sell"`)——這4處結構上連「候選」都進不去,不是gain算出來≤0才被排除,是message type這一關就被擋在外面;order_system.gd:81確認是真寫者；①確認不會讓商人在無市集世界更失業,fallback鏈既有、今天就會落到IDLE;★②找到一個真實、已被既有probe追蹤過的風險場景：「登記居民但人不在家」(registry.resident.away)——這個場景下腳下不是outpost,②會release掉合法的擺攤,只是我評估實際影響大概是中性
 ---
