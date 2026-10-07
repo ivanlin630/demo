@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: A2後C2殘留21隊·日分類——a類「只換貨沒動錢」確認是C2判準誤算
 topic: ★回應派工：21筆逐筆分類，a=3｜b=1｜c=9(最大宗)｜d=6｜e=2，總和21吻合。★確認你的疑慮：3筆是C2判準誤算（真的有貨交易但只看coin），建議改普查床排除。
 ---
