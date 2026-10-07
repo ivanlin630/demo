@@ -59,25 +59,11 @@ P6 一格：同一個世界狀態，區塊資料 → 字串 的輸出與拆刀�
 
 ```
 主畫面加一行「游標處」，跟游標即時更新，內容**只用附身者知道的**（belief／親見）：
-  地形｜已知據點與擁有者（belief）｜看得到／記得的隊伍（含最後所知時間）｜距最近**已知**據點幾格｜此格可否紮營＋引擎原因（含數字）
+  地形｜已知據點與擁有者（belief）｜看得到／記得的隊伍（含最後所知時間）｜距最近**已知**據點幾格｜此格可否紮營＋引擎原因
 ⇒ 資料來源：快照與 belief 查詢（走區塊資料層，F6）；可否紮營＝`precheck_camp` 同一支（列的條件＝做的條件）
-⇒ ★感知邊界（我先標，請 R² 打）：紮營的間距檢查讀的是**真實**據點位置（世界物理，合法），但原因句若寫「距最近同類據點 4 格」而那個據點玩家不知道
-   ⇒ 原因句洩露了一個他不知道的據點的存在與距離 ⇒ 擋住的據點不在玩家 belief 裡時，原因句只說「這裡離某個據點太近」（不給距離與位置）；在 belief 裡才給數字與名字
 ⇒ debug pane（TEXTUI_DEBUG_PANE=1）印真值那支照舊，不混進這一行
-⇒ ★R² 打回（2026-10-07）：`OutpostSystem._check_distance`（outpost_system.gd:932-952）只回 bool ⇒ 呼叫端不知道【誰】擋的，無從跟 belief 核對
-   ⇒ 拆成一支來源、兩個出口：新 `_distance_blockers(state, pos, type) -> Array`（每筆 {tile_pos, dist, rule:"any"|"same"}；礦村豁免 ⇒ 空陣列；掃法與比較符號逐字搬）
-     `_check_distance` 改成 `return _distance_blockers(...).is_empty()` ——★不准留第二份掃描（兩份會漂開）；呼叫點 :571／player_command_system:592／qa_probe 不用改
-   ⇒ precheck_camp 拿 blockers，逐筆問 `BeliefSystem.known_outpost_at(state, 玩家隊, b.tile_pos, …)`：
-     有任一筆已知 ⇒ 原因句用【已知那幾筆裡最近的一筆】給名字與距離＋規則門檻（例「距 X 的據點 3 格；同類須 ≥ 11」）
-     全部未知 ⇒ 只說「這裡離某個據點太近」——不給距離、方向、座標、類別
-     ★不准挑「最近的那筆」再問知不知道：最近那筆未知而次近那筆已知時，那樣寫會丟掉玩家本來有權知道的原因
-   ⇒ ★R² 第二輪（442c82d41）：`known_outpost_at(state, obs, pos, owner_id)` 要 owner，而 blockers 沒有 owner 欄
-     ⇒ 我不照「blockers 順手存 live 的 t.outpost_owner 再傳進去」：擋你的那座城若在你上次看到之後易主，用 live owner 去問會查無 ⇒ 你明明知道那裡有座城，原因句卻變成「某個據點」
-     ⇒ 裁：「知不知道」＝【這一格】在不在 `known_outposts(state, 玩家隊)` 裡（逐筆比 tile_pos，同 known_outpost_at 的迴圈、不比 owner）；名字用 belief 那筆的 owner_id
-     ⇒ ★原因句的擁有者一律是玩家以為的那一個，不是 live（live owner 一個字都不進句子）
-     P7 補一格：擋住的城在玩家看過之後易主 ⇒ 原因句仍給距離，擁有者印玩家記得的那一支
-P7b 純重構守衛：world-fp 不變（_check_distance 語意零改）｜反向：在 fp 世界挑 3 格被擋的格，bool 與 blockers.is_empty() 逐格相反為零
-P7 游標移到三種格各一次（已知據點旁／未知據點旁／空地）⇒ 明細內容正確；★未知據點旁的原因句不得含距離或座標
+⇒ 間距規則已整條退場（用戶裁，藍圖 `e1a09f429`；見 F8）⇒ 擋紮營的只剩「同格已有據點／營地」，那一格就是腳下、玩家看得見 ⇒ 原因句不涉及看不見的據點
+P7 游標移到三種格各一次（已知據點格／自己營地格／空地）⇒ 明細內容正確
 ```
 
 F7b【「選中」區塊同一條規則】（量測員旁證 afaf2bea1 → systems 追到）：text_ui_main.gd:1553-1560 選中格印 `query_tile`（sim_bridge.gd:189 直讀 state.world.tiles）的
@@ -86,43 +72,43 @@ F7b【「選中」區塊同一條規則】（量測員旁證 afaf2bea1 → syste
    ★debug pane（:1494 `_build_hover_truth_lines`）照舊讀 query_tile，那是合法的真值區
 P7c 選一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反向：走過去看見 ⇒ 出現
 
-（據點間距 2／11 的規則改不改＝藍圖待用戶裁，本票不動）
-⇒ 藍圖補（同精神）：紮營被擋＝一次觀察 ⇒ 寫弱 belief「附近（≤11 格）有據點，位置不明」，進情報頁，游標處可印「聽說附近有據點」
-   ★今天的 belief 是「觀察者 → 目標**隊伍**」的 claim（`belief_system.gd::record_claim(obs, tgt_team, …)`）——「某一帶有據點、主人與位置不明」沒有目標隊可掛
-   ⇒ 它需要「地點類 belief kind」——正是交玩後深層批「糧源情報 kind」那張要造的基礎（親見／傳聞／打聽寫同一種、帶時戳與可信度）
-   ⇒ 本批不做；併進糧源情報那張當第二個 kind（「附近有據點」），那張 spec 寫時列為驗收一格
+（紮營被擋寫弱 belief「附近有據點」那條：間距退場後不會再有「被看不見的據點擋住」⇒ 作廢）
 
-## F8 玩家紮營＝L0、紮根＝第二步；四個寫入點同守間距（藍圖裁 (i) `7d10ddb4a`；同批）
+## F8 玩家紮營＝L0、紮根＝第二步；間距與山地禁令整條退場、只留物理（藍圖裁 (i) `7d10ddb4a`＋用戶裁 `e1a09f429`；同批）
 
 ```
-前提（git grep，systems c49ddd504）：間距檢查 production 呼叫點＝2（outpost_system.gd:571 start_build｜player_command_system.gd:592 precheck_camp）
-  玩家「紮營」今天＝crude_camp 工程，完工即 L1（outpost_system.gd:472-492）＝一鍵直達 L1 免材料
-  NPC 立 L0（faction_ai_system.gd:6935 establish_crude_camp，呼叫點 :3019／:3033／:6791）不查間距；NPC 紮根（:7151 設 crude_camp 工程）不查間距
+前提（git grep）：
+  間距規則 production 出現處＝3：outpost_system.gd:571 start_build→_check_distance（:932-952，MIN_DIST_ANY 2／MIN_DIST_SAME 11，:228-229）
+    ｜player_command_system.gd:592 precheck_camp→_check_distance｜★faction_ai_system.gd:5960-5964 NPC 建點選址 `min_dist = 1 if 礦山 else 2`（第三處，不叫 distance 的那一處）
+  山地禁紮出現處＝2：player_command_system.gd:590 precheck_camp｜faction_ai_system.gd:6939 establish_crude_camp
+  玩家「紮營」今天＝crude_camp 工程，完工即 L1（outpost_system.gd:472-492）＝一鍵直達 L1
+  「同格已有據點」今天四個寫入點各自已查（start_build :564／establish :6937／precheck_camp :588／NPC 紮根 :7137）
 
-①間距一支來源兩層：_distance_blockers(state, pos, type, tier)
-   tier "L0"：只比據點（outpost_level>0）d < MIN_DIST_ANY｜tier "L1"：今天的兩條（ANY＋同類 SAME）
-   礦村豁免照今天（只在 type=="civilian"、礦山格；L0 本來就不准立在山上 ⇒ 對 L0 不會發生）
-   _check_distance(state,pos,type) ＝ _distance_blockers(…, "L1").is_empty()（start_build 照舊走它）
-②四個寫入點同呼：
-   NPC 立 L0：establish_crude_camp 開頭加 L0 檢查（有 blocker ⇒ return false；三個呼叫點不用改）
-   NPC 紮根：:7151 前加 L1 檢查（type 用那裡已算出的 camp_type；擋 ⇒ Probe "root.commit_drop.spacing"、不落地，同 :7137 那支的形狀）
-   玩家紮營：_action_camp 改呼 establish_crude_camp（★同一支，不准第二份 L0 寫法）；precheck_camp 改 tier "L0"、加「此地已有營地」（camp_level>0）
-   玩家紮根：新動作「紮根」——★只在【自己的 L0 營地】上列出（tile.camp_level==1 且 camp_team_id==玩家隊）；
-            執行＝把 NPC 紮根落地那段（:7140-7161：設 crude_camp 工程、settle 工期、construction_team_id、corvee_site）抽成一支共用函式，玩家與 NPC 同呼；type 參數化（NPC 照 leader 價值、玩家照 build_type）
-            precheck_settle：tier "L1"；原因句走 F7 那套（已知據點給距離與門檻、未知只說太近）
-            ★R² 打回：precheck_settle 另查 tile.construction_team_id == -1（紮根施工中 camp_level 仍是 1 ⇒ 不查就能重按、把工期重置成滿值）；不可時原因「紮根施工中（剩 N 人時）」
-③成本：玩家紮根＝NPC 紮根今天的成本：settle 工期、免材料（藍圖定：成本就是時間，材料留給之後蓋設施）
-④營地欄（藍圖裁（乙）`68cd9883d`：§6「營地不是家」保留，家＝歸屬／居民身分／稅軌）：家欄與 _home_tile 一行不動
-   mapper 新增兩欄 camp_pos／camp_distance（同一支 state.own_camp_tile(玩家隊) 取值，兩欄同給或同 null）
-   頂列加「營地：(x,y) 離 N」；null ⇒「營地：無」——★「無」只在 mapper 那一欄【有寫入者】時印（欄位缺席 ⇒ 印「營地：？」不是「無」，同家欄的值主張規則）
-⑤動作鍵：紮根是新 action id（不變量 #10 靜態 id）；不讓「紮營」在自己營地上變成紮根（同一鍵兩個意思）
+①退場（刪，不留空殼）：MIN_DIST_ANY／MIN_DIST_SAME 兩常數、_check_distance 整支、start_build 與 precheck_camp 那兩行呼叫、
+   faction_ai:5960 的 min_dist（候選格本來就 `outpost_level > 0 ⇒ continue`，同格已排除 ⇒ min_dist 改成無；max_dist 是搜尋半徑不是間距，留）、
+   兩處山地禁紮；礦村豁免（outpost_system.gd:936-941、faction_ai:5957-5960 的 is_ore_mountain 對 min_dist 那半）隨之消失
+   ★不新增 _distance_blockers：同格檢查四處已在，再包一支只會變成第二份
+   qa_probe.gd／ui_flow_test.gd:208 引用 _check_distance 的註解與呼叫一起改
+   player_command_system.gd:1041 原因句「資源不足或距離限制」⇒ 去掉「或距離限制」
+②兩步結構（保留）：
+   玩家紮營：_action_camp 改呼 establish_crude_camp（同一支，不准第二份 L0 寫法）；precheck_camp 加「此地已有營地」（camp_level>0）
+   玩家紮根：新動作「紮根」——只在【自己的 L0 營地】上列出（camp_level==1 且 camp_team_id==玩家隊）；
+            執行＝把 NPC 紮根落地那段（faction_ai:7140-7161）抽成一支共用函式，玩家與 NPC 同呼；type 參數化（NPC 照 leader 價值、玩家照 build_type）
+            precheck_settle：另查 tile.construction_team_id == -1（施工中 camp_level 仍是 1 ⇒ 不查就能重按把工期重置）；不可時「紮根施工中（剩 N 人時）」
+③成本：玩家紮根＝NPC 紮根今天的成本：settle 工期、免材料（藍圖定：成本就是時間）
+   ★藍圖信寫「山地可（工期按地形）」——今天工期【不】看地形（build_person_hours 只吃 kind／level；TERRAIN_BUILD_BONUS 只進 NPC 選址分數）
+   ⇒ 本票不加；山地的代價今天只有野糧少、走得慢（已回藍圖）
+④營地欄（藍圖裁（乙）`68cd9883d`：§6「營地不是家」保留）：家欄與 _home_tile 一行不動
+   mapper 新增 camp_pos／camp_distance（同一支 state.own_camp_tile(玩家隊) 取值，兩欄同給或同 null）
+   頂列「營地：(x,y) 離 N」；null ⇒「營地：無」——「無」只在那一欄有寫入者時印（缺席 ⇒「營地：？」）
+⑤動作鍵：紮根是新 action id（不變量 #10）；不讓「紮營」在自己營地上變成紮根
 ```
 ```
-P8a 距最近村 3 格平地 ⇒ 紮營可；距 1 格 ⇒ 不可，原因「離據點太近（需 ≥2）」（據點已知時帶距離）
-P8b 同 3 格處先紮營、再紮根 ⇒ 不可，原因「距最近同類據點 3 格，需 ≥11」（已知才給數字）
-P8c NPC 在距村 1 格處 establish_crude_camp ⇒ false｜NPC 紮根在距同類 3 格處 ⇒ 不落地且 Probe root.commit_drop.spacing +1
-P8d 紮營後營地欄＝座標、家欄不變；紮根完工 ⇒ 家欄變成那座據點、營地欄＝無｜反向：快照拿掉 camp_pos 鍵 ⇒ 印「？」不印「無」
-P8e 站在自己營地上 ⇒ 動作清單有「紮根」；站在別人營地／空地 ⇒ 沒有
-P8f 反向：把 L0 檢查拿掉 ⇒ P8a 距 1 格那格必紅；把共用紮根函式換回各自一份 ⇒ grep 兩份 crude_camp 工程設點必紅（只准一處）
-P8g world-fp 會變（NPC 多兩道檢查）⇒ 先量；變了才換基準（同 commit）；回報 Probe camp.built／settlement.l0_to_l1_start 改前改後（30 天 seed 1337），觀察輪重跑再看
+P8a 緊鄰既有村的平地 ⇒ 紮營可｜山地 ⇒ 紮營可｜同格已有據點或營地 ⇒ 不可，原因照實
+P8b 緊鄰同類據點處先紮營、再紮根 ⇒ 可（工期＝settle）
+P8c NPC：establish_crude_camp 在緊鄰村的格與山地 ⇒ true｜NPC 選址候選含距中心 1 格的格（修前被 min_dist 排除）
+P8d 紮營後營地欄＝座標、家欄不變；紮根完工 ⇒ 家欄＝那座據點、營地欄＝無｜反向：快照拿掉 camp_pos 鍵 ⇒ 印「？」不印「無」
+P8e 站在自己營地上 ⇒ 動作清單有「紮根」；別人營地／空地 ⇒ 沒有｜紮根施工中再按 ⇒ 不可、工期不變
+P8f grep：MIN_DIST_／_check_distance／「山地無法紮營」在 scripts/ 出現次數＝0｜crude_camp 工程設點只准一處（共用函式）
+P8g world-fp 會變 ⇒ 先量、換基準同 commit；回報 30 天 seed 1337 改前改後：camp.built／settlement.l0_to_l1_start／山地立營數／據點兩兩最近距離分佈
 ```
