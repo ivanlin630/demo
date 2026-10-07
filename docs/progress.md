@@ -3688,3 +3688,4 @@ A4：實作端訂正「走離工地」不成立（同 tick 被蓋）⇒ 定性�
 #9 地圖記憶 §7（含 overlay 結構擋）R² CLEAN f3a6ce00d；派工等量測員段 1（決定 §3(B) 純 render 或 harvest 搬感知層）
 第五輪試玩收場的裁決檔固定落在 docs/playtest/round5-verdict.md（defers forage-range-shared-regen-pool／outpost-maintenance-is-physics 的 met_check 讀它；systems 2026-10-07）
 深層批序列加：直轄上限＋分封（藍圖票 282b1abc7，用戶裁）——HOW spec 待寫；與 (D) 據點維護互補，(D) 仍等用戶
+深層批序列加：據點維護即物理（藍圖票 4d70c8aad①，用戶裁；原 defer outpost-maintenance-is-physics 轉正式票、已撤 defer）——HOW spec 待寫，與直轄上限＋分封互補
