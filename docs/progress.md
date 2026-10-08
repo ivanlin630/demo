@@ -3704,3 +3704,4 @@ A2 缺陷修已 merge（df40dfe5f），不回滾
 ★systems 錯在：把 A2 缺陷修排到友善度批之前——缺陷修不等於可插隊；世界／商業的缺陷除非玩家畫面上看得到，一律進深層批
 ```
 A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip e7b702bf5（基 df40dfe5f）；床修前紅→修後綠、seed 7 非市集到場 23→0；★回來時：rebase、全電池、world-fp 重量（WIP 量到的 fcc71f83 是舊基底值，不可沿用）
+第五輪邀請流程（藍圖 2026-10-08）：#9 merge → systems 合併 E2E（已知紅 0）→ 藍圖真跑 → 邀請信第一步請用戶做 F5 P5d（VS Code 整合終端＋Windows Terminal 各按 x／Esc／Tab／方向鍵／Ctrl+C，確認單鍵）→ 結果轉 systems｜觀察輪重跑：間距退場對照要換 seed 或拉長（default 30 天 NPC 從沒被 2／11 擋過）
