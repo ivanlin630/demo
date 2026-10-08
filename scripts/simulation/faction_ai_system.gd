@@ -5922,6 +5922,10 @@ const SITE_RES_BONUS: Dictionary = {
 	"ore_gold": 35.0, "ore_silver": 35.0,
 }
 
+# ★F8：選址候選的距離條件（只剩搜尋半徑；min_dist 間距退場）——一支函式，床直接驗
+static func _site_candidate_ok(dist: int, is_ore_mountain: bool) -> bool:
+	return dist <= (ORE_MOUNTAIN_MAX_DIST if is_ore_mountain else 5)
+
 # 回傳最佳候選 { "pos": Vector2i, "score": float, "tile": HexTileData }，無則 {}。
 # 多中心滾動拓殖：候選 = 任一 center（leader 所在 + faction 所有 outpost）dist 2-5。
 # S2 修：貪婪/野心 leader（greed+ambition >= MINING_GREED_THRESHOLD）搜索距離擴至 ORE_MOUNTAIN_MAX_DIST。
@@ -5957,11 +5961,9 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 		var is_ore_mountain: bool = tile.terrain == "mountain" \
 			and (float(tile.resource_cap.get("ore_gold", 0)) > 0.0 \
 				or float(tile.resource_cap.get("ore_silver", 0)) > 0.0)
-		var min_dist: int = 1 if is_ore_mountain else 2
-		# S2 礦村搜索擴距：ore 山搜索 dist 擴至 ORE_MOUNTAIN_MAX_DIST（r=8 礦山常在邊陲）。
-		# ★F1 靶B：去 is_greedy_leader 硬 gate——ore 山恆擴搜、差異化由下方連續 score bonus 定（普通 leader 搜到但 bonus 小不選、fp 不變）。
-		var max_dist: int = ORE_MOUNTAIN_MAX_DIST if is_ore_mountain else 5
-		if dist > max_dist or dist < min_dist: continue
+		# ★F8：min_dist（距中心至少 2 格、礦山 1 格）退場——那是據點間距規則的第三處（用戶裁 e1a09f429）；
+		#   候選格本來就 `outpost_level > 0 ⇒ continue`（同格已排除）。max_dist 是搜尋半徑不是間距，留。
+		if not _site_candidate_ok(dist, is_ore_mountain): continue
 		var score: float = float(tile.productivity) * 100.0
 		score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
 		score -= float(dist) * 5.0
@@ -6936,8 +6938,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x*1000 + team.tile_pos.y)
 	if tile == null or tile.outpost_level > 0 or tile.outpost_owner != -1 or tile.camp_level > 0:
 		return false
-	if tile.terrain == "mountain":
-		return false
+	# ★F8：山地禁紮退場（用戶裁 e1a09f429）；山地的代價今天是野糧少、走得慢（工期不看地形，已回藍圖）
 	# ★★★成功 ＝ 該任務【自己的完成定義】（blueprint 裁 2026-09-11，禁一把全域尺）：紮營＝立營成立（腳下那格）。
 	if Probe.enabled: Probe.bump("task.done.t%d.%s" % [team.team_id, TeamData.TASK_CAMP])
 	tile.camp_level = 1
@@ -7145,9 +7146,14 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
 	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
 	var camp_type: String = "military" if (martial > 0.6 or ambition > 0.7) else "civilian"
-	# ★person_hours 記進 target（S6 phase2）：紮根與玩家紮營【同叫 crude_camp 但工期不同】
-	#   ⇒ construction_ticks_total 分不出它們，改制前對兩者都回 0（既有 bug，sunk-cost 因此恆 0）。
-	#   ⇒ ★這裡記的是【實際扣了多少】，不是第二張表。
+	start_settle_construction(state, team, tile, camp_type)
+
+
+# ★F8：紮根落地段（L0 營地 → crude_camp 工程，完工晉 L1）——NPC（_commit_settle_site）與玩家（_action_settle）同呼一支
+#   ★type 參數化：NPC 照 leader 價值、玩家照 build_type；工期＝settle、免材料（藍圖定：成本就是時間）
+#   ★crude_camp 工程設點只准這一處（F8 床 P8f 數它）
+func start_settle_construction(state: WorldState, team: TeamData, tile: HexTileData, camp_type: String) -> void:
+	# ★person_hours 記進 target（S6 phase2）：記的是【實際扣了多少】，不是第二張表
 	tile.construction_target = {"action": "crude_camp", "type": camp_type, "level": 1, "owner": team.team_id,
 		"person_hours": OutpostSystem.build_person_hours("settle", 1)}
 	# ★★★S6 phase2：CORVEE 常數退場 —— 常數不存在，就沒有第二個語意可黏
@@ -7155,10 +7161,10 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 	tile.construction_team_id = team.team_id
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	team.corvee_site = site   # ★記工地（recovery 憑此回頭）
+	team.corvee_site = tile.tile_pos   # ★記工地（recovery 憑此回頭）
 	if Probe.enabled: Probe.bump("settlement.l0_to_l1_start")
 	print("[CorveeL1] Team%d L0→L1 紮根工期 @(%d,%d) %s (%d person-ticks)" % [
-		team.team_id, site.x, site.y, camp_type, tile.construction_ticks_left])
+		team.team_id, tile.tile_pos.x, tile.tile_pos.y, camp_type, tile.construction_ticks_left])
 
 # ★T2 churn 根修 (3)：arrival-fail 釋放（撲空/timeout）復用既有 rejection-learning（零新機制）——
 # 寫 join_rejected memory（同 interaction._resolve_join:1280 拒收路），decision_context:530

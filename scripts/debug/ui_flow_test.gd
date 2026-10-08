@@ -205,7 +205,7 @@ func _test_camp_action_reachable() -> void:
 	var tile = st.world.tiles.get(pt.tile_pos.x*1000 + pt.tile_pos.y)
 	if tile != null:
 		tile.outpost_level = 0; tile.outpost_owner = -1; tile.terrain = "plains"
-	# N-3: camp 現有 _check_distance 真 gate → 清掉附近既有 outpost 才能通過（gate 通過時仍可達）
+	# N-3: 清掉附近既有 outpost（舊時代為了通過間距檢查；間距規則已退場，留著無害）
 	for tid in st.world.tiles:
 		var t = st.world.tiles[tid]
 		if t != tile: t.outpost_level = 0; t.outpost_owner = -1

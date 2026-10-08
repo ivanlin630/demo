@@ -153,6 +153,8 @@ static func top_row(v: Dictionary) -> String:
 		"第 %s" % String(v.get("clock", "—")),
 		"%s（人口 %s）" % [String(v.get("team_name", "—")), String(v.get("pop", "—"))],
 		"家：%s" % String(v.get("home", "—")),
+		# ★F8 營地欄：沒有寫入者（鍵缺席）⇒「？」；寫入者說沒有 ⇒「無」（兩句不同的話）
+		"營地：%s" % String(v.get("camp", "？")),
 		"糧撐 %s" % String(v.get("food", "—")),
 	]
 	var tail: String = "待執行 %s" % String(v.get("pending", "—"))

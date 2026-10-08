@@ -922,6 +922,7 @@ func build_regions(pend_txt: String) -> Dictionary:
 			#   ★有隊時照舊：家 null ＝ 寫入者明示沒有家 ⇒「（無）」；糧 0 天 ＝ 真警報 ⇒ 照印
 			"home": "—" if ct.is_empty() else (("(%d,%d)" % [int(hp.get("q", 0)), int(hp.get("r", 0))]) if not hp.is_empty() else "（無）"),
 			"food": ("%.1f 天" % float(ct["food_days"])) if ct.has("food_days") else "—",
+			"camp": _camp_text(ct),
 			"threat": threat,
 			# ★故事結束（票 #2 刀 0）：讀 snapshot 的兩鍵（mapper 出）—— **不走 `_bridge` 直讀**
 			#   ⇒ 空字串 ＝ 故事沒結束 ⇒ view 照舊印威脅欄
@@ -955,6 +956,18 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"battle": _encounter_view.terminal_block() if _in_battle() else "",
 		"battle_keys": _encounter_view.terminal_keys() if _in_battle() else "",
 	}
+
+# ★F8 營地欄：附身者沒有隊 ⇒「—」；快照沒有 camp_pos 鍵（沒有寫入者）⇒「？」；null ⇒「無」
+static func _camp_text(ct: Dictionary) -> String:
+	if ct.is_empty():
+		return "—"
+	if not ct.has("camp_pos"):
+		return "？"
+	var cp = ct["camp_pos"]
+	if cp == null:
+		return "無"
+	return "(%d,%d) 離 %d" % [int(cp.get("q", 0)), int(cp.get("r", 0)), int(ct.get("camp_distance", 0))]
+
 
 # ★F1：首屏三行（主畫面才有；資料＝動作清單同一份，規則在 UiModel.first_three）
 func _first3_rows() -> Array:

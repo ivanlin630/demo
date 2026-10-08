@@ -51,7 +51,7 @@ func _probe_camp_completion() -> void:
 	var st = node._bridge.get_state()
 	var ptid = st.persons[st.player_id].team_id
 	var pt = st.teams[ptid]
-	# 移到一個遠離既有 outpost 的空格(避免 _check_distance 失敗)
+	# 移到一個遠離既有 outpost 的空格（舊時代為了避開間距檢查；間距規則已退場，留著無害）
 	pt.tile_pos = Vector2i(60, 60)
 	var tk = pt.tile_pos.x*1000+pt.tile_pos.y
 	var tile = st.world.tiles.get(tk)
@@ -111,14 +111,11 @@ func _probe_gate_mismatches() -> void:
 	var tile = st.world.tiles.get(pt.tile_pos.x*1000+pt.tile_pos.y)
 	if tile != null:
 		tile.outpost_level = 0; tile.outpost_owner = -1; tile.terrain = "plains"
-		# 鄰格放 outpost 使 _check_distance 失敗
-		var os = OutpostSystem.new()
-		var ok_dist = os._check_distance(st, tile.tile_pos, "civilian")
-		print("  腳下 _check_distance(civilian)=%s" % ok_dist)
+		# （間距檢查已退場：spec 2026-10-07 round5 §F8 ⇒ 這裡不再量它）
 	node._refresh()
 	self_ids = []
 	for a in node._interact_action_split()["self"]: self_ids.append(a.get("action_id",""))
-	print("  camp 在 self? %s (query gate 不查 _check_distance)" % ("camp" in self_ids))
+	print("  camp 在 self? %s" % ("camp" in self_ids))
 	await _free(node)
 
 # label scope:自隊「狀態:」,子隊/成員下令保留「任務」字樣

@@ -91,6 +91,20 @@ static func _home_distance(state: WorldState, t: TeamData):
 	var dy: int = b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
+# ★F8 營地欄（藍圖裁（乙）68cd9883d：營地不是家，家欄不動）：camp_pos／camp_distance 同一支 own_camp_tile 取值
+#   ⇒ 兩欄同給或同 null（同「家」三欄的結構保證）；自己的營地＝self-knowledge
+static func _camp_pos(state: WorldState, t: TeamData):
+	var c: HexTileData = state.own_camp_tile(t.team_id)
+	if c == null: return null
+	return {"q": c.tile_pos.x, "r": c.tile_pos.y}
+
+static func _camp_distance(state: WorldState, t: TeamData):
+	var c: HexTileData = state.own_camp_tile(t.team_id)
+	if c == null: return null
+	var dx: int = c.tile_pos.x - t.tile_pos.x
+	var dy: int = c.tile_pos.y - t.tile_pos.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
 static func map_controlled_team(state: WorldState) -> Dictionary:
 	var pid: int = state.player_id
 	var p: PersonData = state.persons.get(pid) if pid != -1 else null
@@ -136,6 +150,8 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"home_kind": _home_kind(state, t),
 		"home_distance": _home_distance(state, t),
 		"home_count": state.own_outpost_count(t.team_id),
+		"camp_pos": _camp_pos(state, t),
+		"camp_distance": _camp_distance(state, t),
 		"members": members,
 		"resources": {
 			"food":               int(t.resources.get("food", 0)),
@@ -437,6 +453,7 @@ static func action_label(action_id: String) -> String:
 		"promote_anon":          return "拔擢匿名→記名"
 		"rest":                  return "休息"
 		"camp":                  return "紮營"
+		"settle":                return "紮根"
 		# ★`cancel_move` 補進來（2026-10-01）：查詢面原本**手寫**「取消移動」
 		#   ⇒ 那是第二個 label 生產者，而本票把那 11 段收成一個迴圈之後
 		#     迴圈只呼這一支 ⇒ 手寫那一份隨之消失。

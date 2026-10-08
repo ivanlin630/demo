@@ -8,7 +8,7 @@ extends SceneTree
 # P8c NPC：establish_crude_camp 在緊鄰村的格與山地 ⇒ true｜NPC 選址距中心 1 格的候選不再被排除
 # P8d 紮營後營地欄＝座標、家欄不變；紮根完工 ⇒ 家欄＝那座據點、營地欄＝無｜反向：快照沒有 camp_pos 鍵 ⇒「？」不印「無」
 # P8e 站在自己營地上 ⇒ 動作清單有「紮根」；空地 ⇒ 沒有｜紮根施工中再按 ⇒ 不可、工期不變
-# P8f grep：間距常數／距離檢查／「山地無法紮營」在 scripts/ 出現 0 次｜crude_camp 工程設點只准一處
+# P8f grep：間距常數／距離檢查／山地禁紮那一句在 scripts/ 出現 0 次｜crude_camp 工程設點只准一處
 # （P8g 的 30 天改前改後數字在 f8_camp_spacing_measure.gd，量測產物落 docs/measurements/）
 #
 # ★修前不存在的函式（precheck_settle／_action_settle／_site_candidate_ok）用 has_method／call 動態呼
@@ -229,7 +229,7 @@ func _p8f() -> void:
 				setpoints.append(f)
 	print("   命中：%s" % str(hits))
 	print("   crude_camp 工程設點：%s" % str(setpoints))
-	_check("P8f 間距常數／距離檢查／「山地無法紮營」在 scripts/ 出現 0 次（%d 處）" % hits.size(), hits.is_empty())
+	_check("P8f 間距常數／距離檢查／山地禁紮那一句在 scripts/ 出現 0 次（%d 處）" % hits.size(), hits.is_empty())
 	_check("P8f crude_camp 工程設點只准一處（共用函式）（%d）" % setpoints.size(), setpoints.size() == 1)
 
 

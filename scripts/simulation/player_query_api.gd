@@ -357,7 +357,7 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 	#   `enabled`／`disabled_reason` 來自**共用前置檢查**、`allowed_kinds` 從宣告導出、
 	#   label 來自**唯一的生產者** ⇒ 四件東西都不在這裡重寫。
 	#   ⇒ ★★★而最重要的後果：**不可做的那一列仍然在**（P2b 守它）。
-	# ★★★★而這裡**不准**再出現任何條件字面（`TRAIN_COST_COIN`／`_check_distance`／
+	# ★★★★而這裡**不准**再出現任何條件字面（`TRAIN_COST_COIN`／間距檢查／
 	#   `outpost_level`…）或任何動詞名的字面 —— P3b／P4 就是在驗這件事。
 	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
 	var none_ids: Array = []
@@ -372,6 +372,9 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 		if not pc.is_valid():
 			# ★沒有前置檢查 ⇒ **不在這裡靜默補一個**（那會讓它永遠 enabled）
 			#   ⇒ 床的第四條反向掃會紅並指名。本處跳過並讓那一格說話。
+			continue
+		# ★F8：紮根只在自己的 L0 營地上列出（別處不是「不可」，是這個動作不存在）
+		if aid == "settle" and not PlayerCommandSystem.settle_listed(state, pt):
 			continue
 		var pr: Dictionary = pc.call(state, pt)
 		var kind: String = String((PlayerCommandSystem.ACTION_SHAPE[aid] as Dictionary).get("target", "none"))
