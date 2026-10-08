@@ -14070,7 +14070,8 @@ func _test_player_camp() -> void:
 	assert(pt.current_task == TeamData.TASK_BUILD, "紮根中玩家隊 task=建設,實際=%s" % pt.current_task)
 	assert(tile.construction_ticks_left > 0, "應設施工 ticks")
 	var os := OutpostSystem.new()
-	for _i in range(100):
+	# ★F8：工期＝settle（比舊紮營長）⇒ 推到工期用完為止（上限給足，不寫死 100）
+	for _i in range(OutpostSystem.build_person_hours("settle", 1) * 4 + 10):
 		os._tick_construction(state, tile)
 		if tile.outpost_level > 0: break
 	assert(tile.outpost_level == 1, "完工應 lvl1,實際=%d" % tile.outpost_level)

@@ -1,5 +1,6 @@
 extends SceneTree
-# @bed-kind: diagnostic
+# @bed-kind: acceptance
+# slice: godview 跟進（舊診斷床；F9′ 改呼 _known_outpost_relations 取非同勢力位置——那一格在 Tier2 baseline 本來就紅）
 
 # god-view follow-up TDD（spec 2026-07-20-godview-followup；detector v3 撿 2 殘留）。
 # ① jhost(decision_context:373) live pos→belief_pos（同 1119）：無 belief→不可達。
