@@ -2,12 +2,33 @@
 class_name TextMapRenderer
 
 const VISION_RADIUS: int = VisionSystem.VISION_RADIUS   # 引用 sim 權威源（單一真值）
-const VIEW_RADIUS: int = 5     # 視窗半徑（以玩家為中心顯示的範圍,> VISION_RADIUS 留霧邊）
 const TERRAIN_CHAR: Dictionary = { "plains": "P", "forest": "F", "mountain": "M" }
 
-# U16: 以玩家所在格為中心的視窗（@ 永遠在正中,地圖在底下捲）。
+# ★F10（spec 2026-10-07 round5-friendliness §F10，用戶裁 藍圖 4d70c8aad②）：視窗＝整張地圖
+#   ⇒ 視窗中心＝地圖中心、半徑＝地圖半徑，兩者都從 state.world.tiles 的座標範圍算（儲存座標中心在 (N,N) 不是 (0,0)；
+#     world_generator 的 radius 是 config、生成後沒存進 state ⇒ 不寫死）
+#   ⇒ @ 畫在玩家實際位置（舊 U16「@ 永遠在正中、地圖在底下捲」那條由這一條取代）
 # axial 投影:列 dr 的水平位移 = dq + dr/2 → 用累進切變（每列右移半格 = 2 字元）。
-# 舊版渲染整張地圖絕對座標 + @ 放玩家絕對位置 → 玩家偏離地圖中心時 @ 不在視窗中央（U16 真因）。
+#   寬度：r=8 ⇒ 每列 17 格 × 4 字＝68，加最末列切變縮排 2 × 2r＝32 ⇒ 最寬 100 欄
+static func map_extent(state: WorldState) -> Dictionary:
+	var qmin: int = 1 << 30
+	var qmax: int = -(1 << 30)
+	var rmin: int = 1 << 30
+	var rmax: int = -(1 << 30)
+	for k in state.world.tiles.keys():
+		var q: int = int(k) / 1000
+		var r: int = int(k) % 1000
+		qmin = mini(qmin, q); qmax = maxi(qmax, q)
+		rmin = mini(rmin, r); rmax = maxi(rmax, r)
+	if qmin > qmax:
+		return {"center": Vector2i.ZERO, "radius": 0}
+	var c := Vector2i((qmin + qmax) / 2, (rmin + rmax) / 2)
+	var rad: int = 0
+	for k2 in state.world.tiles.keys():
+		rad = maxi(rad, _hex_dist(c, Vector2i(int(k2) / 1000, int(k2) % 1000)))
+	return {"center": c, "radius": rad}
+
+
 static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> String:
 	var player_team: TeamData = state.teams.get(player_tid)
 	var player_pos: Vector2i  = player_team.tile_pos if player_team else Vector2i(4, 4)
@@ -21,17 +42,20 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 		if not team_at.has(k): team_at[k] = []
 		(team_at[k] as Array).append(tid)
 
-	# 以玩家為中心的視窗:dr/dq ∈ [-VIEW_RADIUS, VIEW_RADIUS]，hex 距離內才畫。
-	# 每列累進切變 indent = (dr + VIEW_RADIUS) * 2（dr 由上到下遞增 → 右移）。
+	# 以地圖中心為中心的整張視窗:dr/dq ∈ [-R, R]，hex 距離內才畫。
+	# 每列累進切變 indent = (dr + R) * 2（dr 由上到下遞增 → 右移）。
+	var ext: Dictionary = map_extent(state)
+	var center: Vector2i = ext["center"]
+	var view_r: int = int(ext["radius"])
 	var lines: Array = []
-	for dr in range(-VIEW_RADIUS, VIEW_RADIUS + 1):
-		var indent: String = "  ".repeat(dr + VIEW_RADIUS)
+	for dr in range(-view_r, view_r + 1):
+		var indent: String = "  ".repeat(dr + view_r)
 		var line: String = indent
-		for dq in range(-VIEW_RADIUS, VIEW_RADIUS + 1):
-			if _hex_dist(Vector2i(dq, dr), Vector2i.ZERO) > VIEW_RADIUS:
+		for dq in range(-view_r, view_r + 1):
+			if _hex_dist(Vector2i(dq, dr), Vector2i.ZERO) > view_r:
 				line += "    "   # 視窗外（菱形外緣）留白,維持對齊
 				continue
-			var pos: Vector2i = player_pos + Vector2i(dq, dr)
+			var pos: Vector2i = center + Vector2i(dq, dr)
 			line += _cell(state, pos, player_pos, player_tid, cursor, discovered, team_at)
 		lines.append(line)
 	return "\n".join(lines)
@@ -39,7 +63,7 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
 		player_tid: int, cursor: Vector2i,
 		discovered: Array, team_at: Dictionary) -> String:
-	# 玩家標記恆畫（即使腳下 tile 資料缺,@ 也要在視窗正中顯示）
+	# 玩家標記恆畫（即使腳下 tile 資料缺也畫 @）
 	if pos == player_pos:
 		return "[@] " if pos == cursor else "@   "
 	var tile_key: int = pos.x * 1000 + pos.y
