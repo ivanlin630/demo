@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪友善度 F1–F7（R² 全 CLEAN：F1–F6 448398660 前後輪、F7 三輪至 05fc19e82）
 topic: spec docs/superpowers/specs/2026-10-07-round5-friendliness-convergence-HOW.md 全文｜序＝你手上排在前面的票做完之後｜★F7 裡「據點間距 2／11」那條不做（等藍圖再裁），其餘照做
 ---
