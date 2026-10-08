@@ -3712,3 +3712,4 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 「看得到」＝VisionSystem.vision_range(玩家隊, 日夜倍率)：地圖大寫區與游標處同一支（高偵查看得遠、夜裡看得近）
 - 游標處：記得的隊標「記得／聽說」（最佳 claim 不是自己親見＝聽說）；沒去過的格也列出記得在那裡的隊
 - world-fp 不變（707534a…）；床 map_memory_bed（註冊 map-memory）、E2E 加 MM7D
+第五輪邀請流程（藍圖 2026-10-08）：#9 merge → systems 合併 E2E（已知紅 0）→ 藍圖真跑 → 邀請信第一步請用戶做 F5 P5d（VS Code 整合終端＋Windows Terminal 各按 x／Esc／Tab／方向鍵／Ctrl+C，確認單鍵）→ 結果轉 systems｜觀察輪重跑：間距退場對照要換 seed 或拉長（default 30 天 NPC 從沒被 2／11 擋過）
