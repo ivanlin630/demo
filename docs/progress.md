@@ -3704,3 +3704,11 @@ A2 缺陷修已 merge（df40dfe5f），不回滾
 ★systems 錯在：把 A2 缺陷修排到友善度批之前——缺陷修不等於可插隊；世界／商業的缺陷除非玩家畫面上看得到，一律進深層批
 ```
 A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip e7b702bf5（基 df40dfe5f）；床修前紅→修後綠、seed 7 非市集到場 23→0；★回來時：rebase、全電池、world-fp 重量（WIP 量到的 fcc71f83 是舊基底值，不可沿用）
+
+### #9 地圖記憶（實作端 2026-10-08，branch feat/map-memory-on-f10）
+- 地圖只畫附身隊知道的：記得的格小寫地形（team_tile_known）、視野外的隊畫在 belief 最後所知位置「a?」（過期線＝belief_pos 那 3 天）、沒 belief 不畫；不再用 live 位置畫「曾發現」的隊
+- 據點圖示 ^ 村／# 營（型別記在那筆觀察裡：belief_system 據點子記錄加 type，裁甲 0995cbbe2）／$ 市集（team_market_known）；renderer 的格函式不收 tile，結構上讀不到 live 據點欄
+- 隊伍代號表一份（TextMapRenderer.team_codes：a–z 去 f m p、第 24 支起 *）：地圖、右欄可互動目標、游標處同讀
+- 「看得到」＝VisionSystem.vision_range(玩家隊, 日夜倍率)：地圖大寫區與游標處同一支（高偵查看得遠、夜裡看得近）
+- 游標處：記得的隊標「記得／聽說」（最佳 claim 不是自己親見＝聽說）；沒去過的格也列出記得在那裡的隊
+- world-fp 不變（707534a…）；床 map_memory_bed（註冊 map-memory）、E2E 加 MM7D
