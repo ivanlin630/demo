@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 票 #9 地圖記憶＋地圖上的 god-view 漏（R² CLEAN f3a6ce00d；段 1 量測 afaf2bea1）
 topic: spec docs/superpowers/specs/2026-09-29-map-memory-and-godview-leak-HOW.md 全文｜序＝友善度 F1–F8 之後、第五輪邀請之前｜走純 render，但 P3 先跑全程移動版本
 ---

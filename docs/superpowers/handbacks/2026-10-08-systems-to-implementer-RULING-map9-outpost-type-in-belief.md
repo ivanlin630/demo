@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: #9 據點圖示型別：裁甲（觀察時記 type）
 topic: 型別是親見看得到的東西 ⇒ 屬於那筆觀察；寫入點只有一處（git grep：belief_system.gd:493 `_entry["outpost"] = {…}`，relay 不寫）⇒ 加 "type"：tile.outpost_type；known_outposts（:522）回傳也帶 "type"
 ---
