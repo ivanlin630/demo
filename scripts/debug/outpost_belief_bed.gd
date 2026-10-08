@@ -3,7 +3,7 @@ extends SceneTree
 # slice: 據點知識進 belief（HOW spec 2026-09-17-outpost-belief-claim-HOW.md §3 八格）
 #
 # ★★★這一票不是「換一個比較準的欄位」，是把【地點的知識】從 god-view 拆出來：
-#   舊版 `_enemy_outpost_positions()` **全圖掃真實 tile**，再用「我對【主人】有沒有 belief」當代理
+#   舊版選址避讓那一支（F9′ 前叫 enemy-outpost-positions）**全圖掃真實 tile**，再用「我對【主人】有沒有 belief」當代理
 #   ⇒ ★那道閘擋的是**主人**，不是**地點** ⇒ 兩個方向都錯：
 #     ①**知道得太多**：沒看過那座城，卻因為在千里外見過主人 ⇒ 它對我存在
 #     ②**知道得太少**：★親眼走過那座敵城、從沒見過主人 ⇒ 它對我不存在（★★舊註解沒寫這個方向）
@@ -119,7 +119,7 @@ func _cells_two_directions() -> void:
 	BeliefSystem.record_claim(s1, 1, 2, 1, "親見",
 		{"tile_pos": Vector2i(11, 11), "population_est": 10.0}, 1.0, false)   # ★在千里外見過城主
 	BeliefSystem.harvest_tile_known(s1, s1.teams[1])
-	var a_set: Array = fai._enemy_outpost_positions(s1, s1.teams[1])
+	var a_set: Array = _avoid_positions(fai, s1, s1.teams[1])
 	var a_owner_belief: Vector2i = BeliefSystem.belief_pos(s1, 1, 2)
 	print("3-a｜對城主有 belief（%s）、從未走過那座城 ⇒ 迴避集 %s" % [str(a_owner_belief), str(a_set)])
 	_ok(a_owner_belief != Vector2i(-1, -1),
@@ -132,7 +132,7 @@ func _cells_two_directions() -> void:
 	# 3-b｜親眼走過那座城、從沒見過主人 ⇒ 城【在】迴避集（★舊註解沒寫的那個方向）
 	var s2 := _mk_world(Vector2i(5, 5))   # ★觀察者就站在城上
 	BeliefSystem.harvest_tile_known(s2, s2.teams[1])
-	var b_set: Array = fai._enemy_outpost_positions(s2, s2.teams[1])
+	var b_set: Array = _avoid_positions(fai, s2, s2.teams[1])
 	var b_owner_belief: Vector2i = BeliefSystem.belief_pos(s2, 1, 2)
 	print("3-b｜親眼走過那座城、對城主的 belief=%s ⇒ 迴避集 %s" % [str(b_owner_belief), str(b_set)])
 	_ok(b_owner_belief == Vector2i(-1, -1),
@@ -149,7 +149,7 @@ func _cell_d_three_states() -> void:
 
 	var s_never := _mk_world(Vector2i(0, 0))
 	BeliefSystem.harvest_tile_known(s_never, s_never.teams[1])
-	var never_set: Array = fai._enemy_outpost_positions(s_never, s_never.teams[1])
+	var never_set: Array = _avoid_positions(fai, s_never, s_never.teams[1])
 	print("3-d-①｜從沒觀察過任何據點 ⇒ 迴避集 %s（世界上確實有一座城）" % str(never_set))
 	_ok(never_set.is_empty(),
 		"3-d-① ★**沒看過 ⇒ 空集**（★★不是 fallback 到全圖）"
@@ -159,7 +159,7 @@ func _cell_d_three_states() -> void:
 	var s_old := _mk_world(Vector2i(5, 5))
 	BeliefSystem.harvest_tile_known(s_old, s_old.teams[1])
 	s_old.world.current_tick += BeliefSystem.BELIEF_STALE_TICKS + 30 * day   # ★把世界時間往前推
-	var old_set: Array = fai._enemy_outpost_positions(s_old, s_old.teams[1])
+	var old_set: Array = _avoid_positions(fai, s_old, s_old.teams[1])
 	var recs: Array = BeliefSystem.known_outposts(s_old, 1)
 	var age_days: float = 0.0
 	if not recs.is_empty():
@@ -235,12 +235,12 @@ func _cell_g_old_consumers() -> void:
 func _cells_source_verbatim() -> void:
 	print("\n— 3-c／3-e：原始碼 —")
 	var fai: String = FileAccess.get_file_as_string("res://scripts/simulation/faction_ai_system.gd")
-	var head: int = fai.find("func _enemy_outpost_positions")
+	var head: int = fai.find("func _known_outpost_relations")   # ★F9′ 改名改形（舊名已退場）
 	var body: String = ""
 	if head != -1:
 		var tail: int = fai.find("\nfunc ", head + 10)
 		body = fai.substr(head, (tail - head) if tail != -1 else 2000)
-	_ok(head != -1, "3-c-前提 找得到 `_enemy_outpost_positions`")
+	_ok(head != -1, "3-c-前提 找得到 `_known_outpost_relations`（F9′ 改名）")
 	_ok(not body.contains("for tile_id in state.world.tiles"),
 		"3-c-a ★**全圖掃已經刪掉**（★★殘留 ＝ 下一個讀者的陷阱）")
 	_ok(not body.contains("tile.outpost_owner") and not body.contains("tile.outpost_level"),
@@ -294,7 +294,7 @@ func _cell_f_world() -> void:
 		var n_ops: int = BeliefSystem.known_outposts(st, team.team_id).size()
 		entries_peak = maxi(entries_peak, n_ops)
 		entries_sum += n_ops
-		var new_set: Array = fai._enemy_outpost_positions(st, team)
+		var new_set: Array = _avoid_positions(fai, st, team)
 		var proxy_set: Array = _proxy_enemy_outposts(st, team)
 		for p in new_set:
 			if proxy_set.has(p):
@@ -333,4 +333,14 @@ func _proxy_enemy_outposts(state: WorldState, leader_team: TeamData) -> Array:
 		if owner.faction_id == leader_team.faction_id and owner.faction_id != -1: continue
 		if BeliefSystem.belief_pos(state, leader_team.team_id, owner.team_id) == Vector2i(-1, -1): continue
 		out.append(tile.tile_pos)
+	return out
+
+
+# ★F9′ 之後舊函式（只回「非自家、非同勢力」的位置）改名改形成 _known_outpost_relations（每筆帶 g）
+#   ⇒ 本床要的仍是舊語意（要避讓的那些位置）＝ g < 1（同勢力那些 g＝1，不避）
+static func _avoid_positions(fai, st: WorldState, team: TeamData) -> Array:
+	var out: Array = []
+	for r in fai._known_outpost_relations(st, team):
+		if float(r["g"]) < 1.0:
+			out.append(r["tile_pos"])
 	return out

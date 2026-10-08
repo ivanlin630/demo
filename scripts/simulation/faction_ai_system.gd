@@ -5947,8 +5947,10 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	# 差異化改由「ore bonus ∝ (貪婪+野心) × 山地地形懲罰」湧現：普通 leader 小 bonus 壓不過山懲→不建礦(稀有擬真保留)、
 	# 貪婪 leader 大 bonus 壓過→建礦。零差異化損失（貪婪隊 bonus ≥ 舊 gate 值）、無 1.09→1.1 懸崖。
 	var greed_ambition: float = ldr_greed + ldr_ambition
-	# 敵 outpost 位置一次收集（hoist：原每 candidate 全圖掃 = O(tiles²) → 500-tick infra spike 根）
-	var enemy_outposts: Array = _enemy_outpost_positions(state, leader_team)
+	# ★F9′：已知據點與關係一次收集（hoist：原每 candidate 全圖掃 = O(tiles²) → 500-tick infra spike 根）
+	var known_rels: Array = _known_outpost_relations(state, leader_team)
+	var site_w: float = site_persona_w(float(ldr.values.get("慎重", 0.5)) if ldr != null else 0.5,
+		float(ldr.values.get("好戰", 0.5)) if ldr != null else 0.5)
 	for tile_id in state.world.tiles:   # gate-ok: 同上
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0: continue
@@ -5976,21 +5978,21 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 			var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
 			if ore_here > 0.0:
 				score += ore_here * greed_ambition * MINING_GREED_WEIGHT   # 連續 weight（無 1.1 gate）
-		var min_enemy_dist: int = 9999
-		for ep in enemy_outposts:
-			var ed: int = _hex_dist(tile.tile_pos, ep)
-			if ed < min_enemy_dist: min_enemy_dist = ed
-		if min_enemy_dist < 5: score -= float(5 - min_enemy_dist) * 10.0
+		# ★F9′：最危險的那一座敵城＋最可靠的那一座友城（不是 Σ：Σ 會隨密度線性長、蓋過其他項）
+		var known_term: float = known_outpost_term(known_rels, tile.tile_pos, site_w)
+		score += known_term
+		if Probe.enabled: Probe.note("site.known_outpost_term", known_term)   # ★觀測不耗 RNG
 		if score >= MIN_BUILD_SCORE:
-			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile })
+			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile, "known_term": known_term })
 	if candidates.is_empty(): return {}   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	candidates.sort_custom(func(a, b): return a.score > b.score)
 	var best: Dictionary = candidates[0]
 	var sig: String = "%d_%d" % [best.pos.x, best.pos.y]
 	if _last_site_sig.get(leader_team.faction_id, "") != sig:
 		_last_site_sig[leader_team.faction_id] = sig
-		print("[Site] 選址 %s score=%.0f 周邊資源=%s terrain=%s" % [
-			str(best.pos), best.score, str(_site_resources_nearby(state, best.pos)), best.tile.terrain])
+		print("[Site] 選址 %s score=%.0f 周邊資源=%s terrain=%s 已知據點項=%.1f 用到的據點=%s" % [
+			str(best.pos), best.score, str(_site_resources_nearby(state, best.pos)), best.tile.terrain,
+			float(best.get("known_term", 0.0)), str(_rels_near(known_rels, best.pos))])
 	return best
 
 func _site_resource_bonus(state: WorldState, pos: Vector2i) -> float:
@@ -6046,20 +6048,67 @@ func _site_resources_nearby(state: WorldState, pos: Vector2i) -> Dictionary:
 #   ⇒ 現在改讀【我自己看過的據點】：`BeliefSystem.known_outposts`（親見時寫、relay 不寫）。
 #   ★**同陣營判定用【我自己陣營的名冊】**（自知，合法），
 #     ★★不是去讀對方的 `faction_id` —— 隸屬是組織層，§1a：不得因為決策需要就把它變成可見。
-func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array:
+# ★F9′（spec 2026-10-07 round5-friendliness §F9′，用戶裁 (C) 藍圖 c2ed35c05）：已知據點＋關係
+#   ★舊版只回「非自家且不在我勢力名冊」的位置 ⇒ 陌生人一律當敵、只看最近一座、只扣分
+#   ⇒ 每筆 {tile_pos, owner_id, g}：同勢力 +1；否則 clampf(grat − feud, −1, 1)（DiplomaticAiSystem._edge_intensity_to，同外交那支）；沒有邊 ⇒ 0（中立）
+#   ★自家據點不進本表；不知道的據點不在 known_outposts ⇒ 自然不進分
+#   ★誠實限：查邊用對方隊【現在的】leader_id（codebase 沒有「我記得誰是首領」的 belief）⇒ 換過首領 ⇒ 舊恩怨查無、退成中立
+#   ★兩個讀者同一份資料：NPC 選址（_evaluate_new_outpost_location）與玩家游標處明細（F7）
+func _known_outpost_relations(state: WorldState, leader_team: TeamData) -> Array:
 	var out: Array = []
 	var my_faction: FactionData = state.factions.get(leader_team.faction_id)
+	var me_leader: PersonData = state.persons.get(leader_team.leader_id)
+	var my_edges: Array = me_leader.relation_edges if me_leader != null else []
 	for rec in BeliefSystem.known_outposts(state, leader_team.team_id):
 		var oid: int = int(rec["owner_id"])
 		if oid == leader_team.team_id:
 			continue
+		var g: float = 0.0
 		if my_faction != null and my_faction.member_team_ids.has(oid):
-			continue   # 自家人的據點不用避
-		out.append(rec["tile_pos"])
+			g = 1.0   # 自知：我勢力的名冊
+		else:
+			var ot: TeamData = state.teams.get(oid)
+			var olid: int = ot.leader_id if ot != null else -1
+			var grat: float = DiplomaticAiSystem._edge_intensity_to(my_edges, "gratitude", olid)
+			var feud: float = DiplomaticAiSystem._edge_intensity_to(my_edges, "feud", olid)
+			g = clampf(grat - feud, -1.0, 1.0)
+		out.append({"tile_pos": rec["tile_pos"], "owner_id": oid, "g": g})
 	if Probe.enabled:
 		Probe.bump("outpost_belief.avoid_call")
 		Probe.note("outpost_belief.avoid_set_size", float(out.size()))
 		if out.is_empty(): Probe.bump("outpost_belief.avoid_empty")
+	return out
+
+# ★F9′ 分數項：每筆 v＝g × max(0, 5 − d) × 10 × w；項＝min(0, 最負一筆) ＋ max(0, 最正一筆)
+#   ★5 與 10 搬自舊寫法（「最近一座敵城 5 格內每格扣 10」），不新增常數；各自上限 ≤ 50 × w
+static func known_outpost_term(rels: Array, pos: Vector2i, w: float) -> float:
+	var worst: float = 0.0
+	var best: float = 0.0
+	for r in rels:
+		var p: Vector2i = r["tile_pos"]
+		var dx: int = p.x - pos.x
+		var dy: int = p.y - pos.y
+		var d: int = (absi(dx) + absi(dx + dy) + absi(dy)) / 2
+		var v: float = float(r["g"]) * maxf(0.0, 5.0 - float(d)) * 10.0 * w
+		worst = minf(worst, v)
+		best = maxf(best, v)
+	return worst + best
+
+
+# ★F9′ 人格權重（連續）：w＝慎重＋(1−好戰)；預設 0.5／0.5 ⇒ w＝1 ⇒ 對敵對據點與舊式同量級
+static func site_persona_w(cautious: float, martial: float) -> float:
+	return cautious + (1.0 - martial)
+
+
+# [Site] 那一行印的「用到的據點」：5 格內、g≠0 的那幾座
+static func _rels_near(rels: Array, pos: Vector2i) -> Array:
+	var out: Array = []
+	for r in rels:
+		var p: Vector2i = r["tile_pos"]
+		var dx: int = p.x - pos.x
+		var dy: int = p.y - pos.y
+		if (absi(dx) + absi(dx + dy) + absi(dy)) / 2 < 5 and float(r["g"]) != 0.0:
+			out.append("%s/T%d/g%.2f" % [str(p), int(r["owner_id"]), float(r["g"])])
 	return out
 
 # ──────── 基建主決策 ────────
