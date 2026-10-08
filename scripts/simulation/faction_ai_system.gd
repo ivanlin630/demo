@@ -5922,6 +5922,27 @@ const SITE_RES_BONUS: Dictionary = {
 	"ore_gold": 35.0, "ore_silver": 35.0,
 }
 
+# ★F9′：候選格的分數（一支；選址迴圈與床同呼 ⇒ 床驗的是【真的加進分數】那一項，不只項本身）
+func _site_candidate_score(state: WorldState, tile: HexTileData, dist: int, greed_ambition: float,
+		known_rels: Array, site_w: float) -> Dictionary:
+	var score: float = float(tile.productivity) * 100.0
+	score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
+	score -= float(dist) * 5.0
+	score += clampf(10.0 - float(dist), 0.0, 10.0) * 2.0
+	score += _site_resource_bonus(state, tile.tile_pos)
+	# ★F1 靶B：ore bonus 連續 ∝ (貪婪+野心)（去 is_greedy_leader 硬 gate、無 1.1 懸崖）。
+	# 山地地形懲罰(TERRAIN_BUILD_BONUS/低 productivity)自然差異化：普通 leader 小 bonus 壓不過→不建礦(稀有擬真)、
+	# 貪婪 leader 大 bonus 壓過→蓄意富裕擴張。貪婪隊(>=1.1) bonus = (greed+ambition)×WEIGHT ≥ 舊 gate 值=零損失。
+	if tile.terrain == "mountain":
+		var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
+		if ore_here > 0.0:
+			score += ore_here * greed_ambition * MINING_GREED_WEIGHT   # 連續 weight（無 1.1 gate）
+	# ★F9′：最危險的那一座敵城＋最可靠的那一座友城（不是 Σ：Σ 會隨密度線性長、蓋過其他項）
+	var known_term: float = known_outpost_term(known_rels, tile.tile_pos, site_w)
+	score += known_term
+	if Probe.enabled: Probe.note("site.known_outpost_term", known_term)   # ★觀測不耗 RNG
+	return {"score": score, "known_term": known_term}
+
 # ★F8：選址候選的距離條件（只剩搜尋半徑；min_dist 間距退場）——一支函式，床直接驗
 static func _site_candidate_ok(dist: int, is_ore_mountain: bool) -> bool:
 	return dist <= (ORE_MOUNTAIN_MAX_DIST if is_ore_mountain else 5)
@@ -5966,22 +5987,9 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 		# ★F8：min_dist（距中心至少 2 格、礦山 1 格）退場——那是據點間距規則的第三處（用戶裁 e1a09f429）；
 		#   候選格本來就 `outpost_level > 0 ⇒ continue`（同格已排除）。max_dist 是搜尋半徑不是間距，留。
 		if not _site_candidate_ok(dist, is_ore_mountain): continue
-		var score: float = float(tile.productivity) * 100.0
-		score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
-		score -= float(dist) * 5.0
-		score += clampf(10.0 - float(dist), 0.0, 10.0) * 2.0
-		score += _site_resource_bonus(state, tile.tile_pos)
-		# ★F1 靶B：ore bonus 連續 ∝ (貪婪+野心)（去 is_greedy_leader 硬 gate、無 1.1 懸崖）。
-		# 山地地形懲罰(TERRAIN_BUILD_BONUS/低 productivity)自然差異化：普通 leader 小 bonus 壓不過→不建礦(稀有擬真)、
-		# 貪婪 leader 大 bonus 壓過→蓄意富裕擴張。貪婪隊(>=1.1) bonus = (greed+ambition)×WEIGHT ≥ 舊 gate 值=零損失。
-		if tile.terrain == "mountain":
-			var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
-			if ore_here > 0.0:
-				score += ore_here * greed_ambition * MINING_GREED_WEIGHT   # 連續 weight（無 1.1 gate）
-		# ★F9′：最危險的那一座敵城＋最可靠的那一座友城（不是 Σ：Σ 會隨密度線性長、蓋過其他項）
-		var known_term: float = known_outpost_term(known_rels, tile.tile_pos, site_w)
-		score += known_term
-		if Probe.enabled: Probe.note("site.known_outpost_term", known_term)   # ★觀測不耗 RNG
+		var sc: Dictionary = _site_candidate_score(state, tile, dist, greed_ambition, known_rels, site_w)
+		var score: float = float(sc["score"])
+		var known_term: float = float(sc["known_term"])
 		if score >= MIN_BUILD_SCORE:
 			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile, "known_term": known_term })
 	if candidates.is_empty(): return {}   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)

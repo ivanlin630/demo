@@ -73,6 +73,20 @@ func _initialize() -> void:
 	print("   敵對據點 2 格外（belief 有）⇒ %.1f｜同位置但 belief 沒有 ⇒ %.1f" % [enemy, unknown_enemy])
 	_check("P9a belief 有敵對據點 ⇒ 分數低", has_rel and has_term and enemy < base)
 	_check("P9a 同位置但 belief 沒有 ⇒ 與無據點同分", has_rel and has_term and is_equal_approx(unknown_enemy, base))
+	# ★P9a 在【選址分數】上（不只項本身）：候選格分數＝_site_candidate_score（選址迴圈同一支）
+	#   ⇒ 負對照「拿掉該項」（P9e）會在這一格紅；只驗項本身的話拿掉也照綠（實測過一次）
+	var has_score: bool = fa.has_method("_site_candidate_score")
+	var ctile: HexTileData = st.world.tiles.get(cand.x * 1000 + cand.y)
+	_check("★P9a-分數 母體地板：候選格在地圖上、分數函式在", ctile != null and has_score)
+	if ctile != null and has_score:
+		var s_none: float = float(fa.call("_site_candidate_score", st, ctile, 2, 1.0, [], w)["score"])
+		_know(st, me, op_pos, other.team_id)
+		var s_enemy: float = float(fa.call("_site_candidate_score", st, ctile, 2, 1.0, fa.call("_known_outpost_relations", st, me), w)["score"])
+		st.team_tile_known[me.team_id] = {}
+		var s_unknown: float = float(fa.call("_site_candidate_score", st, ctile, 2, 1.0, fa.call("_known_outpost_relations", st, me), w)["score"])
+		print("   選址分數：無據點 %.1f｜已知敵城 2 格外 %.1f｜同位置但不知道 %.1f" % [s_none, s_enemy, s_unknown])
+		_check("P9a-分數 已知敵城 ⇒ 候選格分數較低", s_enemy < s_none)
+		_check("P9a-分數 不知道的敵城 ⇒ 分數與沒有時相同", is_equal_approx(s_unknown, s_none))
 	# P9d 人格
 	_know(st, me, op_pos, other.team_id)
 	var w_cautious: float = float(FA_SCRIPT.call("site_persona_w", 0.9, 0.1)) if _has_static("site_persona_w") else 0.0
