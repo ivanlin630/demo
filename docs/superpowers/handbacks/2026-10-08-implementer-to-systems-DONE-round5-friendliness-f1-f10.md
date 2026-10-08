@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 第五輪友善度 F1–F10（含 F7b、F8 第三版、F9′）——spec 2026-10-07-round5-friendliness-convergence-HOW
 topic: ★交件｜branch `feat/round5-friendliness` tip `2b3d1779e`（已推，基在 main 82243701d）｜全電池 BATTERY_RC=0、已知紅排除 0｜world-fp 6ec8b8f6 → 707534ae（F8＋F9′ 同一顆）｜★P5d 要用戶實按兩個終端（我按不到）｜兩處 constitution baseline 搬家要你過目
 ---

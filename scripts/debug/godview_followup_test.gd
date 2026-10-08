@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: godview 跟進（舊診斷床；F9′ 改呼 _known_outpost_relations 取非同勢力位置——那一格在 Tier2 baseline 本來就紅）
 
 # god-view follow-up TDD（spec 2026-07-20-godview-followup；detector v3 撿 2 殘留）。
 # ① jhost(decision_context:373) live pos→belief_pos（同 1119）：無 belief→不可達。
@@ -41,7 +43,7 @@ func _test_enemy_outpost_belief_gate() -> void:
 	var t88: HexTileData = s.world.tiles[8 * 1000 + 8]; t88.outpost_level = 1; t88.outpost_owner = 8
 	# leader(team1)對 owner 7 有 belief、對 8 無
 	s.team_intel[1] = {7: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(3, 3), "last_tick": 100000}}
-	var out: Array = FactionAISystem.new()._enemy_outpost_positions(s, lt)
+	var out: Array = _avoid_positions(FactionAISystem.new(), s, lt)
 	_ok(out.has(Vector2i(3, 3)), "owner7 有 belief→納入避讓(3,3)")
 	_ok(not out.has(Vector2i(8, 8)), "owner8 無 belief→不納(未見敵不避，更多衝突湧現)")
 
@@ -62,3 +64,13 @@ func _test_jhost_no_belief_unreachable() -> void:
 
 func _seed_pop_big(t: TeamData) -> void:
 	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 50)
+
+
+# ★F9′ 之後舊函式（只回「非自家、非同勢力」的位置）改名改形成 _known_outpost_relations（每筆帶 g）
+#   ⇒ 本床要的仍是舊語意（要避讓的那些位置）＝ g < 1（同勢力那些 g＝1，不避）
+static func _avoid_positions(fai, st: WorldState, team: TeamData) -> Array:
+	var out: Array = []
+	for r in fai._known_outpost_relations(st, team):
+		if float(r["g"]) < 1.0:
+			out.append(r["tile_pos"])
+	return out

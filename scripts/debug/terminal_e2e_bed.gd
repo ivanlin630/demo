@@ -19,7 +19,8 @@ var _errors: int = 0
 var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
 	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3", "S1", "S2", "S3", "S4",
-	"FR1", "FR2", "FO", "FO2", "RS2", "RC3"]
+	"FR1", "FR2", "FO", "FO2", "RS2", "RC3",
+	"R5F1", "R5F2", "R5F3", "R5F4", "R5F7", "R5F7C"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -55,7 +56,7 @@ const PANEL_HEADER: String = "─ 面板（接管畫面）"
 const EFFECT_FIELDS: Dictionary = {
 	"task": ["task"], "belief": ["belief"], "faction": ["faction"],
 	"resources_self": ["res_self"], "resources_both": ["res_self", "res_others"],
-	"encounter": ["encounter"], "encounter_result": ["encounter_result"],
+	"encounter": ["encounter"], "encounter_result": ["encounter_result"], "camp": ["camp"],
 	"roster": ["roster_self"], "roster_other": ["roster_others"], "menu": [],
 }
 
@@ -103,6 +104,8 @@ func _initialize() -> void:
 	await _fr_cells()
 	await _rs_cells()
 	await _fo2_same_pass()
+	await _r5_cells()
+	await _r5_f7_cells()
 	_fo_judge()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
@@ -452,7 +455,7 @@ static func _snap(node: Node) -> Dictionary:
 	if pt == null:
 		return {"task": "dead", "belief": "", "faction": "", "res_self": "", "res_others": str(others_res),
 			"encounter": "%s|%d|%s" % [str(st.encounter_active), st.teams.size(), str(st.last_encounter_outcome)],
-			"encounter_result": str(st.last_encounter_result), "roster_self": "", "roster_others": str(others_roster)}
+			"encounter_result": str(st.last_encounter_result), "roster_self": "", "roster_others": str(others_roster), "camp": ""}
 	return {
 		"task": "%s|%s" % [pt.current_task, str(pt.move_target)],
 		"belief": JSON.stringify(node._bridge.query_memory_panel()),
@@ -467,6 +470,8 @@ static func _snap(node: Node) -> Dictionary:
 		"encounter_result": str(st.last_encounter_result),
 		"roster_self": "%d|%s|%d" % [pt.leader_id, str(pt.named_members), pt.population],
 		"roster_others": str(others_roster),
+		# ★F8：紮營＝當場立 L0 營地（不設任務）⇒ 它的效果落在「自己的營地」這一欄
+		"camp": str(st.own_camp_tile(pid).tile_pos) if st.own_camp_tile(pid) != null else "",
 	}
 
 
@@ -1410,6 +1415,7 @@ func _rs_cells() -> void:
 	var w: Dictionary = _new_w(await _build(SEED_A))
 	var node: Node = w["node"]
 	await _press(w, "t")
+	await _press(w, "?")   # ★F2 之後不可的項預設折疊 ⇒ 展開再看
 	var p: Dictionary = parse_screen(_screen(node))
 	var eng: Dictionary = {}
 	for sa in node._interact_action_split()["self"]:
@@ -1463,6 +1469,291 @@ func _rs_cells() -> void:
 			scr.contains("Team%d 只有領袖一人" % NPC_ID) and not scr.contains("無可招募對象"))
 	_cells_ran.append("RC3")
 	await _drop(wr["node"])
+
+
+# ══ 友善度 F1–F4（spec 2026-10-07 round5-friendliness-convergence）══════════════════════════════════════
+static var LETTER_NO_RESPONSE: String = String(load("res://scripts/ui/text_ui_main.gd").get_script_constant_map().get("LETTER_NO_RESPONSE_MSG", "現在沒有要回應的事件"))   # 讀 UI 那一份
+const R5_FIRST3_ANCHOR: String = "─ 你現在能做的"
+const R5_FOLD_HEAD: String = "另有 "
+const R5_FOLD_TAIL: String = " 個暫時不能做（按 ? 展開看原因）"
+
+
+static func _r5_first3(screen: String) -> Array:
+	var out: Array = []
+	var on: bool = false
+	var re := RegEx.create_from_string("^ \\[([^\\]]+)\\] (.+)$")
+	for l in screen.split("\n"):
+		if l.begins_with(R5_FIRST3_ANCHOR):
+			on = true
+			continue
+		if on:
+			var m := re.search(l)
+			if m == null:
+				break
+			out.append({"key": m.get_string(1), "text": m.get_string(2)})
+	return out
+
+
+static func _r5_self_lines(screen: String) -> Array:
+	var out: Array = []
+	var on: bool = false
+	for l in screen.split("\n"):
+		if l.begins_with("── 自家隊動作"):
+			on = true
+			continue
+		if on and (l.begins_with("── ") or l.begins_with("─ ")):
+			break
+		if on:
+			out.append(l)
+	return out
+
+
+func _r5_open_self(w: Dictionary) -> void:
+	await _press(w, "t")
+	if not bool(parse_screen(_screen(w["node"]))["self_active"]):
+		await _press(w, "tab")
+
+
+func _r5_cells() -> void:
+	print("\n── R5F1 主畫面最上方三行「你現在能做的」：每行一鍵一句、每個鍵按下有效 ──")
+	var w1: Dictionary = _new_w(await _build(SEED_A))
+	w1["node"]._bridge._state.set_player_forced_event({}, "")
+	await _to_main(w1)
+	var f3: Array = _r5_first3(_screen(w1["node"]))
+	print("   三行：%s" % str(f3))
+	await _drop(w1["node"])
+	_check("R5F1 首屏有「你現在能做的」三行（%d）" % f3.size(), f3.size() == 3)
+	var dead: Array = []
+	for row in f3:
+		var w1b: Dictionary = _new_w(await _build(SEED_A))
+		w1b["node"]._bridge._state.set_player_forced_event({}, "")
+		await _to_main(w1b)
+		var scr0: String = _screen(w1b["node"])
+		await _press(w1b, String(row["key"]).to_lower())
+		var res: String = _result_line(_screen(w1b["node"]))
+		if res.contains("無作用") or res.contains(LETTER_NO_RESPONSE) or _screen(w1b["node"]) == scr0:
+			dead.append("%s（%s）" % [row["key"], res])
+		await _drop(w1b["node"])
+	_check("R5F1 三行的每個鍵按下去都有效（無效：%s）" % str(dead), dead.is_empty() and f3.size() == 3)
+	_cells_ran.append("R5F1")
+
+	print("\n── R5F2 自家隊動作：能做的排前、不可的折疊成一行、鍵號不漂移、按 ? 展開帶原因 ──")
+	var w2: Dictionary = _new_w(await _build(SEED_A))
+	var node2: Node = w2["node"]
+	await _r5_open_self(w2)
+	var eng: Array = node2._interact_action_split()["self"]
+	# ★折疊以【這一頁】為單位：鍵號是頁內位置（靜態，不變量 #10），超過 9 項分頁 ⇒ 第一頁＝引擎前 9 項
+	var n_dis: int = 0
+	for a in eng.slice(0, 9):
+		if not bool(a.get("enabled", true)):
+			n_dis += 1
+	var sl: Array = _r5_self_lines(_screen(node2))
+	var items: Array = parse_screen(_screen(node2))["self"]
+	var first_dis: int = -1
+	var last_en: int = -1
+	for i in range(items.size()):
+		if bool(items[i]["enabled"]):
+			last_en = i
+		elif first_dis < 0:
+			first_dis = i
+	var fold_line: String = ""
+	for l in sl:
+		if String(l).contains(R5_FOLD_TAIL):
+			fold_line = String(l).strip_edges()
+	var keys_ok: bool = true
+	for it in items:
+		var k: int = int(it["key"]) - 1
+		if k < 0 or k >= eng.size() or String(eng[k].get("label", "")) != String(it["label"]):
+			keys_ok = false
+	print("   引擎 %d 項（不可 %d）｜畫面 %s｜折疊行「%s」" % [eng.size(), n_dis, str(items.map(func(x): return "%s%s%s" % [x["key"], x["label"], "" if x["enabled"] else "×"])), fold_line])
+	_check("★R5F2 母體地板：這一頁有可做也有不可的項", n_dis > 0 and n_dis < mini(9, eng.size()))
+	_check("R5F2 收起時畫面上沒有不可的項（全折進一行）", first_dis < 0)
+	_check("R5F2 折疊行「另有 %d 個暫時不能做（按 ? 展開看原因）」" % n_dis, fold_line == R5_FOLD_HEAD + str(n_dis) + R5_FOLD_TAIL)
+	_check("R5F2 鍵號＝引擎那一項（不因排序折疊漂移）", keys_ok and items.size() > 0)
+	await _press(w2, "?")
+	var items2: Array = parse_screen(_screen(node2))["self"]
+	var en_seen_after_dis: bool = false
+	var seen_dis: bool = false
+	var dis_n2: int = 0
+	var dis_with_why: int = 0
+	for it2 in items2:
+		if not bool(it2["enabled"]):
+			seen_dis = true
+			dis_n2 += 1
+			if String(it2.get("why", "")) != "":
+				dis_with_why += 1
+		elif seen_dis:
+			en_seen_after_dis = true
+	print("   按 ? 之後：%s" % str(items2.map(func(x): return "%s%s%s" % [x["key"], x["label"], "" if x["enabled"] else "×"])))
+	_check("R5F2 展開後不可的項全出現（%d／%d）、都帶原因（%d）、仍排在可做的後面" % [dis_n2, n_dis, dis_with_why],
+		dis_n2 == n_dis and dis_with_why == n_dis and not en_seen_after_dis)
+	_cells_ran.append("R5F2")
+
+	print("\n── R5F3 拒絕句帶主詞與（有則）下一步：「<動作>不行：<原因>；可以先做 <動作>」──")
+	var bad3: Array = []
+	var n_hint: int = 0
+	for it3 in items2:
+		if bool(it3["enabled"]):
+			continue
+		var a3: Dictionary = eng[int(it3["key"]) - 1]
+		var hint: String = String(a3.get("hint", ""))
+		if hint != "":
+			n_hint += 1
+		var w3: Dictionary = _new_w(await _build(SEED_A))
+		await _r5_open_self(w3)
+		await _press(w3, String(it3["key"]))
+		var res3: String = _result_line(_screen(w3["node"])).trim_prefix("✗ ").trim_prefix("✓ ")
+		var want: String = "%s不行：%s" % [a3.get("label", ""), a3.get("disabled_reason", "")]
+		if hint != "":
+			want += "；可以先做 %s" % PlayerApiMapper.action_label(hint)
+		print("   按 [%s]%s ⇒「%s」" % [it3["key"], it3["label"], res3])
+		if res3 != want:
+			bad3.append("%s：「%s」≠「%s」" % [it3["label"], res3, want])
+		await _drop(w3["node"])
+	_check("R5F3 每個不可的項按下去，結果行＝主詞＋原因＋（有則）下一步（不對：%s）" % str(bad3), bad3.is_empty() and dis_n2 > 0)
+	print("   （其中引擎給了下一步的 %d 項）" % n_hint)
+	_cells_ran.append("R5F3")
+	await _drop(node2)
+
+	print("\n── R5F4 鍵列只印當下有效的鍵：互動面板沒有找上門的事 ⇒ 不印回應字母；有 ⇒ 印 ──")
+	var w4: Dictionary = _new_w(await _build(SEED_A))
+	w4["node"]._bridge._state.set_player_forced_event({}, "")
+	await _press(w4, "t")
+	var hint4: String = _hint(w4["node"])
+	await _drop(w4["node"])
+	var w4b: Dictionary = _new_w(await _build(SEED_A))
+	await _press(w4b, "t")
+	var hint4b: String = _hint(w4b["node"])
+	await _drop(w4b["node"])
+	print("   沒事：%s\n   有事：%s" % [hint4, hint4b])
+	_check("R5F4 沒有找上門的事 ⇒ 鍵列不印回應字母那一項", not hint4.contains("回應"))
+	_check("R5F4 有找上門的事 ⇒ 鍵列印回應字母那一項", hint4b.contains("回應"))
+	_cells_ran.append("R5F4")
+
+
+# ══ 友善度 F7／F7b：游標處一行、選中區塊——只讀附身者知道的 ═════════════════════════════════════════
+const R5_CURSOR_HEAD: String = "游標處 "
+
+
+static func _r5_cursor_line(screen: String) -> String:
+	for l in screen.split("\n"):
+		if l.strip_edges().begins_with(R5_CURSOR_HEAD):
+			return l.strip_edges()
+	return ""
+
+
+static func _r5_hex(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x
+	var dy: int = b.y - a.y
+	return (absi(dx) + absi(dx + dy) + absi(dy)) / 2
+
+
+func _r5_f7_cells() -> void:
+	print("\n── R5F7 游標處一行：已知據點格／自己營地格／空地／沒去過 ──")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var node: Node = w["node"]
+	var st: WorldState = node._bridge._state
+	st.set_player_forced_event({}, "")
+	await _to_main(w)
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	# ①已知據點格：別人的據點，佈置進玩家的 belief（親見那一份）
+	var op_tile: HexTileData = null
+	var ids: Array = st.world.tiles.keys()
+	ids.sort()
+	for k in ids:
+		var t: HexTileData = st.world.tiles[k]
+		if t.outpost_level > 0 and t.outpost_owner != ptid and t.outpost_owner != -1:
+			op_tile = t
+			break
+	_check("★R5F7 母體地板：有一座別人的據點", op_tile != null)
+	var bad: Array = []
+	if op_tile != null:
+		var known: Dictionary = st.team_tile_known.get(ptid, {})
+		known[op_tile.tile_id] = {"outpost": {"owner_id": op_tile.outpost_owner, "level": op_tile.outpost_level, "last_tick": 0}}
+		st.team_tile_known[ptid] = known
+		node._cursor = op_tile.tile_pos
+		node._refresh()
+		var l1: String = _r5_cursor_line(_screen(node))
+		print("   已知據點格 ⇒「%s」" % l1)
+		if not l1.contains("Team%d" % op_tile.outpost_owner) or not l1.contains("據點"):
+			bad.append("已知據點格：%s" % l1)
+	# ②自己營地格（腳下）
+	var camp_ok: bool = FactionAISystem.shared().establish_crude_camp(st, pt)
+	node._cursor = pt.tile_pos
+	node._refresh()
+	var l2: String = _r5_cursor_line(_screen(node))
+	print("   自己營地格（腳下，立營 %s）⇒「%s」" % [str(camp_ok), l2])
+	if not camp_ok or not l2.contains("你的營地") or not l2.contains("紮營"):
+		bad.append("自己營地格：%s" % l2)
+	# ③視野內的空地（不是據點、不是營地）
+	var empty: Vector2i = Vector2i(-1, -1)
+	for k2 in ids:
+		var t2: HexTileData = st.world.tiles[k2]
+		if t2.outpost_level == 0 and t2.camp_level == 0 and t2.tile_pos != pt.tile_pos \
+				and _r5_hex(t2.tile_pos, pt.tile_pos) <= VisionSystem.VISION_RADIUS:
+			empty = t2.tile_pos
+			break
+	node._cursor = empty
+	node._refresh()
+	var l3: String = _r5_cursor_line(_screen(node))
+	var tl: String = String((load("res://scripts/simulation/player_api_mapper.gd") as Script).call("terrain_label", String(st.world.tiles[empty.x * 1000 + empty.y].terrain))) if _has_mapper("terrain_label") else "?"
+	print("   視野內空地 %s ⇒「%s」" % [str(empty), l3])
+	if not l3.contains(tl) or l3.contains("據點："):
+		bad.append("空地：%s" % l3)
+	# ④沒去過
+	var far: Vector2i = Vector2i(-1, -1)
+	for k3 in ids:
+		var t3: HexTileData = st.world.tiles[k3]
+		if _r5_hex(t3.tile_pos, pt.tile_pos) > VisionSystem.VISION_RADIUS + 2 and not st.team_tile_known.get(ptid, {}).has(k3):
+			far = t3.tile_pos
+			break
+	node._cursor = far
+	node._refresh()
+	var l4: String = _r5_cursor_line(_screen(node))
+	print("   沒去過 %s ⇒「%s」" % [str(far), l4])
+	if not l4.contains("沒去過"):
+		bad.append("沒去過：%s" % l4)
+	_check("R5F7 游標處一行在三種格（＋沒去過）內容正確（不對：%s）" % str(bad), bad.is_empty())
+	_cells_ran.append("R5F7")
+	print("\n── R5F7C 選中一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反向：走過去看見 ⇒ 出現 ──")
+	node._selected = far
+	node._cursor = far
+	node._refresh()
+	var sel1: String = _r5_selected_block(_screen(node))
+	pt.tile_pos = far
+	node._refresh()
+	var sel2: String = _r5_selected_block(_screen(node))
+	print("   沒去過時：「%s」\n   站上去之後：「%s」" % [sel1, sel2])
+	_check("★R5F7C 母體地板：選中區塊有印出來", sel1 != "" and sel2 != "")
+	_check("R5F7C 沒去過 ⇒ 沒有糧量數字", not RegEx.create_from_string("食[:：] *[0-9]").search(sel1) != null)
+	_check("R5F7C 反向：看得見 ⇒ 有糧量數字", RegEx.create_from_string("食[:：] *[0-9]").search(sel2) != null)
+	_cells_ran.append("R5F7C")
+	await _drop(node)
+
+
+static func _r5_selected_block(screen: String) -> String:
+	var out: Array = []
+	var on: bool = false
+	for l in screen.split("\n"):
+		var t: String = l.strip_edges()
+		var i: int = t.find("選中: ")
+		if i >= 0:
+			on = true
+			out.append(t.substr(i))
+			continue
+		if on:
+			if t.contains("食") or t.contains("糧量") or t.contains("農"):
+				out.append(t)
+			break
+	return "／".join(PackedStringArray(out))
+
+
+static func _has_mapper(fn: String) -> bool:
+	for m in (load("res://scripts/simulation/player_api_mapper.gd") as Script).get_script_method_list():
+		if String(m.get("name", "")) == fn:
+			return true
+	return false
 
 
 func _m_cells() -> void:
@@ -1764,6 +2055,7 @@ func _e2_no_faction_alliance() -> void:
 	if not bool(p2["targets_active"]):
 		await _press(w2, "tab")
 	await _press(w2, "1")
+	await _press(w2, "?")   # ★F2 之後不可的項預設折疊 ⇒ 展開再看
 	var pa2: Dictionary = parse_screen(_screen(w2["node"]))
 	await _drop(w2["node"])
 	var row2: Dictionary = {}

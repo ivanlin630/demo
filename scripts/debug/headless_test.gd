@@ -14063,10 +14063,15 @@ func _test_player_camp() -> void:
 	var food_before: float = float(tile.resources.get("food", 0))
 	var r: Dictionary = cs._action_camp(state, -1, pt, 0)
 	assert(r.get("ok", false), "紮營應成功（免材料）:%s" % str(r))
-	assert(pt.current_task == TeamData.TASK_BUILD, "紮營中玩家隊 task=建設,實際=%s" % pt.current_task)
+	# ★F8（spec 2026-10-07 round5 §F8）：紮營＝當場立 L0 營地；升 L1 是第二步「紮根」（工期＝settle）
+	assert(tile.camp_level == 1 and tile.camp_team_id == 0, "紮營應當場立 L0 營地,camp_level=%d" % tile.camp_level)
+	var r2: Dictionary = cs._action_settle(state, -1, pt, 0)
+	assert(r2.get("ok", false), "紮根應成功（免材料）:%s" % str(r2))
+	assert(pt.current_task == TeamData.TASK_BUILD, "紮根中玩家隊 task=建設,實際=%s" % pt.current_task)
 	assert(tile.construction_ticks_left > 0, "應設施工 ticks")
 	var os := OutpostSystem.new()
-	for _i in range(100):
+	# ★F8：工期＝settle（比舊紮營長）⇒ 推到工期用完為止（上限給足，不寫死 100）
+	for _i in range(OutpostSystem.build_person_hours("settle", 1) * 4 + 10):
 		os._tick_construction(state, tile)
 		if tile.outpost_level > 0: break
 	assert(tile.outpost_level == 1, "完工應 lvl1,實際=%d" % tile.outpost_level)
@@ -14306,6 +14311,7 @@ func _test_action_ui_coverage() -> void:
 		"offer_surrender": "interact-team(encounter)",
 		"hunt": "interact-self", "hunt_beast": "interact-self", "establish_faction": "interact-self",
 		"train": "interact-self", "camp": "interact-self", "promote_anon": "interact-self",
+		"settle": "interact-self",   # ★F8 紮根（只在自己的 L0 營地上列出）
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
 		"rest": "interact-self",   # ★票T §1③ 休息（自家隊動作區）

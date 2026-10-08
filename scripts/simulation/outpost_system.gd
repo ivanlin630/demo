@@ -225,8 +225,8 @@ const PRISONER_CAP: Dictionary = {
 	"military": [10, 30,  80 ],
 }
 
-const MIN_DIST_ANY:  int = 2    # 任意兩據點最小 hex 距離
-const MIN_DIST_SAME: int = 11   # 同類型最小 hex 距離
+# ★據點間距規則（任意 2／同類 11）整條退場（用戶裁 藍圖 e1a09f429，spec 2026-10-07 round5 §F8）：
+#   擋建點的只剩「同格已有」（start_build／establish_crude_camp／precheck_camp／NPC 紮根各自已查）
 
 # 公庫容量常數 + 計算已搬入 TileBank（單點）。以下委派保留既有呼叫端（os._get_storage_cap / storage_cap）不動。
 
@@ -567,9 +567,6 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 		return false
 	if tile.construction_team_id != -1:
 		push_warning("[Outpost] start_build: 目標格建設中")
-		return false
-	if not _check_distance(state, tile.tile_pos, type):
-		push_warning("[Outpost] start_build: 距離限制違規")
 		return false
 	var cost: Dictionary = OUTPOST_COST[type][level - 1]
 	if not _can_afford(team, tile, cost, "start_build"):
@@ -928,28 +925,6 @@ func get_outpost_name(type: String, level: int) -> String:
 	return "未知據點"
 
 # ──────── 輔助 ────────
-
-func _check_distance(state: WorldState, pos: Vector2i, type: String) -> bool:
-	# S2 礦村：civilian 且目標格 resource_cap 有礦 → 距離免疫（礦山位置不可選擇）。
-	# 條件限 type=="civilian" 防軍事 outpost / 玩家紮營繞過距離限制；
-	# 用 resource_cap（永不耗盡）而非 resources（採集後可能 =0）判礦脈存在。
-	if type == "civilian":
-		var target_tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
-		var is_ore_mountain: bool = target_tile != null and target_tile.terrain == "mountain" \
-			and (float(target_tile.resource_cap.get("ore_gold", 0)) > 0.0 \
-				or float(target_tile.resource_cap.get("ore_silver", 0)) > 0.0)
-		if is_ore_mountain:
-			return true   # 礦村 tile：跳過距離限制（礦山位置不可選擇，強制允建）
-	for tile_id in state.world.tiles:
-		var t: HexTileData = state.world.tiles[tile_id]
-		if t.outpost_level == 0:
-			continue
-		var d: int = _hex_dist(pos, t.tile_pos)
-		if d < MIN_DIST_ANY:
-			return false
-		if t.outpost_type == type and d < MIN_DIST_SAME:
-			return false
-	return true
 
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x

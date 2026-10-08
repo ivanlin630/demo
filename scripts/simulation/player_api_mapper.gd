@@ -91,6 +91,28 @@ static func _home_distance(state: WorldState, t: TeamData):
 	var dy: int = b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
+# ★F7：地形的玩家面中文（唯一一份；認不得的不吞，印出來）
+static func terrain_label(t: String) -> String:
+	match t:
+		"plains":   return "平原"
+		"forest":   return "森林"
+		"mountain": return "山地"
+	return "（未知地形：%s）" % t
+
+# ★F8 營地欄（藍圖裁（乙）68cd9883d：營地不是家，家欄不動）：camp_pos／camp_distance 同一支 own_camp_tile 取值
+#   ⇒ 兩欄同給或同 null（同「家」三欄的結構保證）；自己的營地＝self-knowledge
+static func _camp_pos(state: WorldState, t: TeamData):
+	var c: HexTileData = state.own_camp_tile(t.team_id)
+	if c == null: return null
+	return {"q": c.tile_pos.x, "r": c.tile_pos.y}
+
+static func _camp_distance(state: WorldState, t: TeamData):
+	var c: HexTileData = state.own_camp_tile(t.team_id)
+	if c == null: return null
+	var dx: int = c.tile_pos.x - t.tile_pos.x
+	var dy: int = c.tile_pos.y - t.tile_pos.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
 static func map_controlled_team(state: WorldState) -> Dictionary:
 	var pid: int = state.player_id
 	var p: PersonData = state.persons.get(pid) if pid != -1 else null
@@ -136,6 +158,8 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"home_kind": _home_kind(state, t),
 		"home_distance": _home_distance(state, t),
 		"home_count": state.own_outpost_count(t.team_id),
+		"camp_pos": _camp_pos(state, t),
+		"camp_distance": _camp_distance(state, t),
 		"members": members,
 		"resources": {
 			"food":               int(t.resources.get("food", 0)),
@@ -437,6 +461,7 @@ static func action_label(action_id: String) -> String:
 		"promote_anon":          return "拔擢匿名→記名"
 		"rest":                  return "休息"
 		"camp":                  return "紮營"
+		"settle":                return "紮根"
 		# ★`cancel_move` 補進來（2026-10-01）：查詢面原本**手寫**「取消移動」
 		#   ⇒ 那是第二個 label 生產者，而本票把那 11 段收成一個迴圈之後
 		#     迴圈只呼這一支 ⇒ 手寫那一份隨之消失。
@@ -743,13 +768,16 @@ static func map_inventory_state(state: WorldState) -> Dictionary:
 #   ★而它的失效長相是「那個符號沒出現」—— 沒有任何斷言在看，所以它是靜默的。
 #   ★★預設 `false`：既有 21 個呼叫點不用改（它們不是子選單入口），
 #     而團隊目標那一條路把全列版算出來的值傳進來。
+# ★F3（spec 2026-10-07 round5-friendliness）：`hint`＝能解除這個不可條件的動作 id（引擎給；指不出 ⇒ ""）
+#   ⇒ 排版層把拒絕句排成「<動作>不行：<原因>；可以先做 <hint 的動作名>」，不自寫下一步
 static func map_available_action(action_id: String, label: String, enabled: bool,
 		disabled_reason: String, target_requirements: Dictionary,
 		command_name: String, command_args: Dictionary,
-		opens_submenu: bool = false) -> Dictionary:
+		opens_submenu: bool = false, hint: String = "") -> Dictionary:
 	return {
 		"action_id": action_id, "label": label, "enabled": enabled,
 		"disabled_reason": disabled_reason,
+		"hint": hint,
 		"opens_submenu": opens_submenu,
 		"target_requirements": target_requirements,
 		"command_name": command_name, "command_args": command_args

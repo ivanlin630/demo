@@ -87,6 +87,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 			continue
 		var ok: bool = true
 		var why: String = ""
+		var hint: String = ""   # ★F3：能解除這個條件的動作 id（指不出 ⇒ ""，不硬湊）
 		if pt == null or tgt == null:
 			ok = false
 			why = "沒有可操作的隊伍或目標"
@@ -109,6 +110,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 						ok = false
 						why = "人口不足（需超過對方 1.5 倍；你 %d、對方 %d）" % [
 							pt.population, tgt.population]
+						hint = "recruit"
 				"extort":
 					if pt.readiness < 0.7:
 						ok = false
@@ -118,6 +120,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 					if coin_a < RECRUIT_COST_ANON:
 						ok = false
 						why = "金幣不足（需 %d，現 %d）" % [int(RECRUIT_COST_ANON), int(coin_a)]
+						hint = "trade"
 					elif not _target_has_anon(tgt):
 						ok = false
 						why = "對方沒有可招募的無名之人"
@@ -125,6 +128,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 					if not _can_invite_settle(state, pt, tgt):
 						ok = false
 						why = "你不在自家據點上，無法邀請對方定居"
+						hint = "camp"
 				"offer_surrender":
 					# ★原因【不在這裡寫】：讀共用前置檢查回的那句話
 					#   ⇒ 同一條規則一份字面，而「原因」與「判斷」仍在同一個回傳裡。
@@ -140,6 +144,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 			"label": PlayerApiMapper.action_label(act),   # ★唯一一份中文表（systems 裁④）
 			"enabled": ok,
 			"disabled_reason": why,
+			"hint": hint,
 			"opens_submenu": SUBMENU_OPENERS.has(act),    # ★從宣告導出，不是第二份名單
 		})
 	return out
@@ -243,6 +248,7 @@ func _setup_registry() -> void:
 		"hunt_beast":             _action_hunt_beast,
 		"train":                  _action_train,
 		"camp":                   _action_camp,
+		"settle":                 _action_settle,
 		"promote_anon":           _action_promote_anon,
 		"rest":                   _action_rest,
 	}
@@ -399,7 +405,8 @@ const ACTION_SHAPE: Dictionary = {
 	"betray_faction":          {"target": "none", "listed": false},
 	"build_facility":          {"target": "none", "listed": false},
 	"build_outpost":           {"target": "none", "listed": false},
-	"camp":                    {"target": "none", "listed": true, "effect": "task"},
+	"camp":                    {"target": "none", "listed": true, "effect": "camp"},   # ★F8：紮營＝當場立 L0 營地（不設任務）
+	"settle":                  {"target": "none", "listed": true, "effect": "task"},   # ★F8：紮根（只在自己的 L0 營地上列出）
 	"cancel_move":             {"target": "none", "listed": false},  # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
 	#   ★★★`listed: true → false`（systems 裁 2026-10-01）—— ★**不要改回 true**：
 	#     `listed` 的語意逐字是「出現在【自家隊動作區】那一屏」⇒ **畫面就是這個欄位的定義**，
@@ -497,13 +504,14 @@ static func _derive_team_target_actions() -> Array:
 # ★★兩個消費者，而「同一份」是**結構性的**不是紀律性的：
 #   ·`_action_<x>` 的既有前置檢查**改呼它**（人話搬進來，原地只留呼叫）
 #   ·全列版的迴圈**也呼它** ⇒ `enabled`／`disabled_reason` 從這裡來
-# ★★★**禁止**在查詢面重寫任何條件字面（`TRAIN_COST_COIN`／`_check_distance`／
+# ★★★**禁止**在查詢面重寫任何條件字面（`TRAIN_COST_COIN`／`outpost_level`／
 #   `outpost_level`…）—— 那一條與第一張票的 P7 同形，而 P7 已經有血證會紅。
 #
 # ★★★★【三處 handler 與查詢面原本條件【不同】，而我照 spec 裁「handler 權威」，
 #   例外逐一寫出來】（2026-10-01 實測，三處都是 (甲) 那個病的本體）：
 #   ①`camp`：查詢面**複製了 4 個條件**（`outpost_level`／`outpost_owner`／`terrain`／
-#     `_check_distance`），而 handler 有**5 句人話**。⇒ 收成一份，人話全部來自 handler。
+#     間距檢查），而 handler 有**5 句人話**。⇒ 收成一份，人話全部來自 handler。
+#     （間距與山地兩條後來整條退場：spec 2026-10-07 round5 §F8，用戶裁 e1a09f429）
 #   ②`confirm_gather_intel`：handler 檢「參數遺漏」（npc 存在 ＋ choice 非空），
 #     查詢面檢 `pending_intel_target`。★**這兩個不是重複**：前者是「參數完整嗎」（執行時），
 #     後者是「有沒有待確認的事」（前置）⇒ 前置檢查用後者，而 handler 那一句**留著**
@@ -533,7 +541,7 @@ func precheck_take_loot(state: WorldState, _pt: TeamData) -> Dictionary:
 	if res.is_empty() or int(res.get("winner_id", -1)) != _get_player_team_id(state):
 		# ★措辭用 handler 既有那句（spec §3②「handler 那句人話搬進去」）——
 		#   藍圖裁定裡的「你沒有剛結束的戰鬥」是**例**不是指定，而既有那句更具體。
-		return { "ok": false, "reason": "無可收取戰利品" }
+		return { "ok": false, "reason": "無可收取戰利品", "hint": "attack" }
 	return { "ok": true, "reason": "" }
 
 func precheck_leave_loot(state: WorldState, pt: TeamData) -> Dictionary:
@@ -544,19 +552,19 @@ func precheck_leave_loot(state: WorldState, pt: TeamData) -> Dictionary:
 	var r: Dictionary = precheck_take_loot(state, pt)
 	if bool(r.get("ok", false)):
 		return r
-	return { "ok": false, "reason": "無可放棄的戰利品" }
+	return { "ok": false, "reason": "無可放棄的戰利品", "hint": "attack" }
 
 func precheck_subjugate_enemy(state: WorldState, _pt: TeamData) -> Dictionary:
 	var res: Dictionary = state.last_encounter_result
 	if res.is_empty() or not bool(res.get("can_subjugate", false)):
-		return { "ok": false, "reason": "無可收編的敗者" }
+		return { "ok": false, "reason": "無可收編的敗者", "hint": "attack" }
 	return { "ok": true, "reason": "" }
 
 func precheck_confirm_gather_intel(state: WorldState, _pt: TeamData) -> Dictionary:
 	if not state.player_state.has("pending_intel_target"):
 		# ★本票第二句新造的措辭 —— 而它是**藍圖裁定逐字給的那一句**
 		#   （handler 的「參數遺漏」答的是另一個問題：參數完整嗎）。
-		return { "ok": false, "reason": "沒有待確認的打聽" }
+		return { "ok": false, "reason": "沒有待確認的打聽", "hint": "gather_intel" }
 	return { "ok": true, "reason": "" }
 
 func precheck_hunt(state: WorldState, pt: TeamData) -> Dictionary:
@@ -587,28 +595,46 @@ func precheck_camp(state: WorldState, pt: TeamData) -> Dictionary:
 		return { "ok": false, "reason": "格子不存在" }
 	if tile.outpost_level != 0 or tile.outpost_owner != -1:
 		return { "ok": false, "reason": "此地已有據點" }
-	if tile.terrain == "mountain":
-		return { "ok": false, "reason": "山地無法紮營" }
-	if not OutpostSystem.new()._check_distance(state, tile.tile_pos, camp_type):
-		return { "ok": false, "reason": "離既有據點太近,無法紮營" }
+	# ★F8：紮營＝L0 營地（establish_crude_camp）⇒ 同格已有營地不可再紮（自己的營地上要做的是「紮根」）
+	if tile.camp_level > 0:
+		return { "ok": false, "reason": "此地已有營地" }
+	return { "ok": true, "reason": "" }
+
+
+# ★F8：紮根＝玩家把自己的 L0 營地升成 L1 據點（共用 NPC 紮根落地那一支：FactionAISystem.start_settle_construction）
+#   ★只在【自己的 L0 營地】上列出（settle_listed）；施工中不可（不查的話重按會把工期重置）
+static func settle_listed(state: WorldState, pt: TeamData) -> bool:
+	if pt == null:
+		return false
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	return tile != null and tile.camp_level == 1 and tile.camp_team_id == pt.team_id and tile.outpost_level == 0
+
+func precheck_settle(state: WorldState, pt: TeamData) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	if not settle_listed(state, pt):
+		return { "ok": false, "reason": "這裡不是你的營地", "hint": "camp" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile.construction_team_id != -1:
+		return { "ok": false, "reason": "紮根施工中（剩 %d 人時）" % tile.construction_ticks_left }
 	return { "ok": true, "reason": "" }
 
 func precheck_train(state: WorldState, pt: TeamData) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if AnonTierSystem.total_pop(pt) <= 0:
-		return { "ok": false, "reason": "無匿名人口可訓練" }
+		return { "ok": false, "reason": "無匿名人口可訓練", "hint": "recruit" }
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		# ★★那個數字從常數來（查詢面不准再寫一次 `TRAIN_COST_COIN`）——
 		#   P3a 的行為證就是擾動這個常數之後**原因裡的數字要跟著變**。
-		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
+		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN, "hint": "trade" }
 	return { "ok": true, "reason": "" }
 
 func precheck_promote_anon(_state: WorldState, pt: TeamData) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if AnonTierSystem.total_pop(pt) <= 0:
-		return { "ok": false, "reason": "無匿名兵可拔擢" }
+		return { "ok": false, "reason": "無匿名兵可拔擢", "hint": "recruit" }
 	return { "ok": true, "reason": "" }
 
 # ★票 T：玩家「休息」—— 前置只問「累不累」（不累休息沒有東西可回復，說出來而不是吞掉）
@@ -632,6 +658,7 @@ func _precheck_for(action: String) -> Callable:
 		"hunt":                  return precheck_hunt
 		"hunt_beast":            return precheck_hunt_beast
 		"camp":                  return precheck_camp
+		"settle":                return precheck_settle
 		"train":                 return precheck_train
 		"promote_anon":          return precheck_promote_anon
 		"rest":                  return precheck_rest
@@ -770,21 +797,30 @@ func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int)
 	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_camp()` 裡，
 	#   原地只留呼叫 —— 全列版的迴圈呼的是同一支。
 	#   ★★而本支是 (甲) 那個病最清楚的實例：查詢面原本**複製了 4 個條件**
-	#     （`outpost_level`／`outpost_owner`／`terrain`／`_check_distance`），
+	#     （`outpost_level`／`outpost_owner`／`terrain`／間距檢查），
 	#     而這裡有**5 句人話** ⇒ 現在只有一份。
 	var pre_c: Dictionary = precheck_camp(state, pt)
 	if not bool(pre_c.get("ok", false)):
 		return { "ok": false, "msg": String(pre_c.get("reason", "")) }
+	# ★F8（藍圖裁 (i) 7d10ddb4a）：玩家紮營＝L0 營地，與 NPC 同一支（establish_crude_camp），當場成立；
+	#   升 L1 是第二步「紮根」（_action_settle）——舊版這裡直接開 crude_camp 工程、完工即 L1＝一鍵直達 L1
+	if not FactionAISystem.shared().establish_crude_camp(state, pt):
+		return { "ok": false, "msg": "無法紮營" }
+	return { "ok": true, "msg": "在 (%d,%d) 紮營（營地，可再紮根成據點）" % [pt.tile_pos.x, pt.tile_pos.y] }
+
+func _action_settle(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var pre_s: Dictionary = precheck_settle(state, pt)
+	if not bool(pre_s.get("ok", false)):
+		return { "ok": false, "msg": String(pre_s.get("reason", "")) }
 	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
+	if camp_type not in ["civilian", "military"]:
+		camp_type = "civilian"
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
-	var os := OutpostSystem.new()
-	# ★同 faction_ai 的紮根：記下實付工量，讓 construction_ticks_total 分得出兩種 crude_camp
-	tile.construction_target = { "action": "crude_camp", "type": camp_type, "level": 1, "owner": pt.team_id,
-		"person_hours": OutpostSystem.build_person_hours("camp") }
-	tile.construction_ticks_left = OutpostSystem.build_person_hours("camp")
-	tile.construction_started_tick = -1
-	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_camp")
-	return { "ok": true, "msg": "開始紮營 %s（%d 人時,免材料）" % [camp_type, OutpostSystem.build_person_hours("camp")] }
+	# ★成本＝NPC 紮根今天的成本：settle 工期、免材料（藍圖：成本就是時間）
+	FactionAISystem.shared().start_settle_construction(state, pt, tile, camp_type)
+	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_settle")   # gate-ok: 玩家指令設任務（同 _action_rest；舊 _action_camp 那一行搬到這裡）
+	return { "ok": true, "msg": "開始紮根成%s（%d 人時,免材料）" % [
+		String((OutpostSystem.OUTPOST_NAMES.get(camp_type, ["據點"]) as Array)[0]), OutpostSystem.build_person_hours("settle", 1)] }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
@@ -1048,7 +1084,7 @@ func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt
 	var _os := OutpostSystem.new()
 	var ok: bool = _os.start_build(state, pt, outpost_type, 1)
 	if not ok:
-		return { "ok": false, "msg": "無法建造（資源不足或距離限制）" }
+		return { "ok": false, "msg": "無法建造（資源不足）" }
 	print("[PlayerCmd] build_outpost type=%s" % outpost_type)
 	return { "ok": true, "msg": "開始建造 %s" % outpost_type }
 

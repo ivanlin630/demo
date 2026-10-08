@@ -205,7 +205,7 @@ func _test_camp_action_reachable() -> void:
 	var tile = st.world.tiles.get(pt.tile_pos.x*1000 + pt.tile_pos.y)
 	if tile != null:
 		tile.outpost_level = 0; tile.outpost_owner = -1; tile.terrain = "plains"
-	# N-3: camp 現有 _check_distance 真 gate → 清掉附近既有 outpost 才能通過（gate 通過時仍可達）
+	# N-3: 清掉附近既有 outpost（舊時代為了通過間距檢查；間距規則已退場，留著無害）
 	for tid in st.world.tiles:
 		var t = st.world.tiles[tid]
 		if t != tile: t.outpost_level = 0; t.outpost_owner = -1
@@ -237,9 +237,19 @@ func _test_camp_action_reachable() -> void:
 	print("   自家隊那一側 %d 列：%s" % [self_rows2.size(), str(self_ids2)])
 	_check("★★★距離太近時 camp **仍然列出**（舊斷言寫的是它消失 ＝ 把 (乙) 的病當預期）",
 		"camp" in self_ids2)
-	_check("★★而它 `enabled==false`", not bool(camp_row.get("enabled", true)))
-	_check("★★★★而它的原因**非空**（實測「%s」）" % String(camp_row.get("disabled_reason", "")),
-		String(camp_row.get("disabled_reason", "")).strip_edges() != "")
+	# ★★F8（2026-10-08，spec round5 §F8，用戶裁 e1a09f429）：據點間距規則整條退場 ⇒ 緊鄰據點【可以】紮營
+	_check("★★F8：緊鄰據點時 camp 可做（間距規則退場）", bool(camp_row.get("enabled", false)))
+	# ★★★「不可時列出＋引擎原因」那條原則改用【仍存在的】條件驗：腳下那一格已有據點
+	var here_t = st.world.tiles.get(pt.tile_pos.x*1000 + pt.tile_pos.y)
+	here_t.outpost_level = 1; here_t.outpost_owner = 999; here_t.outpost_type = "civilian"
+	node._refresh()
+	var camp_row2: Dictionary = {}
+	for a2 in node._interact_action_split()["self"]:
+		if String(a2.get("action_id", "")) == "camp":
+			camp_row2 = a2 as Dictionary
+	_check("★★腳下已有據點 ⇒ camp 仍列出而 `enabled==false`", not camp_row2.is_empty() and not bool(camp_row2.get("enabled", true)))
+	_check("★★★★而它的原因**非空**（實測「%s」）" % String(camp_row2.get("disabled_reason", "")),
+		String(camp_row2.get("disabled_reason", "")).strip_edges() != "")
 	await _free_ui(node)
 	_cell("_test_camp_action_reachable")
 
@@ -3272,9 +3282,11 @@ func _test_p29_key_on_screen_runs_that_row() -> void:
 	node._refresh()
 	var rows: Array = node._interact_action_split()["team"]
 	var keyed: Array = []
+	var enabled_of: Dictionary = {}
 	for r in rows:
 		if TextUiView.key_for(String(r.get("action_id", ""))) != "":
 			keyed.append(String(r.get("action_id", "")))
+			enabled_of[String(r.get("action_id", ""))] = bool(r.get("enabled", true))
 	print("   這一輪 %d 列，其中【有鍵】的 %d 列：%s" % [rows.size(), keyed.size(), str(keyed)])
 	_check("★★母體地板：有鍵的列 > 0（0 ⇒ 下面的迴圈一次都不跑 ⇒ 本格不可判不是綠）",
 		keyed.size() > 0)
@@ -3303,10 +3315,14 @@ func _test_p29_key_on_screen_runs_that_row() -> void:
 				got = String(a.get("action_id", ""))
 		if got == "" and node._ui_depth() > 0:
 			got = String(node._ui_top())
-		print("   按 [%s]（畫面說「%s」）⇒ 實際 action_id ＝ 「%s」%s" % [
-			key, String(aid), got, "" if got == String(aid) else "★不符"])
-		if got != String(aid):
-			wrong.append("按 [%s] 畫面說「%s」而實際是「%s」" % [key, String(aid), got])
+		# ★F3（列的條件＝做的條件）：不可的列按下去是拒絕句（主詞＋原因）、不下令 ⇒ 期望「什麼都沒排」且結果行說那一列
+		var want: String = String(aid) if bool(enabled_of.get(String(aid), true)) else ""
+		var fb: String = String(node._feedback_line.text)
+		var refused_ok: bool = want != "" or fb.contains(PlayerApiMapper.action_label(String(aid)) + "不行：")
+		print("   按 [%s]（畫面說「%s」%s）⇒ 實際 action_id ＝ 「%s」%s" % [
+			key, String(aid), "" if want != "" else "，不可", got, "" if (got == want and refused_ok) else "★不符"])
+		if got != want or not refused_ok:
+			wrong.append("按 [%s] 畫面說「%s」而實際是「%s」（結果行「%s」）" % [key, String(aid), got, fb])
 	_check("★★★★★按下畫面印的鍵 ⇒ 執行的就是那一列（不符的：%s）" % str(wrong),
 		wrong.is_empty())
 	# ★(d) 沒有鍵的那些要【真的按不到】—— 而現在它們不在反查表裡 ⇒ 按任何鍵都不會選到它們
@@ -3655,6 +3671,10 @@ func _test_p33_listed_matches_the_screen() -> void:
 	for k in PlayerCommandSystem.ACTION_SHAPE.keys():
 		var sh: Dictionary = PlayerCommandSystem.ACTION_SHAPE[k] as Dictionary
 		if String(sh.get("target", "")) == "none" and bool(sh.get("listed", false)):
+			# ★F8（2026-10-08）：settle（紮根）只在自己的 L0 營地上列出（PlayerCommandSystem.settle_listed）
+			#   ⇒ 這一屏（不在自己營地上）本來就不該有它 —— 指名排除，不放寬計數
+			if String(k) == "settle":   # 這一格的 UI 是新建的世界、玩家不在自己的營地上
+				continue
 			declared.append(String(k))
 	declared.sort()
 	print("   宣告側（`target==\"none\" and listed`）＝ %d 個：%s" % [declared.size(), str(declared)])
@@ -3666,6 +3686,7 @@ func _test_p33_listed_matches_the_screen() -> void:
 	node._interact_target = -1
 	node._interact_pane = TextUiMain.PANE_SELF
 	node._self_page = 0
+	node._actions_expanded = true   # ★F2 之後不可的列預設折疊 ⇒ 數「按得到的列」要先展開（鍵號不因展開而變）
 	node._refresh()
 	var seen_rows: Array = []
 	var guard: int = 0

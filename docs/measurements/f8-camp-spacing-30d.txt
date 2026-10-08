@@ -1,0 +1,28 @@
+# 友善度 F8 P8g（spec 2026-10-07 round5-friendliness §F8）：seed 1337、30 天、default config（無玩家）
+# 三段：e6bb3630f＝F8 改前｜2fdb88a54＝F8 之後｜cfd5ffd34＝F8 之後＋F9′（那一段量的是 cfd5ffd34 加上當時未 commit 的 F9′ 修法，即下一顆 commit 的樹）
+# ★三段逐數相同：這 30 天 default 世界裡 NPC 沒有碰到被間距或山地禁紮擋下的情形；world-fp（另一個世界設定）有變 6ec8b8f6→707534ae
+
+[F8-P8g] tree=e6bb3630f seed=1337 days=30
+camp.built: 15
+settlement.l0_to_l1_start: 1
+mountain_camps: 0
+outposts_day30: 10
+nearest_outpost_distance_hist: 2:4, 3:3, 4:1, 5:2
+mountain_camp_survived_days: 0
+
+[F8-P8g] tree=2fdb88a54 seed=1337 days=30
+camp.built: 15
+settlement.l0_to_l1_start: 1
+mountain_camps: 0
+outposts_day30: 10
+nearest_outpost_distance_hist: 2:4, 3:3, 4:1, 5:2
+mountain_camp_survived_days: 0
+
+[F8-P8g] tree=cfd5ffd34 seed=1337 days=30
+camp.built: 15
+settlement.l0_to_l1_start: 1
+mountain_camps: 0
+outposts_day30: 10
+nearest_outpost_distance_hist: 2:4, 3:3, 4:1, 5:2
+mountain_camp_survived_days: 0
+

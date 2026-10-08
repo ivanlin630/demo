@@ -198,24 +198,106 @@ def read_frame(sock: socket.socket) -> str:
             return text.split(FRAME_END)[0]
 
 
+# ══ ★F5（spec 2026-10-07 round5-friendliness §F5，用戶：「什麼都要打字，連 Esc 都要打 e-s-c 加 Enter」）══════
+# ★一個按鍵 ⇒ 一個 token。token 名稱＝`player_repl.gd` NAMED_KEYS 的鍵名（同一份；這裡不另發明名字）
+# ★純函式：吃「一次按鍵讀到的原始字元」（一般鍵 1 個字元；方向鍵 2 個：\xe0 或 \x00 前綴＋H/P/K/M）
+#   ⇒ 回 token；Ctrl+C ⇒ QUIT_TOKEN（走既有離開路，同 q 那支，不另開一條）；認不得的特殊鍵 ⇒ ""（不送）
+ARROW_SUFFIX = {"H": "up", "P": "down", "K": "left", "M": "right"}
+SPECIAL_PREFIX = ("\xe0", "\x00")
+CTRL_C = "\x03"
+SINGLE_CHAR_TOKEN = {"\x1b": "esc", "\r": "enter", "\t": "tab", " ": "space", "\x08": "backspace"}
+
+
+def key_token(chars: str) -> str:
+    if not chars:
+        return ""
+    c0 = chars[0]
+    if c0 in SPECIAL_PREFIX:
+        return ARROW_SUFFIX.get(chars[1:2], "")
+    if c0 == CTRL_C:
+        return QUIT_TOKEN
+    if c0 in SINGLE_CHAR_TOKEN:
+        return SINGLE_CHAR_TOKEN[c0]
+    if c0.isprintable():
+        return c0
+    return ""
+
+
+# ★對照表本身的自驗（不起 Godot）：`python tools/play.py --selfcheck`
+KEY_TOKEN_CASES = [
+    ("x", "x"), ("G", "G"), ("3", "3"), (",", ","), ("\x1b", "esc"), ("\r", "enter"), ("\t", "tab"),
+    (" ", "space"), ("\x08", "backspace"),
+    ("\xe0H", "up"), ("\xe0P", "down"), ("\xe0K", "left"), ("\xe0M", "right"),
+    ("\x00H", "up"), ("\x00P", "down"), ("\x00K", "left"), ("\x00M", "right"),
+    ("\x03", QUIT_TOKEN), ("\x00;", ""),
+]
+
+
+def selfcheck() -> int:
+    bad = 0
+    for raw, want in KEY_TOKEN_CASES:
+        got = key_token(raw)
+        ok = got == want
+        bad += 0 if ok else 1
+        print("  %s key_token(%r) = %r（應 %r）" % ("PASS" if ok else "FAIL", raw, got, want))
+    print("=== play key_token selfcheck DONE === errors: %d" % bad)
+    return 1 if bad else 0
+
+
+def _single_key_mode() -> bool:
+    """stdin 是 tty 且有 msvcrt（Windows）⇒ 單鍵模式；否則（管道、床、藍圖餵鍵）退回逐行，行為逐字不變。"""
+    if not sys.stdin.isatty():
+        return False
+    try:
+        import msvcrt  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
+def _read_key() -> str:
+    import msvcrt
+    c = msvcrt.getwch()
+    if c in SPECIAL_PREFIX:
+        c += msvcrt.getwch()
+    return c
+
+
+CLEAR_SCREEN = "\x1b[2J\x1b[H"
+
+
 def main() -> int:
+    if "--selfcheck" in sys.argv[1:]:
+        return selfcheck()
+    single = _single_key_mode()
     root = repo_root()
     proc, port, beacon = start_server(root)
     sock = socket.create_connection(("127.0.0.1", port), timeout=30)
     sock.settimeout(120)
     try:
         try:
-            print(read_frame(sock))        # 第一屏
+            first = read_frame(sock)        # 第一屏
+            if single:
+                print(CLEAR_SCREEN + first)
+                print("[play] 直接按鍵，不用 Enter（q 或 Ctrl+C 離開）")
+            else:
+                print(first)
         except (TimeoutError, socket.timeout):
             # ★逾時 ⇒ 把 server 的尾巴印出來（它會說出是「沒送」還是「死了」）
             print("[play] ✗ 接上了，但等不到第一屏（socket 逾時）。")
             srv_tail()
             raise
         while True:
-            try:
-                line = input("> ")
-            except (EOFError, KeyboardInterrupt):
-                line = QUIT_TOKEN
+            if single:
+                # ★單鍵：一鍵一 token；認不得的特殊鍵不送（"" ⇒ 再讀下一鍵）
+                line = key_token(_read_key())
+                if line == "":
+                    continue
+            else:
+                try:
+                    line = input("> ")
+                except (EOFError, KeyboardInterrupt):
+                    line = QUIT_TOKEN
             if line.strip().lower() in ("q", "quit", QUIT_TOKEN):
                 # ★★`q` 是**遊戲裡**的離開鍵，而 `:quit` 是離開這支 harness ——
                 #   ★這裡把 `q` 也當成「我要離開」，因為在一支**只為了玩**的客戶端上
@@ -223,7 +305,9 @@ def main() -> int:
                 sock.sendall((QUIT_TOKEN + "\n").encode("utf-8"))
                 break
             sock.sendall((line + "\n").encode("utf-8"))
-            print(read_frame(sock))
+            frame = read_frame(sock)
+            # ★單鍵模式：清屏再印，畫面不往上捲；逐行模式照舊
+            print(CLEAR_SCREEN + frame if single else frame)
     finally:
         try:
             sock.close()

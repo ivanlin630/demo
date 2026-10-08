@@ -205,6 +205,10 @@ func query_tile(q: int, r: int) -> Dictionary:
 		"outpost_owner":  tile.outpost_owner,
 	}
 
+# ★F7／F7b：附身者對一格知道什麼（查詢面那一支；不讀 query_tile 的真值）
+func tile_knowledge(q: int, r: int) -> Dictionary:
+	return PlayerQueryApi.tile_knowledge(_state, Vector2i(q, r))
+
 func render_text_map(player_tid: int, cursor: Vector2i) -> String:
 	return TextMapRenderer.render(_state, player_tid, cursor)
 

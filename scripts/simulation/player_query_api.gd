@@ -318,7 +318,7 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 					"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
 				},
 				# ★缺口③：把全列版算出來的 `opens_submenu` 傳進信封（原本被吃掉 ⇒ `▸` 印不出來）
-				bool(row2.get("opens_submenu", false))
+				bool(row2.get("opens_submenu", false)), String(row2.get("hint", ""))
 			))
 
 		# ★★★原本這裡有三段【停用列】（demand_tribute／extort／recruit），
@@ -357,7 +357,7 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 	#   `enabled`／`disabled_reason` 來自**共用前置檢查**、`allowed_kinds` 從宣告導出、
 	#   label 來自**唯一的生產者** ⇒ 四件東西都不在這裡重寫。
 	#   ⇒ ★★★而最重要的後果：**不可做的那一列仍然在**（P2b 守它）。
-	# ★★★★而這裡**不准**再出現任何條件字面（`TRAIN_COST_COIN`／`_check_distance`／
+	# ★★★★而這裡**不准**再出現任何條件字面（`TRAIN_COST_COIN`／間距檢查／
 	#   `outpost_level`…）或任何動詞名的字面 —— P3b／P4 就是在驗這件事。
 	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
 	var none_ids: Array = []
@@ -372,6 +372,9 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 		if not pc.is_valid():
 			# ★沒有前置檢查 ⇒ **不在這裡靜默補一個**（那會讓它永遠 enabled）
 			#   ⇒ 床的第四條反向掃會紅並指名。本處跳過並讓那一格說話。
+			continue
+		# ★F8：紮根只在自己的 L0 營地上列出（別處不是「不可」，是這個動作不存在）
+		if aid == "settle" and not PlayerCommandSystem.settle_listed(state, pt):
 			continue
 		var pr: Dictionary = pc.call(state, pt)
 		var kind: String = String((PlayerCommandSystem.ACTION_SHAPE[aid] as Dictionary).get("target", "none"))
@@ -392,10 +395,81 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				"requires_forced_interaction": false,
 				"allows_self_target": false
 			},
-			"execute_action", args))
+			"execute_action", args, false, String(pr.get("hint", ""))))
 
 
 	return actions
+
+# ══ ★F7／F7b（spec 2026-10-07 round5-friendliness）：附身者對一格【知道】什麼 ══════════════════════════════
+# ★只用附身者知道的（親見／belief／自知），不讀別人的真值：
+#   ·視野內（距離 ≤ VISION_RADIUS）⇒ 地形＋糧量真值（看得見）
+#   ·記得的格（team_tile_known 有它）⇒ 地形；糧量不記（普通格的記憶只是 bool、沒有時戳）
+#   ·沒去過 ⇒ 只回 status
+#   ·據點＝自己的（自知）或 belief 那一份（FactionAISystem._known_outpost_relations，NPC 選址同一份資料）
+#   ·隊伍＝視野內看得到的（現在）＋belief 裡記得在這一格的（最後所知 tick）
+#   ·可否紮營 ⇒ 只在【腳下那一格】回答（precheck_camp 同一支；別格的真值玩家看不到，不替它答）
+static func tile_knowledge(state: WorldState, pos: Vector2i) -> Dictionary:
+	var p: PersonData = state.persons.get(state.player_id)
+	var ptid: int = p.team_id if p != null else -1
+	var pt: TeamData = state.teams.get(ptid)
+	if pt == null:
+		return {"status": "no_team"}
+	var key: int = pos.x * 1000 + pos.y
+	var tile: HexTileData = state.world.tiles.get(key)
+	if tile == null:
+		return {"status": "off_map"}
+	var d: int = _hex(pt.tile_pos, pos)
+	var visible: bool = d <= VisionSystem.VISION_RADIUS
+	var remembered: bool = (state.team_tile_known.get(ptid, {}) as Dictionary).has(key)
+	if not visible and not remembered:
+		return {"status": "unvisited"}
+	var out: Dictionary = {"status": "visible" if visible else "remembered", "terrain": tile.terrain}
+	if visible:
+		out["food"] = int(tile.resources.get("food", 0))
+		out["productivity"] = float(tile.harvest_factor)
+	var rels: Array = FactionAISystem.shared()._known_outpost_relations(state, pt)
+	if tile.outpost_level > 0 and tile.outpost_owner == ptid:
+		out["outpost"] = {"owner": ptid, "mine": true, "g": 1.0}
+	else:
+		for r in rels:
+			if r["tile_pos"] == pos:
+				out["outpost"] = {"owner": int(r["owner_id"]), "mine": false, "g": float(r["g"])}
+	if tile.camp_level > 0 and tile.camp_team_id == ptid:
+		out["own_camp"] = true
+	var teams: Array = []
+	var seen: Dictionary = {}
+	if visible:
+		for tid in state.teams:
+			var t: TeamData = state.teams[tid]
+			if int(tid) != ptid and t.tile_pos == pos and state.is_live_team(int(tid)):
+				teams.append({"id": int(tid), "tick": -1})
+				seen[int(tid)] = true
+	for tid2 in BeliefSystem.known_targets(state, ptid):
+		if seen.has(int(tid2)):
+			continue
+		var be: Dictionary = BeliefSystem.best_estimate(state, ptid, int(tid2))
+		if be.get("tile_pos", Vector2i(-1, -1)) == pos:
+			teams.append({"id": int(tid2), "tick": int(be.get("last_tick", 0))})
+	out["teams"] = teams
+	var near: int = -1
+	var own: HexTileData = state.own_outpost_tile(ptid)
+	if own != null:
+		near = _hex(own.tile_pos, pos)
+	for r2 in rels:
+		var dd: int = _hex(r2["tile_pos"], pos)
+		if near < 0 or dd < near:
+			near = dd
+	out["nearest_known_outpost"] = near
+	if pos == pt.tile_pos:
+		var pr: Dictionary = PlayerCommandSystem.new().precheck_camp(state, pt)
+		out["camp_ok"] = bool(pr.get("ok", false))
+		out["camp_reason"] = String(pr.get("reason", ""))
+	return out
+
+static func _hex(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x
+	var dy: int = b.y - a.y
+	return (absi(dx) + absi(dx + dy) + absi(dy)) / 2
 
 func pt_tile_self(state: WorldState, ptid: int) -> HexTileData:
 	if ptid == -1 or not state.teams.has(ptid): return null
