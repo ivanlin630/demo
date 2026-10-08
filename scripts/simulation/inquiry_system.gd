@@ -47,6 +47,7 @@ func get_options(state: WorldState, player_team: TeamData,
 			"relevance": _score_option(id, state, player_team, npc_team),
 			"enabled": not DISABLED_REASON.has(id),
 			"disabled_reason": String(DISABLED_REASON.get(id, "")),
+			"hint": "",   # ★F3：同欄同形；今天唯一一項（糧源還不會記進情報）指不出解除動作
 		})
 	options.sort_custom(func(a, b): return a["relevance"] > b["relevance"])
 	return options.slice(0, MAX_OPTIONS)

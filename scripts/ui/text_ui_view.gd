@@ -43,6 +43,9 @@ const A_FOOT: String   = " 鍵："          # 底部鍵位那一行
 #   本來就不該要求 `┌─ 地圖（`／`┬─ [` 出現。★★而那一點要由床證：見 P30。
 const A_PANEL: String  = "─ 面板（"
 const REGION_ANCHORS: Array = [A_TOP, A_MAP, A_PAGES, A_ACTION, A_FEED, A_FOOT]
+# ★F1（spec 2026-10-07 round5-friendliness）：主畫面頂列下方「你現在能做的」三行 —— 刻意不進 REGION_ANCHORS
+#   （它只在主畫面、沒有面板時出現；內容來自 UiModel.first_three，本檔只畫）
+const A_FIRST3: String = "─ 你現在能做的（"
 
 # ══ 頂列六欄（spec §2②：★指名六欄，不是「頂列非空」）═══════════════════════════
 # ★★稿子逐字：`第 12 天 09:07 ｜ 灰狼隊（人口 14）｜ 家：(3,5) ｜ 糧撐 6 天 ｜ 威脅：… ｜ 待執行 0 道`
@@ -177,7 +180,14 @@ const STORY_END_LABEL: String = "故事已結束："
 # ★★★rows 逐字是全列版 API 回的那些（`get_action_availability`）：
 #   `{action_id, label, enabled, disabled_reason, opens_submenu}`
 #   ⇒ 本函式**不判斷可不可做、不寫任何原因文案** —— 它只排版。
-static func action_block(rows: Array) -> String:
+static func first3_block(rows: Array) -> String:
+	var lines: Array = [region_title(A_FIRST3, "按下面的鍵")]
+	for r in rows:
+		lines.append(TextUiLayout.clip_to(" [%s] %s" % [String(r["key"]), String(r["text"])], TextUiLayout.COLS))
+	return "\n".join(lines)
+
+
+static func action_block(rows: Array, folded: int = 0) -> String:
 	var lines: Array = []
 	var n_ok: int = 0
 	var n_unbound: int = 0
@@ -205,6 +215,9 @@ static func action_block(rows: Array) -> String:
 			var room: int = TextUiLayout.COLS - TextUiLayout.display_width(line + "（不可：%s）" % "")
 			line += "（不可：%s）" % TextUiLayout.clip_mark(String(r2.get("disabled_reason", "")), room)
 		lines.append(TextUiLayout.clip_to(line, TextUiLayout.COLS))
+	# ★F2：不可的收成一行（展開與否由 UiModel.fold 決定；本檔只畫）
+	if folded > 0:
+		lines.append(" " + UiModel.fold_line(folded))
 	return "\n".join(lines)
 
 # 某個 action_id 拿到哪個鍵（""＝沒綁）★給床做 P8b 的比對用
@@ -358,10 +371,13 @@ static func compose(regions: Dictionary) -> String:
 			feed_block(regions.get("feed", []) as Array),
 			foot_block(String(regions.get("result", "")), "戰鬥｜" + String(regions.get("battle_keys", ""))),
 		])
-	return "\n".join([
-		top_row(regions.get("top", {}) as Dictionary),
+	var head: Array = [top_row(regions.get("top", {}) as Dictionary)]
+	var f3: Array = regions.get("first3", []) as Array
+	if panel.strip_edges() == "" and not f3.is_empty():
+		head.append(first3_block(f3))
+	return "\n".join(head + [
 		mid,
-		action_block(regions.get("action", []) as Array),
+		action_block(regions.get("action", []) as Array, int(regions.get("action_folded", 0))),
 		feed_block(regions.get("feed", []) as Array),
 		foot_block(String(regions.get("result", "")), String(regions.get("keymap", ""))),
 	])

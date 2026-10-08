@@ -743,13 +743,16 @@ static func map_inventory_state(state: WorldState) -> Dictionary:
 #   ★而它的失效長相是「那個符號沒出現」—— 沒有任何斷言在看，所以它是靜默的。
 #   ★★預設 `false`：既有 21 個呼叫點不用改（它們不是子選單入口），
 #     而團隊目標那一條路把全列版算出來的值傳進來。
+# ★F3（spec 2026-10-07 round5-friendliness）：`hint`＝能解除這個不可條件的動作 id（引擎給；指不出 ⇒ ""）
+#   ⇒ 排版層把拒絕句排成「<動作>不行：<原因>；可以先做 <hint 的動作名>」，不自寫下一步
 static func map_available_action(action_id: String, label: String, enabled: bool,
 		disabled_reason: String, target_requirements: Dictionary,
 		command_name: String, command_args: Dictionary,
-		opens_submenu: bool = false) -> Dictionary:
+		opens_submenu: bool = false, hint: String = "") -> Dictionary:
 	return {
 		"action_id": action_id, "label": label, "enabled": enabled,
 		"disabled_reason": disabled_reason,
+		"hint": hint,
 		"opens_submenu": opens_submenu,
 		"target_requirements": target_requirements,
 		"command_name": command_name, "command_args": command_args

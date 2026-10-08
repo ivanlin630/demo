@@ -84,6 +84,7 @@ var _interact_page:   int  = 0   # 互動選單分頁（>9 項翻頁）—— �
 #   ⇒ #10 的推論逐字允許「玩家自己改變的狀態」當判別子；
 #   ★★不得用**字母**切換或編號（字母被強制事件回應獨佔 —— 同一條不變量的另一半）。
 var _self_page:   int = 0        # 自家隊動作那一側的頁
+var _actions_expanded: bool = false   # ★F2：? 展開不可的動作（只換顯示，鍵號不動）
 var _target_page: int = 0        # 目標清單那一側的頁
 # ★當前數字鍵在驅動哪一側 —— ★它只由**玩家按切換鍵**改變（不由世界改變）
 var _interact_pane: String = "self"
@@ -822,7 +823,7 @@ func _refresh() -> void:
 		var _labels: Array = _bridge.pending_command_labels(3)
 		_pend_txt += "（%s%s）" % [
 			"、".join(_labels), "…" if _pend_n > _labels.size() else ""]
-	_hint_line.text = "%s｜%s" % [_mode_keymap(_current_mode_name()), _pend_txt]
+	_hint_line.text = "%s｜%s" % [_keymap_now(_current_mode_name()), _pend_txt]
 	_log_strip.text = _log_strip_text(_events, 3)
 	_render_screen(_pend_txt)
 	_check_alerts()
@@ -893,8 +894,19 @@ func build_regions(pend_txt: String) -> Dictionary:
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
 	var hp: Dictionary = ct.get("home_pos", {}) if ct.get("home_pos", null) != null else {}
 	var rows: Array = []
+	var action_folded: int = 0
 	if _interact_mode and _interact_target >= 0:
-		rows = _interact_action_split()["team"]
+		# ★F2：目標動作同一條規則（鍵是靜態 ACTION_DIGITS，排序折疊不影響）
+		var t_rows: Array = []
+		for ta in _interact_action_split()["team"]:
+			t_rows.append(UiModel.action_row(ta, "對選中目標", TextUiView.key_for(String(ta.get("action_id", "")))))
+		var tfd: Dictionary = UiModel.fold(t_rows, _actions_expanded)
+		var shown_ids: Array = (tfd["shown"] as Array).map(func(x): return String(x["id"]))
+		for sid in shown_ids:
+			for ta2 in _interact_action_split()["team"]:
+				if String(ta2.get("action_id", "")) == String(sid):
+					rows.append(ta2)
+		action_folded = int(tfd["folded"])
 	# ══ ★★★H0：用 `has()` 判，**不用** `== ""`（威脅欄 spec §0）══════════════════════════
 	#   鍵不存在 ⇒ 沒有寫入者 ⇒「尚未提供」｜鍵存在 ⇒ 寫入者說了什麼就印什麼（含它明示的「（無）」）
 	#   ★舊版 `== ""` 讓「沒有寫入者」與「寫入者判定沒有威脅」同形 —— 這一欄因此說謊了一整輪。
@@ -933,6 +945,8 @@ func build_regions(pend_txt: String) -> Dictionary:
 		#     而那一份已經有替代品（`feed` 區吃 `_feed_rows`）⇒ 主畫面不傳（否則印兩份）。
 		"panel": _event_label.text if _current_mode_name() != "main" else "",
 		"action": rows,
+		"action_folded": action_folded,
+		"first3": _first3_rows(),
 		"feed": _feed_rows,
 		# ★F1：戰鬥中每一鍵的回應只有一個出口 ＝ 結果行（encounter_view.key_reply；這一鍵沒有回應 ⇒ 照舊）
 		"result": _encounter_view.key_reply() if _in_battle() and _encounter_view.key_reply() != "" else _feedback_line.text,
@@ -941,6 +955,20 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"battle": _encounter_view.terminal_block() if _in_battle() else "",
 		"battle_keys": _encounter_view.terminal_keys() if _in_battle() else "",
 	}
+
+# ★F1：首屏三行（主畫面才有；資料＝動作清單同一份，規則在 UiModel.first_three）
+func _first3_rows() -> Array:
+	if _current_mode_name() != "main" or _in_battle():
+		return []
+	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
+	var msg: String = String(fi.get("message", "")) if not String(fi.get("interaction_id", "")).is_empty() else ""
+	var self_rows: Array = []
+	var self_all: Array = _interact_action_split()["self"]
+	for i in range(mini(9, self_all.size())):
+		self_rows.append(UiModel.action_row(self_all[i], "自家隊", str(i + 1)))
+	return UiModel.first_three(msg, "T", "X", "推進到整點", self_rows,
+		[{"key": "G", "text": "跳過指定的 tick 數"}])
+
 
 func _in_battle() -> bool:
 	return _encounter_view != null and _encounter_view.visible
@@ -1005,7 +1033,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
 	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
-	"interact":      "[1-9]選目標/行動 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
+	"interact":      "[1-9]選目標/行動 [?]展開不可的 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
 	"faction":       "[A]目標 [B]徵收率 [G]徵用國庫 [C]離開 [D]背叛 [E]解散 [1-9]下令成員 [F/Esc]關閉",
@@ -1021,6 +1049,20 @@ const MODE_KEYMAP: Dictionary = {
 }
 static func _mode_keymap(mode: String) -> String:
 	return MODE_KEYMAP.get(mode, MODE_KEYMAP["main"])
+
+# ★F4（spec 2026-10-07 round5-friendliness）：鍵列只印【當下】有效的鍵 —— 來源仍是 MODE_KEYMAP 那一份
+#   ★「綁了但現在沒有對象」的段落在印之前拿掉（按下去只會得到「現在沒有…」那一句的鍵不印）
+#   ★表只記【那一段要什麼狀態】，不另抄鍵名
+const KEYMAP_NEEDS: Dictionary = {"[A-]回應事件": "forced"}
+func _keymap_now(mode: String) -> String:
+	var out: Array = []
+	var has_forced: bool = not String(_cached_snapshot.get("forced_interaction", {}).get("interaction_id", "")).is_empty()
+	for seg in _mode_keymap(mode).split(" "):
+		var need: String = String(KEYMAP_NEEDS.get(seg, ""))
+		if need == "forced" and not has_forced:
+			continue
+		out.append(seg)
+	return " ".join(PackedStringArray(out))
 
 # feedback 行文字（成✓ 敗✗）
 static func _feedback_text(ok: bool, msg: String) -> String:
@@ -1980,7 +2022,7 @@ func _interact_mode_binds_key(keycode: int) -> bool:
 	#   ⇒ 切換根本到不了我寫的那一段（症狀＝「切換鍵沒有反應」而 code 看起來是對的）。
 	#   ⇒ ★★判準：**加一個新鍵要同時加在【宣告】與【handler】兩處** ——
 	#     只加 handler 的那一半會被頂端守衛吃掉，而那個吃掉是靜默的（它只印一句話）。
-	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD 			or keycode == PANE_TOGGLE_KEY:
+	if keycode == KEY_ESCAPE or keycode == KEY_COMMA or keycode == KEY_PERIOD 			or keycode == PANE_TOGGLE_KEY or keycode == KEY_QUESTION:
 		return true
 	# ★★★【缺口②的紀錄，而它的第一版修法被我自己推翻了 —— 兩版都留著】（2026-10-01）
 	#   ·病：原本這裡無條件對 A..Z 回 true，而 handler 那一支要求 `_interact_target < 0`
@@ -2018,6 +2060,12 @@ func _handle_interact_mode(keycode: int) -> void:
 	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
 	if not _interact_mode_binds_key(keycode):
 		_refuse_unbound_key("互動", keycode)
+		return
+	# ★F2：? 展開／收起不可的動作（只換顯示；鍵號不動）
+	if keycode == KEY_QUESTION:
+		_actions_expanded = not _actions_expanded
+		_set_feedback(true, "已展開不可的動作（附原因）" if _actions_expanded else "已收起不可的動作")
+		_refresh()
 		return
 	# ESC 處理
 	if keycode == KEY_ESCAPE:
@@ -2125,6 +2173,11 @@ func _handle_interact_mode(keycode: int) -> void:
 			#   吃掉它、印一句話、什麼都不改（而不是靜默 return 或執行「剛好在那個位置」的那一列）
 			_refuse_unbound_key("互動", keycode)
 			return
+		if act_idx >= 0 and not bool(actions[act_idx].get("enabled", true)):
+			# ★F3：不可的動作按下去 ⇒ 拒絕句（主詞＋原因＋下一步），不下令
+			_set_feedback(false, UiModel.refusal_text(UiModel.action_row(actions[act_idx], "對選中目標", "")))
+			_refresh()
+			return
 		if act_idx >= 0:   # ★到這裡它一定成立（上面已 early-return）—— 保留縮排結構
 			var act: Dictionary = actions[act_idx]
 			var action_id: String = act.get("action_id", "")
@@ -2215,7 +2268,7 @@ func _handle_interact_mode(keycode: int) -> void:
 	if self_idx >= 0 and self_idx < self_acts.size():
 		var sa: Dictionary = self_acts[self_idx]
 		if not sa.get("enabled", true):
-			_set_feedback(false, sa.get("disabled_reason", "不可執行"))
+			_set_feedback(false, UiModel.refusal_text(UiModel.action_row(sa, "自家隊", "")))   # ★F3 主詞＋原因＋下一步
 			_refresh(); return
 		# ★M 票 §2②：休息＝玩家主導、兩段確認 —— 旁邊（同格或相鄰）有敵對隊時，第一次只警告、不下令（時間不動）
 		if _rest_needs_confirm(sa):
@@ -2332,24 +2385,29 @@ func _build_interact_str() -> String:
 		var s_pages: int = maxi(1, int(ceil(self_all.size() / 9.0)))
 		_self_page = clampi(_self_page, 0, s_pages - 1)
 		var s_start: int = _self_page * 9
+		# ★F2／F6：區塊資料（UiModel）排序與折疊；鍵號＝頁內位置（靜態，不因排序折疊漂移）
+		var page_rows: Array = []
+		for si in range(s_start, mini(s_start + 9, self_all.size())):
+			page_rows.append(UiModel.action_row(self_all[si], "自家隊", str(si - s_start + 1)))
+		var fd: Dictionary = UiModel.fold(page_rows, _actions_expanded)
 		var s_shown: int = 0
 		var s_row: String = ""
-		for si in range(s_start, mini(s_start + 9, self_all.size())):
+		for r2 in fd["shown"]:
 			s_shown += 1
-			var sa2: Dictionary = self_all[si]
-			var en2: bool = bool(sa2.get("enabled", true))
 			# ★reasons ②（spec 2026-10-07 invite-whole-team-inline-reasons）：（不可）後印引擎的 disabled_reason（排版層不自寫原因）
-			#   ★寬度預算：一列三項 ⇒ 每項 SELF_ITEM_COLS 格；原因放不下截在那裡、以「…」結尾；完整原因按下去結果行印（:2211 那支）
-			var _head2: String = "[%d]%s" % [s_shown, sa2.get("label", sa2.get("action_id", ""))]
+			#   ★寬度預算：一列三項 ⇒ 每項 SELF_ITEM_COLS 格；原因放不下截在那裡、以「…」結尾；完整拒絕句按下去結果行印
+			var _head2: String = "[%s]%s" % [r2["key"], r2["label"]]
 			var _tail2: String = ""
-			if not en2:
+			if not bool(r2["enabled"]):
 				var _room2: int = SELF_ITEM_COLS - TextUiLayout.display_width(_head2 + "（不可：）")
-				_tail2 = "（不可：%s）" % TextUiLayout.clip_mark(String(sa2.get("disabled_reason", "")), _room2)
+				_tail2 = "（不可：%s）" % TextUiLayout.clip_mark(String(r2["reason"]), _room2)
 			s_row += _head2 + _tail2 + "  "
 			if s_shown % 3 == 0:
 				lines.append(s_row.strip_edges()); s_row = ""
 		if s_row != "":
 			lines.append(s_row.strip_edges())
+		if int(fd["folded"]) > 0:
+			lines.append(UiModel.fold_line(int(fd["folded"])))
 		if s_pages > 1:
 			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_self_page + 1, s_pages])
 	lines.append("── 可互動目標 %s ──" % (

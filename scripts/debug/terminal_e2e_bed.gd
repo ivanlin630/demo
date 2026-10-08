@@ -1412,6 +1412,7 @@ func _rs_cells() -> void:
 	var w: Dictionary = _new_w(await _build(SEED_A))
 	var node: Node = w["node"]
 	await _press(w, "t")
+	await _press(w, "?")   # ★F2 之後不可的項預設折疊 ⇒ 展開再看
 	var p: Dictionary = parse_screen(_screen(node))
 	var eng: Dictionary = {}
 	for sa in node._interact_action_split()["self"]:
@@ -1926,6 +1927,7 @@ func _e2_no_faction_alliance() -> void:
 	if not bool(p2["targets_active"]):
 		await _press(w2, "tab")
 	await _press(w2, "1")
+	await _press(w2, "?")   # ★F2 之後不可的項預設折疊 ⇒ 展開再看
 	var pa2: Dictionary = parse_screen(_screen(w2["node"]))
 	await _drop(w2["node"])
 	var row2: Dictionary = {}

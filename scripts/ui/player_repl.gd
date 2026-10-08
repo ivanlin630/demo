@@ -173,6 +173,7 @@ static func keycode_for(token: String) -> int:
 		"-": return KEY_MINUS
 		"=": return KEY_EQUAL
 		"/": return KEY_SLASH
+		"?": return KEY_QUESTION   # ★F2：展開／收起不可的動作
 		" ": return KEY_SPACE
 	return -1
 

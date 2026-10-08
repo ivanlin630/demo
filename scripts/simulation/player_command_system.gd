@@ -87,6 +87,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 			continue
 		var ok: bool = true
 		var why: String = ""
+		var hint: String = ""   # ★F3：能解除這個條件的動作 id（指不出 ⇒ ""，不硬湊）
 		if pt == null or tgt == null:
 			ok = false
 			why = "沒有可操作的隊伍或目標"
@@ -109,6 +110,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 						ok = false
 						why = "人口不足（需超過對方 1.5 倍；你 %d、對方 %d）" % [
 							pt.population, tgt.population]
+						hint = "recruit"
 				"extort":
 					if pt.readiness < 0.7:
 						ok = false
@@ -118,6 +120,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 					if coin_a < RECRUIT_COST_ANON:
 						ok = false
 						why = "金幣不足（需 %d，現 %d）" % [int(RECRUIT_COST_ANON), int(coin_a)]
+						hint = "trade"
 					elif not _target_has_anon(tgt):
 						ok = false
 						why = "對方沒有可招募的無名之人"
@@ -125,6 +128,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 					if not _can_invite_settle(state, pt, tgt):
 						ok = false
 						why = "你不在自家據點上，無法邀請對方定居"
+						hint = "camp"
 				"offer_surrender":
 					# ★原因【不在這裡寫】：讀共用前置檢查回的那句話
 					#   ⇒ 同一條規則一份字面，而「原因」與「判斷」仍在同一個回傳裡。
@@ -140,6 +144,7 @@ func get_action_availability(state: WorldState, target_id: int) -> Array:
 			"label": PlayerApiMapper.action_label(act),   # ★唯一一份中文表（systems 裁④）
 			"enabled": ok,
 			"disabled_reason": why,
+			"hint": hint,
 			"opens_submenu": SUBMENU_OPENERS.has(act),    # ★從宣告導出，不是第二份名單
 		})
 	return out
@@ -533,7 +538,7 @@ func precheck_take_loot(state: WorldState, _pt: TeamData) -> Dictionary:
 	if res.is_empty() or int(res.get("winner_id", -1)) != _get_player_team_id(state):
 		# ★措辭用 handler 既有那句（spec §3②「handler 那句人話搬進去」）——
 		#   藍圖裁定裡的「你沒有剛結束的戰鬥」是**例**不是指定，而既有那句更具體。
-		return { "ok": false, "reason": "無可收取戰利品" }
+		return { "ok": false, "reason": "無可收取戰利品", "hint": "attack" }
 	return { "ok": true, "reason": "" }
 
 func precheck_leave_loot(state: WorldState, pt: TeamData) -> Dictionary:
@@ -544,19 +549,19 @@ func precheck_leave_loot(state: WorldState, pt: TeamData) -> Dictionary:
 	var r: Dictionary = precheck_take_loot(state, pt)
 	if bool(r.get("ok", false)):
 		return r
-	return { "ok": false, "reason": "無可放棄的戰利品" }
+	return { "ok": false, "reason": "無可放棄的戰利品", "hint": "attack" }
 
 func precheck_subjugate_enemy(state: WorldState, _pt: TeamData) -> Dictionary:
 	var res: Dictionary = state.last_encounter_result
 	if res.is_empty() or not bool(res.get("can_subjugate", false)):
-		return { "ok": false, "reason": "無可收編的敗者" }
+		return { "ok": false, "reason": "無可收編的敗者", "hint": "attack" }
 	return { "ok": true, "reason": "" }
 
 func precheck_confirm_gather_intel(state: WorldState, _pt: TeamData) -> Dictionary:
 	if not state.player_state.has("pending_intel_target"):
 		# ★本票第二句新造的措辭 —— 而它是**藍圖裁定逐字給的那一句**
 		#   （handler 的「參數遺漏」答的是另一個問題：參數完整嗎）。
-		return { "ok": false, "reason": "沒有待確認的打聽" }
+		return { "ok": false, "reason": "沒有待確認的打聽", "hint": "gather_intel" }
 	return { "ok": true, "reason": "" }
 
 func precheck_hunt(state: WorldState, pt: TeamData) -> Dictionary:
@@ -597,18 +602,18 @@ func precheck_train(state: WorldState, pt: TeamData) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if AnonTierSystem.total_pop(pt) <= 0:
-		return { "ok": false, "reason": "無匿名人口可訓練" }
+		return { "ok": false, "reason": "無匿名人口可訓練", "hint": "recruit" }
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		# ★★那個數字從常數來（查詢面不准再寫一次 `TRAIN_COST_COIN`）——
 		#   P3a 的行為證就是擾動這個常數之後**原因裡的數字要跟著變**。
-		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
+		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN, "hint": "trade" }
 	return { "ok": true, "reason": "" }
 
 func precheck_promote_anon(_state: WorldState, pt: TeamData) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if AnonTierSystem.total_pop(pt) <= 0:
-		return { "ok": false, "reason": "無匿名兵可拔擢" }
+		return { "ok": false, "reason": "無匿名兵可拔擢", "hint": "recruit" }
 	return { "ok": true, "reason": "" }
 
 # ★票 T：玩家「休息」—— 前置只問「累不累」（不累休息沒有東西可回復，說出來而不是吞掉）

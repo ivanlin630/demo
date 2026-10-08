@@ -318,7 +318,7 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 					"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
 				},
 				# ★缺口③：把全列版算出來的 `opens_submenu` 傳進信封（原本被吃掉 ⇒ `▸` 印不出來）
-				bool(row2.get("opens_submenu", false))
+				bool(row2.get("opens_submenu", false)), String(row2.get("hint", ""))
 			))
 
 		# ★★★原本這裡有三段【停用列】（demand_tribute／extort／recruit），
@@ -392,7 +392,7 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				"requires_forced_interaction": false,
 				"allows_self_target": false
 			},
-			"execute_action", args))
+			"execute_action", args, false, String(pr.get("hint", ""))))
 
 
 	return actions
