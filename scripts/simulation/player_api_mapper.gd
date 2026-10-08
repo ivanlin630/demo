@@ -91,6 +91,14 @@ static func _home_distance(state: WorldState, t: TeamData):
 	var dy: int = b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
+# ★F7：地形的玩家面中文（唯一一份；認不得的不吞，印出來）
+static func terrain_label(t: String) -> String:
+	match t:
+		"plains":   return "平原"
+		"forest":   return "森林"
+		"mountain": return "山地"
+	return "（未知地形：%s）" % t
+
 # ★F8 營地欄（藍圖裁（乙）68cd9883d：營地不是家，家欄不動）：camp_pos／camp_distance 同一支 own_camp_tile 取值
 #   ⇒ 兩欄同給或同 null（同「家」三欄的結構保證）；自己的營地＝self-knowledge
 static func _camp_pos(state: WorldState, t: TeamData):

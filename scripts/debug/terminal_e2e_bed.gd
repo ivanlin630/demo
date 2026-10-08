@@ -20,7 +20,7 @@ var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
 	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3", "S1", "S2", "S3", "S4",
 	"FR1", "FR2", "FO", "FO2", "RS2", "RC3",
-	"R5F1", "R5F2", "R5F3", "R5F4"]
+	"R5F1", "R5F2", "R5F3", "R5F4", "R5F7", "R5F7C"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -56,7 +56,7 @@ const PANEL_HEADER: String = "─ 面板（接管畫面）"
 const EFFECT_FIELDS: Dictionary = {
 	"task": ["task"], "belief": ["belief"], "faction": ["faction"],
 	"resources_self": ["res_self"], "resources_both": ["res_self", "res_others"],
-	"encounter": ["encounter"], "encounter_result": ["encounter_result"],
+	"encounter": ["encounter"], "encounter_result": ["encounter_result"], "camp": ["camp"],
 	"roster": ["roster_self"], "roster_other": ["roster_others"], "menu": [],
 }
 
@@ -105,6 +105,7 @@ func _initialize() -> void:
 	await _rs_cells()
 	await _fo2_same_pass()
 	await _r5_cells()
+	await _r5_f7_cells()
 	_fo_judge()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
@@ -454,7 +455,7 @@ static func _snap(node: Node) -> Dictionary:
 	if pt == null:
 		return {"task": "dead", "belief": "", "faction": "", "res_self": "", "res_others": str(others_res),
 			"encounter": "%s|%d|%s" % [str(st.encounter_active), st.teams.size(), str(st.last_encounter_outcome)],
-			"encounter_result": str(st.last_encounter_result), "roster_self": "", "roster_others": str(others_roster)}
+			"encounter_result": str(st.last_encounter_result), "roster_self": "", "roster_others": str(others_roster), "camp": ""}
 	return {
 		"task": "%s|%s" % [pt.current_task, str(pt.move_target)],
 		"belief": JSON.stringify(node._bridge.query_memory_panel()),
@@ -469,6 +470,8 @@ static func _snap(node: Node) -> Dictionary:
 		"encounter_result": str(st.last_encounter_result),
 		"roster_self": "%d|%s|%d" % [pt.leader_id, str(pt.named_members), pt.population],
 		"roster_others": str(others_roster),
+		# ★F8：紮營＝當場立 L0 營地（不設任務）⇒ 它的效果落在「自己的營地」這一欄
+		"camp": str(st.own_camp_tile(pid).tile_pos) if st.own_camp_tile(pid) != null else "",
 	}
 
 
@@ -1626,6 +1629,131 @@ func _r5_cells() -> void:
 	_check("R5F4 沒有找上門的事 ⇒ 鍵列不印回應字母那一項", not hint4.contains("回應"))
 	_check("R5F4 有找上門的事 ⇒ 鍵列印回應字母那一項", hint4b.contains("回應"))
 	_cells_ran.append("R5F4")
+
+
+# ══ 友善度 F7／F7b：游標處一行、選中區塊——只讀附身者知道的 ═════════════════════════════════════════
+const R5_CURSOR_HEAD: String = "游標處 "
+
+
+static func _r5_cursor_line(screen: String) -> String:
+	for l in screen.split("\n"):
+		if l.strip_edges().begins_with(R5_CURSOR_HEAD):
+			return l.strip_edges()
+	return ""
+
+
+static func _r5_hex(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x
+	var dy: int = b.y - a.y
+	return (absi(dx) + absi(dx + dy) + absi(dy)) / 2
+
+
+func _r5_f7_cells() -> void:
+	print("\n── R5F7 游標處一行：已知據點格／自己營地格／空地／沒去過 ──")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var node: Node = w["node"]
+	var st: WorldState = node._bridge._state
+	st.set_player_forced_event({}, "")
+	await _to_main(w)
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	# ①已知據點格：別人的據點，佈置進玩家的 belief（親見那一份）
+	var op_tile: HexTileData = null
+	var ids: Array = st.world.tiles.keys()
+	ids.sort()
+	for k in ids:
+		var t: HexTileData = st.world.tiles[k]
+		if t.outpost_level > 0 and t.outpost_owner != ptid and t.outpost_owner != -1:
+			op_tile = t
+			break
+	_check("★R5F7 母體地板：有一座別人的據點", op_tile != null)
+	var bad: Array = []
+	if op_tile != null:
+		var known: Dictionary = st.team_tile_known.get(ptid, {})
+		known[op_tile.tile_id] = {"outpost": {"owner_id": op_tile.outpost_owner, "level": op_tile.outpost_level, "last_tick": 0}}
+		st.team_tile_known[ptid] = known
+		node._cursor = op_tile.tile_pos
+		node._refresh()
+		var l1: String = _r5_cursor_line(_screen(node))
+		print("   已知據點格 ⇒「%s」" % l1)
+		if not l1.contains("Team%d" % op_tile.outpost_owner) or not l1.contains("據點"):
+			bad.append("已知據點格：%s" % l1)
+	# ②自己營地格（腳下）
+	var camp_ok: bool = FactionAISystem.shared().establish_crude_camp(st, pt)
+	node._cursor = pt.tile_pos
+	node._refresh()
+	var l2: String = _r5_cursor_line(_screen(node))
+	print("   自己營地格（腳下，立營 %s）⇒「%s」" % [str(camp_ok), l2])
+	if not camp_ok or not l2.contains("你的營地") or not l2.contains("紮營"):
+		bad.append("自己營地格：%s" % l2)
+	# ③視野內的空地（不是據點、不是營地）
+	var empty: Vector2i = Vector2i(-1, -1)
+	for k2 in ids:
+		var t2: HexTileData = st.world.tiles[k2]
+		if t2.outpost_level == 0 and t2.camp_level == 0 and t2.tile_pos != pt.tile_pos \
+				and _r5_hex(t2.tile_pos, pt.tile_pos) <= VisionSystem.VISION_RADIUS:
+			empty = t2.tile_pos
+			break
+	node._cursor = empty
+	node._refresh()
+	var l3: String = _r5_cursor_line(_screen(node))
+	var tl: String = String((load("res://scripts/simulation/player_api_mapper.gd") as Script).call("terrain_label", String(st.world.tiles[empty.x * 1000 + empty.y].terrain))) if _has_mapper("terrain_label") else "?"
+	print("   視野內空地 %s ⇒「%s」" % [str(empty), l3])
+	if not l3.contains(tl) or l3.contains("據點："):
+		bad.append("空地：%s" % l3)
+	# ④沒去過
+	var far: Vector2i = Vector2i(-1, -1)
+	for k3 in ids:
+		var t3: HexTileData = st.world.tiles[k3]
+		if _r5_hex(t3.tile_pos, pt.tile_pos) > VisionSystem.VISION_RADIUS + 2 and not st.team_tile_known.get(ptid, {}).has(k3):
+			far = t3.tile_pos
+			break
+	node._cursor = far
+	node._refresh()
+	var l4: String = _r5_cursor_line(_screen(node))
+	print("   沒去過 %s ⇒「%s」" % [str(far), l4])
+	if not l4.contains("沒去過"):
+		bad.append("沒去過：%s" % l4)
+	_check("R5F7 游標處一行在三種格（＋沒去過）內容正確（不對：%s）" % str(bad), bad.is_empty())
+	_cells_ran.append("R5F7")
+	print("\n── R5F7C 選中一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反向：走過去看見 ⇒ 出現 ──")
+	node._selected = far
+	node._cursor = far
+	node._refresh()
+	var sel1: String = _r5_selected_block(_screen(node))
+	pt.tile_pos = far
+	node._refresh()
+	var sel2: String = _r5_selected_block(_screen(node))
+	print("   沒去過時：「%s」\n   站上去之後：「%s」" % [sel1, sel2])
+	_check("★R5F7C 母體地板：選中區塊有印出來", sel1 != "" and sel2 != "")
+	_check("R5F7C 沒去過 ⇒ 沒有糧量數字", not RegEx.create_from_string("食[:：] *[0-9]").search(sel1) != null)
+	_check("R5F7C 反向：看得見 ⇒ 有糧量數字", RegEx.create_from_string("食[:：] *[0-9]").search(sel2) != null)
+	_cells_ran.append("R5F7C")
+	await _drop(node)
+
+
+static func _r5_selected_block(screen: String) -> String:
+	var out: Array = []
+	var on: bool = false
+	for l in screen.split("\n"):
+		var t: String = l.strip_edges()
+		var i: int = t.find("選中: ")
+		if i >= 0:
+			on = true
+			out.append(t.substr(i))
+			continue
+		if on:
+			if t.contains("食") or t.contains("糧量") or t.contains("農"):
+				out.append(t)
+			break
+	return "／".join(PackedStringArray(out))
+
+
+static func _has_mapper(fn: String) -> bool:
+	for m in (load("res://scripts/simulation/player_api_mapper.gd") as Script).get_script_method_list():
+		if String(m.get("name", "")) == fn:
+			return true
+	return false
 
 
 func _m_cells() -> void:

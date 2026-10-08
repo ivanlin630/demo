@@ -405,7 +405,7 @@ const ACTION_SHAPE: Dictionary = {
 	"betray_faction":          {"target": "none", "listed": false},
 	"build_facility":          {"target": "none", "listed": false},
 	"build_outpost":           {"target": "none", "listed": false},
-	"camp":                    {"target": "none", "listed": true, "effect": "task"},
+	"camp":                    {"target": "none", "listed": true, "effect": "camp"},   # ★F8：紮營＝當場立 L0 營地（不設任務）
 	"settle":                  {"target": "none", "listed": true, "effect": "task"},   # ★F8：紮根（只在自己的 L0 營地上列出）
 	"cancel_move":             {"target": "none", "listed": false},  # ★具名豁免：不在 `_action_registry`（它是一格 dispatch 動詞）
 	#   ★★★`listed: true → false`（systems 裁 2026-10-01）—— ★**不要改回 true**：
@@ -819,7 +819,8 @@ func _action_settle(state: WorldState, _target_id: int, pt: TeamData, _pt_id: in
 	# ★成本＝NPC 紮根今天的成本：settle 工期、免材料（藍圖：成本就是時間）
 	FactionAISystem.shared().start_settle_construction(state, pt, tile, camp_type)
 	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_settle")
-	return { "ok": true, "msg": "開始紮根 %s（%d 人時,免材料）" % [camp_type, OutpostSystem.build_person_hours("settle", 1)] }
+	return { "ok": true, "msg": "開始紮根成%s（%d 人時,免材料）" % [
+		String((OutpostSystem.OUTPOST_NAMES.get(camp_type, ["據點"]) as Array)[0]), OutpostSystem.build_person_hours("settle", 1)] }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))

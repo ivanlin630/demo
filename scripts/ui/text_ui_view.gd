@@ -377,6 +377,9 @@ static func compose(regions: Dictionary) -> String:
 	var f3: Array = regions.get("first3", []) as Array
 	if panel.strip_edges() == "" and not f3.is_empty():
 		head.append(first3_block(f3))
+	var cur: String = String(regions.get("cursor_line", ""))
+	if panel.strip_edges() == "" and cur != "":
+		head.append(TextUiLayout.clip_mark(" " + cur, TextUiLayout.COLS))   # ★F7 游標處一行
 	return "\n".join(head + [
 		mid,
 		action_block(regions.get("action", []) as Array, int(regions.get("action_folded", 0))),

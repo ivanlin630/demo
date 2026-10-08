@@ -948,6 +948,7 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"action": rows,
 		"action_folded": action_folded,
 		"first3": _first3_rows(),
+		"cursor_line": _cursor_line(),
 		"feed": _feed_rows,
 		# ★F1：戰鬥中每一鍵的回應只有一個出口 ＝ 結果行（encounter_view.key_reply；這一鍵沒有回應 ⇒ 照舊）
 		"result": _encounter_view.key_reply() if _in_battle() and _encounter_view.key_reply() != "" else _feedback_line.text,
@@ -956,6 +957,41 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"battle": _encounter_view.terminal_block() if _in_battle() else "",
 		"battle_keys": _encounter_view.terminal_keys() if _in_battle() else "",
 	}
+
+# ★F7：游標處一行（主畫面；資料＝PlayerQueryApi.tile_knowledge，只讀附身者知道的）
+func _cursor_line() -> String:
+	if _current_mode_name() != "main" or _in_battle() or _cursor == Vector2i(-1, -1):
+		return ""
+	var k: Dictionary = _bridge.tile_knowledge(_cursor.x, _cursor.y)
+	var head: String = "游標處 (%d,%d)：" % [_cursor.x, _cursor.y]
+	match String(k.get("status", "")):
+		"unvisited": return head + "沒去過"
+		"off_map": return head + "不在地圖上"
+		"no_team": return ""
+	var parts: Array = [PlayerApiMapper.terrain_label(String(k.get("terrain", "")))]
+	parts.append(("糧 %d" % int(k["food"])) if k.has("food") else "糧量：未記錄")
+	if k.has("outpost"):
+		var op: Dictionary = k["outpost"]
+		if bool(op.get("mine", false)):
+			parts.append("據點：你的")
+		else:
+			parts.append("據點：Team%d 的（關係 %+.2f）" % [int(op.get("owner", -1)), float(op.get("g", 0.0))])
+	if bool(k.get("own_camp", false)):
+		parts.append("你的營地")
+	var tms: Array = []
+	for t in k.get("teams", []):
+		var tk: int = int(t.get("tick", -1))
+		tms.append("Team%d（%s）" % [int(t["id"]), "現在" if tk < 0 else "記得，第 " + PlayerApiMapper.tick_clock(tk)])
+	if not tms.is_empty():
+		parts.append("隊伍：" + "、".join(PackedStringArray(tms)))
+	var near: int = int(k.get("nearest_known_outpost", -1))
+	parts.append(("最近已知據點 %d 格" % near) if near >= 0 else "附近沒有已知據點")
+	if k.has("camp_ok"):
+		parts.append("紮營：可" if bool(k["camp_ok"]) else "紮營：不可（%s）" % String(k.get("camp_reason", "")))
+	else:
+		parts.append("紮營：要站上這一格才知道")
+	return head + "｜".join(PackedStringArray(parts))
+
 
 # ★F8 營地欄：附身者沒有隊 ⇒「—」；快照沒有 camp_pos 鍵（沒有寫入者）⇒「？」；null ⇒「無」
 static func _camp_text(ct: Dictionary) -> String:
@@ -1673,13 +1709,20 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 
 
 	if _selected != Vector2i(-1, -1):
-		var sel_tile: Dictionary = _bridge.query_tile(_selected.x, _selected.y)
+		# ★F7b（spec 2026-10-07 round5-friendliness）：選中區塊與游標處那一行同源（只讀附身者知道的）——
+		#   舊版直讀 query_tile（state.world.tiles 真值）⇒ 選一個從沒去過的遠格也印得出它的糧 ＝ 顯示邊界 god-view
+		#   ⇒ 視野內 ⇒ 真值｜記得的格 ⇒ 地形＋「糧量：未記錄」｜沒去過 ⇒「沒去過」（debug pane 那支照舊讀 query_tile）
+		var sel_k: Dictionary = _bridge.tile_knowledge(_selected.x, _selected.y)
+		var sel_tile: Dictionary = {} if String(sel_k.get("status", "")) in ["off_map", "no_team"] else sel_k
 		lines.append("────────────────")
-		if not sel_tile.is_empty():
-			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, sel_tile.get("terrain", "?")])
-			lines.append("  農:%.0f%%  食:%d" % [
-				sel_tile.get("productivity", 0) * 100,
-				int(sel_tile.get("resources", {}).get("food", 0))])
+		if String(sel_k.get("status", "")) == "unvisited":
+			lines.append("選中: (%d,%d) 沒去過" % [_selected.x, _selected.y])
+		elif not sel_tile.is_empty():
+			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, PlayerApiMapper.terrain_label(String(sel_tile.get("terrain", "")))])
+			if sel_tile.has("food"):
+				lines.append("  農:%.0f%%  食:%d" % [float(sel_tile.get("productivity", 0)) * 100, int(sel_tile["food"])])
+			else:
+				lines.append("  糧量：未記錄")
 			var occ: Array = lc.get("occupants", [])
 			if not occ.is_empty():
 				var vts: Array = _cached_snapshot.get("visible_teams", [])
