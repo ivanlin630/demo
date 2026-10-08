@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票 #9 地圖記憶（spec 2026-09-29-map-memory-and-godview-leak-HOW §7）
 topic: ★P3 先跑：綠（全程移動 6 天、走過再離開 21 格全記得、玩家 team_tile_known 142 格）⇒ 走純 render｜★卡一點：§7 的據點圖示要分「^ 村／# 營」，但 belief 的據點記錄沒有型別（只有 owner／level／last_tick）⇒ 要嘛 harvest 多記一欄 type（sim 寫入、fp 可能變），要嘛只用一種圖示｜請裁
 ---
