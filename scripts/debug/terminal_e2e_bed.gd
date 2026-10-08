@@ -20,7 +20,7 @@ var _cells_ran: Array = []
 const EXPECTED_CELLS: Array = ["P0", "P10", "WALK", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P11", "FOOTER", "E2", "E4", "BATTLE",
 	"D1A", "D2B", "D3C", "D4D", "BS1", "BS2", "BS3", "V2MAP", "V2TGT", "V2R", "V2TAB", "V2PART", "F1", "F2", "F3", "M1", "M2", "M3", "S1", "S2", "S3", "S4",
 	"FR1", "FR2", "FO", "FO2", "RS2", "RC3",
-	"R5F1", "R5F2", "R5F3", "R5F4", "R5F7", "R5F7C"]
+	"R5F1", "R5F2", "R5F3", "R5F4", "R5F7", "R5F7C", "MM7D"]
 
 # ══ 四個畫面缺陷（spec 2026-10-07 play-py-real-run-four-screen-defects §1）══════════════════════════
 # ★格 a：事件流區也掃英文識別字 —— 抽取器與白名單用終端自驗 (d) 那一份（同一支，不抄）
@@ -106,6 +106,7 @@ func _initialize() -> void:
 	await _fo2_same_pass()
 	await _r5_cells()
 	await _r5_f7_cells()
+	await _mm_p7d_cell()
 	_fo_judge()
 	for k in KNOWN:
 		_check("★已知條目這一輪真的再現：%s（不再現 ⇒ 世界修好了，回來拿掉這一條）" % k, _known_hit.has(k))
@@ -1670,7 +1671,7 @@ func _r5_f7_cells() -> void:
 	var bad: Array = []
 	if op_tile != null:
 		var known: Dictionary = st.team_tile_known.get(ptid, {})
-		known[op_tile.tile_id] = {"outpost": {"owner_id": op_tile.outpost_owner, "level": op_tile.outpost_level, "last_tick": 0}}
+		known[op_tile.tile_id] = {"outpost": {"owner_id": op_tile.outpost_owner, "level": op_tile.outpost_level, "last_tick": 0, "type": op_tile.outpost_type}}
 		st.team_tile_known[ptid] = known
 		node._cursor = op_tile.tile_pos
 		node._refresh()
@@ -1687,11 +1688,13 @@ func _r5_f7_cells() -> void:
 	if not camp_ok or not l2.contains("你的營地") or not l2.contains("紮營"):
 		bad.append("自己營地格：%s" % l2)
 	# ③視野內的空地（不是據點、不是營地）
+	#   ★#9 §8：「視野內」讀同一個權威（vision_range × 日夜，bridge 給游標處的同一個倍率）——不是 VISION_RADIUS 常數
+	var vr3: int = VisionSystem.vision_range(st, pt, node._bridge.get_vision_mult())
 	var empty: Vector2i = Vector2i(-1, -1)
 	for k2 in ids:
 		var t2: HexTileData = st.world.tiles[k2]
 		if t2.outpost_level == 0 and t2.camp_level == 0 and t2.tile_pos != pt.tile_pos \
-				and _r5_hex(t2.tile_pos, pt.tile_pos) <= VisionSystem.VISION_RADIUS:
+				and _r5_hex(t2.tile_pos, pt.tile_pos) <= vr3:
 			empty = t2.tile_pos
 			break
 	node._cursor = empty
@@ -1705,7 +1708,7 @@ func _r5_f7_cells() -> void:
 	var far: Vector2i = Vector2i(-1, -1)
 	for k3 in ids:
 		var t3: HexTileData = st.world.tiles[k3]
-		if _r5_hex(t3.tile_pos, pt.tile_pos) > VisionSystem.VISION_RADIUS + 2 and not st.team_tile_known.get(ptid, {}).has(k3):
+		if _r5_hex(t3.tile_pos, pt.tile_pos) > vr3 + 2 and not st.team_tile_known.get(ptid, {}).has(k3):
 			far = t3.tile_pos
 			break
 	node._cursor = far
@@ -1729,6 +1732,81 @@ func _r5_f7_cells() -> void:
 	_check("R5F7C 沒去過 ⇒ 沒有糧量數字", not RegEx.create_from_string("食[:：] *[0-9]").search(sel1) != null)
 	_check("R5F7C 反向：看得見 ⇒ 有糧量數字", RegEx.create_from_string("食[:：] *[0-9]").search(sel2) != null)
 	_cells_ran.append("R5F7C")
+	await _drop(node)
+
+
+# ══ #9 P7d（spec 2026-09-29 map-memory-and-godview-leak §7③）：同一幀地圖上的字母、右欄清單、游標處指同一支隊 ══
+#   ★逐支比對：佈置兩支別的隊在玩家旁邊（看得到）、放進可互動目標
+#   ⇒ 地圖那一格的字母 ＝ 游標處「x TeamN」的 x ＝ 右欄「[n] x TeamN」的 x
+static func _mm_glyph(map_str: String, ext: Dictionary, pos: Vector2i) -> String:
+	var c: Vector2i = ext["center"]
+	var r: int = int(ext["radius"])
+	var dq: int = pos.x - c.x
+	var dr: int = pos.y - c.y
+	var lines: PackedStringArray = map_str.split("
+")
+	if dr + r < 0 or dr + r >= lines.size():
+		return ""
+	var start: int = 2 * (dr + r) + (dq + r) * 4
+	var cell: String = lines[dr + r].substr(start, 4)
+	return cell.replace("[", "").replace("]", "").strip_edges()
+
+
+func _mm_p7d_cell() -> void:
+	print("
+── MM7D 隊伍代號一致：地圖字母＝右欄＝游標處（逐支）──")
+	var w: Dictionary = _new_w(await _build(SEED_A))
+	var node: Node = w["node"]
+	var st: WorldState = node._bridge._state
+	st.set_player_forced_event({}, "")
+	await _to_main(w)
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	var spots: Array = [pt.tile_pos + Vector2i(1, 0), pt.tile_pos + Vector2i(0, 1)]
+	var picked: Array = []
+	var ids: Array = st.teams.keys()
+	ids.sort()
+	for tid in ids:
+		if picked.size() >= 2:
+			break
+		if int(tid) != ptid and st.is_live_team(int(tid)) and st.world.tiles.has(spots[picked.size()].x * 1000 + spots[picked.size()].y):
+			st.teams[tid].tile_pos = spots[picked.size()]
+			picked.append(int(tid))
+	_check("★MM7D 母體地板：佈置了兩支看得到的隊", picked.size() == 2)
+	st.player_pending_targets.clear()
+	for tid2 in picked:
+		st.player_pending_targets.append(tid2)
+	var ext: Dictionary = TextMapRenderer.map_extent(st)
+	var bad: Array = []
+	var map_letter: Dictionary = {}
+	for tid3 in picked:
+		node._cursor = st.teams[tid3].tile_pos
+		node._refresh()
+		var scr: String = _screen(node)
+		var g: String = _mm_glyph(node._map_label.text, ext, st.teams[tid3].tile_pos)
+		map_letter[tid3] = g
+		var cl: String = _r5_cursor_line(scr)
+		print("   Team%d 地圖「%s」｜游標處「%s」" % [tid3, g, cl])
+		if g.length() != 1 or not TextMapRenderer.TEAM_LETTERS.contains(g):
+			bad.append("Team%d 地圖不是隊伍字母「%s」" % [tid3, g])
+		elif not cl.contains("%s Team%d（" % [g, tid3]):
+			bad.append("Team%d 游標處沒有「%s Team%d」" % [tid3, g, tid3])
+	await _press(w, "t")
+	if not bool(parse_screen(_screen(node))["targets_active"]):
+		await _press(w, "tab")
+	var tg: Array = parse_screen(_screen(node))["targets"]
+	print("   右欄：%s" % str(tg.map(func(x): return x["label"])))
+	for tid4 in picked:
+		var hit: bool = false
+		for row in tg:
+			if String(row["label"]).begins_with("%s Team%d" % [String(map_letter.get(tid4, "")), tid4]):
+				hit = true
+		if not hit:
+			bad.append("Team%d 右欄沒有「%s Team%d」" % [tid4, map_letter.get(tid4, ""), tid4])
+	var letters: Array = map_letter.values()
+	_check("★MM7D 兩支隊的字母不同（%s）" % str(letters), letters.size() == 2 and letters[0] != letters[1])
+	_check("MM7D 地圖字母＝游標處＝右欄（不對：%s）" % str(bad), bad.is_empty())
+	_cells_ran.append("MM7D")
 	await _drop(node)
 
 
