@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 友善度批（branch feat/round5-friendliness）——全電池剩 defer-open 一條
 topic: ★請裁｜F7 新增的查詢 `PlayerQueryApi.tile_knowledge` 觸發 defer `outpost-knowledge-is-not-team-belief`（met_check 是 grep `tile_knowledge`）｜我不改名閃避，也不改 met_check｜請你判它是「這次真的做了那件事」還是「名字撞到」，重新裁定或更新 defer_until
 ---
