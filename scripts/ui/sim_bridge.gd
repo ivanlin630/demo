@@ -207,10 +207,20 @@ func query_tile(q: int, r: int) -> Dictionary:
 
 # ★F7／F7b：附身者對一格知道什麼（查詢面那一支；不讀 query_tile 的真值）
 func tile_knowledge(q: int, r: int) -> Dictionary:
-	return PlayerQueryApi.tile_knowledge(_state, Vector2i(q, r))
+	return PlayerQueryApi.tile_knowledge(_state, Vector2i(q, r), get_vision_mult())
 
 func render_text_map(player_tid: int, cursor: Vector2i) -> String:
-	return TextMapRenderer.render(_state, player_tid, cursor)
+	return TextMapRenderer.render(_state, player_tid, cursor, get_vision_mult())
+
+# ★#9 §8：日夜視野倍率 —— 唯讀，用 runner 那一顆 DayNightSystem（sim 視野用的同一支），不每幀 new
+func get_vision_mult() -> float:
+	if _runner == null or _runner._day_night_system == null:
+		return 1.0
+	return _runner._day_night_system.get_vision_mult(_state)
+
+# ★#9 §7③：隊伍代號表（地圖／右欄／游標處三處同讀這一份；產生點在 TextMapRenderer.team_codes）
+func get_team_codes(player_tid: int) -> Dictionary:
+	return TextMapRenderer.team_codes(_state, player_tid, get_vision_mult())
 
 # ── Step 3: data query wrappers ────────────────────────────────────────────────
 

@@ -929,7 +929,7 @@ func build_regions(pend_txt: String) -> Dictionary:
 			"story_end": _story_end_text(),
 			"pending": pend_txt.trim_prefix("待執行 "),
 		},
-		"map_note": "大寫=看得到 小寫=記得 ?=沒去過 3?=最後所知",
+		"map_note": TextMapRenderer.LEGEND,   # ★#9 P8：圖例與字元表同一處（renderer）
 		"tabs": String(UiPages.header(_page_idx)).trim_prefix("["),
 		"map": _map_label.text,
 		# ★★★★★【剝掉 `pages` 的第一行抬頭 —— 因為框標題已經印了同一份】
@@ -965,11 +965,12 @@ func _cursor_line() -> String:
 	var k: Dictionary = _bridge.tile_knowledge(_cursor.x, _cursor.y)
 	var head: String = "游標處 (%d,%d)：" % [_cursor.x, _cursor.y]
 	match String(k.get("status", "")):
-		"unvisited": return head + "沒去過"
 		"off_map": return head + "不在地圖上"
 		"no_team": return ""
-	var parts: Array = [PlayerApiMapper.terrain_label(String(k.get("terrain", "")))]
-	parts.append(("糧 %d" % int(k["food"])) if k.has("food") else "糧量：未記錄")
+	var unvisited: bool = String(k.get("status", "")) == "unvisited"
+	var parts: Array = ["沒去過"] if unvisited else [PlayerApiMapper.terrain_label(String(k.get("terrain", "")))]
+	if not unvisited:
+		parts.append(("糧 %d" % int(k["food"])) if k.has("food") else "糧量：未記錄")
 	if k.has("outpost"):
 		var op: Dictionary = k["outpost"]
 		if bool(op.get("mine", false)):
@@ -979,11 +980,16 @@ func _cursor_line() -> String:
 	if bool(k.get("own_camp", false)):
 		parts.append("你的營地")
 	var tms: Array = []
+	var codes: Dictionary = _bridge.get_team_codes(_player_tid)   # ★#9 P7d：與地圖、右欄同一份代號
 	for t in k.get("teams", []):
 		var tk: int = int(t.get("tick", -1))
-		tms.append("Team%d（%s）" % [int(t["id"]), "現在" if tk < 0 else "記得，第 " + PlayerApiMapper.tick_clock(tk)])
+		var code: String = String(codes.get(int(t["id"]), ""))
+		var when: String = "現在" if tk < 0 else ("聽說" if bool(t.get("heard", false)) else "記得") 			+ "，第 " + PlayerApiMapper.tick_clock(tk)
+		tms.append("%sTeam%d（%s）" % [(code + " ") if code != "" else "", int(t["id"]), when])
 	if not tms.is_empty():
 		parts.append("隊伍：" + "、".join(PackedStringArray(tms)))
+	if unvisited:
+		return head + "｜".join(PackedStringArray(parts))
 	var near: int = int(k.get("nearest_known_outpost", -1))
 	parts.append(("最近已知據點 %d 格" % near) if near >= 0 else "附近沒有已知據點")
 	if k.has("camp_ok"):
@@ -2470,16 +2476,19 @@ func _build_interact_str() -> String:
 		"◀ 數字鍵在這一側" if _interact_pane == PANE_TARGETS else "（按 [Tab] 切過來）"))
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	var vts: Array = _cached_snapshot.get("visible_teams", [])
+	# ★#9 P7d：每列前印地圖上的同一個代號（代號表一份：sim_bridge.get_team_codes；不用本清單順序當代號）
+	var t_codes: Dictionary = _bridge.get_team_codes(_player_tid)
 	for target_info in pending_tgts:
 		var tid: int = target_info.get("target_id", -1)
+		var code_pfx: String = (String(t_codes[tid]) + " ") if t_codes.has(tid) else ""
 		var vt: Dictionary = {}
 		for v in vts:
 			if v.get("id", -1) == tid: vt = v; break
 		if vt.is_empty():
-			items.append("Team%d" % tid)
+			items.append(code_pfx + "Team%d" % tid)
 			continue
 		var pos: Dictionary = vt.get("position", {})
-		items.append("Team%d @(%d,%d) %s pop:%d" % [
+		items.append(code_pfx + "Team%d @(%d,%d) %s pop:%d" % [
 			tid, pos.get("q", 0), pos.get("r", 0), vt.get("faction_display", "?"), vt.get("population", 0)])
 	if items.is_empty():
 		lines.append("（無可互動目標）")

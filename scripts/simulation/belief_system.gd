@@ -212,6 +212,11 @@ static func position_estimate(state: WorldState, observer_id: int, target_id: in
 
 static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
 	if Probe.enabled and DecisionContext._in_gather: Probe.bump("gseg.sub.best_estimate")   # ★§1：重複子呼叫樁
+	var bc: Dictionary = best_claim(state, obs_id, tgt_id)
+	return bc["value"] if not bc.is_empty() else {}
+
+# ★#9 P11：整筆最佳 claim（含 source_type）—— best_estimate 只回 value；游標處要知道那一筆是不是「聽說」
+static func best_claim(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
 	var cs: Array = claims(state, obs_id, tgt_id)
 	if Probe.enabled: Probe.bump("bel.best_call")
 	if cs.is_empty(): return {}
@@ -228,7 +233,7 @@ static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictio
 		if age < WorldState.TICKS_PER_MONTH: Probe.bump("bel.claim_fresh")
 		elif age < 3 * WorldState.TICKS_PER_MONTH: Probe.bump("bel.claim_mid")
 		else: Probe.bump("bel.claim_stale")
-	return best["value"]
+	return best
 
 # credibility-weighted（G3d-2）：(1−最強源 eff_cred) + cred 加權值分歧。
 # 親見高 cred 主導 → top→1 + 假源時效衰權重低 → spread 小 → 壓低不確定（查證可收斂）。
@@ -494,6 +499,8 @@ static func harvest_tile_known(state: WorldState, team: TeamData) -> void:
 						"owner_id": int(_t.outpost_owner),
 						"level": int(_t.outpost_level),
 						"last_tick": int(state.world.current_tick),
+						# ★#9 裁甲（systems 0995cbbe2）：村／營是親眼看得到的東西 ⇒ 屬於這筆觀察（render 只讀這裡）
+						"type": String(_t.outpost_type),
 					}
 					known[tid] = _entry
 				else:
@@ -533,6 +540,7 @@ static func known_outposts(state: WorldState, observer_id: int) -> Array:
 			"tile_pos": Vector2i(int(tid) / 1000, int(tid) % 1000),
 			"owner_id": int(op.get("owner_id", -1)),
 			"level": int(op.get("level", 0)),
+			"type": String(op.get("type", "")),
 			"last_tick": int(op.get("last_tick", 0)),
 		})
 	return out
