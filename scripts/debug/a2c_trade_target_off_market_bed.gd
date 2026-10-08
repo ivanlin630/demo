@@ -71,10 +71,10 @@ func _a_market(ws: WorldState) -> HexTileData:
 	return null
 
 
-func _order_msg(kind: String, origin: int, pos: Vector2i, price: float, oid: int) -> MessageData:
+func _order_msg(kind: String, origin: int, pos: Vector2i, price: float, oid: int, res: String) -> MessageData:
 	var m := MessageData.new()
 	m.type = kind
-	m.params = {"res": "food", "qty": 20, "origin_team": origin, "origin_pos": pos, "order_id": oid, "price": price}
+	m.params = {"res": res, "qty": 20, "origin_team": origin, "origin_pos": pos, "order_id": oid, "price": price}
 	return m
 
 
@@ -90,19 +90,30 @@ func _p2_arbitrage_picks_known_market() -> void:
 	ids.sort()
 	var merchant: TeamData = ws.teams[ids[0]]
 	var other: int = int(ids[1])
-	merchant.tile_pos = mk.coord if "coord" in mk else Vector2i(int(mk.tile_id / 1000), int(mk.tile_id % 1000))
+	# ★座標一律由 tiles 的鍵推（x*1000+y，同 _pos_is_known_market／_nearest_market_outpost 的換算）
+	merchant.tile_pos = Vector2i(int(mk.tile_id / 1000), int(mk.tile_id % 1000))
+	_check("★母體地板：市集座標換回 tiles 鍵就是那座市集", ws.world.tiles.get(merchant.tile_pos.x * 1000 + merchant.tile_pos.y) == mk)
 	var empty: Vector2i = merchant.tile_pos + Vector2i(1, 0)
 	var et: HexTileData = ws.world.tiles.get(empty.x * 1000 + empty.y)
 	_check("★空地真的不是市集", et == null or et.outpost_level <= 0)
 	ws.team_market_known[merchant.team_id] = {mk.tile_id: true}
+	# ★挑商人估值最高的資源（估值 0 ⇒ 任何價都沒有正套利 ⇒ 兩張都不選，這一格就沒有鑑別力——第一版就是這樣假紅）
+	var res: String = ""
+	var mine: float = 0.0
+	for r in TradeValuation.BASE_PRICE.keys():
+		var v: float = TradeValuation.local_value(merchant, String(r), ws)
+		if v > mine:
+			mine = v
+			res = String(r)
+	_check("★母體地板：商人對某種貨估值 > 0（%s＝%.3f）⇒ 兩張單都有正套利" % [res, mine], mine > 0.0)
 	ws.team_known[merchant.team_id] = [
-		_order_msg("order_sell", other, empty, 0.01, 9001),
-		_order_msg("order_sell", other, merchant.tile_pos, 0.5, 9002)]
+		_order_msg("order_sell", other, empty, mine * 0.1, 9001, res),
+		_order_msg("order_sell", other, merchant.tile_pos, mine * 0.5, 9002, res)]
 	var os := OrderSystem.new()
 	var pick: Dictionary = os.best_arbitrage_order(ws, merchant)
 	print("   兩張都有 ⇒ 選到 pos %s（市集 %s、空地 %s）" % [str(pick.get("pos", "空")), str(merchant.tile_pos), str(empty)])
 	_check("P2 選市集那張（不選更便宜的空地單）", not pick.is_empty() and pick.get("pos") == merchant.tile_pos)
-	ws.team_known[merchant.team_id] = [_order_msg("order_sell", other, empty, 0.01, 9003)]
+	ws.team_known[merchant.team_id] = [_order_msg("order_sell", other, empty, mine * 0.1, 9003, res)]
 	var pick2: Dictionary = os.best_arbitrage_order(ws, merchant)
 	print("   只有漫遊單 ⇒ %s" % ("回空" if pick2.is_empty() else "選到 " + str(pick2.get("pos"))))
 	_check("P2 只有漫遊單 ⇒ 回空（_merchant_trade_target 會退到最近已知市集）", pick2.is_empty())
