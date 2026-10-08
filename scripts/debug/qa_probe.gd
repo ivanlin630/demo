@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # QA 探測：驗證已知種子根因 + 幾個 B/C 類落差。純 print，不 assert（避免 headless 卡死）。
 

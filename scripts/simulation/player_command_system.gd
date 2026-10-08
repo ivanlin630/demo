@@ -818,7 +818,7 @@ func _action_settle(state: WorldState, _target_id: int, pt: TeamData, _pt_id: in
 	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
 	# ★成本＝NPC 紮根今天的成本：settle 工期、免材料（藍圖：成本就是時間）
 	FactionAISystem.shared().start_settle_construction(state, pt, tile, camp_type)
-	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_settle")
+	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_settle")   # gate-ok: 玩家指令設任務（同 _action_rest；舊 _action_camp 那一行搬到這裡）
 	return { "ok": true, "msg": "開始紮根成%s（%d 人時,免材料）" % [
 		String((OutpostSystem.OUTPOST_NAMES.get(camp_type, ["據點"]) as Array)[0]), OutpostSystem.build_person_hours("settle", 1)] }
 

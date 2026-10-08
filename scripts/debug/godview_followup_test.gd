@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # god-view follow-up TDD（spec 2026-07-20-godview-followup；detector v3 撿 2 殘留）。
 # ① jhost(decision_context:373) live pos→belief_pos（同 1119）：無 belief→不可達。

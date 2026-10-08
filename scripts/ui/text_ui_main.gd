@@ -899,7 +899,7 @@ func build_regions(pend_txt: String) -> Dictionary:
 		# ★F2：目標動作同一條規則（鍵是靜態 ACTION_DIGITS，排序折疊不影響）
 		var t_rows: Array = []
 		for ta in _interact_action_split()["team"]:
-			t_rows.append(UiModel.action_row(ta, "對選中目標", TextUiView.key_for(String(ta.get("action_id", "")))))
+			t_rows.append(UiModel.action_row(ta, "對選中目標", ""))   # ★鍵由 action_block 照 ACTION_DIGITS 畫（不在這裡另算一份）
 		var tfd: Dictionary = UiModel.fold(t_rows, _actions_expanded)
 		var shown_ids: Array = (tfd["shown"] as Array).map(func(x): return String(x["id"]))
 		for sid in shown_ids:

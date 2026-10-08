@@ -237,9 +237,19 @@ func _test_camp_action_reachable() -> void:
 	print("   自家隊那一側 %d 列：%s" % [self_rows2.size(), str(self_ids2)])
 	_check("★★★距離太近時 camp **仍然列出**（舊斷言寫的是它消失 ＝ 把 (乙) 的病當預期）",
 		"camp" in self_ids2)
-	_check("★★而它 `enabled==false`", not bool(camp_row.get("enabled", true)))
-	_check("★★★★而它的原因**非空**（實測「%s」）" % String(camp_row.get("disabled_reason", "")),
-		String(camp_row.get("disabled_reason", "")).strip_edges() != "")
+	# ★★F8（2026-10-08，spec round5 §F8，用戶裁 e1a09f429）：據點間距規則整條退場 ⇒ 緊鄰據點【可以】紮營
+	_check("★★F8：緊鄰據點時 camp 可做（間距規則退場）", bool(camp_row.get("enabled", false)))
+	# ★★★「不可時列出＋引擎原因」那條原則改用【仍存在的】條件驗：腳下那一格已有據點
+	var here_t = st.world.tiles.get(pt.tile_pos.x*1000 + pt.tile_pos.y)
+	here_t.outpost_level = 1; here_t.outpost_owner = 999; here_t.outpost_type = "civilian"
+	node._refresh()
+	var camp_row2: Dictionary = {}
+	for a2 in node._interact_action_split()["self"]:
+		if String(a2.get("action_id", "")) == "camp":
+			camp_row2 = a2 as Dictionary
+	_check("★★腳下已有據點 ⇒ camp 仍列出而 `enabled==false`", not camp_row2.is_empty() and not bool(camp_row2.get("enabled", true)))
+	_check("★★★★而它的原因**非空**（實測「%s」）" % String(camp_row2.get("disabled_reason", "")),
+		String(camp_row2.get("disabled_reason", "")).strip_edges() != "")
 	await _free_ui(node)
 	_cell("_test_camp_action_reachable")
 
@@ -3661,6 +3671,10 @@ func _test_p33_listed_matches_the_screen() -> void:
 	for k in PlayerCommandSystem.ACTION_SHAPE.keys():
 		var sh: Dictionary = PlayerCommandSystem.ACTION_SHAPE[k] as Dictionary
 		if String(sh.get("target", "")) == "none" and bool(sh.get("listed", false)):
+			# ★F8（2026-10-08）：settle（紮根）只在自己的 L0 營地上列出（PlayerCommandSystem.settle_listed）
+			#   ⇒ 這一屏（不在自己營地上）本來就不該有它 —— 指名排除，不放寬計數
+			if String(k) == "settle":   # 這一格的 UI 是新建的世界、玩家不在自己的營地上
+				continue
 			declared.append(String(k))
 	declared.sort()
 	print("   宣告側（`target==\"none\" and listed`）＝ %d 個：%s" % [declared.size(), str(declared)])

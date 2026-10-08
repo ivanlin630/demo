@@ -59,6 +59,7 @@ var _cells_ran: Array = []
 #       這兩支是被 `_render_screen` 餵進去的**資料流**，不是被按鍵呼叫的動作。
 const SPEC_LIVE_UI_FILES: Array = ["encounter_view.gd", "sim_bridge.gd", "team_ui_helper.gd",
 	"text_map_renderer.gd", "text_ui_layout.gd", "text_ui_main.gd", "text_ui_view.gd",
+	"ui_model.gd",   # ★友善度 F6（2026-10-08）：區塊資料層，text_ui_main／text_ui_view 都讀它
 	"ui_pages.gd"]
 const SPEC_CALLSITES_BRIDGE_SELF: int = 1   # ★sim_bridge 內部自呼（不是玩家按得到的呼叫點）
 const SPEC_CALLSITES_TEXT_UI: int = 36      # spec §1① 逐字那一個
