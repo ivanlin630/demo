@@ -81,3 +81,4 @@ scripts/simulation/resource_system.gd:348	flush_forage_episodes	C	R² 初判 [A]
 scripts/simulation/faction_ai_system.gd:7467	tick_solo_think	A	★錯開票新增的思考迴圈（每 tick 到期才想）——已有 null 守衛，★★而 null 看不見 pending_erase：死判定但未清除的隊仍會進來想一次⇒ on-touch 轉 live_team()
 scripts/simulation/sim_runner.gd:913	_step3c_read_market_board	A	A2 修：補 market 步名單（TRADE、trade_arrived、人在市集格）＝對隊解算市集／記失敗／放手 ⇒ 要活著的（迴圈內 is_live_team 已濾）
 scripts/simulation/player_query_api.gd:442	tile_knowledge	A	友善度 F7：游標處／選中區塊列「看得到的隊伍」＝玩家可見的世界 ⇒ 要活著的（迴圈內 is_live_team 已濾）
+scripts/simulation/player_query_api.gd:469	_remembered_teams_at	A	#9：游標處列 belief 記得在這一格的隊（與地圖 a? 同一條 belief_pos 線）＝玩家可見的世界 ⇒ 要活著的（迴圈內 is_live_team 已濾）

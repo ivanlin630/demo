@@ -402,13 +402,14 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 
 # ══ ★F7／F7b（spec 2026-10-07 round5-friendliness）：附身者對一格【知道】什麼 ══════════════════════════════
 # ★只用附身者知道的（親見／belief／自知），不讀別人的真值：
-#   ·視野內（距離 ≤ VISION_RADIUS）⇒ 地形＋糧量真值（看得見）
+#   ·視野內（距離 ≤ VisionSystem.vision_range(玩家隊, 日夜倍率)，地圖大寫區同一支）⇒ 地形＋糧量真值（看得見）
 #   ·記得的格（team_tile_known 有它）⇒ 地形；糧量不記（普通格的記憶只是 bool、沒有時戳）
 #   ·沒去過 ⇒ 只回 status
 #   ·據點＝自己的（自知）或 belief 那一份（FactionAISystem._known_outpost_relations，NPC 選址同一份資料）
-#   ·隊伍＝視野內看得到的（現在）＋belief 裡記得在這一格的（最後所知 tick）
+#   ·隊伍＝視野內看得到的（現在）＋belief 裡記得在這一格的（最後所知 tick；belief_pos 同一條過期線＝地圖 a? 同一份）
+#     ★#9 P11：最佳 claim 不是親見 ⇒ "heard": true（游標處標「聽說」）
 #   ·可否紮營 ⇒ 只在【腳下那一格】回答（precheck_camp 同一支；別格的真值玩家看不到，不替它答）
-static func tile_knowledge(state: WorldState, pos: Vector2i) -> Dictionary:
+static func tile_knowledge(state: WorldState, pos: Vector2i, vision_mult: float = 1.0) -> Dictionary:
 	var p: PersonData = state.persons.get(state.player_id)
 	var ptid: int = p.team_id if p != null else -1
 	var pt: TeamData = state.teams.get(ptid)
@@ -419,10 +420,11 @@ static func tile_knowledge(state: WorldState, pos: Vector2i) -> Dictionary:
 	if tile == null:
 		return {"status": "off_map"}
 	var d: int = _hex(pt.tile_pos, pos)
-	var visible: bool = d <= VisionSystem.VISION_RADIUS
+	var visible: bool = d <= VisionSystem.vision_range(state, pt, vision_mult)
 	var remembered: bool = (state.team_tile_known.get(ptid, {}) as Dictionary).has(key)
 	if not visible and not remembered:
-		return {"status": "unvisited"}
+		# ★#9 P11：沒去過的格也可能有【記得的隊】（belief 位置不必是我走過的地方）——地圖在這裡畫 a?，游標處要說得出是誰
+		return {"status": "unvisited", "teams": _remembered_teams_at(state, ptid, pos, {})}
 	var out: Dictionary = {"status": "visible" if visible else "remembered", "terrain": tile.terrain}
 	if visible:
 		out["food"] = int(tile.resources.get("food", 0))
@@ -442,14 +444,9 @@ static func tile_knowledge(state: WorldState, pos: Vector2i) -> Dictionary:
 		for tid in state.teams:
 			var t: TeamData = state.teams[tid]
 			if int(tid) != ptid and t.tile_pos == pos and state.is_live_team(int(tid)):
-				teams.append({"id": int(tid), "tick": -1})
+				teams.append({"id": int(tid), "tick": -1, "heard": false})
 				seen[int(tid)] = true
-	for tid2 in BeliefSystem.known_targets(state, ptid):
-		if seen.has(int(tid2)):
-			continue
-		var be: Dictionary = BeliefSystem.best_estimate(state, ptid, int(tid2))
-		if be.get("tile_pos", Vector2i(-1, -1)) == pos:
-			teams.append({"id": int(tid2), "tick": int(be.get("last_tick", 0))})
+	teams.append_array(_remembered_teams_at(state, ptid, pos, seen))
 	out["teams"] = teams
 	var near: int = -1
 	var own: HexTileData = state.own_outpost_tile(ptid)
@@ -464,6 +461,22 @@ static func tile_knowledge(state: WorldState, pos: Vector2i) -> Dictionary:
 		var pr: Dictionary = PlayerCommandSystem.new().precheck_camp(state, pt)
 		out["camp_ok"] = bool(pr.get("ok", false))
 		out["camp_reason"] = String(pr.get("reason", ""))
+	return out
+
+# ★#9：belief 記得在這一格的隊（belief_pos 同一條過期線 ⇒ 與地圖 a? 同一份）；seen＝已列為「現在看得到」的隊
+static func _remembered_teams_at(state: WorldState, ptid: int, pos: Vector2i, seen: Dictionary) -> Array:
+	var out: Array = []
+	for tid2 in state.teams:
+		if int(tid2) == ptid or seen.has(int(tid2)) or not state.is_live_team(int(tid2)):
+			continue
+		if BeliefSystem.belief_pos(state, ptid, int(tid2)) != pos:
+			continue
+		var bc: Dictionary = BeliefSystem.best_claim(state, ptid, int(tid2))
+		var val: Dictionary = bc.get("value", {})
+		out.append({"id": int(tid2), "tick": int(val.get("last_tick", 0)),
+			# ★親見＝belief_system 的 firsthand 定義（source 是親見且就是自己）；別隊轉述的「親見」對我仍是聽說
+			"heard": not bc.is_empty() and not (String(bc.get("source_type", "")) == "親見"
+				and int(bc.get("source_id", -1)) == ptid)})
 	return out
 
 static func _hex(a: Vector2i, b: Vector2i) -> int:
