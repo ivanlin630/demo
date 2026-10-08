@@ -12,7 +12,8 @@ const TEAM_LETTERS: String = "abcdeghijklnoqrstuvwxyz"
 const GLYPH_BY_TYPE: Dictionary = {"civilian": "^", "military": "#"}
 const MARKET_GLYPH: String = "$"
 # ★圖例與字元表同一處維護（P8：新增一種而不加圖例 ⇒ 床紅）
-const LEGEND: String = "@你 a隊伍 ^村 #營 $市集 a?記得的隊 P看得到 p記得 ?沒去過"
+#   ★它印在地圖框的上框（text_ui_view.map_pages_box），左半框只裝得下 ~48 欄 ⇒ 字要短（終端自驗 (e-1) 擋超寬）
+const LEGEND: String = "@你 a隊 ^村 #營 $市集 a?記得 P看見 p記得 ?未知"
 
 # ★F10（spec 2026-10-07 round5-friendliness §F10，用戶裁 藍圖 4d70c8aad②）：視窗＝整張地圖
 #   ⇒ 視窗中心＝地圖中心、半徑＝地圖半徑，兩者都從 state.world.tiles 的座標範圍算（儲存座標中心在 (N,N) 不是 (0,0)；

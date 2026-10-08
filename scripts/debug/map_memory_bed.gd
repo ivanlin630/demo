@@ -239,19 +239,18 @@ func _render_cells() -> void:
 	_check("P7b 同格看得到的隊＋已知據點 ⇒ 印隊伍字母", g_nb.length() == 1 and g_nb >= "a" and g_nb <= "z")
 	_check("P7 已知營畫 #（型別來自 belief）", g_op == "#")
 	_check("P7 記得的格印小寫地形", g_rem.length() == 1 and g_rem in ["p", "f", "m"])
-	var kinds: Dictionary = {}
-	for row in m5.split("\n"):
-		for i in range(0, row.length() - 3, 4):
-			pass
-	for ch in ["@", "?"]:
-		kinds[ch] = m5.contains(ch)
-	kinds["字母"] = g_nb >= "a" and g_nb <= "z"
-	kinds["據點"] = g_op == "#"
-	kinds["x?"] = _is_x(_glyph_at(m5, ext, far2))
-	kinds["大寫"] = RegEx.create_from_string("[PFM] ").search(m5) != null
-	kinds["小寫"] = g_rem in ["p", "f", "m"]
+	# ★逐層一列（名稱, 這一幀有沒有）——印出來給人讀，判決看第二欄
+	var kinds: Array = [
+		["@", m5.contains("@")],
+		["?", m5.contains("?")],
+		["隊伍字母", g_nb >= "a" and g_nb <= "z"],
+		["據點圖示", g_op == "#"],
+		["字母?", _is_x(_glyph_at(m5, ext, far2))],
+		["大寫地形", RegEx.create_from_string("[PFM] ").search(m5) != null],
+		["小寫地形", g_rem in ["p", "f", "m"]],
+	]
 	print("   P7 這一幀各層：%s" % str(kinds))
-	_check("P7 五層同一幀都分得開（每一種至少一格）", not kinds.values().has(false))
+	_check("P7 五層同一幀都分得開（每一種至少一格）", kinds.all(func(x): return bool(x[1])))
 	# P9：每格 4 字元
 	var c: Vector2i = ext["center"]
 	var rr: int = int(ext["radius"])
