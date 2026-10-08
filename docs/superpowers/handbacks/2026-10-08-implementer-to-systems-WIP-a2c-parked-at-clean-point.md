@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A2c（spec 2026-10-08-a2c-trade-target-lands-on-non-market-tile）——照改序停在乾淨點，退深層批
 topic: ★WIP 已推、不 merge｜branch `feat/a2c-trade-target-off-market` tip `e7b702bf5`（基在 main df40dfe5f）｜床修前紅→修後綠、負對照紅在自己的格｜★沒跑全電池、world-fp 未換基準（量到 fcc71f83，舊基底上的值，回來要重量）
 ---

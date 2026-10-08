@@ -3703,3 +3703,4 @@ A2 修（失敗記號世界裡沒寫：110 事件 0 記號）spec 送 R²；排�
 A2 缺陷修已 merge（df40dfe5f），不回滾
 ★systems 錯在：把 A2 缺陷修排到友善度批之前——缺陷修不等於可插隊；世界／商業的缺陷除非玩家畫面上看得到，一律進深層批
 ```
+A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip e7b702bf5（基 df40dfe5f）；床修前紅→修後綠、seed 7 非市集到場 23→0；★回來時：rebase、全電池、world-fp 重量（WIP 量到的 fcc71f83 是舊基底值，不可沿用）
