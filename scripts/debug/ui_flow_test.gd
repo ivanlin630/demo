@@ -3272,9 +3272,11 @@ func _test_p29_key_on_screen_runs_that_row() -> void:
 	node._refresh()
 	var rows: Array = node._interact_action_split()["team"]
 	var keyed: Array = []
+	var enabled_of: Dictionary = {}
 	for r in rows:
 		if TextUiView.key_for(String(r.get("action_id", ""))) != "":
 			keyed.append(String(r.get("action_id", "")))
+			enabled_of[String(r.get("action_id", ""))] = bool(r.get("enabled", true))
 	print("   這一輪 %d 列，其中【有鍵】的 %d 列：%s" % [rows.size(), keyed.size(), str(keyed)])
 	_check("★★母體地板：有鍵的列 > 0（0 ⇒ 下面的迴圈一次都不跑 ⇒ 本格不可判不是綠）",
 		keyed.size() > 0)
@@ -3303,10 +3305,14 @@ func _test_p29_key_on_screen_runs_that_row() -> void:
 				got = String(a.get("action_id", ""))
 		if got == "" and node._ui_depth() > 0:
 			got = String(node._ui_top())
-		print("   按 [%s]（畫面說「%s」）⇒ 實際 action_id ＝ 「%s」%s" % [
-			key, String(aid), got, "" if got == String(aid) else "★不符"])
-		if got != String(aid):
-			wrong.append("按 [%s] 畫面說「%s」而實際是「%s」" % [key, String(aid), got])
+		# ★F3（列的條件＝做的條件）：不可的列按下去是拒絕句（主詞＋原因）、不下令 ⇒ 期望「什麼都沒排」且結果行說那一列
+		var want: String = String(aid) if bool(enabled_of.get(String(aid), true)) else ""
+		var fb: String = String(node._feedback_line.text)
+		var refused_ok: bool = want != "" or fb.contains(PlayerApiMapper.action_label(String(aid)) + "不行：")
+		print("   按 [%s]（畫面說「%s」%s）⇒ 實際 action_id ＝ 「%s」%s" % [
+			key, String(aid), "" if want != "" else "，不可", got, "" if (got == want and refused_ok) else "★不符"])
+		if got != want or not refused_ok:
+			wrong.append("按 [%s] 畫面說「%s」而實際是「%s」（結果行「%s」）" % [key, String(aid), got, fb])
 	_check("★★★★★按下畫面印的鍵 ⇒ 執行的就是那一列（不符的：%s）" % str(wrong),
 		wrong.is_empty())
 	# ★(d) 沒有鍵的那些要【真的按不到】—— 而現在它們不在反查表裡 ⇒ 按任何鍵都不會選到它們
@@ -3666,6 +3672,7 @@ func _test_p33_listed_matches_the_screen() -> void:
 	node._interact_target = -1
 	node._interact_pane = TextUiMain.PANE_SELF
 	node._self_page = 0
+	node._actions_expanded = true   # ★F2 之後不可的列預設折疊 ⇒ 數「按得到的列」要先展開（鍵號不因展開而變）
 	node._refresh()
 	var seen_rows: Array = []
 	var guard: int = 0

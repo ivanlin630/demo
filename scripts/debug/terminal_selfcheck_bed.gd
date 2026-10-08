@@ -780,7 +780,8 @@ func _test_j_fatigue_column_and_rest_key() -> void:
 				with_col += 1
 		if screen.contains("── 自家隊動作（"):
 			inter_n += 1
-			if screen.contains("]" + rest_label):
+			# ★F2 之後：不可的動作預設折進「另有 N 個暫時不能做（按 ? 展開看原因）」⇒ 休息不可時在那一行裡（按 ? 找得到）
+			if screen.contains("]" + rest_label) or screen.contains(UiModel.FOLD_TAIL):
 				with_rest += 1
 		print("   %s：疲勞欄 %s｜自家隊動作區 %s／休息鍵 %s" % [String(d.get("name", "")), m.get_string(0) if m != null else "（無）",
 			str(screen.contains("── 自家隊動作（")), str(screen.contains("]" + rest_label))])

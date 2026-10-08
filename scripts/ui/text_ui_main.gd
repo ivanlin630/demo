@@ -967,7 +967,7 @@ func _first3_rows() -> Array:
 	for i in range(mini(9, self_all.size())):
 		self_rows.append(UiModel.action_row(self_all[i], "自家隊", str(i + 1)))
 	return UiModel.first_three(msg, "T", "X", "推進到整點", self_rows,
-		[{"key": "G", "text": "跳過指定的 tick 數"}])
+		[{"key": "G", "text": "跳過指定的時間"}])
 
 
 func _in_battle() -> bool:
