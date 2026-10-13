@@ -8,6 +8,21 @@ const SITUATION_SKILL_MAP: Dictionary = {
 	"intel_read":    "偵查",
 }
 
+const SITUATION_LABELS: Dictionary = {"assess_enemy": "評估敵情", "diplomatic": "外交判讀", "resources": "資源狀況",
+	"strategic": "大局", "intel_read": "解讀情報"}
+
+# ★玩家選單的情境集合（spec terminal-input-prompts 追加三 ①）：SITUATION_SKILL_MAP 的鍵 ∩ TextBank 有 advisor_<鍵> 模板
+#   ⇒ 沒有模板的（strategic／intel_read）不上選單（上了只會拿到預設句）
+static func menu_situations() -> Array:
+	var out: Array = []
+	for k in SITUATION_SKILL_MAP:
+		if TextBank.TEMPLATES.has("advisor_" + String(k)):
+			out.append(String(k))
+	return out
+
+static func situation_label(k: String) -> String:
+	return String(SITUATION_LABELS.get(k, k))
+
 func get_advice(advisor: PersonData, situation: String,
 		situation_data: Dictionary, state: WorldState) -> String:
 	if advisor == null:

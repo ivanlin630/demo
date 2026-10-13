@@ -22,6 +22,29 @@ const SURRENDER_TRANSFER_RES: Array = [
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 var _encounter:   EncounterSystem    = EncounterSystem.new()
+# ★玩家可下令的任務（spec 2026-10-13-terminal-input-prompts 追加三 ②，systems 定＝子隊那六項）：[任務常數, 顯示名]
+#   ★一份：UI 的子隊任務選單與「下令成員隊」選單都讀它；action 與信使抵達端驗同一份（拒絕未知任務）
+const ORDERABLE_TASKS: Array = [
+	[TeamData.TASK_IDLE,   "待機"],
+	[TeamData.TASK_FORAGE, "覓食"],
+	[TeamData.TASK_SETTLE, "安頓"],
+	[TeamData.TASK_PATROL, "巡邏"],
+	[TeamData.TASK_BUILD,  "建設"],
+	[TeamData.TASK_SCOUT,  "偵查"],
+]
+# ★勢力目標集合（追加三 ③：原本內聯在 _action_set_faction_goal 的字面）；空字串＝清除指定目標
+const FACTION_GOALS: Array = ["expand", "defend", "trade_net"]
+const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（跟隨 AI）"}
+
+static func faction_goal_label(g: String) -> String:
+	return String(FACTION_GOAL_LABELS.get(g, g))
+
+static func is_orderable_task(t: String) -> bool:
+	for e in ORDERABLE_TASKS:
+		if String(e[0]) == t:
+			return true
+	return false
+
 var _subteam:     SubteamSystem      = SubteamSystem.new()
 var _action_registry: Dictionary = {}
 
@@ -1370,8 +1393,8 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 	if pt.faction_id == -1:
 		return { "ok": false, "msg": "玩家不在勢力中" }
 	var goal9: String = str(state.player_state.get("faction_goal_input", ""))
-	if goal9 not in ["expand", "defend", "trade_net", ""]:
-		return { "ok": false, "msg": "無效目標（expand/defend/trade_net/空字串清除）" }
+	if goal9 != "" and goal9 not in FACTION_GOALS:
+		return { "ok": false, "msg": "無效目標（%s／空字串清除）" % "/".join(FACTION_GOALS) }
 	var f9: FactionData = state.factions.get(pt.faction_id)
 	if f9 == null:
 		return { "ok": false, "msg": "勢力不存在" }
@@ -1390,6 +1413,11 @@ func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamDa
 		return { "ok": false, "msg": "目標成員不存在" }
 	if m_task.is_empty():
 		return { "ok": false, "msg": "未指定任務" }
+	# ★追加三 ②：驗成員資格＋拒絕不在集合的任務（舊版只查非空 ⇒ 打錯字會原樣變成別隊的 current_task）
+	if pt.faction_id == -1 or member_team.faction_id != pt.faction_id:
+		return { "ok": false, "msg": "Team%d 不是你勢力的成員" % member_team_id }
+	if not is_orderable_task(m_task):
+		return { "ok": false, "msg": "不能下令這個任務：%s" % m_task }
 	if pt.population < 2:
 		return { "ok": false, "msg": "人數不足以派信使" }
 	# 從 named_members 選一非 leader 的成員當信使
