@@ -23,3 +23,7 @@ topic: 社交層全進決策引擎：主動提案、回應提案、同格該不�
 
 # 順位
 深層批第一張；不插玩家可見批。挖角票、戰時徵用 v2、回應提案框架票（舊）併入本票。
+
+## 接線（systems 2026-10-13 要求寫明）
+- 本票 tap 前綴 `social.`；**挖角部分的子前綴固定 `social.poach`**（defer token `resident-bound-to-landlord-faction-is-transitional` 以 scripts/simulation 出現 `social.poach` 為到期判準；換名＝那道過渡閘永遠不退場）。挖角票舊寫的 `poach.` 前綴作廢，以本段為準。
+- 通商提案停掉那條併進行動稽核票 ④（玩家可見批）；defer `trade-proposal-paused-until-social-layer` 在本票落地時觸發恢復。

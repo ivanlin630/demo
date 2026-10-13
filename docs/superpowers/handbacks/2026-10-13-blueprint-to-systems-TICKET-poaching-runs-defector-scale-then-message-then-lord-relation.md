@@ -27,4 +27,4 @@ topic: 挖角三段：被挖隊秤「跟原主的牽連」→改投成一則消�
 同盟票為了防「居民被結盟搬出地主勢力 ⇒ 登記還在卻停產 ⇒ 地主悄悄斷炊」，加了一道硬閘：登記在別人據點上的居民不得被結盟另投。那是補丁閘（被擋下的那些本來該去哪裡：去挖角與脫離那條路）。
 - 本票落地時那道閘要退場，改成：居民改投走本票的秤（跟原主的牽連）；改投＝**離開那個據點**（登記解除、成為流亡或走向新主的據點），不存在「掛別人的旗、住地主的屋、照地主的帳生產」這種狀態。地主收到「居民離開」事件（帶原因）。
 - 床：原閘的那句「它是 TeamN 據點上的居民，不能另投」在本票之後不得再出現。
-- ★接線：本票的 tap 一律用 Probe 前綴 `poach.`（例 `poach.scale`、`poach.msg_sent`、`poach.msg_arrived`、`poach.lord_relation`）。同盟票登的 defer token `resident-bound-to-landlord-faction-is-transitional` 以「scripts/simulation 出現 `poach.`」為到期判準；換前綴＝那道過渡閘永遠不退場。
+- ★接線：本票的 tap 一律用 Probe 前綴 `social.poach`（例 `social.poach.scale`、`social.poach.msg_sent`、`social.poach.msg_arrived`、`social.poach.lord_relation`；併入社交層框架票後改此前綴）。同盟票登的 defer token `resident-bound-to-landlord-faction-is-transitional` 以「scripts/simulation 出現 `social.poach`」為到期判準；換前綴＝那道過渡閘永遠不退場。
