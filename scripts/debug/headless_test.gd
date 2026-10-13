@@ -1623,7 +1623,7 @@ func _test_driver_ledger() -> void:
 	LoyaltyBank.adjust(PersonData.new(), 0.1, "loy")
 	UnrestBank.add(t, 2, "unr")
 	var tile := HexTileData.new(); tile.outpost_owner = -1
-	OutpostOwnerBank.set_owner(tile, 3, "outp")
+	OutpostOwnerBank.set_owner(null, tile, 3, "outp")
 	var reasons: Array = []
 	for x in WorldState.driver_ledger: reasons.append(x["reason"])
 	assert("treas" in reasons and "loy" in reasons and "unr" in reasons and "outp" in reasons,
@@ -7645,9 +7645,9 @@ func _test_anon_treasury_bank() -> void:
 func _test_outpost_owner_bank() -> void:
 	print("--- OutpostOwnerBank 單一 owner ---")
 	var tile := HexTileData.new(); tile.outpost_owner = -1
-	OutpostOwnerBank.set_owner(tile, 5, "capture")
+	OutpostOwnerBank.set_owner(null, tile, 5, "capture")
 	assert(tile.outpost_owner == 5, "set_owner →5，實際=%d" % tile.outpost_owner)
-	OutpostOwnerBank.set_owner(tile, -1, "abandon")
+	OutpostOwnerBank.set_owner(null, tile, -1, "abandon")
 	assert(tile.outpost_owner == -1, "set_owner -1(棄守) →-1")
 	print("outpost owner bank OK")
 
@@ -9845,7 +9845,7 @@ func _test_conquest_flip_governance() -> void:
 	# tile：村格，已 capture 翻旗給 winner（combat 已翻旗，此驗治權隨旗語意）
 	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0)
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	OutpostOwnerBank.set_owner(tile, 0, "test_capture")
+	OutpostOwnerBank.set_owner(state, tile, 0, "test_capture")
 	state.world.tiles[0] = tile
 	# 治權隨旗：on_captured_tile=true
 	NpcCombatSystem.new()._try_subjugate(state, 0, 1, true)
@@ -9916,7 +9916,7 @@ func _occupy_margin_state(wolf_armed_ratio: float) -> WorldState:
 	state.teams[1] = village
 	var vtile: HexTileData = state.world.tiles[1 * 1000 + 0]
 	vtile.outpost_type = "civilian"; vtile.outpost_level = 1
-	OutpostOwnerBank.set_owner(vtile, 1, "test")
+	OutpostOwnerBank.set_owner(state, vtile, 1, "test")
 	state.team_discovered[0] = [1]
 	# belief：pop_est 10（過 pop_ratio）、armed_est 3（過 armed_est gate 3<9）
 	# ★同上：補 tile_pos。★意圖確認：本測的意圖是【margin gate：弱狼不圍/壯狼圍】，
@@ -9941,7 +9941,7 @@ func _test_conquest_collection_loop() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_level = 2
 	tile.terrain = "plains"; tile.harvest_factor = 1.0; tile.farming_level = 1
 	tile.productivity = 1.0; tile.resources = {"food": 500.0}
-	OutpostOwnerBank.set_owner(tile, 0, "test")
+	OutpostOwnerBank.set_owner(state, tile, 0, "test")
 	state.world.tiles[0] = tile
 	# (a) owner 站村上：村產出入 tile 公庫 → effective_food 讀得到
 	var ef_before: float = ResourceSystem.effective_food(state, owner)

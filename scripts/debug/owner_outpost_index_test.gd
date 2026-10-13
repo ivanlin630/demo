@@ -57,7 +57,7 @@ func _run() -> void:
 	var t2 := _add_team(s1, 2, Vector2i(3, 3))
 	_chk(s1, fai, t1, Vector2i(0, 0), "①前：owner=1 查到自家據點")
 	_chk(s1, fai, t2, NONE, "①前：team2 無據點")
-	OutpostOwnerBank.set_owner(s1.world.tiles[0], 2, "test_capture")
+	OutpostOwnerBank.set_owner(s1, s1.world.tiles[0], 2, "test_capture")
 	_chk(s1, fai, t1, NONE, "★①後：換手後舊主查無")
 	_chk(s1, fai, t2, Vector2i(0, 0), "★①後：新主查到")
 
@@ -99,7 +99,7 @@ func _run() -> void:
 	_add_tile(s5, 11, Vector2i(6, 0), 3, 6)   # 後插入、等級更高、座標更大
 	var t6 := _add_team(s5, 6, Vector2i(0, 0))
 	_chk(s5, fai, t6, Vector2i(5, 0), "★⑤多據點回迭代序最前者（非最高級/非最近）")
-	OutpostOwnerBank.set_owner(s5.world.tiles[10], -1, "test_abandon")
+	OutpostOwnerBank.set_owner(s5, s5.world.tiles[10], -1, "test_abandon")
 	_chk(s5, fai, t6, Vector2i(6, 0), "★⑤第一個失去後遞補第二個")
 
 	# ⑥ 迭代序 ≠ 座標序（反向插入）

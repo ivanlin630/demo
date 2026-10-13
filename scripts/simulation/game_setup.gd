@@ -435,7 +435,7 @@ static func _generate_independent_teams(state, plan, config, rng) -> void:
 				named_ratio, richness_mult, "independent_settled")
 			team.tile_pos = opos
 			var key: int = opos.x * 1000 + opos.y
-			OutpostOwnerBank.set_owner(state.world.tiles[key], team.team_id, "init")
+			OutpostOwnerBank.set_owner(state, state.world.tiles[key], team.team_id, "init")
 			# 補注 granary：據點方入主（_build_outpost_tile 時 owner=-1 未注）→ 有主才給 buffer。
 			if granary > 0.0:
 				TileBank.deposit(state.world.tiles[key], "food", granary, "gen_seed")
@@ -595,7 +595,7 @@ static func _build_outpost_tile(state: WorldState, pos: Vector2i,
 	tile.outpost_level = level
 	state.outpost_epoch += 1   # ★market-known 快取失效鍵（★我第一版漏了這兩處，specimen 在 tick 1 抓到 8 筆「NPC 看不到自己那一格」）
 	OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（初始佈點）
-	OutpostOwnerBank.set_owner(tile, owner_team_id, "init")
+	OutpostOwnerBank.set_owner(state, tile, owner_team_id, "init")
 	# 開局糧倉 buffer（緩坡旋鈕，TEST VALUE）：注入公庫 food（effective_food 讀 own granary
 	# → 開局幾月不餓崩，讓 pop 從初始緩降至穩態而非懸崖）。走 TileBank.deposit（bootstrap
 	# 亦走 bank，reason="gen_seed" → driver-ledger 可查；deposit 自帶 FOOD_STORAGE_CAP clamp）。
@@ -771,7 +771,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 			tile.outpost_level = int(op_cfg.get("level", 1))
 			state.outpost_epoch += 1   # ★market-known 快取失效鍵（★我第一版漏了這兩處，specimen 在 tick 1 抓到 8 筆「NPC 看不到自己那一格」）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（初始佈點）
-			OutpostOwnerBank.set_owner(tile, team.team_id, "init")
+			OutpostOwnerBank.set_owner(state, tile, team.team_id, "init")
 			if op_cfg.has("tile_food_init"):
 				var f: float = float(op_cfg["tile_food_init"])
 				tile.resources["food"] = f
