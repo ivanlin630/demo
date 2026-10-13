@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪回饋 #6 ③：情報面板
 topic: R² 請審 docs/superpowers/specs/2026-10-13-intel-panel-HOW.md
 ---
