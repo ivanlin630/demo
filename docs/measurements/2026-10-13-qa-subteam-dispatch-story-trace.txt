@@ -1,0 +1,1481 @@
+# QA 故事稽核原始輸出：派遣子隊六任務 × 腳下／一格外，推 1 天，逐 tick 狀態變化
+# 樹 45c2f251c（origin/fix/terminal-input-prompts tip；與 main 821d81817 在本卷引用的程式行號一致，已逐行對過）｜seed 1337｜config/default.json
+# 床＝scripts/debug/qa_subteam_dispatch_trace.gd（QA 觀測床，未 commit；原始碼全文附於本檔末尾，可原樣重跑）
+# 跑法：detached worktree @45c2f251c → godot.ps1 --headless --import → godot.ps1 --headless --script scripts/debug/qa_subteam_dispatch_trace.gd
+# 下列為完整 stdout 去掉 [Order] 列（市場掛單，與子隊無關；原始共 1716 行）
+
+﻿[TREE] path=A:\GDS\demo\.worktrees\qa_subtrace commit=45c2f251c clean=NO code-dirty=1 codehash=085C8EC30596
+[TREE]   *** measuring the WORKING TREE, not commit 45c2f251c ***
+[TREE]   ?? scripts/debug/qa_subteam_dispatch_trace.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=16.3GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== qa_subteam_dispatch_trace ===
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 待機｜腳下  player_team=Team15 pos=(9, 2) tgt=(9, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=idle)
+[QA] t=0 Team16 派出 task=idle reason= prio=0 opt= pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[SubAI] Team16 引擎→外交 (求和)
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[QA] t=65 Team16 task=外交 reason=subteam prio=70 opt=求和 pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=9.93 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[PlayerCmd] forced_event 到達: Team16 找上門：要向你進貢
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[PlayerCmd] forced_event 超時自動拒絕: 你沒有回應Team16 的「要向你進貢」 視同拒絕
+[QA] t=240 Team16 task=idle reason= prio=0 opt=求和 pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.80 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team8 → 覓食 (覓食)
+[QA] t=287 Team16 task=偵查 reason=ambition prio=10 opt=求和 pos=(9, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.73 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Harvest] Tick360 季節=春 base=1.1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 偵查 (偵查)
+[QA] t=420 Team16 task=偵查 reason=ambition prio=10 opt=求和 pos=(9, 1) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.60 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[Move] Team 16 抵達 (9,0)
+[QA] t=720 Team16 task=偵查 reason=ambition prio=10 opt=求和 pos=(9, 0) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.27 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team11 → 覓食 (覓食)
+[QA] t=749 Team16 task=idle reason= prio=0 opt=求和 pos=(9, 0) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=9.20 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[QA] t=1140 Team16 task=idle reason= prio=0 opt=求和 pos=(9, 1) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=8.80 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team10 → 覓食 (覓食)
+[Tick 1247] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team12 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team18 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=470 us max=27778 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/1440
+[QA] t=1440 Team16 一天結束仍在：task=idle reason= prio=0 opt=求和 pos=(9, 1) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=8.47 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 待機｜一格外  player_team=Team15 pos=(9, 2) tgt=(10, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=idle)
+[QA] t=0 Team16 派出 task=idle reason= prio=0 opt= pos=(9, 2) mt=(10, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[SubAI] Team16 引擎→外交 (求和)
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[QA] t=65 Team16 task=外交 reason=subteam prio=70 opt=求和 pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=9.93 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[PlayerCmd] forced_event 到達: Team16 找上門：要向你進貢
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[PlayerCmd] forced_event 超時自動拒絕: 你沒有回應Team16 的「要向你進貢」 視同拒絕
+[QA] t=240 Team16 task=idle reason= prio=0 opt=求和 pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.80 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team8 → 覓食 (覓食)
+[QA] t=287 Team16 task=偵查 reason=ambition prio=10 opt=求和 pos=(9, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.73 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Harvest] Tick360 季節=春 base=1.1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 偵查 (偵查)
+[QA] t=420 Team16 task=偵查 reason=ambition prio=10 opt=求和 pos=(9, 1) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.60 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[Move] Team 16 抵達 (9,0)
+[QA] t=720 Team16 task=偵查 reason=ambition prio=10 opt=求和 pos=(9, 0) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.27 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team11 → 覓食 (覓食)
+[QA] t=749 Team16 task=idle reason= prio=0 opt=求和 pos=(9, 0) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=9.20 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[QA] t=1140 Team16 task=idle reason= prio=0 opt=求和 pos=(9, 1) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=8.80 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[SoloAI] Team10 → 覓食 (覓食)
+[Tick 1247] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team12 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team18 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=474 us max=28261 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/1440
+[QA] t=1440 Team16 一天結束仍在：task=idle reason= prio=0 opt=求和 pos=(9, 1) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=8.47 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 覓食｜腳下  player_team=Team15 pos=(9, 2) tgt=(9, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=覓食)
+[QA] t=0 Team16 派出 task=覓食 reason= prio=50 opt= pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (9,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=覓食 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Merge] Team15 ← Team16 完全合併 (pop=10)
+[QA] t=396 Team16 消失（母隊 Team15 pop=10 仍在=true）；消失前最後狀態：task=覓食 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 覓食｜一格外  player_team=Team15 pos=(9, 2) tgt=(10, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=覓食)
+[QA] t=0 Team16 派出 task=覓食 reason= prio=50 opt= pos=(9, 2) mt=(10, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (10,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=覓食 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[QA] t=396 Team16 task=偵查 reason=ambition prio=10 opt= pos=(10, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.60 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 偵查 (偵查)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Merge] Team15 ← Team16 完全合併 (pop=10)
+[QA] t=660 Team16 消失（母隊 Team15 pop=10 仍在=true）；消失前最後狀態：task=偵查 reason=ambition prio=10 opt= pos=(10, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.33 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 安頓｜腳下  player_team=Team15 pos=(9, 2) tgt=(9, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=安頓)
+[QA] t=0 Team16 派出 task=安頓 reason= prio=50 opt= pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (9,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=安頓 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[Combat Start] Team-1000000 vs Team12
+[Ambush] NPC Team12 被 boar 伏擊
+[Tick 473] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[Combat Start] Team-1000001 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 9 抵達 (8,15)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 12 抵達 (15,1)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team18 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=456 us max=25291 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/1440
+[QA] t=1440 Team16 一天結束仍在：task=安頓 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=8.47 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 安頓｜一格外  player_team=Team15 pos=(9, 2) tgt=(10, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=安頓)
+[QA] t=0 Team16 派出 task=安頓 reason= prio=50 opt= pos=(9, 2) mt=(10, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (10,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=安頓 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[Combat Start] Team-1000000 vs Team12
+[Ambush] NPC Team12 被 boar 伏擊
+[Tick 473] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 12 抵達 (15,1)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team18 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=456 us max=25958 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/1440
+[QA] t=1440 Team16 一天結束仍在：task=安頓 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=8.47 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 巡邏｜腳下  player_team=Team15 pos=(9, 2) tgt=(9, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=巡邏)
+[QA] t=0 Team16 派出 task=巡邏 reason= prio=50 opt= pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (9,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=巡邏 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Merge] Team15 ← Team16 完全合併 (pop=10)
+[QA] t=396 Team16 消失（母隊 Team15 pop=10 仍在=true）；消失前最後狀態：task=巡邏 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 巡邏｜一格外  player_team=Team15 pos=(9, 2) tgt=(10, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=巡邏)
+[QA] t=0 Team16 派出 task=巡邏 reason= prio=50 opt= pos=(9, 2) mt=(10, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (10,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=巡邏 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[QA] t=396 Team16 task=偵查 reason=ambition prio=10 opt= pos=(10, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.60 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 偵查 (偵查)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Merge] Team15 ← Team16 完全合併 (pop=10)
+[QA] t=660 Team16 消失（母隊 Team15 pop=10 仍在=true）；消失前最後狀態：task=偵查 reason=ambition prio=10 opt= pos=(10, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.33 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 建設｜腳下  player_team=Team15 pos=(9, 2) tgt=(9, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=建設)
+[QA] t=0 Team16 派出 task=建設 reason= prio=50 opt= pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (9,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=建設 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[Combat Start] Team-1000000 vs Team12
+[Ambush] NPC Team12 被 boar 伏擊
+[Tick 473] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[Combat Start] Team-1000001 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 9 抵達 (8,15)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 12 抵達 (15,1)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team18 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=453 us max=25217 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/1440
+[QA] t=1440 Team16 一天結束仍在：task=建設 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=8.47 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 建設｜一格外  player_team=Team15 pos=(9, 2) tgt=(10, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=建設)
+[QA] t=0 Team16 派出 task=建設 reason= prio=50 opt= pos=(9, 2) mt=(10, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (10,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=建設 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[Combat Start] Team-1000000 vs Team12
+[Ambush] NPC Team12 被 boar 伏擊
+[Tick 473] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 12 抵達 (15,1)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team18 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=445 us max=25285 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/1440
+[QA] t=1440 Team16 一天結束仍在：task=建設 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=8.47 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 偵查｜腳下  player_team=Team15 pos=(9, 2) tgt=(9, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=偵查)
+[QA] t=0 Team16 派出 task=偵查 reason= prio=50 opt= pos=(9, 2) mt=(9, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (9,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=偵查 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Merge] Team15 ← Team16 完全合併 (pop=10)
+[QA] t=396 Team16 消失（母隊 Team15 pop=10 仍在=true）；消失前最後狀態：task=偵查 reason= prio=50 opt= pos=(9, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+---- [QA] 偵查｜一格外  player_team=Team15 pos=(9, 2) tgt=(10, 2)
+[Sub] Team15 派出子隊 Team16 leader=P42 advisors=[] (pop=2 cap=18 task=偵查)
+[QA] t=0 Team16 派出 task=偵查 reason= prio=50 opt= pos=(9, 2) mt=(10, 2) parent=15 parent_pos=(9, 2) parent_task=idle food=10.00 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.66
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×1
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team17 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Move] Team 16 抵達 (10,2)
+[Harvest] Tick360 季節=春 base=1.1
+[QA] t=360 Team16 task=偵查 reason= prio=50 opt= pos=(10, 2) mt=(-1, -1) parent=15 parent_pos=(9, 2) parent_task=idle food=9.67 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[QA] t=396 Team16 task=偵查 reason=ambition prio=10 opt= pos=(10, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.60 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team11 → 偵查 (偵查)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Merge] Team15 ← Team16 完全合併 (pop=10)
+[QA] t=660 Team16 消失（母隊 Team15 pop=10 仍在=true）；消失前最後狀態：task=偵查 reason=ambition prio=10 opt= pos=(10, 2) mt=(9, 0) parent=15 parent_pos=(9, 2) parent_task=idle food=9.33 | tgt camp=0 outpost=0 owner=-1 constr_team=-1
+=== qa_subteam_dispatch_trace DONE ===
+
+
+# ===== 床原始碼 =====
+extends SceneTree
+# @bed-kind: diagnostic
+# QA 故事稽核用（2026-10-13，systems 信 subteam-dispatch-story-audit）：同 dispatch_task_at_foot_census 的設定，
+#   但逐 tick 印子隊狀態變化（task／reason／priority／pos／move_target／母隊格／營地據點工程欄），
+#   並在子隊消失那一 tick 印出它最後的樣子 ⇒ 讀 motive→action→outcome。
+# 跑法：.\tools\godot.ps1 --headless --script scripts/debug/qa_subteam_dispatch_trace.gd
+
+const SEED: int = 1337
+
+
+func _initialize() -> void:
+	print("=== qa_subteam_dispatch_trace ===")
+	for t in PlayerCommandSystem.ORDERABLE_TASKS:
+		for where in ["腳下", "一格外"]:
+			_run(String(t[0]), String(t[1]), where)
+	print("=== qa_subteam_dispatch_trace DONE ===")
+	quit(0)
+
+
+func _snap(st: WorldState, sub: TeamData, tgt: Vector2i) -> String:
+	var p: TeamData = st.teams.get(sub.parent_team_id)
+	var tt: HexTileData = st.world.tiles.get(tgt.x * 1000 + tgt.y)
+	return "task=%s reason=%s prio=%d opt=%s pos=%s mt=%s parent=%s parent_pos=%s parent_task=%s food=%.2f | tgt camp=%d outpost=%d owner=%d constr_team=%d" % [
+		sub.current_task, sub.task_reason, sub.task_priority, sub.current_option, str(sub.tile_pos), str(sub.move_target),
+		sub.parent_team_id, (str(p.tile_pos) if p else "-"), (p.current_task if p else "-"),
+		float(sub.resources.get("food", 0.0)),
+		(tt.camp_level if tt else -1), (tt.outpost_level if tt else -1), (tt.outpost_owner if tt else -9),
+		(tt.construction_team_id if tt else -9)]
+
+
+func _run(task: String, label: String, where: String) -> void:
+	seed(SEED)
+	var st := WorldState.new()
+	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
+	var ptid: int = st.get_player_team_id()
+	var pt: TeamData = st.teams[ptid]
+	var tgt: Vector2i = pt.tile_pos if where == "腳下" else pt.tile_pos + Vector2i(1, 0)
+	var leader: int = -1
+	for pid in pt.named_members:
+		if pid != pt.leader_id:
+			leader = pid
+			break
+	st.player_state["sub_leader_id"] = leader
+	st.player_state["sub_pop_count"] = 2
+	st.player_state["sub_task"] = task
+	st.player_state["sub_move_q"] = tgt.x
+	st.player_state["sub_move_r"] = tgt.y
+	print("---- [QA] %s｜%s  player_team=Team%d pos=%s tgt=%s" % [label, where, ptid, str(pt.tile_pos), str(tgt)])
+	var r: Dictionary = PlayerCommandSystem.new().execute_action(st, -1, "dispatch_subteam")
+	var sid: int = int(r.get("sub_id", -1))
+	if sid == -1:
+		print("[QA] 派不出去：%s" % String(r.get("msg", "")))
+		return
+	var sub: TeamData = st.teams[sid]
+	var last: String = _snap(st, sub, tgt)
+	print("[QA] t=%d Team%d 派出 %s" % [st.world.current_tick, sid, last])
+	var runner := SimRunner.new()
+	for i in range(WorldState.TICKS_PER_DAY):
+		var p: TeamData = st.teams.get(st.get_player_team_id())
+		runner.advance_tick(st, p.tile_pos if p != null else Vector2i(-1, -1))
+		if st.encounter_active:
+			runner._encounter_system.resolve_encounter_end(st, "draw")
+		if not st.teams.has(sid):
+			var pp: TeamData = st.teams.get(ptid)
+			print("[QA] t=%d Team%d 消失（母隊 Team%d pop=%d 仍在=%s）；消失前最後狀態：%s" % [
+				st.world.current_tick, sid, ptid, (pp.population if pp else -1), str(pp != null), last])
+			return
+		sub = st.teams[sid]
+		var now: String = _snap(st, sub, tgt)
+		if now.get_slice(" food=", 0) != last.get_slice(" food=", 0):
+			print("[QA] t=%d Team%d %s" % [st.world.current_tick, sid, now])
+		last = now
+	print("[QA] t=%d Team%d 一天結束仍在：%s" % [st.world.current_tick, sid, last])
