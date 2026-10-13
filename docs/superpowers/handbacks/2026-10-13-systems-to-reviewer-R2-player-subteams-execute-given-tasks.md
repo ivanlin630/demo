@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家子隊真的做事（QA 判決＋藍圖三裁）
 topic: R² 請審 docs/superpowers/specs/2026-10-13-player-subteams-execute-given-tasks-HOW.md
 ---
