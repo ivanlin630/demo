@@ -49,21 +49,25 @@
    ④try_set／transition 對 possessed 隊的規則（以【事實】為鍵，不以來源字串前綴）：
      ★寫者坐實（實作端 504cc1b91）：tick 96 loop3 _evaluate_threat → _decide_unified(src=threat) → try_set(…,"unified") 替附身隊選「覓食」＝【AI 對威脅的決策】
        ⇒ 威脅／求生層的【決策】也是決策層，#12 不放行；放行的只有【事件與物理】本身
-     priority ≥ PRIO_COMBAT（遭遇／戰鬥系統把隊拉進戰鬥＝事件）⇒ 照 arbiter 既有規則
-     priority < PRIO_COMBAT 且 _source 不在 PLAYER_SOURCES（精確集合，不用前綴；今天＝{"player_rest","player_settle","player_move"}＋:1184 那支的來源，實作端 grep 補齊並逐字列）⇒ deny＋Probe "arbiter.deny.possessed.by.<source>"
+     ★R² 第三輪追加（17f6af199）：PRIO_COMBAT 全 scripts 零使用處；戰鬥不經 arbiter 寫入，靠 try_set 頂端的 combat_target 鎖保護 ⇒ 戰鬥照既有鎖，本規則不另放行
+     ⇒ possessed 隊：_source 不在 PLAYER_SOURCES（∪ EVENT_SOURCES）（精確集合，不用前綴；今天＝{"player_rest","player_settle","player_move"}＋:1184 那支的來源，實作端 grep 補齊並逐字列）⇒ deny＋Probe "arbiter.deny.possessed.by.<source>"
      ★這一條也蓋「附身隊閒著（priority 0）時 AI 來寫」——#12 不只保護玩家下的令，也保護沒下令的時候
      強制事件：走它自己的寫入口（world_state 強制事件唯一入口）；若它要改 task，來源字串加進 PLAYER_SOURCES 旁的 EVENT_SOURCES（精確集合）
+   ⑦（R² 第三輪追加）_evaluate_threat 入口：possessed 隊直接 return（#12：附身隊零 AI 決策）
+     理由：飢荒分支（faction_ai_system.gd:640-646）在判 task 之前直寫 crisis_released_task／until，再 release；release 被 ② 擋下而免疫窗已寫入，
+       try_set 的免疫窗檢查在優先序之前、PRIO_PLAYER 不豁免 ⇒ 玩家重按 M 被擋 CRISIS_IMMUNITY 個 tick
+     ★實作端順手 grep：loop3 其他對附身隊寫的【非 task 欄位】（crisis_released_* 之類）逐處報；P5 守衛只看 task／move_target，這類欄位它看不到
    ⑤抗命窗口（task_arbiter.gd:233）對 possessed 隊跳過——理由：附身隊的決策權不屬 leader 個性（繼承後 leader 換人也一樣）
    ①同層換手（R²：task_arbiter.gd:184 嚴格大於、同層分支只認 DISPATCH/THREAT/SURVIVAL）：
      現任 priority＝PRIO_PLAYER 且新來源 ∈ PLAYER_SOURCES ⇒ 允許換手（玩家改自己的令；M 連按、M 打斷 REST）
      try_set 回 false ⇒ move_to 必回結果行「不能移動：<擋它的現任 task>」（不准靜默）
    ②release()（task_arbiter.gd:338，呼叫點 61）：加預設參數 _source := ""；
-     possessed 隊且現任 priority＝PRIO_PLAYER ⇒ 只有 _source ∈ {"player_cancel","arrival"}＋priority ≥ PRIO_COMBAT 的接手才放；其餘不放＋Probe "arbiter.release_denied.possessed"
+     possessed 隊且現任 priority＝PRIO_PLAYER ⇒ 只有 _source ∈ {"player_cancel","arrival"}才放；其餘不放＋Probe "arbiter.release_denied.possessed"
      ★抵達（movement _on_arrival 後）與 cancel_move 明傳來源；其餘 59 處不用改（預設 "" ⇒ 對附身隊的玩家令不生效）
    ⑥set_strategic_move（sim_runner.gd:887 等）：possessed 隊直接 return（戰略佈點是 AI 決策）
      其他不經 arbiter 的 move_target 寫者（movement.process :60/:97/:100、事件驅動約 25 處）：用第一顆的寫入觀察當守衛（P5）
    ★小註（R² 第三輪，不需再審）：
-     ·SURVIVAL@80 已不放行（門改 PRIO_COMBAT）；UI「停下：<原因>」原因取 task_reason，不由 UI 猜
+     ·威脅／求生的決策都不放行（只認來源集合）；戰鬥中按 M ⇒ 結果行說「戰鬥中，不能移動」；UI「停下：<原因>」原因取 task_reason，不由 UI 猜
      ·PLAYER_SOURCES grep 時確認玩家「邀請安頓」那條的來源字串（invite_settle 在 ENGINE_SOURCES）不被 deny——它若是玩家令就列進 PLAYER_SOURCES
      ·② release deny 與 ④ try_set deny 用【同一個】謂詞函式（例 TaskArbiter._possessed_blocks(team, priority, source)），不寫兩份
    ★附身判定只讀 team.possessed（不再用 leader_id==player_id）；舊守衛不在本票改，但 P8 漂移守衛保證兩者在附身隊上一致
@@ -84,6 +88,7 @@ P5e release 守：佈置一個 AI 路徑對附身隊呼 release()（預設來源
 P8 possessed 漂移守衛（tick 尾）：30 天每 tick「possessed 為真的隊至多一支；player_id≠-1 且玩家活著時＝get_player_team_id() 那一支」（觀察者 player_id=-1 ⇒ 零支）
    注入四格，每格拿掉對應 sync 必紅：①玩家所在隊被吸收併隊 ②玩家被邀入他隊／被逐出 ③玩家戰死而隊還在（窗口內仍 possessed、AI 寫入＝0，直到選繼承人）④possess 一支 NPC 隊再 unpossess
 P5f 寫者重現：實作端診斷床（multi_hop_move_writer_diag.gd，藍圖同一串鍵＋開場閒置 72h 兩種）⇒ 附身隊 try_set:unified 次數＝0；改前＝1（tick 96 覓食）
+P5g 附身隊 TRAVEL 途中佈置飢荒 ⇒ 玩家重按 M 不被免疫窗擋、crisis_released_task 不被寫｜反向：拿掉 ⑦ ⇒ 重按被擋 ⇒ 必紅
 P5b 抗命：佈置 PRIO_DISPATCH 挑戰附身隊的 PRIO_PLAYER ⇒ 不換手、不加 stress｜非附身隊照舊會抗命（反向格）
 P5c 抵達 release：走到後 task＝IDLE、priority 0
 P7 （藍圖）玩家下令後閒置 24 小時：move_target 與 task 逐 tick 不變，除非事件流同 tick 有一筆解釋它為何變（遭遇／強制事件／抵達）｜反向：拿掉 (A) 的排除 ⇒ 出現無解釋的變化 ⇒ 必紅
