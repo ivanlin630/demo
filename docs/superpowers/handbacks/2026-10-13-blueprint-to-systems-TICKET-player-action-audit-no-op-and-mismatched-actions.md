@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #9：全部玩家行動稽核（用戶：「把所有無意義或不符合的行動挖出來 例如通商」）
 topic: 53 個玩家行動逐一看寫入；空動作／不符合宣稱的 4 個要修、3 個已有票、1 個歸深層批
 ---

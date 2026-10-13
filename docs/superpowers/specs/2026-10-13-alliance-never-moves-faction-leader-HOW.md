@@ -30,6 +30,15 @@
    - join 也加 reason 常數（現在只有離開有），各呼叫端帶上；Probe `faction.join.<reason>`，來源才歸因得到。
    - L7 掛進 `InvariantAudit`（每個勢力的 leader_team_id 指向 faction_id 相符的隊），不只是床的斷言。
 
+## 併入回饋 #8：結盟送掉地主的據點（同一個函式，同 branch）
+來源：藍圖 2026-10-13-blueprint-to-systems-TICKET-resident-team-alliance-gives-away-the-lords-outpost（＋追加 bfb405843）。
+- 事實：`_form_alliance` 尾段 :442-449「D C1：team_b 是居民團 ⇒ outpost 轉給 team_a」不看地主是誰 ⇒ 玩家邀來的居民團與 Team4 結盟，玩家據點被送給 Team4、居民團換旗。
+- **#8-0（本 branch 第一個 commit，先做）據點易主進事件流**：在 `OutpostOwnerBank.set_owner`（outpost_owner_bank.gd:6，單寫者）一處 emit `outpost_owner_changed`（info：pos、舊主、新主、reason）；`describe` 依 reason 給人話（alliance／capture／takeover／construct／abandon／demolish／init 各一句；init 不 emit）；玩家相關（舊主或新主是玩家隊，或玩家站在該格）⇒ 進 `ADVANCE_STOP_KINDS`。不在呼叫端各印。
+- **#8-1 拿掉 D C1**（不是加條件）：結盟不轉讓據點；居民團換旗只改自己的旗。
+- **#8-2 地主要知道居民換旗**：據點上的居民團換勢力 ⇒ 對地主 emit「你據點 (q,r) 的居民 TeamN 改投勢力 M」，玩家為地主時列推進停點。掛點：`set_team_faction`（同上面的咽喉）判「這隊站在別人據點上且是居民」。
+- **量（修前）**：觀測回合（同上 3 seed）`set_owner` reason="alliance" fire 次數，寫進交件。D C1 拿掉會動 NPC 世界 ⇒ world-fp 跟同盟那條一起二分。
+- 床：R1（修前紅）玩家擁有據點、上有居民團 R；R 與 T 結盟 ⇒ 據點 owner 仍＝玩家，事件流有「居民 R 改投」句。R2：任一 set_owner（各 reason 佈置一次）⇒ 玩家相關時事件流有對應人話、推進停下。R3 負對照：放回 D C1 ⇒ R1 紅。
+
 ## 先量（動 NPC 端前，藍圖 2026-10-13）
 NPC 之間「兩勢力領袖結盟＝一方被搬進另一方」可能是現況勢力變大的主要管道；不能為修玩家 bug 少一條生長路。
 - 在**修前**樹上跑觀測回合（30 天，**至少 3 個 seed**，含 1337），用 Probe 數：發起方角色×收提案方角色（領袖／成員／獨立）3×3 的 `_form_alliance` 次數；各 JOIN 路徑**絕對次數**（不用 `faction.join` 總數當分母——它含子隊繼承 subteam_system:110/148/175，會把比例壓低）；那一支發生後原勢力剩幾隊、leader_team_id 是否懸空。

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #8（玩家可見，會毀一局；與 #7 同族）
 topic: 居民團跟別人結盟，地主的據點就被轉走（diplomatic_ai_system.gd:443-450「投降勸服」）；非地主不得送出地主的據點
 ---
