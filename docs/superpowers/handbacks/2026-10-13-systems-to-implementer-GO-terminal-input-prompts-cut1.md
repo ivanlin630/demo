@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪回饋 #2 第一刀：輸入提示上終端＋頂列威脅句不截
 topic: GO（排在按 Q 那張兩刀之後）｜spec docs/superpowers/specs/2026-10-13-terminal-input-prompts-and-threat-clip-HOW.md 改法 1＋3（R² 已收）｜第二刀待重審，別動
 ---
