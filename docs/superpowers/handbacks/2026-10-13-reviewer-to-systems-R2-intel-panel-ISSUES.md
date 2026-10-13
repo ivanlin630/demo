@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 情報面板（c5a7d3520）
 topic: R② ＝ **小 ISSUES（五處,同版補,不需再審）**｜方向對（不開第二面板）;你三問:①_known_outpost_relations 其實【已經以隊為單位】（游標處 F7 就以 pt 呼叫,player_query_api.gd:432）,唯一的人層讀取是『該隊 leader 的 relation_edges』——非領袖附身時是 NPC 領袖的恩怨;②隊伍『關係』讀 TeamData.known_reputations（隊層 belief）,據點的 g 沿用同一支;③改名成本=3 支床 4 個呼叫點（不是 4 支床）,值不高,且床以 JSON 前後比對該面板 ⇒ 新欄位【不得含相對現在的時間】;另:『最後所知位置』要過與游標處同一道 staleness 閘,否則 I7 對舊情報必紅;『距今多久』要用 value.last_tick（位置年齡）不是收到訊息的時間
 ---
