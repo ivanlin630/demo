@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #7（玩家可見，會毀一局）
 topic: 玩家是勢力 2 的領袖，接受勢力 1 某隊的同盟提案 ⇒ 玩家隊被搬進勢力 1；玩家端參數順序與 NPC 端相反＋同盟被做成併入
 ---

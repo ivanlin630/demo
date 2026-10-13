@@ -1,0 +1,34 @@
+# 接受同盟把勢力領袖搬進對方勢力——HOW
+
+狀態：草稿，待 R²
+來源：藍圖 2026-10-13-blueprint-to-systems-TICKET-accepting-alliance-moves-faction-leader-into-proposers-faction（第五輪用戶回饋 #7，會毀一局）
+順位：Q 鍵、子隊輸入之後；地圖整寬之前。
+
+## 事實（main 413ed41eb）
+- `diplomatic_ai_system.gd:417-449 _form_alliance(team_a, team_b)`：註解「team_a＝收提案方、team_b＝發起方」；team_a 有勢力 ⇒ **team_b 被搬進 team_a 的勢力**；否則 team_b 有勢力 ⇒ team_a 被搬進去；兩獨立 ⇒ 建國（人多者為領袖）。**沒有任何一條檢查被搬的那隊是不是自己勢力的領袖隊。**
+- 四個呼叫點：
+  - `diplomatic_ai_system.gd:386`（NPC 收提案：`_form_alliance(self_team, sender_team)`，方向照註解）
+  - `player_command_system.gd:876`（玩家發起、對方 accept 之後）——而 `handle_diplomacy_message` 在 :386 **已經結盟過一次**，:876 再呼一次（反方向）⇒ 重複呼叫、名聲 +0.2 兩次。
+  - `player_command_system.gd:1865`（玩家接受 NPC 提案）：`_form_alliance(from_team, pt)` ＝ **發起方放在收提案方的位置** ⇒ 玩家（勢力 2 領袖）被搬進勢力 1。用戶撞到的就是這條。
+  - `player_command_system.gd:1929`（另一條，實作端核語意）。
+- 勢力失去領袖隊之後：`WorldState.set_team_faction`（world_state.gd:552-568）只改 member_team_ids，**不碰 `FactionData.leader_team_id`** ⇒ 勢力 2 的 leader_team_id 仍指向已在勢力 1 的玩家隊＝**無頭勢力、指標懸空**。誰讀 leader_team_id、懸空時各自怎麼壞，由實作端列（grep `leader_team_id`）。
+
+## 改法
+1. **規則收在 `_form_alliance` 本體一處**（四個呼叫點都經過它）：**勢力的領袖隊永不因結盟離開自己的勢力**。
+   - 被搬的那一隊若是自己勢力的領袖隊（`factions[fid].leader_team_id == team.team_id`）⇒ 不搬。
+   - 兩隊都在不同勢力、且被搬方是領袖 ⇒ **只結盟不併入**：雙方名聲 +0.2（現有那兩行），勢力不動。結果句「雙方結盟，各自保留勢力」。
+   - 「同盟≠併入」的完整語意（兩勢力的盟約關係）歸回應提案框架票（深層批）；本票只保證領袖不被搬。
+2. **方向統一**：:1865 改成與 :386 一致（收提案方＝玩家＝team_a）。:876 的重複呼叫拿掉（:386 已做）；若 :876 存在是為了「玩家發起時要以玩家為主」，實作端說明，由我裁。:1929 核對後同樣對齊。
+3. **結果句寫實際後果**（讀 `_form_alliance` 回傳的實際動作，不在呼叫端猜）：讓 `_form_alliance` 回 `{moved_team, to_faction, created_faction}`；玩家看到「Team8 加入你的勢力 2」／「你加入勢力 1（離開勢力 2）」／「雙方結盟，各自保留勢力」。**提案行**（強制事件面板上那一行）也寫實際後果的預告（同一個函式的試算版，不寫第二份規則）。
+4. **懸空 leader 的守衛**：`set_team_faction` 對「把領袖隊移出其勢力」push_error＋Probe（`faction.leader_left`），不擋（擋會改其他路徑行為，例如叛離）。量：30 天世界的 `faction.leader_left` 次數，交件信寫；>0 ⇒ 列出來源路徑，我另開票。
+
+## 驗收
+- L1（修前紅）：玩家是勢力 2 領袖，接受勢力 1 某隊（非領袖）的同盟 ⇒ 玩家仍在勢力 2；對方加入勢力 2；結果句「Team8 加入你的勢力 2」。
+- L2（修前紅）：玩家是勢力 2 領袖，接受勢力 1 **領袖隊**的同盟 ⇒ 兩隊都不換勢力；結果句「雙方結盟，各自保留勢力」。
+- L3（修前紅）：玩家（勢力 2 領袖）向勢力 1 某隊發起、對方接受 ⇒ 玩家不離開勢力 2。
+- L4：玩家獨立，接受勢力 1 隊的同盟 ⇒「你加入勢力 1」，提案行事先寫明。
+- L5：NPC↔NPC：兩勢力領袖結盟 ⇒ 都不換勢力（修前若會換 ⇒ 這格也修前紅）。
+- L6：名聲只 +0.2 一次（:876 重複呼叫拿掉）。
+- L7：任一格結束時，每個勢力的 `leader_team_id` 都指向一個 `faction_id == 該勢力` 的隊。
+- 負對照：拿掉領袖守衛 ⇒ L1／L2／L5 紅。
+- world-fp：L5 會改 NPC 行為 ⇒ fp 可能變；先二分（只動 _form_alliance 那一處），證明是這一條的效果再換基準。
