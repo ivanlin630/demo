@@ -5654,6 +5654,7 @@ faction_ai_system.gd:7612 `_estimate_eta_to` → PathSystem.eta_ticks(team, path
 player_command_system.gd:2043-2046 move_to：PathSystem.find_path 空 ⇒「無法抵達 (q,r)：沒有路（被山或地圖邊緣隔開）」。
 ①感知：find_path 讀真實地圖；對 tile_knowledge=unvisited 的目標回這句＝告訴玩家那格周圍的真地形。
 ②空集：path_system.gd TERRAIN_COST 山只是更貴不是不可通；_astar 只在目標不在地圖上時回空 ⇒「被山隔開」說不出口。
-  多格移動票 P3「四周山佈置」照理造不出紅——要查那張床是不是手造了地圖洞（R² 2026-10-13 §4 指出）。
+  多格移動票 P3：已查（實作端 2026-10-13）＝手造地圖洞（multi_hop_move_bed.gd:164-168 把目標六鄰格從 tiles erase），不是山擋；「四周山」是錯的描述。
+  順序改後 P3 要先把目標設成已知才測得到「沒有路」，另加「沒去過 ⇒ 不呼叫 find_path」格（回饋 #2 第二刀一起改）。
 修法方向：未知格不判可達、直接接單（物理照走）；句子不指名原因。
 ```
