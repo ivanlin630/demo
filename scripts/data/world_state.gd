@@ -468,7 +468,7 @@ func create_faction(leader_team_id: int) -> int:
 	# bidir-safe：若 leader 原屬他 faction（成員/獨立隊建國），先退舊 member_team_ids
 	# 再入新——否則舊 faction 陣列殘留懸空 id，該隊日後 erase 時 faction_id-gated
 	# cleanup 只清新 faction，舊 faction 懸空 → _assign_member_tasks require_team crash。
-	set_team_faction(teams[leader_team_id], f.faction_id)
+	set_team_faction(teams[leader_team_id], f.faction_id, JOIN_CREATE_LEADER)
 	return f.faction_id
 
 # ★繼承-lite（用戶 2026-08-15 裁簡易版；爭位/內戰＝王朝 arc 界外）：勢力領袖團死 → 最強成員接位，
@@ -537,6 +537,22 @@ const LEAVE_BETRAYAL: String = "betrayal"                           # 外交背�
 const LEAVE_PLAYER: String = "player_leave"                         # 玩家主動離團
 const LEAVE_PLAYER_BETRAY: String = "player_betray"                 # 玩家背叛離團
 const LEAVE_FACTION_DISSOLVED: String = "faction_dissolved"         # ★勢力解散（原本直寫，A#27 導回窄口）
+# ★加入勢力的來源（spec 2026-10-13-alliance-never-moves-faction-leader 完整性：join 也帶 reason）
+#   ★Probe `faction.join.<reason>` ⇒ 各 JOIN 路徑的【絕對次數】（不用 faction.join 總數當分母：它含子隊繼承）
+const JOIN_UNSET: String = "unset"                          # ★呼叫端沒標 ⇒ 這個桶非 0 就是有人漏標
+const JOIN_CREATE_LEADER: String = "create_leader"          # create_faction：建國者自己
+const JOIN_ALLIANCE_INTO_RECEIVER: String = "alliance_into_receiver"   # 結盟：發起方被搬進收提案方的勢力
+const JOIN_ALLIANCE_INTO_INITIATOR: String = "alliance_into_initiator" # 結盟：收提案方（獨立）被搬進發起方的勢力
+const JOIN_ALLIANCE_FOUND: String = "alliance_found"        # 結盟：兩獨立建國，弱者入
+const JOIN_SURRENDER_NEIGHBOR: String = "surrender_neighbor" # 投降強鄰
+const JOIN_SUBJUGATE: String = "subjugate"                  # 戰敗臣服
+const JOIN_ABSORB: String = "absorb"                        # 整併
+const JOIN_SETTLE: String = "settle"                        # 安頓入地主勢力
+const JOIN_SUBTEAM_INHERIT: String = "subteam_inherit"      # 子隊繼承母隊勢力（不是頂層入勢力）
+const JOIN_SETUP: String = "setup"                          # 開局佈置
+const JOIN_REASONS: Array = [JOIN_UNSET, JOIN_CREATE_LEADER, JOIN_ALLIANCE_INTO_RECEIVER, JOIN_ALLIANCE_INTO_INITIATOR,
+	JOIN_ALLIANCE_FOUND, JOIN_SURRENDER_NEIGHBOR, JOIN_SUBJUGATE, JOIN_ABSORB, JOIN_SETTLE, JOIN_SUBTEAM_INHERIT, JOIN_SETUP]
+
 const LEAVE_REASONS: Array = [
 	LEAVE_UNSET, LEAVE_UPRISING_INDEPENDENT, LEAVE_UPRISING_EXILE,
 	LEAVE_DEFECT_SURRENDER_FAIL, LEAVE_DEFECT_INDEPENDENT, LEAVE_DEFECT_EVENT,
@@ -560,12 +576,39 @@ func set_team_faction(team: TeamData, fid: int, reason: String = LEAVE_UNSET) ->
 			Probe.bump("faction.leave." + (reason if reason in LEAVE_REASONS else "unknown_reason"))
 		else:
 			Probe.bump("faction.join")
+			Probe.bump("faction.join." + (reason if reason in JOIN_REASONS else "unknown_reason"))
+	var old_fid: int = team.faction_id
 	if team.faction_id != -1 and factions.has(team.faction_id):
 		factions[team.faction_id].member_team_ids.erase(team.team_id)
 	team.faction_id = fid
 	if fid != -1 and factions.has(fid):
 		if not factions[fid].member_team_ids.has(team.team_id):
 			factions[fid].member_team_ids.append(team.team_id)
+	_on_faction_changed(team, old_fid, fid, reason)
+
+# ★換勢力的副作用統一掛在這裡（spec 2026-10-13-alliance-never-moves-faction-leader 改法 4＋#8-2）：
+#   ①領袖隊離開舊勢力（任何路徑：結盟、臣服、投降、整併…）⇒ 繼位或解散——不擋任何路徑，只讓勢力不再無頭
+#     （舊版只改名冊、不碰 leader_team_id ⇒ 指標懸空指向已在別勢力的隊）
+#   ②登記居民換旗 ⇒ 地主要知道（玩家相關才進事件流，同據點易主那條的理由：對 NPC 發會悄悄改它的行為）
+#   ★勢力解散途中（LEAVE_FACTION_DISSOLVED）兩件都不做：解散本身就是處置，再通知會洗版
+func _on_faction_changed(team: TeamData, old_fid: int, new_fid: int, reason: String) -> void:
+	if reason == LEAVE_FACTION_DISSOLVED:
+		return
+	if old_fid != -1 and factions.has(old_fid) and int(factions[old_fid].leader_team_id) == team.team_id:
+		if Probe.enabled: Probe.bump("faction.leader_left." + reason)
+		succeed_or_disband_faction(old_fid, team.team_id)
+	if team.work_outpost != Vector2i(-1, -1):
+		var tile: HexTileData = world.tiles.get(team.work_outpost.x * 1000 + team.work_outpost.y)
+		if tile != null and tile.outpost_level > 0 and tile.outpost_owner != -1 and tile.outpost_owner != team.team_id:
+			var landlord: int = tile.outpost_owner
+			if Probe.enabled: Probe.bump("faction.resident_changed." + reason)
+			var ptid: int = get_player_team_id()
+			var pt: TeamData = teams.get(ptid)
+			var lt: TeamData = teams.get(landlord)
+			var related: bool = landlord == ptid or (pt != null and lt != null and pt.faction_id != -1 and lt.faction_id == pt.faction_id)
+			if related:
+				WorldEvents.emit(self, "resident_changed_faction", [landlord], false,
+					{"pos": team.work_outpost, "resident": team.team_id, "to_faction": new_fid})
 
 func clear_team_faction(team: TeamData, reason: String = LEAVE_UNSET) -> void:
 	set_team_faction(team, -1, reason)
@@ -929,12 +972,8 @@ func erase_teams(tids: Array) -> void:
 			# ★★★這一站**繞過 `OutpostOwnerBank`**（`owner_outpost_index.gd:20` 早就記過這件事）
 			#   ⇒ ★所以易主計數要在這裡**單獨記一筆**，否則「原擁有者死了」會從事件表上消失，
 			#   ★★而它正是把端點差壓平的那一半（淨 +6 底下藏著多少次死亡釋放）。
-			if Probe.enabled:
-				Probe.bump("outpost.owner_change.shape.owned_to_unowned")
-				Probe.bump("outpost.owner_change.reason.death_release")
-				Probe.bump("outpost.owner_change.owned_to_unowned.death_release")
-			wt.outpost_owner = -1
-			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint③：繞過 bank 的直接 owner 寫
+			# ★#8-0：改走 set_owner（真單寫者）——易主計數（同三個 Probe 鍵）、索引失效、玩家相關的事件都在那一處
+			OutpostOwnerBank.set_owner(self, wt, -1, "death_release")
 	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）
 	for otid in teams:
 		if dead.has(otid):

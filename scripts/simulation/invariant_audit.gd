@@ -12,7 +12,19 @@ static func check(state: WorldState) -> Array[String]:
 	_check_anon_cohort(state, violations)
 	_check_captive_cohort(state, violations)
 	_check_no_dangling_team_id(state, violations)
+	_check_faction_leader(state, violations)   # ★L7（spec 2026-10-13-alliance）：勢力不得無頭
 	return violations
+
+# ★L7：每個勢力的 leader_team_id 指向一支存在、而且 faction_id 就是這個勢力的隊
+#   （舊病：結盟／臣服把領袖隊搬走時沒人改 leader_team_id ⇒ 懸空指向已在別勢力的隊）
+static func _check_faction_leader(state: WorldState, out: Array[String]) -> void:
+	for fid in state.factions:
+		var f: FactionData = state.factions[fid]
+		var lt: TeamData = state.teams.get(f.leader_team_id)
+		if lt == null:
+			out.append("勢力無頭 Faction%d.leader_team_id=%d 不存在" % [fid, f.leader_team_id])
+		elif lt.faction_id != fid:
+			out.append("勢力領袖懸空 Faction%d.leader_team_id=Team%d 但它在 Faction%d" % [fid, f.leader_team_id, lt.faction_id])
 
 # population 不變量：== leader(0/1) + named + anon(含 wounded 桶)
 static func _check_population(state: WorldState, out: Array[String]) -> void:

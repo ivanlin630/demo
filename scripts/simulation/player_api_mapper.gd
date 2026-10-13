@@ -361,7 +361,9 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 			"member_name": ""
 		},
 		"message": msg,
-		"consequence": accept_consequence(action, proposal),
+		# ★結盟提案行寫【實際後果】的預告（spec 改法 3）：同一支 plan_alliance 的試算版，不寫第二份規則
+		"consequence": PlayerCommandSystem.alliance_preview(state, from_id) \
+			if action == "diplomacy" and proposal in ["alliance", "propose_alliance"] else accept_consequence(action, proposal),
 		"no_response": no_response_line(action),
 		"responses": responses
 	}

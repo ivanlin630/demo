@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪回饋 #7：接受同盟把勢力領袖搬進對方勢力（會毀一局）
 topic: GO（排在回饋 #2 兩刀之後、地圖整寬之前）｜spec docs/superpowers/specs/2026-10-13-alliance-never-moves-faction-leader-HOW.md（R² 已收）
 ---
