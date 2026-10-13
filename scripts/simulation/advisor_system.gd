@@ -53,7 +53,16 @@ func _pick_variant(advisor: PersonData, situation: String,
 	var hawkish: bool  = float(advisor.values.get("好戰", 0.5)) > 0.7
 	var cautious: bool = float(advisor.values.get("慎重", 0.5)) > 0.7
 	if not accurate:
-		return "wrong_underestimate" if randf() < 0.5 else "wrong_overestimate"
+		# ★各情境的「判斷錯」句型各不相同（TextBank 模板）：舊版一律回 wrong_under/overestimate
+		#   ⇒ 只有 assess_enemy 有那兩個模板 ⇒ diplomatic／resources 判斷錯時落到預設句「有動靜」
+		#   ★randf 照舊只叫一次（不改亂數序列）
+		var coin: bool = randf() < 0.5
+		match situation:
+			"diplomatic":
+				return "wrong_read"
+			"resources":
+				return "wrong_optimistic" if coin else "wrong_pessimistic"
+		return "wrong_underestimate" if coin else "wrong_overestimate"
 	match situation:
 		"assess_enemy":
 			var enemy_strong: bool = int(data.get("enemy_pop", 0)) > int(data.get("self_pop", 0))
