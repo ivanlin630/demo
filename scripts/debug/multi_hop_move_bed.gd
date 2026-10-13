@@ -43,7 +43,11 @@ func _initialize() -> void:
 	_p5e_p5b_p5g()
 	await _p5f_writer()
 	await _p7_idle_24h()
-	_p5_p8_30days()
+	if OS.get_environment("MHM_SKIP_30D") == "1":
+		print("
+── P5／P8 30 天：MHM_SKIP_30D=1 跳過（只給負對照省時；交件與註冊表都不設）──")
+	else:
+		_p5_p8_30days()
 	_p8_injections()
 	print("=== multi_hop_move DONE === errors: %d" % _errors)
 	TeamData.mt_watch_tid = -9999
