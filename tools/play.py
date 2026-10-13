@@ -299,7 +299,7 @@ def main() -> int:
             first = read_frame(sock)        # 第一屏
             if single:
                 print(CLEAR_SCREEN + first)
-                print("[play] 直接按鍵，不用 Enter（Ctrl+C 離開）")
+                print("[play] 直接按鍵，不用 Enter（Esc 連按兩次離開遊戲；Ctrl+C 直接斷線）")
             else:
                 print(first)
         except (TimeoutError, socket.timeout):
@@ -321,8 +321,16 @@ def main() -> int:
             if is_quit_line(line):
                 sock.sendall((QUIT_TOKEN + "\n").encode("utf-8"))
                 break
-            sock.sendall((line + "\n").encode("utf-8"))
-            frame = read_frame(sock)
+            # ★遊戲那一側結束了（Esc×2 ⇒ get_tree().quit() ⇒ server 關 socket）⇒ 印一句、退出碼 0，不再送鍵
+            #   ★兩種長相都是它：讀到空（對方正常關）／Windows 上對方行程結束 ⇒ 連線被重設（ConnectionResetError，床實測）
+            try:
+                sock.sendall((line + "\n").encode("utf-8"))
+                frame = read_frame(sock)
+            except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+                frame = ""
+            if frame == "":
+                print("[play] 遊戲已結束")
+                return 0
             # ★單鍵模式：清屏再印，畫面不往上捲；逐行模式照舊
             print(CLEAR_SCREEN + frame if single else frame)
     finally:

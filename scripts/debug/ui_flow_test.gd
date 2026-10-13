@@ -578,7 +578,7 @@ func _test_armed_count_shown() -> void:
 	_check("畫面上的武裝數 %d ＝ 查詢面的 %d" % [got_armed, want_armed], got_armed == want_armed)
 	await _free_ui(node)
 
-# U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後按 Q→quit 閃退、WASD 漂游標）。
+# U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後鍵落到主畫面：WASD 漂游標；舊版 Q→quit 閃退，Q 離開已拿掉）。
 # 測：overlay visible → 送 KEY_W → _cursor 不動（證 guard early-return）。
 	_cell("_test_armed_count_shown")
 func _test_u15_overlay_input_guard() -> void:

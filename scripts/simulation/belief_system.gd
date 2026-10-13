@@ -314,7 +314,16 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 				_wake = _threat_score >= ThreatAssessment.THREAT_BASE_THRESHOLD
 			# ★★取不到 handle（目標剛消失）⇒ **保守側：照舊喚醒**
 			#   —— ★不確定時維持現狀，而不是靜默吞掉一個喚醒。
-			WorldEvents.emit(state, "intel_arrived", [obs_id], _wake)
+			# ★情報帶內容（spec 2026-10-13-play-client-no-key-interpretation 改法 4）：值是觀察者這次寫進 belief 的
+			#   （fields，不是真值）；★只在觀察者＝玩家自家隊時帶 —— 友軍那則照舊句，否則玩家會讀到友軍對第三方的情報內容
+			#   ★age：轉述的 fields 帶著給情報那隊的 last_tick（親見時間）⇒ 用它；沒有 ⇒ 不帶（句子就不說幾分鐘前）
+			var _iinfo: Dictionary = {}
+			if obs_id == state.get_player_team_id():
+				_iinfo = {"tgt": tgt_id, "pos": fields["tile_pos"], "src": source_type,
+					"firsthand": source_type == "親見" and source_id == obs_id}
+				if fields.has("last_tick"):
+					_iinfo["age"] = maxi(0, int(state.world.current_tick) - int(fields["last_tick"]))
+			WorldEvents.emit(state, "intel_arrived", [obs_id], _wake, _iinfo)
 			# ★★★DIAG 第 0 步（票 §4）：量「這 5386 次 intel_arrived 裡威脅佔比 f」。
 			#   ★★★我【不自己定義威脅】—— 定義是 systems 的欄,我射箭畫靶的話 f 會變成我選的。
 			#     ⇒ 記【定義無關的維度】的交叉表,f 由 systems 挑格子加總。

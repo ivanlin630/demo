@@ -60,7 +60,7 @@ const NAMED_KEYS: Dictionary = {
 	"right": KEY_RIGHT,
 }
 
-# ★離開 REPL 的 token —— ★★它**不是**一個遊戲按鍵：`Q` 是 UI 的「離開」，
+# ★離開 REPL 的 token —— ★★它**不是**一個遊戲按鍵：遊戲裡的「離開」是 Esc 連按兩次（2026-10-13 起；舊版是 Q），
 #   而 `:quit` 是**離開這支 harness**。兩者分開，否則「我想結束這支腳本」與
 #   「我想在遊戲裡離開」會共用一個鍵，而那是本專案最常見的那個病（一個鍵兩個意思）。
 const QUIT_TOKEN: String = ":quit"

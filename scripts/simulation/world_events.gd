@@ -365,7 +365,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"teams_erased":          return "%s 沒了" % who
 		"combat_engaged":        return "%s 捲進了戰鬥" % who
 		"betrayed":              return "%s 被盟友背叛" % who
-		"intel_arrived":         return "%s 收到了情報" % who
+		"intel_arrived":         return _intel_sentence(state, who, info)
 		"convoy_stranded":       return "%s 的運輸隊回不去，轉為自立" % who
 		"construction_stalled":  return "%s 的工地停擺" % who
 		"construction_abandoned":return "%s 放棄了工地" % who
@@ -382,6 +382,28 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 static func _forced_what(info: Dictionary) -> String:
 	return PlayerApiMapper.action_phrase(String(info.get("action", "")),
 		String(info.get("proposal", "")))
+
+# ★情報句（改法 4）：info 只在自家隊那則才有（belief_system 那一端擋）⇒ 缺欄 ⇒ 舊句，不印空對象
+#   親見「你看到…」／轉述「你得知…（N 前的消息）」——轉述保留「得知」：claim 可能失真
+static func _intel_sentence(state: WorldState, who: String, info: Dictionary) -> String:
+	if not info.has("tgt") or not info.has("pos"):
+		return "%s 收到了情報" % who
+	var pos: Vector2i = info["pos"]
+	var tgt: String = _team_name(state, int(info["tgt"]))
+	if bool(info.get("firsthand", false)):
+		return "你看到 %s 在 (%d,%d)" % [tgt, pos.x, pos.y]
+	var s: String = "你得知 %s 在 (%d,%d)" % [tgt, pos.x, pos.y]
+	if info.has("age"):
+		s += "（%s前的消息）" % _age_text(int(info["age"]))
+	return s
+
+static func _age_text(ticks: int) -> String:
+	var mins: int = ticks * 60 / WorldState.TICKS_PER_HOUR
+	if mins < 60:
+		return "%d 分鐘" % mins
+	if ticks < WorldState.TICKS_PER_DAY:
+		return "%d 小時" % (ticks / WorldState.TICKS_PER_HOUR)
+	return "%d 天" % (ticks / WorldState.TICKS_PER_DAY)
 
 static func _team_name(state: WorldState, tid: int) -> String:
 	if tid == -1 or not state.teams.has(tid):
