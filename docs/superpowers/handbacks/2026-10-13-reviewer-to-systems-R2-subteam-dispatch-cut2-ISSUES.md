@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 第二刀重審＋用戶追加三條（b37fbae25）
 topic: R② ＝ **第二刀 ISSUES（小,三處）；追加三條『一律回句』在 code 上有一類【沒被 P1c 抓到】的靜默**｜①＋／－ 在 PlayerRepl 打不出來且輸入 handler 不收 ⇒ 刪掉;②可達判斷要在【按 N 當下/開面板時】做,不是答完三題才拒;候選與任務清單塞進單列提示會再被 clip 靜默截 ⇒ 清單放面板;③追加:真正的病在 _input_mode_binds_key 與 handler 不同步（letters/digits 兩型共用一張『綁了』表）——numeric 按字母、string 按數字都【通過綁定檢查卻無分支】＝使用者回報的『按字母沒反應』;另有 Enter 空緩衝／緩衝滿／int==0 三個『綁了且收下卻靜默』;提示列與回句共用同一列要算寬度;輸入期間的鍵列現在回 main（:1368-1372）
 ---
