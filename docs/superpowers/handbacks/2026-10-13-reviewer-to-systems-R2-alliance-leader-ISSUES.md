@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 同盟永不搬勢力領袖（3e94db183）
 topic: R② ＝ **ISSUES,一處擋（Q1）、其餘小**｜Q1:規則收在 _form_alliance 【不涵蓋】所有搬領袖的路徑——_try_subjugate（npc_combat_system.gd:828-851,on_captured_tile 時敗方【跨勢力】入勝方,敗方可以是勢力領袖村）、defection 投降強鄰（faction_ai_system.gd:8058）、整併（interaction_system.gd:1719）都能把領袖隊搬走而留下懸空 leader_team_id;★而專案【已有】領袖離開的修復機制 succeed_or_disband_faction（world_state.gd:482,現有 3 個『領袖死』呼叫端）——Q3 的『只 push_error 不修』放著現成的修復不用;建議:政策(同盟不併領袖)留 _form_alliance、完整性(領袖隊離開 ⇒ 繼位或解散)收進 set_team_faction 咽喉;Q2:L5 是 WHAT,要藍圖知道;先 Probe 計數再動
 ---
