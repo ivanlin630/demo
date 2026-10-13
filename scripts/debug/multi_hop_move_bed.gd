@@ -123,8 +123,8 @@ func _p1_repro() -> void:
 	print("   最終位置 %s｜task %s＠%d｜抵達事件：%s" % [str(pt.tile_pos), pt.current_task, pt.task_priority,
 		str(ms.filter(func(m): return String(m).begins_with("抵達") or String(m).begins_with("停下")))])
 	_check("P1 最終在 (9,0)", pt.tile_pos == Vector2i(9, 0))
-	_check("P1 事件流有「抵達 (9,0)」", ms.has("抵達 (9,0)"))
-	_check("P1 沒有「抵達 (10,2)」", not ms.has("抵達 (10,2)"))
+	_check("P1 事件流有「抵達 (9,0)」", ms.has(_arrive_msg(Vector2i(9, 0))))
+	_check("P1 沒有「抵達 (10,2)」", not ms.has(_arrive_msg(Vector2i(10, 2))))
 	_check("P5c 抵達後 task＝idle、priority 0", pt.current_task == TeamData.TASK_IDLE and pt.task_priority == 0)
 	await _drop(node)
 
@@ -151,7 +151,7 @@ func _p2_two_hex() -> void:
 	_check("★P2 母體地板：目標真的在兩格外", tgt != Vector2i(-1, -1))
 	_check("P2 走到目標", pt.tile_pos == tgt)
 	_check("P2 途中沒有印抵達", early == 0)
-	_check("P2 到了恰一筆「抵達 %s」" % str(tgt), _count_prefix(ms, "抵達") == 1 and ms.has("抵達 (%d,%d)" % [tgt.x, tgt.y]))
+	_check("P2 到了恰一筆「抵達 %s」" % str(tgt), _count_prefix(ms, "抵達") == 1 and ms.has(_arrive_msg(tgt)))
 	await _drop(node)
 
 
@@ -439,3 +439,7 @@ func _p8_injections() -> void:
 	print("   ④ possess Team%d ⇒ %s｜unpossess ⇒ %s" % [other.team_id, str(on_ok), str(back_ok)])
 	_check("P8④ possess 一支 NPC 隊 ⇒ possessed 換過去", on_ok)
 	_check("P8④ unpossess ⇒ 回到原隊", back_ok)
+
+# ★與 text_ui_main.gd 的抵達訊息同一個格式字串（不寫死單次字面值：value-key 閘的查表 key 要成對）
+func _arrive_msg(p: Vector2i) -> String:
+	return "抵達 (%d,%d)" % [p.x, p.y]

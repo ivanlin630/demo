@@ -66,6 +66,14 @@ static func _possessed_blocks(team: TeamData, source: String, is_release: bool) 
 #   ★只對 TeamData.mt_watch_tid 那一隊掛（預設 -9999 ⇒ 一個整數比較就走、不改值、不耗 RNG）
 static var watch_src: String = ""
 
+# ★★★跨 run 清除（cross-run-static 閘點）：watch_src 只在被觀察隊的入口呼叫期間非空、出口清回 ""；
+#   ★而入口中途若 push_error 中斷（床被殺），殘值會讓下一個世界的第一筆直接寫被標成 arbiter 寫 ⇒ 清。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if watch_src != "": cleared["TaskArbiter.watch_src"] = watch_src
+	watch_src = ""
+	return {"checked": 1, "cleared": cleared}
+
 static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 	if team.team_id != TeamData.mt_watch_tid:
 		_set_strategic_move_body(team, pos)
