@@ -59,8 +59,45 @@ spec 的清單只列了第一個輸入的變動。player_id 的寫者我全數�
 ⑥ set_strategic_move 對 possessed 直接 return ✓。
 ```
 
-# 3 判決
+# 3 追加（77a480050:allowlist 門 PRIO_THREAT→PRIO_COMBAT、P5f）
 ```
 verdict: issues（premise_contradiction: false）
-擋:⓪ ——補 (a)(c) 與 P8 三處後重送;①②④⑥ 與註不需再審,補在同一版
+擋:⓪ ——補 (a)(c) 與 P8 三處後重送;追加段 §3.2 (改寫 COMBAT 放行句)、§3.3 (入口 return 或收進 arbiter + P5g) 同版補;①②④⑥ 與註不需再審
+```
+
+## 3.1 方向對,而且實作端的坐實比我第二輪的猜測更硬
+```
+寫者＝loop3 _evaluate_threat（faction_ai_system.gd:628 起,idle 且威脅過門檻）→ :677 _decide_unified(src=threat) → try_set(…,"unified"),不是我猜的 ambient。
+門檻從 THREAT 改 COMBAT 合理:threat/survival 是 AI【決策】,#12 不放。P5f 用實作端診斷床、「改前=1」是真陽性對照,✓。
+```
+## 3.2 但 PRIO_COMBAT 這個放行條件【母體是空的】
+```
+grep PRIO_COMBAT 全 scripts（排除 debug）:只有 task_arbiter.gd:7 常數宣告,【零個使用處】。
+encounter_system／npc_combat_system／reaction_system 對 TaskArbiter.try_set／transition／release 也是零呼叫（grep 空）。
+⇒ 「priority ≥ PRIO_COMBAT 照既有規則」今天放行的寫入 = 0 筆;戰鬥對隊伍的保護靠的是 try_set 最頂的 combat_target != -1 鎖（事實）,不是優先序。
+⇒ 規則實際等價於「附身隊只接 PLAYER_SOURCES」。這不是壞事,但 spec 文字描述了一條【不存在的路】:
+   (a) 把 ≥PRIO_COMBAT 那一句改寫成「戰鬥由 combat_target 鎖保護（不經 arbiter 寫入）」;或
+   (b) 保留但標明『今天無寫者,預留』——選 (a),預留的放行條件是日後有人偷開洞的現成入口
+   release 守同理:『priority ≥ PRIO_COMBAT 的接手才放』也無人能滿足,刪掉比留著誠實
+後果要想清楚:戰鬥鎖對玩家自己的 M 也生效（try_set 頂端 return false）⇒ 戰鬥中按 M 會走 ① 的『不能移動：<擋它的現任 task>』——戰鬥中現任可能是 IDLE／TRAVEL,
+   句子要能說出『戰鬥中』,不能只印現任 task 名。
+```
+## 3.3 ★新漏洞:AI 對附身隊的【非 arbiter 寫入】還在 _evaluate_threat 裡
+```
+faction_ai_system.gd:640-646 _famine_crisis 分支（在 :647 的 task 判斷之前、與 current_task 無關）:
+  team.crisis_released_task = team.current_task      ← 直寫欄位,不經 try_set／release
+  team.crisis_released_until = tick + CRISIS_IMMUNITY
+  TaskArbiter.release(team)                         ← 對附身隊 PRIO_PLAYER 現任會被 ② 擋下
+  team.previous_task = ""
+task_arbiter.gd:~146-153 try_set 的 crisis 免疫窗檢查在【優先序判斷之前】且無 PRIO_PLAYER 例外:
+  `new_task == crisis_released_task and tick < crisis_released_until → deny`
+⇒ 附身隊 TRAVEL 途中鬧飢荒:release 被擋（TRAVEL 還在）,但 crisis_released_task=TRAVEL 已寫入 ⇒ 玩家接下來【重按 M（TRAVEL）被免疫窗擋 CRISIS_IMMUNITY 個 tick】,
+   結果行只會說「不能移動」之類。這是 release 被擋而【副作用沒被擋】的半套——跟我第二輪 §2 同一類,只是這次躲在直寫欄位。
+同理 :629-630 threat_eval_next_tick、previous_task 等 AI 簿記欄位被寫在附身隊上:無害,但 P7『task／move_target 逐 tick 不變』之外還有這類欄位會讓 P8/fp 比對噪音。
+修法兩選一（HOW,systems 定）:
+  (a) _evaluate_threat 入口對 possessed 隊直接 return（一行,在『AI 決策入口』而不是 131 個迴圈）——因為附身隊整個沒有 AI 決策,這一行是【語意正確的】,
+      與 ② ④ 並存:咽喉擋 arbiter 寫入、入口擋簿記直寫;P5f 反向格:拿掉 (a) 且飢荒佈置 ⇒ crisis_released_task 被寫（可計數）
+  (b) 把 crisis_released_* 的寫入收進 arbiter（一個 release_for_crisis），由咽喉的同一個謂詞管
+選 (a) 較小;但要在 spec 明講『這一行不是第二套補丁,是因為 #12 說附身隊零 AI 決策,而 _evaluate_threat 在 :640-646 有非 arbiter 的直寫』。
+並補一個 P5g:附身隊 TRAVEL 中佈置飢荒 ⇒ 玩家 M 重下令不被免疫窗擋（結果行成功）。
 ```
