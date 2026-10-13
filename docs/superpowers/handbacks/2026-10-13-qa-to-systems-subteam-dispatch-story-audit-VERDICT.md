@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 slice: 派遣子隊六種任務的故事稽核（回 2026-10-13-systems-to-qa-subteam-dispatch-story-audit）
 topic: 五條斷鏈全坐實——建設＝玩家給的是「施工中」狀態但從沒開工程（outpost_system:254 跳過）；安頓＝只認自家據點格、其餘格永遠 return（fai:4109-4118）；覓食巡邏偵查＝抵達即被 fai:4126 一律歸建（腳下當場併、一格外被放回 IDLE 後由野心層派偵查、半路踩到母隊格被吞）；待機＝兩個決策入口都在派它，且威脅掃描沒排除母隊 ⇒ 玩家自己的子隊上門「要向你進貢」
 ---
