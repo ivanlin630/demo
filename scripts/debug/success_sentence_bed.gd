@@ -230,8 +230,10 @@ func _test_p2_population_is_visible() -> void:
 	var cur_fn: String = ""
 	for i0 in range(lines.size()):
 		var l0: String = String(lines[i0])
-		if l0.begins_with("func "):
-			cur_fn = l0.substr(5, maxi(0, l0.find("(") - 5))
+		# ★`static func` 也是函式邊界（2026-10-14：舊版只認 `func ` ⇒ 靜態的 precheck_target 三行被歸到上一支 inspect_member）
+		var fn_head: String = l0.trim_prefix("static ")
+		if fn_head.begins_with("func "):
+			cur_fn = fn_head.substr(5, maxi(0, fn_head.find("(") - 5))
 		owner.append(cur_fn)
 	var excluded: Array = []       # ★逐名（不是只報一個數）
 	for i in range(lines.size()):

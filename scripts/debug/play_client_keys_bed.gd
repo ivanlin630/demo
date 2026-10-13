@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 按 Q 兩刀：客戶端不解釋遊戲鍵＋Esc×2 離開＋情報帶內容／折疊三態（spec 2026-10-13-play-client-no-key-interpretation-HOW）
 # 客戶端不解釋遊戲鍵＋離開不綁 Q＋情報帶內容（spec 2026-10-13-play-client-no-key-interpretation-HOW）
 #   送鍵走 PlayerRepl.press_on（跟玩家 REPL 同一條路）；離開以 text_ui_main.quit_requests 計（床設 suppress_quit，不真的收掉）
 #   Q1  進遭遇戰後送 q ⇒ 程式仍在、仍在戰鬥畫面、沒有要求離開
@@ -11,6 +12,9 @@ extends SceneTree
 #   Q6  戰後「按任意鍵離開」那一鍵只被派一次：(i) PlayerRepl.press_on（終端）(ii) Viewport.push_input（引擎廣播，GUI）
 #   Q7  自家隊 intel_arrived 句子含對象與座標：親見「你看到…」、轉述「你得知…（…前的消息）」
 #   Q7b 友軍隊的 intel_arrived 不含對象與座標
+#   Q8  同一 tick 同來源 4 則情報 ⇒ 事件區 1 條、含 4 個對象；同 tick 不同來源 ⇒ 2 條；同來源跨 tick ⇒ 2 條（藍圖回饋 #6 ①）
+#   Q9  同一人一分鐘內問兩次 ⇒ 第二次結果句「他說的你早就知道了（更新了時間）」，不是「記下 N 筆」（#6 ②）
+#   Q9b 他說的跟你親見的不同、可信度沒贏 ⇒ 結果句是「沒採信」那一態，不是「早就知道了」（R² 三態）
 #   （Q3 的客戶端那一半——play.py 退出碼 0、印「遊戲已結束」——在 tools/play_selfcheck.py；Q5 在 play.py --selfcheck）
 # 跑法：.\tools\godot.ps1 --headless --script scripts/debug/play_client_keys_bed.gd
 
@@ -40,6 +44,8 @@ func _initialize() -> void:
 	await _q6_post_battle_terminal()
 	await _q6_post_battle_engine()
 	await _q7_intel()
+	_q8_fold()
+	_q9_inquiry_twice_and_conflict()
 	print("=== play_client_keys DONE === errors: %d" % _errors)
 	quit(1 if _errors > 0 else 0)
 
@@ -269,7 +275,7 @@ func _q7_intel() -> void:
 	print("   親見：「%s」｜轉述：「%s」" % [s1, s2])
 	_check("★母體地板：兩則都真的進了玩家事件流", s1 != "" and s2 != "")
 	_check("Q7 親見句含「你看到」、對象與座標", s1.begins_with("你看到") and s1.contains("Team%d" % t1) and s1.contains("(3,4)"))
-	_check("Q7 轉述句含「你得知」、對象、座標與幾分鐘前", s2.begins_with("你得知") and s2.contains("Team%d" % t2)
+	_check("Q7 轉述句含「從 TeamX 得知：」、對象、座標與幾分鐘前", s2.contains("從 Team%d 得知：" % giver) and s2.contains("Team%d" % t2)
 		and s2.contains("(5,6)") and s2.contains("30 分鐘前"))
 	# Q7b：友軍（同勢力、非自家）收到情報
 	var ally: TeamData = null
@@ -292,3 +298,100 @@ func _q7_intel() -> void:
 	print("   友軍 Team%d 的情報：「%s」" % [ally.team_id, s3])
 	_check("★母體地板：友軍那則真的進了玩家事件流（同勢力放行）", s3 != "")
 	_check("Q7b 友軍那則不含對象與座標", not s3.contains("Team%d" % t3) and not s3.contains("(7,8)"))
+
+
+# ── Q8 折疊 ─────────────────────────────────────────────────────────────────
+func _intel_entries(st: WorldState, seq0: int) -> Array:
+	var out: Array = []
+	for e in st.player_events:
+		var d: Dictionary = e
+		if int(d.get("seq", 0)) > seq0 and String(d.get("kind", "")) == "intel_arrived":
+			out.append(d)
+	return out
+
+
+func _q8_fold() -> void:
+	print("\n── Q8 同 tick 同來源折成一條；不同來源／跨 tick 不併 ──")
+	seed(SEED)
+	var st := WorldState.new()
+	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
+	var ptid: int = st.get_player_team_id()
+	var ids: Array = st.teams.keys()
+	ids.sort()
+	var others: Array = ids.filter(func(t): return int(t) != ptid)
+	var src_a: int = int(others[0])
+	var src_b: int = int(others[1])
+	var tgts: Array = others.slice(2, 8)
+	# ①同 tick、同來源 4 則
+	var seq: int = st.player_event_seq
+	for i in range(4):
+		BeliefSystem.record_claim(st, ptid, int(tgts[i]), src_a, "轉述", {"tile_pos": Vector2i(i, i + 1)}, 0.6, false)
+	var e1: Array = _intel_entries(st, seq)
+	var t1: String = String(e1[0].get("text", "")) if not e1.is_empty() else ""
+	var all4: bool = true
+	for i in range(4):
+		if not t1.contains("Team%d 在 (%d,%d)" % [int(tgts[i]), i, i + 1]):
+			all4 = false
+	print("   同來源 4 則 ⇒ %d 條：「%s」" % [e1.size(), t1])
+	_check("Q8 同 tick 同來源 4 則 ⇒ 1 條、含 4 個對象", e1.size() == 1 and all4)
+	# ②同 tick、不同來源（★先推一 tick：否則①那條折疊項仍是同 tick 同來源的最後一筆，第一則會併進去）
+	st.world.current_tick += 1
+	seq = st.player_event_seq
+	BeliefSystem.record_claim(st, ptid, int(tgts[4]), src_a, "轉述", {"tile_pos": Vector2i(7, 7)}, 0.6, false)
+	BeliefSystem.record_claim(st, ptid, int(tgts[5]), src_b, "轉述", {"tile_pos": Vector2i(8, 8)}, 0.6, false)
+	var e2: Array = _intel_entries(st, seq)
+	print("   同 tick 不同來源 ⇒ %d 條" % e2.size())
+	_check("Q8 同 tick 不同來源 ⇒ 2 條", e2.size() == 2)
+	# ③同來源、跨 tick（換新位置才會再發）
+	seq = st.player_event_seq
+	BeliefSystem.record_claim(st, ptid, int(tgts[0]), src_a, "轉述", {"tile_pos": Vector2i(9, 1)}, 0.6, false)
+	st.world.current_tick += 1
+	BeliefSystem.record_claim(st, ptid, int(tgts[1]), src_a, "轉述", {"tile_pos": Vector2i(9, 2)}, 0.6, false)
+	var e3: Array = _intel_entries(st, seq)
+	print("   同來源跨 tick ⇒ %d 條" % e3.size())
+	_check("Q8 同來源跨 tick ⇒ 2 條", e3.size() == 2)
+
+
+# ── Q9／Q9b 打聽：三態結果句 ───────────────────────────────────────────────────
+func _ask(st: WorldState, npc: int) -> String:
+	st.player_state["gather_intel_npc_id"] = npc
+	st.player_state["gather_intel_choice"] = "ask_team_location"
+	var r: Dictionary = PlayerCommandSystem.new().execute_action(st, npc, "confirm_gather_intel")
+	return String(r.get("msg", ""))
+
+
+func _q9_inquiry_twice_and_conflict() -> void:
+	print("\n── Q9 問兩次 ⇒ 第二次「更新了時間」；Q9b 衝突未採信 ⇒「沒採信」──")
+	seed(SEED)
+	var st := WorldState.new()
+	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
+	var ptid: int = st.get_player_team_id()
+	var ids: Array = st.teams.keys()
+	ids.sort()
+	var others: Array = ids.filter(func(t): return int(t) != ptid and (st.teams[t] as TeamData).leader_id != -1)
+	var giver: TeamData = st.teams[int(others[0])]
+	var tgt: int = int(others[1])
+	var tgt2: int = int(others[2])
+	# 佈置：給情報的那隊只知道 tgt 一件事、對玩家坦白（聲望高）；玩家對 tgt 一無所知
+	st.team_intel[giver.team_id] = {}
+	st.team_intel.get(ptid, {}).erase(tgt)
+	st.team_intel.get(ptid, {}).erase(tgt2)
+	st.team_discovered[ptid] = []
+	st.team_known[giver.team_id] = []
+	giver.known_reputations[ptid] = 1.0
+	BeliefSystem.record_claim(st, giver.team_id, tgt, giver.team_id, "親見", {"tile_pos": Vector2i(5, 5), "population_est": 10}, 1.0, false)
+	var m1: String = _ask(st, giver.team_id)
+	st.world.current_tick += 1   # 一分鐘後再問
+	var m2: String = _ask(st, giver.team_id)
+	print("   第一次：「%s」｜第二次：「%s」" % [m1, m2])
+	_check("★母體地板：第一次真的記下了（不然第二次的判讀沒有意義）", m1.contains("記下"))
+	_check("Q9 第二次 ⇒「他說的你早就知道了（更新了時間）」、不是「記下 N 筆」", m2 == "他說的你早就知道了（更新了時間）")
+	# Q9b：玩家親見 tgt2 在 (3,4)；給情報的那隊說它在 (8,8) ⇒ 轉述的可信度贏不過親見 ⇒ 沒採信
+	BeliefSystem.record_claim(st, ptid, tgt2, ptid, "親見", {"tile_pos": Vector2i(3, 4), "population_est": 7}, 1.0, false)
+	st.team_intel[giver.team_id] = {}
+	BeliefSystem.record_claim(st, giver.team_id, tgt2, giver.team_id, "親見", {"tile_pos": Vector2i(8, 8), "population_est": 7}, 1.0, false)
+	var m3: String = _ask(st, giver.team_id)
+	var best: Dictionary = BeliefSystem.best_value_quiet(st, ptid, tgt2)
+	print("   衝突那一次：「%s」｜玩家採信的位置 %s" % [m3, str(best.get("tile_pos", null))])
+	_check("★母體地板：玩家的親見仍是勝出那一筆（衝突真的沒被採信）", best.get("tile_pos", null) == Vector2i(3, 4))
+	_check("Q9b 衝突未採信 ⇒ 結果句是「沒採信」那一態，不是「早就知道了」", m3.contains("沒採信") and not m3.contains("早就知道"))

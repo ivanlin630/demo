@@ -522,14 +522,14 @@ func check_target(q: int, r: int) -> Dictionary:
 	var pt: TeamData = _state.teams.get(p.team_id) if p != null else null
 	if pt == null:
 		return {"ok": false, "status": "off_map", "reason": "你已沒有隊伍"}
-	return PlayerCommandSystem.check_target(_state, pt, Vector2i(q, r), get_vision_mult())
+	return PlayerCommandSystem.precheck_target(_state, pt, Vector2i(q, r), get_vision_mult())
 
 func dispatch_task_check(q: int, r: int, task: String) -> Dictionary:
 	var p: PersonData = _state.persons.get(_state.player_id)
 	var pt: TeamData = _state.teams.get(p.team_id) if p != null else null
 	if pt == null:
 		return {"ok": false, "reason": "你已沒有隊伍"}
-	return PlayerCommandSystem.dispatch_task_check(_state, pt, Vector2i(q, r), task, get_vision_mult())
+	return PlayerCommandSystem.precheck_dispatch_task(_state, pt, Vector2i(q, r), task, get_vision_mult())
 
 func query_subteam_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_subteam_panel(_state)

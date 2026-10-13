@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 大地圖整寬（spec 2026-10-13-map-pane-full-width-HOW）
 # 大地圖整張看得到（spec 2026-10-13-map-pane-full-width-HOW，藍圖裁 43817c7d1 固定上下排）—— 驗【合成後的最終畫面】
 #   M1  預設世界：地圖的每一列（renderer 輸出）在畫面上一字不缺；列數＝2R＋1（R 從 world 讀）
 #   M2  `@` 在畫面內；游標移到地圖最右下角也在畫面內
