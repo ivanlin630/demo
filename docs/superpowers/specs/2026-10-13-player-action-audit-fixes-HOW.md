@@ -23,6 +23,12 @@
 - 改法：既有 `SimBridge.UI_INTERNAL_COMMANDS`（sim_bridge.gd:495，現只用來不蓋結果行）——在同一個結果排空迴圈（text_ui_main.gd 約 317-332）對它再濾掉 `_events.append` 與 `_feed_push`；佇列與世界寫入不動。
 - 順查頂列「待執行 N」是否把 UI 內部令算進去；是 ⇒ 一併排除。
 
+## ④ 過渡：通商提案停掉（藍圖框架票 4761fa563 第 6 條）
+- 社交層框架票落地前：NPC 不提 propose_trade（提案選項生成處移除）、玩家選單不列「通商」；回句不需要，它不出現就好。
+- defer token `trade-proposal-paused-until-social-layer`：框架票落地即恢復（屆時由秤決定提不提）。程式碼旁註同 token。
+- 會動 NPC 行為 ⇒ world-fp 可能變：先二分（只動這一處）再換基準。
+- 驗收 P4：30 天觀測回合 `propose_trade` 送出 0 次；玩家行動清單無通商。
+
 ## 驗收
 - A1（修前紅）：設比例 0.5、武器足 ⇒ 1 天後 `armed_anon_ratio` = 0.5；武器只夠 30% ⇒ 0.3，結果句含「武器只夠 30%」。
 - A2：NPC 隊 world-fp 不變。

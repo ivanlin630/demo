@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 框架票（深層批第一張,取代「回應提案進引擎」）
 topic: 社交層全進決策引擎：主動提案、回應提案、同格該不該打／談／併；效用＝真實後果；禁門檻梯；過渡期停掉通商提案
 ---
