@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #1：play.py 吃掉 Q、離開不綁 Q、情報帶內容（插隊最前）
 topic: R² 請審 docs/superpowers/specs/2026-10-13-play-client-no-key-interpretation-HOW.md
 ---
