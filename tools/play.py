@@ -201,7 +201,7 @@ def read_frame(sock: socket.socket) -> str:
 # ══ ★F5（spec 2026-10-07 round5-friendliness §F5，用戶：「什麼都要打字，連 Esc 都要打 e-s-c 加 Enter」）══════
 # ★一個按鍵 ⇒ 一個 token。token 名稱＝`player_repl.gd` NAMED_KEYS 的鍵名（同一份；這裡不另發明名字）
 # ★純函式：吃「一次按鍵讀到的原始字元」（一般鍵 1 個字元；方向鍵 2 個：\xe0 或 \x00 前綴＋H/P/K/M）
-#   ⇒ 回 token；Ctrl+C ⇒ QUIT_TOKEN（走既有離開路，同 q 那支，不另開一條）；認不得的特殊鍵 ⇒ ""（不送）
+#   ⇒ 回 token；Ctrl+C ⇒ QUIT_TOKEN（客戶端唯一的離開路）；認不得的特殊鍵 ⇒ ""（不送）
 ARROW_SUFFIX = {"H": "up", "P": "down", "K": "left", "M": "right"}
 SPECIAL_PREFIX = ("\xe0", "\x00")
 CTRL_C = "\x03"
@@ -223,6 +223,17 @@ def key_token(chars: str) -> str:
     return ""
 
 
+# ★客戶端不解釋任何遊戲鍵（spec 2026-10-13-play-client-no-key-interpretation 改法 1）：
+#   離開這支 harness 只認 QUIT_TOKEN（`:quit`，Ctrl+C 經 key_token 也轉成它）；`q`／`quit` 都原樣送進遊戲
+#   ★病：舊版把 q 當離開 ⇒ 戰鬥裡六向移動的 Q 一按，整支程式就斷線（第五輪用戶真機回饋 #1）
+def is_quit_line(line: str) -> bool:
+    return line.strip() == QUIT_TOKEN
+
+
+# ★Q5：key_token 之後的字原樣送出，不被當成離開（玩家層按到的字都走這兩支）
+QUIT_LINE_CASES = [("q", False), ("Q", False), ("quit", False), ("QUIT", False), (QUIT_TOKEN, True)]
+
+
 # ★對照表本身的自驗（不起 Godot）：`python tools/play.py --selfcheck`
 KEY_TOKEN_CASES = [
     ("x", "x"), ("G", "G"), ("3", "3"), (",", ","), ("\x1b", "esc"), ("\r", "enter"), ("\t", "tab"),
@@ -240,6 +251,15 @@ def selfcheck() -> int:
         ok = got == want
         bad += 0 if ok else 1
         print("  %s key_token(%r) = %r（應 %r）" % ("PASS" if ok else "FAIL", raw, got, want))
+    for raw, want in QUIT_LINE_CASES:
+        got = is_quit_line(raw)
+        ok = got == want
+        bad += 0 if ok else 1
+        print("  %s Q5 is_quit_line(%r) = %r（應 %r）" % ("PASS" if ok else "FAIL", raw, got, want))
+    tq = key_token("q")
+    ok = tq == "q" and not is_quit_line(tq)
+    bad += 0 if ok else 1
+    print("  %s Q5 按 q ⇒ key_token %r、不當離開（照原樣送進遊戲）" % ("PASS" if ok else "FAIL", tq))
     print("=== play key_token selfcheck DONE === errors: %d" % bad)
     return 1 if bad else 0
 
@@ -279,7 +299,7 @@ def main() -> int:
             first = read_frame(sock)        # 第一屏
             if single:
                 print(CLEAR_SCREEN + first)
-                print("[play] 直接按鍵，不用 Enter（q 或 Ctrl+C 離開）")
+                print("[play] 直接按鍵，不用 Enter（Ctrl+C 離開）")
             else:
                 print(first)
         except (TimeoutError, socket.timeout):
@@ -298,10 +318,7 @@ def main() -> int:
                     line = input("> ")
                 except (EOFError, KeyboardInterrupt):
                     line = QUIT_TOKEN
-            if line.strip().lower() in ("q", "quit", QUIT_TOKEN):
-                # ★★`q` 是**遊戲裡**的離開鍵，而 `:quit` 是離開這支 harness ——
-                #   ★這裡把 `q` 也當成「我要離開」，因為在一支**只為了玩**的客戶端上
-                #   那兩件事對人來說是同一件；而 server 那一側仍然分得開（它收到的是 `:quit`）。
+            if is_quit_line(line):
                 sock.sendall((QUIT_TOKEN + "\n").encode("utf-8"))
                 break
             sock.sendall((line + "\n").encode("utf-8"))

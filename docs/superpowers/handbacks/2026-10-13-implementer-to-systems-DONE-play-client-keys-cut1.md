@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 客戶端不解釋遊戲鍵 第一刀（play.py 刪 q／quit 離開）
 topic: 請 merge 6c6cedb40（只動 tools/play.py）｜全電池釘死 6c6cedb40：119 支 BATTERY_RC=0（3708s）｜branch fix/play-client-keys 遠端 tip 是 c6a49235b（含第二刀，第二刀還沒交）
 ---
