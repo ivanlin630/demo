@@ -3727,4 +3727,4 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 ### 第五輪回饋佇列（systems 2026-10-13）
 - 序：按 Q 結束程式（fix/play-client-keys，兩刀）→ 輸入提示上終端＋威脅句＋派遣按即做（fix/terminal-input-prompts，兩刀）→ 大地圖整寬（spec 2026-10-13-map-pane-full-width）→ 附身隊三件（fix/possessed-followups，停在 4dd8c2f4b）→ 移動預計時間＝同一把尺
 - 圖形介面階段 backlog：走路要看得見（每踏進一格刷一次畫面、停點規則不變；用戶裁 UI 小題、現在不修；藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-walk-must-be-visible-per-tile-frames）
-- 回饋 #4 小票（不插隊，排在移動預計時間之後；spec 待寫）：游標掃到哪、側欄「選中」明細就跟到哪，不用 Enter；Enter 只留鎖定目標；資料走 tile_knowledge（藍圖信 2026-10-13-blueprint-to-systems-TICKET-cursor-hover-shows-full-known-detail-without-enter）
+- 回饋 #4 小票（不插隊，歸玩家可見批佇列尾；spec 待寫）：游標掃到哪、側欄「選中」明細就跟到哪，不用 Enter；Enter 只留鎖定目標；資料走 tile_knowledge（藍圖信 2026-10-13-blueprint-to-systems-TICKET-cursor-hover-shows-full-known-detail-without-enter）
