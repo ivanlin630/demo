@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #4（玩家可見，小票，排本批之後）
 topic: 游標掃到哪、側欄「選中」明細就跟到哪，不用按 Enter；Enter 只留給鎖定目標
 ---
