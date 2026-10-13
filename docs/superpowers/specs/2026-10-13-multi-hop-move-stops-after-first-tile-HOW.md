@@ -38,9 +38,14 @@
    ②抵達要 release：movement_system._step_team 抵達兩處（:344/:366 之後的 _on_arrival）task＝TRAVEL ⇒ TaskArbiter.release
    ③cancel_move 同步 release
 (#12 執法點；R² 第二輪改寫 2026-10-13）
-   ⓪附身是一個【事實欄】：TeamData.possessed（bool），唯一寫入者 WorldState.sync_possession()——開局、附身改變、繼承（choose_heir）、玩家隊消滅時呼叫；
-     值＝(team_id == get_player_team_id())；★漂移守衛：P8 每 tick 斷言「possessed 為真的隊＝get_player_team_id() 那一支，且只有一支」
-     （理由：release()／set_strategic_move() 沒有 state 參數、呼叫點 61＋處，不改簽章就讀不到「誰被附身」）
+   ⓪附身是一個【事實欄】：TeamData.possessed（bool），唯一寫入者 WorldState.sync_possession()；值＝f(player_id, persons[player_id].team_id)
+     ★R² 第三輪：兩個輸入都要觸發 sync（理由：release()／set_strategic_move() 沒有 state、呼叫點 61＋處，不改簽章就讀不到「誰被附身」）
+       ·player_id 的寫者（game_setup 477/810、possess／unpossess、choose_heir、init_player）末尾呼 sync
+       ·person.team_id 的咽喉（add_member／remove_member 34 站共用的那支、set_leader）內：pid == player_id ⇒ sync
+       ·subteam_system.gd:268 吸收併隊直寫 p.team_id ⇒ 改走咽喉（不另加 sync 呼叫）
+       ·戰死窗口（npc_combat_system.gd:796-807 persons.erase 後 get_player_team_id 回 -1、player_id 要等 choose_heir 才換）：
+         possessed 保持在最後所屬隊，直到繼任（choose_heir）或 game_over —— 那段時間它仍是玩家的隊（等玩家選繼承人），AI 不得接手
+     ★漂移校驗放在【所有系統跑完的 tick 尾】（sync 之後立刻比＝恆真）：不一致 ⇒ 印警告＋Probe "possession.drift"（不自動修，讓它紅）
    ④try_set／transition 對 possessed 隊的規則（以【事實】為鍵，不以來源字串前綴）：
      ★寫者坐實（實作端 504cc1b91）：tick 96 loop3 _evaluate_threat → _decide_unified(src=threat) → try_set(…,"unified") 替附身隊選「覓食」＝【AI 對威脅的決策】
        ⇒ 威脅／求生層的【決策】也是決策層，#12 不放行；放行的只有【事件與物理】本身
@@ -57,6 +62,10 @@
      ★抵達（movement _on_arrival 後）與 cancel_move 明傳來源；其餘 59 處不用改（預設 "" ⇒ 對附身隊的玩家令不生效）
    ⑥set_strategic_move（sim_runner.gd:887 等）：possessed 隊直接 return（戰略佈點是 AI 決策）
      其他不經 arbiter 的 move_target 寫者（movement.process :60/:97/:100、事件驅動約 25 處）：用第一顆的寫入觀察當守衛（P5）
+   ★小註（R² 第三輪，不需再審）：
+     ·SURVIVAL@80 已不放行（門改 PRIO_COMBAT）；UI「停下：<原因>」原因取 task_reason，不由 UI 猜
+     ·PLAYER_SOURCES grep 時確認玩家「邀請安頓」那條的來源字串（invite_settle 在 ENGINE_SOURCES）不被 deny——它若是玩家令就列進 PLAYER_SOURCES
+     ·② release deny 與 ④ try_set deny 用【同一個】謂詞函式（例 TaskArbiter._possessed_blocks(team, priority, source)），不寫兩份
    ★附身判定只讀 team.possessed（不再用 leader_id==player_id）；舊守衛不在本票改，但 P8 漂移守衛保證兩者在附身隊上一致
 (C) 真的無路：下令時算路徑；不可達 ⇒ 結果行「無法抵達 (q,r)：原因」不下令；途中路斷 ⇒ 事件「停下：到 (q,r) 的路斷了」
 UI（R²：不開第三欄位）：M 也設既有 _arrive_target；「抵達」只在 pos＝_arrive_target 時印；目標被清而人不在 _arrive_target ⇒ 事件「停下：<原因>（停在 (q,r)）」
@@ -72,7 +81,8 @@ P4 目標被別的原因清掉（佈置：途中 cancel）⇒ 事件流印「停
 P5 30 天、玩家附身、真世界：附身隊 task／move_target 的 allowlist 外寫入＝0（逐筆印）｜反向：拿掉 ④ ⇒ >0 必紅
 P5d 連按 M：TRAVEL 進行中再下 M 到別格 ⇒ 換目標、結果行說開始走向新格｜REST 中下 M ⇒ 換成 TRAVEL
 P5e release 守：佈置一個 AI 路徑對附身隊呼 release()（預設來源）⇒ TRAVEL 與 move_target 不變
-P8 possessed 漂移守衛：30 天每 tick「possessed 隊＝get_player_team_id() 那一支且唯一」；佈置繼承一次 ⇒ 換隊後仍成立
+P8 possessed 漂移守衛（tick 尾）：30 天每 tick「possessed 為真的隊至多一支；player_id≠-1 且玩家活著時＝get_player_team_id() 那一支」（觀察者 player_id=-1 ⇒ 零支）
+   注入四格，每格拿掉對應 sync 必紅：①玩家所在隊被吸收併隊 ②玩家被邀入他隊／被逐出 ③玩家戰死而隊還在（窗口內仍 possessed、AI 寫入＝0，直到選繼承人）④possess 一支 NPC 隊再 unpossess
 P5f 寫者重現：實作端診斷床（multi_hop_move_writer_diag.gd，藍圖同一串鍵＋開場閒置 72h 兩種）⇒ 附身隊 try_set:unified 次數＝0；改前＝1（tick 96 覓食）
 P5b 抗命：佈置 PRIO_DISPATCH 挑戰附身隊的 PRIO_PLAYER ⇒ 不換手、不加 stress｜非附身隊照舊會抗命（反向格）
 P5c 抵達 release：走到後 task＝IDLE、priority 0

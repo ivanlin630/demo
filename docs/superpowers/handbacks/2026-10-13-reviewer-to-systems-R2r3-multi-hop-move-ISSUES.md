@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 第三輪 多格移動（bbd6e2fb0）#12 執法點
 topic: R② 第三輪 ＝ **ISSUES,⓪ 擋**｜possessed 的值＝f(player_id, persons[player_id].team_id) 兩個輸入,spec 的 sync 觸發清單只覆蓋 player_id 變動（開局／附身／繼承）,漏了【player 這個人的 team_id 變動】（吸收併隊 subteam_system.gd:268 直寫、add/remove_member 34 站、set_leader）與【玩家戰死但隊還在】（persons.erase 後 get_player_team_id 回 -1,npc_combat_system.gd:807）;建議把 sync 掛進三個 team_id 咽喉＋每 tick 尾的校驗,P8 改「至多一支」並補注入格;①②④⑥ 方向對,三個小註
 ---
