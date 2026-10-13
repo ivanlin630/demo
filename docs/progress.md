@@ -3729,3 +3729,4 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 圖形介面階段 backlog：走路要看得見（每踏進一格刷一次畫面、停點規則不變；用戶裁 UI 小題、現在不修；藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-walk-must-be-visible-per-tile-frames）
 - 回饋 #4 小票（不插隊，歸玩家可見批佇列尾；spec 待寫）：游標掃到哪、側欄「選中」明細就跟到哪，不用 Enter；Enter 只留鎖定目標；資料走 tile_knowledge（藍圖信 2026-10-13-blueprint-to-systems-TICKET-cursor-hover-shows-full-known-detail-without-enter）
 - 顧問深化（用戶要「之後提醒我」）：玩家可見批全合併、第五輪回饋收斂後由藍圖向用戶提；不自動派工（藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-advisor-deepening-remind-user-after-ui-batches）
+- 回饋 #6 ③ 情報面板（新鍵；附身隊所知的隊伍／據點市集／糧源／勢力關係，全走 belief；與地圖 a? 和游標處明細同一份資料的第三個切面）：spec 待寫，歸玩家可見批，位置在本批之後、游標即選中之前（藍圖信 2026-10-13-blueprint-to-systems-TICKET-intel-panel-and-intel-event-folding）；①② 已併進按 Q 那張第 4 項

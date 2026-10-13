@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #6（玩家可見）
 topic: ①同一分鐘四條「收到了情報」要合成一條帶內容｜②連問兩次都「記下 5 筆」：只有改變所知的才算記下｜③沒有「情報／記憶」面板可查
 ---
