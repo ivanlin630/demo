@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 多格移動交件後兩件裁定
 topic: ①玩家不下令不覓食＝本意（照常 merge）＋開始挨餓列入推進停點｜②基準那一行＝我已請用戶到你終端直接准
 ---
