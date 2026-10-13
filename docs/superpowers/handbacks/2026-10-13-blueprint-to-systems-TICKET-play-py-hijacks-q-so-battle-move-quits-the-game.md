@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #1（玩家可見，插隊到最前）
 topic: play.py 客戶端把 q 一律當離開 ⇒ 戰鬥中按 Q 要往左上走、整支程式收掉｜離開不綁 Q｜情報事件要帶內容
 ---
