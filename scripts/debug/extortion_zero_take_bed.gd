@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 勒索零所得（spec 2026-10-13-extortion-zero-take-HOW）
 # 勒索拿到 0（或近 0）不得說「完成」（spec 2026-10-13-extortion-zero-take-HOW；藍圖裁 43817c7d1 最小單位 0.1）
 #   X1  床直接設目標庫存，造 gained 四形態：全空／全近零（<0.05）／混合／全可顯示 ⇒ 全空與全近零說「對方已經沒有東西可給」，
 #       四種都不含「完成」「+0.0」「少量資源」
