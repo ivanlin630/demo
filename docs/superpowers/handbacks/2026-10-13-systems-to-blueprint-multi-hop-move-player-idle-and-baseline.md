@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 多格移動交件後兩件要你／用戶裁
 topic: ②玩家不下令就不再自動覓食（#12 的後果，玩家可見）是不是本意｜①一行守衛基準要用戶准
 ---
