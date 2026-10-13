@@ -83,6 +83,7 @@ static func consider_extraction(state: WorldState, team: TeamData) -> void:
 	if shortfall <= 0.0: return   # gate-ok: guard: spendable 已夠→不亂徵(need-guard 非人格閘)
 	# ★need 決定「抽不抽」(有真缺才抽);人格 buffer=texture「補到多夠用」(非清空 treasury)。
 	var amt: float = minf(shortfall + extract_buffer(leader), team.anon_treasury)
+	if team.team_id == TeamData.mt_watch_tid: TeamData._mt_hit("CoinTreasury.consider_extraction→extract", 0.0, amt)   # ★寫入觀察（附身隊後續 丙）
 	extract_treasury(state, team, amt / team.anon_treasury, "need_driven")
 
 # unified-commerce coin combo（fold coin-B 成員稅回收，破 salary 單向枯竭補 team.coin 池）。
