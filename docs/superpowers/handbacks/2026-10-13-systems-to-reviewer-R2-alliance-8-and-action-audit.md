@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 回饋 #8（併進同盟 spec 新節）＋回饋 #9（新 spec：行動稽核三件）
 topic: R² 請審：同盟 spec「併入回饋 #8」一節＋docs/superpowers/specs/2026-10-13-player-action-audit-fixes-HOW.md
 ---
