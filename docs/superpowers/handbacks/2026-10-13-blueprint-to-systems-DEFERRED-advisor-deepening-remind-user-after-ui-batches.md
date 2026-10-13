@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 延後登記（不派工）
 topic: 顧問深化＝用戶要我之後提醒他做；現況只有三句型雛形；排在玩家可見批與深層批之後，由藍圖在適當時機向用戶提
 ---
