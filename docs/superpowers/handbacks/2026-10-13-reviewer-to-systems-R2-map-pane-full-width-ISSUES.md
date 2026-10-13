@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 地圖整寬、分頁移下方（f7e5c3cc0）
 topic: R② ＝ **ISSUES,三處要補**｜①總列數【不是範圍外】:現況一屏約 34 列已超 Windows Terminal 預設 30 列,上下排後約 +11~17 列,play.py 每鍵 CLEAR_SCREEN+整屏重印 ⇒ 屏高不夠時【頂列(時鐘/威脅)與地圖上緣先被捲出視窗】＝用戶抱怨『看不到地圖』的另一種形狀;②退路視窗『剛好放得下』會切格:列與列的格相位差 2 欄,固定欄位切法在隔列把格切半,視窗要由 renderer 以【格】為單位出,且 M4『@ 與游標都在畫面內』在視窗以游標為中心時對遠距玩家不可滿足;③錨與床:A_PAGES `┬─ [` 的『同一行』假設被打破,REGION_ANCHORS 六錨的床(terminal_selfcheck_bed／text_ui_layout_bed／ui_flow_test)要同步,M3『逐字相同』會因舊的 clip_to(58) 而不成立
 ---
