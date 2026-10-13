@@ -77,3 +77,48 @@ verdict: issues
 §3 通知藍圖（L5 是 WHAT）、§4 同版補
 補 §2 後不需再審;若選擇不用 succeed_or_disband_faction 而保留 log-only,請寫理由回我
 ```
+
+# 6 追加:對 7da86e7ca／c696ae0f9(領袖結盟拒絕＋先量)的審
+## 6.1 負斷言核對:FactionData.relations 無行為讀寫者——成立
+```
+搜索:`grep -rn "relations" scripts --include=*.gd`（排除 scripts/debug;再排除 person 層的 leader.relations／p.relations／known_outpost_relations／_update_relations／relation_edges）;
+      另搜 `"ally"`／`"enemy"` 字面。
+結果:faction_data.gd:41 宣告;state_fingerprint.gd:435-437 把 f.relations 放進指紋字串（只讀、只雜湊,欄位恆空 ⇒ 無行為）;player_api_mapper.gd:916 的註解自己記『全站零寫入者』。
+     "ally" 字面只出現在 faction_ai_system.gd 的 _emit_goal(…,"ally")（:88,:2019,:2139）——那是目標『模式』標籤,寫進 f.goal_drivers,不是 FactionData.relations。
+結論:無讀者 ⇒ 『兩勢力結盟尚無實作』的判斷成立。
+並且那個 ally 目標的前提是 `_has_independent(state, f.leader_team_id)`（:2018,:2133）——它是在【招募獨立隊】,不是勢力對勢力 ⇒ 拒絕勢力領袖互盟不會讓這條 AI 目標變成無法達成。
+```
+## 6.2 規則的謂詞要寫準:『兩勢力領袖結盟』不是被拒集合的邊界
+```
+_form_alliance 被搬的只有 team_b（發起方）,且只在 team_a（收提案方）有勢力時（diplomatic_ai_system.gd:419-421）。
+⇒ 『領袖被搬』的真條件＝【發起方是自己勢力的領袖 ∧ 收提案方在另一個勢力】——收提案方【不必】是領袖。
+   被拒集合因此是 {領袖→領袖} ∪ {領袖→非領袖成員}。spec 的字面『兩個勢力的領袖結盟』漏了後者。
+   （反向:收提案方是領袖、發起方是非領袖成員 ⇒ 發起方照搬入,不受此規則影響——那是成員換邊,保持。）
+   請把謂詞寫成『發起方為領袖隊且收提案方勢力≠發起方勢力』,L2/L5 各補一格 {領袖→非領袖}。
+```
+## 6.3 NPC 端:拒絕要在【提案選項】層排除,不是送出後才拒
+```
+try_proactive_diplomacy（diplomatic_ai_system.gd:167-186）:任何有勢力的隊(不限領袖)對同格異勢力隊 score>0.6 ⇒ 送 propose_alliance 並 `return`（本輪外交就用掉了）。
+被拒的後果只有 sender.diplomacy_reject_cooldown[target]（:221-223）。若照 spec 只在 _form_alliance/handle 處拒絕:
+   ·領袖發起方每個冷卻週期對同一對象重送一次必被拒的提案,而且每次 `return` 吃掉那一輪的外交機會(同輪的 propose_trade／demand_tribute 選項被擠掉)——
+     『同一原因禁無記憶反覆撞』（執行失敗反饋鐵律）的形狀,雖然有冷卻擋住密度。
+   ⇒ 用你的 plan_alliance(a,b) 純函式在【選項生成處】判:plan 為『無動作』的結盟不列為選項(score 排序時直接跳過),讓 NPC 去做 trade／tribute;
+      handle_diplomacy_message 內再判一次作為安全網(玩家端與外部呼叫也過同一支)。
+handle_diplomacy_message 目前的順序:算 score → `_form_alliance` → 回 "accept"（:384-388）。要改成:先 plan,plan 為『無動作』⇒ 回 reject（並帶可映射的原因碼給玩家端),不先 form 再回 accept。
+   玩家端 `_action_propose_alliance` 把原因碼經 PlayerApiMapper 映射成『兩個勢力之間的結盟還沒做』（玩家面零英文識別字的既有紀律,player_command_system.gd:~880 註解）。
+```
+## 6.4 『先量』的設計缺口(c696ae0f9)
+```
+①分母:『被搬方是領袖那一支佔全部勢力成員變動(faction.join)的比例』——world_state.gd:552-569 的 faction.join 是 set_team_faction 每次入勢力都 +1,
+   含 subteam_system.gd:110/148/175（子隊繼承母隊勢力）、interaction_system.gd:1719/1748、game_setup 等 ⇒ 子隊繼承會灌大分母,把比例壓低,『不是主要管道』的結論偏向放行。
+   ⇒ 分母改成『頂層隊入勢力且來源路徑歸因』(join reason 常數,見 §2)，或直接報各 JOIN_* 路徑的絕對次數,別用總 join 做分母。
+②樣本:只跑 30 天 seed 1337 一個 seed。『fire 0 次』是負斷言,母體太小:至少 3 個 seed、且一個『陽性對照』(佈置一個同格的領袖→領袖／領袖→成員提案,證明修前確實 fire 這一支,量測儀器接得到)。
+   (專案已記 multi sanity 無 seed、drift 不可重現——所以要的是『多 seed 的分佈』,不是一次跑。)
+③報表:發起方角色 × 收提案方角色(領袖／非領袖成員／獨立)的 3×3 次數,不是單一『被搬方是領袖』;並報『那一支發生後原勢力剩幾隊、leader_team_id 是否懸空』(你已寫)。
+④『停手交件』門檻:『主要管道』沒有數字。請在 spec 先寫判準(例:該支佔『頂層隊入勢力』次數 ≥ X% 或使 ≥ Y 個勢力成長),或明講『有任何 fire 就交件給藍圖看分布』;
+   事後才定門檻等於用結果決定標準。
+```
+## 6.5 判決(追加)
+```
+verdict: 同 §5（issues）;追加 §6.2 謂詞、§6.3 選項層排除與 handle 順序、§6.4 量測設計,同版補;玩家端出貨不受量測影響(你已寫),本追加不擋它
+```
