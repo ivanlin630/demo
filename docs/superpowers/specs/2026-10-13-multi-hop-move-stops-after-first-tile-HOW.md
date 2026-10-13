@@ -7,8 +7,7 @@
   ①事件「抵達 (X)」印的是 _last_move_target（text_ui_main.gd:339-343：上一幀目標被清成 (-1,-1) 且人站在那格）
     ⇒ 印出 (10,2) ＝ 在清掉之前，玩家隊的 move_target 已經是 (10,2)，不是 (9,0)
   ②player_command_system.gd:2030 move_to 只寫 pt.move_target＝(9,0)
-  ③(10,2) 到 (9,0) 的 hex 距離＝3，比起點 (9,2) 的 2 還遠 ⇒ 不是「往 (9,0) 走的路上一格」
-⇒ 有【另一個寫者】在 01:01 之後把玩家隊的 move_target 改成 (10,2)；到了之後 movement_system.gd:344/366 清掉 ⇒ UI 照規則印「抵達 (10,2)」
+⇒ 有【另一個寫者】（R² 核：_last_move_target 唯一寫者 text_ui_main.gd:346 取自 team.move_target ⇒ 成立；只證有第二寫者、不證是誰）在 01:01 之後把玩家隊的 move_target 改成 (10,2)；到了之後 movement_system.gd:344/366 清掉 ⇒ UI 照規則印「抵達 (10,2)」
   候選（未驗）：faction_ai _evaluate_loop3_teams（:1526）對【每一隊含玩家】在 IDLE 時跑 gather／ambient（量測員 2026-10-07 已證它對玩家隊跑）；
   或其他對 state.teams 全掃、寫 move_target 而沒排除玩家隊的路徑
 ★若坐實：這是【AI 在替玩家走路】——比「停住」更重，玩家隊的移動只能由玩家指令寫（不變量：玩家隊零特殊物理，但決策只屬於玩家）
@@ -28,14 +27,49 @@
 ⇒ 若是 (A)：修法＝把附身隊從 NPC 決策迴圈的【寫入】排除（讀可以、寫不行）；★不准在 UI 把目標改回來
 ```
 
-## 修法（依查到的寫者；三種形狀先寫好）
+## 修法（R² 第一輪 2026-10-13 改寫：(B) 根治＋#12 收在咽喉；(A) 降為量測）
 ```
-(A) 若是 AI 決策路徑（loop3 ambient／任何 NPC 迴圈）寫了玩家隊 ⇒ 那條路徑排除玩家隊（同 SoloAI faction_ai:4557 既有的守衛形狀；★先 grep 這類全隊迴圈共有幾條，逐條報「已排除／未排除」）
-(B) 若是任務系統（TaskArbiter 搶 task 時改 move_target）⇒ 玩家指令的移動不得被非玩家來源覆寫（PRIO_PLAYER）
-(C) 若真的是無路可走（_calc_next_step 回原地 ⇒ movement_system.gd:351-355 清目標＋只 print）⇒ 下令時就算路徑：不可達 ⇒ 結果行「無法抵達 (q,r)：原因」不下令；途中變成不可達 ⇒ 事件「停下：到 (q,r) 的路斷了」
-不管哪一種都要補（藍圖要求）：
-  ·途中每抵一格不印「抵達」；只有 pos＝最初下令的目的地才印「抵達」（UI 判法改比【玩家下令時記下的目的地】，不比上一幀 move_target）
-  ·目標被非抵達原因清掉（人不在目的地）⇒ 事件「停下：<原因>（停在 (q,r)）」——今天這種情況什麼都不印
+根因候選（R² 讀碼，待寫入觀察定案）：move_to（player_command_system.gd:2039）只寫 move_target、task 留 IDLE＠0
+  ⇒ 玩家的移動不是 arbiter 的一筆佔用；loop3 ambient（faction_ai_system.gd:1728 IDLE → :1737 try_set PRIO_AMBIENT=10 > 0）可無條件覆寫（task_arbiter.gd:244）
+  ⇒ 其他玩家令（:790/:821/:1185）都走 try_set PRIO_PLAYER，只有 move_to 沒有
+(B) 玩家移動成為一筆 arbiter 佔用：
+   ①move_to 改走 TaskArbiter.try_set(…, TASK_TRAVEL, target, PRIO_PLAYER, "player_move")——★新 task 常數 TASK_TRAVEL（「行進」）；
+     先 git grep `current_task ==`／`match .*current_task` 讀者，逐處報「新值走哪一支（預設／明列）」，有會誤判成別的 task 的就停手回我
+   ②抵達要 release：movement_system._step_team 抵達兩處（:344/:366 之後的 _on_arrival）task＝TRAVEL ⇒ TaskArbiter.release
+   ③cancel_move 同步 release
+(#12 執法點；R² 第二輪改寫 2026-10-13）
+   ⓪附身是一個【事實欄】：TeamData.possessed（bool），唯一寫入者 WorldState.sync_possession()；值＝f(player_id, persons[player_id].team_id)
+     ★R² 第三輪：兩個輸入都要觸發 sync（理由：release()／set_strategic_move() 沒有 state、呼叫點 61＋處，不改簽章就讀不到「誰被附身」）
+       ·player_id 的寫者（game_setup 477/810、possess／unpossess、choose_heir、init_player）末尾呼 sync
+       ·person.team_id 的咽喉（add_member／remove_member 34 站共用的那支、set_leader）內：pid == player_id ⇒ sync
+       ·subteam_system.gd:268 吸收併隊直寫 p.team_id ⇒ 改走咽喉（不另加 sync 呼叫）
+       ·戰死窗口（npc_combat_system.gd:796-807 persons.erase 後 get_player_team_id 回 -1、player_id 要等 choose_heir 才換）：
+         possessed 保持在最後所屬隊，直到繼任（choose_heir）或 game_over —— 那段時間它仍是玩家的隊（等玩家選繼承人），AI 不得接手
+     ★漂移校驗放在【所有系統跑完的 tick 尾】（sync 之後立刻比＝恆真）：不一致 ⇒ 印警告＋Probe "possession.drift"（不自動修，讓它紅）
+   ④try_set／transition 對 possessed 隊的規則（以【事實】為鍵，不以來源字串前綴）：
+     ★寫者坐實（實作端 504cc1b91）：tick 96 loop3 _evaluate_threat → _decide_unified(src=threat) → try_set(…,"unified") 替附身隊選「覓食」＝【AI 對威脅的決策】
+       ⇒ 威脅／求生層的【決策】也是決策層，#12 不放行；放行的只有【事件與物理】本身
+     priority ≥ PRIO_COMBAT（遭遇／戰鬥系統把隊拉進戰鬥＝事件）⇒ 照 arbiter 既有規則
+     priority < PRIO_COMBAT 且 _source 不在 PLAYER_SOURCES（精確集合，不用前綴；今天＝{"player_rest","player_settle","player_move"}＋:1184 那支的來源，實作端 grep 補齊並逐字列）⇒ deny＋Probe "arbiter.deny.possessed.by.<source>"
+     ★這一條也蓋「附身隊閒著（priority 0）時 AI 來寫」——#12 不只保護玩家下的令，也保護沒下令的時候
+     強制事件：走它自己的寫入口（world_state 強制事件唯一入口）；若它要改 task，來源字串加進 PLAYER_SOURCES 旁的 EVENT_SOURCES（精確集合）
+   ⑤抗命窗口（task_arbiter.gd:233）對 possessed 隊跳過——理由：附身隊的決策權不屬 leader 個性（繼承後 leader 換人也一樣）
+   ①同層換手（R²：task_arbiter.gd:184 嚴格大於、同層分支只認 DISPATCH/THREAT/SURVIVAL）：
+     現任 priority＝PRIO_PLAYER 且新來源 ∈ PLAYER_SOURCES ⇒ 允許換手（玩家改自己的令；M 連按、M 打斷 REST）
+     try_set 回 false ⇒ move_to 必回結果行「不能移動：<擋它的現任 task>」（不准靜默）
+   ②release()（task_arbiter.gd:338，呼叫點 61）：加預設參數 _source := ""；
+     possessed 隊且現任 priority＝PRIO_PLAYER ⇒ 只有 _source ∈ {"player_cancel","arrival"}＋priority ≥ PRIO_COMBAT 的接手才放；其餘不放＋Probe "arbiter.release_denied.possessed"
+     ★抵達（movement _on_arrival 後）與 cancel_move 明傳來源；其餘 59 處不用改（預設 "" ⇒ 對附身隊的玩家令不生效）
+   ⑥set_strategic_move（sim_runner.gd:887 等）：possessed 隊直接 return（戰略佈點是 AI 決策）
+     其他不經 arbiter 的 move_target 寫者（movement.process :60/:97/:100、事件驅動約 25 處）：用第一顆的寫入觀察當守衛（P5）
+   ★小註（R² 第三輪，不需再審）：
+     ·SURVIVAL@80 已不放行（門改 PRIO_COMBAT）；UI「停下：<原因>」原因取 task_reason，不由 UI 猜
+     ·PLAYER_SOURCES grep 時確認玩家「邀請安頓」那條的來源字串（invite_settle 在 ENGINE_SOURCES）不被 deny——它若是玩家令就列進 PLAYER_SOURCES
+     ·② release deny 與 ④ try_set deny 用【同一個】謂詞函式（例 TaskArbiter._possessed_blocks(team, priority, source)），不寫兩份
+   ★附身判定只讀 team.possessed（不再用 leader_id==player_id）；舊守衛不在本票改，但 P8 漂移守衛保證兩者在附身隊上一致
+(C) 真的無路：下令時算路徑；不可達 ⇒ 結果行「無法抵達 (q,r)：原因」不下令；途中路斷 ⇒ 事件「停下：到 (q,r) 的路斷了」
+UI（R²：不開第三欄位）：M 也設既有 _arrive_target；「抵達」只在 pos＝_arrive_target 時印；目標被清而人不在 _arrive_target ⇒ 事件「停下：<原因>（停在 (q,r)）」
+(A) 降為量測：P5 改成「⑥ 的寫入觀察在 30 天內 allowlist 外寫入＝0」
 ```
 
 ## 驗收（界限第 24 條：走真路徑）
@@ -44,7 +78,14 @@ P1 play.py 同一重現：最終 tile＝(9,0)，事件流有「抵達 (9,0)」�
 P2 下令到兩格外的可達格 ⇒ 走到；途中不印抵達
 P3 下令到不可達格（佈置：四周山或地圖外緣隔絕）⇒ 結果行「無法抵達」，move_target 不被寫
 P4 目標被別的原因清掉（佈置：途中 cancel）⇒ 事件流印「停下：…」
-P5 若是 (A)：全隊迴圈寫玩家隊 move_target 的次數（30 天 fp 世界、玩家附身）＝0｜反向：拿掉排除 ⇒ >0
+P5 30 天、玩家附身、真世界：附身隊 task／move_target 的 allowlist 外寫入＝0（逐筆印）｜反向：拿掉 ④ ⇒ >0 必紅
+P5d 連按 M：TRAVEL 進行中再下 M 到別格 ⇒ 換目標、結果行說開始走向新格｜REST 中下 M ⇒ 換成 TRAVEL
+P5e release 守：佈置一個 AI 路徑對附身隊呼 release()（預設來源）⇒ TRAVEL 與 move_target 不變
+P8 possessed 漂移守衛（tick 尾）：30 天每 tick「possessed 為真的隊至多一支；player_id≠-1 且玩家活著時＝get_player_team_id() 那一支」（觀察者 player_id=-1 ⇒ 零支）
+   注入四格，每格拿掉對應 sync 必紅：①玩家所在隊被吸收併隊 ②玩家被邀入他隊／被逐出 ③玩家戰死而隊還在（窗口內仍 possessed、AI 寫入＝0，直到選繼承人）④possess 一支 NPC 隊再 unpossess
+P5f 寫者重現：實作端診斷床（multi_hop_move_writer_diag.gd，藍圖同一串鍵＋開場閒置 72h 兩種）⇒ 附身隊 try_set:unified 次數＝0；改前＝1（tick 96 覓食）
+P5b 抗命：佈置 PRIO_DISPATCH 挑戰附身隊的 PRIO_PLAYER ⇒ 不換手、不加 stress｜非附身隊照舊會抗命（反向格）
+P5c 抵達 release：走到後 task＝IDLE、priority 0
 P7 （藍圖）玩家下令後閒置 24 小時：move_target 與 task 逐 tick 不變，除非事件流同 tick 有一筆解釋它為何變（遭遇／強制事件／抵達）｜反向：拿掉 (A) 的排除 ⇒ 出現無解釋的變化 ⇒ 必紅
 P6 終端 E2E 已知紅排除 0；world-fp 若變（(A) 會改世界）先量、同 commit 換基準
 ```
