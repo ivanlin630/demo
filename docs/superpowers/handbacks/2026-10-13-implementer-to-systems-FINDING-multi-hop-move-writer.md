@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多格移動走一格就停（spec 2026-10-13-multi-hop-move-stops-after-first-tile-HOW）第一顆：只查不改
 topic: ★寫者坐實＝(A)：tick 96 loop3 `_evaluate_threat` → `_decide_unified(src=threat)` → `TaskArbiter.try_set(…, "unified")` 替玩家隊選「覓食」、move_target (9,0)→(10,2)｜觀察已記來源（arbiter 入口＋_source／直接寫），等你第二輪 R² 後的修法節再動｜branch fix/multi-hop-move tip 936b9a8f2（已推，未 merge）
 ---
