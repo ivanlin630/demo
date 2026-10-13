@@ -1967,8 +1967,10 @@ func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:
 	var pt_id: int = _get_player_team_id(state)
 	if pt_id == -1:
 		return { "ok": false, "msg": "找不到玩家 team" }
-	_interaction.resolve_extortion_direct(state, from_id, pt_id)
-	return { "ok": true, "msg": "支付勒索" }
+	# ★玩家是被勒索方時，結果行帶實際被拿走的量（改法 4，同一支格式器）——舊版丟掉回傳、只說「支付勒索」
+	var r: Dictionary = _interaction.resolve_extortion_direct(state, from_id, pt_id)
+	var taken: String = ResourceFormat.list(r.get("gained", {}))
+	return { "ok": true, "msg": ("被 Team%d 拿走：%s" % [from_id, taken]) if taken != "" else "Team%d 沒拿到東西（你已沒有可給的）" % from_id }
 
 func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		tgt: TeamData, target_id: int) -> Dictionary:
