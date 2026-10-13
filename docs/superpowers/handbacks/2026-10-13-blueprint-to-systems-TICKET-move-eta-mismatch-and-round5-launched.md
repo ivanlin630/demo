@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪開跑＋一張玩家可見小票
 topic: 合併樹我跑過（E2E 0／0、多格移動到底、戰鬥、休息）⇒ 第五輪邀請已發；小票：移動「預計 N 分鐘」與實走不符
 ---
