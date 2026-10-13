@@ -195,7 +195,13 @@ var resources: Dictionary = {
 	"armor_low": 0, "armor_high": 0,
 }
 var tags: Array = []
-var current_task: String = TASK_IDLE
+var current_task: String = TASK_IDLE:
+	set(v):
+		# ★寫入觀察（同 move_target 那一支；spec 2026-10-13 multi-hop-move）
+		if team_id == mt_watch_tid and v != current_task:
+			mt_log.append({"field": "task", "old": current_task, "new": v, "task": current_task,
+				"src": TaskArbiter.watch_src if TaskArbiter.watch_src != "" else "直接寫（不經 arbiter）"})
+		current_task = v
 var task_priority: int = 0   # 現任 task 優先權；idle 時 0（TaskArbiter 管理）
 var previous_task: String = ""   # survival override 前的原 task，回復用
 var tax_rate: float = 0.3                    # 收稅率（PRODUCE team 用，0.1-0.7）
@@ -226,7 +232,8 @@ var move_target: Vector2i = Vector2i(-1, -1):  # -1,-1 = 無目標，不移動
 		#   預設 -9999 ⇒ 一個整數比較就走，不改值、不耗 RNG
 		#   ★不記呼叫堆疊：get_stack() 在 headless 沒接除錯器時回空陣列 ⇒ 記寫入當下的 task／task_reason 判寫者
 		if team_id == mt_watch_tid and v != move_target:
-			mt_log.append({"old": move_target, "new": v, "task": current_task, "reason": task_reason})
+			mt_log.append({"field": "move_target", "old": move_target, "new": v, "task": current_task,
+				"src": TaskArbiter.watch_src if TaskArbiter.watch_src != "" else "直接寫（不經 arbiter）"})
 		move_target = v
 static var mt_watch_tid: int = -9999
 static var mt_log: Array = []

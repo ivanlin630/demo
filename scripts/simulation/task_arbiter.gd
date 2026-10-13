@@ -40,7 +40,20 @@ const ENGINE_SOURCES: Array = ["unified", "solo", "invite_settle"]   # ★A4 9�
 # A2c-2（FA6 折入）：戰略移動 move_target 唯一 arbiter-owned write path（收 movement 直讀 bypass=D11/V3）。
 # 純移動覆蓋——不碰 current_task/task_priority（候選 C 精髓：保 IDLE→interaction:253 自發併隊續 fire）。
 # ★內建 2 道純 team-欄 guard（原掛 movement:64/68，folding 一併搬進 method，防未來呼叫點遺漏破不變量）：
+# ★寫入觀察（spec 2026-10-13 multi-hop-move；之後變 P5 守衛）：四個入口在呼叫期間掛「目前來源」，
+#   TeamData 的 move_target／current_task setter 讀它；沒掛＝不經 arbiter 的直接寫
+#   ★只對 TeamData.mt_watch_tid 那一隊掛（預設 -9999 ⇒ 一個整數比較就走、不改值、不耗 RNG）
+static var watch_src: String = ""
+
 static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
+	if team.team_id != TeamData.mt_watch_tid:
+		_set_strategic_move_body(team, pos)
+		return
+	watch_src = "arbiter.set_strategic_move"
+	_set_strategic_move_body(team, pos)
+	watch_src = ""
+
+static func _set_strategic_move_body(team: TeamData, pos: Vector2i) -> void:
 	if team.combat_target != -1: return                    # 戰鬥鎖絕對（同 try_set:28-29 全域不變量）
 	if team.current_task == TeamData.TASK_FLEE: return      # 逃跑不被戰略位覆蓋
 	# 僅 move_target 空/抵達才覆蓋（保現行觸發顆粒，byte-identical），不動 task=IDLE 保留。
@@ -124,6 +137,16 @@ static func _note_task_lost(team: TeamData, bucket: String, new_task: String, so
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "",
 		_util: float = -1.0) -> bool:
+	if team.team_id != TeamData.mt_watch_tid:
+		return _try_set_body(state, team, new_task, move_target, priority, _source, _opt, _util)
+	watch_src = "arbiter.try_set:" + _source
+	var ok: bool = _try_set_body(state, team, new_task, move_target, priority, _source, _opt, _util)
+	watch_src = ""
+	return ok
+
+static func _try_set_body(state: WorldState, team: TeamData, new_task: String,
+		move_target: Vector2i, priority: int, _source: String, _opt: String,
+		_util: float) -> bool:
 	# ★★★求居半的追蹤（systems 2026-09-11）：★「流浪隊有沒有真的走到」與「它半路被別的事搶走」
 	#   是兩個不同的斷點，而它們在結果上都長成「領主沒看到求居者」。
 	# ★幀數歸因用（systems 2026-09-11）：★★「一次很貴」與「被叫很多次」是兩個結論，
@@ -336,6 +359,14 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 
 # task 完成 / 取消 / 釋放條件達成 → 回 idle + priority 歸 0
 static func release(team: TeamData) -> void:
+	if team.team_id != TeamData.mt_watch_tid:
+		_release_body(team)
+		return
+	watch_src = "arbiter.release"
+	_release_body(team)
+	watch_src = ""
+
+static func _release_body(team: TeamData) -> void:
 	# ★§N 兩欄之①：【合法退場】次數（不該下降）。判準用欄位 proxy（release 拿不到 state）：
 	#   身上沒有任何未完成承諾標記 ＝ 這次卸任務沒有丟下任何東西。
 	#   ★①掉 ＝ 正當退場被誤擋 ＝ 回歸（latch 前兆）；②升 ＝ 想換 task 被擋住 ＝ 正是要的。
@@ -383,6 +414,14 @@ static func release(team: TeamData) -> void:
 #   ★★move_target **必填、不給 default**（同 record_driver 的 kind：default 只會讓下一個忘記的人靜默通過）
 #     ⇒ 每個呼叫點自己決定：新任務有目的地就傳那個，沒有就傳 Vector2i(-1, -1)
 static func transition(state: WorldState, team: TeamData, new_task: String, priority: int, move_target: Vector2i, _source: String = "transition") -> void:
+	if team.team_id != TeamData.mt_watch_tid:
+		_transition_body(state, team, new_task, priority, move_target, _source)
+		return
+	watch_src = "arbiter.transition:" + _source
+	_transition_body(state, team, new_task, priority, move_target, _source)
+	watch_src = ""
+
+static func _transition_body(state: WorldState, team: TeamData, new_task: String, priority: int, move_target: Vector2i, _source: String) -> void:
 	# ★arbiter 後門根治（手不聽腦，team16 凍死）：transition 舊為無條件 raw 覆寫繞 arbiter → 外部低 prio
 	# 呼叫（defection「等待新領主」@AMBIENT）clobber 引擎剛派的 survival@80 + 繞免疫 → crisis 永不 fire。
 	# 補齊三 guard（對齊 try_set 的 current_task 寫入不變量）：擋「外部 in-place stomp active emergency」。
