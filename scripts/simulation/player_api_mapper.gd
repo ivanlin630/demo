@@ -162,9 +162,11 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"camp_distance": _camp_distance(state, t),
 		"members": members,
 		"resources": {
-			"food":               int(t.resources.get("food", 0)),
-			"coin":               int(t.resources.get("coin", 0)),
-			"material":           int(t.resources.get("material", 0)),
+			# ★食／幣／材給原值（不截整）：面板按 0.1 顯示（spec 2026-10-13-extortion-zero-take 改法 1，藍圖裁 43817c7d1）
+			#   ——舊版 int() 在這一層就截掉小數 ⇒ 面板永遠是整數、跟勒索結果句對不上帳；格式只在 ResourceFormat 做
+			"food":               float(t.resources.get("food", 0)),
+			"coin":               float(t.resources.get("coin", 0)),
+			"material":           float(t.resources.get("material", 0)),
 			"weapon_melee_low":   int(t.resources.get("weapon_melee_low", 0)),
 			"weapon_melee_high":  int(t.resources.get("weapon_melee_high", 0)),
 			"weapon_ranged_low":  int(t.resources.get("weapon_ranged_low", 0)),
