@@ -1049,10 +1049,12 @@ var last_encounter_outcome: Dictionary = {}
 #   persons 裡找不到玩家 ⇒ 保持在最後所屬的隊（那段時間它仍是玩家的隊，等玩家選繼承人；AI 不得接手）
 # ★tick 尾漂移校驗：check_possession_drift()（sim_runner 每 tick 末呼）
 var _possessed_tid: int = -1
+# ★第一個 tick 一律再 sync 一次（sim_runner.advance_tick）：量測床常在 setup 之後直寫 player_id = -1（_strip_player 等，
+#   80 張床 177 處）而不經 sync ⇒ 不補的話 possessed 會留在舊玩家隊、AI 永遠動不了它（觀察者長跑被改）
+#   ★只補這一次；跑到一半才換 player_id 而沒 sync 的 ⇒ tick 尾校驗警告（不自動修）
 var possession_bootstrapped: bool = false
 
 func sync_possession() -> void:
-	possession_bootstrapped = true
 	var tid: int = -1
 	if player_id != -1:
 		var p: PersonData = persons.get(player_id)

@@ -44,8 +44,8 @@ const PLAYER_SOURCES: Array = ["player_move", "player_rest", "player_settle", "p
 #   （遭遇／戰鬥不經 arbiter，靠 try_set 頂端的 combat_target 鎖；飢餓是物理，不改 task）
 const EVENT_SOURCES: Array = []
 # ★release 對附身隊的玩家令：只有抵達與玩家取消放行（其餘 release() 呼叫點預設 "" ⇒ 不生效）
-#   ★path_broken＝途中路斷（movement 的物理，不是決策）
-const RELEASE_SOURCES: Array = ["arrival", "player_cancel", "path_broken"]
+#   ★path_broken＝途中路斷（movement 的物理，不是決策）｜construction_done＝玩家下的工程完工（事件；outpost_system crude_camp 那一支）
+const RELEASE_SOURCES: Array = ["arrival", "player_cancel", "path_broken", "construction_done"]
 
 # ★try_set／transition／release 三處共用【同一個】謂詞（R²：不寫兩份）
 #   ·寫入（try_set／transition）：附身隊 ⇒ 來源不在 PLAYER_SOURCES ∪ EVENT_SOURCES 就擋（含附身隊閒著時）

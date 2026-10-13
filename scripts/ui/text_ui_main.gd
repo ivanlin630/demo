@@ -269,9 +269,9 @@ func _update_day_baseline() -> void:
 
 func _process(_delta: float) -> void:
 	if not _bridge.is_advancing(): return
-	# ★這一次推進是不是「走到抵達」（L）：推進鍵（X 等）會設 _key_advance_target，L 不設
-	#   ⇒ 到了就停只屬於 L；按 X 走路時到了照樣推滿那一小時（按鍵的承諾是請求量）
-	var _arrive_mode: bool = _key_advance_target < 0
+	# ★這一次推進是不是「走到抵達」（L）⇒ 到了就停只屬於 L；按 X 走路時到了照樣推滿那一小時（按鍵的承諾是請求量）
+	#   ★不能用「_key_advance_target < 0」判：M 下令本身也推進一顆、而它不設那一欄（實測：M 被當成 L、結果行被蓋掉）
+	var _arrive_mode: bool = _arrive_advance
 	var result := _bridge.tick_step()
 	_update_day_baseline()   # ★★日邊界的擁有者在這裡，不在 render
 	_events.append_array(result.get("events", []))
@@ -1204,6 +1204,7 @@ func _global_advance_key(keycode: int) -> void:
 				return
 			# ★推到抵達或任何事件（ADVANCE_UNTIL_EVENT 既有的停點）；抵達那一刻由上面的邊緣偵測停下
 			_arrive_target = mt
+			_arrive_advance = true
 			_bridge.request_advance(SimBridge.ADVANCE_UNTIL_EVENT)
 
 # 推進為什麼停下（推進鍵的結果句共用這一份；事件型別來自 SimBridge._diff_events）
@@ -1242,6 +1243,9 @@ func _rest_needs_confirm(act: Dictionary) -> bool:
 # ══ ★M ②：走到抵達那一鍵的結果句 —— 推進停下的那一刻寫（抵達／途中事件）══════════════════════════════
 var _arrive_target: Vector2i = Vector2i(-1, -1)
 var _last_move_target: Vector2i = Vector2i(-1, -1)
+# ★多格移動：_arrive_target 現在是「玩家下令的目的地」（M 與 L 都設）⇒「這一次推進是 L」要另一個標記
+#   ★它不是第三個目的地欄（R² 不准開的那種），只是 L 的推進模式；L 停下時清掉
+var _arrive_advance: bool = false
 func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
 	if _arrive_target == Vector2i(-1, -1):
 		return
@@ -1249,6 +1253,7 @@ func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
 		or not String(_cached_snapshot.get("forced_interaction", {}).get("interaction_id", "")).is_empty()
 	if not stopping:
 		return
+	_arrive_advance = false
 	var pos: Vector2i = _bridge.get_player_tile_pos()
 	if pos == _arrive_target:
 		_set_feedback(true, "抵達 (%d,%d)" % [pos.x, pos.y])
