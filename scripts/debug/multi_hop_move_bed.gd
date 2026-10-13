@@ -273,9 +273,15 @@ func _p5e_p5b_p5g() -> void:
 	print("   P5b 反向 非附身隊 Team%d ⇒ try_set=%s｜task %s｜reason %s" % [npc.team_id, str(ok_n), npc.current_task, npc.task_reason])
 	_check("P5b 反向：非附身隊照舊會抗命", ok_n and npc.task_reason == "defy_unified")
 	# P5g
+	# ★佈置飢荒判定的三個條件（faction_ai _famine_crisis）：深餓、承諾滿 CRISIS_DAYS、承諾以來沒緩解
 	pt.resources["food"] = 0.0
+	pt.task_start_tick = st.world.current_tick - 10 * WorldState.TICKS_PER_DAY
+	pt.crisis_committed_tick = pt.task_start_tick
+	pt.crisis_committed_food = 0.0
 	pt.threat_eval_next_tick = 0
 	pt.crisis_released_task = ""
+	var famine: bool = FactionAISystem.shared()._famine_crisis(st, pt)
+	_check("★P5g 母體地板：飢荒判定真的成立", famine)
 	FactionAISystem.shared()._evaluate_threat(st, pt)
 	var again: Vector2i = _tile_at_dist(st, pt.tile_pos, 5)
 	var r2: Dictionary = cs.move_to(st, again)
@@ -415,6 +421,7 @@ func _p8_injections() -> void:
 	if pt.leader_id == dead:
 		pt.leader_id = -1
 	st.persons.erase(dead)
+	st.sync_possession()   # ★窗口內任何一次 sync（例：第一個 tick 的補同步）都不得把附身拿掉
 	var still: bool = pt.possessed
 	var w_ok: bool = TaskArbiter.try_set(st, pt, TeamData.TASK_FORAGE, pt.tile_pos, TaskArbiter.PRIO_DISPATCH, "unified")
 	print("   ③ 戰死窗口 ⇒ Team%d possessed=%s｜AI try_set=%s" % [pid0, str(still), str(w_ok)])
