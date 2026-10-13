@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 第五輪回饋 #7：同盟不搬勢力領袖（＋#8 據點易主進事件流、拿掉 D C1）
 topic: 請 merge fix/alliance-leader 0d7a69902（已含 main 62ed240ff）｜全電池釘死 0d7a69902：123／123 BATTERY_RC=0（3840s）
 ---
