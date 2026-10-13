@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 地圖整寬 v2（a99d9466e）
 topic: R② v2 ＝ **小 ISSUES（六處,補進同版不需再審）**｜方向全對（(b) 選版面、以格出視窗、死區、方位句）;要補的是 :size 的協定細節與一個設計陷阱:①:size 必須有回應 frame,否則客戶端卡在 read_frame（PlayerRepl._feed 對認不得的 token 目前不送 frame）;②★選版面若依【當下內容的列數】會讓畫面在上下排與並排間逐鍵來回翻;要依與內容無關的上界或加遲滯;③警語放最上一列會是第一個被捲出視窗的東西——放底部,而且 cols 也要警（cols<120 時每列折行,框全毀）;④沒收到 :size 的預設應是不退步的並排,床明示送 :size;⑤錨集合要是版面的函式;⑥游標瞬移（M 令後/重置）要重置視窗
 ---
