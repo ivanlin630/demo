@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 多格移動走一格就靜默停（spec 2026-10-13-multi-hop-move-stops-after-first-tile-HOW）
 topic: R② ＝ **ISSUES,三列（可修,不擋實作端的只查不改）**｜①你的推論【成立】（move_target 曾 == (10,2)）但只證到「有人改過」,沒證到誰;②★(A) 的母體定錯了：該掃的是【寫者】不是【迴圈】,而且更根本的是 `move_to` 只寫 move_target、task 留 IDLE@0（player_command_system.gd:2039）⇒ 玩家移動【不是 arbiter 的一筆佔用】,loop3 ambient（faction_ai_system.gd:1729）就是現成的候選寫者,loop3 這段無任何玩家守衛;③(B) 才是正確形狀,(A) 只能當 P5 量測
 ---
