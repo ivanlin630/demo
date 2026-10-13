@@ -33,11 +33,19 @@
 ## 併入回饋 #8：結盟送掉地主的據點（同一個函式，同 branch）
 來源：藍圖 2026-10-13-blueprint-to-systems-TICKET-resident-team-alliance-gives-away-the-lords-outpost（＋追加 bfb405843）。
 - 事實：`_form_alliance` 尾段 :442-449「D C1：team_b 是居民團 ⇒ outpost 轉給 team_a」不看地主是誰 ⇒ 玩家邀來的居民團與 Team4 結盟，玩家據點被送給 Team4、居民團換旗。
-- **#8-0（本 branch 第一個 commit，先做）據點易主進事件流**：在 `OutpostOwnerBank.set_owner`（outpost_owner_bank.gd:6，單寫者）一處 emit `outpost_owner_changed`（info：pos、舊主、新主、reason）；`describe` 依 reason 給人話（alliance／capture／takeover／construct／abandon／demolish／init 各一句；init 不 emit）；玩家相關（舊主或新主是玩家隊，或玩家站在該格）⇒ 進 `ADVANCE_STOP_KINDS`。不在呼叫端各印。
-- **#8-1 拿掉 D C1**（不是加條件）：結盟不轉讓據點；居民團換旗只改自己的旗。
-- **#8-2 地主要知道居民換旗**：據點上的居民團換勢力 ⇒ 對地主 emit「你據點 (q,r) 的居民 TeamN 改投勢力 M」，玩家為地主時列推進停點。掛點：`set_team_faction`（同上面的咽喉）判「這隊站在別人據點上且是居民」。
+- **#8-0（本 branch 第一個 commit，先做）據點易主進事件流**（收 R² #8+#9）：
+  - **先讓 set_owner 真的是單寫者**：`world_state.gd:936` 死亡釋放直寫 owner（註解自承繞過 bank）⇒ 改走 `set_owner`（reason `death_release`）。
+  - **簽章加 `state`**（19 個呼叫端機械改）；不用靜態緩衝（延後排空會多一份暫態）。
+  - **只在玩家相關時 emit**（舊主或新主是玩家隊或其同勢力隊）；subjects 只放這些隊；`wake_thinking=false`。**NPC↔NPC 易主不 emit**——emit 會對每個 subject 標 `pending_rethink`（world_events.gd:138，共用水管、不入指紋），對 NPC 發會悄悄改行為、fp 抓不到。拿掉「玩家站在該格」（停點條件是 subjects 含玩家隊，表達不出來）。
+  - kind `outpost_owner_changed` 登記三張清單＋`describe`；reason 全集：alliance／capture／takeover／construct／abandon／demolish／init／relocate_abandon／death_release（init 不 emit）。玩家相關 ⇒ 進 `ADVANCE_STOP_KINDS`。
+- **#8-1 拿掉 D C1**（不是加條件）：結盟不轉讓據點。
+  - **但被換旗的居民會停產**（R²）：`manufacturing_system.gd:232-239 _legacy_works_tile_by_position` 要求居民與地主同勢力才開工；居民是以地主的勢力身分在這格工作（安頓入勢力 interaction_system.gd:1748）。結盟把居民搬進 T 的勢力 ⇒ 登記還在、不開工 ⇒ 地主據點悄悄停產。
+  - ⇒ **`plan_alliance` 加第二條綁定：登記居民（`TeamData.work_outpost` 指向他人據點）不得被結盟搬出地主的勢力**（與「領袖綁勢力」並列）；回句「它是 TeamN 據點上的居民，不能另投」。「換旗即退租」語意較大，不採。
+- **#8-2 地主要知道居民換旗**（其他路徑仍可能讓居民換旗：起義、脫離、投降）：對地主 emit「你據點 (q,r) 的居民 TeamN 改投勢力 M」，玩家為地主時列推進停點。
+  - 謂詞用**登記**（`TeamData.work_outpost`），不用「站在別人據點上」（走開的居民會漏）；排除 `LEAVE_FACTION_DISSOLVED`（解散洗版）。
+  - `set_team_faction` 在資料層、不呼 `FactionAISystem`；領袖繼位、居民通知、Probe 三件統一掛在內部 `_on_faction_changed(team, old_fid, new_fid, reason)`。
 - **量（修前）**：觀測回合（同上 3 seed）`set_owner` reason="alliance" fire 次數，寫進交件。D C1 拿掉會動 NPC 世界 ⇒ world-fp 跟同盟那條一起二分。
-- 床：R1（修前紅）玩家擁有據點、上有居民團 R；R 與 T 結盟 ⇒ 據點 owner 仍＝玩家，事件流有「居民 R 改投」句。R2：任一 set_owner（各 reason 佈置一次）⇒ 玩家相關時事件流有對應人話、推進停下。R3 負對照：放回 D C1 ⇒ R1 紅。
+- 床：R1（修前紅）玩家擁有據點、上有登記居民 R；R 向 T（異勢力）提同盟 ⇒ 被拒（居民綁定），據點 owner 仍＝玩家、R 照常生產。R1b：R 經其他路徑（佈置脫離）換旗 ⇒ 事件流有「居民 R 改投」句。R1c：NPC↔NPC 易主 ⇒ 不 emit、pending_rethink 不被標。R2：任一 set_owner（各 reason 佈置一次）⇒ 玩家相關時事件流有對應人話、推進停下。R3 負對照：放回 D C1 ⇒ R1 紅。
 
 ## 先量（動 NPC 端前，藍圖 2026-10-13）
 NPC 之間「兩勢力領袖結盟＝一方被搬進另一方」可能是現況勢力變大的主要管道；不能為修玩家 bug 少一條生長路。

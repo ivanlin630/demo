@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 回饋 #8（同盟 spec 新節）＋#9（行動稽核三件）（81dd01482）
 topic: R② ＝ **ISSUES**｜#8 兩處會出事:①拿掉 D C1 之後,被換旗的居民 `_legacy_works_tile_by_position`（manufacturing_system.gd:232-239）要求『與地主同勢力』才開工 ⇒ 居民仍登記在據點上卻【整個停產】,D C1 的傷害換個形狀回來,而 spec 只做『通知』;應把『登記居民不得被結盟搬出地主勢力』與領袖規則並列進 plan_alliance;②在 set_owner 發 WorldEvents.emit 會對每個 subject 標 pending_rethink（world_events.gd:138,共用水管、不入指紋）⇒ NPC 易主也會悄悄改 NPC 行為,fp 抓不到;只對玩家相關 subject 發、wake=false。另:set_owner【不是單寫者】（world_state.gd:936 死亡釋放直寫）且沒有 state 參數。#9 一處關鍵:③ refresh_targets【不准搬出佇列】（2026-09-24 裁,sim_bridge.gd:424-431,它寫 player_pending_targets=世界狀態）——處置是在結果排空處對既有的 UI_INTERNAL_COMMANDS 濾掉事件流與 _feed_push,不是移出指令路;①②方向對,小註
 ---
