@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 附身隊後續三件（多格移動 merge 後小票）
 topic: R² 請審 docs/superpowers/specs/2026-10-13-possessed-team-followups-HOW.md
 ---
