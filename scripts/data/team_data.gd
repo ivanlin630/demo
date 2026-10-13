@@ -220,7 +220,16 @@ var tile_pos: Vector2i = Vector2i.ZERO
 #   ★`-1.0` ＝【不知道】，**不是 0**：0 是一個合法的 util，而「沒人告訴我」不是。
 var task_util: float = -1.0
 var work_outpost: Vector2i = Vector2i(-1, -1)
-var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
+var move_target: Vector2i = Vector2i(-1, -1):  # -1,-1 = 無目標，不移動
+	set(v):
+		# ★寫入觀察（spec 2026-10-13 multi-hop-move 第一顆：只查不改）：只在床把 mt_watch_tid 設成某隊時記；
+		#   預設 -9999 ⇒ 一個整數比較就走，不改值、不耗 RNG
+		#   ★不記呼叫堆疊：get_stack() 在 headless 沒接除錯器時回空陣列 ⇒ 記寫入當下的 task／task_reason 判寫者
+		if team_id == mt_watch_tid and v != move_target:
+			mt_log.append({"old": move_target, "new": v, "task": current_task, "reason": task_reason})
+		move_target = v
+static var mt_watch_tid: int = -9999
+static var mt_log: Array = []
 # flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。
 var flee_from_pos: Vector2i = Vector2i(-1, -1)
 # ★settlement S2b：L0→L1 紮根工地位（自己起的 corvee，team 記得自己未完工程=self-knowledge 非 god-view）。
