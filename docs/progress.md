@@ -3722,4 +3722,4 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - world-fp 換基準 aad02d9（possessed 欄進尺，分區比對證明行為零漂移）；床 multi_hop_move_bed（註冊 multi-hop-move）
 - 未做／待裁：loop3 對附身隊仍會寫的非 task 欄位（委託單、公庫徵用、求生決策先寫 order_target_id 等）逐處列在交件信
 - 合併（systems 2026-10-13）：三裁 ①憲法基準加 move_to（用戶在 systems 終端直接准，e255a1125）②ui-flow「前」快照只換狀態行（藍圖裁不下令不覓食＝本意）③latch 收私有；電池 119／119 綠（db0f451f0）
-- merge 後小票（玩家可見，排在藍圖真跑之後、深層批之前）：附身隊不掛買賣單｜開始挨餓停推進｜loop3 其餘寫者分類（known_issues 三筆）
+- merge 後小票（玩家可見，歸玩家可見批；深層批不插隊）：附身隊不掛買賣單｜開始挨餓停推進｜loop3 其餘寫者分類（known_issues 三筆）
