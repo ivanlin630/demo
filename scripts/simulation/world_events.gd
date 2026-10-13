@@ -429,8 +429,8 @@ static func _intel_sentence(state: WorldState, who: String, info: Dictionary) ->
 	return "你從 %s 得知：%s" % [_team_name(state, int(info.get("source_id", -1))), "、".join(parts)]
 
 static func _age_text(ticks: int) -> String:
-	var mins: int = ticks * 60 / WorldState.TICKS_PER_HOUR
-	if mins < 60:
+	var mins: int = ticks * PlayerApiMapper.MINUTES_PER_HOUR / WorldState.TICKS_PER_HOUR   # ★分鐘換算走具名常數（bare-tick 閘）
+	if mins < PlayerApiMapper.MINUTES_PER_HOUR:
 		return "%d 分鐘" % mins
 	if ticks < WorldState.TICKS_PER_DAY:
 		return "%d 小時" % (ticks / WorldState.TICKS_PER_HOUR)

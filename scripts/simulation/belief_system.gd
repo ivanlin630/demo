@@ -331,7 +331,8 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 				_iinfo = {"tgt": tgt_id, "pos": fields["tile_pos"], "src": source_type, "source_id": source_id,
 					"firsthand": source_type == "親見" and source_id == obs_id}
 				if fields.has("last_tick"):
-					_iinfo["age"] = maxi(0, int(state.world.current_tick) - int(fields["last_tick"]))
+					var _age: int = int(state.world.current_tick) - int(fields["last_tick"])
+					_iinfo["age"] = maxi(_age, 0)
 			WorldEvents.emit(state, "intel_arrived", [obs_id], _wake, _iinfo)
 			# ★★★DIAG 第 0 步（票 §4）：量「這 5386 次 intel_arrived 裡威脅佔比 f」。
 			#   ★★★我【不自己定義威脅】—— 定義是 systems 的欄,我射箭畫靶的話 f 會變成我選的。
