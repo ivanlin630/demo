@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 同盟不搬領袖（spec 2026-10-13-alliance-never-moves-faction-leader-HOW）
 # 同盟不搬領袖＋據點易主進事件流（spec 2026-10-13-alliance-never-moves-faction-leader-HOW）
 #   #8-0
 #   R2  任一 set_owner（各 reason 佈置一次）⇒ 玩家相關時事件流有對應人話、而且是推進停點
