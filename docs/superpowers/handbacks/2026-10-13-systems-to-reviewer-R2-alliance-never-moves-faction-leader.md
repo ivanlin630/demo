@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪回饋 #7：接受同盟把勢力領袖搬進對方勢力（會毀一局）
 topic: R² 請審 docs/superpowers/specs/2026-10-13-alliance-never-moves-faction-leader-HOW.md
 ---
