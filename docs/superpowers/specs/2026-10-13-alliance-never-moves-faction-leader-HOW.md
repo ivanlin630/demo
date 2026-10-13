@@ -41,6 +41,7 @@
 - **#8-1 拿掉 D C1**（不是加條件）：結盟不轉讓據點。
   - **但被換旗的居民會停產**（R²）：`manufacturing_system.gd:232-239 _legacy_works_tile_by_position` 要求居民與地主同勢力才開工；居民是以地主的勢力身分在這格工作（安頓入勢力 interaction_system.gd:1748）。結盟把居民搬進 T 的勢力 ⇒ 登記還在、不開工 ⇒ 地主據點悄悄停產。
   - ⇒ **`plan_alliance` 加第二條綁定：登記居民（`TeamData.work_outpost` 指向他人據點）不得被結盟搬出地主的勢力**（與「領袖綁勢力」並列）；回句「它是 TeamN 據點上的居民，不能另投」。「換旗即退租」語意較大，不採。
+  - **過渡：挖角票落地即退場**（藍圖 2026-10-13：這是補丁閘，被擋的那些該走挖角／脫離那條路）。defer token `resident-bound-to-landlord-faction-is-transitional`；程式碼該條旁註同一個 token。
 - **#8-2 地主要知道居民換旗**（其他路徑仍可能讓居民換旗：起義、脫離、投降）：對地主 emit「你據點 (q,r) 的居民 TeamN 改投勢力 M」，玩家為地主時列推進停點。
   - 謂詞用**登記**（`TeamData.work_outpost`），不用「站在別人據點上」（走開的居民會漏）；排除 `LEAVE_FACTION_DISSOLVED`（解散洗版）。
   - `set_team_faction` 在資料層、不呼 `FactionAISystem`；領袖繼位、居民通知、Probe 三件統一掛在內部 `_on_faction_changed(team, old_fid, new_fid, reason)`。
