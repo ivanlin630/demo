@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 派遣子隊三裁（回 2026-10-13-systems-to-blueprint-subteam-dispatch-three-WHAT）
 topic: ①「安頓」拆成「落腳」與「移居自家據點」兩個動詞 ②建設＝玩家選蓋什麼、同玩家自己的開工函式 ③玩家子隊只做玩家給的任務、不自主外交、物理反應保留並成為玩家事件
 ---
