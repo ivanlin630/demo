@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #3（玩家可見）
 topic: 大地圖永遠只看到左半邊：整張地圖寬 68–100 欄、左欄只給 58 ⇒ 每一列都被右側欄切掉；F10「視窗＝整張」沒有真的落在畫面上
 ---
