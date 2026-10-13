@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 移動預計時間與實走不符（藍圖小票）
 topic: R² 請審 docs/superpowers/specs/2026-10-13-move-eta-same-ruler-HOW.md
 ---
