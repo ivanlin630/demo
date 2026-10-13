@@ -3699,7 +3699,7 @@ A2 修（失敗記號世界裡沒寫：110 事件 0 記號）spec 送 R²；排�
   ①友善度 F1–F10（含 F5 單鍵、F6 資料／排版拆刀、F7／F7b 游標處與選中、F8 紮營 L0＋間距退場、F9′ 選址讀敵友、F10 地圖整張）
   ②#9 地圖記憶
   ③合併後 E2E 已知紅 0 ⇒ 藍圖真跑 ⇒ 邀第五輪
-深層批（第五輪之後）：A2c（實作端停在乾淨點、WIP 推 branch、不 merge）、A2b、據點維護、直轄上限＋分封、進貢可用糧、糧源情報 kind、框架票（回應提案進決策）
+深層批（第五輪之後）：A2c（實作端停在乾淨點、WIP 推 branch、不 merge）、A2b、據點維護、直轄上限＋分封、進貢可用糧、糧源情報 kind、框架票（回應提案進決策）、資源物理量化 0.1 步（轉移／結算＋守恆床；藍圖 43817c7d1，顯示側已併回饋 #5）、挖角三段（藍圖 2026-10-13 a42351427：被挖隊秤原主牽連→改投成訊息走傳播→原領主收到才跑關係帳；NPC 挖玩家對稱）、AI 估路程漏晝夜
 A2 缺陷修已 merge（df40dfe5f），不回滾
 ★systems 錯在：把 A2 缺陷修排到友善度批之前——缺陷修不等於可插隊；世界／商業的缺陷除非玩家畫面上看得到，一律進深層批
 ```
@@ -3723,3 +3723,12 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 未做／待裁：loop3 對附身隊仍會寫的非 task 欄位（委託單、公庫徵用、求生決策先寫 order_target_id 等）逐處列在交件信
 - 合併（systems 2026-10-13）：三裁 ①憲法基準加 move_to（用戶在 systems 終端直接准，e255a1125）②ui-flow「前」快照只換狀態行（藍圖裁不下令不覓食＝本意）③latch 收私有；電池 119／119 綠（db0f451f0）
 - merge 後小票（玩家可見，歸玩家可見批；深層批不插隊）：附身隊不掛買賣單｜開始挨餓停推進｜loop3 其餘寫者分類（known_issues 三筆）
+
+### 第五輪回饋佇列（systems 2026-10-13）
+- 序：按 Q 結束程式（fix/play-client-keys，兩刀）→ 輸入提示上終端＋威脅句＋派遣按即做（fix/terminal-input-prompts，兩刀）→ 大地圖整寬（spec 2026-10-13-map-pane-full-width）→ 附身隊三件（fix/possessed-followups，停在 4dd8c2f4b）→ 移動預計時間＝同一把尺
+- 圖形介面階段 backlog：走路要看得見（每踏進一格刷一次畫面、停點規則不變；用戶裁 UI 小題、現在不修；藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-walk-must-be-visible-per-tile-frames）
+- 回饋 #4 小票（不插隊，歸玩家可見批佇列尾；spec 待寫）：游標掃到哪、側欄「選中」明細就跟到哪，不用 Enter；Enter 只留鎖定目標；資料走 tile_knowledge（藍圖信 2026-10-13-blueprint-to-systems-TICKET-cursor-hover-shows-full-known-detail-without-enter）
+- 顧問深化（用戶要「之後提醒我」）：玩家可見批全合併、第五輪回饋收斂後由藍圖向用戶提；不自動派工（藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-advisor-deepening-remind-user-after-ui-batches）
+- 回饋 #6 ③ 情報面板（新鍵；附身隊所知的隊伍／據點市集／糧源／勢力關係，全走 belief；與地圖 a? 和游標處明細同一份資料的第三個切面）：spec 待寫，歸玩家可見批，位置在本批之後、游標即選中之前（藍圖信 2026-10-13-blueprint-to-systems-TICKET-intel-panel-and-intel-event-folding）；①② 已併進按 Q 那張第 4 項
+- 深層批第一張（用戶裁「先弄 1」，藍圖 4761fa563）：社交層進引擎框架票——提案／回應／同格打談併同一把秤、效用＝真實後果、禁門檻梯、tap 前綴 social.（挖角用 social.poach）；取代舊「回應提案進引擎」，併入挖角票與戰時徵用 v2；第二群（領主側每日試試看鏈）用戶討論中不開。過渡：通商提案暫停併進行動稽核票 ④
+- 現況（systems 2026-10-14）：三張做完只差全電池，電池因用戶遊戲（player_repl ×2）在跑而不可判——按 Q 第二刀 fix/play-client-keys b76cbc1cc｜終端輸入兩刀 fix/terminal-input-prompts 45c2f251c｜同盟不搬領袖 fix/alliance-leader 481cac31b（量測：3 seed「領袖被搬」0 次 ⇒ NPC 端照拒；負對照 A1–A7 待收）。改電池前置條件（player_repl 不計）被 systems 權限擋、已呈用戶待准。實作端用量到上限暫停；之後：大地圖 → 勒索零所得 → 行動稽核 → 玩家子隊 → 附身隊三件 → 移動預計時間 → 情報面板 → 游標即選中

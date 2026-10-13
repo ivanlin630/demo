@@ -5643,3 +5643,64 @@ faction_ai_system.gd:7612 `_estimate_eta_to` → PathSystem.eta_ticks(team, path
 玩家側由「移動預計時間＝同一把尺」票修（spec 2026-10-13-move-eta-same-ruler-HOW），AI 側改了動決策與 world-fp ⇒ 歸深層批。
 修法方向：AI 改用同一支 estimate_travel_ticks（該票新增）。
 ```
+
+## 多格移動下令時的可達判斷讀真地圖：對沒去過的格會洩露地形，且「不可達」近乎不會發生
+
+狀態：已知未修
+
+回訪：觸發事件 —— 回饋 #2 第二刀把可達判斷抽成共用函式時一起修（同一支，順序 off_map → 未知 → 腳下 → 可達）。
+
+```
+player_command_system.gd:2043-2046 move_to：PathSystem.find_path 空 ⇒「無法抵達 (q,r)：沒有路（被山或地圖邊緣隔開）」。
+①感知：find_path 讀真實地圖；對 tile_knowledge=unvisited 的目標回這句＝告訴玩家那格周圍的真地形。
+②空集：path_system.gd TERRAIN_COST 山只是更貴不是不可通；_astar 只在目標不在地圖上時回空 ⇒「被山隔開」說不出口。
+  多格移動票 P3：已查（實作端 2026-10-13）＝手造地圖洞（multi_hop_move_bed.gd:164-168 把目標六鄰格從 tiles erase），不是山擋；「四周山」是錯的描述。
+  順序改後 P3 要先把目標設成已知才測得到「沒有路」，另加「沒去過 ⇒ 不呼叫 find_path」格（回饋 #2 第二刀一起改）。
+修法方向：未知格不判可達、直接接單（物理照走）；句子不指名原因。
+```
+
+## 顧問 strategic／intel_read 兩種情境沒有文字模板
+
+狀態：已知未修
+
+回訪：觸發事件 —— 有人要擴顧問情境或補 TextBank 時。
+
+```
+advisor_system.gd:3-9 有 assess_enemy／diplomatic／resources／strategic／intel_read 五鍵；text_bank.gd:69-84 只有前三個模板。
+回饋 #2 第一刀把顧問情境改成數字選單時只列有模板的三項（R² 2026-10-13）；後兩項不上選單，補模板前玩家選不到。
+另：改選單前 UI 提示寫 attack／diplomacy／resource，與鍵全對不上 ⇒ 任何輸入都落預設句「Team{origin} 有動靜」——本票一併修掉。
+```
+
+## 終端畫面總列數超過 Windows Terminal 預設 30 列；標準視窗高度未定
+
+狀態：已知未修
+
+回訪：觸發事件 —— 藍圖轉來用戶的視窗列數／是否願意拉高時。
+
+```
+R² 2026-10-13 實量：現況一屏約 34 列（並排）；大地圖整寬（上下排）約 46～53 列。
+大地圖票採自適應（play.py 回報 :size，server 依內容無關上界選版面；不足由客戶端在底部警語）——但並排版面本身就超 30 列，壓縮列數不在該票。
+待：藍圖給標準視窗高度（已在問用戶）後，再決定要不要壓並排版面。
+```
+
+## 半徑 R ≥ 10 的世界：終端地圖框會超寬，沒有退路
+
+狀態：已知未實裝
+
+回訪：觸發事件 —— 換成更大的世界（半徑 ≥ 10）或做圖形介面時。
+
+```
+大地圖整寬票（spec 2026-10-13-map-pane-full-width-HOW）依藍圖裁定（用戶：終端 UI 只是暫時）固定上下排、不做游標視窗退路。
+12R+4 ≤ COLS−2（=118）⇒ R ≤ 9 放得下；R ≥ 10 只會 push_error＋地圖框標題「（版面異常）」，畫面會超寬。目前世界 R=8。
+```
+
+## NPC 子隊「抵達＝完成」一律歸建閘
+
+狀態：已知未修
+
+回訪：觸發事件 —— 深層批開動時（藍圖 2026-10-13 同意另開票）；玩家子隊票交件信的 fire 次數量測到手後寫 spec。
+
+```
+faction_ai_system.gd:4126-4131：move_target==-1 且 task≠IDLE ⇒ 抵達即歸建（2026-09-22 measurer tap 已量到，未修；QA 2026-10-13 判決再坐實）。
+覓食／巡邏／偵查子隊因此一到就被叫回，執行端一 tick 都沒跑。玩家子隊票（spec 2026-10-13-player-subteams-execute-given-tasks-HOW）只對玩家子隊拿掉；NPC 照舊，改它會動 NPC 世界。
+```
