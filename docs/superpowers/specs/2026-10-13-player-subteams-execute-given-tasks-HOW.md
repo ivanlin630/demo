@@ -7,7 +7,7 @@
 
 ## 一、誰是「玩家子隊」（單一謂詞）
 - `is_player_subteam(state, team)`：`team.parent_team_id == state.get_player_team_id()`，且該子隊由玩家指令派出（`dispatch` 的玩家路徑寫入一個事實欄 `TeamData.dispatched_by_player: bool`，NPC 派遣不寫）。兩條都要，避免換附身後把 NPC 的舊子隊也算進來。
-- 換附身／繼承：新附身隊的既有子隊不自動變成玩家子隊（沒有 `dispatched_by_player`）；交件信寫明這個選擇。
+- 換附身／繼承：新附身隊的既有子隊不自動變成玩家子隊（沒有 `dispatched_by_player`）。**藍圖補（2026-10-13）**：子隊面板對這種子隊標「自主（非你派出）」；玩家對它下**任一道令**（下令移動、召回、改任務）⇒ `dispatched_by_player` 翻成 true、成為玩家子隊（翻在玩家指令路徑的同一處，不在 UI）。不得出現「面板列著、我下了令、它還自己亂跑」。床 S12：換附身後舊子隊面板標「自主」；對它下令移動 ⇒ 之後 24 小時無任何決策層改派。
 
 ## 二、決策層不碰（藍圖 ③）
 - 同多格移動票的 arbiter 咽喉：`_possessed_blocks` 擴成「附身隊**或**玩家子隊」共用的謂詞；玩家子隊的任務只接受 `PLAYER_SOURCES` ∪ `EVENT_SOURCES` ∪ **物理反應來源**（自衛、逃、求生——列成具名集合 `PHYSICAL_REACTION_SOURCES`，實作端從現有 source 字串查出精確成員，交件信列表）。
