@@ -166,12 +166,33 @@ func _p3_unreachable() -> void:
 	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
 		var n: Vector2i = tgt + d
 		st.world.tiles.erase(n.x * 1000 + n.y)
+	# ★目標格設成已知（記得的格）：2026-10-13 起未知格不做可達預判（往迷霧走是探索，systems 裁 08e6f4899）
+	var known: Dictionary = st.team_tile_known.get(pt.team_id, {})
+	known[tgt.x * 1000 + tgt.y] = true
+	st.team_tile_known[pt.team_id] = known
 	node._cursor = tgt
 	await _press(node, "m")
 	var fb: String = String(node._feedback_line.text)
 	print("   目標 %s｜結果行「%s」｜move_target %s｜task %s" % [str(tgt), fb, str(pt.move_target), pt.current_task])
-	_check("P3 結果行說「無法抵達」", fb.contains("無法抵達"))
+	_check("P3 結果行說「無法抵達…沒有路」、不指名原因", fb.contains("無法抵達") and fb.contains("沒有路") and not fb.contains("被山"))
 	_check("P3 move_target 沒被寫、task 不是行進", pt.move_target == Vector2i(-1, -1) and pt.current_task != TeamData.TASK_TRAVEL)
+	await _drop(node)
+	# P3b：同樣的孤島、但玩家沒去過也看不到 ⇒ 照樣下令（不預判、不洩露那格周圍的真地形）
+	print("\n── P3b 沒去過的孤島：照樣下令 ──")
+	node = await _ui()
+	st = node._bridge._state
+	pt = _pt(node)
+	var far: Vector2i = _tile_at_dist(st, pt.tile_pos, 9)
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
+		var n2: Vector2i = far + d
+		st.world.tiles.erase(n2.x * 1000 + n2.y)
+	var k2: Dictionary = PlayerQueryApi.tile_knowledge(st, far)
+	node._cursor = far
+	await _press(node, "m")
+	var fb2: String = String(node._feedback_line.text)
+	print("   目標 %s（%s）｜結果行「%s」｜task %s" % [str(far), String(k2.get("status", "")), fb2, pt.current_task])
+	_check("★母體地板：那一格對玩家是沒去過", String(k2.get("status", "")) == "unvisited")
+	_check("P3b 沒去過的孤島照樣下令（不說「沒有路」）", not fb2.contains("沒有路") and not fb2.contains("無法抵達"))
 	await _drop(node)
 
 

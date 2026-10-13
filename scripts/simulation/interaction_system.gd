@@ -853,6 +853,10 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 		var pending: Dictionary = state.player_pending_orders[str_target_id]
 		if pending.get("herald_id", -1) == messenger_id:
 			is_player_order = true
+			# ★追加三 ②：玩家的令也在抵達端驗一次（舊存檔／其他入口）——不在集合 ⇒ 不執行、改成待機
+			if not PlayerCommandSystem.is_orderable_task(order):
+				print("[Order] player herald 帶來未知任務 %s ⇒ 不執行" % order)
+				order = TeamData.TASK_IDLE
 			target.player_commanded_task = order
 			state.player_pending_orders.erase(str_target_id)
 			print("[Order] player herald 抵達 Team%d，player_commanded_task = %s" % [target_id, order])

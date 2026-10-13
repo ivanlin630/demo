@@ -38,7 +38,7 @@ const CANDIDATE_KEYS: Array = [
 	KEY_COMMA, KEY_PERIOD, KEY_SEMICOLON, KEY_SLASH, KEY_MINUS, KEY_EQUAL,
 ]
 # ★Esc 刻意【不在候選裡】：它有語意（回上一層）⇒ P3 單獨驗它，而它不得被當未綁定。
-const SPEC_MODE_COUNT: int = 13
+const SPEC_MODE_COUNT: int = 14   # ★2026-10-13 terminal-input-prompts：輸入模式依型別拆成兩個（_input_numeric_mode／_input_string_mode），綁鍵不同
 # ★回饋句的 token（★認 token 不認整句：措辭改了不該誤報，而語意改了要紅）
 const SPEC_FEEDBACK_TOKEN: String = "此鍵在此模式無作用"
 # ★★★【綁了但現在沒有對象】那一句的**外部期望** —— ★**刻意不讀**

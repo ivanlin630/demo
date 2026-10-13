@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #1：戰鬥中按 Q 整支結束（插隊最前）
 topic: GO｜spec docs/superpowers/specs/2026-10-13-play-client-no-key-interpretation-HOW.md（R² 已收，不需再審）｜兩刀：第一刀 play.py 單獨先交
 ---

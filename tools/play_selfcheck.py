@@ -172,11 +172,33 @@ def p3() -> None:
           % len(hits2), len(hits2) > 0)
 
 
+# ══ Q3（spec 2026-10-13-play-client-no-key-interpretation）客戶端那一半：遊戲裡 Esc×2 離開 ⇒ play.py 自己收乾淨 ══
+#   ★管道餵鍵（非 tty ⇒ play.py 走逐行模式，同藍圖／床餵鍵那條路）：esc、esc
+#   ⇒ 遊戲 get_tree().quit() ⇒ server 關 socket ⇒ play.py read_frame 讀到空 ⇒ 印「遊戲已結束」、退出碼 0、沒有 traceback
+#   ★修前：沒有 EOF 分支 ⇒ 下一鍵 sendall 撞已關的 socket
+def q3_esc_twice_exits() -> None:
+    print("\n── Q3 遊戲裡 Esc×2 ⇒ play.py 退出碼 0、印「遊戲已結束」──")
+    root = Path(__file__).resolve().parent.parent
+    try:
+        r = subprocess.run([sys.executable, "-X", "utf8", str(root / "tools" / "play.py")], input="esc\nesc\nw\n",
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=240, cwd=str(root))
+        out = (r.stdout or "") + (r.stderr or "")
+        rc = r.returncode
+    except subprocess.TimeoutExpired:
+        out, rc = "", None
+    print("   退出碼 %s｜末三行：%s" % (rc, [l for l in out.splitlines() if l.strip()][-3:]))
+    check("★母體地板：真的收到第一屏（有「 鍵：」那一行）", " 鍵：" in out)
+    check("★★Q3：第一次 Esc 之後畫面有「再按一次 Esc 離開」", "再按一次 Esc 離開" in out)
+    check("★★★Q3：Esc×2 之後 play.py 印「遊戲已結束」、退出碼 0、沒有 traceback",
+          "遊戲已結束" in out and rc == 0 and "Traceback" not in out)
+
+
 def main() -> int:
     print("=== play_selfcheck：一行可玩的自驗 ===")
     p1_and_p2a()
     p2b()
     p3()
+    q3_esc_twice_exits()
     print("\n=== play_selfcheck DONE === errors: %d" % _errors)
     return 1 if _errors else 0
 

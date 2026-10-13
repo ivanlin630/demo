@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: 派遣子隊六種任務的故事稽核（玩家可見：派出去的子隊看起來大多什麼都沒做）
 topic: 請讀故事：安頓／建設整天空轉、覓食／巡邏／偵查立刻併回母隊、待機自己去外交——是哪個機制，在哪一行
 ---

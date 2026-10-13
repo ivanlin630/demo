@@ -470,10 +470,10 @@ func _test_b_no_duplicate_labels() -> void:
 	_check("★★★★★(b-2) 框抬頭沒有在內容裡再出現一次（%s）" % str(all_echo), all_echo.is_empty())
 	# ★反向對照（(b-2)）：用一個**合成的乾淨字串**（不是已經脏的那一屏）⇒ 0 → 1
 	#   ★★理由與 (g) 同：在脏的 base 上塞東西，「必須 > 0」不用鑑別力就會過。
-	var clean_t: String = "┌─ 地圖（x）──┬─ [── 測試抬頭 ────┐
-│  │內容與抬頭無關        │"
+	var clean_t: String = "┌─ [── 測試抬頭 ────┐
+│內容與抬頭無關        │"
 	var dirty_t: String = clean_t + "
-│  │測試抬頭               │"
+│測試抬頭               │"
 	print("   ★反向對照：乾淨合成 %d 條 → 造一個回音之後 %d 條" % [
 		_bad_title_echo(clean_t).size(), _bad_title_echo(dirty_t).size()])
 	_check("★★【反向對照】乾淨合成字串 0 條（%d）" % _bad_title_echo(clean_t).size(),

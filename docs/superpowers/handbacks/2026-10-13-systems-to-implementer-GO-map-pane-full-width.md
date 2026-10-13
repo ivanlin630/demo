@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪回饋 #3：大地圖只看到左半邊
 topic: GO（排在回饋 #2 兩刀之後、附身隊三件之前）｜spec docs/superpowers/specs/2026-10-13-map-pane-full-width-HOW.md（R² 兩輪已收，不需再審）
 ---
