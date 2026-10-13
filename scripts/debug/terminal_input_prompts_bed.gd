@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 終端輸入提示上終端＋頂列威脅句不截＋派遣目標格判斷（spec 2026-10-13-terminal-input-prompts-and-threat-clip-HOW 兩刀）
 # 輸入模式提示上終端＋頂列威脅句不截（spec 2026-10-13-terminal-input-prompts-and-threat-clip-HOW 第一刀：改法 1＋3）
 #   送鍵走 PlayerRepl.press_on（跟玩家 REPL 同一條路）；終端畫面讀 node._view_dict()（終端那一份 view）
 #   P1   子隊面板按 N ⇒ 終端結果列是「輸入：選隊長 (1~N): _」
