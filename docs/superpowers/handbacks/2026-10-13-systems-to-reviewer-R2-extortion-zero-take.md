@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪回饋 #5：勒索拿到 0（或近 0）卻印「勒索完成（食+0.0, 幣+0.0）」
 topic: R² 請審 docs/superpowers/specs/2026-10-13-extortion-zero-take-HOW.md
 ---
