@@ -414,14 +414,31 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 			return "accept" if accept_score > 0.5 else "reject"
 	return "reject"
 
+# ★量測（spec 2026-10-13-alliance §先量）：角色＝自己勢力的領袖隊／成員／獨立
+static func _alliance_role(state: WorldState, t: TeamData) -> String:
+	if t.faction_id == -1:
+		return "indep"
+	var f = state.factions.get(t.faction_id)
+	return "leader" if f != null and int(f.leader_team_id) == t.team_id else "member"
+
 func _form_alliance(state: WorldState,
 		team_a: TeamData, team_b: TeamData) -> void:
 	# team_a = 收提案方, team_b = 發起方（handle_diplomacy_message 呼叫序）
+	if Probe.enabled:
+		# ★純計數：發起方角色 × 收提案方角色（3×3）；被搬的若是領袖隊 ⇒ 記原勢力剩幾隊、領袖指標是否懸空
+		Probe.bump("alliance.form.%s_to_%s" % [_alliance_role(state, team_b), _alliance_role(state, team_a)])
+		var _mv: TeamData = team_b if team_a.faction_id != -1 else (team_a if team_b.faction_id != -1 else null)
+		if _mv != null and _alliance_role(state, _mv) == "leader":
+			var _of = state.factions.get(_mv.faction_id)
+			Probe.bump("alliance.moved_leader")
+			Probe.bump_sample("alliance.moved_leader", {"tick": state.world.current_tick, "team": _mv.team_id,
+				"from_faction": _mv.faction_id, "to_faction": (team_a if _mv == team_b else team_b).faction_id,
+				"left_behind": (_of.member_team_ids.size() - 1) if _of != null else -1}, 40)
 	if team_a.faction_id != -1:
-		state.set_team_faction(team_b, team_a.faction_id)   # team_b 入 team_a faction（雙向同步）
+		state.set_team_faction(team_b, team_a.faction_id, WorldState.JOIN_ALLIANCE_INTO_RECEIVER)   # team_b 入 team_a faction（雙向同步）
 		state.snapshot_faction_member(team_b.team_id, state.world.current_tick)
 	elif team_b.faction_id != -1:
-		state.set_team_faction(team_a, team_b.faction_id)   # team_a 入 team_b faction（雙向同步）
+		state.set_team_faction(team_a, team_b.faction_id, WorldState.JOIN_ALLIANCE_INTO_INITIATOR)   # team_a 入 team_b faction（雙向同步）
 		state.snapshot_faction_member(team_a.team_id, state.world.current_tick)
 	else:
 		# 兩獨立 → create_faction（強者 leader，建國）。F-I1 搬家：以 population 取代 god-view team_strength
@@ -431,7 +448,7 @@ func _form_alliance(state: WorldState,
 		var fid: int = state.create_faction(strong_id)
 		if fid == -1:
 			return
-		state.set_team_faction(state.teams[weak_id], fid)   # 弱者入新 faction（雙向同步）
+		state.set_team_faction(state.teams[weak_id], fid, WorldState.JOIN_ALLIANCE_FOUND)   # 弱者入新 faction（雙向同步）
 		state.snapshot_faction_member(strong_id, state.world.current_tick)
 		state.snapshot_faction_member(weak_id, state.world.current_tick)
 		print("[Diplomacy] Team%d + Team%d 建國 → 勢力%d（leader=Team%d）" % [

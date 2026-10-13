@@ -8055,7 +8055,7 @@ func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: St
 		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
 		var strong_id: int = _find_strong_neighbor(state, team)
 		if strong_id != -1:
-			state.set_team_faction(team, state.teams[strong_id].faction_id)   # 投降強鄰 faction（雙向同步）
+			state.set_team_faction(team, state.teams[strong_id].faction_id, WorldState.JOIN_SURRENDER_NEIGHBOR)   # 投降強鄰 faction（雙向同步）
 		else:
 			if Probe.enabled: Probe.bump("defection.surrender_fail")   # ★tap-gap 補：投降強鄰 fail→脫離獨立
 			state.clear_team_faction(team, WorldState.LEAVE_DEFECT_SURRENDER_FAIL)

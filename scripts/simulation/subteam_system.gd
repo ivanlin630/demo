@@ -107,7 +107,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
 	state.create_team(sub)   # S9 chokepoint：註冊 + known/discovered init
 	state.set_subteam_parent(sub, parent_id)         # 母子關係走入口（雙向同步 subteam_ids）
-	state.set_team_faction(sub, parent.faction_id)   # 子隊繼承 parent faction 走入口（雙向同步 member_team_ids）
+	state.set_team_faction(sub, parent.faction_id, WorldState.JOIN_SUBTEAM_INHERIT)   # 子隊繼承 parent faction 走入口（雙向同步 member_team_ids）
 	print("[Sub] Team%d 派出子隊 Team%d leader=P%d advisors=%s (pop=%d cap=%d task=%s)" % [
 		parent_id, sub.team_id, sub_leader_id, str(sub.named_members), pop_count, sub_cap, task])
 	return sub.team_id
@@ -145,7 +145,7 @@ func dispatch_anon_migrants(state: WorldState, parent_id: int, k: int,
 	ResourceBank.add(sub, "food", paid, "migrant_rations_in")
 	state.create_team(sub)
 	state.set_subteam_parent(sub, parent_id)
-	state.set_team_faction(sub, parent.faction_id)
+	state.set_team_faction(sub, parent.faction_id, WorldState.JOIN_SUBTEAM_INHERIT)
 	return sub.team_id
 
 func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, reason: String,
@@ -172,7 +172,7 @@ func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, re
 	AnonTierSystem.transfer_proportional(parent, sub, 1)
 	state.create_team(sub)
 	state.set_subteam_parent(sub, parent_id)
-	state.set_team_faction(sub, parent.faction_id)
+	state.set_team_faction(sub, parent.faction_id, WorldState.JOIN_SUBTEAM_INHERIT)
 	return sub.team_id
 
 func try_merge_back(state: WorldState, sub_id: int) -> bool:
