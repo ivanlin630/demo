@@ -328,7 +328,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 		var _before: Dictionary = _known_values(BeliefSystem.best_value_quiet(state, receiver_id, tgt_id))
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
 		var _after: Dictionary = _known_values(BeliefSystem.best_value_quiet(state, receiver_id, tgt_id))
-		if _after != _before:
+		if not _same_knowledge(_after, _before):
 			out["written"] = int(out.get("written", 0)) + 1
 		elif _agrees(_known_values(entry), _after):
 			out["refreshed"] = int(out.get("refreshed", 0)) + 1
@@ -351,9 +351,28 @@ static func _known_values(v: Dictionary) -> Dictionary:
 # 他說的每個值欄位都跟勝出值一致（他沒說的欄不算衝突）
 static func _agrees(said: Dictionary, best: Dictionary) -> bool:
 	for k in said:
-		if not best.has(k) or best[k] != said[k]:
+		if not best.has(k) or not _value_same(String(k), said[k], best[k]):
 			return false
 	return true
+
+# 兩份所知是否同一件事：鍵集合相同、每欄 _value_same
+static func _same_knowledge(a: Dictionary, b: Dictionary) -> bool:
+	if a.size() != b.size():
+		return false
+	for k in a:
+		if not b.has(k) or not _value_same(String(k), a[k], b[k]):
+			return false
+	return true
+
+# ★*_est 數值欄用相對容差（＝坦白雜訊上限 DistortionEngine.HONEST_EST_NOISE）：同一個人如實再說一次，
+#   估計值會在雜訊內跳 ⇒ 那不是新消息；位置、類別欄照舊精確比｜＋0.5＝雜訊那一行 roundi 的半個單位（小估計值上取整的誤差）
+static func _value_same(k: String, x, y) -> bool:
+	if k.ends_with("_est") and (typeof(x) == TYPE_INT or typeof(x) == TYPE_FLOAT) \
+			and (typeof(y) == TYPE_INT or typeof(y) == TYPE_FLOAT):
+		var fx: float = float(x)
+		var fy: float = float(y)
+		return absf(fx - fy) <= DistortionEngine.HONEST_EST_NOISE * maxf(absf(fx), absf(fy)) + 0.5
+	return x == y
 
 func process_pending(_state: WorldState) -> void:
 	# 未來：處理 pending delivery queue（據點同步、信使到達）

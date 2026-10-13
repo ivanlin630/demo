@@ -44,11 +44,15 @@ static func distort_message(state: WorldState, msg: MessageData, mode: String) -
 				msg.description = TextBank.fmt(msg.type, "malicious", msg.params)
 
 # intel entry 失真（原 message._distort_intel_entry 1:1）。silent → {}。
+# ★坦白轉述的人口估計雜訊上限（相對）：雜訊那一行與打聽結果句的比較器讀同一份
+#   （spec 2026-10-13-play-client-no-key-interpretation #6 Q9，systems 裁 a）
+const HONEST_EST_NOISE: float = 0.1
+
 static func distort_intel_entry(entry: Dictionary, mode: String, hop_decay: float) -> Dictionary:
 	var e: Dictionary = entry.duplicate()
 	match mode:
 		"honest":
-			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.9, 1.1))
+			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(1.0 - HONEST_EST_NOISE, 1.0 + HONEST_EST_NOISE))
 		"unintentional":
 			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.6, 1.5))
 			e["tile_pos"] = e.get("tile_pos", Vector2i.ZERO) + \
