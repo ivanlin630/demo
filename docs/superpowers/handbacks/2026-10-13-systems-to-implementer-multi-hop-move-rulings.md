@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 多格移動三裁（回 2026-10-13-implementer-to-systems-DONE-multi-hop-move-3-rulings）
 topic: ③裁 a（收成私有）可動｜①不代加，已呈用戶｜②待藍圖（玩家可見行為變化）｜orders 寫者另開票
 ---
