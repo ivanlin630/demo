@@ -3713,3 +3713,13 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 游標處：記得的隊標「記得／聽說」（最佳 claim 不是自己親見＝聽說）；沒去過的格也列出記得在那裡的隊
 - world-fp 不變（707534a…）；床 map_memory_bed（註冊 map-memory）、E2E 加 MM7D
 第五輪邀請流程（藍圖 2026-10-08）：#9 merge → systems 合併 E2E（已知紅 0）→ 藍圖真跑 → 邀請信第一步請用戶做 F5 P5d（VS Code 整合終端＋Windows Terminal 各按 x／Esc／Tab／方向鍵／Ctrl+C，確認單鍵）→ 結果轉 systems｜觀察輪重跑：間距退場對照要換 seed 或拉長（default 30 天 NPC 從沒被 2／11 擋過）
+
+### 多格移動走一格就停＋不變量 #12（實作端 2026-10-13，branch fix/multi-hop-move）
+- 寫者坐實：loop3 `_evaluate_threat` → `_decide_unified(src=threat)` 替玩家隊選「覓食」、改目的地（玩家的移動以前只寫 move_target、task 留 idle＠0，誰都蓋得掉）
+- 玩家移動改成 TASK_TRAVEL＠PRIO_PLAYER（arbiter 的一筆佔用）；抵達／取消／路斷／紮營完工帶來源 release；下令時就算路，不可達即拒；戰鬥中按 M 回「戰鬥中，不能移動」
+- #12 執法點：TeamData.possessed 事實欄（唯一寫者 WorldState.sync_possession；player_id 寫者與 add/remove_member、set_leader 咽喉同步；戰死窗口保持；第一個 tick 補同步一次；tick 尾漂移校驗）；arbiter 對附身隊只收 PLAYER_SOURCES∪EVENT_SOURCES（try_set／transition／release 同一謂詞）；威脅評估入口跳過附身隊；set_strategic_move 跳過；附身隊不抗命
+- UI：抵達只在玩家下令的目的地印；目標被清而人不在 ⇒「停下：原因（停在…）」
+- world-fp 換基準 aad02d9（possessed 欄進尺，分區比對證明行為零漂移）；床 multi_hop_move_bed（註冊 multi-hop-move）
+- 未做／待裁：loop3 對附身隊仍會寫的非 task 欄位（委託單、公庫徵用、求生決策先寫 order_target_id 等）逐處列在交件信
+- 合併（systems 2026-10-13）：三裁 ①憲法基準加 move_to（用戶在 systems 終端直接准，e255a1125）②ui-flow「前」快照只換狀態行（藍圖裁不下令不覓食＝本意）③latch 收私有；電池 119／119 綠（db0f451f0）
+- merge 後小票（玩家可見，排在藍圖真跑之後、深層批之前）：附身隊不掛買賣單｜開始挨餓停推進｜loop3 其餘寫者分類（known_issues 三筆）

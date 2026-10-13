@@ -97,6 +97,7 @@ static func _sweep() -> Dictionary:
 		SimRunner._reset_cross_run(),
 		WorldState._reset_cross_run(),
 		PopulationSystem._reset_cross_run(),
+		TaskArbiter._reset_cross_run(),   # ★寫入觀察的「目前來源」（多格移動票）
 		TeamData._reset_cross_run(),   # ★吞寫計數器（swallowed_writes / swallow_sites）――
 		#   ★★光寫 `_reset_cross_run` 不夠：閘只檢查【名字有沒有出現在那支函式裡】，
 		#   而沒註冊進這一串 ⇒ 它就是一支【零 caller 的守衛】。

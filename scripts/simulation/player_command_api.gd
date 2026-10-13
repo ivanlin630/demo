@@ -193,6 +193,7 @@ func possess(state: WorldState, person_id: int) -> Dictionary:
 	var prev: int = state.player_id
 	state.player_possess_prev = prev
 	state.player_id = person_id
+	state.sync_possession()   # ★#12 事實欄
 	return PlayerApiMapper.map_command_result(true, "ok", "",
 		{ "player_id": person_id, "prev_player_id": prev })
 
@@ -201,6 +202,7 @@ func unpossess(state: WorldState) -> Dictionary:
 	var cur: int = state.player_id
 	state.player_id = prev
 	state.player_possess_prev = -1
+	state.sync_possession()   # ★#12 事實欄
 	return PlayerApiMapper.map_command_result(true, "ok", "",
 		{ "player_id": prev, "left_person_id": cur })
 

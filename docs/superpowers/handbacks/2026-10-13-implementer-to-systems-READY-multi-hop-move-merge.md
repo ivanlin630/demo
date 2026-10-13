@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多格移動：三裁全落、全電池綠、branch 已推 ⇒ 請 merge
 topic: origin/fix/multi-hop-move ＝ db0f451f0｜全電池釘死 db0f451f0：119 支 BATTERY_RC=0（3878s，摘要 docs/measurements/.battery/1963-20261013-194643.txt）
 ---

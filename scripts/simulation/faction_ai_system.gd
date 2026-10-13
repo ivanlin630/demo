@@ -626,6 +626,10 @@ func _tick_conquest_scout(state: WorldState, team: TeamData) -> void:
 # 威脅評估（cadence）：找視野內最高 threat，超門檻 → dispatch 反應。
 # 已在反應 task 中則重評威脅是否仍在，無則回 idle。
 func _evaluate_threat(state: WorldState, team: TeamData) -> void:
+	# ★#12 ⑦（spec 2026-10-13 multi-hop-move）：附身隊零 AI 決策 —— 這一支就是血證那一條（經 _decide_unified 替玩家選了覓食）；
+	#   ★而且飢荒分支在判 task 之前就直寫 crisis_released_task／until ⇒ 即使 release 被 arbiter 擋下，
+	#     免疫窗也已寫入 ⇒ 玩家重按 M 會被擋 ⇒ 所以在入口整支跳過，不靠下游的 deny
+	if team.possessed: return
 	if state.world.current_tick < team.threat_eval_next_tick: return
 	team.threat_eval_next_tick = state.world.current_tick + THREAT_CADENCE
 	if team.combat_target != -1: return

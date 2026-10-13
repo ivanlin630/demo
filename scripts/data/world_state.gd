@@ -613,6 +613,8 @@ func add_member(team: TeamData, pid: int) -> void:
 	var p: PersonData = persons.get(pid)
 	if p != null:
 		p.team_id = team.team_id
+	if pid == player_id and pid != -1:
+		sync_possession()   # ★#12 事實欄：玩家換隊
 
 func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void:
 	team.named_members.erase(pid)
@@ -620,6 +622,8 @@ func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void
 		var p: PersonData = persons.get(pid)
 		if p != null:
 			p.team_id = -1
+		if pid == player_id and pid != -1:
+			sync_possession()   # ★#12 事實欄：玩家被逐出
 
 # 雙向單一入口：team.leader_id ↔ person.team_id（leader 屬本隊）+ role 同步（規則2 leader 版）。
 # 統一 leader 指派 chokepoint，mirror add_member/set_team_faction：所有 team.leader_id= 直寫改走此。
@@ -680,6 +684,8 @@ func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") ->
 		if p != null:
 			p.team_id = team.team_id     # 強制回指本隊（修 stale desync）
 			p.role = "leader"
+		if pid == player_id:
+			sync_possession()   # ★#12 事實欄
 
 # ── ★★★登記錨 ④a：登記謂詞（唯一真值＝ TeamData.work_outpost）────────────
 # ★呼叫端【只准用這三支】。★★手寫 `tile.outpost_owner == team.team_id or ... parent_team_id`
@@ -1033,6 +1039,59 @@ var last_encounter_result: Dictionary = {}
 var last_encounter_outcome: Dictionary = {}
 # Format: { "winner_id": int, "loser_id": int, "loot_pool": Dictionary, "can_subjugate": bool }
 # Cleared after player takes/leaves loot.
+
+# ══ ★不變量 #12 的事實欄：TeamData.possessed 的【唯一寫入者】（spec 2026-10-13 multi-hop-move ⓪）══
+# ★值＝f(player_id, persons[player_id].team_id)：玩家所在的那一隊為真、其餘為假
+# ★兩個輸入的寫者都在末尾呼這一支：
+#   ·player_id：game_setup（建玩家／指定玩家隊）、possess／unpossess、choose_heir、init_player
+#   ·person.team_id：add_member／remove_member／set_leader 遇到 pid == player_id
+# ★戰死窗口（npc_combat 把玩家從 persons 移掉、player_id 要等 choose_heir 才換）：
+#   persons 裡找不到玩家 ⇒ 保持在最後所屬的隊（那段時間它仍是玩家的隊，等玩家選繼承人；AI 不得接手）
+# ★tick 尾漂移校驗：check_possession_drift()（sim_runner 每 tick 末呼）
+var _possessed_tid: int = -1
+# ★第一個 tick 一律再 sync 一次（sim_runner.advance_tick）：量測床常在 setup 之後直寫 player_id = -1（_strip_player 等，
+#   80 張床 177 處）而不經 sync ⇒ 不補的話 possessed 會留在舊玩家隊、AI 永遠動不了它（觀察者長跑被改）
+#   ★只補這一次；跑到一半才換 player_id 而沒 sync 的 ⇒ tick 尾校驗警告（不自動修）
+#   ★私有（systems 裁 ③a）：一次性 latch 不是世界狀態，不進 fp 也不該被外部讀 ⇒ 外部只呼叫 bootstrap_possession_once()
+var _possession_bootstrapped: bool = false
+
+func bootstrap_possession_once() -> void:
+	if _possession_bootstrapped:
+		return
+	_possession_bootstrapped = true
+	sync_possession()
+
+func sync_possession() -> void:
+	var tid: int = -1
+	if player_id != -1:
+		var p: PersonData = persons.get(player_id)
+		tid = p.team_id if p != null else _possessed_tid   # ★戰死窗口：保持
+	if _possessed_tid != tid and teams.has(_possessed_tid):
+		(teams[_possessed_tid] as TeamData).possessed = false
+	_possessed_tid = tid
+	if teams.has(tid):
+		(teams[tid] as TeamData).possessed = true
+
+# ★tick 尾校驗（sync 之後立刻比＝恆真 ⇒ 放在所有系統跑完之後）：不一致只印警告＋Probe，不自動修（讓它紅）
+#   回傳違反說明（空字串＝一致），床讀它
+func check_possession_drift() -> String:
+	var n: int = 0
+	var which: int = -1
+	for tid in teams:
+		if (teams[tid] as TeamData).possessed:
+			n += 1
+			which = int(tid)
+	var why: String = ""
+	if n > 1:
+		why = "possessed 為真的隊有 %d 支" % n
+	elif player_id == -1 and n != 0:
+		why = "沒有玩家卻有 possessed 隊 Team%d" % which
+	elif player_id != -1 and persons.has(player_id) and which != get_player_team_id():
+		why = "possessed＝Team%d 而玩家在 Team%d" % [which, get_player_team_id()]
+	if why != "":
+		if Probe.enabled: Probe.bump("possession.drift")
+		push_warning("[Possession] 漂移：" + why)
+	return why
 
 # Leader 繼承等用：player 所屬 team_id 單一源（player 死亡時反查掛載 team）。
 func get_player_team_id() -> int:

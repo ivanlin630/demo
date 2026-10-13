@@ -37,6 +37,7 @@ const TASK_SHELTER     := "收留"
 const TASK_SEEK_HOME   := "求居"
 const TASK_UPGRADE     := "升級"
 const TASK_EXPAND      := "擴建"
+const TASK_TRAVEL      := "行進"   # ★玩家移動（spec 2026-10-13 multi-hop-move）：move_to 走 arbiter @PRIO_PLAYER，抵達／取消 release
 const TASK_CONVOY      := "運輸"   # ★後勤 SLICE A：供給-delivery convoy（porter 把 surplus 物理送到 demand 市場結買單）
 const TASK_TRIBUTE_OFFER := "tribute_offer"   # order_task（提供納貢），非 current_task
 
@@ -195,7 +196,13 @@ var resources: Dictionary = {
 	"armor_low": 0, "armor_high": 0,
 }
 var tags: Array = []
-var current_task: String = TASK_IDLE
+var current_task: String = TASK_IDLE:
+	set(v):
+		# ★寫入觀察（同 move_target 那一支；spec 2026-10-13 multi-hop-move）
+		if team_id == mt_watch_tid and v != current_task:
+			mt_log.append({"field": "task", "old": current_task, "new": v, "task": current_task,
+				"src": TaskArbiter.watch_src if TaskArbiter.watch_src != "" else "直接寫（不經 arbiter）"})
+		current_task = v
 var task_priority: int = 0   # 現任 task 優先權；idle 時 0（TaskArbiter 管理）
 var previous_task: String = ""   # survival override 前的原 task，回復用
 var tax_rate: float = 0.3                    # 收稅率（PRODUCE team 用，0.1-0.7）
@@ -220,7 +227,21 @@ var tile_pos: Vector2i = Vector2i.ZERO
 #   ★`-1.0` ＝【不知道】，**不是 0**：0 是一個合法的 util，而「沒人告訴我」不是。
 var task_util: float = -1.0
 var work_outpost: Vector2i = Vector2i(-1, -1)
-var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
+var move_target: Vector2i = Vector2i(-1, -1):  # -1,-1 = 無目標，不移動
+	set(v):
+		# ★寫入觀察（spec 2026-10-13 multi-hop-move 第一顆：只查不改）：只在床把 mt_watch_tid 設成某隊時記；
+		#   預設 -9999 ⇒ 一個整數比較就走，不改值、不耗 RNG
+		#   ★不記呼叫堆疊：get_stack() 在 headless 沒接除錯器時回空陣列 ⇒ 記寫入當下的 task／task_reason 判寫者
+		if team_id == mt_watch_tid and v != move_target:
+			mt_log.append({"field": "move_target", "old": move_target, "new": v, "task": current_task,
+				"src": TaskArbiter.watch_src if TaskArbiter.watch_src != "" else "直接寫（不經 arbiter）"})
+		move_target = v
+# ★不變量 #12 的事實欄（spec 2026-10-13 multi-hop-move ⓪）：這一隊正被玩家附身
+#   ★唯一寫入者＝WorldState.sync_possession()（值＝f(player_id, persons[player_id].team_id)；戰死窗口保持）
+#   ★arbiter 咽喉讀它（release／set_strategic_move 沒有 state，所以要一個隊上的事實）；tick 尾有漂移校驗
+var possessed: bool = false
+static var mt_watch_tid: int = -9999
+static var mt_log: Array = []
 # flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。
 var flee_from_pos: Vector2i = Vector2i(-1, -1)
 # ★settlement S2b：L0→L1 紮根工地位（自己起的 corvee，team 記得自己未完工程=self-knowledge 非 god-view）。

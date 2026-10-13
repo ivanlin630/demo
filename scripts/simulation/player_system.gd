@@ -20,6 +20,7 @@ func init_player(state: WorldState, person_id: int, team_id: int) -> void:
     if p:
         p.role = "leader"
         p.team_id = team_id
+    state.sync_possession()   # ★#12 事實欄
 
 func calc_inventory_weight(state: WorldState) -> float:
     var total: float = 0.0

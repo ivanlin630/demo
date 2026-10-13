@@ -5589,3 +5589,44 @@ FAIL 格④「斥候帶 need 回領主」數到 2 筆、預期 1：
 ```
 
 回訪：觸發事件 —— 實作端佇列空檔或有人改資訊網偵察／care-loop 那段時順手修這支床。
+
+## 附身隊：AI 仍替玩家隊掛買賣單（違反不變量 #12 的 orders）
+
+狀態：已知未修
+
+回訪：觸發事件 —— 多格移動 merge 後、藍圖真跑完，systems 派小票時。
+
+```
+2026-10-13 多格移動交件信（2026-10-13-implementer-to-systems-DONE-multi-hop-move-3-rulings §5）列出：
+OrderSystem.tick_team_orders（order_system.gd:245）對每隊跑「餘量發賣盤」，附身隊也照掛 ⇒ 玩家的貨會被自動賣。
+#12 字面點名 orders ⇒ 是違反，不是範圍外。玩家看得到。
+修法方向：掛單段對附身隊跳過；到期清理／退貨帳（release_order_escrow）是物理照跑。
+排程：多格移動 merge 後的小票（藍圖 2026-10-13 同意）。
+```
+
+## 附身隊：loop3 仍會寫的其他非 task 欄位，未分類
+
+狀態：已知未修
+
+回訪：觸發事件 —— 多格移動 merge 後、藍圖真跑完，systems 派小票時。
+
+```
+同一封交件信 §5 逐處列出：決策節奏（decision_eval_next_tick、previous_task）、_trigger_survival 寫
+current_option／order_target_id、_detect_survival_stall 寫 survival_committed_*、AmbitionLadder 的 ambition_rung、
+CoinTreasury.consider_extraction、conquest_scout／pursuit 的 prosperity_target_id、pursuit 對攻擊 task 直寫
+move_target（附身隊進不了攻擊 task ⇒ 目前不可達，寫者在）、據點駐留欄、裝備欄（mobilized_fraction、equip_order…）。
+玩家是勢力首領／成員時 _decide_unified 本體先跑，try_set 才擋。
+待做：逐項判「是決策（#12 管）還是物理／記帳（照跑）」，是決策的照掛單那張的寫法排除。
+```
+
+## 自家隊開始挨餓時推進不會停
+
+狀態：已知未修
+
+回訪：觸發事件 —— 多格移動 merge 後、藍圖真跑完，systems 派小票時。
+
+```
+藍圖 2026-10-13 裁：附身隊不下令不覓食＝本意，代價由遊戲明示 ⇒「開始挨餓」要進推進停點清單（意圖帳已補）。
+現況：world_events.gd ADVANCE_STOP_KINDS 沒有這一項，也沒有「開始挨餓」的事件種類（只有 member_died 帶餓死）。
+排程：多格移動 merge 後的小票。
+```

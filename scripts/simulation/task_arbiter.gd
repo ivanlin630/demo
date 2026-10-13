@@ -34,13 +34,56 @@ const PROGRESSIVE_HOLD_TASKS: Array = [
 # 這兩面（_decide_unified / _evaluate_solo）的 rank[0] 允許同層換掉引擎自己派的 task
 #（equal-priority self-replace，閉迴路）。scout/prosperity scaffolding 自帶 release 換手
 # 不入列；ambition@AMBIENT 被嚴格大於覆蓋不需入列。外部子系統/PLAYER 不在列=仍嚴格大於。
-const ENGINE_SOURCES: Array = ["unified", "solo", "invite_settle"]   # ★A4 9筆：invite_settle 同層 50=50 self-replace（非 priority-crank、被邀 settle 令不被同層 stomp）
+const ENGINE_SOURCES: Array = ["unified", "solo", "invite_settle"]
+
+# ══ ★不變量 #12 的執法點（spec 2026-10-13 multi-hop-move ④②）：附身隊只收這些來源 ══════════════
+# ★精確集合（不用前綴）：玩家指令的 try_set 來源（grep 2026-10-13 逐字列）
+#   player_move＝move_to｜player_rest＝:790 休息｜player_settle＝:821 紮根｜player_order＝:1184 下令子隊｜player_command＝faction_ai 成員玩家令
+const PLAYER_SOURCES: Array = ["player_move", "player_rest", "player_settle", "player_order", "player_command"]
+# ★事件要改附身隊的 task 時走這裡（精確集合）；2026-10-13 grep：沒有一條事件來源寫附身隊的 task ⇒ 空
+#   （遭遇／戰鬥不經 arbiter，靠 try_set 頂端的 combat_target 鎖；飢餓是物理，不改 task）
+const EVENT_SOURCES: Array = []
+# ★release 對附身隊的玩家令：只有抵達與玩家取消放行（其餘 release() 呼叫點預設 "" ⇒ 不生效）
+#   ★path_broken＝途中路斷（movement 的物理，不是決策）｜construction_done＝玩家下的工程完工（事件；outpost_system crude_camp 那一支）
+const RELEASE_SOURCES: Array = ["arrival", "player_cancel", "path_broken", "construction_done"]
+
+# ★try_set／transition／release 三處共用【同一個】謂詞（R²：不寫兩份）
+#   ·寫入（try_set／transition）：附身隊 ⇒ 來源不在 PLAYER_SOURCES ∪ EVENT_SOURCES 就擋（含附身隊閒著時）
+#   ·release：附身隊且現任是玩家令（PRIO_PLAYER）⇒ 來源不在 RELEASE_SOURCES 就擋
+static func _possessed_blocks(team: TeamData, source: String, is_release: bool) -> bool:
+	if not team.possessed:
+		return false
+	if is_release:
+		return team.task_priority == PRIO_PLAYER and not (source in RELEASE_SOURCES)
+	return not (source in PLAYER_SOURCES or source in EVENT_SOURCES)   # ★A4 9筆：invite_settle 同層 50=50 self-replace（非 priority-crank、被邀 settle 令不被同層 stomp）
 
 
 # A2c-2（FA6 折入）：戰略移動 move_target 唯一 arbiter-owned write path（收 movement 直讀 bypass=D11/V3）。
 # 純移動覆蓋——不碰 current_task/task_priority（候選 C 精髓：保 IDLE→interaction:253 自發併隊續 fire）。
 # ★內建 2 道純 team-欄 guard（原掛 movement:64/68，folding 一併搬進 method，防未來呼叫點遺漏破不變量）：
+# ★寫入觀察（spec 2026-10-13 multi-hop-move；之後變 P5 守衛）：四個入口在呼叫期間掛「目前來源」，
+#   TeamData 的 move_target／current_task setter 讀它；沒掛＝不經 arbiter 的直接寫
+#   ★只對 TeamData.mt_watch_tid 那一隊掛（預設 -9999 ⇒ 一個整數比較就走、不改值、不耗 RNG）
+static var watch_src: String = ""
+
+# ★★★跨 run 清除（cross-run-static 閘點）：watch_src 只在被觀察隊的入口呼叫期間非空、出口清回 ""；
+#   ★而入口中途若 push_error 中斷（床被殺），殘值會讓下一個世界的第一筆直接寫被標成 arbiter 寫 ⇒ 清。
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if watch_src != "": cleared["TaskArbiter.watch_src"] = watch_src
+	watch_src = ""
+	return {"checked": 1, "cleared": cleared}
+
 static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
+	if team.team_id != TeamData.mt_watch_tid:
+		_set_strategic_move_body(team, pos)
+		return
+	watch_src = "arbiter.set_strategic_move"
+	_set_strategic_move_body(team, pos)
+	watch_src = ""
+
+static func _set_strategic_move_body(team: TeamData, pos: Vector2i) -> void:
+	if team.possessed: return   # ★#12：戰略佈點是 AI 決策（spec ⑥）
 	if team.combat_target != -1: return                    # 戰鬥鎖絕對（同 try_set:28-29 全域不變量）
 	if team.current_task == TeamData.TASK_FLEE: return      # 逃跑不被戰略位覆蓋
 	# 僅 move_target 空/抵達才覆蓋（保現行觸發顆粒，byte-identical），不動 task=IDLE 保留。
@@ -124,6 +167,16 @@ static func _note_task_lost(team: TeamData, bucket: String, new_task: String, so
 static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "", _opt: String = "",
 		_util: float = -1.0) -> bool:
+	if team.team_id != TeamData.mt_watch_tid:
+		return _try_set_body(state, team, new_task, move_target, priority, _source, _opt, _util)
+	watch_src = "arbiter.try_set:" + _source
+	var ok: bool = _try_set_body(state, team, new_task, move_target, priority, _source, _opt, _util)
+	watch_src = ""
+	return ok
+
+static func _try_set_body(state: WorldState, team: TeamData, new_task: String,
+		move_target: Vector2i, priority: int, _source: String, _opt: String,
+		_util: float) -> bool:
 	# ★★★求居半的追蹤（systems 2026-09-11）：★「流浪隊有沒有真的走到」與「它半路被別的事搶走」
 	#   是兩個不同的斷點，而它們在結果上都長成「領主沒看到求居者」。
 	# ★幀數歸因用（systems 2026-09-11）：★★「一次很貴」與「被叫很多次」是兩個結論，
@@ -139,6 +192,9 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			if _opt != "": Probe.bump("arbiter.deny.戰鬥鎖.opt." + _opt)
 			if _opt == "求居": _note_seek_deny(state, team, priority, "戰鬥鎖")
 		return false   # 戰鬥鎖絕對（combat 結束流程清 combat_target）
+	if _possessed_blocks(team, _source, false):
+		if Probe.enabled: Probe.bump("arbiter.deny.possessed.by." + (_source if _source != "" else "(無來源)"))
+		return false   # ★#12：附身隊的決策只屬於玩家
 	# crisis-override 免疫窗：剛 crisis-released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit：
 	# defection「等待新領主」/solo FLEE 子系統立刻打回原 task → survival 永無機會）。只擋「同一 task」→ survival
 	# 選別的 task（覓食/買糧…）不受阻，順利接住餓死隊。到期自動解。
@@ -206,6 +262,17 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 	# 等同層現任不被 stomp。防抖動由引擎 COMMITMENT_BONUS 承擔（rank 前已偏置現任 option）。
 	# ★threat-oracle S3：擴認 PRIO_THREAT self-replace（收斂後 threat option 走 _decide_unified@PRIO_THREAT 70；
 	# 同層 threat option 可換 迎戰→求和 不卡=finding3 黏性）。source 白名單(unified/solo)擋 uprising 誤觸。
+	# ★玩家同層換手（spec ①）：現任是玩家令、新的也是玩家令 ⇒ 玩家改自己的令（M 連按換目標、M 打斷休息）
+	if priority == PRIO_PLAYER and team.task_priority == PRIO_PLAYER and _source in PLAYER_SOURCES:
+		if Probe.enabled: _note_task_lost(team, "player_handoff", new_task, "try_set")
+		team.current_task = new_task
+		team.move_target = move_target
+		if Probe.enabled: _note_handoff(team, "try_set", move_target)
+		team.task_priority = priority
+		team.task_reason = _source
+		team.task_start_tick = state.world.current_tick
+		team.task_util = _util
+		return true
 	if priority in [PRIO_DISPATCH, PRIO_THREAT, PRIO_SURVIVAL] and team.task_priority == priority \
 			and _source in ENGINE_SOURCES \
 			and team.task_reason.trim_prefix("defy_") in ENGINE_SOURCES:
@@ -230,7 +297,8 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.task_util = _util        # ★設上那一刻的身價（-1.0 ＝ 呼叫端沒給）
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
-	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH:
+	# ★#12 ⑤：附身隊跳過抗命 —— 它的決策權不屬 leader 個性（繼承後 leader 換人也一樣）
+	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH and not team.possessed:
 		var leader: PersonData = state.persons.get(team.leader_id)
 		if leader != null and _defiance_check(leader):
 			print("[抗命] Team%d leader 棄玩家命令 → %s" % [team.team_id, new_task])
@@ -335,7 +403,21 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 
 
 # task 完成 / 取消 / 釋放條件達成 → 回 idle + priority 歸 0
-static func release(team: TeamData) -> void:
+# ★_source（spec ②）：附身隊的玩家令只認 "arrival"／"player_cancel"；其餘呼叫點不用改（預設 "" ⇒ 對附身隊的玩家令不生效）
+static func release(team: TeamData, _source: String = "") -> void:
+	if _possessed_blocks(team, _source, true):
+		if Probe.enabled:
+			Probe.bump("arbiter.release_denied.possessed")
+			Probe.bump("arbiter.release_denied.possessed.by." + (_source if _source != "" else "(無來源)"))
+		return
+	if team.team_id != TeamData.mt_watch_tid:
+		_release_body(team, _source)
+		return
+	watch_src = "arbiter.release:" + _source
+	_release_body(team, _source)
+	watch_src = ""
+
+static func _release_body(team: TeamData, _source: String = "") -> void:
 	# ★§N 兩欄之①：【合法退場】次數（不該下降）。判準用欄位 proxy（release 拿不到 state）：
 	#   身上沒有任何未完成承諾標記 ＝ 這次卸任務沒有丟下任何東西。
 	#   ★①掉 ＝ 正當退場被誤擋 ＝ 回歸（latch 前兆）；②升 ＝ 想換 task 被擋住 ＝ 正是要的。
@@ -369,7 +451,9 @@ static func release(team: TeamData) -> void:
 		# ★這個計數【現在應該非 0】＝證明殘留真的存在；修完它本身不變，
 		#   ★★變的是那個殘留【不再被下游讀到】
 		Probe.bump("commit.release_with_stale_reason")
-	team.task_reason = ""
+	# ★帶來源的 release（抵達／玩家取消／路斷）把來源留在 task_reason ⇒ UI「停下：<原因>」讀它，不由 UI 猜；
+	#   其餘呼叫點預設 "" ⇒ 逐字照舊
+	team.task_reason = _source
 
 
 # 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）。
@@ -383,6 +467,17 @@ static func release(team: TeamData) -> void:
 #   ★★move_target **必填、不給 default**（同 record_driver 的 kind：default 只會讓下一個忘記的人靜默通過）
 #     ⇒ 每個呼叫點自己決定：新任務有目的地就傳那個，沒有就傳 Vector2i(-1, -1)
 static func transition(state: WorldState, team: TeamData, new_task: String, priority: int, move_target: Vector2i, _source: String = "transition") -> void:
+	if team.team_id != TeamData.mt_watch_tid:
+		_transition_body(state, team, new_task, priority, move_target, _source)
+		return
+	watch_src = "arbiter.transition:" + _source
+	_transition_body(state, team, new_task, priority, move_target, _source)
+	watch_src = ""
+
+static func _transition_body(state: WorldState, team: TeamData, new_task: String, priority: int, move_target: Vector2i, _source: String) -> void:
+	if _possessed_blocks(team, _source, false):
+		if Probe.enabled: Probe.bump("arbiter.deny.possessed.by." + _source)
+		return   # ★#12：同 try_set 那一道
 	# ★arbiter 後門根治（手不聽腦，team16 凍死）：transition 舊為無條件 raw 覆寫繞 arbiter → 外部低 prio
 	# 呼叫（defection「等待新領主」@AMBIENT）clobber 引擎剛派的 survival@80 + 繞免疫 → crisis 永不 fire。
 	# 補齊三 guard（對齊 try_set 的 current_task 寫入不變量）：擋「外部 in-place stomp active emergency」。

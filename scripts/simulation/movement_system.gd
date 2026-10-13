@@ -342,6 +342,8 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 		if Probe.enabled and team.current_task == TeamData.TASK_SEEK_HOME:
 			Probe.bump("seek.arrived")
 		team.move_target = Vector2i(-1, -1)
+		if team.current_task == TeamData.TASK_TRAVEL:
+			TaskArbiter.release(team, "arrival")   # ★多格移動：玩家的移動到了才放（spec (B)②）
 		_on_arrival(state, team)
 		return false
 	var next_pos: Vector2i = _calc_next_step(state, team.tile_pos, team.move_target)
@@ -352,6 +354,8 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 			team.move_target.x, team.move_target.y,
 			team.current_task, str(team.strategic_assignments)])
 		team.move_target = Vector2i(-1, -1)
+		if team.current_task == TeamData.TASK_TRAVEL:
+			TaskArbiter.release(team, "path_broken")   # ★多格移動 (C)：途中路斷 ⇒ 放掉、原因留給 UI
 		return false
 	team.last_tile_pos = old_pos   # 記錄上一步位置（observe_velocity 用）
 	team.tile_pos = next_pos
@@ -365,6 +369,8 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 		Probe.bump("qty.move_n")   # ★分母：移動事件次數（一步＝一格時兩者相等，不相等就是訊號）
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
+		if team.current_task == TeamData.TASK_TRAVEL:
+			TaskArbiter.release(team, "arrival")   # ★多格移動：玩家的移動到了才放（spec (B)②）
 		_on_arrival(state, team)
 	return team.tile_pos != old_pos
 
