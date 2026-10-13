@@ -15,7 +15,7 @@
 - 查詢面 `query_memory_panel` **不改名**（R²：3 支床 4 個呼叫點，價值低），函式註解寫「頁名＝情報」。擴欄如下。
 - **payload 是 belief 的純函數**：不得含「N 分鐘前」「距今」等相對現在的欄（`inquiry_writes_bed` 以 JSON 前後比對、`terminal_e2e_bed` 存整個快照，相對欄會讓它們隔 tick 誤紅）。查詢回**絕對 tick**；「N 分鐘前」在 UI 組句時算，在 UI 層驗。
   - **隊伍**：對象、最後所知位置、位置的 tick（**`value.last_tick`**＝位置年齡，轉述時繼承 giver 的；不是收到 claim 的 tick；UI 欄標「位置是 N 分鐘前的」）、親見／聽說（**重用 `_remembered_teams_at` 的謂詞**：source_type=="親見" 且 source_id==ptid，不自寫）、來源、有疑點、關係（**`TeamData.known_reputations`**，隊層 belief；未知印「不明」，不用預設 0.5；不讀 leader.relations／relation_edges）、實力估（若有）。
-    - **staleness**：位置與游標處 `_remembered_teams_at` 過同一道閘（belief_pos 的過期線）。過期的 ⇒ 面板仍列該隊，但位置欄印「（太久，視同不知）」，並從 I7 母體排除。
+    - **staleness**：位置與游標處 `_remembered_teams_at` 過同一道閘（belief_pos 的過期線）。過期的 ⇒ 面板仍列該隊，但位置欄印「（太久，視同不知）」，並從 I7 母體排除。過期與否取決於「現在」⇒ **不放進 payload**（會破 I8 純函數）；payload 只給位置 tick，UI 組句時呼叫同一個過期謂詞（抽成 static 供游標處與面板共用）判定。
     - 有 claim 沒位置（best_estimate 為 {} 或無 tile_pos）⇒「位置不明」。
   - **據點與市集**：讀 `_known_outpost_relations` 同一支，以附身隊 pt 呼叫（游標處 F7 已這樣，player_query_api.gd:432；它讀的是該隊自己的 known_outposts 與自家勢力名冊）。關係值 g 唯一人層讀取是該隊領袖的 relation_edges ⇒ **採 (a)：g＝隊的立場（取自領袖）**，類別標頭一句「關係＝你隊伍領袖的看法」。與游標處一致。
   - **勢力關係**：只列附身隊 belief 裡有的；沒有 ⇒「尚無」。
