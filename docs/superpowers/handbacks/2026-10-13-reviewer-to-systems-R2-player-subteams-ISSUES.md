@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 玩家子隊真的做事（12ff4120a＋dff99dcba）
 topic: R② ＝ **ISSUES,兩處擋**｜①設計自己卡自己:建設走 begin_subteam_construction → start_build（outpost_system.gd:581）內有 TaskArbiter.transition(…"建設", PRIO_DISPATCH),預設來源 "transition",你擴後的 _possessed_blocks 對玩家子隊只放 PLAYER／EVENT／物理反應來源 ⇒ 這一步被 deny ⇒ 子隊卡在 CONSTRUCT,10 天後被強制 release/merge;且蓋好的據點 owner＝子隊 id,玩家召回併回後子隊被 erase ⇒ 據點可能被釋放(無主);②PHYSICAL_REACTION_SOURCES 母體是空的/會開洞——全專案沒有純物理的 source 字串(自衛/逃走根本不經 arbiter,逃與求生走 "unified"/"survival" 與 AI 閒逛同名),且與附身隊已定的規則(威脅/求生【決策】不放行,用事件通知)相反;另:覓食/巡邏沒有主動執行端,S1/S2 的『抵達後會做事』要重寫成與實際機制相符
 ---
