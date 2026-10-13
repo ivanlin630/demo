@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 按 Q 兩刀：客戶端不解釋遊戲鍵＋Esc×2 離開＋情報帶內容／折疊三態（spec 2026-10-13-play-client-no-key-interpretation-HOW）
 # 客戶端不解釋遊戲鍵＋離開不綁 Q＋情報帶內容（spec 2026-10-13-play-client-no-key-interpretation-HOW）
 #   送鍵走 PlayerRepl.press_on（跟玩家 REPL 同一條路）；離開以 text_ui_main.quit_requests 計（床設 suppress_quit，不真的收掉）
 #   Q1  進遭遇戰後送 q ⇒ 程式仍在、仍在戰鬥畫面、沒有要求離開

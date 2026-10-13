@@ -323,8 +323,8 @@ func _process(_delta: float) -> void:
 		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
 		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
 		if not SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
-			_feedback_line.text = _feedback_text(bool(r.get("ok", false)), String(r.get("text", "")))
-			_feedback_line.modulate = _feedback_color(bool(r.get("ok", false)))
+			_write_feedback(_feedback_text(bool(r.get("ok", false)), String(r.get("text", ""))),
+				_feedback_color(bool(r.get("ok", false))))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 	if _feed_rows.size() > 100:
@@ -1230,7 +1230,7 @@ func _quit_game() -> void:
 func _disarm_esc() -> void:
 	_esc_armed = false
 	if _feedback_line != null and _feedback_line.text == _feedback_text(true, ESC_ARM_HINT):
-		_feedback_line.text = ""
+		_write_feedback("", _feedback_line.modulate)
 
 static func _feedback_text(ok: bool, msg: String) -> String:
 	return ("✓ " if ok else "✗ ") + msg
@@ -1490,8 +1490,13 @@ func _refuse_unbound_key(mode_label: String, _keycode: int) -> void:
 func _set_feedback(ok: bool, msg: String) -> void:
 	if _feedback_line == null: return
 	if str(msg).is_empty(): return
-	_feedback_line.text = _feedback_text(ok, msg)
-	_feedback_line.modulate = _feedback_color(ok)
+	_write_feedback(_feedback_text(ok, msg), _feedback_color(ok))
+
+# ★結果行的【唯一寫入點】（延後裁定 feedback-line-label-is-the-only-store-for-feedback 數寫入點 ≤ 2）：
+#   令結算、_set_feedback、Esc 撤提示三個來源都走這裡 ⇒ 將來把 feedback 搬成真的狀態欄位只改這一支
+func _write_feedback(text: String, color: Color) -> void:
+	_feedback_line.text = text
+	_feedback_line.modulate = color
 
 func _build_state_str() -> String:
 	var ct: Dictionary  = _cached_snapshot.get("controlled_team", {})
