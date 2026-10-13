@@ -273,6 +273,11 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 	team.active_orders = kept
 	# WS-2b：同步市集看板（鏡像權威）——過期/已滿足/已消失單從看板清，避免商隊讀幽靈單撲空。
 	_sync_board(state, team)
+	# ★#12（附身隊後續 甲）：以上是到期與退貨＝物理與記帳，照跑；以下 2–4 是 AI 替這隊決定掛什麼單 ⇒ 附身隊不跑。
+	#   玩家自己的單走 player_command_api._post_order → post_order，不經這裡。
+	if team.possessed:
+		if Probe.enabled: Probe.bump("order.skip_possessed")
+		return
 	# M3：掛單門檻走 effective_holding + 人格化 reserve（貪婪守/絕境鬆手，活命糧 floor）。
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 建造/施工隊不賣資源（背負建材上路，賣光→抵達建不了）
