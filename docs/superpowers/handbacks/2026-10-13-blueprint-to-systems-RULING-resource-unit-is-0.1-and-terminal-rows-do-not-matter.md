@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 兩則裁定
 topic: ①糧與幣最小單位 0.1（顯示側併回饋 #5、物理量化深層批）｜②終端屏高用戶不在乎、終端 UI 暫時：地圖整寬上下排固定做法，不做三態自適應
 ---

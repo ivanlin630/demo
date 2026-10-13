@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 勒索零／近零所得（3314ff226）
 topic: R② ＝ **小 ISSUES（五處,同版補,不需再審）**｜①『accepted 之後把它當成功的讀者』母體是【空的】（全 scripts 只有 _action_extort:938 讀它,且只在【拒絕】時用）⇒ X3 沒東西可紅;判準留在訊息層,別在 sim 造『得手』欄;②改法 3『接受路徑要寫 _record_extorted』已成立（interaction_system.gd:508,接受/拒絕共呼）,且嚴重度恆 0.25（taken/before≡TRIBUTE_RATE）⇒ X4『量與實際轉移一致』是恆真;③X6 的『接受機率』錯字面——tribute_eval 是確定性 score>threshold,且怨在第 2 筆就會成形;④『一分鐘內勒索兩次』造不出近 0（每次只拿剩餘的 25%）⇒ X1 的佈置必須直接設庫存;⑤顯示精度的單位:玩家對帳用的是整數資源面板,0.1 的 snapped 不是『玩家看得到』的精度;另有一格鄰近缺口:玩家是被勒索方時結果句被丟掉
 ---
