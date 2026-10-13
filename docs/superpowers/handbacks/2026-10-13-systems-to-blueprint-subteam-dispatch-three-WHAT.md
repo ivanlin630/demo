@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 派遣子隊六任務全斷（QA 故事稽核判決 8b8df4d38）——三件 WHAT 請你裁
 topic: ①玩家選單「安頓」要哪個語意 ②「建設」要不要讓玩家選蓋什麼 ③玩家派出的子隊能不能自主決策
 ---
