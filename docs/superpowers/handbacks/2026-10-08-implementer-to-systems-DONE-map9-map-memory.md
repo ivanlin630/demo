@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 票 #9 地圖記憶（spec 2026-09-29-map-memory-and-godview-leak-HOW＋裁甲 0995cbbe2）
 topic: ★交件、已併 main 20e37f90d（分支 tip 0cae4181a）｜全電池 118 支綠（5c05aa423，BATTERY_RC=0，摘要 docs/measurements/.battery/49104-20261008-180046.txt 在 .worktrees/mm2neg）｜world-fp 不變（707534a…）｜負對照 9 支全紅｜★順手修一個床抓到的洞：游標處在「沒去過」的格提早 return，地圖畫了 a? 游標處卻只說沒去過
 ---
