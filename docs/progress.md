@@ -3731,3 +3731,4 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 顧問深化（用戶要「之後提醒我」）：玩家可見批全合併、第五輪回饋收斂後由藍圖向用戶提；不自動派工（藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-advisor-deepening-remind-user-after-ui-batches）
 - 回饋 #6 ③ 情報面板（新鍵；附身隊所知的隊伍／據點市集／糧源／勢力關係，全走 belief；與地圖 a? 和游標處明細同一份資料的第三個切面）：spec 待寫，歸玩家可見批，位置在本批之後、游標即選中之前（藍圖信 2026-10-13-blueprint-to-systems-TICKET-intel-panel-and-intel-event-folding）；①② 已併進按 Q 那張第 4 項
 - 深層批第一張（用戶裁「先弄 1」，藍圖 4761fa563）：社交層進引擎框架票——提案／回應／同格打談併同一把秤、效用＝真實後果、禁門檻梯、tap 前綴 social.（挖角用 social.poach）；取代舊「回應提案進引擎」，併入挖角票與戰時徵用 v2；第二群（領主側每日試試看鏈）用戶討論中不開。過渡：通商提案暫停併進行動稽核票 ④
+- 現況（systems 2026-10-14）：三張做完只差全電池，電池因用戶遊戲（player_repl ×2）在跑而不可判——按 Q 第二刀 fix/play-client-keys b76cbc1cc｜終端輸入兩刀 fix/terminal-input-prompts 45c2f251c｜同盟不搬領袖 fix/alliance-leader 481cac31b（量測：3 seed「領袖被搬」0 次 ⇒ NPC 端照拒；負對照 A1–A7 待收）。改電池前置條件（player_repl 不計）被 systems 權限擋、已呈用戶待准。實作端用量到上限暫停；之後：大地圖 → 勒索零所得 → 行動稽核 → 玩家子隊 → 附身隊三件 → 移動預計時間 → 情報面板 → 游標即選中
