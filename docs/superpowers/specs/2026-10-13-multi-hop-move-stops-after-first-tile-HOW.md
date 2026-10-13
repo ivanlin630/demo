@@ -37,12 +37,25 @@
      先 git grep `current_task ==`／`match .*current_task` 讀者，逐處報「新值走哪一支（預設／明列）」，有會誤判成別的 task 的就停手回我
    ②抵達要 release：movement_system._step_team 抵達兩處（:344/:366 之後的 _on_arrival）task＝TRAVEL ⇒ TaskArbiter.release
    ③cancel_move 同步 release
-(#12 執法點) 附身隊的決策寫入在【咽喉】擋，不在 131 條迴圈逐條擋：
-   ④task_arbiter：try_set／transition 對附身隊只接受 allowlist 來源（player_*、遭遇／戰鬥、強制事件）；其餘 deny＋Probe "arbiter.deny.possessed.by.<source>"
-   ⑤抗命窗口（task_arbiter.gd:233 PRIO_PLAYER 被 PRIO_DISPATCH 挑戰 ⇒ leader 個性判定）對附身隊不適用（附身＝玩家就是那個 leader；#12：決策層不得寫）⇒ 附身隊跳過抗命判定（這一條會把「新的靜默停」堵掉）
-   ⑥不經 arbiter 的 move_target 寫者（movement.process :60/:97/:100、set_strategic_move、事件驅動約 25 處）：
-     不改造，用第一顆的寫入觀察當守衛——30 天、玩家附身、玩家下令之後的每一次 move_target 寫入，寫入者必須在 allowlist；違反逐筆印
-   ★附身隊判定只用一個謂詞：person.team_id 取玩家隊那一支（R²：faction_ai 守衛用 leader_id==player_id，附身／繼承後會分叉）——新程式一律用同一支，舊守衛不在本票改
+(#12 執法點；R² 第二輪改寫 2026-10-13）
+   ⓪附身是一個【事實欄】：TeamData.possessed（bool），唯一寫入者 WorldState.sync_possession()——開局、附身改變、繼承（choose_heir）、玩家隊消滅時呼叫；
+     值＝(team_id == get_player_team_id())；★漂移守衛：P8 每 tick 斷言「possessed 為真的隊＝get_player_team_id() 那一支，且只有一支」
+     （理由：release()／set_strategic_move() 沒有 state 參數、呼叫點 61＋處，不改簽章就讀不到「誰被附身」）
+   ④try_set／transition 對 possessed 隊的規則（以【事實】為鍵，不以來源字串前綴）：
+     priority ≥ PRIO_THREAT（威脅／求生／戰鬥＝物理與事件的反應）⇒ 照 arbiter 既有規則
+     priority < PRIO_THREAT 且 _source 不在 PLAYER_SOURCES（精確集合，不用前綴；今天＝{"player_rest","player_settle","player_move"}＋:1184 那支的來源，實作端 grep 補齊並逐字列）⇒ deny＋Probe "arbiter.deny.possessed.by.<source>"
+     ★這一條也蓋「附身隊閒著（priority 0）時 AI 來寫」——#12 不只保護玩家下的令，也保護沒下令的時候
+     強制事件：走它自己的寫入口（world_state 強制事件唯一入口）；若它要改 task，來源字串加進 PLAYER_SOURCES 旁的 EVENT_SOURCES（精確集合）
+   ⑤抗命窗口（task_arbiter.gd:233）對 possessed 隊跳過——理由：附身隊的決策權不屬 leader 個性（繼承後 leader 換人也一樣）
+   ①同層換手（R²：task_arbiter.gd:184 嚴格大於、同層分支只認 DISPATCH/THREAT/SURVIVAL）：
+     現任 priority＝PRIO_PLAYER 且新來源 ∈ PLAYER_SOURCES ⇒ 允許換手（玩家改自己的令；M 連按、M 打斷 REST）
+     try_set 回 false ⇒ move_to 必回結果行「不能移動：<擋它的現任 task>」（不准靜默）
+   ②release()（task_arbiter.gd:338，呼叫點 61）：加預設參數 _source := ""；
+     possessed 隊且現任 priority＝PRIO_PLAYER ⇒ 只有 _source ∈ {"player_cancel","arrival"}＋priority ≥ PRIO_THREAT 的接手才放；其餘不放＋Probe "arbiter.release_denied.possessed"
+     ★抵達（movement _on_arrival 後）與 cancel_move 明傳來源；其餘 59 處不用改（預設 "" ⇒ 對附身隊的玩家令不生效）
+   ⑥set_strategic_move（sim_runner.gd:887 等）：possessed 隊直接 return（戰略佈點是 AI 決策）
+     其他不經 arbiter 的 move_target 寫者（movement.process :60/:97/:100、事件驅動約 25 處）：用第一顆的寫入觀察當守衛（P5）
+   ★附身判定只讀 team.possessed（不再用 leader_id==player_id）；舊守衛不在本票改，但 P8 漂移守衛保證兩者在附身隊上一致
 (C) 真的無路：下令時算路徑；不可達 ⇒ 結果行「無法抵達 (q,r)：原因」不下令；途中路斷 ⇒ 事件「停下：到 (q,r) 的路斷了」
 UI（R²：不開第三欄位）：M 也設既有 _arrive_target；「抵達」只在 pos＝_arrive_target 時印；目標被清而人不在 _arrive_target ⇒ 事件「停下：<原因>（停在 (q,r)）」
 (A) 降為量測：P5 改成「⑥ 的寫入觀察在 30 天內 allowlist 外寫入＝0」
@@ -55,6 +68,9 @@ P2 下令到兩格外的可達格 ⇒ 走到；途中不印抵達
 P3 下令到不可達格（佈置：四周山或地圖外緣隔絕）⇒ 結果行「無法抵達」，move_target 不被寫
 P4 目標被別的原因清掉（佈置：途中 cancel）⇒ 事件流印「停下：…」
 P5 30 天、玩家附身、真世界：附身隊 task／move_target 的 allowlist 外寫入＝0（逐筆印）｜反向：拿掉 ④ ⇒ >0 必紅
+P5d 連按 M：TRAVEL 進行中再下 M 到別格 ⇒ 換目標、結果行說開始走向新格｜REST 中下 M ⇒ 換成 TRAVEL
+P5e release 守：佈置一個 AI 路徑對附身隊呼 release()（預設來源）⇒ TRAVEL 與 move_target 不變
+P8 possessed 漂移守衛：30 天每 tick「possessed 隊＝get_player_team_id() 那一支且唯一」；佈置繼承一次 ⇒ 換隊後仍成立
 P5b 抗命：佈置 PRIO_DISPATCH 挑戰附身隊的 PRIO_PLAYER ⇒ 不換手、不加 stress｜非附身隊照舊會抗命（反向格）
 P5c 抵達 release：走到後 task＝IDLE、priority 0
 P7 （藍圖）玩家下令後閒置 24 小時：move_target 與 task 逐 tick 不變，除非事件流同 tick 有一筆解釋它為何變（遭遇／強制事件／抵達）｜反向：拿掉 (A) 的排除 ⇒ 出現無解釋的變化 ⇒ 必紅

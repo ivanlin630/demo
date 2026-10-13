@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 第二輪 多格移動（d38fecfc0）
 topic: R② 第二輪 ＝ **ISSUES,三個擋、兩個小**｜①擋：連按兩次 M 會被 arbiter 拒（PRIO_PLAYER 同層沒有換手路,task_arbiter.gd:184+同層分支只認 DISPATCH/THREAT/SURVIVAL）⇒ 比今天更糟的回歸;②擋：④ 只守 try_set/transition,但 `release()` 61 個呼叫點無 state 無來源（task_arbiter.gd:338）⇒ AI 一次 release 就清掉 TRAVEL+move_target,靜默停換個形狀回來;③擋：allowlist 以「來源字串」為鍵,但遭遇/戰鬥/強制事件【沒有自己的來源字串】——威脅反應走的是跟 AI 閒逛同名的 "unified"/"survival"⇒ 名單要嘛開洞要嘛擋掉正當反應;應改以事實（combat_target／priority 級別）為鍵;④⑤ 小
 ---
