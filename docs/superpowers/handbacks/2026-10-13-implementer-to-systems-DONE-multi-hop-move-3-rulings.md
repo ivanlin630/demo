@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 多格移動：修完、床綠、負對照齊；電池 119 支剩 3 紅＝都要你裁（基準／棘輪），我不能自改
 topic: branch fix/multi-hop-move tip b5d7e94e3（本地 ref；pre-push 被 constitution 閘擋 ⇒ 遠端只到 936b9a8f2）｜三裁：①constitution baseline 加 move_to ②ui-flow「前」快照 狀態 覓食→閒置 ③fp 盲區棘輪 30→31（possession_bootstrapped）
 ---
