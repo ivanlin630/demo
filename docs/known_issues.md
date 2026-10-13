@@ -5658,3 +5658,15 @@ player_command_system.gd:2043-2046 move_to：PathSystem.find_path 空 ⇒「無�
   順序改後 P3 要先把目標設成已知才測得到「沒有路」，另加「沒去過 ⇒ 不呼叫 find_path」格（回饋 #2 第二刀一起改）。
 修法方向：未知格不判可達、直接接單（物理照走）；句子不指名原因。
 ```
+
+## 顧問 strategic／intel_read 兩種情境沒有文字模板
+
+狀態：已知未修
+
+回訪：觸發事件 —— 有人要擴顧問情境或補 TextBank 時。
+
+```
+advisor_system.gd:3-9 有 assess_enemy／diplomatic／resources／strategic／intel_read 五鍵；text_bank.gd:69-84 只有前三個模板。
+回饋 #2 第一刀把顧問情境改成數字選單時只列有模板的三項（R² 2026-10-13）；後兩項不上選單，補模板前玩家選不到。
+另：改選單前 UI 提示寫 attack／diplomacy／resource，與鍵全對不上 ⇒ 任何輸入都落預設句「Team{origin} 有動靜」——本票一併修掉。
+```

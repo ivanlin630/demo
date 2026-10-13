@@ -23,6 +23,11 @@
        修（R² 補）：numeric 與 string 兩型統一成「取出 callback、全清（欄位、buffer、模式）、再呼叫」（string 分支 :645-653 現在是呼叫後不清、留 stale，反向不對稱）。「無 callback ⇒ 推進 N tick」的隱含分支**整段刪**；G 給一個真 callback；`_open_input` 的 callback 必填。
      - **藍圖追加三（3b70da57a，用戶撞到顧問面板卡輸入）**：20 處入口的面板對照表在藍圖信尾（P1c 對帳用）。
        - 三個**文字輸入**要玩家打英文：勢力目標（:2603）、下令成員隊任務（:2691）、顧問情境關鍵字（:3212）⇒ **改成有限選單按數字，不准打字串**。選單項目從該輸入原本接受的那份集合產生（parser 認得的字就是選單，一個來源），選單印在面板上、提示列只印「選 (1~N): _」。改完後若已無文字輸入入口，string 型可保留但不得有入口（交件信寫明）。
+       - **三處集合（R² 指出兩處沒有現成集合，systems 定）**：
+         ① 顧問情境：UI 提示的 attack／diplomacy／resource 與 `AdvisorSystem` 鍵（advisor_system.gd:3-9）對不上 ⇒ 現況任何輸入都落到預設句（既有活 bug）。選單＝`AdvisorSystem` 鍵 ∩ `TextBank` 有模板者（assess_enemy／diplomatic／resources 三項）；strategic／intel_read 沒有模板 ⇒ 不上選單（不在本票補模板，記 known_issues）。P1h 斷言每個選項的輸出都不是 fallback 句。
+         ② 下令成員隊任務：sim 側定 `PlayerCommandSystem.ORDERABLE_TASKS`（具名 const，內容＝現行子隊六項：待機／覓食／安頓／巡邏／建設／偵查）；`SUBTEAM_TASK_CHOICES`（text_ui_main.gd:10-18）改讀它（一份）。`_action_order_faction_member`（player_command_system.gd:1396-1408）驗成員資格並**拒絕不在集合的任務**；信使抵達端（interaction_system.gd:852-868）同樣驗（防舊存檔／其他入口）。
+         ③ 勢力目標：內聯字面 `["expand","defend","trade_net",""]`（player_command_system.gd:1373）提成具名 const，選單讀它。
+         ④ 原本「空字串＝清除」的入口，選單給一個明確的「清除」選項（不靠空 Enter）。
        - 兩條數字鏈（派遣五步、下令子隊三步）都中「callback 被抹」⇒ 床**各走到底**（P1f、P1g）。
      - **`_open_input` 帶 origin**：Esc 回 origin；鏈式入口（一個輸入接下一個）沿用原 origin。
      - **輸入模式開著時，開它的那個面板留在畫面上**（子模式面板照畫），輸入列連已鍵入字元一起印。Esc ⇒ 回到那個面板（不是回大地圖）。
