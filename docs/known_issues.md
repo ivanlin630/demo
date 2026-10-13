@@ -5630,3 +5630,16 @@ move_target（附身隊進不了攻擊 task ⇒ 目前不可達，寫者在）�
 現況：world_events.gd ADVANCE_STOP_KINDS 沒有這一項，也沒有「開始挨餓」的事件種類（只有 member_died 帶餓死）。
 排程：多格移動 merge 後的小票。
 ```
+
+## AI 估路程（_estimate_eta_to）漏晝夜倍率，與物理不同尺
+
+狀態：已知未修
+
+回訪：觸發事件 —— 深層批開動時（等第五輪用戶回饋期間不動）。
+
+```
+faction_ai_system.gd:7612 `_estimate_eta_to` → PathSystem.eta_ticks(team, path.cost)：只除 stamina_factor；
+物理 movement_system.gd move_cost_pure 另乘晝夜（DayNightSystem.get_speed_mult，夜 0.5）、超載、車輛，且每格用腳下地形。
+玩家側由「移動預計時間＝同一把尺」票修（spec 2026-10-13-move-eta-same-ruler-HOW），AI 側改了動決策與 world-fp ⇒ 歸深層批。
+修法方向：AI 改用同一支 estimate_travel_ticks（該票新增）。
+```
