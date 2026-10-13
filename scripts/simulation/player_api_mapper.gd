@@ -923,6 +923,13 @@ static func map_story_end(state: WorldState) -> Dictionary:
 #   ·★誠實限：野獸種類讀 `state.teams[tgt].beast_kind`（spec §2 指定的判準）——那是身分不是位置；
 #     目標已不在 `state.teams`（死了／散了）⇒ 當作非野獸（**不**因此跳過，否則「它死了」會從真值漏進來）
 const BEAST_LABEL: Dictionary = {"deer": "鹿群", "boar": "野豬", "bear": "熊", "wolves": "狼群"}
+# ★威脅句模板（spec 2026-10-13-terminal-input-prompts 改法 3）：句子有界 ⇒ 頂列照模板預留寬度、句子本身不再被截
+#   ★產生者與排版讀同一份（排版用它們算最長可能寬度）
+const THREAT_ENGAGED: String = "交戰中：%s"
+const THREAT_ENEMY: String = "Team%d 敵對，最後所知 %d 格"
+const THREAT_BEAST: String = "%s有%s"
+const THREAT_NONE: String = "（無）"
+const BEARINGS: Array = ["東邊", "東北", "北邊", "西北", "西邊", "西南", "南邊", "東南"]   # _bearing 的八方位（同格另回「附近」）
 
 static func map_threat_line(state: WorldState) -> String:
 	var pid: int = state.player_id
@@ -935,7 +942,7 @@ static func map_threat_line(state: WorldState) -> String:
 	if state.encounter_active and tid in [state.encounter_attacker_id, state.encounter_defender_id]:
 		var other: int = state.encounter_defender_id if tid == state.encounter_attacker_id \
 			else state.encounter_attacker_id
-		return "交戰中：%s" % _threat_name(state, other)
+		return THREAT_ENGAGED % _threat_name(state, other)
 	# ②③ 一個迴圈（★P5：本函式體內呼叫 best_estimate 的地方 ＝ 1）
 	var n: int = VisionSystem.vision_range(state, t, DayNightSystem.new().get_vision_mult(state))
 	var enemy_id: int = -1
@@ -962,10 +969,10 @@ static func map_threat_line(state: WorldState) -> String:
 			if d < enemy_d:
 				enemy_d = d; enemy_id = g
 	if enemy_id != -1:
-		return "Team%d 敵對，最後所知 %d 格" % [enemy_id, enemy_d]
+		return THREAT_ENEMY % [enemy_id, enemy_d]
 	if beast_id != -1:
-		return "%s有%s" % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
-	return "（無）"
+		return THREAT_BEAST % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
+	return THREAT_NONE
 
 static func _threat_name(state: WorldState, team_id: int) -> String:
 	var tt: TeamData = state.teams.get(team_id)
@@ -988,7 +995,7 @@ static func _bearing(from: Vector2i, to: Vector2i) -> String:
 	if absf(x) < 0.01 and absf(y) < 0.01:
 		return "附近"
 	var ang: float = rad_to_deg(atan2(-y, x))   # 0 ＝ 東、90 ＝ 北
-	var names: Array = ["東邊", "東北", "北邊", "西北", "西邊", "西南", "南邊", "東南"]
+	var names: Array = BEARINGS
 	var idx: int = int(round(fposmod(ang, 360.0) / 45.0)) % 8
 	return String(names[idx])
 

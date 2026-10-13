@@ -22,6 +22,29 @@ const SURRENDER_TRANSFER_RES: Array = [
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 var _encounter:   EncounterSystem    = EncounterSystem.new()
+# ★玩家可下令的任務（spec 2026-10-13-terminal-input-prompts 追加三 ②，systems 定＝子隊那六項）：[任務常數, 顯示名]
+#   ★一份：UI 的子隊任務選單與「下令成員隊」選單都讀它；action 與信使抵達端驗同一份（拒絕未知任務）
+const ORDERABLE_TASKS: Array = [
+	[TeamData.TASK_IDLE,   "待機"],
+	[TeamData.TASK_FORAGE, "覓食"],
+	[TeamData.TASK_SETTLE, "安頓"],
+	[TeamData.TASK_PATROL, "巡邏"],
+	[TeamData.TASK_BUILD,  "建設"],
+	[TeamData.TASK_SCOUT,  "偵查"],
+]
+# ★勢力目標集合（追加三 ③：原本內聯在 _action_set_faction_goal 的字面）；空字串＝清除指定目標
+const FACTION_GOALS: Array = ["expand", "defend", "trade_net"]
+const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（跟隨 AI）"}
+
+static func faction_goal_label(g: String) -> String:
+	return String(FACTION_GOAL_LABELS.get(g, g))
+
+static func is_orderable_task(t: String) -> bool:
+	for e in ORDERABLE_TASKS:
+		if String(e[0]) == t:
+			return true
+	return false
+
 var _subteam:     SubteamSystem      = SubteamSystem.new()
 var _action_registry: Dictionary = {}
 
@@ -1165,6 +1188,11 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 		return { "ok": false, "msg": "未指定子隊統領" }
 	if pop_count < 1 or pop_count >= pt.population:
 		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
+	# ★目標格的任務前提（同一支，UI 也呼叫它）——有目標格才判（-1,-1 ＝ 舊流程的就地派遣）
+	if move_tgt != Vector2i(-1, -1):
+		var tc: Dictionary = precheck_dispatch_task(state, pt, move_tgt, task)
+		if not bool(tc["ok"]):
+			return { "ok": false, "msg": "不能派往 (%d,%d)：%s" % [tq, tr, String(tc["reason"])] }
 	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
 	if sub_id == -1:
 		return { "ok": false, "msg": "派遣失敗" }
@@ -1370,8 +1398,8 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 	if pt.faction_id == -1:
 		return { "ok": false, "msg": "玩家不在勢力中" }
 	var goal9: String = str(state.player_state.get("faction_goal_input", ""))
-	if goal9 not in ["expand", "defend", "trade_net", ""]:
-		return { "ok": false, "msg": "無效目標（expand/defend/trade_net/空字串清除）" }
+	if goal9 != "" and goal9 not in FACTION_GOALS:
+		return { "ok": false, "msg": "無效目標（%s／空字串清除）" % "/".join(FACTION_GOALS) }
 	var f9: FactionData = state.factions.get(pt.faction_id)
 	if f9 == null:
 		return { "ok": false, "msg": "勢力不存在" }
@@ -1390,6 +1418,11 @@ func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamDa
 		return { "ok": false, "msg": "目標成員不存在" }
 	if m_task.is_empty():
 		return { "ok": false, "msg": "未指定任務" }
+	# ★追加三 ②：驗成員資格＋拒絕不在集合的任務（舊版只查非空 ⇒ 打錯字會原樣變成別隊的 current_task）
+	if pt.faction_id == -1 or member_team.faction_id != pt.faction_id:
+		return { "ok": false, "msg": "Team%d 不是你勢力的成員" % member_team_id }
+	if not is_orderable_task(m_task):
+		return { "ok": false, "msg": "不能下令這個任務：%s" % m_task }
 	if pt.population < 2:
 		return { "ok": false, "msg": "人數不足以派信使" }
 	# 從 named_members 選一非 leader 的成員當信使
@@ -2034,6 +2067,45 @@ func inspect_member(state: WorldState, person_id: int) -> Dictionary:
 		"equipment": p.equipment
 	}
 
+# ★玩家指定目標格的可達判斷（spec 2026-10-13-terminal-input-prompts 第二刀；多格移動與派遣共用一支）
+#   順序：不在地圖上 → 沒去過（玩家所知）⇒ 回原因、【不呼叫 find_path】→ 腳下（合法）→ 找路
+#   ★為什麼未知格要擋在找路之前：找路讀真地圖 ⇒ 對沒去過的格回「沒有路」＝把那格周圍的真地形報給玩家（感知鐵律）
+#   ★不可達的句子不指名原因（山只是貴、不是牆；空集近乎只有地圖洞）⇒ 只說「沒有路」
+#   回 {ok, status: off_map|unknown|here|reachable|no_path, reason}
+#   ★名字帶 precheck_：純查詢的前置判斷（ok:true 不帶句子，不是結果句；success-sentence 床依此前綴排除）
+static func precheck_target(state: WorldState, pt: TeamData, pos: Vector2i, vision_mult: float = 1.0) -> Dictionary:
+	var k: Dictionary = PlayerQueryApi.tile_knowledge(state, pos, vision_mult)
+	match String(k.get("status", "")):
+		"off_map":
+			return {"ok": false, "status": "off_map", "reason": "(%d,%d) 不在地圖上" % [pos.x, pos.y]}
+		"no_team":
+			return {"ok": false, "status": "off_map", "reason": "你已沒有隊伍"}
+		"unvisited":
+			return {"ok": false, "status": "unknown", "reason": "還沒去過／看過 (%d,%d) 這格" % [pos.x, pos.y]}
+	if pt.tile_pos == pos:
+		return {"ok": true, "status": "here", "reason": ""}
+	if PathSystem.find_path(state, pt.tile_pos, pos).path.is_empty():
+		return {"ok": false, "status": "no_path", "reason": "到 (%d,%d) 沒有路" % [pos.x, pos.y]}
+	return {"ok": true, "status": "reachable", "reason": ""}
+
+# ★派遣任務對目標格的前提（systems 501b884b5）：沒去過的格——偵查可以去；安頓、建設要先知道那格的地形 ⇒ 拒並說原因
+#   ★其餘任務（偵查／待機／覓食／巡邏）放行（藍圖確認 44d310612：安頓、建設要讀那一格）
+const TASKS_NEED_KNOWN_TILE: Array = [TeamData.TASK_SETTLE, TeamData.TASK_BUILD]
+
+static func precheck_dispatch_task(state: WorldState, pt: TeamData, pos: Vector2i, task: String, vision_mult: float = 1.0) -> Dictionary:
+	var chk: Dictionary = precheck_target(state, pt, pos, vision_mult)
+	if String(chk["status"]) == "unknown":
+		if task in TASKS_NEED_KNOWN_TILE:
+			return {"ok": false, "reason": "%s要先知道那格的地形（%s）" % [_task_label(task), String(chk["reason"])]}
+		return {"ok": true, "reason": ""}
+	return {"ok": bool(chk["ok"]), "reason": String(chk["reason"])}
+
+static func _task_label(task: String) -> String:
+	for e in ORDERABLE_TASKS:
+		if String(e[0]) == task:
+			return String(e[1])
+	return task
+
 func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 	var pt: TeamData = get_player_team(state)
 	if pt == null:
@@ -2048,8 +2120,11 @@ func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 	if pt.combat_target != -1:
 		return { "ok": false, "msg": "戰鬥中，不能移動" }
 	# (C) 下令時就算路：不可達 ⇒ 不下令、說原因（不是走一格再停）
-	if PathSystem.find_path(state, pt.tile_pos, target_pos).path.is_empty():
-		return { "ok": false, "msg": "無法抵達 (%d,%d)：沒有路（被山或地圖邊緣隔開）" % [target_pos.x, target_pos.y] }
+	#   ★共用判斷 precheck_target（systems 裁 a）：沒去過的格【不預判】、照樣下令——往迷霧走是探索；
+	#     真的走不通由行進中的 path_broken 說「到 (q,r) 的路斷了」。舊句「被山或地圖邊緣隔開」對未知格洩露真地形，拿掉
+	var chk: Dictionary = precheck_target(state, pt, target_pos)
+	if not bool(chk["ok"]) and String(chk["status"]) != "unknown":
+		return { "ok": false, "msg": "無法抵達 (%d,%d)：%s" % [target_pos.x, target_pos.y, String(chk["reason"])] }
 	if not TaskArbiter.try_set(state, pt, TeamData.TASK_TRAVEL, target_pos, TaskArbiter.PRIO_PLAYER, "player_move"):   # gate-ok：玩家指令（PRIO_PLAYER）
 		return { "ok": false, "msg": "不能移動：現在有更急的事" }   # ★不准靜默（spec ①）；措辭同休息那句
 	# ★M ①：結果句說預計多久（讀既有移動成本 PathSystem.eta_ticks；1 tick ＝ 1 分鐘）

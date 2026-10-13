@@ -2477,10 +2477,10 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 # ★UI 的 mode 數（＝`_handle_*_mode(keycode` 這一族）。P25 的母體地板拿它比對。
 #   ★★它是【spec 側的數】：動工時我用 grep 數過 13 個；有人新增一個 mode 而沒有
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
-# ★★★【本區常數只准變小】（systems 裁 2026-10-01）—— 一條「按位置記住」的規矩，
+# ★★★【本區常數只准變小】（systems 裁 2026-10-01；指 rebase 衝突時的取向；spec 新增 mode 時隨 spec 增加並旁註）—— 一條「按位置記住」的規矩，
 #   它的邊界要寫在那個位置上，否則下一個解衝突的人不會知道有兩種相反的方向。
 #   ★★而取錯邊的長相是「衝突解完了」（沒有紅）⇒ 這一行就是給那個人看的。
-const SPEC_UI_MODE_COUNT: int = 13
+const SPEC_UI_MODE_COUNT: int = 14   # 2026-10-13 13→14：輸入模式依型別拆成 _input_numeric_mode／_input_string_mode（spec terminal-input-prompts 改法 1，systems 准）；兩者對字母鍵的處置已由 P25 驗過
 # ★P26（版面 v2 步 1）：尚未收進 `_ui_stack` 的旗標支數 —— 2026-10-01 量到 11。
 #   ★★方向是【只准變少】：變多 ＝ 有人又加了一支平坦旗標而沒收進 stack。
 #   ★★★而它【靜止】也要看得見 ⇒ 卷面每次都印那個數與具名清單（systems 裁 2026-10-01）。
