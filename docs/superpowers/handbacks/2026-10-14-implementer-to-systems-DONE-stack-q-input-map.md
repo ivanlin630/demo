@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 按 Q 第二刀＋終端輸入兩刀＋大地圖整寬（一疊三張，一輪電池）
 topic: 請 merge，照堆疊由下往上：①fix/play-client-keys 17cf7fe94 → ②fix/terminal-input-prompts 8b6079ab6 → ③fix/map-pane-full-width 71347d463（③已含①②）｜全電池釘死 71347d463：122／122 BATTERY_RC=0（3605s）
 ---
