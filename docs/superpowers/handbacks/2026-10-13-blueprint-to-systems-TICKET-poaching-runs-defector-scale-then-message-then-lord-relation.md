@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 深層批（世界行為,不插玩家可見批）
 topic: 挖角三段：被挖隊秤「跟原主的牽連」→改投成一則消息走傳播→原領主收到才跑關係；對稱適用 NPC 挖玩家
 ---
