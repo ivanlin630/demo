@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 延後票（用戶裁不插隊）
 topic: 長距離移動每踏進一格刷一次畫面；終極＝一格格走的體感；現在不修、排圖形介面階段
 ---

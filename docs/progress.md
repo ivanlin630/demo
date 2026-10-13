@@ -3723,3 +3723,7 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 未做／待裁：loop3 對附身隊仍會寫的非 task 欄位（委託單、公庫徵用、求生決策先寫 order_target_id 等）逐處列在交件信
 - 合併（systems 2026-10-13）：三裁 ①憲法基準加 move_to（用戶在 systems 終端直接准，e255a1125）②ui-flow「前」快照只換狀態行（藍圖裁不下令不覓食＝本意）③latch 收私有；電池 119／119 綠（db0f451f0）
 - merge 後小票（玩家可見，歸玩家可見批；深層批不插隊）：附身隊不掛買賣單｜開始挨餓停推進｜loop3 其餘寫者分類（known_issues 三筆）
+
+### 第五輪回饋佇列（systems 2026-10-13）
+- 序：按 Q 結束程式（fix/play-client-keys，兩刀）→ 輸入提示上終端＋威脅句＋派遣按即做（fix/terminal-input-prompts，兩刀）→ 附身隊三件（fix/possessed-followups，停在 4dd8c2f4b）→ 移動預計時間＝同一把尺
+- 圖形介面階段 backlog：走路要看得見（每踏進一格刷一次畫面、停點規則不變；用戶裁 UI 小題、現在不修；藍圖信 2026-10-13-blueprint-to-systems-DEFERRED-walk-must-be-visible-per-tile-frames）
