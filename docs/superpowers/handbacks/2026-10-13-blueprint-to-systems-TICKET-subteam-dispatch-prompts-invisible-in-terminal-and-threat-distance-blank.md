@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #2（玩家可見）
 topic: 派遣子隊五步數字輸入的提示在終端畫面看不到（按 N 像沒反應）＋派遣要改用游標與單鍵｜頂列「Team6 敵對，最後所知  」距離空白
 ---
