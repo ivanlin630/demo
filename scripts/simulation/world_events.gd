@@ -75,6 +75,7 @@ const FUNC_KINDS: Array = [
 	# ══ #8-0（spec 2026-10-13-alliance-never-moves-faction-leader）：據點易主 —— 寫入點在 OutpostOwnerBank.set_owner（單寫者）══
 	#   ★只在玩家相關時 emit、wake_thinking=false（NPC↔NPC 易主不進匯流排）
 	"outpost_owner_changed",
+	"resident_changed_faction",   # ★#8-2 登記居民改投別的勢力（地主要知道；玩家相關才發）
 ]
 
 # ③狀態跨線型（本刀新增偵測點）
@@ -102,13 +103,13 @@ const KIND_LABEL: Dictionary = {
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
 	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "hostile_adjacent": "敵人逼近",
-	"outpost_owner_changed": "據點易主",
+	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
 }
 # ══ ★M 票 §2：推進的停點（具名集合，唯一一份）—— 推進碰到這幾種【涉及玩家隊】的事件就停在那一 tick ══════════════
 #   找上門／提案到達（強制事件）、被攻擊或遭遇開始、敵對隊進入同格或相鄰格、成員死亡或離隊
 #   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
 const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "hostile_adjacent",
-	"member_died", "member_left", "outpost_owner_changed"]
+	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction"]
 
 # 玩家事件匯流排上 seq0 之後第一筆停點事件（kind ∈ ADVANCE_STOP_KINDS 且主體含玩家隊）；沒有 ⇒ {}
 static func stop_event_since(state: WorldState, seq0: int) -> Dictionary:
@@ -370,6 +371,11 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"combat_engaged":        return "%s 捲進了戰鬥" % who
 		"betrayed":              return "%s 被盟友背叛" % who
 		"outpost_owner_changed": return _owner_change_sentence(state, info)
+		"resident_changed_faction":
+			var rp: Vector2i = info.get("pos", Vector2i(-1, -1))
+			var tf: int = int(info.get("to_faction", -1))
+			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
+				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
 		"intel_arrived":         return "%s 收到了情報" % who
 		"convoy_stranded":       return "%s 的運輸隊回不去，轉為自立" % who
 		"construction_stalled":  return "%s 的工地停擺" % who

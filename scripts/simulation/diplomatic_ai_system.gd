@@ -178,7 +178,10 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 			continue
 		var score: float = _calc_diplomacy_score(state, self_team, other)
 
-		if score > 0.6 and self_team.faction_id != -1:
+		# ★選項層排除無動作的結盟（spec 改法 1 R² §6③）：被拒集合的提案不送——否則領袖每個冷卻週期重送必被拒的提案、
+		#   擠掉同輪 trade／tribute。★跳過後照舊往下走：score > 0.6 必 > 0.4 ⇒ 同輪改提通商（其餘選項的條件逐字不變）
+		if score > 0.6 and self_team.faction_id != -1 \
+				and String(plan_alliance(state, other, self_team)["action"]) != "none":
 			_send_diplomacy_message(state, self_team, other, "propose_alliance")
 			return
 		elif score > 0.4:
@@ -216,6 +219,7 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 			return
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
 	Probe.bump("dip.proposal_sent")
+	if Probe.enabled: Probe.bump("dip.send." + action)   # ★逐種類（L9：領袖不再對異勢力隊送必被拒的結盟）
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
 	if response == "reject" or response == "refuse":
@@ -376,14 +380,21 @@ static func apply_trade_accept(a: TeamData, b: TeamData) -> void:
 	a.update_reputation(b.team_id, TRADE_ACCEPT_REP)
 	b.update_reputation(a.team_id, TRADE_ACCEPT_REP)
 
+var last_alliance: Dictionary = {}   # 最近一次結盟的試算／實際結果（玩家端讀它寫結果句，不在呼叫端猜）
+
 func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 		sender_team: TeamData, action: String, gift: Dictionary = {}) -> String:
 	if Probe.enabled: Probe.bump("dip.proposal_handled")
 	var score: float = _calc_diplomacy_score(state, self_team, sender_team, gift)
 	match action:
 		"propose_alliance":
+			# ★先試算：這個結盟在規則上不成立（領袖綁勢力／居民綁地主）⇒ 不論好感都回 reject，原因碼留給玩家端
+			var plan: Dictionary = plan_alliance(state, self_team, sender_team)
+			last_alliance = plan
+			if String(plan["action"]) == "none":
+				return "reject"
 			if score > ALLIANCE_ACCEPT_THRESHOLD:
-				_form_alliance(state, self_team, sender_team)
+				last_alliance = _form_alliance(state, self_team, sender_team)
 				if Probe.enabled: Probe.bump("dip.proposal_accept")
 				return "accept"
 			return "reject"
@@ -421,9 +432,48 @@ static func _alliance_role(state: WorldState, t: TeamData) -> String:
 	var f = state.factions.get(t.faction_id)
 	return "leader" if f != null and int(f.leader_team_id) == t.team_id else "member"
 
+# ══ 結盟的試算（spec 2026-10-13-alliance-never-moves-faction-leader 改法 1，純函式：_form_alliance、NPC 選項層、
+#   handle_diplomacy_message、玩家提案行預告都呼叫它——規則只有這一份）═════════════════════════════
+#   a＝收提案方、b＝發起方（_form_alliance 的呼叫序）。回 {action, moved_team, to_faction, code, reason}
+#   action：move（b 入 a 的勢力／a 入 b 的勢力）｜found（兩獨立建國）｜same（同勢力，只加名聲）｜none（拒）
+#   ★綁定①勢力的領袖隊永不因結盟離開自己的勢力：被搬的只有發起方 b、且只在 a 有勢力時
+#     ⇒ 被拒集合＝「b 是其勢力領袖 ∧ a 在另一勢力」（a 不必是領袖；反向——領袖收、成員發起——照搬入）
+#     ⇒ 兩勢力之間的同盟（不搬人的盟約）還沒做（FactionData.relations 全站無讀者）⇒ 不變成空動作，直接拒
+#   ★綁定②登記居民（work_outpost 指向他人據點）不得被結盟搬出地主的勢力（否則地主據點悄悄停產）
+#     defer token `resident-bound-to-landlord-faction-is-transitional`（挖角票落地即退場：被擋的該走挖角／脫離那條路）
+static func plan_alliance(state: WorldState, a: TeamData, b: TeamData) -> Dictionary:
+	if a.faction_id != -1:
+		if b.faction_id == a.faction_id:
+			return {"action": "same", "moved_team": -1, "to_faction": a.faction_id, "code": "", "reason": ""}
+		if b.faction_id != -1 and _alliance_role(state, b) == "leader":
+			return {"action": "none", "moved_team": -1, "to_faction": -1, "code": "leader_bound",
+				"reason": "兩個勢力之間的結盟還沒做"}
+		var landlord: int = _landlord_of(state, b)
+		if landlord != -1 and b.faction_id != -1:   # resident-bound-to-landlord-faction-is-transitional
+			return {"action": "none", "moved_team": -1, "to_faction": -1, "code": "resident_bound",
+				"reason": "它是 Team%d 據點上的居民，不能另投" % landlord}
+		return {"action": "move", "moved_team": b.team_id, "to_faction": a.faction_id, "code": "", "reason": ""}
+	if b.faction_id != -1:
+		return {"action": "move", "moved_team": a.team_id, "to_faction": b.faction_id, "code": "", "reason": ""}
+	return {"action": "found", "moved_team": -1, "to_faction": -1, "code": "", "reason": ""}
+
+# 登記居民的地主（work_outpost 指向【別人】的據點 ⇒ 那個據點的主人；否則 -1）
+static func _landlord_of(state: WorldState, t: TeamData) -> int:
+	if t.work_outpost == Vector2i(-1, -1):
+		return -1
+	var tile: HexTileData = state.world.tiles.get(t.work_outpost.x * 1000 + t.work_outpost.y)
+	if tile == null or tile.outpost_level <= 0 or tile.outpost_owner == -1 or tile.outpost_owner == t.team_id:
+		return -1
+	return tile.outpost_owner
+
+# 回 plan 那一份＋實際建國時的勢力 id（created_faction）
 func _form_alliance(state: WorldState,
-		team_a: TeamData, team_b: TeamData) -> void:
+		team_a: TeamData, team_b: TeamData) -> Dictionary:
 	# team_a = 收提案方, team_b = 發起方（handle_diplomacy_message 呼叫序）
+	var plan: Dictionary = plan_alliance(state, team_a, team_b)
+	if String(plan["action"]) == "none":
+		if Probe.enabled: Probe.bump("alliance.refused." + String(plan["code"]))
+		return plan
 	if Probe.enabled:
 		# ★純計數：發起方角色 × 收提案方角色（3×3）；被搬的若是領袖隊 ⇒ 記原勢力剩幾隊、領袖指標是否懸空
 		Probe.bump("alliance.form.%s_to_%s" % [_alliance_role(state, team_b), _alliance_role(state, team_a)])
@@ -447,7 +497,10 @@ func _form_alliance(state: WorldState,
 		var weak_id: int = team_b.team_id if strong_id == team_a.team_id else team_a.team_id
 		var fid: int = state.create_faction(strong_id)
 		if fid == -1:
-			return
+			return {"action": "none", "moved_team": -1, "to_faction": -1, "code": "found_failed", "reason": "建國失敗"}
+		plan["created_faction"] = fid
+		plan["moved_team"] = weak_id
+		plan["to_faction"] = fid
 		state.set_team_faction(state.teams[weak_id], fid, WorldState.JOIN_ALLIANCE_FOUND)   # 弱者入新 faction（雙向同步）
 		state.snapshot_faction_member(strong_id, state.world.current_tick)
 		state.snapshot_faction_member(weak_id, state.world.current_tick)
@@ -456,14 +509,9 @@ func _form_alliance(state: WorldState,
 	team_a.update_reputation(team_b.team_id, 0.2)
 	team_b.update_reputation(team_a.team_id, 0.2)
 	print("[Diplomacy] Team%d 與 Team%d 結盟" % [team_a.team_id, team_b.team_id])
-	# D C1: 若 team_b 是居民團 → 投降勸服，outpost 轉給 team_a
-	if team_b.tags.has(TeamData.TAG_PRODUCE):
-		var tile: HexTileData = state.world.tiles.get(team_b.tile_pos.x * 1000 + team_b.tile_pos.y)
-		if tile != null and tile.outpost_level > 0 and tile.outpost_owner != team_a.team_id:
-			var old_owner: int = tile.outpost_owner
-			OutpostOwnerBank.set_owner(state, tile, team_a.team_id, "alliance")
-			print("[Surrender] 居民團 Team%d 投降，outpost (%d,%d) %d→%d" % [
-				team_b.team_id, team_b.tile_pos.x, team_b.tile_pos.y, old_owner, team_a.team_id])
+	# ★#8-1：舊「D C1 居民團結盟 ⇒ 據點轉給收提案方」拿掉（不是加條件）：結盟不轉讓據點
+	#   ⇒ 舊版不看地主是誰——玩家邀來的居民團與別隊結盟，玩家的據點就被送走
+	return plan
 
 # G3-E Task3+1e：背叛評估純函數（無 RNG，供決策與測試）。
 # driver = 人格(野心/背信/薄義) + belief power advantage（盟弱我利→動機↑）；

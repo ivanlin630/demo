@@ -577,12 +577,38 @@ func set_team_faction(team: TeamData, fid: int, reason: String = LEAVE_UNSET) ->
 		else:
 			Probe.bump("faction.join")
 			Probe.bump("faction.join." + (reason if reason in JOIN_REASONS else "unknown_reason"))
+	var old_fid: int = team.faction_id
 	if team.faction_id != -1 and factions.has(team.faction_id):
 		factions[team.faction_id].member_team_ids.erase(team.team_id)
 	team.faction_id = fid
 	if fid != -1 and factions.has(fid):
 		if not factions[fid].member_team_ids.has(team.team_id):
 			factions[fid].member_team_ids.append(team.team_id)
+	_on_faction_changed(team, old_fid, fid, reason)
+
+# ★換勢力的副作用統一掛在這裡（spec 2026-10-13-alliance-never-moves-faction-leader 改法 4＋#8-2）：
+#   ①領袖隊離開舊勢力（任何路徑：結盟、臣服、投降、整併…）⇒ 繼位或解散——不擋任何路徑，只讓勢力不再無頭
+#     （舊版只改名冊、不碰 leader_team_id ⇒ 指標懸空指向已在別勢力的隊）
+#   ②登記居民換旗 ⇒ 地主要知道（玩家相關才進事件流，同據點易主那條的理由：對 NPC 發會悄悄改它的行為）
+#   ★勢力解散途中（LEAVE_FACTION_DISSOLVED）兩件都不做：解散本身就是處置，再通知會洗版
+func _on_faction_changed(team: TeamData, old_fid: int, new_fid: int, reason: String) -> void:
+	if reason == LEAVE_FACTION_DISSOLVED:
+		return
+	if old_fid != -1 and factions.has(old_fid) and int(factions[old_fid].leader_team_id) == team.team_id:
+		if Probe.enabled: Probe.bump("faction.leader_left." + reason)
+		succeed_or_disband_faction(old_fid, team.team_id)
+	if team.work_outpost != Vector2i(-1, -1):
+		var tile: HexTileData = world.tiles.get(team.work_outpost.x * 1000 + team.work_outpost.y)
+		if tile != null and tile.outpost_level > 0 and tile.outpost_owner != -1 and tile.outpost_owner != team.team_id:
+			var landlord: int = tile.outpost_owner
+			if Probe.enabled: Probe.bump("faction.resident_changed." + reason)
+			var ptid: int = get_player_team_id()
+			var pt: TeamData = teams.get(ptid)
+			var lt: TeamData = teams.get(landlord)
+			var related: bool = landlord == ptid or (pt != null and lt != null and pt.faction_id != -1 and lt.faction_id == pt.faction_id)
+			if related:
+				WorldEvents.emit(self, "resident_changed_faction", [landlord], false,
+					{"pos": team.work_outpost, "resident": team.team_id, "to_faction": new_fid})
 
 func clear_team_faction(team: TeamData, reason: String = LEAVE_UNSET) -> void:
 	set_team_faction(team, -1, reason)
