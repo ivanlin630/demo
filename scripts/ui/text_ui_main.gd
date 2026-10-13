@@ -330,8 +330,8 @@ func _process(_delta: float) -> void:
 		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
 		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
 		if not SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
-			_feedback_line.text = _feedback_text(bool(r.get("ok", false)), String(r.get("text", "")))
-			_feedback_line.modulate = _feedback_color(bool(r.get("ok", false)))
+			_write_feedback(_feedback_text(bool(r.get("ok", false)), String(r.get("text", ""))),
+				_feedback_color(bool(r.get("ok", false))))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 	if _feed_rows.size() > 100:
@@ -397,10 +397,15 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	if not event.pressed: return
+	# ★離開＝Esc 兩段（spec 2026-10-13-play-client-no-key-interpretation 改法 2）：旗標在這裡【先清】——
+	#   任何一鍵（含之後被戰鬥 overlay、輸入模式、面板提早 return 吃掉的鍵）都讓上膛失效；
+	#   只有下面主畫面 KEY_ESCAPE 那一支讀「這一鍵之前是否已上膛」
+	var esc_was_armed: bool = _esc_armed
+	if _esc_armed:
+		_disarm_esc()
 	# 遭遇戰 overlay 顯示中（含戰後「按任意鍵離開」畫面，此時 encounter_active 已 false）
 	# → 鍵盤全權交給 encounter_view，主畫面一律不處理。
-	# 否則 Q 會落到下方 KEY_Q→get_tree().quit() 造成戰後一按鍵就閃退；
-	# WASD 也會同時漂移世界地圖游標。用 overlay 可見性（非 encounter_active）判定。
+	# 否則鍵會同時落到主畫面（WASD 漂移世界地圖游標；舊版 Q 還會退遊戲）。用 overlay 可見性（非 encounter_active）判定。
 	if _encounter_view != null and _encounter_view.visible:
 		# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1①）：這裡照舊 return ——
 		#   GUI 的那一次按鍵引擎本來就廣播給 encounter_view._input；終端路由 PlayerRepl.press_on 直接分流到
@@ -577,6 +582,13 @@ func _input(event: InputEvent) -> void:
 				_bridge.cancel_advance()
 				_input_bar.text = ""
 				_refresh()
+			elif not (_interact_mode or _member_mode or _inv_mode or _faction_mode or _outpost_mode or _subteam_mode):
+				# ★這一次 Esc 沒有任何副作用（沒取消推進、沒關面板、沒退出模式）⇒ 兩段離開
+				if esc_was_armed:
+					_quit_game()
+				else:
+					_esc_armed = true
+					_set_feedback(true, ESC_ARM_HINT)
 			elif _interact_mode:
 				if _interact_target >= 0:
 					_interact_target = -1   # 退回目標清單
@@ -602,11 +614,6 @@ func _input(event: InputEvent) -> void:
 				else:
 					_subteam_mode = false
 				_refresh()
-		KEY_Q:
-			if _bridge != null and _bridge.is_encounter_active():
-				pass    # encounter_view handles Q as northwest movement
-			else:
-				get_tree().quit()
 		KEY_Z:
 			if not _pending_alerts.is_empty():
 				_pending_alerts.pop_front()
@@ -1101,7 +1108,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開",
 	"interact":      "[1-9]選目標/行動 [?]展開不可的 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -1134,6 +1141,24 @@ func _keymap_now(mode: String) -> String:
 	return " ".join(PackedStringArray(out))
 
 # feedback 行文字（成✓ 敗✗）
+# ★Esc 兩段離開的旗標與提示（改法 2）。★清旗標時一併撤提示：結果行若仍是這一句就清掉，不讓提示說謊
+const ESC_ARM_HINT: String = "再按一次 Esc 離開"
+var _esc_armed: bool = false
+
+# ★離開的唯一出口。床設 suppress_quit ⇒ 只記次數不真的結束（否則床自己的 SceneTree 會跟著收掉）
+var quit_requests: int = 0
+var suppress_quit: bool = false
+
+func _quit_game() -> void:
+	quit_requests += 1
+	if not suppress_quit:
+		get_tree().quit()
+
+func _disarm_esc() -> void:
+	_esc_armed = false
+	if _feedback_line != null and _feedback_line.text == _feedback_text(true, ESC_ARM_HINT):
+		_write_feedback("", _feedback_line.modulate)
+
 static func _feedback_text(ok: bool, msg: String) -> String:
 	return ("✓ " if ok else "✗ ") + msg
 static func _feedback_color(ok: bool) -> Color:
@@ -1388,8 +1413,13 @@ func _refuse_unbound_key(mode_label: String, _keycode: int) -> void:
 func _set_feedback(ok: bool, msg: String) -> void:
 	if _feedback_line == null: return
 	if str(msg).is_empty(): return
-	_feedback_line.text = _feedback_text(ok, msg)
-	_feedback_line.modulate = _feedback_color(ok)
+	_write_feedback(_feedback_text(ok, msg), _feedback_color(ok))
+
+# ★結果行的【唯一寫入點】（延後裁定 feedback-line-label-is-the-only-store-for-feedback 數寫入點 ≤ 2）：
+#   令結算、_set_feedback、Esc 撤提示三個來源都走這裡 ⇒ 將來把 feedback 搬成真的狀態欄位只改這一支
+func _write_feedback(text: String, color: Color) -> void:
+	_feedback_line.text = text
+	_feedback_line.modulate = color
 
 func _build_state_str() -> String:
 	var ct: Dictionary  = _cached_snapshot.get("controlled_team", {})
