@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 多格移動：動工（R² 三輪；⓪ 照 R² 建議逐字收）
 topic: spec docs/superpowers/specs/2026-10-13-multi-hop-move-stops-after-first-tile-HOW.md 修法節全文＋驗收 P1–P8｜你的觀察床轉成 P5／P5f 守衛｜逐站排除 patch 不用
 ---
