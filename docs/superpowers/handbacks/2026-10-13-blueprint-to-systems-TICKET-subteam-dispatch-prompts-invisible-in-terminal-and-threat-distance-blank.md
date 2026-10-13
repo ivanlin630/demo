@@ -34,3 +34,13 @@ topic: 派遣子隊五步數字輸入的提示在終端畫面看不到（按 N �
 - 機制（`text_ui_main.gd:410-412`＋`:633-668`）：`_input_mode` 開著時所有鍵先進 `_handle_input_mode`；數字模式只收 0-9／Backspace／Enter／Esc，**其他鍵靜默吞掉、不印「此鍵無作用」**；提示與已輸入的數字只寫 `_input_bar`（終端不印）；面板本身在輸入模式下不畫 ⇒ 玩家看到的是大地圖＋死掉的鍵盤。Esc 能退出（`:654`），但畫面沒告訴他。
 - WHAT 補兩條：①輸入模式吃掉的任何鍵都要回一句（同「此鍵在此模式無作用」那條通則，輸入模式不得例外）；②輸入模式開著時原面板要留在畫面上，提示列跟已鍵入的字元一起印。你那個「同一處讀提示」的咽喉要連 `_input_buffer` 一起印出來。
 - 床加一格：子隊面板按 N 之後再按 Z／T／X 任一字母，畫面必須有回應句且面板仍在；Esc 回面板。
+
+## 追加二（藍圖讀 code 確認的真 bug）：五步鏈在第一步之後就斷，之後的 Enter 變成「跳 N tick」
+- `text_ui_main.gd:674-681`（numeric 模式 KEY_ENTER）：先 `_input_mode = false` → 呼叫 callback（步驟 1 的 callback 在裡面把 `_input_mode = true`、裝上步驟 2 的 callback）→ 回來之後**再執行 `_input_mode_callback = Callable()`** ⇒ 把剛裝上的步驟 2 callback 抹掉。
+- 後果：`_input_mode` 仍為 true、callback 無效 ⇒ 玩家接著打「人數 + Enter」走到 `elif int(_input_buffer) > 0` 那條舊路 ⇒ **`_request_key_advance(n)` 跳 n 顆 tick**，而不是派子隊；打座標數字也一樣變成跳 tick。整條路派不出子隊。
+- 床：管道餵鍵 `u n 1 enter 2 enter 1 enter 9 enter 1 enter` 之後，必須出現「派出子隊 TeamN」且世界時間沒有被跳走；現況會紅。
+- 我在管道與 winpty 單鍵模式各重現一次：按 N 後畫面回大地圖、Esc 可退（`scratchpad r5b_sub.txt`／`r5b_singlekey.txt`）。用戶的「Esc 也卡、全鍵都卡」我沒重現出來，兩支行程都閒置；在跟用戶對輸入法與畫面。
+
+## 裁定（回審查員問）：游標停在腳下按 N ＝ 合法
+- 母隊所在格派子隊去覓食、建設、安頓是自然用法；留守待機也是（守家）。腳下不另設禁令，合法與否由任務自己的前提判（例：建設要有材料），回句用任務的原因。
+- 資訊霧那條同意：沒去過的格回「還沒去過」、不判路；不可達不指名原因。已 merge 的多格移動同病一起修。
