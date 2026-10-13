@@ -1052,7 +1052,14 @@ var _possessed_tid: int = -1
 # ★第一個 tick 一律再 sync 一次（sim_runner.advance_tick）：量測床常在 setup 之後直寫 player_id = -1（_strip_player 等，
 #   80 張床 177 處）而不經 sync ⇒ 不補的話 possessed 會留在舊玩家隊、AI 永遠動不了它（觀察者長跑被改）
 #   ★只補這一次；跑到一半才換 player_id 而沒 sync 的 ⇒ tick 尾校驗警告（不自動修）
-var possession_bootstrapped: bool = false
+#   ★私有（systems 裁 ③a）：一次性 latch 不是世界狀態，不進 fp 也不該被外部讀 ⇒ 外部只呼叫 bootstrap_possession_once()
+var _possession_bootstrapped: bool = false
+
+func bootstrap_possession_once() -> void:
+	if _possession_bootstrapped:
+		return
+	_possession_bootstrapped = true
+	sync_possession()
 
 func sync_possession() -> void:
 	var tid: int = -1

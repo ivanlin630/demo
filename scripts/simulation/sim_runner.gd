@@ -125,9 +125,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	state.auto_register_stub_sweep()
 	# ★#12 事實欄的第二個入口（同上面登記錨的形狀）：不經 GameSetup 的世界（載檔／床自組）在第一個 tick 同步一次
 	#   ★一次性旗 ⇒ 之後不再補 —— 漏了 sync 的寫者要讓 tick 尾校驗紅，不在這裡默默修好
-	if not state.possession_bootstrapped:
-		state.possession_bootstrapped = true
-		state.sync_possession()
+	state.bootstrap_possession_once()
 	# H: 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）—— 它是【等玩家輸入的模態】
 	# ★★★故事結束（`state.game_over`）**是 UI 旗標，本檔不讀它**（意圖帳 #43／#44：
 	#   故事結束 ≠ 世界停止；世界的存在不綁玩家）。票 #2 刀 1（2026-10-06）拿掉了這裡原本的
