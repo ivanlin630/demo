@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #3：大地圖只看到左半邊
 topic: R² 請審 docs/superpowers/specs/2026-10-13-map-pane-full-width-HOW.md
 ---
