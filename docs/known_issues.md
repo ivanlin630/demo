@@ -5643,3 +5643,17 @@ faction_ai_system.gd:7612 `_estimate_eta_to` → PathSystem.eta_ticks(team, path
 玩家側由「移動預計時間＝同一把尺」票修（spec 2026-10-13-move-eta-same-ruler-HOW），AI 側改了動決策與 world-fp ⇒ 歸深層批。
 修法方向：AI 改用同一支 estimate_travel_ticks（該票新增）。
 ```
+
+## 多格移動下令時的可達判斷讀真地圖：對沒去過的格會洩露地形，且「不可達」近乎不會發生
+
+狀態：已知未修
+
+回訪：觸發事件 —— 回饋 #2 第二刀把可達判斷抽成共用函式時一起修（同一支，順序 off_map → 未知 → 腳下 → 可達）。
+
+```
+player_command_system.gd:2043-2046 move_to：PathSystem.find_path 空 ⇒「無法抵達 (q,r)：沒有路（被山或地圖邊緣隔開）」。
+①感知：find_path 讀真實地圖；對 tile_knowledge=unvisited 的目標回這句＝告訴玩家那格周圍的真地形。
+②空集：path_system.gd TERRAIN_COST 山只是更貴不是不可通；_astar 只在目標不在地圖上時回空 ⇒「被山隔開」說不出口。
+  多格移動票 P3「四周山佈置」照理造不出紅——要查那張床是不是手造了地圖洞（R² 2026-10-13 §4 指出）。
+修法方向：未知格不判可達、直接接單（物理照走）；句子不指名原因。
+```
