@@ -1457,6 +1457,12 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 			msg_gi = "他不願多說"
 		elif wrote_gi <= 0 and _inquiry_payload_empty(result_gi):
 			msg_gi = "他也不知道"
+		elif wrote_gi <= 0 and int(out_gi.get("conflicted", 0)) > 0:
+			# ★R² 三態③：他說的跟你知道的不一樣、可信度沒贏 ⇒ 不能說「早就知道了」（那是錯的）
+			msg_gi = "他說的跟你知道的不一樣，你沒採信（%d 筆）" % int(out_gi.get("conflicted", 0))
+		elif wrote_gi <= 0 and int(out_gi.get("refreshed", 0)) > 0:
+			# ★回饋 #6 ②：他說的每一則都只是把你已知的時間戳換新 ⇒ 說出來（舊版印「記下 5 筆」）
+			msg_gi = "他說的你早就知道了（更新了時間）"
 		elif wrote_gi <= 0:
 			# ★打聽票 I5（藍圖第四句）：他說了（payload 非空）而一筆都沒記下 ⇒ 你早就知道了 —— 舊版印「記下 0 筆」
 			msg_gi = "他說的你早就知道了"

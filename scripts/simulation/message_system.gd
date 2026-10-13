@@ -245,6 +245,8 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 	# ★★所以到達那條路【今天沒有】隱藏累積物 —— 而這一行仍然留著：
 	#   ★★★契約不該依賴一個語言細節，而 `out` 必須由【做事的那一趟】完整寫滿。
 	out["written"] = 0
+	out["refreshed"] = 0    # ★回饋 #6 ②：寫了 claim 但所知的值沒變（只換時間戳）⇒ 計這裡，不算 written
+	out["conflicted"] = 0   # ★R²：他說的跟你所知的不同、而可信度沒贏過你現有的 ⇒ 寫進 claims 但沒採信
 	# ★被問方知道多少（P5 母體地板要的那個數）—— ★在 silent 之前就記，
 	#   否則「他不願多說」與「他什麼都不知道」在卷面上分不出來。
 	out["giver_known"] = BeliefSystem.known_targets(state, giver_id).size()
@@ -318,8 +320,40 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 			if not state.team_discovered.has(receiver_id):
 				state.team_discovered[receiver_id] = []
 			state.team_discovered[receiver_id].append(tgt_id)
+		# ★「記下 N 筆」只數改變所知的（藍圖回饋 #6 ②＋R²）：寫入前後比接收方對這個目標【勝出那一筆】的值欄位
+		#   （明列 CLAIM_VALUE_KEYS；不含時間戳與可信度）⇒ 三態：
+		#   ①勝出值變了＝採信而改變（written）②沒變、而他說的跟勝出值一致＝只更新時間（refreshed）
+		#   ③沒變、而他說的跟勝出值不同＝衝突未採信（conflicted）
+		#   ★比對用 best_value_quiet（不計 bel.best_call；用 best_estimate 會讓每次打聽多計兩次）
+		var _before: Dictionary = _known_values(BeliefSystem.best_value_quiet(state, receiver_id, tgt_id))
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
-		out["written"] = int(out.get("written", 0)) + 1
+		var _after: Dictionary = _known_values(BeliefSystem.best_value_quiet(state, receiver_id, tgt_id))
+		if _after != _before:
+			out["written"] = int(out.get("written", 0)) + 1
+		elif _agrees(_known_values(entry), _after):
+			out["refreshed"] = int(out.get("refreshed", 0)) + 1
+		else:
+			out["conflicted"] = int(out.get("conflicted", 0)) + 1
+
+# ★claim 的值欄位（明列，R²：value 字典裡本來就帶 last_tick，比整個字典會讓每筆親見都算「有變」）
+#   來源＝record_claim 各呼叫端實際寫的鍵：vision_system.gd:157-192（親見快照）、interaction_system.gd:1467-1490（同格快照）、
+#   distort_intel_entry（轉述）、faction_ai_system.gd:2614（envoy）。排除：last_tick（時間）、confidence／is_suspicious（可信度）
+const CLAIM_VALUE_KEYS: Array = ["tile_pos", "population_est", "tier", "tags", "tags_seen", "activity", "in_combat",
+	"combat_target_est", "resource_scale", "armed_est", "coin_est", "food_est", "goods_est", "material_est",
+	"current_task", "faction_id"]
+static func _known_values(v: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k in CLAIM_VALUE_KEYS:
+		if v.has(k):
+			out[k] = v[k]
+	return out
+
+# 他說的每個值欄位都跟勝出值一致（他沒說的欄不算衝突）
+static func _agrees(said: Dictionary, best: Dictionary) -> bool:
+	for k in said:
+		if not best.has(k) or best[k] != said[k]:
+			return false
+	return true
 
 func process_pending(_state: WorldState) -> void:
 	# 未來：處理 pending delivery queue（據點同步、信使到達）
