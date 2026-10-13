@@ -24,6 +24,7 @@ import subprocess
 import sys
 import threading
 import time
+import unicodedata
 from pathlib import Path
 
 # ══ ★★★★★★【客戶端自己的 stdout 也要強制 UTF-8】═════════════════════════════
@@ -234,6 +235,51 @@ def is_quit_line(line: str) -> bool:
 QUIT_LINE_CASES = [("q", False), ("Q", False), ("quit", False), ("QUIT", False), (QUIT_TOKEN, True)]
 
 
+# ══ 視窗大小提示（spec 2026-10-13-map-pane-full-width：play.py 自己判，server 讀不到視窗）══════════════
+# ★最寬列用【顯示寬度】：畫面幾乎全是全形字，len() 會少算一半（W／F 計 2 欄）
+def display_width(line: str) -> int:
+    return sum(2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1 for ch in line)
+
+
+# 回提示句（不夠高／不夠寬）；讀不到視窗大小（rows／cols 為 None）⇒ 那一項不判
+def size_hint(frame: str, cols, rows) -> str:
+    lines = frame.split("\n")
+    need_rows = len(lines)
+    need_cols = max((display_width(l) for l in lines), default=0)
+    out = []
+    if rows is not None and need_rows > rows:
+        out.append("畫面需 %d 列、現 %d 列，請拉高視窗" % (need_rows, rows))
+    if cols is not None and need_cols > cols:
+        out.append("畫面需 %d 欄、現 %d 欄，請拉寬視窗" % (need_cols, cols))
+    return "；".join(out)
+
+
+def _terminal_size():
+    try:
+        sz = os.get_terminal_size(sys.stdout.fileno())
+        return sz.columns, sz.lines
+    except (OSError, ValueError, AttributeError):
+        return None, None
+
+
+# ★印一屏 ＋ 必要時在【最後一列之後】印提示（屏高不夠時終端最先捲掉的是最上面 ⇒ 提示不放頂列）
+def show_frame(frame: str, clear: bool) -> None:
+    print(CLEAR_SCREEN + frame if clear else frame)
+    cols, rows = _terminal_size()
+    hint = size_hint(frame, cols, rows)
+    if hint:
+        print("[play] " + hint)
+
+
+# ★M8：視窗提示的自驗格
+SIZE_HINT_CASES = [
+    ("50 列的屏、視窗 30 列 ⇒ 提示拉高", "\n".join(["x"] * 50), 120, 30, "需 50 列"),
+    ("讀不到視窗大小 ⇒ 不印", "\n".join(["x"] * 50), None, None, ""),
+    ("一列 61 個全形字（122 欄）、視窗 120 欄 ⇒ 提示拉寬（len 只有 61 會漏報）", "地" * 61, 120, 40, "需 122 欄"),
+    ("夠大 ⇒ 不印", "地" * 10, 120, 40, ""),
+]
+
+
 # ★對照表本身的自驗（不起 Godot）：`python tools/play.py --selfcheck`
 KEY_TOKEN_CASES = [
     ("x", "x"), ("G", "G"), ("3", "3"), (",", ","), ("\x1b", "esc"), ("\r", "enter"), ("\t", "tab"),
@@ -256,6 +302,11 @@ def selfcheck() -> int:
         ok = got == want
         bad += 0 if ok else 1
         print("  %s Q5 is_quit_line(%r) = %r（應 %r）" % ("PASS" if ok else "FAIL", raw, got, want))
+    for name, frame, cols, rows, want in SIZE_HINT_CASES:
+        got = size_hint(frame, cols, rows)
+        ok = (want in got) if want else (got == "")
+        bad += 0 if ok else 1
+        print("  %s M8 %s ⇒ %r" % ("PASS" if ok else "FAIL", name, got))
     tq = key_token("q")
     ok = tq == "q" and not is_quit_line(tq)
     bad += 0 if ok else 1
@@ -298,10 +349,10 @@ def main() -> int:
         try:
             first = read_frame(sock)        # 第一屏
             if single:
-                print(CLEAR_SCREEN + first)
+                show_frame(first, True)
                 print("[play] 直接按鍵，不用 Enter（Esc 連按兩次離開遊戲；Ctrl+C 直接斷線）")
             else:
-                print(first)
+                show_frame(first, False)
         except (TimeoutError, socket.timeout):
             # ★逾時 ⇒ 把 server 的尾巴印出來（它會說出是「沒送」還是「死了」）
             print("[play] ✗ 接上了，但等不到第一屏（socket 逾時）。")
@@ -332,7 +383,7 @@ def main() -> int:
                 print("[play] 遊戲已結束")
                 return 0
             # ★單鍵模式：清屏再印，畫面不往上捲；逐行模式照舊
-            print(CLEAR_SCREEN + frame if single else frame)
+            show_frame(frame, single)
     finally:
         try:
             sock.close()

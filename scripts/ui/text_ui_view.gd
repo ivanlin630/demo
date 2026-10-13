@@ -34,7 +34,7 @@ extends Node
 #     **守衛要適應被守的東西，不是反過來** —— 用戶核可的是那個外觀。
 const A_TOP: String    = "｜ 待執行 "     # 頂列最後一欄
 const A_MAP: String    = "┌─ 地圖（"     # ★自帶 `┌`
-const A_PAGES: String  = "┬─ ["          # ★自帶 `┬` ⇒ 組框時**不要**再加一個
+const A_PAGES: String  = "┌─ ["          # ★2026-10-13 地圖整寬（spec map-pane-full-width）：分頁框改接在地圖框下面、獨佔一行 ⇒ 不再是 `┬`
 const A_ACTION: String = "─ 動作（"
 const A_FEED: String   = "─ 事件（"
 const A_FOOT: String   = " 鍵："          # 底部鍵位那一行
@@ -115,34 +115,36 @@ static func _fill_to(s: String, width: int, ch: String) -> String:
 static func region_title(anchor: String, note: String) -> String:
 	return _fill_to(anchor + note + "）", TextUiLayout.COLS, "─")
 
-# 左右各半：`COLS` 扣掉三根框線字元之後平分（lw ＋ rw ＋ 3 ＝ COLS）
-static func box_widths() -> Array:
-	var inner: int = TextUiLayout.COLS - 3
-	var left: int = int(float(inner) / 2.0)
-	return [left, inner - left]
+# ══ ②地圖 ＋ ③分頁：★上下兩個整寬框（spec 2026-10-13-map-pane-full-width，藍圖裁 43817c7d1 固定一種版面）═══
+# ★舊版左右各半：地圖欄只有 (COLS−3)/2＝58 欄，而整張地圖每列 68～100 欄 ⇒ 逐列 clip_to 把右半靜默切掉
+# ★現在：地圖框寬＝COLS、地圖列【不經 clip_to】；renderer 最寬列放不下（R ≥ 10）⇒ push_error＋標題「（版面異常）」，不截
+# ★分頁列仍 clip_to（交件信列給 systems 判）
+const MAP_ABNORMAL: String = "（版面異常）"
 
+static func map_inner_width() -> int:
+	return TextUiLayout.COLS - 2
 
-# ══ ②左地圖 ＋ ③右分頁：★**一個框、兩欄**（稿子 §一）═════════════════════════
-# ★★兩個錨在【同一行】（上框），而 `┬` 由 `A_PAGES` 自己帶 ⇒ 這裡**不要**再加。
+static func map_max_width(map_body: String) -> int:
+	var w: int = 0
+	for l in map_body.split("\n"):
+		w = maxi(w, TextUiLayout.display_width(String(l)))
+	return w
+
 static func map_pages_box(map_body: String, pages_body: String,
 		map_note: String, tabs: String) -> String:
-	var w: Array = box_widths()
-	var lw: int = int(w[0])
-	var rw: int = int(w[1])
+	var inner: int = map_inner_width()
 	var lines: Array = []
-	# 上框：`┌─ 地圖（…）───…` ＋ `┬─ [1]生存 …───…` ＋ `┐`
-	lines.append(
-		_fill_to(A_MAP + map_note + "）", lw + 1, "─")
-		+ _fill_to(A_PAGES + tabs, rw + 1, "─") + "┐")
-	# 中身：逐列並排，短的那一側補空白
-	var ml: Array = map_body.split("\n")
-	var pl: Array = pages_body.split("\n")
-	for i in range(maxi(ml.size(), pl.size())):
-		var l: String = String(ml[i]) if i < ml.size() else ""
-		var r: String = String(pl[i]) if i < pl.size() else ""
-		lines.append("│" + _fill_to(TextUiLayout.clip_to(l, lw), lw, " ")
-			+ "│" + _fill_to(TextUiLayout.clip_to(r, rw), rw, " ") + "│")
-	lines.append("└" + "─".repeat(lw) + "┴" + "─".repeat(rw) + "┘")
+	var abnormal: bool = map_max_width(map_body) > inner
+	if abnormal:
+		push_error("[TextUiView] 地圖最寬列 %d 欄 > 框內 %d 欄（版面異常；不截）" % [map_max_width(map_body), inner])
+	lines.append(_fill_to(A_MAP + map_note + "）" + (MAP_ABNORMAL if abnormal else ""), inner + 1, "─") + "┐")
+	for l in map_body.split("\n"):
+		lines.append("│" + _fill_to(String(l), inner, " ") + "│")
+	lines.append("└" + "─".repeat(inner) + "┘")
+	lines.append(_fill_to(A_PAGES + tabs, inner + 1, "─") + "┐")
+	for r in pages_body.split("\n"):
+		lines.append("│" + _fill_to(TextUiLayout.clip_to(String(r), inner), inner, " ") + "│")
+	lines.append("└" + "─".repeat(inner) + "┘")
 	return "\n".join(lines)
 
 
@@ -389,7 +391,6 @@ static func _keymap_lines(keymap: String) -> Array:
 #   ★放在 map+pages 的位置：子模式本來就是「接管畫面」的語意，
 #     而放那裡保住「顯示只有一個」（不是再加一區）。
 static func panel_block(panel_body: String) -> String:
-	var w: Array = box_widths()
 	var lines: Array = []
 	lines.append(_fill_to(A_PANEL + "接管畫面）", TextUiLayout.COLS, "─"))
 	for l in panel_body.split("\n"):
