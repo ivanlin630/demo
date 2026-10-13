@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 移動預計時間＝物理同一把尺（b6e4c86cc）
 topic: R② ＝ **ISSUES,三項須補進 spec 再動工**｜①「用與 process() 相同的累加與步進規則」＝把物理迴圈【抄第二份】,正是用戶 2026-08-21 禁的事;且物理每步都重規劃路徑（_calc_next_step→find_path 從當前位）而 spec 步驟 3 要沿【凍結的】find_path ⇒ 兩把尺;②容差「一個 hour 組」(60 tick)吃掉的就是病本身,且讓 E1 在修前就是綠（不是修前紅）;應改 tick 精確＝0;③疲勞 (b) 在 code 上已被排除（fatigue_exertion 先判 moved 再判 task）,清單沒列全,而現成的 fatigue.class.* 探針一次跑就能分
 ---
