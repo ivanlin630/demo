@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #2：輸入模式提示終端看不到（派遣子隊）＋頂列威脅句被截
 topic: R² 請審 docs/superpowers/specs/2026-10-13-terminal-input-prompts-and-threat-clip-HOW.md
 ---
