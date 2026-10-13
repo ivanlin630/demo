@@ -42,6 +42,8 @@ func _initialize() -> void:
 	await _p1g_order_chain()
 	await _p1h_menus()
 	await _p3_threat()
+	await _p4_p5_dispatch_to_cursor()
+	await _p6_targets()
 	print("=== terminal_input_prompts DONE === errors: %d" % _errors)
 	quit(1 if _errors > 0 else 0)
 
@@ -102,7 +104,7 @@ func _p2_census() -> void:
 		if String(c).contains("\"numeric\"") or String(c).contains("\"string\""):
 			typed += 1
 	print("   入口 %d 處；型別寫成字面的 %d 處" % [calls.size(), typed])
-	_check("★母體地板：入口數 ≥ 20（spec 普查 20 處；少了＝有人繞過咽喉或普查壞了）", calls.size() >= 20)
+	_check("★母體地板：入口數 > 0（數字由 grep 得，不手抄；第一刀 20、第二刀派遣五步併成三步後 18；繞過咽喉由 P2b 抓）", calls.size() > 0)
 	_check("P2 每一處入口的型別都是字面 numeric／string（按鍵處置只依型別 ⇒ P1c 覆蓋它們）", typed == calls.size())
 
 
@@ -196,7 +198,7 @@ func _p1f_dispatch_chain() -> void:
 	var node: Node = await _build()
 	var t0: int = _tick(node)
 	var subs0: int = node._bridge.get_state().teams.size()
-	await _press_all(node, ["u", "n", "1", "enter", "2", "enter", "1", "enter", "9", "enter", "1"])
+	await _press_all(node, ["u", "n", "1", "enter", "2", "enter", "1"])   # 第二刀起三步：隊長、人數、任務（目標＝游標格）
 	var t_before_last: int = _tick(node)
 	await _press(node, "enter")
 	var fb: String = String(node._feedback_line.text)
@@ -210,7 +212,7 @@ func _p1f_dispatch_chain() -> void:
 func _p1g_order_chain() -> void:
 	print("\n── P1g 下令子隊三步鏈（a q r 任務）：命令生效、tick 不動 ──")
 	var node: Node = await _build()
-	await _press_all(node, ["u", "n", "1", "enter", "2", "enter", "1", "enter", "9", "enter", "1", "enter"])
+	await _press_all(node, ["u", "n", "1", "enter", "2", "enter", "1", "enter"])
 	var t0: int = _tick(node)
 	await _press(node, "1")   # 選第一支子隊
 	var sel: int = int(node._subteam_selection)
@@ -325,3 +327,99 @@ func _p3_threat() -> void:
 		v["threat"] = t
 		var r3: String = TextUiView.top_row(v)
 		_check("P3 模板「%s」整句、單列不超寬" % t, r3.contains("威脅：" + t) and TextUiLayout.display_width(r3) <= TextUiLayout.COLS)
+
+
+# ══ 第二刀：派遣按即做 ═══════════════════════════════════════════════════════
+#   P4  主畫面游標移到可達格、U N 隊長 人數 任務 ⇒ 子隊出發、目標＝游標格；全程不打座標
+#   P5  派遣模態中，面板上帶 [n] 的只有那一組選單（子隊列表不帶號）
+#   P6  已知但到不了的格（手造地圖洞）⇒ N 直接回原因、不開模態
+#   P6b 游標在腳下按 N ⇒ 進流程
+#   P6c 沒去過的格：N 不拒；選安頓／建設 ⇒ 拒並說原因；選偵查 ⇒ 出發；判斷沒呼叫 find_path；不在地圖上 ⇒ 回原因
+#   P6e Esc 任一步 ⇒ 清掉已寫的派遣殘值、回子隊面板
+func _subteams_of(st: WorldState, ptid: int) -> Array:
+	var out: Array = []
+	for tid in st.teams:
+		if int((st.teams[tid] as TeamData).parent_team_id) == ptid:
+			out.append(int(tid))
+	return out
+
+
+func _p4_p5_dispatch_to_cursor() -> void:
+	print("\n── P4／P5 主畫面游標＝目標；派遣三步不打座標；同屏只有一組數字 ──")
+	var node: Node = await _build()
+	var st: WorldState = node._bridge.get_state()
+	var ptid: int = st.get_player_team_id()
+	await _press_all(node, ["d", "d"])
+	var tgt: Vector2i = node._cursor
+	var before: Array = _subteams_of(st, ptid)
+	await _press_all(node, ["u", "n"])
+	var panel: String = String(_view(node).get("panel", ""))
+	var numbered: int = panel.count("[1]")
+	print("   目標 %s｜模態中面板 [1] 出現 %d 次" % [str(tgt), numbered])
+	_check("P5 派遣模態中同屏只有一組帶號的選單", numbered == 1)
+	_check("P4 每一步提示印凍結的目標", String(_view(node).get("result", "")).contains("目標＝(%d,%d)" % [tgt.x, tgt.y]))
+	await _press_all(node, ["1", "enter", "2", "enter", "2", "enter"])
+	var after: Array = _subteams_of(st, ptid).filter(func(t): return not before.has(t))
+	var mt: Vector2i = (st.teams[after[0]] as TeamData).move_target if not after.is_empty() else Vector2i(-9, -9)
+	print("   新子隊 %s｜move_target %s｜結果列「%s」" % [str(after), str(mt), node._feedback_line.text])
+	_check("P4 子隊出發、目標＝游標格（全程沒打座標）", after.size() == 1 and mt == tgt)
+	await _drop(node)
+
+
+func _p6_targets() -> void:
+	print("\n── P6 目標格判斷：不可達／腳下／沒去過／不在地圖上；Esc 清殘值 ──")
+	var node: Node = await _build()
+	var st: WorldState = node._bridge.get_state()
+	var pt: TeamData = st.teams[st.get_player_team_id()]
+	# P6：已知但到不了（目標的六鄰格移出地圖）
+	var hole: Vector2i = pt.tile_pos + Vector2i(3, 0)
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
+		st.world.tiles.erase((hole + d).x * 1000 + (hole + d).y)
+	var known: Dictionary = st.team_tile_known.get(pt.team_id, {})
+	known[hole.x * 1000 + hole.y] = true
+	st.team_tile_known[pt.team_id] = known
+	node._cursor = hole
+	await _press_all(node, ["u", "n"])
+	print("   不可達 %s ⇒ 結果列「%s」｜輸入模式 %s" % [str(hole), node._feedback_line.text, str(node._input_mode)])
+	_check("P6 已知不可達 ⇒ N 回「沒有路」、不開模態", node._feedback_line.text.contains("沒有路") and not bool(node._input_mode))
+	await _press(node, "esc")
+	# P6b：腳下
+	node._cursor = pt.tile_pos
+	await _press_all(node, ["u", "n"])
+	_check("P6b 游標在腳下按 N ⇒ 進流程", bool(node._input_mode))
+	# P6e：Esc 中途 ⇒ 清殘值、回子隊面板
+	await _press_all(node, ["1", "enter"])
+	var had: bool = st.player_state.has("sub_leader_id")
+	await _press(node, "esc")
+	_check("P6e Esc 中途 ⇒ 清掉已寫的派遣殘值、回子隊面板", had and not st.player_state.has("sub_leader_id") and bool(node._subteam_mode) and not bool(node._input_mode))
+	await _press(node, "esc")
+	# P6c：沒去過的格
+	var far: Vector2i = pt.tile_pos + Vector2i(-9, 0)
+	if not st.world.tiles.has(far.x * 1000 + far.y):
+		far = pt.tile_pos + Vector2i(0, 9)
+	var status: String = String(PlayerQueryApi.tile_knowledge(st, far).get("status", ""))
+	Probe.enabled = true
+	var p0: int = int(Probe.counts.get("path.cache_hit", 0)) + int(Probe.counts.get("path.cache_miss", 0))
+	var chk: Dictionary = node._bridge.check_target(far.x, far.y)
+	var p1: int = int(Probe.counts.get("path.cache_hit", 0)) + int(Probe.counts.get("path.cache_miss", 0))
+	Probe.enabled = false
+	print("   沒去過 %s（%s）⇒ %s｜find_path 呼叫 %d 次" % [str(far), status, str(chk), p1 - p0])
+	_check("★母體地板：那一格對玩家是沒去過", status == "unvisited")
+	_check("P6c 沒去過 ⇒ 判斷回「還沒去過」且沒呼叫 find_path（不洩露真地形）", String(chk.get("reason", "")).contains("還沒去過") and p1 == p0)
+	node._cursor = far
+	await _press_all(node, ["u", "n"])
+	_check("P6c 沒去過的格 N 不拒、進流程", bool(node._input_mode))
+	var build_idx: int = 0
+	var scout_idx: int = 0
+	for i in range(PlayerCommandSystem.ORDERABLE_TASKS.size()):
+		if String(PlayerCommandSystem.ORDERABLE_TASKS[i][0]) == TeamData.TASK_BUILD: build_idx = i + 1
+		if String(PlayerCommandSystem.ORDERABLE_TASKS[i][0]) == TeamData.TASK_SCOUT: scout_idx = i + 1
+	await _press_all(node, ["1", "enter", "2", "enter", str(build_idx), "enter"])
+	var fb_b: String = node._feedback_line.text
+	_check("P6c 沒去過的格選建設 ⇒ 拒並說原因（要先知道地形）、留在任務那一步", fb_b.contains("要先知道") and bool(node._input_mode))
+	await _press_all(node, [str(scout_idx), "enter"])
+	print("   建設「%s」｜偵查「%s」" % [fb_b, node._feedback_line.text])
+	_check("P6c 沒去過的格選偵查 ⇒ 出發", node._feedback_line.text.contains("派出子隊"))
+	var off: Dictionary = node._bridge.check_target(-50, -50)
+	_check("P6c 不在地圖上 ⇒ 回原因", not bool(off.get("ok", true)) and String(off.get("reason", "")).contains("不在地圖上"))
+	await _drop(node)

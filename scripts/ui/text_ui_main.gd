@@ -618,8 +618,10 @@ var _input_reply: String = ""
 var _input_menu: Array = []           # 有限選單（數字選）：印在面板上，提示列只印「選 (1~N): _」
 var _in_input_callback: bool = false  # callback 執行中 ⇒ 這時再開的輸入是鏈的下一步，沿用 origin
 var _input_chain_origin: String = "main"
+var _input_on_cancel: Callable = Callable()   # Esc 時呼叫（鏈式輸入清掉已寫的殘值）
 
-func _open_input(prompt: String, type: String, callback: Callable, allow_empty: bool = false, menu: Array = []) -> bool:
+func _open_input(prompt: String, type: String, callback: Callable, allow_empty: bool = false, menu: Array = [],
+		on_cancel: Callable = Callable()) -> bool:
 	if prompt.strip_edges().is_empty() or not callback.is_valid():
 		push_error("[_open_input] 空 prompt 或沒有 callback ⇒ 不開輸入模式（%s）" % prompt)
 		return false
@@ -631,6 +633,7 @@ func _open_input(prompt: String, type: String, callback: Callable, allow_empty: 
 	_input_mode_allow_empty = allow_empty
 	_input_mode_callback = callback
 	_input_menu = menu
+	_input_on_cancel = on_cancel
 	_input_reply = ""
 	_input_bar.text = _input_line()
 	return true
@@ -648,6 +651,7 @@ func _close_input() -> void:
 	_input_buffer = ""
 	_input_mode_callback = Callable()
 	_input_menu = []
+	_input_on_cancel = Callable()
 	_input_reply = ""
 	_input_bar.text = ""
 
@@ -746,7 +750,10 @@ func _input_common_key(keycode: int) -> void:
 			_refresh()
 		KEY_ESCAPE:
 			var origin2: String = _input_origin
+			var oc: Callable = _input_on_cancel
 			_close_input()
+			if oc.is_valid():
+				oc.call()
 			_restore_input_origin(origin2)
 			_set_feedback(false, "取消輸入")
 			_refresh()
@@ -3108,43 +3115,18 @@ func _handle_subteam_mode(keycode: int) -> void:
 			var candidates: Array = sp.get("dispatch_candidates", [])
 			var max_pop: int = sp.get("player_population", 0)
 			if candidates.is_empty():
-				_log_event("[子隊] 無可用隊長（需命名非 leader 成員）")
+				_set_feedback(false, "無可用隊長（需命名非 leader 成員）")
 				_refresh()
 				return
-			# 步驟 1：選隊長
-			var _cb_in3062 := func(buf1: String):
-				var cidx: int = int(buf1) - 1
-				if cidx < 0 or cidx >= candidates.size():
-					_log_event("[子隊] 無效隊長編號")
-					return
-				var leader_id: int = candidates[cidx].get("person_id", -1)
-				_bridge.set_player_input("sub_leader_id", leader_id)
-				# 步驟 2：人數
-				var _cb_in3074 := func(buf2: String):
-					var pop: int = int(buf2)
-					_bridge.set_player_input("sub_pop_count", pop)
-					# 步驟 3：選任務（Q7-5：非寫死 IDLE,開放合理子集）
-					var _cb_in3082 := func(buf_task: String):
-						var task_id: String = _subteam_task_from_index(int(buf_task))
-						_bridge.set_player_input("sub_task", task_id)
-						# 步驟 4：目標 q
-						var _cb_in3090 := func(buf3: String):
-							var dq: int = int(buf3)
-							_bridge.set_player_input("sub_move_q", dq)
-							# 步驟 5：目標 r → 執行
-							var _cb_in3098 := func(buf4: String):
-								var dr: int = int(buf4)
-								_bridge.set_player_input("sub_move_r", dr)
-								var res := _bridge.command_player("execute_action", {
-									"action_id": "dispatch_subteam",
-									"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-								_log_event("[子隊] %s" % res.get("message", ""))
-								_set_feedback(res.get("ok", true), res.get("message", ""))
-							_open_input("目標格 R: ", "numeric", _cb_in3098)
-						_open_input("目標格 Q: ", "numeric", _cb_in3090)
-					_open_input("選任務 (1~%d): " % SUBTEAM_TASK_CHOICES.size(), "numeric", _cb_in3082, false, SUBTEAM_TASK_CHOICES.map(func(t): return String(t[1])))
-				_open_input("派遣人數 (1~%d): " % (max_pop - 1), "numeric", _cb_in3074)
-			_open_input("選隊長 (1~%d): " % candidates.size(), "numeric", _cb_in3062)
+			# ★第二刀：目標＝主畫面定好的游標格；按 N 當下判可達、當下凍結（每步提示印凍結值，不每步重讀 _cursor）
+			var tgt: Vector2i = _cursor
+			var chk: Dictionary = _bridge.check_target(tgt.x, tgt.y)
+			# ★沒去過的格 N 當下不拒（systems 501b884b5）：偵查就是要去迷霧；任務選定後再依任務前提判
+			if not bool(chk.get("ok", false)) and String(chk.get("status", "")) != "unknown":
+				_set_feedback(false, "不能派往 (%d,%d)：%s" % [tgt.x, tgt.y, String(chk.get("reason", ""))])
+				_refresh()
+				return
+			_dispatch_begin(candidates, max_pop, tgt)
 			_refresh()
 			return
 		# 選子隊
@@ -3187,21 +3169,95 @@ func _handle_subteam_mode(keycode: int) -> void:
 			_subteam_selection = -1
 	_refresh()
 
+# ★派遣三步（spec 第二刀）：選隊長 → 人數 → 任務 ⇒ 出發；全走 _open_input、同一個 on_cancel（Esc 任一步都清殘值）
+const _DISPATCH_INPUT_KEYS: Array = ["sub_leader_id", "sub_pop_count", "sub_task", "sub_move_q", "sub_move_r"]
+var _dispatch_target: Vector2i = Vector2i(-1, -1)
+
+func _dispatch_clear_inputs() -> void:
+	for k in _DISPATCH_INPUT_KEYS:
+		_bridge.get_state().player_state.erase(k)
+	_dispatch_target = Vector2i(-1, -1)
+
+func _dispatch_begin(candidates: Array, max_pop: int, tgt: Vector2i) -> void:
+	_dispatch_clear_inputs()
+	_dispatch_target = tgt
+	_dispatch_step_leader(candidates, max_pop)
+
+func _dispatch_tag() -> String:
+	return "目標＝(%d,%d)" % [_dispatch_target.x, _dispatch_target.y]
+
+func _dispatch_step_leader(candidates: Array, max_pop: int) -> void:
+	var cb := func(buf: String) -> void:
+		var ci: int = int(buf) - 1
+		if ci < 0 or ci >= candidates.size():
+			_set_feedback(false, "沒有第 %s 位（1~%d）" % [buf, candidates.size()])
+			_dispatch_step_leader(candidates, max_pop)
+			return
+		_bridge.set_player_input("sub_leader_id", int(candidates[ci].get("person_id", -1)))
+		_dispatch_step_pop(max_pop)
+	_open_input("選隊長 (1~%d)　%s: " % [candidates.size(), _dispatch_tag()], "numeric", cb, false,
+		candidates.map(func(c): return String(c.get("name", "?"))), _dispatch_clear_inputs)
+
+func _dispatch_step_pop(max_pop: int) -> void:
+	var cb := func(buf: String) -> void:
+		var n: int = int(buf)
+		if n < 1 or n > max_pop - 1:
+			_set_feedback(false, "人數要在 1~%d 之間" % (max_pop - 1))
+			_dispatch_step_pop(max_pop)
+			return
+		_bridge.set_player_input("sub_pop_count", n)
+		_dispatch_step_task()
+	_open_input("派遣人數 (1~%d)　%s: " % [max_pop - 1, _dispatch_tag()], "numeric", cb, false, [], _dispatch_clear_inputs)
+
+func _dispatch_step_task() -> void:
+	var cb := func(buf: String) -> void:
+		var ti: int = int(buf) - 1
+		if ti < 0 or ti >= SUBTEAM_TASK_CHOICES.size():
+			_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, SUBTEAM_TASK_CHOICES.size()])
+			_dispatch_step_task()
+			return
+		var tc: Dictionary = _bridge.dispatch_task_check(_dispatch_target.x, _dispatch_target.y, String(SUBTEAM_TASK_CHOICES[ti][0]))
+		if not bool(tc.get("ok", false)):
+			_set_feedback(false, "不能派往 (%d,%d)：%s" % [_dispatch_target.x, _dispatch_target.y, String(tc.get("reason", ""))])
+			_dispatch_step_task()   # 換一個任務（或 Esc 取消）
+			return
+		_bridge.set_player_input("sub_task", String(SUBTEAM_TASK_CHOICES[ti][0]))
+		_bridge.set_player_input("sub_move_q", _dispatch_target.x)
+		_bridge.set_player_input("sub_move_r", _dispatch_target.y)
+		var res := _bridge.command_player("execute_action", {
+			"action_id": "dispatch_subteam",
+			"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+		_log_event("[子隊] %s" % res.get("message", ""))
+		_set_feedback(res.get("ok", true), res.get("message", ""))
+		_dispatch_target = Vector2i(-1, -1)
+	_open_input("選任務 (1~%d)　%s: " % [SUBTEAM_TASK_CHOICES.size(), _dispatch_tag()], "numeric", cb, false,
+		SUBTEAM_TASK_CHOICES.map(func(t): return String(t[1])), _dispatch_clear_inputs)
+
 func _build_subteam_str() -> String:
 	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {}).get("subteam_panel", {})
 	var subteams: Array = sp.get("subteams", [])
 	var candidates: Array = sp.get("dispatch_candidates", [])
 	var lines: Array = []
 	lines.append("── 子隊 ──")
+	# ★第二刀：目標＝游標處（玩家不用記游標停哪）；派遣中印凍結值
+	if _dispatch_target != Vector2i(-1, -1):
+		lines.append("目標＝(%d,%d)（派遣中）" % [_dispatch_target.x, _dispatch_target.y])
+	else:
+		var chk: Dictionary = _bridge.check_target(_cursor.x, _cursor.y)
+		var st_k: String = String(chk.get("status", ""))
+		lines.append("目標＝游標處 (%d,%d)（%s）" % [_cursor.x, _cursor.y,
+			"腳下" if st_k == "here" else ("沒去過：只能派偵查等不需地形的任務" if st_k == "unknown" else ("可達" if bool(chk.get("ok", false)) else "不可達：" + String(chk.get("reason", ""))))])
 	if subteams.is_empty():
 		lines.append("（無子隊）")
+	# ★P5：輸入模式（選單用數字）期間子隊列表不帶 [n]——同屏不准有兩組數字鍵指不同東西
+	var numbered: bool = not _input_mode
 	for i in range(subteams.size()):
 		var st: Dictionary = subteams[i]
 		var pos_v: Vector2i = st.get("tile_pos", Vector2i.ZERO) as Vector2i
 		var task_str: String = st.get("player_commanded_task", st.get("current_task", "?"))
 		var selected_mark: String = "* " if st.get("team_id", -1) == _subteam_selection else "  "
-		lines.append("[%d]%sTeam%d @(%d,%d)  %s  人口:%d" % [
-			i + 1, selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
+		lines.append("%s%sTeam%d @(%d,%d)  %s  人口:%d" % [
+			("[%d]" % (i + 1)) if numbered else " · ", selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
 			task_str, st.get("population", 0)])
 		if st.get("team_id", -1) == _subteam_selection:
 			var pop: int = sp.get("player_population", 0)
@@ -3219,10 +3275,11 @@ func _build_subteam_str() -> String:
 			lines.append("（無可用隊長——先到互動選單『拔擢匿名→記名』培養成員）")
 		else:
 			lines.append("（無：需命名非 leader 成員）")
-	for i in range(candidates.size()):
-		lines.append("  %d. %s" % [i + 1, candidates[i].get("name", "?")])
+	if not _input_mode:   # 派遣中候選印在選單裡（帶號）；平時只列名不帶號（號碼是子隊的 [1-9]）
+		for i in range(candidates.size()):
+			lines.append("  · %s" % candidates[i].get("name", "?"))
 	if not candidates.is_empty():
-		lines.append("[N]派遣新子隊")
+		lines.append("[N]派遣新子隊（往游標處）")
 	lines.append("[U/Esc]關閉")
 	return "\n".join(lines)
 
