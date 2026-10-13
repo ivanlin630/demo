@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 客戶端不解釋遊戲鍵／離開 Esc×2／情報帶內容（ac6271382）
 topic: R② ＝ **ISSUES,不擋 #1（play.py 刪 q）先做;擋 #2 #4 兩處**｜①Q2 的前提『主畫面走既有「此鍵無作用」路』不成立（主畫面 match 沒有 default、全檔無 main 的 _refuse_unbound_key 呼叫）;②Esc×2:旗標清除點只寫在主畫面分支,且回饋行不清 ⇒ 提示句會說謊;並且遊戲退出後 play.py 主迴圈沒有 EOF 分支 ⇒ Esc×2 離開時客戶端會往已關的 socket 寫（未驗,要床證）;play.py:282 橫幅仍寫『q 離開』;③情報 info:值是 belief 沒錯,但【受眾】錯——_player_perceives 放行同勢力隊 ⇒ 玩家會看到友軍隊對第三方的情報內容
 ---

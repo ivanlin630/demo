@@ -1,6 +1,7 @@
 # 客戶端不解釋遊戲鍵＋離開不綁 Q＋情報帶內容——HOW
 
-狀態：草稿，待 R²
+狀態：收 R²（2026-10-13-reviewer-to-systems-R2-play-client-no-key-interpretation-ISSUES；補完同版不需再審）
+交付分兩刀：**第一刀＝改法 1 單獨 commit 先上**（用戶那個病的直接原因只有 play.py:301 一行）；第二刀＝改法 2–4。
 來源：藍圖 2026-10-13-blueprint-to-systems-TICKET-play-py-hijacks-q-so-battle-move-quits-the-game（第五輪用戶真機回饋 #1）
 順位：插到「附身隊後續三件」之前（實作端手上那張停在乾淨點，branch 上 commit，回頭續做）
 
@@ -11,23 +12,34 @@
 - 情報：`belief_system.gd:317` `WorldEvents.emit(state,"intel_arrived",[obs_id],_wake)` 不帶 info；`world_events.gd:368` 只能印「X 收到了情報」。全 scripts 只有這一個產生者。
 
 ## 改法
-1. **play.py 不解釋任何遊戲鍵**：刪掉 `"q"`、`"quit"` 兩個字面；只認 `QUIT_TOKEN`（`:quit`）與 Ctrl+C（`key_token` 已把 Ctrl+C 轉 `:quit`）。所有其他 token 原樣送。拿掉 :301-304 那段過期註解。
-2. **遊戲側離開不綁 Q**：`KEY_Q` 主畫面分支拿掉 quit（主畫面 Q 無作用 ⇒ 走既有「此鍵無作用」路）。離開改 **Esc 兩段**：主畫面（沒有任何面板／模式開著時）第一次 Esc ⇒ 結果行「再按一次 Esc 離開」並記旗標；下一鍵若是 Esc ⇒ 離開；其他鍵 ⇒ 旗標清掉、照該鍵原意處理。
+1. **play.py 不解釋任何遊戲鍵**：刪掉 `"q"`、`"quit"` 兩個字面；只認 `QUIT_TOKEN`（`:quit`）與 Ctrl+C（`key_token` 已把 Ctrl+C 轉 `:quit`）。所有其他 token 原樣送。拿掉 :301-304 那段過期註解；橫幅（:282）改字；`--selfcheck` 加 Q5 那一格。獨立 commit。
+2. **遊戲側離開不綁 Q**：`KEY_Q` 主畫面分支拿掉 quit。主畫面 match（:575-614）沒有 default、也沒有未綁定鍵出口 ⇒ 拿掉後按 q 是**靜默、狀態不變**（給主畫面加未綁定鍵出口會碰 unbound_key_bed 與不變量 #10，不在本票）。
+   離開改 **Esc 兩段**：
+   - **上膛條件**：這次 Esc 沒有任何副作用（沒關面板、沒取消推進、沒退出任何模式）才上膛，結果行印「再按一次 Esc 離開」。⇒ 面板開著時要連按 Esc×3 才離開，明文接受這個退出反射。
+   - **清旗標放 `_input` 最頂端**：任何非 Esc 鍵都清（含之後被戰鬥 overlay、輸入模式提早 return 吃掉的鍵）；否則上膛後進戰鬥再按 Esc 就離開了。
+   - **清旗標時撤掉提示**：結果行若仍是「再按一次 Esc 離開」就清掉，不讓提示說謊。
+   - 下一鍵是 Esc 且旗標在 ⇒ 離開。
    - 先查：主畫面 Esc 目前有沒有綁別的意思（面板／模式內的 Esc 是關閉，照舊——只有「什麼都沒開」那一層才進兩段）。有衝突 ⇒ 交件信列出、不自行取捨。
-   - 鍵列「[Q]離開」改「[Esc×2]離開」，`KEYMAP_NEEDS` 同步。
+   - 「Q 離開」全部改：鍵列 `text_ui_main.gd:1104`、play.py:282 橫幅、`text_ui_layout_bed.gd:213`、`ui_flow_test.gd:581` U15、`resolved_issues.md:147`——**用 grep 掃全**（q／Q＋離開／quit 各種寫法），交件信附命中清單與處置，不靠這五處。`KEYMAP_NEEDS` 同步。
+   - **離開後客戶端**：play.py 主迴圈（:290-312）沒有 EOF 分支 ⇒ 遊戲 quit 後下一鍵 sendall 預期 BrokenPipe（讀碼推論，床證）。改：`read_frame` 回空 ⇒ 印「遊戲已結束」、return 0。
    - 終端路徑：`PlayerRepl` 對 Esc 已有命名鍵（F5 `NAMED_KEYS`）；確認 Esc 能經 `press_on` 進到這一層。
-3. **戰鬥結束那一拍不吃下一鍵**：戰後畫面到主畫面的切換那一刻，同一次按鍵不得同時被兩個模式解讀（例：戰後「按任意鍵離開」吃掉一鍵後，同一鍵又落到主畫面）。實作端先用床重現（管道送「戰鬥最後一鍵＋一個主畫面有意思的鍵」），重現得到才修，修在模式切換的入口（一鍵只派給一個模式）；重現不到 ⇒ 交件信寫明試了哪些序列。
-4. **情報帶內容**：`intel_arrived` emit 帶 info `{tgt: tgt_id, pos: fields["tile_pos"]}`（都是觀察者這次寫進 belief 的值，不是真值——感知鐵律）；`describe` 改「<隊> 得知 Team<tgt> 在 (q,r)」。info 缺欄 ⇒ 退回舊句（不印空對象）。
+3. **戰鬥結束那一拍不吃下一鍵**：戰後畫面到主畫面的切換那一刻，同一次按鍵不得同時被兩個模式解讀（例：戰後「按任意鍵離開」吃掉一鍵後，同一鍵又落到主畫面）。實作端先用床重現，**兩條路都試、各寫結果**：(i) 終端 `PlayerRepl.press_on`（本來就一鍵一派，P10b；重現不到不能證沒 bug）；(ii) 引擎層 `Input.parse_input_event` 注入（GUI 廣播下 encounter_view 先 hide，主畫面 `_input` 再看到 visible==false）。重現得到才修，修在模式切換入口（一鍵只派一個模式）；都重現不到 ⇒ 交件信寫明試了哪些序列。
+4. **情報帶內容**：`intel_arrived` emit 帶 info `{tgt, pos, src, age}`（觀察者這次寫進 belief 的值，不是真值——感知鐵律就值而言成立）。
+   - **受眾**：`_player_perceives` 放行同勢力隊 ⇒ 若照帶，玩家會看到「Team7 得知 Team3 在 (q,r)」＝友軍對第三方的情報內容，玩家沒被告知（:304-310 註解自己警告的「有 belief 撐著所以看起來合法」）。⇒ **info 只在 subjects 含玩家自家隊時才帶**；友軍那則照舊句、不帶對象與座標。
+   - 句子：自家「你得知 Team<tgt> 在 (q,r)」；**親見與轉述分開**——親見「你看到…」，轉述「你得知…（N 分鐘前的消息）」，來源與時間讀 claim 的 source／tick。info 缺欄 ⇒ 舊句（不印空對象）。保留「得知」的轉述語氣（claim 可能失真）。
    - 「糧源情報同型」：目前沒有糧源情報這種事件（糧源 belief 種類在深層批）⇒ 本票不做，在交件信註明。
 
 ## 驗收（床，管道餵鍵走 play.py 同一條路或 PlayerRepl）
 - Q1（修前紅）：進遭遇戰後送 `q` ⇒ 連線不斷，結果行是移動句或邊界句。
-- Q2（修前紅）：主畫面送 `q` ⇒ 程式仍在，結果行「此鍵無作用」型。
-- Q3（修前紅）：主畫面 Esc 一次 ⇒ 仍在＋提示；Esc 兩次 ⇒ 離開；Esc 後按別的鍵 ⇒ 不離開且該鍵照原意。
-- Q4：面板開著時 Esc ⇒ 只關面板（不進兩段）。
+- Q2（修前紅）：主畫面送 `q` ⇒ 程式仍在、狀態不變。
+- Q3（修前紅）：主畫面 Esc 一次 ⇒ 仍在＋提示；Esc 兩次 ⇒ 離開，play.py 退出碼 0、無 traceback、印「遊戲已結束」。
+- Q3b：Esc→WASD→Esc ⇒ 不離開，且 WASD 之後結果行不再有「再按一次 Esc 離開」。
+- Q3c：Esc 上膛→進遭遇戰→Esc ⇒ 不離開。
+- Q4：面板開著時 Esc ⇒ 只關面板（不上膛）；面板開著連按 Esc×3 ⇒ 離開。
 - Q5：play.py `--selfcheck` 加一格：`key_token` 後的 `q` 照原樣送出（不轉 `:quit`）。
 - Q6（若 3 重現得到）：戰後切換那一鍵只被派一次。
-- Q7（修前紅）：事件區出現 intel_arrived 時句子含對象與座標；全跑一次 E2E，「收到了情報」0 筆。
+- Q7（修前紅）：自家隊的 intel_arrived 句子含對象與座標，親見／轉述兩種句子各一格。
+- Q7b：友軍隊的 intel_arrived 不含 tgt 與座標（放寬受眾謂詞 ⇒ 必紅）。
 - 負對照：play.py 放回 `"q"` ⇒ Q1 紅；`describe` 放回舊句 ⇒ Q7 紅。
 - terminal E2E 照綠；有既有步驟用 Q 離開的 ⇒ 改成 Esc×2，交件信列出。
 - world-fp 不變（info 多帶欄位不進世界狀態）。
