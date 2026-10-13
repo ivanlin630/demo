@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: owner→outpost 索引（spec 2026-08-20-owner-outpost-index-HOW；2026-10-14 同盟票改 set_owner 簽章時觸及而補宣告）
 # owner→outpost 索引 TDD（效能 arc B、HOW spec §4.3 失效路徑五條 + 語意等價）。
 # 每條 assert 都同時比對「索引結果」與「舊全圖掃基準」，任一不符即 FAIL。
 # ①set_owner 換手 ②完工 0→>0（★owner 不變的 discriminating case：set_owner 會 early-return，

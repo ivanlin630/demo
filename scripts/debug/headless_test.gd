@@ -1470,6 +1470,7 @@ func _test_invariant_faction_bidir() -> void:
 	var t := TeamData.new(); t.team_id = 0; t.faction_id = 9
 	state.teams[0] = t
 	var f := FactionData.new(); f.faction_id = 9; f.member_team_ids = [0]
+	f.leader_team_id = 0   # ★L7（勢力不得無頭）之後最小一致勢力要有領袖
 	state.factions[9] = f
 	# 修掉 population 干擾：給最小一致 team
 	t.leader_id = -1; t.named_members = []; _seed_pop(t, 0)
@@ -7804,7 +7805,7 @@ func _test_unowned_outpost_takeover() -> void:
 	print("Trade Task7 OK")
 
 func _test_alliance_outpost_transfer() -> void:
-	print("--- Trade Task8: 居民團 alliance → outpost 轉 ---")
+	print("--- Trade Task8: 居民團 alliance → outpost 不轉（#8-1）---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
@@ -7830,7 +7831,8 @@ func _test_alliance_outpost_transfer() -> void:
 	# 模擬 alliance accept（直接呼叫 _form_alliance + outpost 連動）
 	var diplo := DiplomaticAiSystem.new()
 	diplo._form_alliance(state, attacker, v)
-	assert(tile.outpost_owner == 5, "outpost owner 應變攻方 5，實際=%d" % tile.outpost_owner)
+	# ★spec 2026-10-13-alliance #8-1 拿掉 D C1：結盟不轉讓據點 ⇒ owner 留原主 99
+	assert(tile.outpost_owner == 99, "結盟不轉讓據點：owner 應留 99，實際=%d" % tile.outpost_owner)
 	print("Trade Task8 OK")
 
 func _test_uprising_paths() -> void:

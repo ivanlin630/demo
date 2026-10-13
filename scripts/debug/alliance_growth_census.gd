@@ -28,10 +28,8 @@ func _initialize() -> void:
 func _positive_control() -> void:
 	print("\n── 陽性對照：A 勢力領袖向 B 勢力成員提同盟 ──")
 	seed(1337)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
-	Probe.reset()
-	Probe.enabled = true
+	# ★arm 先於 setup（bed-arm 閘）；留玩家（玩家隊照常推進）
+	var st := MeasureBedHelper.arm_and_setup("res://config/default.json", false)
 	var fids: Array = st.factions.keys()
 	fids.sort()
 	var fa: FactionData = st.factions[fids[0]]
@@ -63,10 +61,8 @@ func _positive_control() -> void:
 
 func _run(sd: int, days: int) -> bool:
 	seed(sd)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
-	Probe.reset()
-	Probe.enabled = true
+	# ★arm 先於 setup（bed-arm 閘）；留玩家（玩家隊照常推進）
+	var st := MeasureBedHelper.arm_and_setup("res://config/default.json", false)
 	var runner := SimRunner.new()
 	var enc: int = 0
 	for i in range(days * WorldState.TICKS_PER_DAY):

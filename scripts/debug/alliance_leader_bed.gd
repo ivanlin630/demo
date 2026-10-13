@@ -37,9 +37,8 @@ func _initialize() -> void:
 
 func _world() -> WorldState:
 	seed(SEED)
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
-	return st
+	# ★arm 先於 setup（bed-arm 閘）；留玩家（L／R2 要玩家端）
+	return MeasureBedHelper.arm_and_setup("res://config/default.json", false)
 
 
 func _free_tile(st: WorldState) -> HexTileData:
