@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪用戶回饋 #5（玩家可見）
 topic: 「勒索完成（食+0.0, 幣+0.0）」一分鐘內兩次——拿到 0 不是完成；要寫對方已無可取、不算一次成功、事件帶對象
 ---
