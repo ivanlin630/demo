@@ -175,6 +175,10 @@ static func top_row(v: Dictionary) -> String:
 	var budget: int = TextUiLayout.COLS - used
 	# ★威脅句永不被截（改法 3）：它有界、寬度已在 _fit_names 預留 ⇒ 原樣放；故事結束那句照舊吃剩餘並截
 	var threat: String = label + (TextUiLayout.clip_to(body, maxi(budget, 0)) if story_end != "" else body)
+	# ★列寬上限比「威脅句整句」硬：名字三欄都讓到最小仍超過 COLS（極端值：999 天／人口 9999／待執行 99 道）
+	#   ⇒ 才截威脅句、帶截斷記號（不靜默截）。威脅欄床 P6 守這一格；真實開局走不到這裡（輸入床 P3 守）
+	if story_end == "" and TextUiLayout.display_width(body) > budget:
+		threat = label + TextUiLayout.clip_mark(body, maxi(budget, 1))
 	return sep.join(PackedStringArray(head + [threat, tail]))
 
 # 威脅句的最長可能寬度（模板以最長可能值填入）——床用它驗「最寬的威脅句也放得進一列」

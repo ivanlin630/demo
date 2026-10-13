@@ -1190,7 +1190,7 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
 	# ★目標格的任務前提（同一支，UI 也呼叫它）——有目標格才判（-1,-1 ＝ 舊流程的就地派遣）
 	if move_tgt != Vector2i(-1, -1):
-		var tc: Dictionary = dispatch_task_check(state, pt, move_tgt, task)
+		var tc: Dictionary = precheck_dispatch_task(state, pt, move_tgt, task)
 		if not bool(tc["ok"]):
 			return { "ok": false, "msg": "不能派往 (%d,%d)：%s" % [tq, tr, String(tc["reason"])] }
 	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
@@ -2066,7 +2066,8 @@ func inspect_member(state: WorldState, person_id: int) -> Dictionary:
 #   ★為什麼未知格要擋在找路之前：找路讀真地圖 ⇒ 對沒去過的格回「沒有路」＝把那格周圍的真地形報給玩家（感知鐵律）
 #   ★不可達的句子不指名原因（山只是貴、不是牆；空集近乎只有地圖洞）⇒ 只說「沒有路」
 #   回 {ok, status: off_map|unknown|here|reachable|no_path, reason}
-static func check_target(state: WorldState, pt: TeamData, pos: Vector2i, vision_mult: float = 1.0) -> Dictionary:
+#   ★名字帶 precheck_：純查詢的前置判斷（ok:true 不帶句子，不是結果句；success-sentence 床依此前綴排除）
+static func precheck_target(state: WorldState, pt: TeamData, pos: Vector2i, vision_mult: float = 1.0) -> Dictionary:
 	var k: Dictionary = PlayerQueryApi.tile_knowledge(state, pos, vision_mult)
 	match String(k.get("status", "")):
 		"off_map":
@@ -2085,8 +2086,8 @@ static func check_target(state: WorldState, pt: TeamData, pos: Vector2i, vision_
 #   ★其餘任務（偵查／待機／覓食／巡邏）放行（藍圖確認 44d310612：安頓、建設要讀那一格）
 const TASKS_NEED_KNOWN_TILE: Array = [TeamData.TASK_SETTLE, TeamData.TASK_BUILD]
 
-static func dispatch_task_check(state: WorldState, pt: TeamData, pos: Vector2i, task: String, vision_mult: float = 1.0) -> Dictionary:
-	var chk: Dictionary = check_target(state, pt, pos, vision_mult)
+static func precheck_dispatch_task(state: WorldState, pt: TeamData, pos: Vector2i, task: String, vision_mult: float = 1.0) -> Dictionary:
+	var chk: Dictionary = precheck_target(state, pt, pos, vision_mult)
 	if String(chk["status"]) == "unknown":
 		if task in TASKS_NEED_KNOWN_TILE:
 			return {"ok": false, "reason": "%s要先知道那格的地形（%s）" % [_task_label(task), String(chk["reason"])]}
@@ -2113,9 +2114,9 @@ func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 	if pt.combat_target != -1:
 		return { "ok": false, "msg": "戰鬥中，不能移動" }
 	# (C) 下令時就算路：不可達 ⇒ 不下令、說原因（不是走一格再停）
-	#   ★共用判斷 check_target（systems 裁 a）：沒去過的格【不預判】、照樣下令——往迷霧走是探索；
+	#   ★共用判斷 precheck_target（systems 裁 a）：沒去過的格【不預判】、照樣下令——往迷霧走是探索；
 	#     真的走不通由行進中的 path_broken 說「到 (q,r) 的路斷了」。舊句「被山或地圖邊緣隔開」對未知格洩露真地形，拿掉
-	var chk: Dictionary = check_target(state, pt, target_pos)
+	var chk: Dictionary = precheck_target(state, pt, target_pos)
 	if not bool(chk["ok"]) and String(chk["status"]) != "unknown":
 		return { "ok": false, "msg": "無法抵達 (%d,%d)：%s" % [target_pos.x, target_pos.y, String(chk["reason"])] }
 	if not TaskArbiter.try_set(state, pt, TeamData.TASK_TRAVEL, target_pos, TaskArbiter.PRIO_PLAYER, "player_move"):   # gate-ok：玩家指令（PRIO_PLAYER）
