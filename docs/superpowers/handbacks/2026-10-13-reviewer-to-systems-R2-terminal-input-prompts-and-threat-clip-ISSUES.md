@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 輸入提示上終端＋派遣按即做＋頂列威脅句（d886de165）
 topic: R② ＝ **ISSUES,第一刀（改法 1＋3）三處要補、第二刀（改法 2）有鍵衝突擋住**｜①20 個入口都寫 _input_mode_prompt（✓）,但【不要讀 _input_bar.text】——它有 32 個寫入點、兼作非輸入用途;應讀 prompt＋buffer 並與 GUI 共用同一支組字函式;②威脅句截斷成因核實,但『多一行』會讓整屏在威脅出現的瞬間下移且要動 ≥5 支床;更好的是給威脅預留寬度、改截【無界的隊名/家】用 …;③派遣『先 WASD 移游標再按 N』在子隊面板內【做不到】——WASD 在面板內未綁定（_subteam_mode_binds_key）;字母選隊長會撞 U/N/A/B
 ---
