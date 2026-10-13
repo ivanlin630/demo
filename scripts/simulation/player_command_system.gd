@@ -893,16 +893,56 @@ func _action_propose_alliance(state: WorldState, target_id: int, pt: TeamData, p
 	if tgt == null:
 		return { "ok": false, "msg": "目標不存在" }
 	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "propose_alliance")
-	if resp == "accept":
-		if pt.faction_id == -1 and tgt.faction_id == -1:
-			state.create_faction(pt_id)
-		_diplomatic._form_alliance(state, pt, tgt)
-		print("[PlayerCmd] 同盟成立，勢力%d" % pt.faction_id)
+	# ★改法 2：舊版 accept 之後又反方向呼一次 _form_alliance（handle 在 :386 已結過一次）⇒ 名聲加兩次、方向打架 ⇒ 拿掉
 	state.player_pending_targets.erase(target_id)
+	var res: Dictionary = _diplomatic.last_alliance
+	if resp == "accept":
+		return { "ok": true, "msg": alliance_sentence(state, res, pt.team_id) }
+	if String(res.get("action", "")) == "none":
+		return { "ok": false, "msg": "外交結果：%s" % String(res.get("reason", "")) }
 	# ★玩家面字串零英文識別字（⑤ 那張票的不變量）：`resp` 是引擎的 id（accept／refuse／reject）
 	#   ⇒ 不能直接印給玩家。★中文來自唯一生產者 `PlayerApiMapper`，不在這裡寫第二份。
-	return { "ok": resp == "accept",
-		"msg": "外交結果：%s" % PlayerApiMapper.diplomacy_reply_label(resp) }
+	return { "ok": false, "msg": "外交結果：%s" % PlayerApiMapper.diplomacy_reply_label(resp) }
+
+# ★提案行的預告（玩家接受 from_id 的結盟提案會發生什麼）：與 _accept_diplomacy 同一個順序試算
+#   （兩隊都獨立時那一支先讓對方建國、對方當領袖，再走 plan_alliance）
+static func alliance_preview(state: WorldState, from_id: int) -> String:
+	var ft: TeamData = state.teams.get(from_id)
+	var pt: TeamData = state.teams.get(state.get_player_team_id())
+	if ft == null or pt == null:
+		return "接受＝後果未知（隊伍不存在）"
+	if ft.faction_id == -1 and pt.faction_id == -1:
+		return "接受＝你加入 Team%d 新建的勢力（對方當領袖）" % from_id
+	var plan: Dictionary = DiplomaticAiSystem.plan_alliance(state, pt, ft)
+	match String(plan["action"]):
+		"none":
+			return "接受也不會成立：%s" % String(plan["reason"])
+		"same":
+			return "接受＝你們本來就在同一個勢力"
+		"move":
+			if int(plan["moved_team"]) == pt.team_id:
+				return "接受＝你加入勢力%d（離開勢力%d）" % [int(plan["to_faction"]), pt.faction_id] if pt.faction_id != -1 \
+					else "接受＝你加入勢力%d" % int(plan["to_faction"])
+			return "接受＝Team%d 加入你的勢力%d" % [int(plan["moved_team"]), int(plan["to_faction"])]
+	return "接受＝與對方結盟"
+
+# ★結盟結果句寫【實際後果】（改法 3）：讀 _form_alliance／plan_alliance 回的實際動作，不在呼叫端猜
+static func alliance_sentence(state: WorldState, res: Dictionary, ptid: int) -> String:
+	var act: String = String(res.get("action", ""))
+	var mv: int = int(res.get("moved_team", -1))
+	var to: int = int(res.get("to_faction", -1))
+	match act:
+		"none":
+			return String(res.get("reason", "結盟沒有成立"))
+		"same":
+			return "你們本來就在同一個勢力（勢力%d）" % to
+		"found":
+			return "兩隊建立勢力%d" % int(res.get("created_faction", to))
+		"move":
+			if mv == ptid:
+				return "你加入勢力%d" % to
+			return "Team%d 加入你的勢力%d" % [mv, to]
+	return "結盟沒有成立"
 
 func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)
@@ -1174,7 +1214,7 @@ func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: TeamData, 
 		return { "ok": false, "msg": "目標無 outpost" }
 	if tile.outpost_owner != pt_id:
 		return { "ok": false, "msg": "非自家 outpost" }
-	OutpostOwnerBank.set_owner(tile, -1, "abandon")
+	OutpostOwnerBank.set_owner(state, tile, -1, "abandon")
 	return { "ok": true, "msg": "已棄置 outpost (%d,%d)" % [pos.x, pos.y] }
 
 func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
@@ -1901,8 +1941,10 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 			# 雙方皆獨立時 _form_alliance 無效，需先建立勢力
 			if from_team.faction_id == -1 and pt.faction_id == -1:
 				state.create_faction(from_id)   # NPC 為領袖
-			_diplomatic._form_alliance(state, from_team, pt)
-			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
+			# ★改法 2：方向與 NPC 收提案（diplomatic_ai_system :386）一致——收提案方＝玩家＝team_a
+			#   舊版 _form_alliance(from_team, pt) 把發起方放在收提案方的位置 ⇒ 玩家（勢力領袖）被搬進對方勢力（用戶撞到的那條）
+			var res: Dictionary = _diplomatic._form_alliance(state, pt, from_team)
+			return { "ok": String(res.get("action", "")) != "none", "msg": alliance_sentence(state, res, pt.team_id) }
 		"tribute", "demand_tribute":   # _send_diplomacy_message 寫 "demand_tribute"（原只認 "tribute" → 未知提案類型 bug）
 			return _pay_extortion(state, from_id)
 		# ★★★`propose_trade`：**走 NPC↔NPC 那一段【同一份 code】**（藍圖裁 (b)，spec 2026-09-30）。
@@ -1965,7 +2007,9 @@ func _accept_diplomacy_as_leader(state: WorldState, from_id: int) -> Dictionary:
 		return { "ok": false, "msg": "隊伍不存在" }
 	if pt.faction_id == -1:
 		state.create_faction(pt_id)
-	_diplomatic._form_alliance(state, pt, from_team)
+	var res: Dictionary = _diplomatic._form_alliance(state, pt, from_team)   # 方向已一致：收提案方＝玩家
+	if String(res.get("action", "")) == "none":
+		return { "ok": false, "msg": alliance_sentence(state, res, pt.team_id) }
 	return { "ok": true, "msg": "自立後接納 Team%d，勢力%d" % [from_id, pt.faction_id] }
 
 func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:

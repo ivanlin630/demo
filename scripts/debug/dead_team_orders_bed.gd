@@ -30,7 +30,7 @@ func _mk_market_tile(state: WorldState, pos: Vector2i, owner_id: int) -> HexTile
 	t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos; t.terrain = "plains"
 	t.outpost_type = "civilian"; t.outpost_level = 1
 	state.world.tiles[t.tile_id] = t
-	OutpostOwnerBank.set_owner(t, owner_id, "bed")
+	OutpostOwnerBank.set_owner(state, t, owner_id, "bed")
 	return t
 
 func _mk_team(state: WorldState, tid: int, pos: Vector2i) -> TeamData:

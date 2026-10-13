@@ -413,7 +413,7 @@ static func _generate_factions(state, plan, config, rng) -> void:
 		var faction_id: int = state.create_faction(first_team_id)
 
 		for tid in this_faction_team_ids.slice(1):
-			state.set_team_faction(state.teams[tid], faction_id)   # 入 faction（雙向同步）
+			state.set_team_faction(state.teams[tid], faction_id, WorldState.JOIN_SETUP)   # 入 faction（雙向同步）
 
 		_build_outpost_tile(state, main_pos, main_type, 1, first_team_id, granary)
 		for opos in outposts.slice(1):
@@ -435,7 +435,7 @@ static func _generate_independent_teams(state, plan, config, rng) -> void:
 				named_ratio, richness_mult, "independent_settled")
 			team.tile_pos = opos
 			var key: int = opos.x * 1000 + opos.y
-			OutpostOwnerBank.set_owner(state.world.tiles[key], team.team_id, "init")
+			OutpostOwnerBank.set_owner(state, state.world.tiles[key], team.team_id, "init")
 			# 補注 granary：據點方入主（_build_outpost_tile 時 owner=-1 未注）→ 有主才給 buffer。
 			if granary > 0.0:
 				TileBank.deposit(state.world.tiles[key], "food", granary, "gen_seed")
@@ -507,7 +507,7 @@ static func _setup_random_player(state, config, rng) -> void:
 					team.tile_pos = old_leader_team.tile_pos
 				else:
 					team.tile_pos = _random_empty_tile(state, rng)
-				state.set_team_faction(team, weakest_fid)   # 玩家入 faction（雙向同步）
+				state.set_team_faction(team, weakest_fid, WorldState.JOIN_SETUP)   # 玩家入 faction（雙向同步）
 				var old_leader_tid: int = faction.leader_team_id
 				faction.leader_team_id = team.team_id
 				print("[GameSetup] 玩家成為勢力 %d 統領（原 leader_team=%d 保留為下屬）" %
@@ -517,7 +517,7 @@ static func _setup_random_player(state, config, rng) -> void:
 			if join_mode.begins_with("join:"):
 				var fi: int = int(join_mode.substr(5))
 				if state.factions.has(fi):
-					state.set_team_faction(team, fi)   # 入 faction（雙向同步）
+					state.set_team_faction(team, fi, WorldState.JOIN_SETUP)   # 入 faction（雙向同步）
 					var lt: TeamData = state.teams.get(state.factions[fi].leader_team_id)
 					if lt:
 						team.tile_pos = _random_near(state, [lt.tile_pos], rng)
@@ -595,7 +595,7 @@ static func _build_outpost_tile(state: WorldState, pos: Vector2i,
 	tile.outpost_level = level
 	state.outpost_epoch += 1   # ★market-known 快取失效鍵（★我第一版漏了這兩處，specimen 在 tick 1 抓到 8 筆「NPC 看不到自己那一格」）
 	OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（初始佈點）
-	OutpostOwnerBank.set_owner(tile, owner_team_id, "init")
+	OutpostOwnerBank.set_owner(state, tile, owner_team_id, "init")
 	# 開局糧倉 buffer（緩坡旋鈕，TEST VALUE）：注入公庫 food（effective_food 讀 own granary
 	# → 開局幾月不餓崩，讓 pop 從初始緩降至穩態而非懸崖）。走 TileBank.deposit（bootstrap
 	# 亦走 bank，reason="gen_seed" → driver-ledger 可查；deposit 自帶 FOOD_STORAGE_CAP clamp）。
@@ -704,7 +704,7 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 		if t_cfg.get("is_faction_leader", false): continue
 		var tid: int = int(t_cfg["id"])
 		if cfg_to_actual.has(fid2) and state.teams.has(tid):
-			state.set_team_faction(state.teams[tid], cfg_to_actual[fid2])   # ★用 actual id 入正確 faction（查不到=沿舊靜默不指派 factionless、非新失敗模式）
+			state.set_team_faction(state.teams[tid], cfg_to_actual[fid2], WorldState.JOIN_SETUP)   # ★用 actual id 入正確 faction（查不到=沿舊靜默不指派 factionless、非新失敗模式）
 	# ★god-view Slice B：創世知識 seed（②+③，非全知）取代舊 all-pairs 全知（開局全知污染 emergence
 	# 冷啟動：初識/外交/威脅該靠 belief 傳播長出）。② 同 faction 互 discovered / ③ 本地鄰居(proximity≤
 	# CREATION_KNOW_RADIUS) / ③ 淵源(parent 若 config 有)。窄例外：omniscient_discovery=true(default false)
@@ -771,7 +771,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 			tile.outpost_level = int(op_cfg.get("level", 1))
 			state.outpost_epoch += 1   # ★market-known 快取失效鍵（★我第一版漏了這兩處，specimen 在 tick 1 抓到 8 筆「NPC 看不到自己那一格」）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（初始佈點）
-			OutpostOwnerBank.set_owner(tile, team.team_id, "init")
+			OutpostOwnerBank.set_owner(state, tile, team.team_id, "init")
 			if op_cfg.has("tile_food_init"):
 				var f: float = float(op_cfg["tile_food_init"])
 				tile.resources["food"] = f

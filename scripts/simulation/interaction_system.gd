@@ -1720,7 +1720,7 @@ func _resolve_mergein(state: WorldState, absorber_id: int, absorbed_id: int) -> 
 	else:
 		if Probe.enabled: Probe.bump("mergein.subteam")
 		state.set_subteam_parent(absorbed, absorber_id)
-		state.set_team_faction(absorbed, absorber.faction_id)   # set_subteam_parent 不動 faction_id → 補
+		state.set_team_faction(absorbed, absorber.faction_id, WorldState.JOIN_ABSORB)   # set_subteam_parent 不動 faction_id → 補
 		# 起始忠誠 = f(好感, 義氣)。強吸弱常低好感→帶怨子隊(S-B 叛離燃料)。
 		if ab_leader != null:
 			var yiqi: float = float(ab_leader.values.get("義氣", 0.5))
@@ -1749,7 +1749,7 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 	if not t.tags.has(TeamData.TAG_PRODUCE):
 		state.add_tag(t, TeamData.TAG_PRODUCE, "settle")
 	state.remove_tag(t, "流亡", "settle")
-	state.set_team_faction(t, faction_id)   # 安頓入 faction（雙向同步）
+	state.set_team_faction(t, faction_id, WorldState.JOIN_SETTLE)   # 安頓入 faction（雙向同步）
 	# release-first：流亡隊常在 survival@80，先 release→IDLE@0 過 transition guard，再 set 生產（正當安頓退場）。
 	TaskArbiter.release(t)
 	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))   # A4：安頓後原地生產

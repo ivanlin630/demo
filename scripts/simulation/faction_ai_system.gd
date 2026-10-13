@@ -2973,7 +2973,7 @@ func _begin_village_relocate(state: WorldState, village: TeamData, target_pos: V
 	# 棄現據點（真成本沉沒；generalize _action_abandon_outpost 的核 set_owner(-1)）
 	var cur_tile: HexTileData = state.world.tiles.get(village.tile_pos.x * 1000 + village.tile_pos.y)
 	if cur_tile != null and cur_tile.outpost_owner == village.team_id:
-		OutpostOwnerBank.set_owner(cur_tile, -1, "relocate_abandon")
+		OutpostOwnerBank.set_owner(state, cur_tile, -1, "relocate_abandon")
 		if Probe.enabled: Probe.bump("relocate.abandoned")
 		# ★§4c 反饋（失敗掛點之二）：主動棄村＝這塊地沒撐住 → 寫棄村隊自己 leader 的選址記憶
 		# （actor 乾淨＝決定棄的人就是記取教訓的人）。self-knowledge、零 RNG、只寫存活 leader。
@@ -7893,7 +7893,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 		team.occupying_outpost_since = state.world.current_tick
 		return
 	if state.world.current_tick - team.occupying_outpost_since >= OUTPOST_TAKEOVER_DAYS * WorldState.TICKS_PER_DAY:   # gate-ok: world-mechanic: OUTPOST_TAKEOVER_DAYS 占領 timer
-		OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
+		OutpostOwnerBank.set_owner(state, tile, team.team_id, "takeover")
 		team.occupying_outpost_since = -1
 		print("[Takeover] Team%d 接管無人 outpost (%d,%d)" % [
 			team.team_id, team.tile_pos.x, team.tile_pos.y])
@@ -7949,7 +7949,7 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 			state.clear_team_faction(team, WorldState.LEAVE_UPRISING_INDEPENDENT)   # 自立脫離 faction（雙向同步）
 			print("[Uprising A] Team%d 守城自立（野心=%.2f secede=%.2f>=stay=%.2f，old owner=Team%d）" % [
 				team.team_id, ambition, secede_u, stay_u, old_owner_id])
-		if tile: OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
+		if tile: OutpostOwnerBank.set_owner(state, tile, team.team_id, "takeover")
 	else:
 		# Path B 流亡（原 spec E 邏輯）
 		if Probe.enabled: Probe.bump("uprising.exile")   # ★tap-gap 補：起義流亡脫離 faction
@@ -8055,7 +8055,7 @@ func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: St
 		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
 		var strong_id: int = _find_strong_neighbor(state, team)
 		if strong_id != -1:
-			state.set_team_faction(team, state.teams[strong_id].faction_id)   # 投降強鄰 faction（雙向同步）
+			state.set_team_faction(team, state.teams[strong_id].faction_id, WorldState.JOIN_SURRENDER_NEIGHBOR)   # 投降強鄰 faction（雙向同步）
 		else:
 			if Probe.enabled: Probe.bump("defection.surrender_fail")   # ★tap-gap 補：投降強鄰 fail→脫離獨立
 			state.clear_team_faction(team, WorldState.LEAVE_DEFECT_SURRENDER_FAIL)
