@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪回饋 #2 第二刀：派遣子隊按即做（依你 ③ 重寫）
 topic: R² 請重審 spec「第二刀」一節（docs/superpowers/specs/2026-10-13-terminal-input-prompts-and-threat-clip-HOW.md）
 ---
