@@ -16,7 +16,7 @@
 - 超寬（renderer 最寬列 > COLS−2，即 R ≥ 10）⇒ push_error **且**地圖框標題印「（版面異常）」（不靜默截）；不做退路。renderer 回 `{text, max_width}`，單次 render。
 
 ### 視窗不夠高／不夠寬的提示
-- **由 play.py 自己判**（它讀得到 `shutil.get_terminal_size()`，server 讀不到）：每收到一屏，數 frame 行數 N 與最寬列，跟視窗列數 M、欄數比。
+- **由 play.py 自己判**（它讀得到 `shutil.get_terminal_size()`，server 讀不到）：每收到一屏，數 frame 行數 N 與最寬列，跟視窗列數 M、欄數比。最寬列用**顯示寬度**（`unicodedata.east_asian_width` W／F 計 2 欄），不是 `len()`——畫面全是全形字，len 會少算一半。
 - 不夠 ⇒ 印「畫面需 N 列、現 M 列，請拉高視窗」（欄不足同型「需 120 欄」）。讀不到視窗大小 ⇒ 不印。
 - 位置：藍圖寫「頂列」；**我改放畫面最後一列之後**——R² v2 ③：屏高不夠時終端最先捲掉的是最上面，提示放頂列會是第一個看不見的東西。已通知藍圖。
 
@@ -30,7 +30,7 @@
 - M3：分頁區——改前輸出是改後輸出的**逐列前綴**。
 - M5：無任何地圖列被靜默截。
 - M7：R＝10 世界 ⇒ 標題含「（版面異常）」、有 push_error。
-- M8：play.py `--selfcheck` 加一格：給定 frame 行數 50、視窗 30 列 ⇒ 印提示；讀不到視窗 ⇒ 不印。
+- M8：play.py `--selfcheck` 加格：給定 frame 行數 50、視窗 30 列 ⇒ 印提示；讀不到視窗 ⇒ 不印；含全形字的最寬列按顯示寬計（len 會漏報那一格）。
 - 負對照：`box_widths` 改回左右各半 ⇒ M1 紅。
 - terminal E2E、ui-flow、text_ui_layout 床照綠（錨字面同步後）。world-fp 不變。交件信寫出實量總列數。
 
