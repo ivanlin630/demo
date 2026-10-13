@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 第五輪回饋 #3 大地圖：§2 §3 補完重送
 topic: R² 重審 docs/superpowers/specs/2026-10-13-map-pane-full-width-HOW.md（§1 已定案）
 ---
