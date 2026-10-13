@@ -265,13 +265,14 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		var p: PersonData = state.persons.get(pid)
 		if p == null or p.team_id != absorbed_id:
 			continue
-		p.team_id = absorber_id
+		# ★#12（spec 2026-10-13 multi-hop-move ⓪）：不在這裡直寫 p.team_id —— 下面兩支都走 add_member（咽喉），
+		#   它設 team_id 並在 pid＝玩家時同步 possessed
 		if pid == absorbed.leader_id:
 			absorbed_leader_moved = true
 			absorbed.leader_id = -1
-			state.add_member(absorber, pid)   # 入吸收隊（team_id 已於上設 absorber）
+			state.add_member(absorber, pid)   # 入吸收隊（咽喉設 team_id）
 		else:
-			state.remove_member(absorbed, pid, false)   # 出被吸隊 roster（team_id 已=absorber）
+			state.remove_member(absorbed, pid, false)   # 出被吸隊 roster（不清 team_id；下一行 add_member 改指 absorber）
 			state.add_member(absorber, pid)             # 入吸收隊
 	AnonTierSystem.transfer_proportional(absorbed, absorber, anon_xfer)
 	# ★★★小孩跟著大人走（systems 派②）――而順序是【先於①】：

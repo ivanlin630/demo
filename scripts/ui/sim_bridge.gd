@@ -186,6 +186,14 @@ func get_player_move_target() -> Vector2i:
 	var t: TeamData = _state.teams.get(tid)
 	return t.move_target if t else Vector2i(-1, -1)
 
+# ★多格移動（spec 2026-10-13 multi-hop-move）：UI「停下：<原因>」讀這一欄，不由 UI 猜
+#   （帶來源的 release 把來源留在 task_reason：arrival／player_cancel／path_broken）
+func get_player_task_reason() -> String:
+	var tid: int = get_player_team_id()
+	if tid < 0: return ""
+	var t: TeamData = _state.teams.get(tid)
+	return t.task_reason if t else ""
+
 # ── Step 2: tile query helpers ─────────────────────────────────────────────────
 
 func is_valid_tile(q: int, r: int) -> bool:

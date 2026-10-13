@@ -1796,6 +1796,7 @@ func _action_choose_heir(state: WorldState, _target: int, _pt: TeamData, _pt_id:
 	#     ⇒ chokepoint 檔頭逐字寫「已死/已他處理 ⇒ none」。
 	state.set_leader(team, heir_id)
 	state.player_id = heir_id
+	state.sync_possession()   # ★#12 事實欄：繼任＝戰死窗口結束
 	state.player_forced_event = {}
 	state.player_forced_event_id = ""
 	state.player_state.erase("heir_id")
@@ -2036,7 +2037,15 @@ func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 		return { "ok": false, "msg": "目標格不在地圖內" }
 	if pt.tile_pos == target_pos:
 		return { "ok": true, "msg": "已在目標格" }
-	pt.move_target = target_pos
+	# ★多格移動（spec 2026-10-13 multi-hop-move (B)(C)）：玩家的移動是 arbiter 的一筆佔用（TASK_TRAVEL＠PRIO_PLAYER），
+	#   不是只寫 move_target —— 只寫 move_target 時 task 留 IDLE＠0，任何 AI 路徑都蓋得掉（血證：tick 96 威脅決策改成覓食）
+	if pt.combat_target != -1:
+		return { "ok": false, "msg": "戰鬥中，不能移動" }
+	# (C) 下令時就算路：不可達 ⇒ 不下令、說原因（不是走一格再停）
+	if PathSystem.find_path(state, pt.tile_pos, target_pos).path.is_empty():
+		return { "ok": false, "msg": "無法抵達 (%d,%d)：沒有路（被山或地圖邊緣隔開）" % [target_pos.x, target_pos.y] }
+	if not TaskArbiter.try_set(state, pt, TeamData.TASK_TRAVEL, target_pos, TaskArbiter.PRIO_PLAYER, "player_move"):   # gate-ok：玩家指令（PRIO_PLAYER）
+		return { "ok": false, "msg": "不能移動：現在有更急的事" }   # ★不准靜默（spec ①）；措辭同休息那句
 	# ★M ①：結果句說預計多久（讀既有移動成本 PathSystem.eta_ticks；1 tick ＝ 1 分鐘）
 	var eta: int = PathSystem.eta_ticks(pt, float(FactionAISystem._hex_dist(pt.tile_pos, target_pos)))
 	return { "ok": true, "msg": "開始走向 (%d,%d)，預計 %d 分鐘" % [target_pos.x, target_pos.y, eta] }
@@ -2045,7 +2054,11 @@ func cancel_move(state: WorldState) -> Dictionary:
 	var pt: TeamData = get_player_team(state)
 	if pt == null:
 		return { "ok": false, "msg": "玩家 team 不存在" }
-	pt.move_target = Vector2i(-1, -1)
+	# ★多格移動：取消＝放掉這一筆佔用（明傳來源；附身隊的玩家令只認 arrival／player_cancel）
+	if pt.current_task == TeamData.TASK_TRAVEL:
+		TaskArbiter.release(pt, "player_cancel")
+	else:
+		pt.move_target = Vector2i(-1, -1)
 	state.player_state.erase("pending_trade_target")
 	return { "ok": true, "msg": "取消移動" }
 

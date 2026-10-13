@@ -269,6 +269,9 @@ func _update_day_baseline() -> void:
 
 func _process(_delta: float) -> void:
 	if not _bridge.is_advancing(): return
+	# ★這一次推進是不是「走到抵達」（L）：推進鍵（X 等）會設 _key_advance_target，L 不設
+	#   ⇒ 到了就停只屬於 L；按 X 走路時到了照樣推滿那一小時（按鍵的承諾是請求量）
+	var _arrive_mode: bool = _key_advance_target < 0
 	var result := _bridge.tick_step()
 	_update_day_baseline()   # ★★日邊界的擁有者在這裡，不在 render
 	_events.append_array(result.get("events", []))
@@ -337,12 +340,21 @@ func _process(_delta: float) -> void:
 	# ★④ 抵達偵測讀【狀態本身】（R² 裁 (A)）：上一幀的目標 → 這一幀被清成 (-1,-1) 而人就站在那一格 ⇒ 抵達
 	#   ★舊版的閘是輸入列文字「移動中」——M 改成一顆 tick 之後那段文字下一顆就沒了、遠早於真正抵達
 	#   ★目標因取消／換任務被清掉而人不在那格 ⇒ 不印
+	#   ★多格移動（spec 2026-10-13 multi-hop-move UI）：比的是【玩家下令時記下的目的地】（_arrive_target，M／L 都設），
+	#     不比上一幀的 move_target —— 血證：目標被 AI 換成 (10,2)，走到那裡也印了「抵達 (10,2)」
+	#   ★目標被清而人不在目的地 ⇒「停下：<原因>（停在 (q,r)）」，原因讀 task_reason（今天這種情況以前什麼都不印）
 	var move_target: Vector2i = _bridge.get_player_move_target()
 	if _last_move_target != Vector2i(-1, -1) and move_target == Vector2i(-1, -1) \
-			and _bridge.get_player_tile_pos() == _last_move_target:
-		_log_event("抵達 (%d,%d)" % [_last_move_target.x, _last_move_target.y])
-		if _arrive_target != Vector2i(-1, -1):
-			_bridge.cancel_advance()   # ★走到抵達那一鍵：到了就停
+			and _arrive_target != Vector2i(-1, -1):
+		var _pos: Vector2i = _bridge.get_player_tile_pos()
+		if _pos == _arrive_target:
+			_log_event("抵達 (%d,%d)" % [_arrive_target.x, _arrive_target.y])
+		else:
+			_log_event("停下：%s（停在 (%d,%d)）" % [_move_stop_reason(_bridge.get_player_task_reason(), _arrive_target), _pos.x, _pos.y])
+		if _arrive_mode:
+			_bridge.cancel_advance()   # ★走到抵達那一鍵：到了（或停了）就停；結果句由 _report_arrive_advance 寫、它清 _arrive_target
+		else:
+			_arrive_target = Vector2i(-1, -1)
 	_last_move_target = move_target
 
 	if result.get("done", false):
@@ -354,7 +366,8 @@ func _process(_delta: float) -> void:
 		_encounter_view.sync_with_world()   # ★戰鬥在世界那一 tick 裡結算（例：投降令）⇒ 戰鬥畫面跟上
 	_refresh()
 	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
-	_report_arrive_advance(ps, result)
+	if _arrive_mode:
+		_report_arrive_advance(ps, result)
 	if ps.get("pre_encounter_pending", false) and not _pre_encounter_mode:
 		_bridge.cancel_advance()
 		_pre_encounter_mode = true
@@ -463,6 +476,7 @@ func _input(event: InputEvent) -> void:
 		KEY_M:
 			var r: Dictionary = _bridge.command_player("move_to", {"tile_q": _cursor.x, "tile_r": _cursor.y})
 			if r.get("ok"):
+				_arrive_target = _cursor   # ★多格移動：記下玩家下令的目的地（抵達只在這一格印）
 				# ★★★這裡原本還有一行 `_log_event(<與下一句同一個 message>)` —— 已刪（systems 裁 2026-09-23）。
 				#   ★理由：佇列化之後這個 message ＝「已排入：<動作>」＝ (乙)① 的回音，而下一句 `_set_feedback` 已經印過它
 				#     ⇒ 兩句一起留＝【同一件事講兩遍】，加上消費點的結果句就是第三遍。
@@ -1248,7 +1262,16 @@ func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
 			else:
 				why = "推進停了"
 		_set_feedback(true, ("停下：%s（停在 (%d,%d)）" if _has_stop_event(result) else "途中：%s，停在 (%d,%d)") % [why, pos.x, pos.y])
-	_arrive_target = Vector2i(-1, -1)
+	# ★還在走（途中被事件停下）⇒ 目的地留著：之後到了才認得出是「抵達」
+	if _bridge.get_player_move_target() == Vector2i(-1, -1):
+		_arrive_target = Vector2i(-1, -1)
+
+# ★「停下：<原因>」的原因（spec multi-hop-move UI）：讀 task_reason（帶來源的 release 留下的），不由 UI 猜
+static func _move_stop_reason(reason: String, dest: Vector2i) -> String:
+	match reason:
+		"player_cancel": return "取消了移動"
+		"path_broken":   return "到 (%d,%d) 的路斷了" % [dest.x, dest.y]
+	return "移動被打斷"
 
 # 各面板的鍵空間宣告（靜態謂詞）—— 一處對照，D4 的分派與各 handler 頂端的守衛讀同一組謂詞
 func _mode_binds_key(mode: String, keycode: int) -> bool:

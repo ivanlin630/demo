@@ -123,6 +123,11 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	# ★自動登記 stub（systems 裁）：沒有它，世界只會失去居民不會取得 ⇒ 地基隨時間崩壞。
 	#   ★★成本：O(隊數) 的欄位比較，且【已登記的隊直接 continue】。
 	state.auto_register_stub_sweep()
+	# ★#12 事實欄的第二個入口（同上面登記錨的形狀）：不經 GameSetup 的世界（載檔／床自組）在第一個 tick 同步一次
+	#   ★一次性旗 ⇒ 之後不再補 —— 漏了 sync 的寫者要讓 tick 尾校驗紅，不在這裡默默修好
+	if not state.possession_bootstrapped:
+		state.possession_bootstrapped = true
+		state.sync_possession()
 	# H: 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）—— 它是【等玩家輸入的模態】
 	# ★★★故事結束（`state.game_over`）**是 UI 旗標，本檔不讀它**（意圖帳 #43／#44：
 	#   故事結束 ≠ 世界停止；世界的存在不綁玩家）。票 #2 刀 1（2026-10-06）拿掉了這裡原本的
@@ -157,6 +162,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	#   同理補 consume_and_clear：與當初 encounter 路被特別補上它的理由【逐字相同】（否則跨 tick 存活）。
 	_step_cleanup_extinct_teams(state)
 	WorldEvents.consume_and_clear(state)
+	state.check_possession_drift()   # ★#12：所有系統跑完的 tick 尾（sync 之後立刻比＝恆真）
 	_record_tick_perf(state, Time.get_ticks_usec() - _perf_t0)
 	return _perf_result
 

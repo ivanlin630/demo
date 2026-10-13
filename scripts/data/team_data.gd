@@ -37,6 +37,7 @@ const TASK_SHELTER     := "收留"
 const TASK_SEEK_HOME   := "求居"
 const TASK_UPGRADE     := "升級"
 const TASK_EXPAND      := "擴建"
+const TASK_TRAVEL      := "行進"   # ★玩家移動（spec 2026-10-13 multi-hop-move）：move_to 走 arbiter @PRIO_PLAYER，抵達／取消 release
 const TASK_CONVOY      := "運輸"   # ★後勤 SLICE A：供給-delivery convoy（porter 把 surplus 物理送到 demand 市場結買單）
 const TASK_TRIBUTE_OFFER := "tribute_offer"   # order_task（提供納貢），非 current_task
 
@@ -235,6 +236,10 @@ var move_target: Vector2i = Vector2i(-1, -1):  # -1,-1 = 無目標，不移動
 			mt_log.append({"field": "move_target", "old": move_target, "new": v, "task": current_task,
 				"src": TaskArbiter.watch_src if TaskArbiter.watch_src != "" else "直接寫（不經 arbiter）"})
 		move_target = v
+# ★不變量 #12 的事實欄（spec 2026-10-13 multi-hop-move ⓪）：這一隊正被玩家附身
+#   ★唯一寫入者＝WorldState.sync_possession()（值＝f(player_id, persons[player_id].team_id)；戰死窗口保持）
+#   ★arbiter 咽喉讀它（release／set_strategic_move 沒有 state，所以要一個隊上的事實）；tick 尾有漂移校驗
+var possessed: bool = false
 static var mt_watch_tid: int = -9999
 static var mt_log: Array = []
 # flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。

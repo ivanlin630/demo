@@ -475,6 +475,7 @@ static func _setup_random_player(state, config, rng) -> void:
 	state.persons[leader.id] = leader
 	state.set_leader(team, leader.id)   # chokepoint：leader_id+team_id+role（建國）
 	state.player_id = leader.id
+	state.sync_possession()   # ★#12 事實欄
 
 	var named_count: int = int(pcfg.get("starting_named_count", 1))
 	for _i in range(named_count):
@@ -808,6 +809,7 @@ static func _setup_player(state: WorldState, config: Dictionary) -> void:
 		return
 	var pteam: TeamData = state.teams[pteam_id]
 	state.player_id = pteam.leader_id
+	state.sync_possession()   # ★#12 事實欄
 
 # ── command schedule ───────────────────────────────────────────────
 
