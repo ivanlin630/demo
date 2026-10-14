@@ -487,6 +487,9 @@ func _s9_recall() -> void:
 	var r: Dictionary = _dispatch(st, TeamData.TASK_FORAGE, tgt)
 	var sid: int = int(r.get("sub_id", -1))
 	_arrive(st, runner, sid)
+	_adv(st, runner, WorldState.TICKS_PER_DAY)   # 抵達後停一天（歸建閘有 cadence；修前 1 天內必吞，見 S1）
+	# ★地板：召回前子隊還在 —— 否則「子隊消失」是抵達即歸建閘先吞掉的，不是召回做的（修前就是這樣綠的）
+	_check("★S9 地板：召回前子隊還在（不是先被歸建閘吞掉）", st.teams.has(sid))
 	var pop0: int = _pt(st).population
 	var rec: Dictionary = _recall(st, sid)
 	var merged: bool = _wait_gone(st, runner, sid, 4 * WorldState.TICKS_PER_DAY)
