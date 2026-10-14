@@ -1,0 +1,11 @@
+# 原始輸出 pst-wfp-M1.txt｜只留 [TREE]／[WFP] 行與結尾，中間模擬 log 截掉
+[TREE] path=A:\GDS\demo\.worktrees\pst commit=34119a815 clean=NO code-dirty=1 codehash=B280DCAD66D0
+[TREE]   *** measuring the WORKING TREE, not commit 34119a815 ***
+[TREE]    M scripts/simulation/state_fingerprint.gd
+[WFP] canon 新增行原文：PQ|pend=[]|seq=0|log=0|res=0
+[WFP] final_fp = 8e0287d157800b5de327ba9f54b2901a
+[WFP] traj_fp  = 5f4188c3c1b04cb94fe86587421d3c375b41554d87e23eb12906d2db1a2c819f   （每 1000 tick 取樣 20 點，串接後再取指紋）
+[WFP] teams=110 persons=170 tick=20000
+[WFP] extra_obs=0｜★注射真正到達 0 次（母體：0  不可判，不是綠）
+
+[godot.ps1] child exit=0

@@ -171,6 +171,7 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 		var other: TeamData = state.teams.get(other_id)
 		if other == null: continue
 		if other.faction_id == self_team.faction_id and self_team.faction_id != -1: continue
+		if TeamData.is_kin(self_team, other): continue   # ★自家人（譜系，spec player-subteams 四）：獨立隊的母子勢力都是 -1，上一行擋不到
 		# invariant：外交/徵收需同格（嚴禁非同格互動）→ 隔空求貢/提案違規。對齊 process_on_move 同格外交。
 		if other.tile_pos != self_team.tile_pos: continue   # gate-ok: 讀 other.tile_pos 只為【同格測試】(co-location)——同格才互動＝物理可見，非遠距窺探
 		# 被拒冷卻中 → 換下一個對象（防同對象連發 spam）
@@ -205,6 +206,11 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 
 func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		target: TeamData, action: String) -> void:
+	# ★量測（spec player-subteams 四，先量；純觀測）：對自家人（譜系）送外交
+	if Probe.enabled and TeamData.is_kin(sender, target):
+		Probe.bump("kin.dip_send." + action)
+		Probe.bump_sample("kin.dip_send", {"from": sender.team_id, "to": target.team_id, "act": action,
+			"tick": state.world.current_tick}, 10)
 	# G-01：偵測玩家目標 → 寫入 forced_event，不直接解算
 	if state.player_id != -1:
 		var player_person: PersonData = state.persons.get(state.player_id)

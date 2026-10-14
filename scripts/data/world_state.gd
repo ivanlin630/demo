@@ -624,6 +624,8 @@ func set_subteam_parent(child: TeamData, parent_id: int) -> void:
 	if parent_id != -1 and teams.has(parent_id):
 		if not teams[parent_id].subteam_ids.has(child.team_id):
 			teams[parent_id].subteam_ids.append(child.team_id)
+	if child.player_controlled or (parent_id != -1 and parent_id == _possessed_tid and child.dispatched_by_player):
+		sync_possession()   # ★player_controlled：子隊併回／脫離／掛上附身隊
 
 func detach_subteam(child: TeamData) -> void:
 	set_subteam_parent(child, -1)
@@ -1088,6 +1090,8 @@ var last_encounter_outcome: Dictionary = {}
 #   persons 裡找不到玩家 ⇒ 保持在最後所屬的隊（那段時間它仍是玩家的隊，等玩家選繼承人；AI 不得接手）
 # ★tick 尾漂移校驗：check_possession_drift()（sim_runner 每 tick 末呼）
 var _possessed_tid: int = -1
+# ★上一輪 sync 寫成 player_controlled 的隊（下一輪先清它們）；私有排程快取，不是世界狀態
+var _player_ctrl_ids: Array = []
 # ★第一個 tick 一律再 sync 一次（sim_runner.advance_tick）：量測床常在 setup 之後直寫 player_id = -1（_strip_player 等，
 #   80 張床 177 處）而不經 sync ⇒ 不補的話 possessed 會留在舊玩家隊、AI 永遠動不了它（觀察者長跑被改）
 #   ★只補這一次；跑到一半才換 player_id 而沒 sync 的 ⇒ tick 尾校驗警告（不自動修）
@@ -1110,6 +1114,26 @@ func sync_possession() -> void:
 	_possessed_tid = tid
 	if teams.has(tid):
 		(teams[tid] as TeamData).possessed = true
+	# ★player_controlled 同一支重算（spec player-subteams 一）：先清上一輪的集合，再順著附身隊的 subteam_ids 重建
+	for ptid in _player_ctrl_ids:
+		if teams.has(ptid):
+			(teams[ptid] as TeamData).player_controlled = false
+	_player_ctrl_ids = player_controlled_ids_derived()
+	for ptid in _player_ctrl_ids:
+		(teams[ptid] as TeamData).player_controlled = true
+
+# ★「玩家控制的隊」的定義（純讀）：sync 用它寫、tick 尾校驗用它比 ⇒ 一份
+func player_controlled_ids_derived() -> Array:
+	var out: Array = []
+	if not teams.has(_possessed_tid):
+		return out
+	var pt: TeamData = teams[_possessed_tid]
+	out.append(_possessed_tid)
+	for sid in pt.subteam_ids:
+		var sub: TeamData = teams.get(sid)
+		if sub != null and sub.parent_team_id == _possessed_tid and sub.dispatched_by_player:
+			out.append(int(sid))
+	return out
 
 # ★tick 尾校驗（sync 之後立刻比＝恆真 ⇒ 放在所有系統跑完之後）：不一致只印警告＋Probe，不自動修（讓它紅）
 #   回傳違反說明（空字串＝一致），床讀它
@@ -1127,6 +1151,17 @@ func check_possession_drift() -> String:
 		why = "沒有玩家卻有 possessed 隊 Team%d" % which
 	elif player_id != -1 and persons.has(player_id) and which != get_player_team_id():
 		why = "possessed＝Team%d 而玩家在 Team%d" % [which, get_player_team_id()]
+	# ★P8 延伸（spec player-subteams 一）：player_controlled 為真的集合必須＝定義算出來的集合
+	if why == "":
+		var want: Array = player_controlled_ids_derived() if (player_id != -1 or n != 0) else []
+		var have: Array = []
+		for tid in teams:
+			if (teams[tid] as TeamData).player_controlled:
+				have.append(int(tid))
+		want.sort()
+		have.sort()
+		if want != have:
+			why = "player_controlled 漂移：應為 %s 實為 %s" % [str(want), str(have)]
 	if why != "":
 		if Probe.enabled: Probe.bump("possession.drift")
 		push_warning("[Possession] 漂移：" + why)

@@ -7,7 +7,7 @@ var _bridge: SimBridge
 
 # Q7-5: 子隊派遣可選任務（合理子集；command 介面不變,已支援任意 sub_task）。
 # 每項 [任務常數, 顯示名]。1=idle 為預設。
-const SUBTEAM_TASK_CHOICES: Array = PlayerCommandSystem.ORDERABLE_TASKS   # ★一份（追加三 ②）：下令成員隊與子隊共用
+const SUBTEAM_TASK_CHOICES: Array = PlayerCommandSystem.SUBTEAM_TASKS   # ★一份（spec player-subteams 三）：派遣與下令子隊共用；成員隊另用 ORDERABLE_TASKS
 
 # Q7-5: 子隊任務選單組字（static → 可單元測）。回傳如「1)待機 2)覓食 …」
 static func _subteam_task_menu_str() -> String:
@@ -2918,14 +2918,18 @@ func _handle_outpost_mode(keycode: int) -> void:
 			if action_id == "build_outpost":
 				# 進入輸入模式：選擇建設類型
 				var _cb_in2835 := func(buf: String):
-					var btype: String = "civilian" if buf.strip_edges() == "1" else "military"
+					var _bi: int = clampi(int(buf.strip_edges()) - 1, 0, OutpostSystem.BUILDABLE_TYPES.size() - 1)
+					var btype: String = String(OutpostSystem.BUILDABLE_TYPES[_bi][0])   # ★同子隊建設那一份清單（spec player-subteams 三）
 					_bridge.set_player_input("build_type", btype)
 					var r2 := _bridge.command_player("execute_action", {
 						"action_id": "build_outpost",
 						"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log_event("[前哨] %s" % r2.get("message", ""))
 					_set_feedback(r2.get("ok", true), r2.get("message", ""))
-				_open_input("建設類型 [1]民用 [2]軍事: ", "numeric", _cb_in2835)
+				var _bnames: Array = []
+				for _bk in range(OutpostSystem.BUILDABLE_TYPES.size()):
+					_bnames.append("[%d]%s" % [_bk + 1, String(OutpostSystem.BUILDABLE_TYPES[_bk][1])])
+				_open_input("建設類型 %s: " % " ".join(_bnames), "numeric", _cb_in2835)
 				_refresh()
 				return
 			else:
@@ -3161,15 +3165,20 @@ func _handle_subteam_mode(keycode: int) -> void:
 					# Q7-5：order 同樣開放任務選擇（非寫死 IDLE）
 					var _cb_in3142 := func(buf_t: String):
 						var new_task_id: String = _subteam_task_from_index(int(buf_t))
-						_bridge.set_player_input("order_sub_id", sub_id_cap)
-						_bridge.set_player_input("sub_new_move_q", q_val)
-						_bridge.set_player_input("sub_new_move_r", r_val)
-						_bridge.set_player_input("sub_new_task", new_task_id)
-						var res := _bridge.command_player("execute_action",
-							{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-						_log_event("[子隊] %s" % res.get("message", ""))
-						_set_feedback(res.get("ok", true), res.get("message", ""))
-						_subteam_selection = -1
+						var send := func() -> void:
+							_bridge.set_player_input("order_sub_id", sub_id_cap)
+							_bridge.set_player_input("sub_new_move_q", q_val)
+							_bridge.set_player_input("sub_new_move_r", r_val)
+							_bridge.set_player_input("sub_new_task", new_task_id)
+							var res := _bridge.command_player("execute_action",
+								{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+							_log_event("[子隊] %s" % res.get("message", ""))
+							_set_feedback(res.get("ok", true), res.get("message", ""))
+							_subteam_selection = -1
+						if new_task_id == TeamData.TASK_CONSTRUCT:
+							_prompt_sub_build_type(send)
+						else:
+							send.call()
 					_open_input("選任務 (1~%d): " % SUBTEAM_TASK_CHOICES.size(), "numeric", _cb_in3142, false, SUBTEAM_TASK_CHOICES.map(func(t): return String(t[1])))
 				_open_input("目標 r: ", "numeric", _cb_in3135)
 			_open_input("目標 q（按 Enter 繼續）: ", "numeric", _cb_in3128)
@@ -3183,7 +3192,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 	_refresh()
 
 # ★派遣三步（spec 第二刀）：選隊長 → 人數 → 任務 ⇒ 出發；全走 _open_input、同一個 on_cancel（Esc 任一步都清殘值）
-const _DISPATCH_INPUT_KEYS: Array = ["sub_leader_id", "sub_pop_count", "sub_task", "sub_move_q", "sub_move_r"]
+const _DISPATCH_INPUT_KEYS: Array = ["sub_leader_id", "sub_pop_count", "sub_task", "sub_move_q", "sub_move_r", "sub_build_type"]
 var _dispatch_target: Vector2i = Vector2i(-1, -1)
 
 func _dispatch_clear_inputs() -> void:
@@ -3229,22 +3238,50 @@ func _dispatch_step_task() -> void:
 			_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, SUBTEAM_TASK_CHOICES.size()])
 			_dispatch_step_task()
 			return
-		var tc: Dictionary = _bridge.dispatch_task_check(_dispatch_target.x, _dispatch_target.y, String(SUBTEAM_TASK_CHOICES[ti][0]))
-		if not bool(tc.get("ok", false)):
-			_set_feedback(false, "不能派往 (%d,%d)：%s" % [_dispatch_target.x, _dispatch_target.y, String(tc.get("reason", ""))])
+		var chosen: String = String(SUBTEAM_TASK_CHOICES[ti][0])
+		var tc0: Dictionary = _bridge.dispatch_task_check(_dispatch_target.x, _dispatch_target.y, chosen)
+		if not bool(tc0.get("ok", false)):
+			_set_feedback(false, "不能派往 (%d,%d)：%s" % [_dispatch_target.x, _dispatch_target.y, String(tc0.get("reason", ""))])
 			_dispatch_step_task()   # 換一個任務（或 Esc 取消）
 			return
-		_bridge.set_player_input("sub_task", String(SUBTEAM_TASK_CHOICES[ti][0]))
-		_bridge.set_player_input("sub_move_q", _dispatch_target.x)
-		_bridge.set_player_input("sub_move_r", _dispatch_target.y)
-		var res := _bridge.command_player("execute_action", {
-			"action_id": "dispatch_subteam",
-			"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-		_log_event("[子隊] %s" % res.get("message", ""))
-		_set_feedback(res.get("ok", true), res.get("message", ""))
-		_dispatch_target = Vector2i(-1, -1)
+		if chosen == TeamData.TASK_CONSTRUCT and not _bridge.get_state().player_state.has("sub_build_type"):
+			_prompt_sub_build_type(func() -> void: _dispatch_finish(chosen))   # 建設要先選蓋什麼（同玩家自己建的那一份清單）
+			return
+		_dispatch_finish(chosen)
 	_open_input("選任務 (1~%d)　%s: " % [SUBTEAM_TASK_CHOICES.size(), _dispatch_tag()], "numeric", cb, false,
 		SUBTEAM_TASK_CHOICES.map(func(t): return String(t[1])), _dispatch_clear_inputs)
+
+# ★建設蓋什麼：清單＝OutpostSystem.BUILDABLE_TYPES（玩家自己建據點也讀它）；選完寫 sub_build_type 再接下一步
+func _prompt_sub_build_type(next: Callable) -> void:
+	var names: Array = OutpostSystem.BUILDABLE_TYPES.map(func(e): return String(e[1]))
+	var cb := func(buf: String) -> void:
+		var bi: int = int(buf) - 1
+		if bi < 0 or bi >= OutpostSystem.BUILDABLE_TYPES.size():
+			_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, OutpostSystem.BUILDABLE_TYPES.size()])
+			_prompt_sub_build_type(next)
+			return
+		_bridge.set_player_input("sub_build_type", String(OutpostSystem.BUILDABLE_TYPES[bi][0]))
+		next.call()
+	var tag: String = _dispatch_tag() if _dispatch_target != Vector2i(-1, -1) else ""
+	_open_input("建什麼 (1~%d)　%s: " % [names.size(), tag], "numeric", cb, false, names, _dispatch_clear_inputs)
+
+func _dispatch_finish(chosen: String) -> void:
+	var tc: Dictionary = _bridge.dispatch_task_check(_dispatch_target.x, _dispatch_target.y, chosen)
+	if not bool(tc.get("ok", false)):
+		_set_feedback(false, "不能派往 (%d,%d)：%s" % [_dispatch_target.x, _dispatch_target.y, String(tc.get("reason", ""))])
+		_bridge.get_state().player_state.erase("sub_build_type")
+		_dispatch_step_task()   # 換一個任務（或 Esc 取消）
+		return
+	_bridge.set_player_input("sub_task", chosen)
+	_bridge.set_player_input("sub_move_q", _dispatch_target.x)
+	_bridge.set_player_input("sub_move_r", _dispatch_target.y)
+	var res := _bridge.command_player("execute_action", {
+		"action_id": "dispatch_subteam",
+		"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+	_log_event("[子隊] %s" % res.get("message", ""))
+	_set_feedback(res.get("ok", true), res.get("message", ""))
+	_bridge.get_state().player_state.erase("sub_build_type")
+	_dispatch_target = Vector2i(-1, -1)
 
 func _build_subteam_str() -> String:
 	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {}).get("subteam_panel", {})
@@ -3269,9 +3306,9 @@ func _build_subteam_str() -> String:
 		var pos_v: Vector2i = st.get("tile_pos", Vector2i.ZERO) as Vector2i
 		var task_str: String = st.get("player_commanded_task", st.get("current_task", "?"))
 		var selected_mark: String = "* " if st.get("team_id", -1) == _subteam_selection else "  "
-		lines.append("%s%sTeam%d @(%d,%d)  %s  人口:%d" % [
+		lines.append("%s%sTeam%d @(%d,%d)  %s  人口:%d%s" % [
 			("[%d]" % (i + 1)) if numbered else " · ", selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
-			task_str, st.get("population", 0)])
+			task_str, st.get("population", 0), "  自主（非你派出）" if bool(st.get("autonomous", false)) else ""])
 		if st.get("team_id", -1) == _subteam_selection:
 			var pop: int = sp.get("player_population", 0)
 			var can_recall: bool = not candidates.is_empty() and pop >= 2

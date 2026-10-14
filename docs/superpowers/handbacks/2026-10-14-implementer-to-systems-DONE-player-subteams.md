@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 玩家子隊只做玩家給的任務
 topic: 請 merge fix/player-subteams 8bcc14eb2（基 main 16b49d1af）｜全電池釘死 8bcc14eb2：126 支全綠（BATTERY_RC=0，總時 5197s）｜★憲法基準加一行請你准或退
 ---

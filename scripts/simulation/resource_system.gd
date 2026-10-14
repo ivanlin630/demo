@@ -245,6 +245,8 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 				# → 該隊當 tick 就能重新思考（不必等 cadence 才發現自己在餓）。
 				if team.famine_days <= 0.0:
 					WorldEvents.emit(state, "famine_crossed", [team.team_id])
+					if team.player_controlled and not team.possessed:
+						WorldEvents.emit_player_subteam(state, team, "famine")   # ★玩家子隊斷糧 ⇒ 玩家事件（spec player-subteams 二）
 				team.famine_days += day_fraction
 				if team.famine_days > float(FAMINE_GRACE_DAYS):
 					_apply_famine_attrition(state, team, day_fraction)

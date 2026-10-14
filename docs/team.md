@@ -206,6 +206,15 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 
 整合於 FactionAI step6b（`faction_ai_system.gd`）。`evaluate_all` 中 `parent_team_id != -1` → 子團模式，優先執行，跳過 faction/solo 策略。
 
+### 玩家子隊（只做玩家給的任務）
+
+- 玩家派出的子隊（`dispatched_by_player`）與附身隊同屬「玩家控制的隊」（`player_controlled`，由 `WorldState.sync_possession` 一處重算）。
+- 決策層不碰：不進下面的「任務完成回歸」、不自動求生／逃、不被引擎改派；arbiter 只放行玩家令與具名事件來源。
+- 到了目標格執行任務直到玩家召回：覓食＝停在那格（只有營地／據點的格採得到）、偵查＝停留觀察、落腳＝紮 L0 營地、移居自家據點＝轉居民、建設＝開工（完工據點歸母隊）。
+- 被攻擊、斷糧、紀律失效、建設逾時、分隊、到了做不成 ⇒ 玩家事件（推進停點），不自己處理。
+- 自家人（母／子／同母兄弟，`TeamData.is_kin`）不互相外交、不互選威脅。
+- 詳 spec `docs/superpowers/specs/2026-10-13-player-subteams-execute-given-tasks-HOW.md`；code 為準。
+
 ### 護衛跟隨（task == "護衛"）
 
 - 每 tick：`move_target = order_target` 的 `tile_pos`

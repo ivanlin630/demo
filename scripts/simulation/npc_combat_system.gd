@@ -117,6 +117,10 @@ func tick_critical_npcs(state: WorldState, all_team_ids: Array) -> void:
 
 func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	WorldEvents.emit(state, "combat_engaged", [atk_id, def_id])   # ★T0-A1 ②：被襲方當 tick 就能反應（不必等 cadence）
+	# ★玩家子隊被攻擊 ⇒ 玩家事件（spec player-subteams 二；自衛靠戰鬥鎖照舊、不自動逃）
+	var _dsub: TeamData = state.teams.get(def_id)
+	if _dsub != null and _dsub.player_controlled and not _dsub.possessed:
+		WorldEvents.emit_player_subteam(state, _dsub, "attacked", {"by": atk_id})
 	var atk: TeamData = state.teams[atk_id]
 	var def: TeamData = state.teams[def_id]
 	state.set_combat_target(atk, def_id)

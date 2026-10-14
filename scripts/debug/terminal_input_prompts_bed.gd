@@ -412,9 +412,10 @@ func _p6_targets() -> void:
 	_check("P6c 沒去過的格 N 不拒、進流程", bool(node._input_mode))
 	var build_idx: int = 0
 	var scout_idx: int = 0
-	for i in range(PlayerCommandSystem.ORDERABLE_TASKS.size()):
-		if String(PlayerCommandSystem.ORDERABLE_TASKS[i][0]) == TeamData.TASK_BUILD: build_idx = i + 1
-		if String(PlayerCommandSystem.ORDERABLE_TASKS[i][0]) == TeamData.TASK_SCOUT: scout_idx = i + 1
+	# ★派遣選單＝子隊那一份（spec 2026-10-13-player-subteams 三：建設改派 TASK_CONSTRUCT；成員隊另用 ORDERABLE_TASKS）
+	for i in range(TextUiMain.SUBTEAM_TASK_CHOICES.size()):
+		if String(TextUiMain.SUBTEAM_TASK_CHOICES[i][0]) == TeamData.TASK_CONSTRUCT: build_idx = i + 1
+		if String(TextUiMain.SUBTEAM_TASK_CHOICES[i][0]) == TeamData.TASK_SCOUT: scout_idx = i + 1
 	await _press_all(node, ["1", "enter", "2", "enter", str(build_idx), "enter"])
 	var fb_b: String = node._feedback_line.text
 	_check("P6c 沒去過的格選建設 ⇒ 拒並說原因（要先知道地形）、留在任務那一步", fb_b.contains("要先知道") and bool(node._input_mode))
