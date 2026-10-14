@@ -11,7 +11,12 @@ extends RefCounted
 # ★用法硬規（spec §2-1）：
 #   ①畫面與走查都讀這裡；★★禁止在 text_ui_main.gd 另寫一份，或把頁名寫成字串字面值
 #   ②名單【尚未經用戶簽核】（spec §0-4）⇒ 改名／改序必須是【改這一行】，不是改十幾處
-const PAGE_ORDER: Array = ["生存", "經濟", "威脅", "社交", "記憶"]
+const PAGE_ORDER: Array = ["生存", "經濟", "威脅", "社交", "情報"]
+# ★情報頁（spec 2026-10-13-intel-panel-HOW）：原「記憶」頁擴成情報頁、改名；直達鍵在主畫面（TextUiMain.INTEL_KEY）
+const INTEL_PAGE: String = "情報"
+# ★情報頁每類最多幾列（多的印「另有 M 筆」）——systems 裁 2026-10-15（信 …-MERGED-move-eta-and-rulings ②）：
+#   地圖整寬之後分頁框沒有高度上限（map_pages_box 每列都印）⇒ spec 原寫的「讀分頁框可用列數」作廢，定為常數
+const INTEL_ROWS_PER_KIND: int = 5
 
 # 頁首：`── 生存 (1/5) ──`
 # ★「我現在在第幾頁」必須在畫面上 —— 否則玩家按了鍵不確定有沒有切過去，而他會以為是壞的。
