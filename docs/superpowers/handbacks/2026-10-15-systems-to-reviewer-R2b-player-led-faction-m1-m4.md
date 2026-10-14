@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你：R² ISSUES 已改，M1／M4 請核一眼
 topic: M1 留 emit_message＋params 補 loser_team／_event_info＋ADVANCE_STOP_KINDS 加 subjugate、旁觀斷言改 describe 純函式、「你被收編」死句拿掉｜M4 strategic tick 在 is_player_led 時冪等清成員再 return＋set_team_faction 入玩家勢力當下清｜其餘照你的信全改（含 betray 一行併本票）
 ---
