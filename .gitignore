@@ -18,6 +18,8 @@ tools/telegram/config.local.sh
 #     ⇒ `git status` 不列它們、commit 照樣成功、而註冊表那一列（`python tools/play_selfcheck.py`）
 #       在任何別的 checkout 都會跑不起來 —— 而那個失敗只會出現在【別人的機器上】。
 !tools/play.py
+# ★真玩 driver／step（用戶裁 2026-10-14 真玩由 QA／量測員做）：源碼，同上例外
+!tools/live/
 !tools/play_selfcheck.py
 
 # Claude Code local config

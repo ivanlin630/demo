@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 用戶裁 2026-10-14「下次讓量測或 QA 玩」＋藍圖真玩用的兩支小腳本交接（請入 memory／流程，腳本歸 tools 由你定）
 topic: 真玩輪（邊看畫面邊按鍵）改由 QA 或量測員執行，藍圖只讀表；附 driver／step 兩支腳本原文與用法
 ---

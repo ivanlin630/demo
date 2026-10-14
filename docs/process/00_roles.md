@@ -60,6 +60,7 @@
 
 ## 驗收鏈（一句 + 指標）
 
+- **真玩輪（邊看畫面邊按鍵、非腳本）由 QA 或量測員執行，藍圖只讀表**（用戶裁 2026-10-14「下次讓量測或 QA 玩」）：工具 `tools/live/driver.py`＋`step.py`；產物＝「看到的／判斷／歸哪」表＋原始畫面檔（形狀同 `docs/playtest/2026-10-14-round5-blueprint-live-play.md`）；誰玩由系統派（讀故事因果＝QA、讀數字＝量測員）。★真玩會起 Godot ⇒ 實作端電池會停下等，開玩前先問實作端有沒有電池在跑。
 user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升用戶），正式 QA release-gate 砍；**逃逸缺陷仍入 `docs/escaped_defects.md`**；轉自動交付→三層 QA 硬閘回歸。**規則本體=`05_acceptance.md`（QA 讀）**。
 
 ## auto-memory 規則（承 §2）

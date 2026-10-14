@@ -66,6 +66,7 @@
 
 ## Scope：要產哪些數字
 
+- **真玩輪（邊看畫面邊按鍵、非腳本）由 QA 或量測員執行，藍圖只讀表**（用戶裁 2026-10-14「下次讓量測或 QA 玩」）：工具 `tools/live/driver.py`＋`step.py`；產物＝「看到的／判斷／歸哪」表＋原始畫面檔（形狀同 `docs/playtest/2026-10-14-round5-blueprint-live-play.md`）；誰玩由系統派（讀故事因果＝QA、讀數字＝量測員）。★真玩會起 Godot ⇒ 實作端電池會停下等，開玩前先問實作端有沒有電池在跑。
 ### ① 標準 beds（每 slice 必跑）
 - **HOB**（`hand_obeys_brain_bed`，`HOB_SEEDS=1337 HOB_MONTHS=1 GODOT_TIMEOUT=600`）：obey% / arbiter_latch / 各 bypass(leader/subteam) / 各機制 / **determinism PASS**。
 - **constitution_gate**：無新增違憲 try_set（sites ⊆ baseline）。
