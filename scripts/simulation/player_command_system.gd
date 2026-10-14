@@ -32,6 +32,24 @@ const ORDERABLE_TASKS: Array = [
 	[TeamData.TASK_BUILD,  "建設"],
 	[TeamData.TASK_SCOUT,  "偵查"],
 ]
+# ★玩家子隊的任務選單（spec 2026-10-13-player-subteams 三）：只列有執行端的任務
+#   ★與下令成員隊（ORDERABLE_TASKS，NPC 引擎執行）分開：巡邏全專案沒有執行端 ⇒ 移除；
+#     安頓拆成「落腳」（到了紮 L0 營地）與「移居自家據點」（到了轉居民）；建設＝去目標格開工（TASK_CONSTRUCT，不再派 TASK_BUILD）
+const SUBTEAM_TASKS: Array = [
+	[TeamData.TASK_IDLE,      "待機"],
+	[TeamData.TASK_FORAGE,    "覓食"],
+	[TeamData.TASK_SCOUT,     "偵查"],
+	[TeamData.TASK_CAMP,      "落腳"],
+	[TeamData.TASK_SETTLE,    "移居自家據點"],
+	[TeamData.TASK_CONSTRUCT, "建設"],
+]
+
+static func is_subteam_task(t: String) -> bool:
+	for e in SUBTEAM_TASKS:
+		if String(e[0]) == t:
+			return true
+	return false
+
 # ★勢力目標集合（追加三 ③：原本內聯在 _action_set_faction_goal 的字面）；空字串＝清除指定目標
 const FACTION_GOALS: Array = ["expand", "defend", "trade_net"]
 const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（跟隨 AI）"}
@@ -613,7 +631,11 @@ func precheck_camp(state: WorldState, pt: TeamData) -> Dictionary:
 		return { "ok": false, "reason": "無效紮營類型" }
 	if pt == null:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
-	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	return precheck_camp_at(state, pt.tile_pos)
+
+# ★紮營的格子前提（純讀）：玩家紮營與子隊「落腳」共用（spec player-subteams 三：同一支 precheck_camp）
+static func precheck_camp_at(state: WorldState, pos: Vector2i) -> Dictionary:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null:
 		return { "ok": false, "reason": "格子不存在" }
 	if tile.outpost_level != 0 or tile.outpost_owner != -1:
@@ -1154,7 +1176,7 @@ func _action_set_armed_ratio(state: WorldState, _target_id: int, pt: TeamData, _
 
 func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var outpost_type: String = str(state.player_state.get("build_type", "civilian"))
-	if outpost_type not in ["civilian", "military"]:
+	if not OutpostSystem.is_buildable_type(outpost_type):
 		return { "ok": false, "msg": "無效據點類型" }
 	var _os := OutpostSystem.new()
 	var ok: bool = _os.start_build(state, pt, outpost_type, 1)
@@ -1241,14 +1263,57 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 	if pop_count < 1 or pop_count >= pt.population:
 		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
 	# ★目標格的任務前提（同一支，UI 也呼叫它）——有目標格才判（-1,-1 ＝ 舊流程的就地派遣）
+	if not is_subteam_task(task):
+		return { "ok": false, "msg": "子隊不能做「%s」" % task }
 	if move_tgt != Vector2i(-1, -1):
-		var tc: Dictionary = precheck_dispatch_task(state, pt, move_tgt, task)
+		var tc: Dictionary = precheck_dispatch_task(state, pt, move_tgt, task, 1.0, pop_count)
 		if not bool(tc["ok"]):
 			return { "ok": false, "msg": "不能派往 (%d,%d)：%s" % [tq, tr, String(tc["reason"])] }
-	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
+	# ★腳下派遣＝已經在目標格（spec player-subteams 五）：不寫 move_target ⇒ 不等一格的移動計時才算抵達
+	var at_foot: bool = move_tgt == pt.tile_pos
+	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task,
+		Vector2i(-1, -1) if at_foot else move_tgt, -1, "", [], true)
 	if sub_id == -1:
 		return { "ok": false, "msg": "派遣失敗" }
-	return { "ok": true, "msg": "派出子隊 Team%d" % sub_id, "sub_id": sub_id }
+	var sub: TeamData = state.teams[sub_id]
+	if task == TeamData.TASK_CONSTRUCT:
+		sub.task_extra_data = {"build_type": _sub_build_type(state), "level": 1, "owner": pt_id}
+		if at_foot:
+			OutpostSystem.new().begin_subteam_construction(state, sub)   # 同抵達那一支（movement._on_arrival）
+	return { "ok": true, "msg": "派出子隊 Team%d：%s" % [sub_id, _subteam_task_sentence(state, task, move_tgt)], "sub_id": sub_id }
+
+static func _sub_build_type(state: WorldState) -> String:
+	var bt: String = str(state.player_state.get("sub_build_type", "civilian"))
+	return bt if OutpostSystem.is_buildable_type(bt) else "civilian"
+
+# ★結果句誠實寫子隊到了會做什麼（spec player-subteams 三：覓食被動、偵查停留觀察）
+static func _subteam_task_sentence(state: WorldState, task: String, pos: Vector2i) -> String:
+	var at: String = "(%d,%d)" % [pos.x, pos.y]
+	match task:
+		TeamData.TASK_FORAGE:
+			# ★產出只報玩家看得見的（同地圖游標那一支 tile_knowledge）：看不見的格不報（感知鐵律）
+			var k: Dictionary = PlayerQueryApi.tile_knowledge(state, pos)
+			if not k.has("food"):
+				return "到 %s 採集（那格現在看不到，產出到了才知道）" % at
+			# ★採集是被動的、只在有營地或據點的格（resource_system 的 collect：outpost_level>0 或 camp_level>0；
+			#   其餘只剩被動小獵）⇒ 格上有糧但沒營地／據點＝採不到，不報「此格產出」
+			var tk: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+			var has_site: bool = k.has("outpost") or (tk != null and tk.camp_level > 0)
+			if not has_site:
+				return "到 %s 採集（此格沒有營地或據點，採不到糧，只能獵野味）" % at
+			var food: float = float(k["food"])
+			return "到 %s 採集（%s）" % [at, ("此格產出：糧 %s" % ResourceFormat.panel(food)) if food > 0.0 else "此格沒有糧源"]
+		TeamData.TASK_SCOUT:     return "到 %s 停留觀察" % at
+		TeamData.TASK_CAMP:      return "到 %s 落腳紮營" % at
+		TeamData.TASK_SETTLE:    return "到 %s 移居成居民" % at
+		TeamData.TASK_CONSTRUCT: return "到 %s 建%s據點" % [at, _build_type_label(_sub_build_type(state))]
+	return "到 %s 待命" % at
+
+static func _build_type_label(t: String) -> String:
+	for e in OutpostSystem.BUILDABLE_TYPES:
+		if String(e[0]) == t:
+			return String(e[1])
+	return t
 
 func _action_order_subteam(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
 	var sub_id2: int   = int(state.player_state.get("order_sub_id", -1))
@@ -1258,14 +1323,31 @@ func _action_order_subteam(state: WorldState, _target_id: int, _pt: TeamData, pt
 	var sub2: TeamData = state.teams.get(sub_id2)
 	if sub2 == null or sub2.parent_team_id != pt_id:
 		return { "ok": false, "msg": "目標不是玩家子隊" }
+	if not is_subteam_task(new_task):
+		return { "ok": false, "msg": "子隊不能做「%s」" % new_task }
+	var npos := Vector2i(nq, nr)
+	if npos != Vector2i(-1, -1):
+		var tc2: Dictionary = precheck_dispatch_task(state, _pt, npos, new_task, 1.0, sub2.population, sub2)
+		if not bool(tc2["ok"]):
+			return { "ok": false, "msg": "不能派往 (%d,%d)：%s" % [nq, nr, String(tc2["reason"])] }
 	if new_task == TeamData.TASK_IDLE:
-		TaskArbiter.release(sub2)
-		sub2.move_target = Vector2i(nq, nr)
-	elif not TaskArbiter.try_set(state, sub2, new_task, Vector2i(nq, nr),
+		TaskArbiter.release(sub2, "player_cancel")
+		sub2.move_target = npos
+	elif not TaskArbiter.try_set(state, sub2, new_task, npos,
 			TaskArbiter.PRIO_PLAYER, "player_order"):
 		return { "ok": false, "msg": "Team%d 正忙（更高優先任務 %s）" % [sub_id2, sub2.current_task] }
+	if new_task == TeamData.TASK_CONSTRUCT:
+		sub2.task_extra_data = {"build_type": _sub_build_type(state), "level": 1, "owner": pt_id}
+	_adopt_subteam(state, sub2)   # ★令被接受之後才翻（被拒的令不翻；spec player-subteams 一 S12）
 	print("[PlayerCmd] order_subteam Team%d → task=%s move=(%d,%d)" % [sub_id2, new_task, nq, nr])
-	return { "ok": true, "msg": "已下令 Team%d" % sub_id2 }
+	return { "ok": true, "msg": "已下令 Team%d：%s" % [sub_id2, _subteam_task_sentence(state, new_task, npos)] }
+
+# ★玩家對「自主」子隊（換附身後繼承來的）下任一道令被接受 ⇒ 成為玩家子隊（翻在指令路徑這一處，不在 UI）
+static func _adopt_subteam(state: WorldState, sub: TeamData) -> void:
+	if sub.dispatched_by_player:
+		return
+	sub.dispatched_by_player = true
+	state.sync_possession()
 
 func _action_recall_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var recall_sub_id: int = int(state.player_state.get("recall_sub_id", -1))
@@ -1286,6 +1368,7 @@ func _action_recall_subteam(state: WorldState, _target_id: int, pt: TeamData, pt
 		recall_sub.tile_pos, recall_sub_id, TeamData.TASK_MERGE)
 	if herald_id == -1:
 		return { "ok": false, "msg": "派信使失敗" }
+	_adopt_subteam(state, recall_sub)   # ★召回也是一道令（spec player-subteams 一）
 	return { "ok": true, "msg": "信使已出發至 Team%d" % recall_sub_id }
 
 func _action_subjugate_enemy(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
@@ -2148,18 +2231,72 @@ static func precheck_target(state: WorldState, pt: TeamData, pos: Vector2i, visi
 
 # ★派遣任務對目標格的前提（systems 501b884b5）：沒去過的格——偵查可以去；安頓、建設要先知道那格的地形 ⇒ 拒並說原因
 #   ★其餘任務（偵查／待機／覓食／巡邏）放行（藍圖確認 44d310612：安頓、建設要讀那一格）
-const TASKS_NEED_KNOWN_TILE: Array = [TeamData.TASK_SETTLE, TeamData.TASK_BUILD]
+#   ★子隊三件（落腳／移居自家據點／建設）都要讀目標那一格 ⇒ 都要先知道（spec player-subteams 三，同 44d310612）
+const TASKS_NEED_KNOWN_TILE: Array = [TeamData.TASK_SETTLE, TeamData.TASK_BUILD, TeamData.TASK_CAMP, TeamData.TASK_CONSTRUCT]
 
-static func precheck_dispatch_task(state: WorldState, pt: TeamData, pos: Vector2i, task: String, vision_mult: float = 1.0) -> Dictionary:
+# ★pop_count／sub：建設要算子隊帶得走的料（派遣前＝母隊按人數比例的那一份；已在外的子隊＝它身上的）；-1 ＝ 不判料
+static func precheck_dispatch_task(state: WorldState, pt: TeamData, pos: Vector2i, task: String, vision_mult: float = 1.0,
+		pop_count: int = -1, sub: TeamData = null) -> Dictionary:
 	var chk: Dictionary = precheck_target(state, pt, pos, vision_mult)
 	if String(chk["status"]) == "unknown":
 		if task in TASKS_NEED_KNOWN_TILE:
 			return {"ok": false, "reason": "%s要先知道那格的地形（%s）" % [_task_label(task), String(chk["reason"])]}
 		return {"ok": true, "reason": ""}
-	return {"ok": bool(chk["ok"]), "reason": String(chk["reason"])}
+	if not bool(chk["ok"]):
+		return {"ok": false, "reason": String(chk["reason"])}
+	match task:
+		TeamData.TASK_CAMP:
+			var cc: Dictionary = precheck_camp_at(state, pos)
+			if not bool(cc["ok"]):
+				return {"ok": false, "reason": "(%d,%d) %s" % [pos.x, pos.y, String(cc["reason"])]}
+		TeamData.TASK_SETTLE:
+			var why: String = own_outpost_reason(state, pt, pos)
+			if why != "":
+				return {"ok": false, "reason": why}
+		TeamData.TASK_CONSTRUCT:
+			return precheck_subteam_build(state, pt, pos, pop_count, sub)
+	return {"ok": true, "reason": ""}
+
+# ★移居自家據點的前提（純讀；派遣時與抵達時共用）：地主＝玩家隊或同勢力的據點；否則回原因
+static func own_outpost_reason(state: WorldState, pt: TeamData, pos: Vector2i) -> String:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	var not_own: String = "(%d,%d) 不是你的據點" % [pos.x, pos.y]
+	if pt == null or tile == null or tile.outpost_level <= 0 or tile.outpost_owner == -1:
+		return not_own
+	if tile.outpost_owner == pt.team_id:
+		return ""
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	if owner != null and pt.faction_id != -1 and owner.faction_id == pt.faction_id:
+		return ""
+	return not_own
+
+# ★子隊建設的前提：格子可開工（同 start_build 的兩條）＋料（同開工那一支 OutpostSystem.afford_shortfall）
+static func precheck_subteam_build(state: WorldState, pt: TeamData, pos: Vector2i, pop_count: int, sub: TeamData) -> Dictionary:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	if tile == null:
+		return {"ok": false, "reason": "(%d,%d) 不在地圖上" % [pos.x, pos.y]}
+	if tile.outpost_level > 0:
+		return {"ok": false, "reason": "(%d,%d) 已有據點" % [pos.x, pos.y]}
+	if tile.construction_team_id != -1:
+		return {"ok": false, "reason": "(%d,%d) 正在施工" % [pos.x, pos.y]}
+	var have: Dictionary = {}
+	if sub != null:
+		have = sub.resources
+	elif pop_count > 0 and pt != null and pt.population > 0:
+		var frac: float = float(pop_count) / float(pt.population)
+		for res in pt.resources:
+			have[res] = float(pt.resources[res]) * frac
+	else:
+		return {"ok": true, "reason": ""}
+	var bt: String = _sub_build_type(state)
+	var sh: Dictionary = OutpostSystem.afford_shortfall(tile, have, OutpostSystem.OUTPOST_COST[bt][0])
+	if not sh.is_empty():
+		return {"ok": false, "reason": "建%s據點需%s %s，子隊帶 %s" % [_build_type_label(bt),
+			TeamUiHelper.resource_name(String(sh["res"])), ResourceFormat.panel(float(sh["need"])), ResourceFormat.panel(float(sh["have"]))]}
+	return {"ok": true, "reason": ""}
 
 static func _task_label(task: String) -> String:
-	for e in ORDERABLE_TASKS:
+	for e in SUBTEAM_TASKS + ORDERABLE_TASKS:
 		if String(e[0]) == task:
 			return String(e[1])
 	return task

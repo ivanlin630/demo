@@ -629,7 +629,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	# ★#12 ⑦（spec 2026-10-13 multi-hop-move）：附身隊零 AI 決策 —— 這一支就是血證那一條（經 _decide_unified 替玩家選了覓食）；
 	#   ★而且飢荒分支在判 task 之前就直寫 crisis_released_task／until ⇒ 即使 release 被 arbiter 擋下，
 	#     免疫窗也已寫入 ⇒ 玩家重按 M 會被擋 ⇒ 所以在入口整支跳過，不靠下游的 deny
-	if team.possessed: return
+	if team.player_controlled: return   # ★玩家子隊同（spec player-subteams 二：逃與求生不自動做，事件通知）
 	if state.world.current_tick < team.threat_eval_next_tick: return
 	team.threat_eval_next_tick = state.world.current_tick + THREAT_CADENCE
 	if team.combat_target != -1: return
@@ -1729,7 +1729,7 @@ func _evaluate_loop3_teams(state: WorldState, team_ids: Array) -> void:
 		# survival/threat（team 到此已過 loop3 survival/threat/prosperity）→ 除次門檻 FLEE churn。
 		# 取首個 dispatchable option（非 IDLE）走 PRIO_AMBIENT；貿易 target 已在 to_task「貿易」內
 		# （_merchant_trade_target：arb 單→巡市集→fallback）→ ambient 語意保。
-		if team.current_task == TeamData.TASK_IDLE:
+		if team.current_task == TeamData.TASK_IDLE and not team.player_controlled:   # ★玩家控制的隊不進野心層（spec player-subteams 二）
 			# ★advance：G2c ambient 是獨立決策入口 → 非 unified 隊在此推進；unified 隊同 tick 可能已在
 			# _decide_unified（decision_engine advance=true）推進過、仍 IDLE 才落到這段 → 對其降 false，
 			# 保「每隊每 tick 推進 ≤1」（need.ewma_advance tap 為安全網）。
@@ -4054,6 +4054,9 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 
 # ──────── 子團自主 AI ────────
 
+# 建造／升級／擴建子隊抵達後多久沒開工就強制 release／併回（NPC 子隊與玩家子隊同一個數）
+const CONSTRUCT_TRANSIT_TIMEOUT: int = 10 * WorldState.TICKS_PER_DAY  # TEST VALUE — 10 天
+
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 	# ★measurer症狀複驗tap(2026-09-22,subteam-idle①-b母體)：覓食subteam抵達次數,不論後續是否被歸建。
 	if Probe.enabled and sub.current_task == TeamData.TASK_FORAGE and sub.move_target == Vector2i(-1, -1):
@@ -4077,6 +4080,10 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 			Probe.bump_sample("convoy.return_task_other", {"team": sub.team_id,
 				"task": sub.current_task, "reason": sub.task_reason,
 				"tick": state.world.current_tick}, 1000)
+	# ★玩家子隊（spec player-subteams 二三）：只做玩家給的任務 ⇒ 不進下面任何一層（歸建閘／_decide_subteam）
+	if sub.player_controlled:
+		_tick_player_subteam(state, sub, merge_queue)
+		return
 	# ②a 信使外交：envoy_proposal 子隊追蹤刷新 target best_estimate + 自配 timeout（新 invariant 自守）
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
 		_tick_envoy(state, sub, merge_queue)
@@ -4096,7 +4103,6 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	if sub.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]:
 		if sub.move_target == Vector2i(-1, -1):
 			# 已到目標但未轉 BUILD：給一次重試，再逾時才 release
-			const CONSTRUCT_TRANSIT_TIMEOUT: int = 10 * WorldState.TICKS_PER_DAY  # TEST VALUE — 10 天
 			if state.world.current_tick - sub.task_start_tick > CONSTRUCT_TRANSIT_TIMEOUT:
 				print("[FactionAI] CONSTRUCT 子隊 Team%d 抵達後逾時未開工 → 強制 release/merge" % sub.team_id)
 				TaskArbiter.release(sub)
@@ -4127,6 +4133,7 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 		# ★measurer症狀複驗tap(2026-09-22,subteam-idle①-a分子)：覓食subteam抵達後被此blanket歸建。
 		if Probe.enabled and sub.current_task == TeamData.TASK_FORAGE:
 			Probe.bump("merge.forage_blanket_evicted")
+		if Probe.enabled: Probe.bump("merge.blanket." + sub.current_task)   # ★量測（spec player-subteams 三）：NPC 子隊一律歸建閘各 task 分佈
 		merge_queue.append(sub.team_id)
 		return
 	# idle → 引擎決策（cadence-gated；A2a 取代 _evaluate_idle_subteam 手 argmax + _check_deviation randf）
@@ -4284,6 +4291,41 @@ func _update_escort(state: WorldState, team: TeamData) -> void:
 		return
 	team.move_target = target.tile_pos
 
+# ★玩家子隊每 tick（spec 2026-10-13-player-subteams-execute-given-tasks 二三）：
+#   ★只做玩家給的任務、直到玩家召回；物理與事件照舊（紀律、逾時、戰鬥鎖），各自發玩家事件；★逾時不併回（只有召回併回）
+#   ★不進：一律歸建閘、_decide_subteam、ambient；★待機＝原地待命
+func _tick_player_subteam(state: WorldState, sub: TeamData, _merge_queue: Array) -> void:
+	if sub.current_task == TeamData.TASK_BUILD:
+		return   # 施工中
+	if sub.current_task == TeamData.TASK_CONSTRUCT:
+		if sub.move_target == Vector2i(-1, -1) and state.world.current_tick - sub.task_start_tick > CONSTRUCT_TRANSIT_TIMEOUT:
+			# ★不強制併回（systems 裁 2026-10-14）：玩家子隊只在玩家召回時併回 ⇒ 原地待命、事件告訴玩家（推進停點）
+			print("[SubAI] 玩家子隊 Team%d 建設抵達後逾時未開工 → 原地待命" % sub.team_id)
+			WorldEvents.emit_player_subteam(state, sub, "construct_timeout")
+			TaskArbiter.release(sub, "construct_timeout")
+		return
+	if _check_discipline(state, sub):
+		return
+	if sub.move_target != Vector2i(-1, -1):
+		return   # 還在路上
+	match sub.current_task:
+		TeamData.TASK_CAMP:
+			# 落腳＝到了就紮 L0 營地（同玩家紮營那一支）；前提在出發時判過，到了再判一次（途中可能被別人先佔）
+			if establish_crude_camp(state, sub):
+				TaskArbiter.release(sub, "camp_established")
+			else:
+				WorldEvents.emit_player_subteam(state, sub, "camp_refused")
+				TaskArbiter.release(sub, "arrival")
+		TeamData.TASK_SETTLE:
+			# 移居自家據點＝到了就轉居民（既有 _convert_to_resident）；地主途中換人 ⇒ 不轉、說原因
+			if PlayerCommandSystem.own_outpost_reason(state, state.teams.get(sub.parent_team_id), sub.tile_pos) == "":
+				InteractionSystem.new()._convert_to_resident(state, sub)
+			else:
+				WorldEvents.emit_player_subteam(state, sub, "settle_refused")
+				TaskArbiter.release(sub, "arrival")
+		_:
+			pass   # 待機／覓食／偵查：停在那一格（覓食產出由所在格決定；偵查提供視野）
+
 func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 	var leader = state.persons.get(sub.leader_id)
 	if leader == null:
@@ -4299,9 +4341,12 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 			count         += 1
 	var fail_chance: float = (1.0 - total_loyalty / count) * (total_stress / count) * DISCIPLINE_FAIL_BASE
 	if randf() < fail_chance:
+		var _was_player_sub: bool = sub.player_controlled
 		state.detach_subteam(sub)   # 紀律失效脫離母團（雙向同步）
 		state.remove_tag(sub, TeamData.TAG_SUBTEAM, "discipline_fail")
-		TaskArbiter.release(sub)
+		TaskArbiter.release(sub, "discipline_fail")
+		if _was_player_sub:
+			WorldEvents.emit_player_subteam(state, sub, "discipline_fail")   # ★玩家事件（spec player-subteams 二）
 		print("[SubAI] Team%d 紀律失效，脫離成獨立" % sub.team_id)
 		return true
 	return false
@@ -4310,6 +4355,7 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 # 取代 _check_deviation(randf 中途叛離) + _evaluate_idle_subteam(手 argmax)：子隊 idle 走全框架
 # rank_scored（含 faction_stakes/threat/掠奪/歸建），歸建(duty)↔掠奪(greed) loyalty-gated 競秤湧現。
 func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	if sub.player_controlled: return   # gate-ok: 不變量 #12 延伸到玩家子隊（決策層不碰；spec player-subteams 二：入口直接跳過，不只靠 arbiter 擋）
 	# ★D5 cadence gate（效能）：子隊決策非逐 tick，比照 threat cadence，攤平 gather+rank 成本。
 	if state.world.current_tick < sub.subteam_eval_next_tick:
 		return
@@ -6847,6 +6893,8 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	if Probe.enabled: _mk_path = "rank_survival"   # ★路徑標記（純觀測，決策端不讀）
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return
+	if team.player_controlled:
+		return   # gate-ok ★玩家子隊不自動求生（spec player-subteams 二；同附身隊）；不然 TASK_CAMP 途中踩到可紮的格就地紮營
 	# 紮營到達結算（W1 hoist）：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放。
 	# 移到 unified gate 前 → unified 隊（引擎派 TASK_CAMP）到達亦能立營。不依賴 days_left，
 	# 對所有持 TASK_CAMP 隊成立；non-unified 隊行為不變（原即走到此）。

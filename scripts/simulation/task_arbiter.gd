@@ -40,18 +40,26 @@ const ENGINE_SOURCES: Array = ["unified", "solo", "invite_settle"]
 # ★精確集合（不用前綴）：玩家指令的 try_set 來源（grep 2026-10-13 逐字列）
 #   player_move＝move_to｜player_rest＝:790 休息｜player_settle＝:821 紮根｜player_order＝:1184 下令子隊｜player_command＝faction_ai 成員玩家令
 const PLAYER_SOURCES: Array = ["player_move", "player_rest", "player_settle", "player_order", "player_command"]
-# ★事件要改附身隊的 task 時走這裡（精確集合）；2026-10-13 grep：沒有一條事件來源寫附身隊的 task ⇒ 空
+# ★事件要改附身隊的 task 時走這裡（精確集合）；2026-10-13 grep：沒有一條事件來源寫附身隊的 task
 #   （遭遇／戰鬥不經 arbiter，靠 try_set 頂端的 combat_target 鎖；飢餓是物理，不改 task）
-const EVENT_SOURCES: Array = []
+# ★玩家子隊（spec 2026-10-13-player-subteams 二）：抵達觸發的生命週期寫入各給具名來源（不放行 "transition"／空字串整類）
+#   construction_started＝outpost_system start_build 抵達開工｜resident_converted＝_convert_to_resident 移居成居民
+#   ★establish_crude_camp 不寫 task（只寫格子）⇒ 不需要來源
+#   ★construct_timeout 只 release（不寫 task、不併回：systems 裁 2026-10-14）⇒ 只在 RELEASE_SOURCES
+const EVENT_SOURCES: Array = ["construction_started", "resident_converted"]
 # ★release 對附身隊的玩家令：只有抵達與玩家取消放行（其餘 release() 呼叫點預設 "" ⇒ 不生效）
 #   ★path_broken＝途中路斷（movement 的物理，不是決策）｜construction_done＝玩家下的工程完工（事件；outpost_system crude_camp 那一支）
-const RELEASE_SOURCES: Array = ["arrival", "player_cancel", "path_broken", "construction_done"]
+#   ★玩家子隊（spec player-subteams 二）：resident_converted＝移居成居民｜construct_timeout＝建設抵達後逾時未開工、原地待命｜
+#     discipline_fail＝紀律失效脫離（randf 合法機率）｜camp_established＝落腳紮營完成——都是事件
+const RELEASE_SOURCES: Array = ["arrival", "player_cancel", "path_broken", "construction_done",
+	"resident_converted", "construct_timeout", "discipline_fail", "camp_established"]
 
 # ★try_set／transition／release 三處共用【同一個】謂詞（R²：不寫兩份）
 #   ·寫入（try_set／transition）：附身隊 ⇒ 來源不在 PLAYER_SOURCES ∪ EVENT_SOURCES 就擋（含附身隊閒著時）
 #   ·release：附身隊且現任是玩家令（PRIO_PLAYER）⇒ 來源不在 RELEASE_SOURCES 就擋
 static func _possessed_blocks(team: TeamData, source: String, is_release: bool) -> bool:
-	if not team.possessed:
+	# ★讀「玩家控制的隊」（附身隊＋玩家派出的子隊；spec player-subteams 二：同一個允許集合）
+	if not team.player_controlled:
 		return false
 	if is_release:
 		return team.task_priority == PRIO_PLAYER and not (source in RELEASE_SOURCES)
@@ -83,7 +91,7 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 	watch_src = ""
 
 static func _set_strategic_move_body(team: TeamData, pos: Vector2i) -> void:
-	if team.possessed: return   # ★#12：戰略佈點是 AI 決策（spec ⑥）
+	if team.player_controlled: return   # ★#12：戰略佈點是 AI 決策（spec ⑥）；玩家子隊同（player-subteams 二）
 	if team.combat_target != -1: return                    # 戰鬥鎖絕對（同 try_set:28-29 全域不變量）
 	if team.current_task == TeamData.TASK_FLEE: return      # 逃跑不被戰略位覆蓋
 	# 僅 move_target 空/抵達才覆蓋（保現行觸發顆粒，byte-identical），不動 task=IDLE 保留。
@@ -298,7 +306,7 @@ static func _try_set_body(state: WorldState, team: TeamData, new_task: String,
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
 	# ★#12 ⑤：附身隊跳過抗命 —— 它的決策權不屬 leader 個性（繼承後 leader 換人也一樣）
-	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH and not team.possessed:
+	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH and not team.player_controlled:
 		var leader: PersonData = state.persons.get(team.leader_id)
 		if leader != null and _defiance_check(leader):
 			print("[抗命] Team%d leader 棄玩家命令 → %s" % [team.team_id, new_task])

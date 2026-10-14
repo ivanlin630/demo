@@ -1171,6 +1171,8 @@ static func map_subteam_panel(state: WorldState) -> Dictionary:
 			"order_task": t.order_task,
 			"population": t.population,
 			"player_commanded_task": t.player_commanded_task,
+			# ★換附身後繼承來的子隊（不是玩家派出的）⇒ 面板標「自主」（spec player-subteams 一）
+			"autonomous": not t.dispatched_by_player,
 		})
 		actions_per[str(tid)] = ["order_subteam", "recall_subteam"]
 	# Candidates: named members of player team not already leading a subteam

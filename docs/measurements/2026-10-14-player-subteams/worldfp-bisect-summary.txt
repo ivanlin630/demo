@@ -1,0 +1,6 @@
+# world-fp 二分（world_fp_snapshot_bed，registry world-fp；舊 expect 8e0287d157800b5de327ba9f54b2901a）
+full  pst 34119a815 clean                                   final_fp = 4a8102dec551e5c21c86105da0c5c54a
+M1    同上＋_derived_line 遮 dispatched_by_player／player_controlled／_player_ctrl_ids   final_fp = 8e0287d157800b5de327ba9f54b2901a（＝舊 expect）
+M2    M1＋拔外交 is_kin＋拔威脅 is_kin（neg n3＋n6）           final_fp = 8e0287d157800b5de327ba9f54b2901a
+⇒ 差異只在新欄；自家人規則與具名來源在這顆 warring_states 種子 20000 tick 看不到效果（census seed 2 看得到：歸建閘 37→17）
+遮罩 patch：scratchpad wfp_mask.py（量測用、未提交）

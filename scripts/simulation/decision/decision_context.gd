@@ -654,11 +654,17 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		if tid == team.team_id: continue
 		var _other: TeamData = state.teams.get(tid)
 		if _other == null: continue
+		if TeamData.is_kin(team, _other): continue   # ★自家人不是威脅（譜系一把，spec player-subteams 四；同外交提案那一支）
 		var _t: float = ThreatAssessment.score(state, team, _other)
 		if _t > _best_t:
 			_best_t = _t; _best_id = tid
 	c.threat_react = _best_t
 	c.threat_id = _best_id
+	# ★量測（spec player-subteams 四，先量；純觀測）：最大威脅是自家人（譜系）
+	if Probe.enabled and _best_id != -1 and TeamData.is_kin(team, state.teams.get(_best_id)):
+		Probe.bump("kin.threat_best")
+		Probe.bump_sample("kin.threat_best", {"team": team.team_id, "kin": _best_id, "score": _best_t,
+			"tick": state.world.current_tick}, 10)
 	if _best_id != -1:
 		var _ot: TeamData = state.teams.get(_best_id)
 		if _ot != null:

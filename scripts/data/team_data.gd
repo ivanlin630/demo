@@ -240,6 +240,22 @@ var move_target: Vector2i = Vector2i(-1, -1):  # -1,-1 = 無目標，不移動
 #   ★唯一寫入者＝WorldState.sync_possession()（值＝f(player_id, persons[player_id].team_id)；戰死窗口保持）
 #   ★arbiter 咽喉讀它（release／set_strategic_move 沒有 state，所以要一個隊上的事實）；tick 尾有漂移校驗
 var possessed: bool = false
+# ★玩家子隊（spec 2026-10-13-player-subteams-execute-given-tasks 一）：玩家派遣路徑寫入的事實（NPC 派遣不寫）
+#   ★換附身後舊子隊沒有它 ⇒ 面板標「自主」；玩家對它下令被接受 ⇒ 翻 true（翻在指令路徑，不在 UI）
+var dispatched_by_player: bool = false
+# ★派生事實欄「玩家控制的隊」＝附身隊，或「parent 是附身隊 ∧ dispatched_by_player」
+#   ★唯一寫入者＝WorldState.sync_possession()（順著附身隊的 subteam_ids 重算）；arbiter 咽喉與各決策入口讀它
+#   ★附身隊三件（丙）的 loop3 入口分類與本票共用這一個謂詞，不各寫一份
+var player_controlled: bool = false
+
+# ★譜系一把（spec player-subteams 四）：母隊／子隊／同母兄弟 ＝ 自家人（純讀兩隊的 parent 事實，不看勢力）
+#   ★外交提案與威脅掃描共用這一支，不各寫一份；同勢力排除照舊另算
+static func is_kin(a: TeamData, b: TeamData) -> bool:
+	if a == null or b == null or a.team_id == b.team_id:
+		return false
+	if a.parent_team_id == b.team_id or b.parent_team_id == a.team_id:
+		return true
+	return a.parent_team_id != -1 and a.parent_team_id == b.parent_team_id
 static var mt_watch_tid: int = -9999
 static var mt_log: Array = []
 # flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。
