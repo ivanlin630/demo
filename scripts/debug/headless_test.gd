@@ -1470,6 +1470,7 @@ func _test_invariant_faction_bidir() -> void:
 	var t := TeamData.new(); t.team_id = 0; t.faction_id = 9
 	state.teams[0] = t
 	var f := FactionData.new(); f.faction_id = 9; f.member_team_ids = [0]
+	f.leader_team_id = 0   # ★L7（勢力不得無頭）之後最小一致勢力要有領袖
 	state.factions[9] = f
 	# 修掉 population 干擾：給最小一致 team
 	t.leader_id = -1; t.named_members = []; _seed_pop(t, 0)
@@ -1623,7 +1624,7 @@ func _test_driver_ledger() -> void:
 	LoyaltyBank.adjust(PersonData.new(), 0.1, "loy")
 	UnrestBank.add(t, 2, "unr")
 	var tile := HexTileData.new(); tile.outpost_owner = -1
-	OutpostOwnerBank.set_owner(tile, 3, "outp")
+	OutpostOwnerBank.set_owner(null, tile, 3, "outp")
 	var reasons: Array = []
 	for x in WorldState.driver_ledger: reasons.append(x["reason"])
 	assert("treas" in reasons and "loy" in reasons and "unr" in reasons and "outp" in reasons,
@@ -7645,9 +7646,9 @@ func _test_anon_treasury_bank() -> void:
 func _test_outpost_owner_bank() -> void:
 	print("--- OutpostOwnerBank 單一 owner ---")
 	var tile := HexTileData.new(); tile.outpost_owner = -1
-	OutpostOwnerBank.set_owner(tile, 5, "capture")
+	OutpostOwnerBank.set_owner(null, tile, 5, "capture")
 	assert(tile.outpost_owner == 5, "set_owner →5，實際=%d" % tile.outpost_owner)
-	OutpostOwnerBank.set_owner(tile, -1, "abandon")
+	OutpostOwnerBank.set_owner(null, tile, -1, "abandon")
 	assert(tile.outpost_owner == -1, "set_owner -1(棄守) →-1")
 	print("outpost owner bank OK")
 
@@ -7804,7 +7805,7 @@ func _test_unowned_outpost_takeover() -> void:
 	print("Trade Task7 OK")
 
 func _test_alliance_outpost_transfer() -> void:
-	print("--- Trade Task8: 居民團 alliance → outpost 轉 ---")
+	print("--- Trade Task8: 居民團 alliance → outpost 不轉（#8-1）---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
@@ -7830,7 +7831,8 @@ func _test_alliance_outpost_transfer() -> void:
 	# 模擬 alliance accept（直接呼叫 _form_alliance + outpost 連動）
 	var diplo := DiplomaticAiSystem.new()
 	diplo._form_alliance(state, attacker, v)
-	assert(tile.outpost_owner == 5, "outpost owner 應變攻方 5，實際=%d" % tile.outpost_owner)
+	# ★spec 2026-10-13-alliance #8-1 拿掉 D C1：結盟不轉讓據點 ⇒ owner 留原主 99
+	assert(tile.outpost_owner == 99, "結盟不轉讓據點：owner 應留 99，實際=%d" % tile.outpost_owner)
 	print("Trade Task8 OK")
 
 func _test_uprising_paths() -> void:
@@ -9845,7 +9847,7 @@ func _test_conquest_flip_governance() -> void:
 	# tile：村格，已 capture 翻旗給 winner（combat 已翻旗，此驗治權隨旗語意）
 	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0)
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	OutpostOwnerBank.set_owner(tile, 0, "test_capture")
+	OutpostOwnerBank.set_owner(state, tile, 0, "test_capture")
 	state.world.tiles[0] = tile
 	# 治權隨旗：on_captured_tile=true
 	NpcCombatSystem.new()._try_subjugate(state, 0, 1, true)
@@ -9916,7 +9918,7 @@ func _occupy_margin_state(wolf_armed_ratio: float) -> WorldState:
 	state.teams[1] = village
 	var vtile: HexTileData = state.world.tiles[1 * 1000 + 0]
 	vtile.outpost_type = "civilian"; vtile.outpost_level = 1
-	OutpostOwnerBank.set_owner(vtile, 1, "test")
+	OutpostOwnerBank.set_owner(state, vtile, 1, "test")
 	state.team_discovered[0] = [1]
 	# belief：pop_est 10（過 pop_ratio）、armed_est 3（過 armed_est gate 3<9）
 	# ★同上：補 tile_pos。★意圖確認：本測的意圖是【margin gate：弱狼不圍/壯狼圍】，
@@ -9941,7 +9943,7 @@ func _test_conquest_collection_loop() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_level = 2
 	tile.terrain = "plains"; tile.harvest_factor = 1.0; tile.farming_level = 1
 	tile.productivity = 1.0; tile.resources = {"food": 500.0}
-	OutpostOwnerBank.set_owner(tile, 0, "test")
+	OutpostOwnerBank.set_owner(state, tile, 0, "test")
 	state.world.tiles[0] = tile
 	# (a) owner 站村上：村產出入 tile 公庫 → effective_food 讀得到
 	var ef_before: float = ResourceSystem.effective_food(state, owner)
@@ -11858,17 +11860,22 @@ func _test_diplomacy_reject_cooldown() -> void:
 	assert(until == 100 + DiplomaticAiSystem.REJECT_COOLDOWN,
 		"reject 應設 cooldown=%d，實際=%d" % [100 + DiplomaticAiSystem.REJECT_COOLDOWN, until])
 	# cooldown 內 try_proactive 不再發 → cooldown 值不被刷新（再發送會被 reject 覆寫成新值）
+	# ★通商提案暫停中（defer token trade-proposal-paused-until-social-layer，spec 2026-10-13-player-action-audit ④）：
+	#   A 對 B 的分數落在通商帶 ⇒ 不送、只記 dip.trade_paused ⇒ 「有沒有走到提案那一步」改讀這一顆（cooldown 內 0、過期 >0）
+	Probe.reset(); Probe.enabled = true
 	state.world.current_tick = 200
 	seed(7)
 	for i in range(50):
 		dip.try_proactive_diplomacy(state, a)
 	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) == until,
 		"cooldown 內不應再發（值被刷新=有發送），實際=%d" % int(a.diplomacy_reject_cooldown.get(1, 0)))
-	# cooldown 過期 → 恢復發送（reject 重設新 cooldown）
+	assert(int(Probe.counts.get("dip.trade_paused", 0)) == 0, "cooldown 內不應走到提案分支")
+	# cooldown 過期 → 恢復走到提案分支
 	state.world.current_tick = until + 1
 	for i in range(50):
 		dip.try_proactive_diplomacy(state, a)
-	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) > until, "cooldown 過期應恢復發送")
+	assert(int(Probe.counts.get("dip.trade_paused", 0)) > 0, "cooldown 過期應恢復發送（暫停中＝走到通商暫停分支）")
+	Probe.reset(); Probe.enabled = false
 	print("EcoFix Task3 OK")
 
 # U20：proactive diplomacy 同格 gate — 遠端已發現隊不得隔空對玩家提案（防 spam）
@@ -11892,18 +11899,22 @@ func _test_u20_proactive_same_tile_gate() -> void:
 	state.team_discovered[5] = [0]
 	var dip := DiplomaticAiSystem.new()
 	# 遠端：呼 50 次，forced_event 須恆空（gate line 52 continue，與 randf 無關）
+	# ★通商提案暫停中（spec 2026-10-13-player-action-audit ④）：這組 values 的分數落在通商帶 ⇒ 正控改讀 dip.trade_paused
+	Probe.reset(); Probe.enabled = true
 	seed(11)
 	for i in range(50):
 		dip.try_proactive_diplomacy(state, state.teams[5])
 	assert(state.player_forced_event.is_empty(),
 		"遠端隊不得隔空對玩家提案（U20 spam）,實際=%s" % str(state.player_forced_event))
+	assert(int(Probe.counts.get("dip.trade_paused", 0)) == 0, "遠端隊不得走到提案分支")
 	# 正控：移同格 → 應發得出（證路徑可觸發,gate 才是擋遠端的關鍵）
 	st.tile_pos = Vector2i(4, 4)
 	var fired: bool = false
 	for i in range(80):
 		dip.try_proactive_diplomacy(state, state.teams[5])
-		if not state.player_forced_event.is_empty():
+		if not state.player_forced_event.is_empty() or int(Probe.counts.get("dip.trade_paused", 0)) > 0:
 			fired = true; break
+	Probe.reset(); Probe.enabled = false
 	assert(fired, "同格時 proactive diplomacy 應發得出（否則遠端測為假陰）")
 	print("U20 same-tile gate OK")
 
@@ -14133,11 +14144,12 @@ func _test_set_armed_ratio() -> void:
 	state.player_state["armed_ratio_input"] = 0.7
 	var r: Dictionary = cmd.execute_action(state, -1, "set_armed_anon_ratio")
 	assert(r.get("ok", false), "應成功")
-	assert(abs(team.armed_anon_ratio - 0.7) < 0.01, "ratio=0.7，實際=%s" % str(team.armed_anon_ratio))
+	# ★玩家只寫目標（spec 2026-10-13-player-action-audit ①）：實際比例由 EquipmentSystem 每日取 min(目標, 可武裝)
+	assert(abs(team.armed_anon_target - 0.7) < 0.01, "target=0.7，實際=%s" % str(team.armed_anon_target))
 	# 越界夾住
 	state.player_state["armed_ratio_input"] = 1.5
 	cmd.execute_action(state, -1, "set_armed_anon_ratio")
-	assert(team.armed_anon_ratio <= 1.0, "夾在 1.0")
+	assert(team.armed_anon_target <= 1.0, "夾在 1.0")
 	print("set_armed_ratio OK")
 
 func _test_equip_member() -> void:

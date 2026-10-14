@@ -848,7 +848,7 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int, on_capture
 		NpcAiSystem.FEUD_SEVERITY["subjugated"], state.world.current_tick)
 	NpcAiSystem.spread_feud(state, loser, winner.leader_id,
 		NpcAiSystem.FEUD_SEVERITY["subjugated"], state.world.current_tick)
-	state.set_team_faction(loser, fid)   # 敗方入勝方 faction（雙向同步）
+	state.set_team_faction(loser, fid, WorldState.JOIN_SUBJUGATE)   # 敗方入勝方 faction（雙向同步）
 	state.snapshot_faction_member(loser_id, state.world.current_tick)
 	if Probe.enabled and on_captured_tile:
 		Probe.bump("yield.flip_with_rule")   # 翻旗+治權接上（同 faction → 村民代 owner 生產）

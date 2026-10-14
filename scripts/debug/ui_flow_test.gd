@@ -556,7 +556,8 @@ func _test_armed_ratio_cmd() -> void:
 		int(_ap_set_armed_anon_ratio.get("applied", 0)) >= 1)
 	_check("★★★set_armed_anon_ratio 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）", _ap_set_armed_anon_ratio.get("ok", false))
 	var ptid: int = st.persons[st.player_id].team_id
-	_check("ratio 設為 0.6", abs(st.teams[ptid].armed_anon_ratio - 0.6) < 0.01)
+	# ★玩家只寫目標（spec 2026-10-13-player-action-audit ①）：實際比例由 EquipmentSystem 每日取 min(目標, 可武裝)
+	_check("武裝目標設為 0.6", abs(st.teams[ptid].armed_anon_target - 0.6) < 0.01)
 	await _free_ui(node)
 	_cell("_test_armed_ratio_cmd")
 
@@ -578,7 +579,7 @@ func _test_armed_count_shown() -> void:
 	_check("畫面上的武裝數 %d ＝ 查詢面的 %d" % [got_armed, want_armed], got_armed == want_armed)
 	await _free_ui(node)
 
-# U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後按 Q→quit 閃退、WASD 漂游標）。
+# U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後鍵落到主畫面：WASD 漂游標；舊版 Q→quit 閃退，Q 離開已拿掉）。
 # 測：overlay visible → 送 KEY_W → _cursor 不動（證 guard early-return）。
 	_cell("_test_armed_count_shown")
 func _test_u15_overlay_input_guard() -> void:
@@ -2309,7 +2310,9 @@ func _test_p13_dedupe_repeated_t() -> void:
 	node._bridge.refresh_interaction_targets()
 	node._bridge.refresh_interaction_targets()
 	node._bridge.refresh_interaction_targets()
-	var n: int = node._bridge.pending_command_count()
+	# ★數的是【佇列】不是頁腳：重掃是介面內部令（SimBridge.UI_INTERNAL_COMMANDS），頁腳「待執行 N」已不算它
+	#   （spec 2026-10-13-player-action-audit ③）；去重守的是佇列本身 ⇒ 讀 pending_commands
+	var n: int = node._bridge.get_state().pending_commands.size()
 	print("   同名無參數入列三次 ⇒ 待辦 %d 道" % n)
 	_check("★入列三次 ⇒ 待辦 1 道（不是 2 也不是 3）", n == 1)
 	var r: Dictionary = node._bridge.command_player("refresh_targets", {})
@@ -2323,7 +2326,7 @@ func _test_p13_dedupe_repeated_t() -> void:
 	_press_key(node2, KEY_T)
 	_press_key(node2, KEY_T)
 	print("   ★對照觀測：連按 KEY_T 三次 ⇒ 待辦 %d 道（互動模式接走了後兩次按鍵）"
-		% node2._bridge.pending_command_count())
+		% node2._bridge.get_state().pending_commands.size())
 	await _free_ui(node2)
 	await _free_ui(node)
 	_cell("_test_p13_dedupe_repeated_t")
@@ -2346,7 +2349,9 @@ func _test_p14_dedupe_does_not_eat_meaningful() -> void:
 	node._bridge.command_player("refresh_targets", {})
 	node._bridge.command_player("move_to", {"tile_q": int(tp.x) + 1, "tile_r": int(tp.y)})
 	var r3: Dictionary = node._bridge.command_player("refresh_targets", {})
-	var n: int = node._bridge.pending_command_count()
+	# ★數的是【佇列】不是頁腳：重掃是介面內部令（SimBridge.UI_INTERNAL_COMMANDS），頁腳「待執行 N」已不算它
+	#   （spec 2026-10-13-player-action-audit ③）；去重守的是佇列本身 ⇒ 讀 pending_commands
+	var n: int = node._bridge.get_state().pending_commands.size()
 	print("   [refresh, move, refresh] ⇒ 待辦 %d 道" % n)
 	_check("★★★被別的指令隔開的第二個 refresh【要保留】⇒ 3 道", n == 3)
 	_check("★而它【沒有】被標成 merged（隔開了就不是同一道）", not bool(r3.get("merged", false)))
@@ -2362,12 +2367,16 @@ func _test_p15b_footer_labels_same_source() -> void:
 	_selftest_gate("_test_p15b_footer_labels_same_source").noop()
 	print("\n── P15b 頁腳列名與回音同源 ──")
 	var node = await _make_ui()
-	var r: Dictionary = node._bridge.command_player("refresh_targets", {})
+	# ★頁腳不列介面內部令（重掃；spec 2026-10-13-player-action-audit ③）⇒ 用一道世界動作（移動一格）驗同源
+	var st15: WorldState = node._bridge.get_state()
+	var tp15: Vector2i = st15.teams[int(st15.persons[st15.player_id].team_id)].tile_pos
+	var args15: Dictionary = {"tile_q": int(tp15.x) + 1, "tile_r": int(tp15.y)}
+	var r: Dictionary = node._bridge.command_player("move_to", args15)
 	var echo: String = String(r.get("message", ""))
 	_check("★母體地板：真的有一道待辦", node._bridge.pending_command_count() >= 1)
 	node._refresh()
 	var hint: String = String(node._hint_line.text)
-	var label: String = PlayerCommandApi.describe("refresh_targets", {})
+	var label: String = PlayerCommandApi.describe("move_to", args15)
 	print("   回音：「%s」｜describe：「%s」" % [echo, label])
 	_check("★入列回音含 describe() 那一份字串", echo.contains(label))
 	_check("★★頁腳也含同一份字串（「%s」）" % label, hint.contains(label))
@@ -2388,7 +2397,10 @@ func _test_p16b_pending_zero_after_advance() -> void:
 	_selftest_gate("_test_p16b_pending_zero_after_advance").noop()
 	print("\n── P16b 推進後待辦歸零 ──")
 	var node = await _make_ui()
-	node._bridge.command_player("refresh_targets", {})
+	# ★頁腳不算介面內部令（spec 2026-10-13-player-action-audit ③）⇒ 用一道世界動作（移動一格）
+	var st16: WorldState = node._bridge.get_state()
+	var tp16: Vector2i = st16.teams[int(st16.persons[st16.player_id].team_id)].tile_pos
+	node._bridge.command_player("move_to", {"tile_q": int(tp16.x) + 1, "tile_r": int(tp16.y)})
 	var before: int = node._bridge.pending_command_count()
 	_check("★母體地板：推進前真的有 ≥1 道（實測 %d）" % before, before >= 1)
 	_press_key(node, KEY_X)
@@ -2477,10 +2489,10 @@ const CONTROL_FLOOR_FEP: int = 10   # forced_event_panel_bed（六格 ＋ P7／P
 # ★UI 的 mode 數（＝`_handle_*_mode(keycode` 這一族）。P25 的母體地板拿它比對。
 #   ★★它是【spec 側的數】：動工時我用 grep 數過 13 個；有人新增一個 mode 而沒有
 #     跟上這裡 ⇒ P25 紅 ⇒ 而那個紅要的是【去想那個新 mode 要不要吃字母鍵】。
-# ★★★【本區常數只准變小】（systems 裁 2026-10-01）—— 一條「按位置記住」的規矩，
+# ★★★【本區常數只准變小】（systems 裁 2026-10-01；指 rebase 衝突時的取向；spec 新增 mode 時隨 spec 增加並旁註）—— 一條「按位置記住」的規矩，
 #   它的邊界要寫在那個位置上，否則下一個解衝突的人不會知道有兩種相反的方向。
 #   ★★而取錯邊的長相是「衝突解完了」（沒有紅）⇒ 這一行就是給那個人看的。
-const SPEC_UI_MODE_COUNT: int = 13
+const SPEC_UI_MODE_COUNT: int = 14   # 2026-10-13 13→14：輸入模式依型別拆成 _input_numeric_mode／_input_string_mode（spec terminal-input-prompts 改法 1，systems 准）；兩者對字母鍵的處置已由 P25 驗過
 # ★P26（版面 v2 步 1）：尚未收進 `_ui_stack` 的旗標支數 —— 2026-10-01 量到 11。
 #   ★★方向是【只准變少】：變多 ＝ 有人又加了一支平坦旗標而沒收進 stack。
 #   ★★★而它【靜止】也要看得見 ⇒ 卷面每次都印那個數與具名清單（systems 裁 2026-10-01）。

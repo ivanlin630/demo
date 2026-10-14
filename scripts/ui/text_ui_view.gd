@@ -34,7 +34,7 @@ extends Node
 #     **守衛要適應被守的東西，不是反過來** —— 用戶核可的是那個外觀。
 const A_TOP: String    = "｜ 待執行 "     # 頂列最後一欄
 const A_MAP: String    = "┌─ 地圖（"     # ★自帶 `┌`
-const A_PAGES: String  = "┬─ ["          # ★自帶 `┬` ⇒ 組框時**不要**再加一個
+const A_PAGES: String  = "┌─ ["          # ★2026-10-13 地圖整寬（spec map-pane-full-width）：分頁框改接在地圖框下面、獨佔一行 ⇒ 不再是 `┬`
 const A_ACTION: String = "─ 動作（"
 const A_FEED: String   = "─ 事件（"
 const A_FOOT: String   = " 鍵："          # 底部鍵位那一行
@@ -115,46 +115,50 @@ static func _fill_to(s: String, width: int, ch: String) -> String:
 static func region_title(anchor: String, note: String) -> String:
 	return _fill_to(anchor + note + "）", TextUiLayout.COLS, "─")
 
-# 左右各半：`COLS` 扣掉三根框線字元之後平分（lw ＋ rw ＋ 3 ＝ COLS）
-static func box_widths() -> Array:
-	var inner: int = TextUiLayout.COLS - 3
-	var left: int = int(float(inner) / 2.0)
-	return [left, inner - left]
+# ══ ②地圖 ＋ ③分頁：★上下兩個整寬框（spec 2026-10-13-map-pane-full-width，藍圖裁 43817c7d1 固定一種版面）═══
+# ★舊版左右各半：地圖欄只有 (COLS−3)/2＝58 欄，而整張地圖每列 68～100 欄 ⇒ 逐列 clip_to 把右半靜默切掉
+# ★現在：地圖框寬＝COLS、地圖列【不經 clip_to】；renderer 最寬列放不下（R ≥ 10）⇒ push_error＋標題「（版面異常）」，不截
+# ★分頁列仍 clip_to（交件信列給 systems 判）
+const MAP_ABNORMAL: String = "（版面異常）"
 
+static func map_inner_width() -> int:
+	return TextUiLayout.COLS - 2
 
-# ══ ②左地圖 ＋ ③右分頁：★**一個框、兩欄**（稿子 §一）═════════════════════════
-# ★★兩個錨在【同一行】（上框），而 `┬` 由 `A_PAGES` 自己帶 ⇒ 這裡**不要**再加。
+static func map_max_width(map_body: String) -> int:
+	var w: int = 0
+	for l in map_body.split("\n"):
+		w = maxi(w, TextUiLayout.display_width(String(l)))
+	return w
+
 static func map_pages_box(map_body: String, pages_body: String,
 		map_note: String, tabs: String) -> String:
-	var w: Array = box_widths()
-	var lw: int = int(w[0])
-	var rw: int = int(w[1])
+	var inner: int = map_inner_width()
 	var lines: Array = []
-	# 上框：`┌─ 地圖（…）───…` ＋ `┬─ [1]生存 …───…` ＋ `┐`
-	lines.append(
-		_fill_to(A_MAP + map_note + "）", lw + 1, "─")
-		+ _fill_to(A_PAGES + tabs, rw + 1, "─") + "┐")
-	# 中身：逐列並排，短的那一側補空白
-	var ml: Array = map_body.split("\n")
-	var pl: Array = pages_body.split("\n")
-	for i in range(maxi(ml.size(), pl.size())):
-		var l: String = String(ml[i]) if i < ml.size() else ""
-		var r: String = String(pl[i]) if i < pl.size() else ""
-		lines.append("│" + _fill_to(TextUiLayout.clip_to(l, lw), lw, " ")
-			+ "│" + _fill_to(TextUiLayout.clip_to(r, rw), rw, " ") + "│")
-	lines.append("└" + "─".repeat(lw) + "┴" + "─".repeat(rw) + "┘")
+	var abnormal: bool = map_max_width(map_body) > inner
+	if abnormal:
+		push_error("[TextUiView] 地圖最寬列 %d 欄 > 框內 %d 欄（版面異常；不截）" % [map_max_width(map_body), inner])
+	lines.append(_fill_to(A_MAP + map_note + "）" + (MAP_ABNORMAL if abnormal else ""), inner + 1, "─") + "┐")
+	for l in map_body.split("\n"):
+		lines.append("│" + _fill_to(String(l), inner, " ") + "│")
+	lines.append("└" + "─".repeat(inner) + "┘")
+	lines.append(_fill_to(A_PAGES + tabs, inner + 1, "─") + "┐")
+	for r in pages_body.split("\n"):
+		lines.append("│" + _fill_to(TextUiLayout.clip_to(String(r), inner), inner, " ") + "│")
+	lines.append("└" + "─".repeat(inner) + "┘")
 	return "\n".join(lines)
 
 
 # ══ ①頂列：忠於稿子（前兩欄無欄標、欄間 ` ｜ `）═══════════════════════════════
 # ★只有【威脅】那一欄會被 clip（見誠實限 2）。
 static func top_row(v: Dictionary) -> String:
+	var story_end0: String = String(v.get("story_end", ""))
+	var names: Array = _fit_names(v, story_end0)
 	var head: Array = [
 		"第 %s" % String(v.get("clock", "—")),
-		"%s（人口 %s）" % [String(v.get("team_name", "—")), String(v.get("pop", "—"))],
-		"家：%s" % String(v.get("home", "—")),
+		"%s（人口 %s）" % [String(names[0]), String(v.get("pop", "—"))],
+		"家：%s" % String(names[1]),
 		# ★F8 營地欄：沒有寫入者（鍵缺席）⇒「？」；寫入者說沒有 ⇒「無」（兩句不同的話）
-		"營地：%s" % String(v.get("camp", "？")),
+		"營地：%s" % String(names[2]),
 		"糧撐 %s" % String(v.get("food", "—")),
 	]
 	var tail: String = "待執行 %s" % String(v.get("pending", "—"))
@@ -171,8 +175,77 @@ static func top_row(v: Dictionary) -> String:
 	var body: String = story_end if story_end != "" else String(v.get("threat", "—"))
 	used += TextUiLayout.display_width(label) + TextUiLayout.display_width(tail)
 	var budget: int = TextUiLayout.COLS - used
-	var threat: String = label + TextUiLayout.clip_to(body, maxi(budget, 0))
+	# ★威脅句永不被截（改法 3）：它有界、寬度已在 _fit_names 預留 ⇒ 原樣放；故事結束那句照舊吃剩餘並截
+	var threat: String = label + (TextUiLayout.clip_to(body, maxi(budget, 0)) if story_end != "" else body)
+	# ★列寬上限比「威脅句整句」硬：名字三欄都讓到最小仍超過 COLS（極端值：999 天／人口 9999／待執行 99 道）
+	#   ⇒ 才截威脅句、帶截斷記號（不靜默截）。威脅欄床 P6 守這一格；真實開局走不到這裡（輸入床 P3 守）
+	if story_end == "" and TextUiLayout.display_width(body) > budget:
+		threat = label + TextUiLayout.clip_mark(body, maxi(budget, 1))
 	return sep.join(PackedStringArray(head + [threat, tail]))
+
+# 威脅句的最長可能寬度（模板以最長可能值填入）——床用它驗「最寬的威脅句也放得進一列」
+#   隊號取 5 位、距離取 2 位（視野半徑遠小於 99）；方位、野獸名取各自集合裡最寬的那一個
+static func threat_reserve() -> int:
+	var w: int = 0
+	var beast_w: String = ""
+	for b in PlayerApiMapper.BEAST_LABEL.values():
+		if TextUiLayout.display_width(String(b)) > TextUiLayout.display_width(beast_w):
+			beast_w = String(b)
+	var bear_w: String = ""
+	for b in PlayerApiMapper.BEARINGS:
+		if TextUiLayout.display_width(String(b)) > TextUiLayout.display_width(bear_w):
+			bear_w = String(b)
+	for s in [PlayerApiMapper.THREAT_ENGAGED % "Team99999", PlayerApiMapper.THREAT_ENGAGED % beast_w,
+			PlayerApiMapper.THREAT_ENEMY % [99999, 99], PlayerApiMapper.THREAT_BEAST % [bear_w, beast_w],
+			PlayerApiMapper.THREAT_NONE, "尚未提供", "—"]:
+		w = maxi(w, TextUiLayout.display_width(String(s)))
+	return w
+
+# ★頂列的可截欄：隊名、家名、營地（依序讓出）——威脅句整句優先，其餘欄吃【威脅句實際寬度之後】剩下的
+#   ★偏離 spec「按模板預留」的理由（交件信呈報）：固定欄＋最長模板預留（30）在真實開局就佔 117 欄
+#     ⇒ 隊名永遠被截成「…」（開局頂列實際只有 96 欄）；而營地有值又看到敵人時，就算隊名家名截光整列仍超過 120
+#   ⇒ 改成按威脅句【實際】寬度讓位：列寬恆 ≤ COLS、威脅句恆整句；代價＝威脅句變長時名字那幾欄跟著縮（列數不變）
+static func _fit_names(v: Dictionary, story_end: String) -> Array:
+	var tn: String = String(v.get("team_name", "—"))
+	var hm: String = String(v.get("home", "—"))
+	var cp: String = String(v.get("camp", "？"))
+	if story_end != "":
+		return [tn, hm, cp]   # 故事結束那句吃剩餘並截（舊行為）⇒ 其餘照原樣
+	var sep: String = " ｜ "
+	var fixed: Array = [
+		"第 %s" % String(v.get("clock", "—")),
+		"（人口 %s）" % String(v.get("pop", "—")),
+		"家：",
+		"營地：",
+		"糧撐 %s" % String(v.get("food", "—")),
+		"威脅：" + String(v.get("threat", "—")),
+		"待執行 %s" % String(v.get("pending", "—")),
+	]
+	var used: int = TextUiLayout.display_width(sep) * 6
+	for f in fixed:
+		used += TextUiLayout.display_width(String(f))
+	var left: int = TextUiLayout.COLS - used
+	var parts: Array = [tn, hm, cp]
+	var widths: Array = parts.map(func(x): return TextUiLayout.display_width(String(x)))
+	if int(widths[0]) + int(widths[1]) + int(widths[2]) <= left:
+		return parts
+	# 營地最後讓：先給營地它要的（最多一半），剩下隊名家名平分、短的讓給長的
+	var bc: int = mini(int(widths[2]), maxi(left, 0) / 2)
+	var rest: int = maxi(left - bc, 0)
+	var bt: int = rest / 2
+	var bh: int = rest - bt
+	if int(widths[0]) < bt:
+		bh += bt - int(widths[0])
+		bt = int(widths[0])
+	elif int(widths[1]) < bh:
+		bt += bh - int(widths[1])
+		bh = int(widths[1])
+	var out: Array = [tn, hm, cp]
+	var budgets: Array = [bt, bh, bc]
+	for i in range(3):
+		if int(widths[i]) > int(budgets[i]):
+			out[i] = TextUiLayout.clip_mark(String(parts[i]), maxi(int(budgets[i]), 1))
+	return out
 
 # ★故事結束那一欄的欄標（床的 P0 斷言這個字面 ⇒ 給它名字，不在兩處各寫一次）
 const STORY_END_LABEL: String = "故事已結束："
@@ -322,7 +395,6 @@ static func _keymap_lines(keymap: String) -> Array:
 #   ★放在 map+pages 的位置：子模式本來就是「接管畫面」的語意，
 #     而放那裡保住「顯示只有一個」（不是再加一區）。
 static func panel_block(panel_body: String) -> String:
-	var w: Array = box_widths()
 	var lines: Array = []
 	lines.append(_fill_to(A_PANEL + "接管畫面）", TextUiLayout.COLS, "─"))
 	for l in panel_body.split("\n"):

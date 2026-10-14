@@ -1382,7 +1382,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		var cap_tile: HexTileData = state.world.tiles.get(cap_tid)
 		if cap_tile != null and cap_tile.outpost_level > 0 and cap_tile.outpost_owner != winner_id:
 			var old_cap_owner: int = cap_tile.outpost_owner
-			OutpostOwnerBank.set_owner(cap_tile, winner_id, "capture")
+			OutpostOwnerBank.set_owner(state, cap_tile, winner_id, "capture")
 			print("[Capture] Outpost (%d,%d) %d→%d" % [
 				loser_team_cap.tile_pos.x, loser_team_cap.tile_pos.y, old_cap_owner, winner_id])
 
@@ -1449,7 +1449,7 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	var caution: float = float(resident_leader.values.get("慎重", 0.5)) if resident_leader else 0.5
 	var accept: bool = (fear > caution + 0.2) and rep > 0.3
 	if accept:
-		OutpostOwnerBank.set_owner(occupied_tile, attacker_id, "capture")
+		OutpostOwnerBank.set_owner(state, occupied_tile, attacker_id, "capture")
 		print("[ResidentAccept] attacker=Team%d resident=Team%d outpost易主" % [attacker_id, resident.team_id])
 		return
 	# 攻城方 leader 個性決定
@@ -1474,7 +1474,7 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 
 func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> void:
-	OutpostOwnerBank.set_owner(tile, attacker.team_id, "capture")
+	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
 	for k in resident.resources:
 		ResourceBank.add(attacker, k, float(resident.resources[k]), "massacre_loot")
 	# 守恆(Bug10)：接收 resident 公庫（原 erase 前未轉 → 銷毀）；移除原 `+= pop×5` 憑空鑄幣
@@ -1491,7 +1491,7 @@ func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
 
 func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> void:
-	OutpostOwnerBank.set_owner(tile, attacker.team_id, "capture")
+	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
 	var occ_dead: int = resident.population - int(float(resident.population) * 0.8)
 	AnonTierSystem.kill_random(resident, occ_dead, "occupy")
 	print("[ForceOccupy] attacker=Team%d resident=Team%d 強佔 pop-20%%" % [attacker.team_id, resident.team_id])

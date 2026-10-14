@@ -7,14 +7,7 @@ var _bridge: SimBridge
 
 # Q7-5: 子隊派遣可選任務（合理子集；command 介面不變,已支援任意 sub_task）。
 # 每項 [任務常數, 顯示名]。1=idle 為預設。
-const SUBTEAM_TASK_CHOICES: Array = [
-	[TeamData.TASK_IDLE,   "待機"],
-	[TeamData.TASK_FORAGE, "覓食"],
-	[TeamData.TASK_SETTLE, "安頓"],
-	[TeamData.TASK_PATROL, "巡邏"],
-	[TeamData.TASK_BUILD,  "建設"],
-	[TeamData.TASK_SCOUT,  "偵查"],
-]
+const SUBTEAM_TASK_CHOICES: Array = PlayerCommandSystem.ORDERABLE_TASKS   # ★一份（追加三 ②）：下令成員隊與子隊共用
 
 # Q7-5: 子隊任務選單組字（static → 可單元測）。回傳如「1)待機 2)覓食 …」
 static func _subteam_task_menu_str() -> String:
@@ -308,6 +301,10 @@ func _process(_delta: float) -> void:
 		if int(r.get("seq", 0)) <= _last_shown_result_seq:
 			continue
 		_last_shown_result_seq = int(r.get("seq", 0))
+		# ★介面內部令（重掃同格對象）不是世界動作（spec 2026-10-13-player-action-audit ③）：
+		#   不進事件流、不進 feed、不蓋結果行；★佇列與世界寫入照舊（2026-09-24 裁：不搬出指令佇列）
+		if SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
+			continue
 		# ★★★形狀要照【這個檔既有的慣例】：`_events` 的元素是 Dictionary
 	#   （`_log_event()`（:1209）就是 `{"type":"ui","msg":msg}`，而讀者 :704／:1032 都用 `e.get("msg")`）
 	#   ★我這裡原本 append 的是【String】⇒ `String` 沒有 `.get()`
@@ -329,9 +326,8 @@ func _process(_delta: float) -> void:
 			"%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
 		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
 		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
-		if not SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
-			_feedback_line.text = _feedback_text(bool(r.get("ok", false)), String(r.get("text", "")))
-			_feedback_line.modulate = _feedback_color(bool(r.get("ok", false)))
+		_write_feedback(_feedback_text(bool(r.get("ok", false)), String(r.get("text", ""))),
+			_feedback_color(bool(r.get("ok", false))))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 	if _feed_rows.size() > 100:
@@ -397,10 +393,15 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	if not event.pressed: return
+	# ★離開＝Esc 兩段（spec 2026-10-13-play-client-no-key-interpretation 改法 2）：旗標在這裡【先清】——
+	#   任何一鍵（含之後被戰鬥 overlay、輸入模式、面板提早 return 吃掉的鍵）都讓上膛失效；
+	#   只有下面主畫面 KEY_ESCAPE 那一支讀「這一鍵之前是否已上膛」
+	var esc_was_armed: bool = _esc_armed
+	if _esc_armed:
+		_disarm_esc()
 	# 遭遇戰 overlay 顯示中（含戰後「按任意鍵離開」畫面，此時 encounter_active 已 false）
 	# → 鍵盤全權交給 encounter_view，主畫面一律不處理。
-	# 否則 Q 會落到下方 KEY_Q→get_tree().quit() 造成戰後一按鍵就閃退；
-	# WASD 也會同時漂移世界地圖游標。用 overlay 可見性（非 encounter_active）判定。
+	# 否則鍵會同時落到主畫面（WASD 漂移世界地圖游標；舊版 Q 還會退遊戲）。用 overlay 可見性（非 encounter_active）判定。
 	if _encounter_view != null and _encounter_view.visible:
 		# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1①）：這裡照舊 return ——
 		#   GUI 的那一次按鍵引擎本來就廣播給 encounter_view._input；終端路由 PlayerRepl.press_on 直接分流到
@@ -408,7 +409,7 @@ func _input(event: InputEvent) -> void:
 		#   ★介面修正票 K5 那一句「交戰中：終端尚無戰鬥畫面」隨本票拿掉
 		return
 	if _input_mode:
-		_handle_input_mode(event.keycode)
+		_dispatch_input_key(event.keycode)
 		return
 	# ★D4：面板開著、按的是全域推進鍵、而那個面板【沒有宣告】這個鍵 ⇒ 全域語意（共用函式），
 	#   不落進面板的「此鍵在此模式無作用」也不落進事件回應那支
@@ -510,18 +511,12 @@ func _input(event: InputEvent) -> void:
 			_global_advance_key(KEY_G)
 		ARRIVE_KEY:
 			_global_advance_key(ARRIVE_KEY)   # ★M ②：走到抵達（同族推進鍵，同一支處理函式）
-			_input_mode_callback = Callable()   # 無 callback → 使用舊有行為
-			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
 			_cursor = _bridge.get_player_tile_pos()
 			_refresh()
 		KEY_R:
 			# U18：設匿名武裝比例（輸入 0~100 百分比）
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "武裝比例 %: "
-			_input_buffer = ""
-			_input_mode_callback = func(buf: String) -> void:
+			var _cb_in525 := func(buf: String) -> void:
 				var pct: float = clampf(buf.to_float(), 0.0, 100.0)
 				var st = _bridge.get_state()
 				st.player_state["armed_ratio_input"] = pct / 100.0
@@ -529,7 +524,7 @@ func _input(event: InputEvent) -> void:
 					{"action_id": "set_armed_anon_ratio", "target": {"kind": "none"}})
 				_set_feedback(r.get("ok", false), r.get("message", r.get("result_summary", "")))
 				_refresh()
-			_input_bar.text = "武裝比例 %: _"
+			_open_input("武裝比例 %: ", "numeric", _cb_in525)
 		KEY_P:
 			_member_mode = not _member_mode
 			if _inv_mode: _inv_mode = false
@@ -577,6 +572,13 @@ func _input(event: InputEvent) -> void:
 				_bridge.cancel_advance()
 				_input_bar.text = ""
 				_refresh()
+			elif not (_interact_mode or _member_mode or _inv_mode or _faction_mode or _outpost_mode or _subteam_mode):
+				# ★這一次 Esc 沒有任何副作用（沒取消推進、沒關面板、沒退出模式）⇒ 兩段離開
+				if esc_was_armed:
+					_quit_game()
+				else:
+					_esc_armed = true
+					_set_feedback(true, ESC_ARM_HINT)
 			elif _interact_mode:
 				if _interact_target >= 0:
 					_interact_target = -1   # 退回目標清單
@@ -602,98 +604,170 @@ func _input(event: InputEvent) -> void:
 				else:
 					_subteam_mode = false
 				_refresh()
-		KEY_Q:
-			if _bridge != null and _bridge.is_encounter_active():
-				pass    # encounter_view handles Q as northwest movement
-			else:
-				get_tree().quit()
 		KEY_Z:
 			if not _pending_alerts.is_empty():
 				_pending_alerts.pop_front()
 			_check_alerts()
 
-# `_handle_input_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
-#   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
-#   ★★床不信這一支：`unbound_key_bed` 的 P2 從那些 `KEY_*` 分支機械抽一份再逐鍵比對 ⇒ 異源。
-func _input_mode_binds_key(keycode: int) -> bool:
+# ══ 輸入模式（spec 2026-10-13-terminal-input-prompts-and-threat-clip 改法 1）══════════════════════════
+# ★一個咽喉：入口全走 `_open_input`（拒空 prompt、callback 必填）⇒ 全檔裸寫 `_input_mode = true` 只有它裡面那一處
+# ★來源讀【狀態】不讀 bar：`_input_line()` ＝ prompt＋buffer，GUI 的 bar 與終端結果列都呼叫它
+# ★origin：開輸入的那個面板（主畫面＝"main"）；鏈式入口（在 callback 裡再開）沿用原 origin ⇒ Esc 回到起點
+# ★回句（_input_reply）：被吃掉而沒進緩衝的鍵一律回一句，跟提示同一列；下一個合法鍵就消失
+const INPUT_NUMERIC_MAX: int = 6
+const INPUT_STRING_MAX: int = 30
+var _input_origin: String = "main"
+var _input_reply: String = ""
+var _input_menu: Array = []           # 有限選單（數字選）：印在面板上，提示列只印「選 (1~N): _」
+var _in_input_callback: bool = false  # callback 執行中 ⇒ 這時再開的輸入是鏈的下一步，沿用 origin
+var _input_chain_origin: String = "main"
+var _input_on_cancel: Callable = Callable()   # Esc 時呼叫（鏈式輸入清掉已寫的殘值）
+
+func _open_input(prompt: String, type: String, callback: Callable, allow_empty: bool = false, menu: Array = [],
+		on_cancel: Callable = Callable()) -> bool:
+	if prompt.strip_edges().is_empty() or not callback.is_valid():
+		push_error("[_open_input] 空 prompt 或沒有 callback ⇒ 不開輸入模式（%s）" % prompt)
+		return false
+	_input_origin = _input_chain_origin if _in_input_callback else _panel_mode_name()
+	_input_mode = true
+	_input_mode_type = type
+	_input_mode_prompt = prompt
+	_input_buffer = ""
+	_input_mode_allow_empty = allow_empty
+	_input_mode_callback = callback
+	_input_menu = menu
+	_input_on_cancel = on_cancel
+	_input_reply = ""
+	_input_bar.text = _input_line()
+	return true
+
+func _input_line() -> String:
+	return "%s%s_" % [_input_mode_prompt, _input_buffer]
+
+# 終端結果列那一格（輸入模式期間換成這一句；回句接在後面、同一列）
+func _input_result_line() -> String:
+	return "輸入：" + _input_line() + (("　" + _input_reply) if _input_reply != "" else "")
+
+func _close_input() -> void:
+	_input_mode = false
+	_input_mode_allow_empty = false
+	_input_buffer = ""
+	_input_mode_callback = Callable()
+	_input_menu = []
+	_input_on_cancel = Callable()
+	_input_reply = ""
+	_input_bar.text = ""
+
+func _input_say(msg: String) -> void:
+	_input_reply = msg
+	_set_feedback(false, msg)
+
+func _skip_ticks_callback(buf: String) -> void:
+	var n: int = mini(int(buf), SimBridge.ADVANCE_MAX_REQUEST)
+	if n <= 0:
+		_set_feedback(false, "跳過的 tick 數要大於 0")
+		return
+	_request_key_advance(n)
+
+# ★床（unbound_key_bed）用的兩個旗標：輸入模式依型別是兩個「模式」——各自的綁定鍵不同
+var _input_numeric_mode: bool:
+	get: return _input_mode and _input_mode_type == "numeric"
+	set(v):
+		_input_mode = v
+		if v: _input_mode_type = "numeric"
+var _input_string_mode: bool:
+	get: return _input_mode and _input_mode_type == "string"
+	set(v):
+		_input_mode = v
+		if v: _input_mode_type = "string"
+
+func _dispatch_input_key(keycode: int) -> void:
+	if _input_mode_type == "string":
+		_handle_input_string_mode(keycode)
+	else:
+		_handle_input_numeric_mode(keycode)
+
+# 綁了哪些鍵（依型別分開）。★病根（R²）：舊版不分型，任何字母與數字都回真 ⇒ 數字模式按字母通過綁定檢查卻沒有分支、靜默落空
+func _input_numeric_mode_binds_key(keycode: int) -> bool:
 	if keycode == KEY_ESCAPE or keycode == KEY_ENTER or keycode == KEY_BACKSPACE:
 		return true
-	# ★輸入模式綁的是【任何可列印字元】—— 它們進緩衝區，不是一份 KEY_* 清單
-	if (keycode >= KEY_A and keycode <= KEY_Z) or (keycode >= KEY_0 and keycode <= KEY_9):
+	return keycode >= KEY_0 and keycode <= KEY_9
+
+func _input_string_mode_binds_key(keycode: int) -> bool:
+	if keycode == KEY_ESCAPE or keycode == KEY_ENTER or keycode == KEY_BACKSPACE:
 		return true
-	return false
+	return keycode >= KEY_A and keycode <= KEY_Z
 
-func _handle_input_mode(keycode: int) -> void:
-	# ★未綁定鍵【先走出口】（spec §2①）：吃掉它、印一句話、什麼都不改。
-	#   ★★擺在最前面而不是尾端：擺尾端的話「已綁分支落到尾端」會兩種都做
-	#     —— 實測 `_inv_mode` 按 I 既關掉又印了那句（床的 P4 抓到）。
-	if not _input_mode_binds_key(keycode):
-		_refuse_unbound_key("輸入", keycode)
+# ★每條 return 路徑都有狀態變化或一句話（床以枚舉分支驗）
+func _handle_input_numeric_mode(keycode: int) -> void:
+	if not _input_numeric_mode_binds_key(keycode):
+		_refuse_unbound_key("只收數字", keycode)
 		return
-	if _input_mode_type == "string":
-		# 接受 A-Z 字元
-		if keycode >= KEY_A and keycode <= KEY_Z:
-			if _input_buffer.length() < 30:
-				_input_buffer += char(keycode).to_lower()
-			_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
-			return
-		match keycode:
-			KEY_BACKSPACE:
-				if _input_buffer.length() > 0:
-					_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
-				_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
-			KEY_ENTER:
-				if _input_buffer.length() > 0 or _input_mode_allow_empty:
-					_input_mode = false
-					_input_mode_allow_empty = false
-					_input_bar.text = ""
-					if _input_mode_callback.is_valid():
-						_input_mode_callback.call(_input_buffer)
-					_input_buffer = ""
-					_refresh()
-			KEY_ESCAPE:
-				_input_mode = false
-				_input_mode_allow_empty = false
-				_input_buffer = ""
-				_input_bar.text = ""
-				_input_mode_callback = Callable()
-				_refresh()
-		return
-
-	# 原有 numeric 模式
 	if keycode >= KEY_0 and keycode <= KEY_9:
-		if _input_buffer.length() < 6:
-			_input_buffer += str(keycode - KEY_0)
-		_input_bar.text = "%s%s_" % [_input_mode_prompt if not _input_mode_prompt.is_empty() else "跳過 tick 數: ", _input_buffer]
+		if _input_buffer.length() >= INPUT_NUMERIC_MAX:
+			_input_say("最多 %d 位" % INPUT_NUMERIC_MAX)
+			return
+		_input_buffer += str(keycode - KEY_0)
+		_input_reply = ""
+		_input_bar.text = _input_line()
 		return
+	_input_common_key(keycode)
+
+func _handle_input_string_mode(keycode: int) -> void:
+	if not _input_string_mode_binds_key(keycode):
+		_refuse_unbound_key("只收字母", keycode)
+		return
+	if keycode >= KEY_A and keycode <= KEY_Z:
+		if _input_buffer.length() >= INPUT_STRING_MAX:
+			_input_say("最多 %d 字" % INPUT_STRING_MAX)
+			return
+		_input_buffer += char(keycode).to_lower()
+		_input_reply = ""
+		_input_bar.text = _input_line()
+		return
+	_input_common_key(keycode)
+
+func _input_common_key(keycode: int) -> void:
 	match keycode:
 		KEY_BACKSPACE:
-			if _input_buffer.length() > 0:
-				_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
-			_input_bar.text = "%s%s_" % [_input_mode_prompt if not _input_mode_prompt.is_empty() else "跳過 tick 數: ", _input_buffer]
+			if _input_buffer.is_empty():
+				_input_say("沒有可刪的字")
+				return
+			_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
+			_input_reply = ""
+			_input_bar.text = _input_line()
 		KEY_ENTER:
-			if _input_buffer.length() > 0:
-				if _input_mode_callback.is_valid():
-					_input_mode = false
-					_input_bar.text = ""
-					_input_mode_callback.call(_input_buffer)
-					_input_buffer = ""
-					_input_mode_callback = Callable()
-					_refresh()
-				elif int(_input_buffer) > 0:
-					# 舊有行為：跳過 N tick
-					var n: int = mini(int(_input_buffer), SimBridge.ADVANCE_MAX_REQUEST)
-					_input_mode = false
-					_input_bar.text = ""
-					_request_key_advance(n)
-					_input_buffer = ""
-					_refresh()
-		KEY_ESCAPE:
-			_input_mode = false
-			_input_buffer = ""
-			_input_bar.text = ""
-			_input_mode_callback = Callable()
+			if _input_buffer.is_empty() and not _input_mode_allow_empty:
+				_input_say("還沒輸入（Esc 取消）")
+				return
+			# ★先取出、全清、再呼叫（鏈式 callback 被抹的修法）：步驟 N 在 callback 裡裝上步驟 N+1；
+			#   舊版呼叫【之後】才清欄位 ⇒ 把剛裝上的下一步抹掉，玩家打的數字落到「跳 n 顆 tick」
+			var cb: Callable = _input_mode_callback
+			var buf: String = _input_buffer
+			var origin: String = _input_origin
+			_close_input()
+			_in_input_callback = true
+			_input_chain_origin = origin
+			cb.call(buf)
+			_in_input_callback = false
 			_refresh()
+		KEY_ESCAPE:
+			var origin2: String = _input_origin
+			var oc: Callable = _input_on_cancel
+			_close_input()
+			if oc.is_valid():
+				oc.call()
+			_restore_input_origin(origin2)
+			_set_feedback(false, "取消輸入")
+			_refresh()
+
+# Esc ⇒ 回到開輸入的那個面板（鏈中途 callback 關掉了面板也一樣回得去）
+func _restore_input_origin(origin: String) -> void:
+	if origin == _panel_mode_name():
+		return
+	_close_all_modes(origin)
+	if origin != "main" and ("_%s_mode" % origin) in self:
+		set("_%s_mode" % origin, true)
 
 # U13: inv 選取版面 — 已裝備槽在前（[1-9] 1..eq_n），背包次之，Team 取出最後
 #   [E]裝備背包物  [U]卸下已裝備槽  [S]存背包物  [G]取 Team 物
@@ -821,6 +895,12 @@ func _refresh() -> void:
 			var e = _events[i]
 			log_lines.append("[T%d] %s" % [_bridge.get_current_tick(), str(e)])
 		_event_label.text = "\n".join(log_lines)
+	# ★輸入模式的有限選單印在面板上（提示列只印「選 (1~N): _」；名字長塞單列會被截）
+	if _input_mode and not _input_menu.is_empty():
+		var ml: Array = ["── 選一項（數字＋Enter，Esc 取消）──"]
+		for i in range(_input_menu.size()):
+			ml.append("[%d] %s" % [i + 1, String(_input_menu[i])])
+		_event_label.text = ("%s\n%s" % [_event_label.text, "\n".join(ml)]) if _event_label.text != "" else "\n".join(ml)
 	# 常駐 chrome：hint（當前模式鍵表）+ LogStrip（與 panel 共存，永遠顯最新 N 條）
 	# ★★★頁腳常駐「待執行 N 道」（spec §3-5③）：玩家要看得到他按的東西【還沒生效】。
 	#   ★常駐＝0 也印 —— ★★只在非零時才出現的東西，玩家學不會它的意思，
@@ -958,14 +1038,15 @@ func build_regions(pend_txt: String) -> Dictionary:
 		#   —— 而「選目標」也在裡面 ⇒ 新版面的整條入口會是黑的。
 		#   ★而它只在【子模式中】非空：主畫面時 `_event_label` 載的是事件 log，
 		#     而那一份已經有替代品（`feed` 區吃 `_feed_rows`）⇒ 主畫面不傳（否則印兩份）。
-		"panel": _event_label.text if _current_mode_name() != "main" else "",
+		"panel": _event_label.text if _panel_mode_name() != "main" else "",
 		"action": rows,
 		"action_folded": action_folded,
 		"first3": _first3_rows(),
 		"cursor_line": _cursor_line(),
 		"feed": _feed_rows,
 		# ★F1：戰鬥中每一鍵的回應只有一個出口 ＝ 結果行（encounter_view.key_reply；這一鍵沒有回應 ⇒ 照舊）
-		"result": _encounter_view.key_reply() if _in_battle() and _encounter_view.key_reply() != "" else _feedback_line.text,
+		"result": _encounter_view.key_reply() if _in_battle() and _encounter_view.key_reply() != "" \
+			else (_input_result_line() if _input_mode else _feedback_line.text),
 		"keymap": _hint_line.text,
 		# ★終端戰鬥區（spec 2026-10-07 terminal-battle-screen §1②）：戰鬥中才非空；內容與鍵提示都從 encounter_view 讀
 		"battle": _encounter_view.terminal_block() if _in_battle() else "",
@@ -1101,7 +1182,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開",
 	"interact":      "[1-9]選目標/行動 [?]展開不可的 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -1110,6 +1191,8 @@ const MODE_KEYMAP: Dictionary = {
 	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
 	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
 	"storage":       "[1-9]存/取 [,.]翻頁 [Esc]離開",
+	"input_numeric": "[0-9]輸入 [Backspace]刪 [Enter]確定 [Esc]取消",
+	"input_string":  "[A-Z]輸入 [Backspace]刪 [Enter]確定 [Esc]取消",
 	"intel":         "[1-5]選題 [Esc]取消",
 	# ★U2（spec 2026-10-07 terminal-ui-fixes）：招募子選單原本沒有自己的一列 ⇒ 鍵列印主畫面那一份（E2E K1）
 	"recruit":       "[1-9]記名 [A]匿名 [Esc]取消",
@@ -1134,6 +1217,24 @@ func _keymap_now(mode: String) -> String:
 	return " ".join(PackedStringArray(out))
 
 # feedback 行文字（成✓ 敗✗）
+# ★Esc 兩段離開的旗標與提示（改法 2）。★清旗標時一併撤提示：結果行若仍是這一句就清掉，不讓提示說謊
+const ESC_ARM_HINT: String = "再按一次 Esc 離開"
+var _esc_armed: bool = false
+
+# ★離開的唯一出口。床設 suppress_quit ⇒ 只記次數不真的結束（否則床自己的 SceneTree 會跟著收掉）
+var quit_requests: int = 0
+var suppress_quit: bool = false
+
+func _quit_game() -> void:
+	quit_requests += 1
+	if not suppress_quit:
+		get_tree().quit()
+
+func _disarm_esc() -> void:
+	_esc_armed = false
+	if _feedback_line != null and _feedback_line.text == _feedback_text(true, ESC_ARM_HINT):
+		_write_feedback("", _feedback_line.modulate)
+
 static func _feedback_text(ok: bool, msg: String) -> String:
 	return ("✓ " if ok else "✗ ") + msg
 static func _feedback_color(ok: bool) -> Color:
@@ -1193,10 +1294,9 @@ func _global_advance_key(keycode: int) -> void:
 		KEY_X:
 			_request_key_advance(_snap_to(WorldState.TICKS_PER_HOUR))
 		KEY_G:
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "跳過 tick 數: "
-			_input_buffer = ""
+			# ★G 給一個真的 callback（spec terminal-input-prompts 改法 1）：舊版靠「沒有 callback ⇒ 推進 N tick」那條隱含分支
+			#   ⇒ 任何忘了設 callback 的入口都會變成推進世界 ⇒ 隱含分支已刪，callback 必填
+			_open_input("跳過 tick 數: ", "numeric", _skip_ticks_callback)
 		ARRIVE_KEY:
 			var mt: Vector2i = _bridge.get_player_move_target()
 			if mt == Vector2i(-1, -1):
@@ -1293,6 +1393,8 @@ func _mode_binds_key(mode: String, keycode: int) -> bool:
 		"subteam":       return _subteam_mode_binds_key(keycode)
 		"advisor":       return _advisor_mode_binds_key(keycode)
 		"storage":       return _storage_mode_binds_key(keycode)
+		"input_numeric": return _input_numeric_mode_binds_key(keycode)
+		"input_string":  return _input_string_mode_binds_key(keycode)
 	return false
 
 # ══ ★F3（spec 2026-10-07 battle-start-visibility）：推進鍵之後結果行 ＝ 推進句 ══════════════════════════
@@ -1352,7 +1454,11 @@ func _ui_set_layer(layer: String, on: bool) -> void:
 		_ui_stack.erase(layer)
 
 func _current_mode_name() -> String:
-	if _input_mode:         return _current_mode_name_under_input()
+	if _input_mode:         return "input_" + _input_mode_type   # ★鍵列＝輸入模式鍵表（不是 main，舊版那一行讓鍵列說謊）
+	return _panel_mode_name()
+
+# 底層面板（輸入模式不算）：輸入期間面板照畫、Esc 回到它
+func _panel_mode_name() -> String:
 	if _pre_encounter_mode: return "pre_encounter"
 	if _trade_mode:         return "trade"
 	if _intel_mode:         return "intel"
@@ -1367,9 +1473,6 @@ func _current_mode_name() -> String:
 	if _storage_mode:       return "storage"
 	return "main"
 
-# 輸入模式時保留底層 panel 的提示（次要：顯通用輸入提示）
-func _current_mode_name_under_input() -> String:
-	return "main"
 
 # 指令成敗 feedback（持續到下個指令，不清）
 # ★★★未綁定鍵的【統一出口】（spec 2026-09-30 §2①，藍圖裁三禁）：
@@ -1384,12 +1487,19 @@ func _current_mode_name_under_input() -> String:
 #     見那些分支的註解（最外層按 Esc ＝ 離開該模式回主畫面）。
 func _refuse_unbound_key(mode_label: String, _keycode: int) -> void:
 	_set_feedback(false, "此鍵在此模式無作用（%s）" % mode_label)
+	if _input_mode:
+		_input_reply = mode_label   # ★輸入列上的短回句（同一列、下一個合法鍵就消失）
 
 func _set_feedback(ok: bool, msg: String) -> void:
 	if _feedback_line == null: return
 	if str(msg).is_empty(): return
-	_feedback_line.text = _feedback_text(ok, msg)
-	_feedback_line.modulate = _feedback_color(ok)
+	_write_feedback(_feedback_text(ok, msg), _feedback_color(ok))
+
+# ★結果行的【唯一寫入點】（延後裁定 feedback-line-label-is-the-only-store-for-feedback 數寫入點 ≤ 2）：
+#   令結算、_set_feedback、Esc 撤提示三個來源都走這裡 ⇒ 將來把 feedback 搬成真的狀態欄位只改這一支
+func _write_feedback(text: String, color: Color) -> void:
+	_feedback_line.text = text
+	_feedback_line.modulate = color
 
 func _build_state_str() -> String:
 	var ct: Dictionary  = _cached_snapshot.get("controlled_team", {})
@@ -1512,10 +1622,11 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 	#     都會讓玩家看到的箭頭變或不變（HOW spec §2）。
 	lines.append("────────────────")
 	lines.append("資源:")
-	lines.append("  食:%d%s 幣:%d%s 材:%d%s" % [
-		res.get("food", 0),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
-		res.get("coin", 0),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
-		res.get("material", 0), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
+	# ★食／幣／材按 0.1 顯示（藍圖裁 43817c7d1；與勒索結果句同一支格式器，玩家對帳對得上）
+	lines.append("  食:%s%s 幣:%s%s 材:%s%s" % [
+		ResourceFormat.panel(float(res.get("food", 0))),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
+		ResourceFormat.panel(float(res.get("coin", 0))),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
+		ResourceFormat.panel(float(res.get("material", 0))), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
 	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
 	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
 	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
@@ -1730,7 +1841,11 @@ func _build_hover_truth_lines() -> Array:
 
 func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
 	var lines: Array = []
-	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
+	# ★玩家設過武裝目標 ⇒ 印「目標 X%／實際 Y%」（武器不夠時兩數不同）；沒設 ⇒ 舊行逐字不變
+	var _arm_tgt: float = float(ct.get("armed_target", -1.0))
+	var _arm_now: int = int(float(ct.get("armed_ratio", 0.0)) * 100.0)
+	var _arm_txt: String = ("比例%d%%" % _arm_now) if _arm_tgt < 0.0 else ("目標 %d%%／實際 %d%%" % [roundi(_arm_tgt * 100.0), _arm_now])
+	lines.append("人口: %d  武裝: %d (%s) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), _arm_txt, ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	# ★`starving` 隨「糧: X 天」那一行搬去生存頁了 ⇒ 這裡不再需要（留著會是未用變數警告）
 	var cap: Dictionary = ct.get("capabilities", {})
@@ -1990,11 +2105,7 @@ func _prompt_member_salary(member: Dictionary) -> void:
 	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
 	var tid: int = int(ct.get("id", -1))
 	var mid: int = int(member.get("id", -1))
-	_input_mode = true
-	_input_mode_type = "numeric"
-	_input_mode_prompt = "%s 薪資: " % member.get("name", "成員")
-	_input_buffer = ""
-	_input_mode_callback = func(buf: String) -> void:
+	var _cb_in2018 := func(buf: String) -> void:
 		var st = _bridge.get_state()
 		st.player_state["salary_input"] = buf.to_float()
 		var r: Dictionary = _bridge.command_player("execute_action",
@@ -2002,7 +2113,7 @@ func _prompt_member_salary(member: Dictionary) -> void:
 			 "target": {"kind": "member", "team_id": tid, "member_id": mid}})
 		_set_feedback(r.get("ok", false), r.get("message", r.get("result_summary", "")))
 		_refresh()
-	_input_bar.text = "%s薪資: _" % member.get("name", "成員")
+	_open_input("%s 薪資: " % member.get("name", "成員"), "numeric", _cb_in2018)
 
 func _build_member_str() -> String:
 	var members: Array    = _cached_snapshot.get("members_detail", [])
@@ -2599,33 +2710,32 @@ func _handle_faction_mode(keycode: int) -> void:
 				_set_feedback(false, "只有勢力領袖能設定目標")
 				_refresh()
 				return
-			_input_mode = true
-			_input_mode_type = "string"
-			_input_mode_prompt = "設定勢力目標: "
-			_input_buffer = ""
-			_input_mode_callback = func(buf: String):
-				_bridge.set_player_input("faction_goal_input", buf)
+			# ★數字選單（追加三）：集合＝sim 側 PlayerCommandSystem.FACTION_GOALS（驗證讀同一份）＋明確的「清除」
+			var goals: Array = PlayerCommandSystem.FACTION_GOALS + [""]
+			var _cb_in2627 := func(buf: String):
+				var gi: int = int(buf) - 1
+				if gi < 0 or gi >= goals.size():
+					_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, goals.size()])
+					return
+				_bridge.set_player_input("faction_goal_input", goals[gi])
 				var r := _bridge.command_player("execute_action",
 					{"action_id": "set_faction_goal", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 				_log_event("[勢力] %s" % r.get("message", ""))
 				_set_feedback(r.get("ok", true), r.get("message", ""))
-			_input_bar.text = "%s_" % _input_mode_prompt
+			_open_input("選勢力目標 (1~%d): " % goals.size(), "numeric", _cb_in2627, false,
+				goals.map(func(g): return PlayerCommandSystem.faction_goal_label(g)))
 		KEY_B:   # 調整徵收率（Q7-6：僅 leader）
 			if not is_faction_leader:
 				_refresh()
 				return
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "徵收率 (0-100): "
-			_input_buffer = ""
-			_input_mode_callback = func(buf: String):
+			var _cb_in2642 := func(buf: String):
 				var rate: float = clampf(float(buf) / 100.0, 0.0, 1.0)
 				_bridge.set_player_input("tribute_rate_input", rate)
 				var r := _bridge.command_player("execute_action",
 					{"action_id": "set_tribute_rate", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 				_log_event("[勢力] %s" % r.get("message", ""))
 				_set_feedback(r.get("ok", true), r.get("message", ""))
-			_input_bar.text = "%s_" % _input_mode_prompt
+			_open_input("徵收率 (0-100): ", "numeric", _cb_in2642)
 		KEY_C:   # 離開勢力
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "leave_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
@@ -2657,11 +2767,7 @@ func _handle_faction_mode(keycode: int) -> void:
 				_set_feedback(rc.get("ok", false), rc.get("message", rc.get("msg", "")))
 				_refresh()
 				return
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "徵用比例 (1-100): "
-			_input_buffer = ""
-			_input_mode_callback = func(buf: String):
+			var _cb_in2685 := func(buf: String):
 				var ratio: float = clampf(float(buf) / 100.0, 0.0, 1.0)
 				if ratio <= 0.0:
 					_set_feedback(false, "比例須 (0,100]")
@@ -2679,7 +2785,7 @@ func _handle_faction_mode(keycode: int) -> void:
 				_log_event("[勢力] %s" % r2.get("message", r2.get("msg", "")))
 				_set_feedback(r2.get("ok", false), r2.get("message", r2.get("msg", "")))
 				_refresh()
-			_input_bar.text = "%s_" % _input_mode_prompt
+			_open_input("徵用比例 (1-100): ", "numeric", _cb_in2685)
 		_:
 			# [1~9] 下令成員
 			if keycode >= KEY_1 and keycode <= KEY_9:
@@ -2687,12 +2793,14 @@ func _handle_faction_mode(keycode: int) -> void:
 				if idx < member_orders.size():
 					var mo: Dictionary = member_orders[idx]
 					var member_tid: int = mo.get("team_id", -1)
-					_input_mode = true
-					_input_mode_type = "string"
-					_input_mode_allow_empty = true
-					_input_mode_prompt = "下令 Team%d 任務(空=清除): " % member_tid
-					_input_buffer = ""
-					_input_mode_callback = func(buf: String):
+					# ★數字選單（追加三）：集合＝sim 側 PlayerCommandSystem.ORDERABLE_TASKS（action 與信使抵達端驗同一份）＋「清除」
+					var otasks: Array = PlayerCommandSystem.ORDERABLE_TASKS
+					var _cb_in2715 := func(buf_i: String):
+						var oi: int = int(buf_i) - 1
+						if oi < 0 or oi > otasks.size():
+							_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf_i, otasks.size() + 1])
+							return
+						var buf: String = "" if oi == otasks.size() else String(otasks[oi][0])
 						_bridge.set_player_input("order_member_id", member_tid)
 						var r: Dictionary
 						if buf.strip_edges().is_empty():
@@ -2704,7 +2812,9 @@ func _handle_faction_mode(keycode: int) -> void:
 								{"action_id": "order_faction_member", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 						_log_event("[勢力] %s" % r.get("message", ""))
 						_set_feedback(r.get("ok", true), r.get("message", ""))
-					_input_bar.text = "%s_" % _input_mode_prompt
+					var omenu: Array = otasks.map(func(t): return String(t[1]))
+					omenu.append("清除命令")
+					_open_input("下令 Team%d 任務 (1~%d): " % [member_tid, omenu.size()], "numeric", _cb_in2715, false, omenu)
 	_refresh()
 
 func _build_faction_str() -> String:
@@ -2807,11 +2917,7 @@ func _handle_outpost_mode(keycode: int) -> void:
 				return
 			if action_id == "build_outpost":
 				# 進入輸入模式：選擇建設類型
-				_input_mode = true
-				_input_mode_type = "numeric"
-				_input_mode_prompt = "建設類型 [1]民用 [2]軍事: "
-				_input_buffer = ""
-				_input_mode_callback = func(buf: String):
+				var _cb_in2835 := func(buf: String):
 					var btype: String = "civilian" if buf.strip_edges() == "1" else "military"
 					_bridge.set_player_input("build_type", btype)
 					var r2 := _bridge.command_player("execute_action", {
@@ -2819,7 +2925,7 @@ func _handle_outpost_mode(keycode: int) -> void:
 						"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log_event("[前哨] %s" % r2.get("message", ""))
 					_set_feedback(r2.get("ok", true), r2.get("message", ""))
-				_input_bar.text = "%s_" % _input_mode_prompt
+				_open_input("建設類型 [1]民用 [2]軍事: ", "numeric", _cb_in2835)
 				_refresh()
 				return
 			else:
@@ -2846,11 +2952,7 @@ func _prompt_build_facility(op: Dictionary) -> void:
 	var menu: Array = []
 	for i in range(choices.size()):
 		menu.append("[%d]%s" % [i + 1, choices[i]])
-	_input_mode = true
-	_input_mode_type = "numeric"
-	_input_mode_prompt = "蓋設施 %s 選: " % " ".join(menu)
-	_input_buffer = ""
-	_input_mode_callback = func(buf: String) -> void:
+	var _cb_in2874 := func(buf: String) -> void:
 		var ci: int = int(buf) - 1
 		if ci < 0 or ci >= choices.size():
 			_set_feedback(false, "無效設施編號")
@@ -2863,7 +2965,7 @@ func _prompt_build_facility(op: Dictionary) -> void:
 		_log_event("[前哨] %s" % r.get("message", r.get("msg", "")))
 		_set_feedback(r.get("ok", false), r.get("message", r.get("msg", "")))
 		_refresh()
-	_input_bar.text = "%s_" % _input_mode_prompt
+	_open_input("蓋設施 %s 選: " % " ".join(menu), "numeric", _cb_in2874)
 
 func _build_outpost_str() -> String:
 	var op: Dictionary = _bridge.query_outpost_panel().get("data", {}).get("outpost_panel", {})
@@ -2980,11 +3082,7 @@ func _handle_storage_mode(keycode: int) -> void:
 	var rows: Array = _storage_rows()
 	if idx >= rows.size(): return
 	var row: Dictionary = rows[idx]
-	_input_mode = true
-	_input_mode_type = "numeric"
-	_input_buffer = ""
-	_input_mode_prompt = "%s %s 數量: " % ["存" if row["dir"] == "deposit" else "取", row["res"]]
-	_input_mode_callback = func(buf: String) -> void:
+	var _cb_in3008 := func(buf: String) -> void:
 		var qty: int = int(buf)
 		if qty > 0:
 			_bridge.set_player_input("storage_res", row["res"])
@@ -2995,7 +3093,7 @@ func _handle_storage_mode(keycode: int) -> void:
 				"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_set_feedback(r.get("ok", false), r.get("message", r.get("msg", "")))
 		_refresh()
-	_input_bar.text = "%s_" % _input_mode_prompt
+	_open_input("%s %s 數量: " % ["存" if row["dir"] == "deposit" else "取", row["res"]], "numeric", _cb_in3008)
 
 # `_handle_subteam_mode` 綁了哪些鍵。★與那些分支【緊鄰】而不是放檔頭：放遠會漂，
 #   而漂開的樣子是「某個鍵突然沒反應」＝最難查的那種。
@@ -3030,63 +3128,18 @@ func _handle_subteam_mode(keycode: int) -> void:
 			var candidates: Array = sp.get("dispatch_candidates", [])
 			var max_pop: int = sp.get("player_population", 0)
 			if candidates.is_empty():
-				_log_event("[子隊] 無可用隊長（需命名非 leader 成員）")
+				_set_feedback(false, "無可用隊長（需命名非 leader 成員）")
 				_refresh()
 				return
-			# 步驟 1：選隊長
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "選隊長 (1~%d): " % candidates.size()
-			_input_buffer = ""
-			_input_mode_callback = func(buf1: String):
-				var cidx: int = int(buf1) - 1
-				if cidx < 0 or cidx >= candidates.size():
-					_log_event("[子隊] 無效隊長編號")
-					return
-				var leader_id: int = candidates[cidx].get("person_id", -1)
-				_bridge.set_player_input("sub_leader_id", leader_id)
-				# 步驟 2：人數
-				_input_mode = true
-				_input_mode_type = "numeric"
-				_input_mode_prompt = "派遣人數 (1~%d): " % (max_pop - 1)
-				_input_buffer = ""
-				_input_mode_callback = func(buf2: String):
-					var pop: int = int(buf2)
-					_bridge.set_player_input("sub_pop_count", pop)
-					# 步驟 3：選任務（Q7-5：非寫死 IDLE,開放合理子集）
-					_input_mode = true
-					_input_mode_type = "numeric"
-					_input_mode_prompt = "選任務 %s: " % _subteam_task_menu_str()
-					_input_buffer = ""
-					_input_mode_callback = func(buf_task: String):
-						var task_id: String = _subteam_task_from_index(int(buf_task))
-						_bridge.set_player_input("sub_task", task_id)
-						# 步驟 4：目標 q
-						_input_mode = true
-						_input_mode_type = "numeric"
-						_input_mode_prompt = "目標格 Q: "
-						_input_buffer = ""
-						_input_mode_callback = func(buf3: String):
-							var dq: int = int(buf3)
-							_bridge.set_player_input("sub_move_q", dq)
-							# 步驟 5：目標 r → 執行
-							_input_mode = true
-							_input_mode_type = "numeric"
-							_input_mode_prompt = "目標格 R: "
-							_input_buffer = ""
-							_input_mode_callback = func(buf4: String):
-								var dr: int = int(buf4)
-								_bridge.set_player_input("sub_move_r", dr)
-								var res := _bridge.command_player("execute_action", {
-									"action_id": "dispatch_subteam",
-									"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-								_log_event("[子隊] %s" % res.get("message", ""))
-								_set_feedback(res.get("ok", true), res.get("message", ""))
-							_input_bar.text = "目標格 R: _"
-						_input_bar.text = "目標格 Q: _"
-					_input_bar.text = "選任務 %s: _" % _subteam_task_menu_str()
-				_input_bar.text = "派遣人數 (1~%d): _" % (max_pop - 1)
-			_input_bar.text = "選隊長 (1~%d): _" % candidates.size()
+			# ★第二刀：目標＝主畫面定好的游標格；按 N 當下判可達、當下凍結（每步提示印凍結值，不每步重讀 _cursor）
+			var tgt: Vector2i = _cursor
+			var chk: Dictionary = _bridge.check_target(tgt.x, tgt.y)
+			# ★沒去過的格 N 當下不拒（systems 501b884b5）：偵查就是要去迷霧；任務選定後再依任務前提判
+			if not bool(chk.get("ok", false)) and String(chk.get("status", "")) != "unknown":
+				_set_feedback(false, "不能派往 (%d,%d)：%s" % [tgt.x, tgt.y, String(chk.get("reason", ""))])
+				_refresh()
+				return
+			_dispatch_begin(candidates, max_pop, tgt)
 			_refresh()
 			return
 		# 選子隊
@@ -3100,25 +3153,13 @@ func _handle_subteam_mode(keycode: int) -> void:
 	# 已選子隊：[A] 下令移動, [B] 召回
 	match keycode:
 		KEY_A:
-			_input_mode = true
-			_input_mode_type = "numeric"
-			_input_mode_prompt = "目標 q（按 Enter 繼續）: "
-			_input_buffer = ""
 			var sub_id_cap: int = _subteam_selection
-			_input_mode_callback = func(buf_q: String):
+			var _cb_in3128 := func(buf_q: String):
 				var q_val: int = int(buf_q)
-				_input_mode = true
-				_input_mode_type = "numeric"
-				_input_mode_prompt = "目標 r: "
-				_input_buffer = ""
-				_input_mode_callback = func(buf_r: String):
+				var _cb_in3135 := func(buf_r: String):
 					var r_val: int = int(buf_r)
 					# Q7-5：order 同樣開放任務選擇（非寫死 IDLE）
-					_input_mode = true
-					_input_mode_type = "numeric"
-					_input_mode_prompt = "選任務 %s: " % _subteam_task_menu_str()
-					_input_buffer = ""
-					_input_mode_callback = func(buf_t: String):
+					var _cb_in3142 := func(buf_t: String):
 						var new_task_id: String = _subteam_task_from_index(int(buf_t))
 						_bridge.set_player_input("order_sub_id", sub_id_cap)
 						_bridge.set_player_input("sub_new_move_q", q_val)
@@ -3129,9 +3170,9 @@ func _handle_subteam_mode(keycode: int) -> void:
 						_log_event("[子隊] %s" % res.get("message", ""))
 						_set_feedback(res.get("ok", true), res.get("message", ""))
 						_subteam_selection = -1
-					_input_bar.text = "選任務 %s: _" % _subteam_task_menu_str()
-				_input_bar.text = "%s_" % _input_mode_prompt
-			_input_bar.text = "%s_" % _input_mode_prompt
+					_open_input("選任務 (1~%d): " % SUBTEAM_TASK_CHOICES.size(), "numeric", _cb_in3142, false, SUBTEAM_TASK_CHOICES.map(func(t): return String(t[1])))
+				_open_input("目標 r: ", "numeric", _cb_in3135)
+			_open_input("目標 q（按 Enter 繼續）: ", "numeric", _cb_in3128)
 		KEY_B:
 			_bridge.set_player_input("recall_sub_id", _subteam_selection)
 			var r := _bridge.command_player("execute_action",
@@ -3141,21 +3182,95 @@ func _handle_subteam_mode(keycode: int) -> void:
 			_subteam_selection = -1
 	_refresh()
 
+# ★派遣三步（spec 第二刀）：選隊長 → 人數 → 任務 ⇒ 出發；全走 _open_input、同一個 on_cancel（Esc 任一步都清殘值）
+const _DISPATCH_INPUT_KEYS: Array = ["sub_leader_id", "sub_pop_count", "sub_task", "sub_move_q", "sub_move_r"]
+var _dispatch_target: Vector2i = Vector2i(-1, -1)
+
+func _dispatch_clear_inputs() -> void:
+	for k in _DISPATCH_INPUT_KEYS:
+		_bridge.get_state().player_state.erase(k)
+	_dispatch_target = Vector2i(-1, -1)
+
+func _dispatch_begin(candidates: Array, max_pop: int, tgt: Vector2i) -> void:
+	_dispatch_clear_inputs()
+	_dispatch_target = tgt
+	_dispatch_step_leader(candidates, max_pop)
+
+func _dispatch_tag() -> String:
+	return "目標＝(%d,%d)" % [_dispatch_target.x, _dispatch_target.y]
+
+func _dispatch_step_leader(candidates: Array, max_pop: int) -> void:
+	var cb := func(buf: String) -> void:
+		var ci: int = int(buf) - 1
+		if ci < 0 or ci >= candidates.size():
+			_set_feedback(false, "沒有第 %s 位（1~%d）" % [buf, candidates.size()])
+			_dispatch_step_leader(candidates, max_pop)
+			return
+		_bridge.set_player_input("sub_leader_id", int(candidates[ci].get("person_id", -1)))
+		_dispatch_step_pop(max_pop)
+	_open_input("選隊長 (1~%d)　%s: " % [candidates.size(), _dispatch_tag()], "numeric", cb, false,
+		candidates.map(func(c): return String(c.get("name", "?"))), _dispatch_clear_inputs)
+
+func _dispatch_step_pop(max_pop: int) -> void:
+	var cb := func(buf: String) -> void:
+		var n: int = int(buf)
+		if n < 1 or n > max_pop - 1:
+			_set_feedback(false, "人數要在 1~%d 之間" % (max_pop - 1))
+			_dispatch_step_pop(max_pop)
+			return
+		_bridge.set_player_input("sub_pop_count", n)
+		_dispatch_step_task()
+	_open_input("派遣人數 (1~%d)　%s: " % [max_pop - 1, _dispatch_tag()], "numeric", cb, false, [], _dispatch_clear_inputs)
+
+func _dispatch_step_task() -> void:
+	var cb := func(buf: String) -> void:
+		var ti: int = int(buf) - 1
+		if ti < 0 or ti >= SUBTEAM_TASK_CHOICES.size():
+			_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, SUBTEAM_TASK_CHOICES.size()])
+			_dispatch_step_task()
+			return
+		var tc: Dictionary = _bridge.dispatch_task_check(_dispatch_target.x, _dispatch_target.y, String(SUBTEAM_TASK_CHOICES[ti][0]))
+		if not bool(tc.get("ok", false)):
+			_set_feedback(false, "不能派往 (%d,%d)：%s" % [_dispatch_target.x, _dispatch_target.y, String(tc.get("reason", ""))])
+			_dispatch_step_task()   # 換一個任務（或 Esc 取消）
+			return
+		_bridge.set_player_input("sub_task", String(SUBTEAM_TASK_CHOICES[ti][0]))
+		_bridge.set_player_input("sub_move_q", _dispatch_target.x)
+		_bridge.set_player_input("sub_move_r", _dispatch_target.y)
+		var res := _bridge.command_player("execute_action", {
+			"action_id": "dispatch_subteam",
+			"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+		_log_event("[子隊] %s" % res.get("message", ""))
+		_set_feedback(res.get("ok", true), res.get("message", ""))
+		_dispatch_target = Vector2i(-1, -1)
+	_open_input("選任務 (1~%d)　%s: " % [SUBTEAM_TASK_CHOICES.size(), _dispatch_tag()], "numeric", cb, false,
+		SUBTEAM_TASK_CHOICES.map(func(t): return String(t[1])), _dispatch_clear_inputs)
+
 func _build_subteam_str() -> String:
 	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {}).get("subteam_panel", {})
 	var subteams: Array = sp.get("subteams", [])
 	var candidates: Array = sp.get("dispatch_candidates", [])
 	var lines: Array = []
 	lines.append("── 子隊 ──")
+	# ★第二刀：目標＝游標處（玩家不用記游標停哪）；派遣中印凍結值
+	if _dispatch_target != Vector2i(-1, -1):
+		lines.append("目標＝(%d,%d)（派遣中）" % [_dispatch_target.x, _dispatch_target.y])
+	else:
+		var chk: Dictionary = _bridge.check_target(_cursor.x, _cursor.y)
+		var st_k: String = String(chk.get("status", ""))
+		lines.append("目標＝游標處 (%d,%d)（%s）" % [_cursor.x, _cursor.y,
+			"腳下" if st_k == "here" else ("沒去過：只能派偵查等不需地形的任務" if st_k == "unknown" else ("可達" if bool(chk.get("ok", false)) else "不可達：" + String(chk.get("reason", ""))))])
 	if subteams.is_empty():
 		lines.append("（無子隊）")
+	# ★P5：輸入模式（選單用數字）期間子隊列表不帶 [n]——同屏不准有兩組數字鍵指不同東西
+	var numbered: bool = not _input_mode
 	for i in range(subteams.size()):
 		var st: Dictionary = subteams[i]
 		var pos_v: Vector2i = st.get("tile_pos", Vector2i.ZERO) as Vector2i
 		var task_str: String = st.get("player_commanded_task", st.get("current_task", "?"))
 		var selected_mark: String = "* " if st.get("team_id", -1) == _subteam_selection else "  "
-		lines.append("[%d]%sTeam%d @(%d,%d)  %s  人口:%d" % [
-			i + 1, selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
+		lines.append("%s%sTeam%d @(%d,%d)  %s  人口:%d" % [
+			("[%d]" % (i + 1)) if numbered else " · ", selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
 			task_str, st.get("population", 0)])
 		if st.get("team_id", -1) == _subteam_selection:
 			var pop: int = sp.get("player_population", 0)
@@ -3173,10 +3288,11 @@ func _build_subteam_str() -> String:
 			lines.append("（無可用隊長——先到互動選單『拔擢匿名→記名』培養成員）")
 		else:
 			lines.append("（無：需命名非 leader 成員）")
-	for i in range(candidates.size()):
-		lines.append("  %d. %s" % [i + 1, candidates[i].get("name", "?")])
+	if not _input_mode:   # 派遣中候選印在選單裡（帶號）；平時只列名不帶號（號碼是子隊的 [1-9]）
+		for i in range(candidates.size()):
+			lines.append("  · %s" % candidates[i].get("name", "?"))
 	if not candidates.is_empty():
-		lines.append("[N]派遣新子隊")
+		lines.append("[N]派遣新子隊（往游標處）")
 	lines.append("[U/Esc]關閉")
 	return "\n".join(lines)
 
@@ -3208,15 +3324,20 @@ func _handle_advisor_mode(keycode: int) -> void:
 		if idx < members.size():
 			_advisor_selection = members[idx].get("id", -1)
 			if _advisor_selection >= 0:
-				_input_mode = true
-				_input_mode_type = "string"
-				_input_mode_prompt = "情境關鍵字 (attack/diplomacy/resource): "
-				_input_buffer = ""
 				var advisor_pid_cap: int = _advisor_selection
-				_input_mode_callback = func(buf: String):
-					var advice: String = _bridge.query_advisor_advice(advisor_pid_cap, buf)
+				# ★數字選單（追加三）：集合＝AdvisorSystem.SITUATION_SKILL_MAP 鍵 ∩ TextBank 有 advisor_<鍵> 模板
+				#   ★舊版提示叫玩家打 attack/diplomacy/resource ⇒ 一個都對不上 ⇒ 任何輸入都只拿到預設句（既有活 bug）
+				var sits: Array = AdvisorSystem.menu_situations()
+				var _cb_in3236 := func(buf: String):
+					var si: int = int(buf) - 1
+					if si < 0 or si >= sits.size():
+						_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, sits.size()])
+						return
+					var advice: String = _bridge.query_advisor_advice(advisor_pid_cap, String(sits[si]))
 					_log_event("[Advisor] 建議：%s" % advice)
-				_input_bar.text = "%s_" % _input_mode_prompt
+					_set_feedback(true, "顧問：%s" % advice)
+				_open_input("選情境 (1~%d): " % sits.size(), "numeric", _cb_in3236, false,
+					sits.map(func(k): return AdvisorSystem.situation_label(k)))
 	_refresh()
 
 func _build_advisor_str() -> String:
@@ -3233,7 +3354,7 @@ func _build_advisor_str() -> String:
 			float(skills.get("計謀", 0)),
 			float(skills.get("交涉", 0)),
 			float(skills.get("戰術", 0))])
-	lines.append("選顧問後輸入情境關鍵字 (attack/diplomacy/resource)")
+	lines.append("選顧問後選情境（數字）")
 	lines.append("[V/Esc]關閉")
 	return "\n".join(lines)
 
@@ -3357,16 +3478,12 @@ func _handle_trade_mode(keycode: int) -> void:
 		_set_feedback(false, "沒有第 %d 項（目前 %d 項）" % [idx + 1, rows.size()])
 		return
 	var row: Dictionary = rows[idx]
-	_input_mode = true
-	_input_mode_type = "numeric"
-	_input_buffer = ""
-	_input_mode_prompt = "%s %s 數量: " % ["給" if row["side"] == "give" else "要", row["grade"]]
-	_input_mode_callback = func(buf: String) -> void:
+	var _cb_in3385 := func(buf: String) -> void:
 		var qty: int = int(buf)
 		if qty > 0:
 			_trade_add(row["side"], row["grade"], qty)
 		_refresh()
-	_input_bar.text = "%s_" % _input_mode_prompt
+	_open_input("%s %s 數量: " % ["給" if row["side"] == "give" else "要", row["grade"]], "numeric", _cb_in3385)
 
 # offer-builder 列：player_items→「我給」、target_items→「我要」，扁平化供索引一致
 func _trade_session_rows() -> Array:

@@ -72,6 +72,10 @@ const FUNC_KINDS: Array = [
 	"forced_event_timeout",   # ★SimRunner hour-tick 自動拒絕
 	# ══ M 票 §2（藍圖 fda4636f1）：敵對隊進到玩家隊同格或相鄰 —— 寫入點在模擬層算完位置之後（SimRunner._note_hostile_adjacent）══
 	"hostile_adjacent",
+	# ══ #8-0（spec 2026-10-13-alliance-never-moves-faction-leader）：據點易主 —— 寫入點在 OutpostOwnerBank.set_owner（單寫者）══
+	#   ★只在玩家相關時 emit、wake_thinking=false（NPC↔NPC 易主不進匯流排）
+	"outpost_owner_changed",
+	"resident_changed_faction",   # ★#8-2 登記居民改投別的勢力（地主要知道；玩家相關才發）
 ]
 
 # ③狀態跨線型（本刀新增偵測點）
@@ -99,12 +103,13 @@ const KIND_LABEL: Dictionary = {
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
 	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "hostile_adjacent": "敵人逼近",
+	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
 }
 # ══ ★M 票 §2：推進的停點（具名集合，唯一一份）—— 推進碰到這幾種【涉及玩家隊】的事件就停在那一 tick ══════════════
 #   找上門／提案到達（強制事件）、被攻擊或遭遇開始、敵對隊進入同格或相鄰格、成員死亡或離隊
 #   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
 const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "hostile_adjacent",
-	"member_died", "member_left"]
+	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction"]
 
 # 玩家事件匯流排上 seq0 之後第一筆停點事件（kind ∈ ADVANCE_STOP_KINDS 且主體含玩家隊）；沒有 ⇒ {}
 static func stop_event_since(state: WorldState, seq0: int) -> Dictionary:
@@ -316,6 +321,13 @@ static func _feed_player(state: WorldState, kind: String, subjects: Array, info:
 		return
 	if not _player_perceives(state, subjects):
 		return
+	# ★情報折疊（藍圖回饋 #6 ①）：同一 tick、同一來源（同一個給情報的隊、同是親見或轉述）的自家情報折成一條
+	#   ★只折帶內容的那幾則（＝自家隊；受眾規則在 belief_system 那端）；折進去的不另發 seq（同一件事）
+	if kind == "intel_arrived" and info.has("tgt") and _fold_intel(state, subjects, info):
+		return
+	if kind == "intel_arrived" and info.has("tgt"):
+		info = info.duplicate()
+		info["items"] = [{"tgt": info["tgt"], "pos": info["pos"], "age": info.get("age", -1)}]
 	state.player_event_seq += 1
 	state.player_events.append({
 		"tick": state.world.current_tick, "seq": state.player_event_seq,
@@ -365,7 +377,19 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"teams_erased":          return "%s 沒了" % who
 		"combat_engaged":        return "%s 捲進了戰鬥" % who
 		"betrayed":              return "%s 被盟友背叛" % who
-		"intel_arrived":         return "%s 收到了情報" % who
+		"outpost_owner_changed": return _owner_change_sentence(state, info)
+		"resident_changed_faction":
+			var rp: Vector2i = info.get("pos", Vector2i(-1, -1))
+			var tf: int = int(info.get("to_faction", -1))
+			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
+				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
+		"intel_arrived":         return _intel_sentence(state, who, info)
+		"extortion":
+			if info.has("aggressor"):
+				var got: String = String(info.get("got", ""))
+				return "%s 勒索 %s：%s" % [_team_name(state, int(info["aggressor"])), _team_name(state, int(info.get("target", -1))),
+					("拿到 " + got) if got != "" else "對方已無可取"]
+			return "%s：勒索" % who
 		"convoy_stranded":       return "%s 的運輸隊回不去，轉為自立" % who
 		"construction_stalled":  return "%s 的工地停擺" % who
 		"construction_abandoned":return "%s 放棄了工地" % who
@@ -382,6 +406,68 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 static func _forced_what(info: Dictionary) -> String:
 	return PlayerApiMapper.action_phrase(String(info.get("action", "")),
 		String(info.get("proposal", "")))
+
+const OWNER_CHANGE_REASON: Dictionary = {"alliance": "結盟", "capture": "被攻下", "takeover": "接管",
+	"construct": "建成", "abandon": "放棄", "demolish": "拆除", "relocate_abandon": "遷村棄守", "death_release": "原主覆滅"}
+
+static func _owner_change_sentence(state: WorldState, info: Dictionary) -> String:
+	var pos: Vector2i = info.get("pos", Vector2i(-1, -1))
+	var why: String = String(OWNER_CHANGE_REASON.get(String(info.get("reason", "")), String(info.get("reason", ""))))
+	var old: int = int(info.get("old", -1))
+	var now: int = int(info.get("new", -1))
+	var ptid: int = state.get_player_team_id()
+	if now == ptid:
+		return "你取得了 (%d,%d) 的據點（%s）" % [pos.x, pos.y, why]
+	if old == ptid:
+		return "你失去了 (%d,%d) 的據點：%s（%s）" % [pos.x, pos.y, ("歸 " + _team_name(state, now)) if now != -1 else "無主", why]
+	return "(%d,%d) 的據點易主：%s → %s（%s）" % [pos.x, pos.y,
+		_team_name(state, old) if old != -1 else "無主", _team_name(state, now) if now != -1 else "無主", why]
+
+# 同 tick、同來源的上一則自家情報 ⇒ 把這一則併進去、重組句子；回 true＝已併
+#   ★只看【最後一筆】（R²）：中間夾了別的事件就不併——保住「玩家事件佇列唯一寫入點」與事件順序；跨 tick 不併
+static func _fold_intel(state: WorldState, subjects: Array, info: Dictionary) -> bool:
+	if state.player_events.is_empty():
+		return false
+	var d: Dictionary = state.player_events[state.player_events.size() - 1]
+	if int(d.get("tick", -1)) != state.world.current_tick:
+		return false
+	if String(d.get("kind", "")) != "intel_arrived" or d.get("subjects", []) != subjects:
+		return false
+	var di: Dictionary = d.get("info", {})
+	if not di.has("items") or int(di.get("source_id", -2)) != int(info.get("source_id", -3)):
+		return false
+	if bool(di.get("firsthand", false)) != bool(info.get("firsthand", false)):
+		return false
+	(di["items"] as Array).append({"tgt": info["tgt"], "pos": info["pos"], "age": info.get("age", -1)})
+	d["text"] = describe(state, "intel_arrived", subjects, di)
+	return true
+
+# ★情報句（改法 4＋回饋 #6）：info 只在自家隊那則才有（belief_system 那一端擋）⇒ 缺欄 ⇒ 舊句，不印空對象
+#   親見「你看到 A 在 (q,r)、B 在 (q,r)」／轉述「你從 TeamX 得知：A 在 (q,r)（N 前的消息）、…」
+#   ——轉述保留「得知」：claim 可能失真；★同 tick 同來源的多則已在 _feed_player 折成這一句
+static func _intel_sentence(state: WorldState, who: String, info: Dictionary) -> String:
+	if not info.has("tgt") or not info.has("pos"):
+		return "%s 收到了情報" % who
+	var items: Array = info.get("items", [{"tgt": info["tgt"], "pos": info["pos"], "age": info.get("age", -1)}])
+	var firsthand: bool = bool(info.get("firsthand", false))
+	var parts: Array = []
+	for it in items:
+		var pos: Vector2i = it["pos"]
+		var p: String = "%s 在 (%d,%d)" % [_team_name(state, int(it["tgt"])), pos.x, pos.y]
+		if not firsthand and int(it.get("age", -1)) >= 0:
+			p += "（%s前的消息）" % _age_text(int(it["age"]))
+		parts.append(p)
+	if firsthand:
+		return "你看到 " + "、".join(parts)
+	return "你從 %s 得知：%s" % [_team_name(state, int(info.get("source_id", -1))), "、".join(parts)]
+
+static func _age_text(ticks: int) -> String:
+	var mins: int = ticks * PlayerApiMapper.MINUTES_PER_HOUR / WorldState.TICKS_PER_HOUR   # ★分鐘換算走具名常數（bare-tick 閘）
+	if mins < PlayerApiMapper.MINUTES_PER_HOUR:
+		return "%d 分鐘" % mins
+	if ticks < WorldState.TICKS_PER_DAY:
+		return "%d 小時" % (ticks / WorldState.TICKS_PER_HOUR)
+	return "%d 天" % (ticks / WorldState.TICKS_PER_DAY)
 
 static func _team_name(state: WorldState, tid: int) -> String:
 	if tid == -1 or not state.teams.has(tid):

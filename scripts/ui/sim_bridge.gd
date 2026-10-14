@@ -447,8 +447,13 @@ func _enqueue_command(name: String, args: Dictionary) -> Dictionary:
 		"message": "已排入：%s" % PlayerCommandApi.describe(name, args)}
 
 # 頁腳常駐用（spec §3-5③）：★★「待執行 N 道」——★玩家要看得到他按的東西還沒生效。
+# ★介面內部令（UI_INTERNAL_COMMANDS）不算玩家的待辦（spec 2026-10-13-player-action-audit ③）
 func pending_command_count() -> int:
-	return _state.pending_commands.size()
+	var n: int = 0
+	for c in _state.pending_commands:
+		if not UI_INTERNAL_COMMANDS.has(String(c.get("name", ""))):
+			n += 1
+	return n
 
 # 「連續、同名、無參數」＝按鍵按太多次的形狀 ⇒ 併進尾端那一道。
 # ★★★為什麼要求【無參數】兩邊都成立：`move_to(3,4)` 與 `move_to(5,6)` 同名而意思不同 ——
@@ -467,6 +472,7 @@ func pending_command_labels(max_n: int = 3) -> Array:
 	var out: Array = []
 	for c in _state.pending_commands:
 		if out.size() >= max_n: break
+		if UI_INTERNAL_COMMANDS.has(String(c.get("name", ""))): continue
 		out.append(PlayerCommandApi.describe(String(c.get("name", "")), Dictionary(c.get("args", {}))))
 	return out
 
@@ -515,6 +521,21 @@ func query_outpost_panel() -> Dictionary:
 
 func query_storage_panel() -> Dictionary:
 	return _query_api.get_storage_panel(_state)
+
+# 派遣／移動目標的可達判斷（sim 那一支，UI 不另寫）
+func check_target(q: int, r: int) -> Dictionary:
+	var p: PersonData = _state.persons.get(_state.player_id)
+	var pt: TeamData = _state.teams.get(p.team_id) if p != null else null
+	if pt == null:
+		return {"ok": false, "status": "off_map", "reason": "你已沒有隊伍"}
+	return PlayerCommandSystem.precheck_target(_state, pt, Vector2i(q, r), get_vision_mult())
+
+func dispatch_task_check(q: int, r: int, task: String) -> Dictionary:
+	var p: PersonData = _state.persons.get(_state.player_id)
+	var pt: TeamData = _state.teams.get(p.team_id) if p != null else null
+	if pt == null:
+		return {"ok": false, "reason": "你已沒有隊伍"}
+	return PlayerCommandSystem.precheck_dispatch_task(_state, pt, Vector2i(q, r), task, get_vision_mult())
 
 func query_subteam_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_subteam_panel(_state)

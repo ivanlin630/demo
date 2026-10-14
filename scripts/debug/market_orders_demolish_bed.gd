@@ -35,7 +35,7 @@ func _init() -> void:
 	state.teams[0] = team
 	state.add_member(team, 1)
 	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 5)
-	OutpostOwnerBank.set_owner(tile, 0, "bed")
+	OutpostOwnerBank.set_owner(state, tile, 0, "bed")
 
 	# ── ①拆除【前】看板要有東西（★沒有這條，下面的 0 證不到是我清的）──
 	tile.market_orders.append({"order_id": 1, "kind": "sell", "res": "food", "qty_remaining": 10,
@@ -65,7 +65,7 @@ func _init() -> void:
 	print("    `order_system.gd:247` 開頭就 `if tile.outpost_level <= 0: return` ⇒ 拆完 level=0 ⇒ 讀不到")
 	print("  ★★★真正的曝露是【重建】：同一格再蓋起來 ⇒ level>0 ⇒ 鬼單復活")
 	tile.outpost_type = "civilian"; tile.outpost_level = 1     # 重建
-	OutpostOwnerBank.set_owner(tile, 0, "rebuild")
+	OutpostOwnerBank.set_owner(state, tile, 0, "rebuild")
 	var os2 := OrderSystem.new()
 	os2.read_market_board(state, team)
 	_ok(tile.market_orders.size() == 0,

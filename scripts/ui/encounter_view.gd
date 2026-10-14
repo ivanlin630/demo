@@ -604,6 +604,10 @@ func _input(event: InputEvent) -> void:
 	if not visible or not _waiting_for_player: return
 	if event is InputEventKey and event.pressed:
 		_handle_key(event.keycode)
+		# ★一鍵只派一個模式（spec 2026-10-13-play-client-no-key-interpretation 改法 3）：引擎廣播時戰鬥畫面先收到；
+		#   戰後「按任意鍵離開」這一鍵會把自己 hide 掉 ⇒ 不標已處理的話，同一鍵接著落到主畫面 _input（visible 已是 false）
+		#   ⇒ 床實測：戰後按 W ⇒ 戰鬥畫面關掉＋主畫面游標同時上移一格（Q6(ii) 修前紅）
+		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
 			_zoom = minf(_zoom * 1.1, 4.0); queue_redraw()

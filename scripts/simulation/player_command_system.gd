@@ -22,6 +22,29 @@ const SURRENDER_TRANSFER_RES: Array = [
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 var _encounter:   EncounterSystem    = EncounterSystem.new()
+# ★玩家可下令的任務（spec 2026-10-13-terminal-input-prompts 追加三 ②，systems 定＝子隊那六項）：[任務常數, 顯示名]
+#   ★一份：UI 的子隊任務選單與「下令成員隊」選單都讀它；action 與信使抵達端驗同一份（拒絕未知任務）
+const ORDERABLE_TASKS: Array = [
+	[TeamData.TASK_IDLE,   "待機"],
+	[TeamData.TASK_FORAGE, "覓食"],
+	[TeamData.TASK_SETTLE, "安頓"],
+	[TeamData.TASK_PATROL, "巡邏"],
+	[TeamData.TASK_BUILD,  "建設"],
+	[TeamData.TASK_SCOUT,  "偵查"],
+]
+# ★勢力目標集合（追加三 ③：原本內聯在 _action_set_faction_goal 的字面）；空字串＝清除指定目標
+const FACTION_GOALS: Array = ["expand", "defend", "trade_net"]
+const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（跟隨 AI）"}
+
+static func faction_goal_label(g: String) -> String:
+	return String(FACTION_GOAL_LABELS.get(g, g))
+
+static func is_orderable_task(t: String) -> bool:
+	for e in ORDERABLE_TASKS:
+		if String(e[0]) == t:
+			return true
+	return false
+
 var _subteam:     SubteamSystem      = SubteamSystem.new()
 var _action_registry: Dictionary = {}
 
@@ -624,11 +647,23 @@ func precheck_train(state: WorldState, pt: TeamData) -> Dictionary:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if AnonTierSystem.total_pop(pt) <= 0:
 		return { "ok": false, "reason": "無匿名人口可訓練", "hint": "recruit" }
+	# ★「無可升階對象」併進前置（spec 2026-10-13-player-action-audit ②）：舊版扣完錢才發現 ⇒ 回 ok:true 白扣
+	#   ★清單可用性與 _action_train 共用這一支 ⇒ 清單列在不可側、原因同一句
+	if _train_target_tier(pt) == "":
+		return { "ok": false, "reason": "無可升階對象（匿名兵都已是精銳）" }
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		# ★★那個數字從常數來（查詢面不准再寫一次 `TRAIN_COST_COIN`）——
 		#   P3a 的行為證就是擾動這個常數之後**原因裡的數字要跟著變**。
 		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN, "hint": "trade" }
 	return { "ok": true, "reason": "" }
+
+# 訓練對象：最低一個還有人的非精銳階（"" ＝ 沒有可升階對象）。precheck_train 與 _action_train 共用
+static func _train_target_tier(pt: TeamData) -> String:
+	for tier in AnonTierSystem.TIER_ORDER:
+		if tier == AnonCohort.TIER_ELITE: break
+		if int(pt.anon_tiers.get(tier, 0)) > 0:
+			return tier
+	return ""
 
 func precheck_promote_anon(_state: WorldState, pt: TeamData) -> Dictionary:
 	if pt == null:
@@ -744,15 +779,10 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 	var pre_t: Dictionary = precheck_train(state, pt)
 	if not bool(pre_t.get("ok", false)):
 		return { "ok": false, "msg": String(pre_t.get("reason", "")) }
+	# ★扣錢之後不再有「無可升階對象」出口（前置已擋；對象由同一支函式給）
+	var target_tier: String = _train_target_tier(pt)
 	ResourceBank.add(pt, "coin", -TRAIN_COST_COIN, "player_train")
 	AnonTreasuryBank.deposit(pt, TRAIN_COST_COIN, "train_salary")   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
-	var target_tier: String = ""
-	for tier in AnonTierSystem.TIER_ORDER:
-		if tier == AnonCohort.TIER_ELITE: break
-		if int(pt.anon_tiers.get(tier, 0)) > 0:
-			target_tier = tier; break
-	if target_tier == "":
-		return { "ok": true, "msg": "訓練（-%.0f 幣,無可升階對象）" % TRAIN_COST_COIN }
 	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN, "train_player")
 	var promoted: int = 0
 	for tier in AnonTierSystem.TIER_ORDER:
@@ -870,16 +900,56 @@ func _action_propose_alliance(state: WorldState, target_id: int, pt: TeamData, p
 	if tgt == null:
 		return { "ok": false, "msg": "目標不存在" }
 	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "propose_alliance")
-	if resp == "accept":
-		if pt.faction_id == -1 and tgt.faction_id == -1:
-			state.create_faction(pt_id)
-		_diplomatic._form_alliance(state, pt, tgt)
-		print("[PlayerCmd] 同盟成立，勢力%d" % pt.faction_id)
+	# ★改法 2：舊版 accept 之後又反方向呼一次 _form_alliance（handle 在 :386 已結過一次）⇒ 名聲加兩次、方向打架 ⇒ 拿掉
 	state.player_pending_targets.erase(target_id)
+	var res: Dictionary = _diplomatic.last_alliance
+	if resp == "accept":
+		return { "ok": true, "msg": alliance_sentence(state, res, pt.team_id) }
+	if String(res.get("action", "")) == "none":
+		return { "ok": false, "msg": "外交結果：%s" % String(res.get("reason", "")) }
 	# ★玩家面字串零英文識別字（⑤ 那張票的不變量）：`resp` 是引擎的 id（accept／refuse／reject）
 	#   ⇒ 不能直接印給玩家。★中文來自唯一生產者 `PlayerApiMapper`，不在這裡寫第二份。
-	return { "ok": resp == "accept",
-		"msg": "外交結果：%s" % PlayerApiMapper.diplomacy_reply_label(resp) }
+	return { "ok": false, "msg": "外交結果：%s" % PlayerApiMapper.diplomacy_reply_label(resp) }
+
+# ★提案行的預告（玩家接受 from_id 的結盟提案會發生什麼）：與 _accept_diplomacy 同一個順序試算
+#   （兩隊都獨立時那一支先讓對方建國、對方當領袖，再走 plan_alliance）
+static func alliance_preview(state: WorldState, from_id: int) -> String:
+	var ft: TeamData = state.teams.get(from_id)
+	var pt: TeamData = state.teams.get(state.get_player_team_id())
+	if ft == null or pt == null:
+		return "接受＝後果未知（隊伍不存在）"
+	if ft.faction_id == -1 and pt.faction_id == -1:
+		return "接受＝你加入 Team%d 新建的勢力（對方當領袖）" % from_id
+	var plan: Dictionary = DiplomaticAiSystem.plan_alliance(state, pt, ft)
+	match String(plan["action"]):
+		"none":
+			return "接受也不會成立：%s" % String(plan["reason"])
+		"same":
+			return "接受＝你們本來就在同一個勢力"
+		"move":
+			if int(plan["moved_team"]) == pt.team_id:
+				return "接受＝你加入勢力%d（離開勢力%d）" % [int(plan["to_faction"]), pt.faction_id] if pt.faction_id != -1 \
+					else "接受＝你加入勢力%d" % int(plan["to_faction"])
+			return "接受＝Team%d 加入你的勢力%d" % [int(plan["moved_team"]), int(plan["to_faction"])]
+	return "接受＝與對方結盟"
+
+# ★結盟結果句寫【實際後果】（改法 3）：讀 _form_alliance／plan_alliance 回的實際動作，不在呼叫端猜
+static func alliance_sentence(state: WorldState, res: Dictionary, ptid: int) -> String:
+	var act: String = String(res.get("action", ""))
+	var mv: int = int(res.get("moved_team", -1))
+	var to: int = int(res.get("to_faction", -1))
+	match act:
+		"none":
+			return String(res.get("reason", "結盟沒有成立"))
+		"same":
+			return "你們本來就在同一個勢力（勢力%d）" % to
+		"found":
+			return "兩隊建立勢力%d" % int(res.get("created_faction", to))
+		"move":
+			if mv == ptid:
+				return "你加入勢力%d" % to
+			return "Team%d 加入你的勢力%d" % [mv, to]
+	return "結盟沒有成立"
 
 func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)
@@ -1072,9 +1142,14 @@ func _action_set_tribute_rate(state: WorldState, _target_id: int, pt: TeamData, 
 
 # U18：設自隊匿名武裝比例（none-target，比照 set_tribute_rate）
 func _action_set_armed_ratio(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# ★只寫目標（spec 2026-10-13-player-action-audit ①）：實際比例由 EquipmentSystem 下一次更新時取 min(目標, 庫存可武裝)
+	#   ★舊版直寫 armed_anon_ratio ⇒ 下一 tick 被 _update_anon_ratio 用庫存重算蓋回（宣稱動作沒改世界）
 	var r: float = clampf(float(state.player_state.get("armed_ratio_input", pt.armed_anon_ratio)), 0.0, 1.0)
-	pt.armed_anon_ratio = r
-	print("[PlayerCmd] set_armed_anon_ratio → %.2f" % r)
+	pt.armed_anon_target = r
+	var can: float = EquipmentSystem.armable_anon_ratio(pt)
+	print("[PlayerCmd] set_armed_anon_ratio → target %.2f（可武裝 %.2f）" % [r, can])
+	if can < r:
+		return { "ok": true, "msg": "武裝目標設為 %.0f%%（武器只夠 %.0f%%）" % [r * 100.0, can * 100.0] }
 	return { "ok": true, "msg": "武裝比例設為 %.0f%%" % (r * 100.0) }
 
 func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
@@ -1151,7 +1226,7 @@ func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: TeamData, 
 		return { "ok": false, "msg": "目標無 outpost" }
 	if tile.outpost_owner != pt_id:
 		return { "ok": false, "msg": "非自家 outpost" }
-	OutpostOwnerBank.set_owner(tile, -1, "abandon")
+	OutpostOwnerBank.set_owner(state, tile, -1, "abandon")
 	return { "ok": true, "msg": "已棄置 outpost (%d,%d)" % [pos.x, pos.y] }
 
 func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
@@ -1165,6 +1240,11 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 		return { "ok": false, "msg": "未指定子隊統領" }
 	if pop_count < 1 or pop_count >= pt.population:
 		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
+	# ★目標格的任務前提（同一支，UI 也呼叫它）——有目標格才判（-1,-1 ＝ 舊流程的就地派遣）
+	if move_tgt != Vector2i(-1, -1):
+		var tc: Dictionary = precheck_dispatch_task(state, pt, move_tgt, task)
+		if not bool(tc["ok"]):
+			return { "ok": false, "msg": "不能派往 (%d,%d)：%s" % [tq, tr, String(tc["reason"])] }
 	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
 	if sub_id == -1:
 		return { "ok": false, "msg": "派遣失敗" }
@@ -1370,8 +1450,8 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 	if pt.faction_id == -1:
 		return { "ok": false, "msg": "玩家不在勢力中" }
 	var goal9: String = str(state.player_state.get("faction_goal_input", ""))
-	if goal9 not in ["expand", "defend", "trade_net", ""]:
-		return { "ok": false, "msg": "無效目標（expand/defend/trade_net/空字串清除）" }
+	if goal9 != "" and goal9 not in FACTION_GOALS:
+		return { "ok": false, "msg": "無效目標（%s／空字串清除）" % "/".join(FACTION_GOALS) }
 	var f9: FactionData = state.factions.get(pt.faction_id)
 	if f9 == null:
 		return { "ok": false, "msg": "勢力不存在" }
@@ -1390,6 +1470,11 @@ func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamDa
 		return { "ok": false, "msg": "目標成員不存在" }
 	if m_task.is_empty():
 		return { "ok": false, "msg": "未指定任務" }
+	# ★追加三 ②：驗成員資格＋拒絕不在集合的任務（舊版只查非空 ⇒ 打錯字會原樣變成別隊的 current_task）
+	if pt.faction_id == -1 or member_team.faction_id != pt.faction_id:
+		return { "ok": false, "msg": "Team%d 不是你勢力的成員" % member_team_id }
+	if not is_orderable_task(m_task):
+		return { "ok": false, "msg": "不能下令這個任務：%s" % m_task }
 	if pt.population < 2:
 		return { "ok": false, "msg": "人數不足以派信使" }
 	# 從 named_members 選一非 leader 的成員當信使
@@ -1457,6 +1542,12 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 			msg_gi = "他不願多說"
 		elif wrote_gi <= 0 and _inquiry_payload_empty(result_gi):
 			msg_gi = "他也不知道"
+		elif wrote_gi <= 0 and int(out_gi.get("conflicted", 0)) > 0:
+			# ★R² 三態③：他說的跟你知道的不一樣、可信度沒贏 ⇒ 不能說「早就知道了」（那是錯的）
+			msg_gi = "他說的跟你知道的不一樣，你沒採信（%d 筆）" % int(out_gi.get("conflicted", 0))
+		elif wrote_gi <= 0 and int(out_gi.get("refreshed", 0)) > 0:
+			# ★回饋 #6 ②：他說的每一則都只是把你已知的時間戳換新 ⇒ 說出來（舊版印「記下 5 筆」）
+			msg_gi = "他說的你早就知道了（更新了時間）"
 		elif wrote_gi <= 0:
 			# ★打聽票 I5（藍圖第四句）：他說了（payload 非空）而一筆都沒記下 ⇒ 你早就知道了 —— 舊版印「記下 0 筆」
 			msg_gi = "他說的你早就知道了"
@@ -1862,8 +1953,10 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 			# 雙方皆獨立時 _form_alliance 無效，需先建立勢力
 			if from_team.faction_id == -1 and pt.faction_id == -1:
 				state.create_faction(from_id)   # NPC 為領袖
-			_diplomatic._form_alliance(state, from_team, pt)
-			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
+			# ★改法 2：方向與 NPC 收提案（diplomatic_ai_system :386）一致——收提案方＝玩家＝team_a
+			#   舊版 _form_alliance(from_team, pt) 把發起方放在收提案方的位置 ⇒ 玩家（勢力領袖）被搬進對方勢力（用戶撞到的那條）
+			var res: Dictionary = _diplomatic._form_alliance(state, pt, from_team)
+			return { "ok": String(res.get("action", "")) != "none", "msg": alliance_sentence(state, res, pt.team_id) }
 		"tribute", "demand_tribute":   # _send_diplomacy_message 寫 "demand_tribute"（原只認 "tribute" → 未知提案類型 bug）
 			return _pay_extortion(state, from_id)
 		# ★★★`propose_trade`：**走 NPC↔NPC 那一段【同一份 code】**（藍圖裁 (b)，spec 2026-09-30）。
@@ -1926,7 +2019,9 @@ func _accept_diplomacy_as_leader(state: WorldState, from_id: int) -> Dictionary:
 		return { "ok": false, "msg": "隊伍不存在" }
 	if pt.faction_id == -1:
 		state.create_faction(pt_id)
-	_diplomatic._form_alliance(state, pt, from_team)
+	var res: Dictionary = _diplomatic._form_alliance(state, pt, from_team)   # 方向已一致：收提案方＝玩家
+	if String(res.get("action", "")) == "none":
+		return { "ok": false, "msg": alliance_sentence(state, res, pt.team_id) }
 	return { "ok": true, "msg": "自立後接納 Team%d，勢力%d" % [from_id, pt.faction_id] }
 
 func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:
@@ -1934,8 +2029,10 @@ func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:
 	var pt_id: int = _get_player_team_id(state)
 	if pt_id == -1:
 		return { "ok": false, "msg": "找不到玩家 team" }
-	_interaction.resolve_extortion_direct(state, from_id, pt_id)
-	return { "ok": true, "msg": "支付勒索" }
+	# ★玩家是被勒索方時，結果行帶實際被拿走的量（改法 4，同一支格式器）——舊版丟掉回傳、只說「支付勒索」
+	var r: Dictionary = _interaction.resolve_extortion_direct(state, from_id, pt_id)
+	var taken: String = ResourceFormat.list(r.get("gained", {}))
+	return { "ok": true, "msg": ("被 Team%d 拿走：%s" % [from_id, taken]) if taken != "" else "Team%d 沒拿到東西（你已沒有可給的）" % from_id }
 
 func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		tgt: TeamData, target_id: int) -> Dictionary:
@@ -2028,6 +2125,45 @@ func inspect_member(state: WorldState, person_id: int) -> Dictionary:
 		"equipment": p.equipment
 	}
 
+# ★玩家指定目標格的可達判斷（spec 2026-10-13-terminal-input-prompts 第二刀；多格移動與派遣共用一支）
+#   順序：不在地圖上 → 沒去過（玩家所知）⇒ 回原因、【不呼叫 find_path】→ 腳下（合法）→ 找路
+#   ★為什麼未知格要擋在找路之前：找路讀真地圖 ⇒ 對沒去過的格回「沒有路」＝把那格周圍的真地形報給玩家（感知鐵律）
+#   ★不可達的句子不指名原因（山只是貴、不是牆；空集近乎只有地圖洞）⇒ 只說「沒有路」
+#   回 {ok, status: off_map|unknown|here|reachable|no_path, reason}
+#   ★名字帶 precheck_：純查詢的前置判斷（ok:true 不帶句子，不是結果句；success-sentence 床依此前綴排除）
+static func precheck_target(state: WorldState, pt: TeamData, pos: Vector2i, vision_mult: float = 1.0) -> Dictionary:
+	var k: Dictionary = PlayerQueryApi.tile_knowledge(state, pos, vision_mult)
+	match String(k.get("status", "")):
+		"off_map":
+			return {"ok": false, "status": "off_map", "reason": "(%d,%d) 不在地圖上" % [pos.x, pos.y]}
+		"no_team":
+			return {"ok": false, "status": "off_map", "reason": "你已沒有隊伍"}
+		"unvisited":
+			return {"ok": false, "status": "unknown", "reason": "還沒去過／看過 (%d,%d) 這格" % [pos.x, pos.y]}
+	if pt.tile_pos == pos:
+		return {"ok": true, "status": "here", "reason": ""}
+	if PathSystem.find_path(state, pt.tile_pos, pos).path.is_empty():
+		return {"ok": false, "status": "no_path", "reason": "到 (%d,%d) 沒有路" % [pos.x, pos.y]}
+	return {"ok": true, "status": "reachable", "reason": ""}
+
+# ★派遣任務對目標格的前提（systems 501b884b5）：沒去過的格——偵查可以去；安頓、建設要先知道那格的地形 ⇒ 拒並說原因
+#   ★其餘任務（偵查／待機／覓食／巡邏）放行（藍圖確認 44d310612：安頓、建設要讀那一格）
+const TASKS_NEED_KNOWN_TILE: Array = [TeamData.TASK_SETTLE, TeamData.TASK_BUILD]
+
+static func precheck_dispatch_task(state: WorldState, pt: TeamData, pos: Vector2i, task: String, vision_mult: float = 1.0) -> Dictionary:
+	var chk: Dictionary = precheck_target(state, pt, pos, vision_mult)
+	if String(chk["status"]) == "unknown":
+		if task in TASKS_NEED_KNOWN_TILE:
+			return {"ok": false, "reason": "%s要先知道那格的地形（%s）" % [_task_label(task), String(chk["reason"])]}
+		return {"ok": true, "reason": ""}
+	return {"ok": bool(chk["ok"]), "reason": String(chk["reason"])}
+
+static func _task_label(task: String) -> String:
+	for e in ORDERABLE_TASKS:
+		if String(e[0]) == task:
+			return String(e[1])
+	return task
+
 func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 	var pt: TeamData = get_player_team(state)
 	if pt == null:
@@ -2042,8 +2178,11 @@ func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 	if pt.combat_target != -1:
 		return { "ok": false, "msg": "戰鬥中，不能移動" }
 	# (C) 下令時就算路：不可達 ⇒ 不下令、說原因（不是走一格再停）
-	if PathSystem.find_path(state, pt.tile_pos, target_pos).path.is_empty():
-		return { "ok": false, "msg": "無法抵達 (%d,%d)：沒有路（被山或地圖邊緣隔開）" % [target_pos.x, target_pos.y] }
+	#   ★共用判斷 precheck_target（systems 裁 a）：沒去過的格【不預判】、照樣下令——往迷霧走是探索；
+	#     真的走不通由行進中的 path_broken 說「到 (q,r) 的路斷了」。舊句「被山或地圖邊緣隔開」對未知格洩露真地形，拿掉
+	var chk: Dictionary = precheck_target(state, pt, target_pos)
+	if not bool(chk["ok"]) and String(chk["status"]) != "unknown":
+		return { "ok": false, "msg": "無法抵達 (%d,%d)：%s" % [target_pos.x, target_pos.y, String(chk["reason"])] }
 	if not TaskArbiter.try_set(state, pt, TeamData.TASK_TRAVEL, target_pos, TaskArbiter.PRIO_PLAYER, "player_move"):   # gate-ok：玩家指令（PRIO_PLAYER）
 		return { "ok": false, "msg": "不能移動：現在有更急的事" }   # ★不准靜默（spec ①）；措辭同休息那句
 	# ★M ①：結果句說預計多久（讀既有移動成本 PathSystem.eta_ticks；1 tick ＝ 1 分鐘）

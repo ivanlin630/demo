@@ -8,6 +8,21 @@ const SITUATION_SKILL_MAP: Dictionary = {
 	"intel_read":    "偵查",
 }
 
+const SITUATION_LABELS: Dictionary = {"assess_enemy": "評估敵情", "diplomatic": "外交判讀", "resources": "資源狀況",
+	"strategic": "大局", "intel_read": "解讀情報"}
+
+# ★玩家選單的情境集合（spec terminal-input-prompts 追加三 ①）：SITUATION_SKILL_MAP 的鍵 ∩ TextBank 有 advisor_<鍵> 模板
+#   ⇒ 沒有模板的（strategic／intel_read）不上選單（上了只會拿到預設句）
+static func menu_situations() -> Array:
+	var out: Array = []
+	for k in SITUATION_SKILL_MAP:
+		if TextBank.TEMPLATES.has("advisor_" + String(k)):
+			out.append(String(k))
+	return out
+
+static func situation_label(k: String) -> String:
+	return String(SITUATION_LABELS.get(k, k))
+
 func get_advice(advisor: PersonData, situation: String,
 		situation_data: Dictionary, state: WorldState) -> String:
 	if advisor == null:
@@ -38,7 +53,16 @@ func _pick_variant(advisor: PersonData, situation: String,
 	var hawkish: bool  = float(advisor.values.get("好戰", 0.5)) > 0.7
 	var cautious: bool = float(advisor.values.get("慎重", 0.5)) > 0.7
 	if not accurate:
-		return "wrong_underestimate" if randf() < 0.5 else "wrong_overestimate"
+		# ★各情境的「判斷錯」句型各不相同（TextBank 模板）：舊版一律回 wrong_under/overestimate
+		#   ⇒ 只有 assess_enemy 有那兩個模板 ⇒ diplomatic／resources 判斷錯時落到預設句「有動靜」
+		#   ★randf 照舊只叫一次（不改亂數序列）
+		var coin: bool = randf() < 0.5
+		match situation:
+			"diplomatic":
+				return "wrong_read"
+			"resources":
+				return "wrong_optimistic" if coin else "wrong_pessimistic"
+		return "wrong_underestimate" if coin else "wrong_overestimate"
 	match situation:
 		"assess_enemy":
 			var enemy_strong: bool = int(data.get("enemy_pop", 0)) > int(data.get("self_pop", 0))
