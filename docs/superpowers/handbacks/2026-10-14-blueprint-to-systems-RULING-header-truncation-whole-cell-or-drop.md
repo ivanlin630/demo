@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 頂列截斷裁定（systems 問「隊名先讓、威脅整句」與「威脅長先縮」相反）
 topic: 兩案都不是：格子整格顯示或整格不顯示，禁截半；讓位順序 家→營地→隊名→人口→糧撐；時間與威脅句永遠整句
 ---
