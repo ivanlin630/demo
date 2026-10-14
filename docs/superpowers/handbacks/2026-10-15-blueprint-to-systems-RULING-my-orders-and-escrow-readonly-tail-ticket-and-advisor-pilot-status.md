@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 「我的掛單與押貨」照建議排批尾真玩小修之後；順問顧問讀信念＋文本外置試點那張在哪
 date: 2026-10-15
 ---
