@@ -184,6 +184,7 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"anon_total":       AnonTierSystem.total_pop(t),
 		"armed_count":      _armed_count(t),
 		"armed_ratio":      t.armed_anon_ratio,
+		"armed_target":     t.armed_anon_target,   # -1＝未設（面板只在設了才印「目標／實際」）
 		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,

@@ -647,11 +647,23 @@ func precheck_train(state: WorldState, pt: TeamData) -> Dictionary:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if AnonTierSystem.total_pop(pt) <= 0:
 		return { "ok": false, "reason": "無匿名人口可訓練", "hint": "recruit" }
+	# ★「無可升階對象」併進前置（spec 2026-10-13-player-action-audit ②）：舊版扣完錢才發現 ⇒ 回 ok:true 白扣
+	#   ★清單可用性與 _action_train 共用這一支 ⇒ 清單列在不可側、原因同一句
+	if _train_target_tier(pt) == "":
+		return { "ok": false, "reason": "無可升階對象（匿名兵都已是精銳）" }
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		# ★★那個數字從常數來（查詢面不准再寫一次 `TRAIN_COST_COIN`）——
 		#   P3a 的行為證就是擾動這個常數之後**原因裡的數字要跟著變**。
 		return { "ok": false, "reason": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN, "hint": "trade" }
 	return { "ok": true, "reason": "" }
+
+# 訓練對象：最低一個還有人的非精銳階（"" ＝ 沒有可升階對象）。precheck_train 與 _action_train 共用
+static func _train_target_tier(pt: TeamData) -> String:
+	for tier in AnonTierSystem.TIER_ORDER:
+		if tier == AnonCohort.TIER_ELITE: break
+		if int(pt.anon_tiers.get(tier, 0)) > 0:
+			return tier
+	return ""
 
 func precheck_promote_anon(_state: WorldState, pt: TeamData) -> Dictionary:
 	if pt == null:
@@ -767,15 +779,10 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 	var pre_t: Dictionary = precheck_train(state, pt)
 	if not bool(pre_t.get("ok", false)):
 		return { "ok": false, "msg": String(pre_t.get("reason", "")) }
+	# ★扣錢之後不再有「無可升階對象」出口（前置已擋；對象由同一支函式給）
+	var target_tier: String = _train_target_tier(pt)
 	ResourceBank.add(pt, "coin", -TRAIN_COST_COIN, "player_train")
 	AnonTreasuryBank.deposit(pt, TRAIN_COST_COIN, "train_salary")   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
-	var target_tier: String = ""
-	for tier in AnonTierSystem.TIER_ORDER:
-		if tier == AnonCohort.TIER_ELITE: break
-		if int(pt.anon_tiers.get(tier, 0)) > 0:
-			target_tier = tier; break
-	if target_tier == "":
-		return { "ok": true, "msg": "訓練（-%.0f 幣,無可升階對象）" % TRAIN_COST_COIN }
 	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN, "train_player")
 	var promoted: int = 0
 	for tier in AnonTierSystem.TIER_ORDER:
@@ -1135,9 +1142,14 @@ func _action_set_tribute_rate(state: WorldState, _target_id: int, pt: TeamData, 
 
 # U18：設自隊匿名武裝比例（none-target，比照 set_tribute_rate）
 func _action_set_armed_ratio(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# ★只寫目標（spec 2026-10-13-player-action-audit ①）：實際比例由 EquipmentSystem 下一次更新時取 min(目標, 庫存可武裝)
+	#   ★舊版直寫 armed_anon_ratio ⇒ 下一 tick 被 _update_anon_ratio 用庫存重算蓋回（宣稱動作沒改世界）
 	var r: float = clampf(float(state.player_state.get("armed_ratio_input", pt.armed_anon_ratio)), 0.0, 1.0)
-	pt.armed_anon_ratio = r
-	print("[PlayerCmd] set_armed_anon_ratio → %.2f" % r)
+	pt.armed_anon_target = r
+	var can: float = EquipmentSystem.armable_anon_ratio(pt)
+	print("[PlayerCmd] set_armed_anon_ratio → target %.2f（可武裝 %.2f）" % [r, can])
+	if can < r:
+		return { "ok": true, "msg": "武裝目標設為 %.0f%%（武器只夠 %.0f%%）" % [r * 100.0, can * 100.0] }
 	return { "ok": true, "msg": "武裝比例設為 %.0f%%" % (r * 100.0) }
 
 func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:

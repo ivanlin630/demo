@@ -59,18 +59,22 @@ func _update_equipment(state: WorldState, team: TeamData) -> void:
 			var pool: int = int(team.resources.get(pool_key, 0))
 			ResourceBank.set_amt(team, pool_key, pool + unequipped_count * UNITS_PER_EQUIP, "unequip_named")
 
-func _update_anon_ratio(state: WorldState, team: TeamData) -> void:
-	var named_ids: Array = _get_named_ids(team)
-	var named_count: int = named_ids.size()
+func _update_anon_ratio(_state: WorldState, team: TeamData) -> void:
+	var can: float = armable_anon_ratio(team)
+	# ★玩家目標（-1＝未設 ⇒ NPC 與未設的玩家逐字照舊）：武器夠就照目標，不夠就照庫存
+	team.armed_anon_ratio = can if team.armed_anon_target < 0.0 else minf(team.armed_anon_target, can)
+
+# 庫存可武裝的匿名比例（純讀）：結果句「武器只夠 N%」與上面那支用同一個數
+static func armable_anon_ratio(team: TeamData) -> float:
+	var named_count: int = team.named_members.size() + (1 if team.leader_id != -1 else 0)
 	var anon_pop: int = maxi(team.population - named_count, 0)
 	if anon_pop <= 0:
-		team.armed_anon_ratio = 0.0
-		return
+		return 0.0
 	var pool_remaining: int = 0
 	for wtype in WEAPON_TYPES:
 		pool_remaining += int(team.resources.get("weapon_" + wtype, 0))
 	var armed_anon: int = mini(anon_pop, pool_remaining / UNITS_PER_EQUIP)
-	team.armed_anon_ratio = float(armed_anon) / float(anon_pop)
+	return float(armed_anon) / float(anon_pop)
 
 func on_named_death(team: TeamData, wtype: String) -> void:
 	if wtype == "" or wtype == "none":

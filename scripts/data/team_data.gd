@@ -427,6 +427,9 @@ var anon_wage: float:
 		#     而【把診斷訊息淡成噪音】與沒有診斷訊息是同一件事。
 		_note_swallowed("anon_wage")
 var armed_anon_ratio: float = 0.0
+# ★玩家設的匿名武裝【目標】（spec 2026-10-13-player-action-audit ①）：-1＝未設＝照舊能武裝多少就武裝多少
+#   ★armed_anon_ratio 仍只由 EquipmentSystem 寫（單寫者）；玩家只寫這一欄，equipment 取 min(目標, 庫存可武裝)
+var armed_anon_target: float = -1.0
 var anon_treasury: float = 0.0   # 匿名兵 wage 沉澱
 var fatigue: float = 0.0
 var guard_ratio: float = 0.2
