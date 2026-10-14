@@ -1,6 +1,6 @@
 # 玩家遭遇戰的戰後收尾：結算事件、場上傷兵命運、俘虜接帳、追擊、居民處置問玩家——HOW
 
-狀態：R² ISSUES（2026-10-14-reviewer-to-systems-R2-battle-aftermath-ISSUES）兩擋已改（2c 容量一支、2d 推進＝不處置不擋推進）；重送審查核；記名失能者雙向一律放（藍圖裁 2026-10-14-…-RULING-ticket7-named-disabled-release-both-ways-until-named-captive-ledger）
+狀態：R² ISSUES（2026-10-14-reviewer-to-systems-R2-battle-aftermath-ISSUES）兩擋已改（2c 容量一支、2d 推進＝不處置不擋推進）；第二輪 R²（…-R2r2-battle-aftermath-ISSUES）一處必修已改（結清點移到指令消化之後），補完不需再審；記名失能者雙向一律放（藍圖裁 2026-10-14-…-RULING-ticket7-named-disabled-release-both-ways-until-named-captive-ledger）
 來源：
 - WHAT：`docs/notes/2026-10-13-annihilation-advisor-trade-prisoners.md` §1a／§4；意圖帳「玩家戰場傷亡入帳」列（藍圖訂正 4f2eb745c）。
 - 排位：藍圖 2026-10-14-blueprint-to-systems-RULING-roadmap-board-and-annihilation-captives-rout-order（第 7 張）。
@@ -40,7 +40,7 @@
 ### 2a. 戰中已被押住的（既有 `_check_prisoners` :596／`_check_rescues` :625，用戶 2026-10-14）
 - 戰中：失能未離場且身旁有敵人 ⇒ 就地 `is_prisoner`（押方＝對方隊）；隊友貼身且無敵看守 ⇒ 救回。這兩支不改。
 - 結算（**兩個方向都算**，現況只數敗方＝漏一邊）：對每個 `is_prisoner` 單位，若押方結算時仍有 `is_combat_capable` 單位在場 ⇒ 被帶走歸押方，**不看誰留場**：
-  - 匿名 ⇒ 押方 `captive_groups`（`absorb_wounded_as_captive`，受同一個 `guard_budget` 上限；押方是玩家時 group 的 treatment＝玩家下一步選，見 2 的「俘虜（厚待／苛待）」；押方是 NPC 時照 manpower 既有）。超過上限的回原隊 wounded 桶、進事件。
+  - 匿名 ⇒ 押方 `captive_groups`（`absorb_wounded_as_captive`，受同一個 `captive_room` 上限；押方是玩家時 group 的 treatment＝玩家下一步選，見 2 的「俘虜（厚待／苛待）」；押方是 NPC 時照 manpower 既有）。超過上限的回原隊 wounded 桶、進事件。
   - 記名 ⇒ 記名俘虜帳不存在（範圍外）⇒ 放回原隊並在結算事件寫「X 被俘後放回（記名俘虜還沒做）」——不憑空消失、不假裝帶走。
 - 押方自己全倒或全離場 ⇒ 被押者等於無人看守 ⇒ 回到下一步（失能者看留場）。
 - 玩家這側每一筆（我方被押走幾人、我方押住幾人、放回幾人）都進 `combat_end` 玩家事件。
@@ -74,18 +74,19 @@
 - **玩家 holder**（判定用 `player_controlled`，不用 leader_id==player_id）：
   - 看守比只在 holder 層一欄 `captive_guard_ratio`（不另造 group 欄）；玩家 holder 不呼 `_decide_guard_ratio`，初值＝具名常數 `PLAYER_GUARD_RATIO_DEFAULT = GUARD_RATIO_MAX / 2`（不讀附身者人格），面板印出；改看守比的動詞本票不做（列「還沒做」）。
   - 不呼 `decide_treatment`，讀 group 的 `treatment` 欄（玩家選）。
-  - `_enforce_guard_cap` 遇玩家 holder 超額 ⇒ **不處置**，發玩家事件「看守不足：俘虜 N 人、可看守 M 人」＋Probe `asm.guardcap_player_excess`（因容量一支，正常為 0；它是守衛）。
-  - 缺糧釋放（:42-46）搬出成獨立物理檢查 `captive_food_ok(state, holder)`，對所有 holder 在 decide 之前跑；玩家 holder 養不起 ⇒ 照放，發玩家事件「養不起，俘虜被放走 N 人」（與 NPC 對稱）。
+  - `_enforce_guard_cap` 遇玩家 holder 超額 ⇒ **不處置**；玩家事件「看守不足：俘虜 N 人、可看守 M 人」**邊緣觸發**（不超額→超額那一次發，持續超額不重發；持續超額的後果由既有逃跑機率承擔）＋Probe `asm.guardcap_player_excess`（捕獲時不會超額；只有之後 total_pop 因戰損下降才會，故非恆 0，計數印在交件信）。
+  - 缺糧釋放（:42-46）搬出成獨立物理檢查 `captive_food_ok(state, holder)`；**NPC 行為須逐位相同**：`tick_all` 新序＝ratio → enforce → `captive_food_ok`（沿用同一條釋放處置函式、在同一個 group 迴圈位置）→ decide（不含缺糧）；census 比對修前修後釋放計數相同，並印「俘了又被 enforce 處置」次數（修後應降，2c 的效果）；玩家 holder 養不起 ⇒ 照放，發玩家事件「養不起，俘虜被放走 N 人」（與 NPC 對稱）。
 - `prisoner_population` 計數器退場（2a 取代它）（寫入點、欄位、指紋那一欄一起拿掉；world-fp 換基準，二分證差異只在這欄＋新帳）。
 
 ### 2d. 未決時推進＝不處置（R² 擋②；不擋推進）
 - 不新增硬模態。戰後處置跟強制事件同一個形狀：**停點＋推進即取被動選項**。`combat_end` 是推進停點，玩家停在結算那一屏、看到選項；若直接推進 ⇒ 在推進的第一個 tick 之前，把每個 pending 以**被動選項**結清：命運＝放走、追擊＝不追、居民＝放棄佔領；結果行寫「你沒有處置：傷兵被放走（N 人）」等。
   - 被動選項＝不作為，不是 AI 替玩家選（#12 成立：沒有讀任何人格）。
-  - 結清點：`SimBridge.request_advance` 咽喉（X／空白／G／L／PlayerRepl 等待迴圈／腳本全經這裡）；一支 `PlayerCommandSystem.settle_pending_aftermath(state)`，冪等。
-  - 不陳舊：結清在世界前進之前 ⇒ N、E、居民狀態都是結算當下的值。
+  - **結清點＝推進的第一顆 tick 裡、玩家指令消化之後、世界系統之前**（R² 第二輪必修）：玩家按「殺傷兵」是指令、走佇列，在下一顆 tick 由 `_consume_player_commands`（sim_runner.gd:646-652，`_step1_advance_time` 之後立刻消化）執行——結清若放在 `request_advance`，會先把 pending 清成放走、隨後玩家的「殺」被 precheck 拒絕＝玩家的決定被吃掉。⇒ `request_advance` 只負責要推進、不結清；`_advance_tick_body` 在指令消化之後呼一支 `PlayerCommandSystem.settle_pending_aftermath(state)`（冪等；pending 已被指令清掉就什麼都不做）。追擊、居民同理。
+  - 不陳舊：結清仍在世界系統之前 ⇒ N、E、居民狀態都是結算當下的值。
+  - **戰後 overlay 的關閉鍵不得同時被主畫面當推進鍵**：overlay 顯示中主畫面 `_input` 直接 return（text_ui_main.gd:402-409）；若引擎把關閉 overlay 的那一鍵（例 X）在 overlay 隱藏後又廣播給主畫面，它就是一次推進 ⇒ 結清 ⇒ 玩家連選項都沒看到就放走。關閉 overlay 的那一鍵要 `set_input_as_handled`（按 Q 第二刀戰後一鍵只派一次同一個修法，與回饋 #2 的戰後那一拍共用重現）。
   - 無軟鎖：沒有任何狀態會擋推進；precheck 全假時被動選項仍成立。
   - 與 choose_heir／game_over：玩家領袖戰死 ⇒ choose_heir 強制事件與 pending 同時成立時，pending 照常列在動作列（新附身者決定）；game_over ⇒ `settle_pending_aftermath` 以被動選項結清，不擋結束畫面。
-  - 無玩家世界／observer_bridge.gd:32 強制 draw 路：pending 只在 `player_id≠-1` 且玩家為留場方／攻佔方時成立，不受影響。
+  - 無玩家世界／observer_bridge.gd:32 強制 draw 路／**有玩家世界裡的 NPC 對 NPC 戰**：pending 只在 `player_id≠-1` 且玩家為留場方／攻佔方時成立，三者都不成立 pending（各一個反向格）。
 - 受影響床（實作端照實列在交件信）：`terminal_e2e_bed` BATTLE 系列（戰後繼續推進——推進會先結清，斷言句子可能多一行）、`ui_flow_test` 戰後流程、任何戰後還推進的床。
 
 ### 3. 追擊（第 2 步之後）
@@ -107,9 +108,12 @@
 ## 驗收（新床 `battle_aftermath_bed.gd`，acceptance，註冊表登一列；各格修前紅除註明）
 - A1 事件：玩家勝／玩家敗／雙方同 tick 全失能（result=attacker_win、零俘虜）／野獸 四場 ⇒ 各一則 `combat_end` 玩家事件，含雙方死傷（per-encounter 比較）；反向格：observer_bridge 強制 draw 路（無玩家）⇒ 不發玩家事件（修前紅）。
 - A2 失能判準：佈置一個血量昏迷、部位全 healthy 的敵方匿名 ⇒ 結算後敗方 wounded 桶含它（修前紅）。
-- A3 未決推進＝不處置：玩家勝後四項都列；不選直接推進 ⇒ 第一個 tick 前結清為放走（N 人留在敗方 wounded）、結果行說明；X／空白／G／L／PlayerRepl 五條推進入口各一格都走同一結清；推進不被拒（無軟鎖）。
+- A3 未決推進＝不處置：玩家勝後四項都列；不選直接推進 ⇒ 第一顆 tick 的指令消化之後、世界系統之前結清為放走（N 人留在敗方 wounded）、結果行說明；X／空白／G／L／PlayerRepl 五條推進入口各一格都走同一結清；推進不被拒（無軟鎖）。
+- A3b 決定不被吃掉：按「殺傷兵」後立刻按 X ⇒ 結果是殺（負對照：結清放回 request_advance ⇒ 結果變放走 ⇒ 紅）。追擊、居民各一格同型。
+- A3c overlay 關閉鍵：用引擎層注入（`Input.parse_input_event` 類，不是 PlayerRepl——它一鍵一派）送「關閉戰後 overlay 的鍵＝推進鍵」⇒ pending 仍在、選項仍列、世界沒前進（與回饋 #2 戰後那一拍共用重現）。
+- A3d 反向：無玩家世界、observer 強制 draw、有玩家世界的 NPC 對 NPC 戰 ⇒ 不成立 pending。
 - A4 殺：wounded 桶減 N、人口減 N；記名失能者出隊。
-- A5 俘：captive_groups 增 k、敗方 wounded 減 k；k＝min(N, guard_budget)；超量者仍在敗方 wounded；事件寫放走數。
+- A5 俘：captive_groups 增 k、敗方 wounded 減 k；k＝min(N, captive_room)；超量者仍在敗方 wounded；事件寫放走數。
 - A6 守恆：A4／A5／放 三條各算 Σ 敗方人口變化 ＝ 殺＋俘，任何人不從兩邊同時消失。
 - A7 玩家俘虜待遇：30 天內 manpower 三條讀人格路徑（decide_treatment／_decide_guard_ratio／_enforce_guard_cap 的人格分支）對玩家 holder 呼叫 0 次（各一個 tap）；group.treatment 只在玩家指令時變；負對照放回 decide_treatment ⇒ 紅。
 - A7b 容量一支：玩家俘 k 人（k＝captive_room，接近上限）後推 3 個 captive cadence ⇒ captive 總數不變（除缺糧物理）、無「苛用」「GuardCap」輸出、無 breakaway 隊、`asm.guardcap_player_excess`＝0；負對照：捕獲改回 pop_cap 公式 ⇒ A7b 紅。

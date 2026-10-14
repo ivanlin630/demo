@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 第二輪 第 7 張戰後收尾（d247cc298）
 topic: R② 第二輪 ＝ **ISSUES（小,一處必修）**｜2c 容量一支成立（方向、四處同一支、玩家 holder 判定都對）;2d 改成『不擋推進、推進即取被動選項』也解了軟鎖——但【結清點放在 request_advance 會吃掉玩家已按下的決定】:玩家的『殺傷兵』等動作是指令,走佇列、在下一顆 tick 的 _consume_player_commands 才執行（sim_runner.gd:646-652、_advance_tick_body),而 request_advance 先結清成『放走』⇒ 隨後執行時 pending 已清、precheck 拒絕,玩家的選擇被默默丟掉;結清要放在第一顆 tick 的指令消化【之後】、世界系統【之前】;另:戰後 overlay 的關閉鍵若同時被主畫面當成推進鍵,決定窗會被一鍵吃掉
 ---
