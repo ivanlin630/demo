@@ -113,27 +113,18 @@ func process(state: WorldState, team_ids: Array,
 			if _dbg_merge: Probe.bump("merge.mv_no_target")   # DIAG：move_target 未設
 			continue
 		if _dbg_merge: Probe.bump("merge.mv_moving")   # DIAG：TASK_MERGE 隊實際行軍
-		team.move_tick_acc += elapsed_ticks
 		var old_target: Vector2i = team.move_target
-		# 多格迴圈：acc>=cost 逐格步進、每步 acc-=cost 保餘數（疏非慢非笨）。
-		# max_steps 上限 = elapsed/MIN_MOVE_TICKS（cost 恒 clamp≥MIN → 防病態無限迴圈）。
-		var max_steps: int = maxi(1, elapsed_ticks / MIN_MOVE_TICKS)
-		var did_move: bool = false
-		var steps: int = 0
-		while steps < max_steps:
-			var cost: int = _move_cost(state, team, time_mult)   # 每格重算（地形變）
-			if team.move_tick_acc < cost:
-				break
-			team.move_tick_acc -= cost
-			if _step_team(state, team):
-				did_move = true
-			steps += 1
+		# ★單窗算術在 run_window（估算器 estimate_travel_ticks 呼叫同一支；spec 2026-10-13-move-eta-same-ruler 改法 1）
+		#   這裡給它的是【會寫狀態】的兩個提供者：成本＝腳下真地形、步進＝_step_team（改位置、抵達、Probe）
+		var cost_fn := func() -> int:
+			return _move_cost(state, team, time_mult)   # 每格重算（地形變）
+		var step_fn := func() -> Dictionary:
+			var m: bool = _step_team(state, team)
 			# 到達/stuck → _step_team 清 move_target → 停（既有到點/相遇語意保留）
-			if team.move_target == Vector2i(-1, -1):
-				break
-		# cost 上限節流下 acc 可能仍 ≥cost（本 window 已步不動）→ clamp 至 MAX_MOVE_TICKS
-		# 只留最多一格昂貴地形的餘數，丟不可能兌現的超額（非丟合法零頭）。
-		team.move_tick_acc = mini(team.move_tick_acc, MAX_MOVE_TICKS)
+			return {"moved": m, "done": team.move_target == Vector2i(-1, -1)}
+		var win: Dictionary = run_window(team.move_tick_acc, elapsed_ticks, cost_fn, step_fn)
+		team.move_tick_acc = int(win["acc"])
+		var did_move: bool = bool(win["moved"])
 		if did_move:
 			moved.append(tid)
 			# arrived = 走到原 move_target（_step_team 內到達會清 move_target）
@@ -144,6 +135,93 @@ func process(state: WorldState, team_ids: Array,
 				if Probe.enabled and old_target in team.strategic_assignments.values():
 					Probe.bump("strat.expand_reached")
 	return { "arrived": arrived, "moved": moved }
+
+# ══ 單隊單窗口的移動算術（process 與估算器共用；spec 2026-10-13-move-eta-same-ruler 改法 1）══════════════
+#   acc += elapsed；acc ≥ 這一格成本就扣掉、走一步；走到／卡住（step 回 done）或步數到上限就停；餘量夾到 MAX
+#   ★兩個提供者決定它是【真走】還是【影子走】：
+#     cost_fn() -> int                 這一步的成本（腳下那格）
+#     step_fn() -> {moved, done}       走一步；done＝目標被清（到達或卡住）
+#   ★本體不讀不寫任何狀態 ⇒ 估算與物理只差在提供者，不差在算術
+static func run_window(acc: int, elapsed_ticks: int, cost_fn: Callable, step_fn: Callable) -> Dictionary:
+	acc += elapsed_ticks
+	# 多格迴圈：acc>=cost 逐格步進、每步 acc-=cost 保餘數（疏非慢非笨）。
+	# max_steps 上限 = elapsed/MIN_MOVE_TICKS（cost 恒 clamp≥MIN → 防病態無限迴圈）。
+	var max_steps: int = maxi(1, elapsed_ticks / MIN_MOVE_TICKS)
+	var moved: bool = false
+	var done: bool = false
+	var steps: int = 0
+	while steps < max_steps:
+		var cost: int = cost_fn.call()
+		if acc < cost:
+			break
+		acc -= cost
+		var r: Dictionary = step_fn.call()
+		if bool(r["moved"]):
+			moved = true
+		steps += 1
+		if bool(r["done"]):
+			done = true
+			break
+	# cost 上限節流下 acc 可能仍 ≥cost（本 window 已步不動）→ clamp 至 MAX_MOVE_TICKS
+	# 只留最多一格昂貴地形的餘數，丟不可能兌現的超額（非丟合法零頭）。
+	return {"acc": mini(acc, MAX_MOVE_TICKS), "steps": steps, "moved": moved, "done": done}
+
+# ══ 移動估算器（spec 2026-10-13-move-eta-same-ruler 改法 2／2b）══════════════════════════════════════
+#   問：這支隊現在（start_tick 下令）走到 target 要幾 tick？
+#   答法：從下令當下的真值（位置、move_tick_acc）出發，逐個移動窗口呼叫 run_window ——【同一支算術】
+#     ①窗口：移動在整點跑（sim_runner 的 hour 組）；指令在推時間之後、系統之前消化 ⇒ 下令 tick 本身是整點時第一窗就是它
+#     ②晝夜倍率：每個窗口邊界 tick 取一次（同物理的取樣點），不是每格
+#     ③成本與步進：同物理的 move_cost_at_pure／next_step_pure，只是地形換成這支隊的 belief（未知格當平原 ⇒ 下界）
+#   ★不呼叫 _step_team（它改位置、占用、抵達、Probe）；belief 找路不寫共用快取（PathSystem.find_path_belief）
+#   ★凍住的第二階輸入（疲勞、重量、人口）列在 residual_inputs —— 路上變了就是殘差，床印出來
+#   回 {ticks, unknown_on_path, residual_inputs, path（影子走過的格，含起點；算得出時才有）}；算不出 ⇒ ticks＝-1 加 reason（no_path｜over_cap，後者帶 cap_ticks）
+static func estimate_travel_ticks(state: WorldState, team: TeamData, target: Vector2i, start_tick: int) -> Dictionary:
+	var residual: Dictionary = {"fatigue": team.fatigue, "weight": calc_total_weight_pure(team), "population": team.population}
+	if team.tile_pos == target:
+		return {"ticks": 0, "unknown_on_path": false, "residual_inputs": residual}
+	var known: Dictionary = belief_known_tiles(state, team)
+	var plan: Dictionary = PathSystem.find_path_belief(state, team.tile_pos, target, known)
+	if (plan["path"] as Array).is_empty():
+		return {"ticks": -1, "reason": "no_path", "unknown_on_path": false, "residual_inputs": residual}
+	var cad: int = SimRunner.NEAR_CADENCE
+	# 上限：一天的窗口數 × 路徑長（最貴的一格＝MAX_MOVE_TICKS，夜裡也在這之內走得完）⇒ 超過就說超過，不靜默截斷
+	var max_windows: int = (WorldState.TICKS_PER_DAY / cad) * maxi(1, (plan["path"] as Array).size() - 1)
+	var sh: Dictionary = {"pos": team.tile_pos, "mult": 1.0, "unknown": false, "stuck": false, "path": [team.tile_pos]}
+	var cost_fn := func() -> int:
+		return move_cost_at_pure(state, team, sh["pos"], float(sh["mult"]), null, known)
+	var step_fn := func() -> Dictionary:
+		var cur: Vector2i = sh["pos"]
+		var nxt: Vector2i = next_step_pure(state, cur, target, known)
+		if nxt == cur:
+			sh["stuck"] = true
+			return {"moved": false, "done": true}
+		sh["pos"] = nxt
+		(sh["path"] as Array).append(nxt)
+		if not known.has(nxt.x * 1000 + nxt.y):
+			sh["unknown"] = true
+		return {"moved": true, "done": nxt == target}
+	var acc: int = team.move_tick_acc
+	var w: int = ((start_tick + cad - 1) / cad) * cad
+	for _i in range(max_windows):
+		sh["mult"] = DayNightSystem.speed_mult_at(w)
+		var win: Dictionary = run_window(acc, cad, cost_fn, step_fn)
+		acc = int(win["acc"])
+		if bool(sh["stuck"]):
+			return {"ticks": -1, "reason": "no_path", "unknown_on_path": bool(sh["unknown"]), "residual_inputs": residual}
+		if bool(win["done"]):
+			return {"ticks": w - start_tick, "unknown_on_path": bool(sh["unknown"]), "residual_inputs": residual, "path": sh["path"]}
+		w += cad
+	return {"ticks": -1, "reason": "over_cap", "cap_ticks": w - start_tick, "unknown_on_path": bool(sh["unknown"]), "residual_inputs": residual}
+
+# 這支隊知道地形的格：記得的（team_tile_known）＋現在看得到的（同 PlayerQueryApi.tile_knowledge 的兩源）
+static func belief_known_tiles(state: WorldState, team: TeamData) -> Dictionary:
+	var known: Dictionary = (state.team_tile_known.get(team.team_id, {}) as Dictionary).duplicate()
+	var r: int = VisionSystem.vision_range(state, team)
+	for dq in range(-r, r + 1):
+		for dr in range(maxi(-r, -dq - r), mini(r, -dq + r) + 1):
+			var p: Vector2i = team.tile_pos + Vector2i(dq, dr)
+			known[p.x * 1000 + p.y] = true
+	return known
 
 # ★★★static pure 核心（2026-09-09）：決策端要算「這支隊的真實每格成本」，
 #   而它拿不到 MovementSystem 實例（per-candidate .new() 是既有 perf 禁忌）。
@@ -239,10 +317,15 @@ static func slowest_tiles_per_day() -> float:
 	return float(WorldState.TICKS_PER_DAY) / float(maxi(MAX_MOVE_TICKS, 1))   # bare-tick-ok: 單位換算分子
 
 static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, bumps) -> int:
+	return move_cost_at_pure(state, team, team.tile_pos, time_mult, bumps)
+
+# ★「在某格」版（spec 2026-10-13-move-eta-same-ruler 改法 1）：估算器的影子位置不是 team.tile_pos
+#   known（可省）：給了就只認裡面的格的地形，其餘當平原（估算器的 belief 版；物理不給）
+static func move_cost_at_pure(state: WorldState, team: TeamData, pos: Vector2i, time_mult: float, bumps, known = null) -> int:
 	var speed: float = team_speed_pure(state, team, bumps) * time_mult
-	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+	var tile_id: int = pos.x * 1000 + pos.y
 	if state.world.tiles.has(tile_id):
-		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
+		var terrain: String = _terrain_seen(state, tile_id, known)
 		if bumps != null: bumps.append("rootdiff.TERRAIN_SPEED_MULT")
 		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
 	# 疲勞懲罰（★票 T §7：唯一一條曲線在 SimRunner.stamina_factor）
@@ -255,12 +338,17 @@ static func move_cost_pure(state: WorldState, team: TeamData, time_mult: float, 
 	# 車輛地形懲罰
 	var wagons: int = get_effective_wagons_pure(team)
 	if wagons > 0:
-		var tile_id2: int = team.tile_pos.x * 1000 + team.tile_pos.y
+		var tile_id2: int = pos.x * 1000 + pos.y
 		var tile2 = state.world.tiles.get(tile_id2)
-		var terrain2: String = tile2.terrain if tile2 else "plains"
+		var terrain2: String = _terrain_seen(state, tile_id2, known) if tile2 else "plains"
 		if bumps != null: bumps.append("rootdiff.WAGON_TERRAIN_MULT")
 		speed *= WAGON_TERRAIN_MULT.get(terrain2, 1.0)
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
+
+static func _terrain_seen(state: WorldState, tile_id: int, known) -> String:
+	if known != null and not (known as Dictionary).has(tile_id):
+		return "plains"
+	return (state.world.tiles[tile_id] as HexTileData).terrain
 
 # 執行端入口：算完把 sink 裡的計數倒進 Probe（★Probe 關掉時傳 null，零配置）
 func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
@@ -376,7 +464,12 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 
 # A* 下一步：回傳 path[1]（下一格）；無路徑回原地
 func _calc_next_step(state: WorldState, from: Vector2i, to: Vector2i) -> Vector2i:
-	var result: Dictionary = PathSystem.find_path(state, from, to)
+	return next_step_pure(state, from, to)
+
+# ★static 版（估算器從影子位置呼叫）：known 給了 ⇒ belief 找路（不寫共用快取）；物理不給 ⇒ 照舊 find_path
+static func next_step_pure(state: WorldState, from: Vector2i, to: Vector2i, known = null) -> Vector2i:
+	var result: Dictionary = PathSystem.find_path(state, from, to) if known == null \
+		else PathSystem.find_path_belief(state, from, to, known)
 	if result.path.is_empty(): return from
 	if result.path.size() > 1: return result.path[1]
 	return result.path[0]

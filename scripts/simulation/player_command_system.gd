@@ -2322,9 +2322,20 @@ func move_to(state: WorldState, target_pos: Vector2i) -> Dictionary:
 		return { "ok": false, "msg": "無法抵達 (%d,%d)：%s" % [target_pos.x, target_pos.y, String(chk["reason"])] }
 	if not TaskArbiter.try_set(state, pt, TeamData.TASK_TRAVEL, target_pos, TaskArbiter.PRIO_PLAYER, "player_move"):   # gate-ok：玩家指令（PRIO_PLAYER）
 		return { "ok": false, "msg": "不能移動：現在有更急的事" }   # ★不准靜默（spec ①）；措辭同休息那句
-	# ★M ①：結果句說預計多久（讀既有移動成本 PathSystem.eta_ticks；1 tick ＝ 1 分鐘）
-	var eta: int = PathSystem.eta_ticks(pt, float(FactionAISystem._hex_dist(pt.tile_pos, target_pos)))
-	return { "ok": true, "msg": "開始走向 (%d,%d)，預計 %d 分鐘" % [target_pos.x, target_pos.y, eta] }
+	# ★M ①：結果句說預計多久（1 tick ＝ 1 分鐘）
+	#   ★讀 MovementSystem.estimate_travel_ticks：同一份移動算術逐窗走一遍（spec 2026-10-13-move-eta-same-ruler）；
+	#     地形用這支隊知道的（未知格當平原）⇒ 路上有沒去過的格時是下界，句子說「至少」
+	var est: Dictionary = MovementSystem.estimate_travel_ticks(state, pt, target_pos, state.world.current_tick)
+	return { "ok": true, "msg": "開始走向 (%d,%d)，%s" % [target_pos.x, target_pos.y, travel_eta_phrase(est)] }
+
+# 估算結果 → 結果句的那半句
+static func travel_eta_phrase(est: Dictionary) -> String:
+	var ticks: int = int(est.get("ticks", -1))
+	if ticks >= 0:
+		return ("至少 %d 分鐘" if bool(est.get("unknown_on_path", false)) else "預計 %d 分鐘") % ticks
+	if String(est.get("reason", "")) == "over_cap":
+		return "預計超過 %d 分鐘" % int(est.get("cap_ticks", 0))
+	return "預計時間算不出（照你知道的地圖找不到路）"
 
 func cancel_move(state: WorldState) -> Dictionary:
 	var pt: TeamData = get_player_team(state)
