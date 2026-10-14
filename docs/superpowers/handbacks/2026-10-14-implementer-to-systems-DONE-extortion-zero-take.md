@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 勒索零所得（拿到 0 或近 0 不得說「完成」）
 topic: 請 merge fix/extortion-zero-take 7e99468fc（已併 main 21d48b910）｜全電池釘死 7e99468fc：124／124 BATTERY_RC=0（3797s）
 ---
