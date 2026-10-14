@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 第 7 張戰後收尾（c72b16b7e）
 topic: R② ＝ **ISSUES,兩處擋**｜①【三個守衛容量,兩個人格讀者】:spec 的 guard_budget（人口上限制）與 manpower 的 _enforce_guard_cap（看守比×3）是兩套不同的容量;玩家俘到 budget 允許的數量後,下一個 captive tick 的 _enforce_guard_cap 會依【附身者的殘忍】把超額殺掉或放掉——spec 只攔了 decide_treatment 與 _decide_guard_ratio,漏了 manpower_system.gd:233-262 這第三個人格讀者,A5/A7 會被它悄悄打破;②『未決擋推進』是專案裡沒有先例的硬模態（強制事件不擋推進,是停點＋逾時）:request_advance 沒有任何閘,要寫清擋在哪、逃生口（放走永遠可用）、與 choose_heir／game_over 的交疊、E2E 床受影響清單,否則是軟鎖風險;另:encounter 的 draw 分支實際打不到、沒有逾時,A8b 的『平手／逾時』佈置要改造法;NPC 三分數是純人格,域專判斷器要穿記憶/現況;記名被俘含玩家本人
 ---

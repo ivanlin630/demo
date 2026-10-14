@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 小修（併真玩小修）＋動詞目錄一列：拔擢匿名→記名
 topic: 用戶問「提拔匿名玩家能一直提，NPC 呢」；核：代價已在（記名薪資制＋欠薪掉忠誠），缺的是①拔擢當下沒告訴玩家他現在餉 0、期望餉 N ②玩家拔擢路徑跳過 NPC 那段初始忠誠（感激／不滿），兩個身體
 ---
