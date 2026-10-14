@@ -1,0 +1,8 @@
+M  scripts/data/team_data.gd M  scripts/simulation/equipment_system.gd M  scripts/simulation/player_api_mapper.gd M  scripts/simulation/player_command_system.gd M  scripts/ui/sim_bridge.gd M  scripts/ui/text_ui_main.gd 
+A1 e9ad7d8b2 ro [WFP] final_fp = 8e0287d157800b5de327ba9f54b2901a
+1
+A1mask e9ad7d8b2 ro [WFP] final_fp = aad02d92b63a67f2b1a44084934c383a
+M  scripts/simulation/diplomatic_ai_system.gd 
+P4only e9ad7d8b2 ro [WFP] final_fp = aad02d92b63a67f2b1a44084934c383a
+
+[exited with code 0]

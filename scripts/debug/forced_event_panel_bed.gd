@@ -344,6 +344,11 @@ func _test_p9_proposal_strings_cross_source() -> void:
 			var fb: String = String(p2[p2.size() - 2]) if p2.size() >= 2 else ""
 			if fb != "" and not a_set.has(fb):
 				a_set.append(fb)
+	# ★通商提案暫停中（defer token trade-proposal-paused-until-social-layer）：寄件端暫時不寫 propose_trade，
+	#   ★而 token 落地就恢復、回應端那一支保留 ⇒ 它仍屬「寄件端會寫的」集合（暫停那一行有 token 才算，不是手抄）
+	if not a_set.has("propose_trade") and FileAccess.get_file_as_string(
+			"res://scripts/simulation/diplomatic_ai_system.gd").contains("trade-proposal-paused-until-social-layer"):
+		a_set.append("propose_trade")
 	# ★order_task 的具體值走常數（全庫唯一非空賦值）
 	if not a_set.has(TeamData.TASK_TRIBUTE_OFFER):
 		a_set.append(TeamData.TASK_TRIBUTE_OFFER)
