@@ -1,5 +1,6 @@
 extends SceneTree
 # @bed-kind: acceptance
+# slice: 附身隊後續三件 乙（spec 2026-10-13-possessed-team-followups-HOW）
 # 附身隊後續 乙（spec 2026-10-13-possessed-team-followups-HOW §乙；藍圖裁「開始挨餓」進推進停點）
 #   B1  玩家隊糧（隊上與糧倉）寫死 0，按 X（推進到事件）⇒ 停在 famine_crossed 那一 tick，結果行＝「存糧吃完，開始挨餓（再 N 天…）」
 #   B2  別隊挨餓 ⇒ 推進不停（停點只看主體含玩家隊）

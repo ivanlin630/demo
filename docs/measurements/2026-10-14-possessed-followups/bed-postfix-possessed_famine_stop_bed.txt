@@ -1,0 +1,32 @@
+# 原始輸出：pf3-possessed_famine_stop_bed.txt｜只留 [TREE]、判準行（PASS／FAIL）、床／量測印的數值行與段落標題；截掉模擬 log（[ 開頭）與開局 MoneyGenesis 對帳區塊（「= Σpop」起四行）｜修後（commit 6a0337e20 之前的工作樹＝同內容）
+[TREE] path=A:\GDS\demo\.worktrees\pf commit=08a6a45cb clean=NO code-dirty=8 codehash=7C33A59093EF
+[TREE]   *** measuring the WORKING TREE, not commit 08a6a45cb ***
+[TREE]    M scripts/data/world_state.gd
+[TREE]    M scripts/debug/possessed_orders_bed.gd
+[TREE]    M scripts/simulation/coin_treasury.gd
+[TREE]    M scripts/simulation/faction_ai_system.gd
+[TREE]    M scripts/simulation/order_system.gd
+[TREE]    M scripts/simulation/world_events.gd
+[TREE]   ?? scripts/debug/possessed_famine_stop_bed.gd
+[TREE]   ?? scripts/debug/possessed_writers_bed.gd
+=== possessed_famine_stop：自家隊開始挨餓  推進停下 ===
+── B1 玩家隊糧寫死 0  按 X 停在開始挨餓那一 tick ──
+  PASS: ★B1 地板：玩家隊附身、尚未挨餓
+   停點 kind=famine_crossed tick=96｜挨餓事件 tick=96｜其他停點 []｜結果行「Team15：存糧吃完，開始挨餓（再 7 天開始有人餓死）」
+  PASS: B1 停點是 famine_crossed
+  PASS: B1 停在挨餓事件那一 tick
+  PASS: B1 結果行＝「<隊>：存糧吃完，開始挨餓（再 7 天開始有人餓死）」（N 讀 FAMINE_GRACE_DAYS）
+── B2 別隊挨餓  推進不停 ──
+  PASS: ★B2 地板：有一支非玩家真隊
+   別隊 T0 famine_days=0.00（挨餓了=true）｜這一天的停點 ["forced_event_arrived"]
+  PASS: ★B2 地板：別隊真的開始挨餓
+  PASS: B2 停點裡沒有 famine_crossed
+── B3 已在挨餓中再推進  不重複停 ──
+  PASS: ★B3 地板：第一次停在 famine_crossed、famine_days > 0
+   第二次按 X：停點 kind= 推進 1135 tick｜famine_days=1.04
+  PASS: B3 挨餓中（一天內仍吃不到）不再停在 famine_crossed
+── B3b 糧一日量 1.2 倍分兩次餵  停點次數＝耗盡次數＝2 ──
+   一日量 8.0｜每次餵 4.8×2｜耗盡（famine_crossed 事件）2 次｜停點 2 次｜其他停點 []
+  PASS: ★B3b 地板：耗盡次數＝2（兩次餵都吃完）
+  PASS: B3b 停點次數＝耗盡次數＝2（不節流）
+=== possessed_famine_stop DONE === 到場 4／4 errors: 0

@@ -1,0 +1,57 @@
+# 原始輸出：pf4-writers-postfix.txt｜同 writers-prefix 截法（只留 [TREE]、判準行、數值行與段落標題；截掉 [ 開頭模擬 log 與 MoneyGenesis 對帳區塊）｜丙 寫入觀察（修後：丙三支 possessed return 已加）× seed 1337,2 × lead／member；樹 7b2864996
+[TREE] path=A:\GDS\demo\.worktrees\pf commit=7b2864996 clean=yes codehash=clean
+=== possessed_writers_census：附身 30 天、附身隊非 task 欄位的寫入 ===
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+── seed 1337｜lead｜tick 0→43200｜附身隊 T15 possessed=true｜換隊 0｜遭遇 draw 0｜凍結 -1 ──
+   armor_config                       寫    719｜變     1｜["t95 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso"]
+   equip_order                        寫    719｜變   294｜["t150 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t186 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t246 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t320 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t400 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee"]
+   guard_ratio                        寫    719｜變   189｜["t95 0.2→0.305", "t186 0.305→0.3575", "t246 0.3575→0.395", "t320 0.395→0.3275", "t400 0.3275→0.3725"]
+   mobilized_fraction                 寫    719｜變   189｜["t95 0→0.36", "t186 0.36→0.465", "t246 0.465→0.54", "t320 0.54→0.405", "t400 0.405→0.495"]
+   occupying_outpost_since            寫    719｜變     0｜[]
+   prosperity_target_id               寫    719｜變     0｜[]
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+── seed 1337｜member（玩家移入 T0，隊長 0）｜tick 0→43200｜附身隊 T0 possessed=true｜換隊 0｜遭遇 draw 0｜凍結 -1 ──
+   armor_config                       寫    719｜變   719｜["t59 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t174 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t204 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t272 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t329 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso"]
+   equip_order                        寫    719｜變   718｜["t174 { \"melee_low\": 4, \"melee→{ \"melee_low\": 0, \"melee", "t204 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee", "t272 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee", "t329 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee", "t402 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee"]
+   guard_ratio                        寫    719｜變   375｜["t59 0.2→0.26848923712969", "t174 0.26848923712969→0.31394378258423", "t491 0.31394378258423→0.3025801462206", "t638 0.3025801462206→0.29121650985696", "t701 0.29121650985696→0.2775801462206"]
+   mobilized_fraction                 寫    719｜變   375｜["t59 0→0.28497572690248", "t174 0.28497572690248→0.37588481781158", "t491 0.37588481781158→0.3531575450843", "t638 0.3531575450843→0.33043027235703", "t701 0.33043027235703→0.3031575450843"]
+   occupying_outpost_since            寫    719｜變     0｜[]
+   persist_strength                   寫    739｜變     0｜[]
+   prosperity_target_id               寫    719｜變     0｜[]
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+── seed 2｜lead｜tick 0→43200｜附身隊 T15 possessed=true｜換隊 0｜遭遇 draw 0｜凍結 -1 ──
+   armor_config                       寫    719｜變     1｜["t95 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso"]
+   equip_order                        寫    719｜變   294｜["t150 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t186 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t246 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t320 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee", "t400 { \"melee_low\": 2, \"melee→{ \"melee_low\": 0, \"melee"]
+   guard_ratio                        寫    719｜變   178｜["t95 0.2→0.305", "t150 0.305→0.29", "t186 0.29→0.3425", "t246 0.3425→0.3725", "t320 0.3725→0.365"]
+   mobilized_fraction                 寫    719｜變   178｜["t95 0→0.36", "t150 0.36→0.33", "t186 0.33→0.435", "t246 0.435→0.495", "t320 0.495→0.48"]
+   occupying_outpost_since            寫    719｜變     0｜[]
+   prosperity_target_id               寫    719｜變     0｜[]
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+── seed 2｜member（玩家移入 T0，隊長 0）｜tick 0→43200｜附身隊 T0 possessed=true｜換隊 0｜遭遇 draw 0｜凍結 -1 ──
+   armor_config                       寫    719｜變   719｜["t59 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t174 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t204 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t272 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso", "t329 { \"head\": \"none\", \"torso→{ \"head\": \"none\", \"torso"]
+   equip_order                        寫    719｜變   718｜["t174 { \"melee_low\": 4, \"melee→{ \"melee_low\": 0, \"melee", "t204 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee", "t272 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee", "t329 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee", "t402 { \"melee_low\": 5, \"melee→{ \"melee_low\": 0, \"melee"]
+   guard_ratio                        寫    719｜變   344｜["t59 0.2→0.26848923712969", "t174 0.26848923712969→0.31394378258423", "t491 0.31394378258423→0.3025801462206", "t638 0.3025801462206→0.29121650985696", "t701 0.29121650985696→0.28667105531151"]
+   mobilized_fraction                 寫    719｜變   344｜["t59 0→0.28497572690248", "t174 0.28497572690248→0.37588481781158", "t491 0.37588481781158→0.3531575450843", "t638 0.3531575450843→0.33043027235703", "t701 0.33043027235703→0.32133936326612"]
+   occupying_outpost_since            寫    719｜變     0｜[]
+   persist_strength                   寫    737｜變     0｜[]
+   prosperity_target_id               寫    719｜變     0｜[]
+── 彙總（各種子相加）──
+   lead 有寫：prosperity_target_id×1438, occupying_outpost_since×1438, mobilized_fraction×1438, equip_order×1438, armor_config×1438, guard_ratio×1438
+   lead 函式層：（0）
+   lead 命中 0：decision_eval_next_tick, previous_task, current_option, order_target_id, order_task, survival_committed_option, survival_committed_tick, survival_committed_food, ambition_rung, residency_eval_next_tick, pending_owner_change_tick, crisis_released_task, crisis_released_until, crisis_committed_tick, crisis_committed_food, persist_strength, last_decision_tick
+   member 有寫：prosperity_target_id×1438, occupying_outpost_since×1438, mobilized_fraction×1438, equip_order×1438, armor_config×1438, guard_ratio×1438, persist_strength×1476
+   member 函式層：（0）
+   member 命中 0：decision_eval_next_tick, previous_task, current_option, order_target_id, order_task, survival_committed_option, survival_committed_tick, survival_committed_food, ambition_rung, residency_eval_next_tick, pending_owner_change_tick, crisis_released_task, crisis_released_until, crisis_committed_tick, crisis_committed_food, last_decision_tick
+=== possessed_writers_census DONE ===

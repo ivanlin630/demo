@@ -1,0 +1,32 @@
+# 原始輸出：pf3-possessed_orders_bed.txt｜只留 [TREE]、判準行（PASS／FAIL）、床／量測印的數值行與段落標題；截掉模擬 log（[ 開頭）與開局 MoneyGenesis 對帳區塊（「= Σpop」起四行）｜修後（工作樹＝6a0337e20 之前的改動，A2 版；到場點名加在 7b2864996）
+[TREE] path=A:\GDS\demo\.worktrees\pf commit=08a6a45cb clean=NO code-dirty=8 codehash=7568F56CF548
+[TREE]   *** measuring the WORKING TREE, not commit 08a6a45cb ***
+[TREE]    M scripts/data/world_state.gd
+[TREE]    M scripts/debug/possessed_orders_bed.gd
+[TREE]    M scripts/simulation/coin_treasury.gd
+[TREE]    M scripts/simulation/faction_ai_system.gd
+[TREE]    M scripts/simulation/order_system.gd
+[TREE]    M scripts/simulation/world_events.gd
+[TREE]   ?? scripts/debug/possessed_famine_stop_bed.gd
+[TREE]   ?? scripts/debug/possessed_writers_bed.gd
+=== possessed_orders：AI 不替附身隊掛單；到期退貨與玩家自己的單照舊 ===
+── A1 推 1 天：附身隊 0 張新 AI 單；非附身隊 >0 ──
+  PASS: ★母體地板：玩家隊 possessed＝真、對照隊存在且非附身
+   附身隊 T15 新單 0 []｜對照 T0 新單 6 ["sell goods", "sell material", "sell food", "buy weapon_melee_low", "buy weapon_ranged_low", "buy tools"]
+  PASS: A1 附身隊推 1 天：新增 AI 單 0
+  PASS: A1 對照：非附身隊同條件 >0（條件真的會觸發掛單）
+── A1b 直呼 tick_team_orders：附身隊 0；非附身隊 >0 ──
+   附身隊 0→0｜對照 0→6
+  PASS: A1b 附身隊：tick_team_orders 不掛新單
+  PASS: A1b 對照：非附身隊掛了單
+── A2 附身前的寄賣單：附身那一刻撤下（殘單量測 >20% 線）、押貨落待領、押貨帳零違反、貨總量守恆 ──
+  PASS: ★母體地板：附身前那張單真的押了貨（escrowed）、對帳母體非空且零違反
+   押貨 10.0｜附身後 possessed=true 單還在=false｜押貨帳還在=false｜貨總量 400.0→400.0｜audit 前 { "orphan_escrow": 0, "orphan_stub": 0, "qty_mismatch": 0, "checked": 1 } 後 { "orphan_escrow": 0, "orphan_stub": 0, "qty_mismatch": 0, "checked": 0 }
+  PASS: A2 附身那一刻：AI 殘單撤下、押貨移出
+  PASS: A2 貨總量守恆（隊上＋押貨＋待領）
+  PASS: A2 撤後押貨帳對帳零違反（checked=0：這張單已出帳，0 是預期）
+  PASS: A2 附身隊 tick_team_orders 之後沒有新的 AI 單
+── A3 玩家自己的掛單照常 ──
+   回傳 { "ok": true, "code": "ok", "message": "", "payload": { "order_id": 1, "kind": "sell", "res": "goods", "qty": 5 } }｜附身隊 active_orders 有那張=true
+  PASS: A3 玩家 post_sell_order 成立、單在附身隊上
+=== possessed_orders DONE === errors: 0
