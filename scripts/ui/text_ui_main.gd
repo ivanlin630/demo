@@ -1622,10 +1622,11 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 	#     都會讓玩家看到的箭頭變或不變（HOW spec §2）。
 	lines.append("────────────────")
 	lines.append("資源:")
-	lines.append("  食:%d%s 幣:%d%s 材:%d%s" % [
-		res.get("food", 0),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
-		res.get("coin", 0),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
-		res.get("material", 0), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
+	# ★食／幣／材按 0.1 顯示（藍圖裁 43817c7d1；與勒索結果句同一支格式器，玩家對帳對得上）
+	lines.append("  食:%s%s 幣:%s%s 材:%s%s" % [
+		ResourceFormat.panel(float(res.get("food", 0))),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
+		ResourceFormat.panel(float(res.get("coin", 0))),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
+		ResourceFormat.panel(float(res.get("material", 0))), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
 	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
 	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
 	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])

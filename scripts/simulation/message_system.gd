@@ -55,7 +55,8 @@ func emit_message(state: WorldState, type: String, description: String,
 			var _v = params[_k]
 			if typeof(_v) == TYPE_INT or typeof(_v) == TYPE_FLOAT:
 				_subjects.append(int(_v))
-	WorldEvents.emit(state, type, _subjects)
+	# ★呼叫端可在 params 帶 `_event_info` 給玩家事件行用（勒索：對象與結果）；沒帶 ⇒ 照舊
+	WorldEvents.emit(state, type, _subjects, true, params.get("_event_info", {}))
 	msg.strength = 1.0
 	msg.params = params
 	state.global_messages.append(msg)

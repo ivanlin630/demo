@@ -384,6 +384,12 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
 				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
 		"intel_arrived":         return _intel_sentence(state, who, info)
+		"extortion":
+			if info.has("aggressor"):
+				var got: String = String(info.get("got", ""))
+				return "%s 勒索 %s：%s" % [_team_name(state, int(info["aggressor"])), _team_name(state, int(info.get("target", -1))),
+					("拿到 " + got) if got != "" else "對方已無可取"]
+			return "%s：勒索" % who
 		"convoy_stranded":       return "%s 的運輸隊回不去，轉為自立" % who
 		"construction_stalled":  return "%s 的工地停擺" % who
 		"construction_abandoned":return "%s 放棄了工地" % who
