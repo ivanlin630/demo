@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪回饋 #5：勒索零所得不說完成
 topic: GO（排在大地圖之後、附身隊三件之前）｜spec docs/superpowers/specs/2026-10-13-extortion-zero-take-HOW.md（R² 已收＋藍圖 0.1 單位裁定）
 ---
