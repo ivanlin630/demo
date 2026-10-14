@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家可見批第 6 張：游標停格即顯示已知（回饋 #4）
 topic: R² 請審 docs/superpowers/specs/2026-10-14-cursor-hover-shows-known-detail-HOW.md
 ---
