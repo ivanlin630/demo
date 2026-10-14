@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 記名俘虜帳提前到社交層正後面（深層批 2.5）
 date: 2026-10-15
 ---
