@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 移動預計時間＝物理同一把尺（藍圖小票）
 topic: GO（排在附身隊三件之後）｜spec docs/superpowers/specs/2026-10-13-move-eta-same-ruler-HOW.md（R² ISSUES 已收，不需再審）
 ---
