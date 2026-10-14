@@ -123,8 +123,8 @@ func _p1_repro() -> void:
 	print("   最終位置 %s｜task %s＠%d｜抵達事件：%s" % [str(pt.tile_pos), pt.current_task, pt.task_priority,
 		str(ms.filter(func(m): return String(m).begins_with("抵達") or String(m).begins_with("停下")))])
 	_check("P1 最終在 (9,0)", pt.tile_pos == Vector2i(9, 0))
-	_check("P1 事件流有「抵達 (9,0)」", ms.has(_arrive_msg(Vector2i(9, 0))))
-	_check("P1 沒有「抵達 (10,2)」", not ms.has(_arrive_msg(Vector2i(10, 2))))
+	_check("P1 事件流有「抵達 (9,0)」", _has_arrive(ms, Vector2i(9, 0)))
+	_check("P1 沒有「抵達 (10,2)」", not _has_arrive(ms, Vector2i(10, 2)))
 	_check("P5c 抵達後 task＝idle、priority 0", pt.current_task == TeamData.TASK_IDLE and pt.task_priority == 0)
 	await _drop(node)
 
@@ -151,7 +151,7 @@ func _p2_two_hex() -> void:
 	_check("★P2 母體地板：目標真的在兩格外", tgt != Vector2i(-1, -1))
 	_check("P2 走到目標", pt.tile_pos == tgt)
 	_check("P2 途中沒有印抵達", early == 0)
-	_check("P2 到了恰一筆「抵達 %s」" % str(tgt), _count_prefix(ms, "抵達") == 1 and ms.has(_arrive_msg(tgt)))
+	_check("P2 到了恰一筆「抵達 %s」" % str(tgt), _count_prefix(ms, "抵達") == 1 and _has_arrive(ms, tgt))
 	await _drop(node)
 
 
@@ -464,3 +464,10 @@ func _p8_injections() -> void:
 # ★與 text_ui_main.gd 的抵達訊息同一個格式字串（不寫死單次字面值：value-key 閘的查表 key 要成對）
 func _arrive_msg(p: Vector2i) -> String:
 	return "抵達 (%d,%d)" % [p.x, p.y]
+
+# ★抵達句後面接「（走了 N 分鐘）」（spec 2026-10-13-move-eta-same-ruler 改法 4）⇒ 比「抵達 (q,r)」整句或後接「（」
+func _has_arrive(ms: Array, p: Vector2i) -> bool:
+	for m in ms:
+		if String(m) == _arrive_msg(p) or String(m).begins_with(_arrive_msg(p) + "（"):
+			return true
+	return false

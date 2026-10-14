@@ -6,14 +6,22 @@ func get_time_of_day(state: WorldState) -> float:
 		float(WorldState.TICKS_PER_DAY)
 
 func get_time_period(state: WorldState) -> String:
-	var t: float = get_time_of_day(state)
+	return period_at(state.world.current_tick)
+
+func get_speed_mult(state: WorldState) -> float:
+	return speed_mult_at(state.world.current_tick)
+
+# ★移動估算（spec 2026-10-13-move-eta-same-ruler 改法 1）：估算器在【未來的窗口邊界 tick】取晝夜倍率
+#   ⇒ 需要一支只吃 tick 的版本；實例方法呼叫它（一份表，不抄第二份）
+static func period_at(tick: int) -> String:
+	var t: float = float(tick % WorldState.TICKS_PER_DAY) / float(WorldState.TICKS_PER_DAY)
 	if t < 0.1:  return "dawn"
 	if t < 0.75: return "day"
 	if t < 0.9:  return "dusk"
 	return "night"
 
-func get_speed_mult(state: WorldState) -> float:
-	match get_time_period(state):
+static func speed_mult_at(tick: int) -> float:
+	match period_at(tick):
 		"day":   return 1.0
 		"dawn":  return 0.8
 		"dusk":  return 0.8

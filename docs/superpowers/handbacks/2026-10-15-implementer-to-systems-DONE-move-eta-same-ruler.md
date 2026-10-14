@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 移動預計時間＝物理同一把尺（spec 2026-10-13-move-eta-same-ruler-HOW）
 topic: 請 merge fix/move-eta-same-ruler 9723d7656（已併 main 8425044a2）｜全電池釘死 9723d7656：130 支全綠（BATTERY_RC=0，總時 4439s）｜E1–E5 估算＝實走 tick 精確、world-fp 不動｜★疲勞 0% 判成 (d) 的一種，但修它會動 world-fp ⇒ 沒修，等你裁
 ---

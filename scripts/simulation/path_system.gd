@@ -137,7 +137,15 @@ static func find_path(state: WorldState, from: Vector2i, to: Vector2i) -> Dictio
 	_path_cache[key] = result
 	return result
 
-static func _astar(state: WorldState, from: Vector2i, to: Vector2i) -> Dictionary:
+# ★belief 版找路（spec 2026-10-13-move-eta-same-ruler 2b，感知鐵律）：給移動估算器的影子規劃用
+#   `known`＝這支隊知道地形的格（tile key → 任意）；不在裡面的格一律當平原（最便宜 ⇒ 估算是下界）
+#   ★不讀也不寫 `_path_cache`：那份快取的鍵只有起終點＋tick（沒有隊伍、沒有地圖版本）
+#     ⇒ belief 路徑寫進去，同 tick 真移動查同一對起終點就會拿到【玩家知識下】的路（E9 守它）
+#   ★實際移動照舊走 find_path（真地圖）—— 改了就是玩家專屬物理
+static func find_path_belief(state: WorldState, from: Vector2i, to: Vector2i, known: Dictionary) -> Dictionary:
+	return _astar(state, from, to, known)
+
+static func _astar(state: WorldState, from: Vector2i, to: Vector2i, known = null) -> Dictionary:
 	if from == to:
 		return { "path": [from], "cost": 0.0 }
 	var open: Array = [{ "pos": from, "g": 0.0, "h": _heuristic(from, to), "from": null }]
@@ -163,7 +171,7 @@ static func _astar(state: WorldState, from: Vector2i, to: Vector2i) -> Dictionar
 			if closed.has(nk): continue
 			var tile: HexTileData = state.world.tiles.get(nk)
 			if tile == null: continue
-			var cost: float = TERRAIN_COST.get(tile.terrain, 1.0)
+			var cost: float = TERRAIN_COST.get(tile.terrain if known == null or (known as Dictionary).has(nk) else "plains", 1.0)
 			open.append({
 				"pos": npos,
 				"g": node["g"] + cost,
@@ -182,6 +190,10 @@ static func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 
 # ────────── ETA ──────────
 
+# ★這支不是真尺（spec 2026-10-13-move-eta-same-ruler 改法 3）：只有距離×基準成本÷疲勞，
+#   漏了晝夜／地形／超載／車輛／窗口相位／起始餘量、距離用直線格數（藍圖實跑：兩格預計 480、實走 720）。
+#   玩家的「預計 N 分鐘」改讀 MovementSystem.estimate_travel_ticks（同一份物理逐窗走一遍）；
+#   這支留著是因為 AI 的 _estimate_eta_to 還在用（遷移屬深層批，known_issues 已記）
 static func eta_ticks(team: TeamData, path_cost: float) -> int:
 	var speed_mult: float = _team_speed_mult(team)
 	return int(path_cost * float(MovementSystem.BASE_MOVE_TICKS) / maxf(speed_mult, 0.1))

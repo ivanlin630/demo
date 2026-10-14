@@ -5631,6 +5631,21 @@ move_target（附身隊進不了攻擊 task ⇒ 目前不可達，寫者在）�
 排程：多格移動 merge 後的小票。
 ```
 
+## 行軍走在半路時疲勞被當成休息（玩家畫面疲勞恆 0%）
+
+狀態：已知未修
+
+回訪：觸發事件 —— 深層批「戰鬥模型落地」寫 HOW 時一起開（同為世界行為、world-fp 必變；體力係數是戰力輸入之一）。
+
+```
+sim_runner.gd:501-503 只在 MovementSystem 回報「這一窗跨了格」時設 moved_since_fatigue；
+一格平原白天約 4 小時，半路的疲勞 pass 全落 "rest" ⇒ 按 0.48／天回復，跨格那次 +0.004 下一次就回 0。
+意圖帳「疲勞回復綁活動」列：移動＝耗力、「夜間未移動」才回復 ⇒ code 違反意圖，不是 WHAT 待裁。
+修法（systems 定）：moved＝這一窗 movement 累積有前進（有 move_target 且 acc 增加），不用 TASK_TRAVEL 進 FATIGUE_EXERT_TASKS（任務名綁定正是票 T 拔掉的形狀）。
+量測：修後重量「移動時間尺」中位（意圖帳該列記的上限撞擊成因＝疲勞地板）。
+出處：移動預計時間交件信 2026-10-15 E7 探針（12 小時 12 次 pass，耗力 1 次）。
+```
+
 ## 附身隊的據點稅率仍由人格自動算
 
 狀態：已知未修
@@ -5678,6 +5693,9 @@ faction_ai_system.gd:7612 `_estimate_eta_to` → PathSystem.eta_ticks(team, path
 物理 movement_system.gd move_cost_pure 另乘晝夜（DayNightSystem.get_speed_mult，夜 0.5）、超載、車輛，且每格用腳下地形。
 玩家側由「移動預計時間＝同一把尺」票修（spec 2026-10-13-move-eta-same-ruler-HOW），AI 側改了動決策與 world-fp ⇒ 歸深層批。
 修法方向：AI 改用同一支 estimate_travel_ticks（該票新增）。
+量（scripts/debug/move_eta_bed.gd AI 格，平原兩格、21:50 下令）：舊估算 480、新估算 670、實走 670 ⇒ 舊估算低估 28.4%。
+  ★這是一格的數，不是 AI 全體的分佈（跨夜比例、窗口相位、地形、超載都會改它）：
+    同床負對照 n1（玩家句改回 eta_ticks）的 10:00 平原兩格是 480 對實走 840（低估 43%）——白天也低估，所以不只是漏晝夜（各項各佔多少沒拆）。
 ```
 
 ## 多格移動下令時的可達判斷讀真地圖：對沒去過的格會洩露地形，且「不可達」近乎不會發生
