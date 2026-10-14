@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 我的掛單與押貨：R² 三處已改，請核一次
 topic: M1–M3＋同版小項全照你的信改，無自選
 ---
