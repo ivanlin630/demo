@@ -5590,11 +5590,11 @@ FAIL 格④「斥候帶 need 回領主」數到 2 筆、預期 1：
 
 回訪：觸發事件 —— 實作端佇列空檔或有人改資訊網偵察／care-loop 那段時順手修這支床。
 
-## 附身隊：AI 仍替玩家隊掛買賣單（違反不變量 #12 的 orders）
+## ✅ 附身隊：AI 仍替玩家隊掛買賣單（違反不變量 #12 的 orders）
 
-狀態：已知未修
+狀態：已修（附身隊三件 merge `048f526c5`）—— tick_team_orders 對附身隊在到期清理／退貨之後 return；中途附身殘單量測 >20%（最高 99.8%）⇒ 附身那一刻 `OrderSystem.withdraw_on_possession` 逐張撤、押貨落該格待領帳。床 `possessed-orders`。
 
-回訪：觸發事件 —— 多格移動 merge 後、藍圖真跑完，systems 派小票時。
+回訪：無（已修）。
 
 ```
 2026-10-13 多格移動交件信（2026-10-13-implementer-to-systems-DONE-multi-hop-move-3-rulings §5）列出：
@@ -5606,9 +5606,9 @@ OrderSystem.tick_team_orders（order_system.gd:245）對每隊跑「餘量發賣
 
 ## 附身隊：loop3 仍會寫的其他非 task 欄位，未分類
 
-狀態：已知未修
+狀態：已知未修（部分已修：附身隊三件 merge `048f526c5`）—— 已分類（交件信 2026-10-14-implementer-to-systems-DONE-possessed-followups 丙表）；修了 `_decide_unified`／`_evaluate_outpost_residency`／`consider_extraction` 三支入口（床 `possessed-writers`）。**剩下的全是武裝／配裝類決策、只列未修**：mobilized_fraction（`_update_mobilization`，與玩家的 set_armed_anon_ratio 關係要裁）、equip_order、armor_config（玩家沒有配裝指令）、`_auto_withdraw_mounts`（出征拉坐騎）；guard_ratio 由第 7 張戰後處置 §2c（玩家 holder 跳過 `_decide_guard_ratio`）接住。另 member 情形 persist_strength 仍被寫 1476 次但值零變化，寫者（faction_ai 1828／2239／3156 之一）沒釘。
 
-回訪：觸發事件 —— 多格移動 merge 後、藍圖真跑完，systems 派小票時。
+回訪：觸發事件 —— 深層批首張「戰鬥模型落地」寫 HOW 時（三軸 階×武裝×坐騎 正是這幾欄的讀者；在那張裡一併定「附身隊的武裝／配裝／坐騎誰決定」）；guard_ratio 在第 7 張 merge 時驗床。
 
 ```
 同一封交件信 §5 逐處列出：決策節奏（decision_eval_next_tick、previous_task）、_trigger_survival 寫
@@ -5619,16 +5619,40 @@ move_target（附身隊進不了攻擊 task ⇒ 目前不可達，寫者在）�
 待做：逐項判「是決策（#12 管）還是物理／記帳（照跑）」，是決策的照掛單那張的寫法排除。
 ```
 
-## 自家隊開始挨餓時推進不會停
+## ✅ 自家隊開始挨餓時推進不會停
 
-狀態：已知未修
+狀態：已修（附身隊三件 merge `048f526c5`）—— `ADVANCE_STOP_KINDS` 加 famine_crossed，結果行「<隊>：存糧吃完，開始挨餓（再 N 天開始有人餓死）」；先量 ≤1 次／天 ⇒ 不節流。床 `possessed-famine-stop`。
 
-回訪：觸發事件 —— 多格移動 merge 後、藍圖真跑完，systems 派小票時。
+回訪：無（已修）。
 
 ```
 藍圖 2026-10-13 裁：附身隊不下令不覓食＝本意，代價由遊戲明示 ⇒「開始挨餓」要進推進停點清單（意圖帳已補）。
 現況：world_events.gd ADVANCE_STOP_KINDS 沒有這一項，也沒有「開始挨餓」的事件種類（只有 member_died 帶餓死）。
 排程：多格移動 merge 後的小票。
+```
+
+## 附身隊的據點稅率仍由人格自動算
+
+狀態：已知未修
+
+回訪：觸發事件 —— 玩家「調據點稅」動詞開票時一起做（擋了而沒有動詞＝凍在預設 0.3）。
+
+```
+ResourceSystem.tax_rate_for（resource_system.gd:523-536）每次依 owner 隊長的 貪婪－慎重 與在建工程重算並寫回 owner.tax_rate；
+owner 是附身隊時＝AI 替玩家定稅率（#12 同族）。玩家沒有調稅指令。
+出處：spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW §範圍外。
+```
+
+## 掛單與押貨（escrow）對玩家不可見
+
+狀態：已知未修
+
+回訪：觸發事件 —— 交易面板或情報面板下一次改版時（玩家可見批之後的那張 UI 票）。
+
+```
+附身隊三件交件信（2026-10-14）：scripts/ui、player_query_api、player_api_mapper 對 active_orders／market_escrow／
+release_order_escrow 零引用 ⇒ 玩家自己掛的單、到期退貨、附身時被撤下落格的押貨，畫面上都看不到。
+玩家能做的只有 player_command_api 的掛單／撤單（盲操作）。
 ```
 
 ## AI 估路程（_estimate_eta_to）漏晝夜倍率，與物理不同尺

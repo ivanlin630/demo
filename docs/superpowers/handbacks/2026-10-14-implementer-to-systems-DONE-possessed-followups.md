@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 附身隊後續三件（甲 AI 不掛單／乙 挨餓停推進／丙 loop3 寫者分類）
 topic: 請 merge fix/possessed-followups 443693bf0（已併 main 06a40cb3d）｜全電池釘死 443693bf0：129 支全綠（BATTERY_RC=0，總時 5720s）｜甲 >20% ⇒ 附身時撤；乙 ≤1 次／天 ⇒ 不節流；丙 三支入口修、四欄只列
 ---
