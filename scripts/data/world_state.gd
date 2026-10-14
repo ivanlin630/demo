@@ -1113,7 +1113,11 @@ func sync_possession() -> void:
 		(teams[_possessed_tid] as TeamData).possessed = false
 	_possessed_tid = tid
 	if teams.has(tid):
-		(teams[tid] as TeamData).possessed = true
+		var _nt: TeamData = teams[tid]
+		# ★附身邊（false→true）：撤掉隊上 AI 殘單（spec possessed-followups 甲；殘單量測押貨扣住最高 99.8% > 20% 線）
+		if not _nt.possessed:
+			OrderSystem.new().withdraw_on_possession(self, _nt)
+		_nt.possessed = true
 	# ★player_controlled 同一支重算（spec player-subteams 一）：先清上一輪的集合，再順著附身隊的 subteam_ids 重建
 	for ptid in _player_ctrl_ids:
 		if teams.has(ptid):

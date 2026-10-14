@@ -110,10 +110,14 @@ const KIND_LABEL: Dictionary = {
 	"player_subteam": "子隊",
 }
 # ══ ★M 票 §2：推進的停點（具名集合，唯一一份）—— 推進碰到這幾種【涉及玩家隊】的事件就停在那一 tick ══════════════
-#   找上門／提案到達（強制事件）、被攻擊或遭遇開始、敵對隊進入同格或相鄰格、成員死亡或離隊
+#   找上門／提案到達（強制事件）、被攻擊或遭遇開始、敵對隊進入同格或相鄰格、成員死亡或離隊、★自家隊開始挨餓
+#   ★挨餓（famine_crossed＝famine_days 由 0 轉正那一刻；spec 2026-10-13-possessed-team-followups 乙，藍圖裁「開始挨餓」進停點）
+#     不節流：附身 30 天兩世界（待機／每天狩獵）×2 種子，單日最多 1 次（docs/measurements/2026-10-14-possessed-followups/）
+#     ⇒ 若日後出現「一天停好幾次」，那是糧在 0 附近震盪（吃飽／滿足度兩處歸零），回去看那份量測，不要在這裡加冷卻
 #   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
 const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "hostile_adjacent",
-	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction", "player_subteam"]
+	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction", "player_subteam",
+	"famine_crossed"]
 
 # 玩家事件匯流排上 seq0 之後第一筆停點事件（kind ∈ ADVANCE_STOP_KINDS 且主體含玩家隊）；沒有 ⇒ {}
 static func stop_event_since(state: WorldState, seq0: int) -> Dictionary:
@@ -414,6 +418,8 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"team_extinct":          return "%s 全滅了" % who
 		"teams_erased":          return "%s 沒了" % who
 		"combat_engaged":        return "%s 捲進了戰鬥" % who
+		# ★N 讀常數（寬限期內不致死；resource_system 過了寬限才開始餓死人）——不抄數字
+		"famine_crossed":        return "%s：存糧吃完，開始挨餓（再 %d 天開始有人餓死）" % [who, ResourceSystem.FAMINE_GRACE_DAYS]
 		"betrayed":              return "%s 被盟友背叛" % who
 		"outpost_owner_changed": return _owner_change_sentence(state, info)
 		"player_subteam":        return _player_subteam_sentence(state, info)

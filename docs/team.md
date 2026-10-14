@@ -215,6 +215,14 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 - 自家人（母／子／同母兄弟，`TeamData.is_kin`）不互相外交、不互選威脅。
 - 詳 spec `docs/superpowers/specs/2026-10-13-player-subteams-execute-given-tasks-HOW.md`；code 為準。
 
+### 附身隊（玩家所在的隊；不變量 #12）
+
+- 決策層不寫它的 task／move_target／orders：AI 不替它掛買賣單；附身那一刻隊上原有的 AI 單撤下（押貨落該格待領帳，同到期退貨那一條守恆路）。
+- 玩家只是成員（隊長是 NPC）時一樣：統一引擎本體、居民派駐（派子隊／邀流亡）、自動徵用公庫都不跑。
+- 自家隊存糧吃完、開始挨餓 ⇒ 推進停點（句子帶寬限天數）；附身隊不會自己覓食（藍圖裁）。
+- 仍由 AI 計算、尚未裁的：動員比、配武器、配甲、守衛比、出征拉坐騎（分類見 possessed-followups 交件信）。
+- 詳 spec `docs/superpowers/specs/2026-10-13-possessed-team-followups-HOW.md`；code 為準。
+
 ### 護衛跟隨（task == "護衛"）
 
 - 每 tick：`move_target = order_target` 的 `tile_pos`

@@ -1,0 +1,30 @@
+# 原始輸出：pfneg-prefix-possessed_writers_bed.txt｜只留 [TREE]、判準行（PASS／FAIL）、床／量測印的數值行與段落標題；截掉模擬 log（[ 開頭）與開局 MoneyGenesis 對帳區塊（「= Σpop」起四行）｜修前：scripts/simulation＋scripts/data 回 main 241d070ec（床用新版）
+[TREE] path=A:\GDS\demo\.worktrees\pf commit=6a0337e20 clean=NO code-dirty=7 codehash=7FFA3035386E
+[TREE]   *** measuring the WORKING TREE, not commit 6a0337e20 ***
+[TREE]   M  scripts/data/team_data.gd
+[TREE]   M  scripts/data/world_state.gd
+[TREE]   M  scripts/simulation/coin_treasury.gd
+[TREE]   M  scripts/simulation/decision/failure_memory.gd
+[TREE]   M  scripts/simulation/faction_ai_system.gd
+[TREE]   M  scripts/simulation/order_system.gd
+[TREE]   M  scripts/simulation/world_events.gd
+=== possessed_writers：AI 決策入口不碰附身隊 ===
+── C1 玩家只是成員  引擎本體不碰附身隊 ──
+  PASS: ★C1 地板：附身隊隊長不是玩家、possessed＝真；有對照隊
+   附身隊 T0 last_decision_tick 0→1391 current_option「」→「建設」｜對照 T1 last_decision_tick 0→1075
+  PASS: ★C1 對照：NPC 隊一天內有決策（last_decision_tick 前進）
+── C2 自家空據點  居民派駐不替附身隊派子隊 ──
+   對照 T0 { "tile": true, "pop": 12, "s0": 0, "s1": 2, "possessed": false }｜附身隊 T15 { "tile": true, "pop": 15, "s0": 0, "s1": 1, "possessed": true }
+  PASS: ★C2 對照：NPC 隊同佈置會派子隊（條件真的會觸發）
+  PASS: ★C2 地板：附身隊佈置成立（有空據點、人口 15）
+── C3 玩家只是成員、公庫有錢、缺糧  不自動徵用 ──
+   對照 T1 { "need": 192, "treasury": 290.7, "coin": 209.3, "possessed": false, "leader_is_player": false }｜附身隊 T0 { "need": 416.7, "treasury": 64.7, "coin": 435.3, "possessed": true, "leader_is_player": false }
+  PASS: ★C3 對照：NPC 隊同佈置會徵用（公庫 <500）
+  PASS: ★C3 地板：附身隊隊長不是玩家、有缺口
+=== possessed_writers DONE === 到場 3／3 errors: 3
+ERROR: [FAIL] C1 附身隊一天內 last_decision_tick、current_option 不動
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] C2 附身隊不被派子隊
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] C3 附身隊公庫不動（500）、coin 不動（0）
+   at: push_error (core/variant/variant_utility.cpp:1091)

@@ -862,6 +862,8 @@ func _has_inflight_settler(state: WorldState, owner: TeamData, tile: HexTileData
 
 # cadence 評估：掃自家無居民 outpost，依個性派子隊或邀流亡
 func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
+	# ★不變量 #12（spec possessed-followups 丙）：替附身隊派子隊／邀流亡＝AI 替玩家做事（還會把他的人帶走）⇒ 不跑
+	if team.possessed: return   # gate-ok: guard early-return（#12 附身隊排除，非決策閘）
 	if state.world.current_tick < team.residency_eval_next_tick: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	team.residency_eval_next_tick = state.world.current_tick + RESIDENCY_CADENCE
 	var leader: PersonData = state.persons.get(team.leader_id)
@@ -3488,6 +3490,13 @@ func uses_unified(team: TeamData) -> bool:
 #   ★src 沒帶 ⇒ 鍵變成 unified.rank.from_unknown ⇒ 它【不在 PHASE_PARENT】⇒ 未登記具名紅
 #     （★★而那是刻意的：新呼叫端不該靜默地混進某個父親）。
 func _decide_unified(state: WorldState, team: TeamData, src: String = "unknown") -> void:
+	# ★不變量 #12（spec 2026-10-13-possessed-team-followups 丙）：附身隊不進引擎本體
+	#   玩家當隊長時上游已擋；★玩家只是成員（隊長是 NPC）時，成員迴圈照呼這裡 ⇒ 本體先寫
+	#   decision_eval_next_tick／last_decision_tick／current_option／承諾偵測，try_set 才擋（丙寫入觀察 30 天實測）
+	#   ⇒ 擋在入口：四個入口（leader／member／threat／solo）都匯進本函式
+	if team.possessed:
+		if Probe.enabled: Probe.bump("unified.skip_possessed.%s" % src)
+		return
 	# ⑦ 統一重評 gate（修每小時過頻）：IDLE/stuck/crisis/命令新仍即時，否則 cadence 節流。
 	if not _should_reeval(state, team):
 		return
