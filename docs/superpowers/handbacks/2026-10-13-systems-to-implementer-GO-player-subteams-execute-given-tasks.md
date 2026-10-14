@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 玩家子隊真的做事（只做玩家給的任務）
 topic: GO（排在回饋 #2 兩刀之後同批）｜spec docs/superpowers/specs/2026-10-13-player-subteams-execute-given-tasks-HOW.md（R² 兩擋已補）｜「被攻擊自己逃」待藍圖，先照不逃做
 ---
