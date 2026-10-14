@@ -288,11 +288,10 @@ static func capture_routed_as_captive(state: WorldState, winner: TeamData, retre
 	var rate: float = clampf(severity * CAPTURE_GUARD_FACTOR, 0.0, CAPTURE_RATE_MAX)
 	if rate <= 0.0:
 		return 0
-	# guard 餘力 cap（守衛容量；滿則俘不下）
-	var leader = state.persons.get(winner.leader_id) if state != null else null
-	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-	var pop_cap: int = FactionAISystem.effective_pop_cap(state, winner)
-	var budget: int = maxi(pop_cap - winner.population - total_captives(winner), 0)
+	# 看守容量（spec 2026-10-14-battle-aftermath §2c：容量一支，與 _enforce_guard_cap 同一個上限）
+	#   ★舊：人口上限餘裕 effective_pop_cap − population − total_captives ⇒ 與 enforce 的看守上限互相打架
+	#     （俘了、下一個 cadence 被 enforce 殺掉／放掉）
+	var budget: int = ManpowerSystem.captive_room(state, winner)
 	if budget <= 0:
 		return 0
 	var captured: Dictionary = {}   # "tier|health" → count

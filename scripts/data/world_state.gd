@@ -1122,9 +1122,14 @@ func sync_possession() -> void:
 	for ptid in _player_ctrl_ids:
 		if teams.has(ptid):
 			(teams[ptid] as TeamData).player_controlled = false
+	var _was_ctrl: Array = _player_ctrl_ids.duplicate()
 	_player_ctrl_ids = player_controlled_ids_derived()
 	for ptid in _player_ctrl_ids:
 		(teams[ptid] as TeamData).player_controlled = true
+		# ★變成玩家控制的那一刻：看守比換成玩家初值（spec 2026-10-14-battle-aftermath §2c；不讀附身者人格，
+		#   之後 tick_all 不再替玩家 holder 重算——改看守比的動詞還沒做）
+		if not _was_ctrl.has(ptid):
+			(teams[ptid] as TeamData).captive_guard_ratio = ManpowerSystem.PLAYER_GUARD_RATIO_DEFAULT
 
 # ★「玩家控制的隊」的定義（純讀）：sync 用它寫、tick 尾校驗用它比 ⇒ 一份
 func player_controlled_ids_derived() -> Array:

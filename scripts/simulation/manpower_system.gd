@@ -28,6 +28,26 @@ const GUARD_LOAD_W: float   = 0.3    # 持有量占比權重（俘越多越加�
 const FLEE_COEF: float      = 0.3    # 逃機率係數：p = clampf(captive/(guard_n+1)×(1-morale)×此, 0, P_FLEE_MAX)
 const P_FLEE_MAX: float     = 0.5    # 每日逃機率上限
 const GUARD_CAP_MULT: float = 3.0    # captive_cap = guard_n × 此（超限→強制處置超額，逼決策別囤）
+# ★玩家 holder 的看守比初值（spec 2026-10-14-battle-aftermath §2c）：不讀附身者人格（#12）；改看守比的動詞還沒做
+const PLAYER_GUARD_RATIO_DEFAULT: float = GUARD_RATIO_MAX / 2.0
+
+# ───── 俘虜容量【一支】（spec 2026-10-14-battle-aftermath §2c）─────
+# room ＝ max(0, floor(total_pop × ratio × GUARD_CAP_MULT) − total_captives)
+#   ratio：NPC＝_decide_guard_ratio 當下值；玩家 holder＝holder.captive_guard_ratio（不讀人格）
+# ★捕獲（戰後俘傷兵）、戰中押走、capture_routed_as_captive、_enforce_guard_cap 四處讀這一支
+#   ⇒ 捕獲時就不會超過下一次 enforce 的上限（舊：潰逃捕獲用人口上限餘裕，與 enforce 的看守上限互相打架）
+static func guard_ratio_of(state: WorldState, holder: TeamData) -> float:
+	if holder.player_controlled:
+		return float(holder.captive_guard_ratio)
+	return _decide_guard_ratio(state, holder)
+
+static func guard_cap(holder: TeamData, ratio: float) -> int:
+	return int(floor(float(AnonTierSystem.total_pop(holder)) * ratio * GUARD_CAP_MULT))
+
+static func captive_room(state: WorldState, holder: TeamData) -> int:
+	if holder == null:
+		return 0
+	return maxi(0, guard_cap(holder, guard_ratio_of(state, holder)) - AnonTierSystem.total_captives(holder))
 
 # ───── 待遇決策（means-end driver；連回 holder leader 意圖）─────
 # driver：野心/欲壯兵 → 厚待同化（服務征服/擴張）；殘忍/急用 → 苛待；無力養（缺糧）→ 釋放。
