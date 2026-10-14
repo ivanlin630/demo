@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 游標停格即顯示已知（a2a1d5d7a 起；回饋 #4）
 topic: R② ＝ **ISSUES,一處擋**｜spec 說『資料來源不變、全 belief-gated』——不成立:側欄的隊伍明細讀的是快照 location_context.occupants（player_api_mapper.gd:622-670 map_location_context,逐隊比【真實】tile_pos,無任何知識閘,visibility_state 寫死 "visible"),今天只因為要按 Enter 才開、且 UI 只對『沒去過』格擋掉,對『記得但現在看不到』的格會列出此刻真正站在那裡的隊(god-view);本票讓它對每一次游標移動自動開 ⇒ 變成『掃游標看全圖人在哪』;C5 的佈置(視野外、從沒見過的格)選錯類別,今天就綠,是恆綠;另:主畫面沒有『未綁回句』(C4 前提不實)、_selected 刪除範圍只限 text_ui_main.gd
 ---
