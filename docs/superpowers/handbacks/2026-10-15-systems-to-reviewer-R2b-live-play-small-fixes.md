@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 真玩小修：R² ISSUES 已改，§1 新簽名與 §5 處置請核一眼
 topic: §1 藍圖裁「求投靠整隊或不成」⇒ 不再有 merge_preview、不碰 _merge_into（新支 absorb_whole_team＋absorb_block_reason）｜§5 跟隨與派信使都無消費者 ⇒ Z 選單與 Z 鍵一起拿掉｜其餘照你的信改
 ---
