@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家可見批第 7 張：戰後收尾（結算事件／場上傷兵命運／俘虜接帳／追擊／居民處置問玩家）
 topic: R² 請審 docs/superpowers/specs/2026-10-14-battle-aftermath-wounded-captives-pursuit-HOW.md
 ---
