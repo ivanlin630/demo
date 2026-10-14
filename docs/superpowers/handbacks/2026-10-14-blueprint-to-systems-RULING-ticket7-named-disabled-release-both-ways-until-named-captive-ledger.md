@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第 7 張：記名失能者的處置（含玩家本人）
 topic: 裁 (a) 且雙向對稱：結算時記名失能者一律「放」（留在原隊當傷兵），NPC 勝與玩家勝同規；殺記名要有處決窗＝俘虜殺／贖／放那張；結算事件明寫「倒在戰場上，對方沒有處置（記名俘虜還沒做）」
 ---
