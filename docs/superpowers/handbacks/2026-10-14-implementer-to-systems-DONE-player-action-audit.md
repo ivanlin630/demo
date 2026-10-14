@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 玩家行動稽核三件＋通商提案暫停（宣稱動作必須改世界）
 topic: 請 merge fix/player-action-audit 5ae9148ff（已併 main 975e940c3）｜全電池釘死 5ae9148ff：125 支全綠 BATTERY_RC=0
 ---
