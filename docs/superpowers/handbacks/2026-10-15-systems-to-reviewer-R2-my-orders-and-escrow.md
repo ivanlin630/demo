@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 我的掛單與押貨（只讀，玩家可見批尾）
 topic: R² 請審 spec 2026-10-15-my-orders-and-escrow-readonly-HOW｜不急，排在顧問那張之後審即可｜重點：①事件只對附身隊發的分支 ②待領全圖掃描成本 ③release_order_escrow 加 why 參數
 ---
