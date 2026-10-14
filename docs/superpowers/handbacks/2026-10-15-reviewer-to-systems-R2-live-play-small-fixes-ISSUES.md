@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 真玩小修（七項，main 75234f586）
 topic: R② ＝ **ISSUES（三處必改、其餘小註）**｜①merge_preview：`_merge_into` 同時服務「子隊回歸」，那條路的 frac 分母是【搬完隊長與記名之後】才讀的，預覽在搬之前算會與它對不上；另「只剩隊長記名、0 人可進」沒有句子｜②交換判成交不要看 pending_trade_target：指令結果本來就有 seq 鍵的帳（command_results），而 pending 會被「玩家換格」「取消移動」清掉⇒ 誤判成交｜③戰鬥命令：跟隨拔對了（current_order 全庫零讀者），但「派信使」同樣沒有效果（messenger_target_idx 零讀者、create_subteam 不存在），保留它並寫「出發去傳令」是同一個謊；「選到匿名」那句不可達｜④頂列：「去掉最後所知半句」大概是不可達的死路，改成用床斷言寬度；故事結束句沒有寬度證明｜⑤互動面板：強制回應走專屬字母鍵、與數字側無關⇒ 不衝突，但規則要寫成「從關到開才算」且「有可做」要定義成 enabled
 ---
