@@ -49,23 +49,18 @@ const BODY_STATUS_SHORT: Dictionary = {"healthy": "健", "wounded": "傷", "crit
 const BODY_STATUS_NAME: Dictionary = {"healthy": "健康", "wounded": "受傷", "critical": "重傷", "severed": "斷肢"}
 static func status_full_name(raw: String) -> String:
 	return String(BODY_STATUS_NAME.get(raw, raw))
-const ITEM_NAME: Dictionary = {
-	"weapon_melee_low": "低階近戰武器", "weapon_melee_high": "高階近戰武器",
-	"weapon_ranged_low": "低階遠程武器", "weapon_ranged_high": "高階遠程武器",
-	"armor_low": "低階護具", "armor_high": "高階護具",
-	"medicine": "藥品", "tools": "工具",
-}
 # ★D1（spec 2026-10-07 四缺陷）：資源鍵 → 玩家畫面的字（與狀態列「食:… 幣:… 材:…」同一套單字）
-const RESOURCE_NAME: Dictionary = {"food": "食", "coin": "幣", "material": "材", "goods": "貨"}
+# ★顯示名只准一張表 data/text/names.tsv（藍圖裁 2026-10-15）：short 查不到 ⇒ 回原鍵，不退回 full
+#   （退 full 會讓 ResourceFormat 面板每格變寬，被 foot_block 裁寬吃字）
 static func resource_name(raw: String) -> String:
-	return String(RESOURCE_NAME.get(raw, raw))
+	return TextBank.res_name(raw, "short")
 # 查不到就原樣回（★而「查不到」會被終端自驗 (d) 咬到 —— 新增一個 id 的人會被床擋下來，不是靜默印英文）
 static func part_name(raw: String) -> String:
 	return String(BODY_PART_NAME.get(raw, raw))
 static func status_name(raw: String) -> String:
 	return String(BODY_STATUS_SHORT.get(raw, raw))
 static func item_name(raw: String) -> String:
-	return String(ITEM_NAME.get(raw, raw))
+	return TextBank.res_name(raw, "full")
 
 # Body parts condensed: e.g. "頭:重 胸:健 右臂:健 左臂:健 右腿:健 左腿:健"
 static func _body_summary(body_parts: Dictionary) -> String:
