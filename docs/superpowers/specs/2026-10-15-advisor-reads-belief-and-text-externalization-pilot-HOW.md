@@ -58,7 +58,7 @@
 
 ### 1c 準不準＝雜訊，偏頗＝偏移（★零 RNG）
 - 估計值 `x'` ＝ `x × (1 + (2u − 1) × amp)`：
-  - `u = PathSystem.observation_noise01(tick, advisor_pid + ADVISOR_NOISE_NS, salt)`（R² M2）。
+  - `u = AdvisorSystem.noise_u(tick, advisor_pid, target_id, situation)`，內部＝`PathSystem.observation_noise01(tick, advisor_pid + ADVISOR_NOISE_NS, salt)`（R² M2／F3：顧問算 u 只准經這一支）。
     - `ADVISOR_NOISE_NS`＝`1 << 40`，具名常數。理由：唯一的既有生產呼叫點 path_system.gd:302 傳的是 (tick, 隊 id, 隊 id)，person id 與隊 id 都從 0 起 ⇒ 不加命名空間，兩個系統的雜訊會相關。
     - salt＝`target_id * 8 + 情境序`；target 為 -1 時取 `-(情境序 + 1)`。兩段值域互斥，同一目標的五個情境各拿各的 u。
     - 不動 `observation_noise01` 本體（它有跨語言釘值床）。
@@ -161,11 +161,10 @@
 - A7 選單：五情境都在；目標選單只列 belief 裡未過期的隊。佈置一支真在旁邊、但附身隊沒 belief 的隊 ⇒ 不在列。
 - A8 不讀真值：問之後把目標真人口改成 3 倍，同 tick 再問 ⇒ 句子不變。★「同 tick」必須直呼 dispatch 或走 `_enqueue_command`，不經 `command_player`（它會 request_advance，sim_bridge.gd:437）。
 - A10 diplomatic 不讀隊長（R² M3）：把目標隊長換成與附身隊成員有 feud 的人（belief 不變），同 tick 再問 ⇒ 句子不變。
-- A9 雜訊命名空間：同一 (tick, 數字 id, 數字 id)，不帶 NS 的呼叫 ⇒ 與 path_system 那條拿到同一個 u（證明撞點存在）；帶 NS ⇒ 不同。
+- A9 雜訊命名空間（R² F3）：顧問算 u 只准經**一支**函式 `AdvisorSystem.noise_u(tick, advisor_pid, target_id, situation)`（NS 與 salt 都在它裡面）。床呼 `noise_u` 與 path_system 那條同一 (tick, 數字 id, 數字 id) 比 ⇒ 不同；另以不帶 NS 的直呼證明撞點存在（相同）。
 - T1 鍵對帳兩檔綠；T2 槽對帳綠。
 - T3 交換畫面：佈置雙方有 food／material／weapon_melee_low／coin ⇒ 面板無 ASCII 資源鍵，印糧食／木料／粗製近戰武器／錢。
-- T4 一張表（R² M7：由表派生，不靠人挑關鍵字）：床讀 names.tsv 每一個值（例「粗製近戰武器」「粗製護甲」），斷言這些**整句值**在 scripts/**/*.gd 的字串字面（非註解）零出現。母體＝表本身，不誤傷「護甲坊」這類設施名。反向：戰鬥畫面裝備欄與事件句對同一鍵印同一字，用 res_name 比，不寫死字。
-  - `ObserverQueryApi.RES_LABEL` 的值（「近戰武器(低)」等）跟 names.tsv 的值不同字，不會被 T4 命中；它屬範圍外，見下。
+- T4 一張表（R² M7＋F1）：母體＝names.tsv 中 `weapon_*`／`armor_*` 的 6 個 full 值（粗製／精製 近戰武器、遠程武器、護甲），斷言這些整句值在 scripts/**/*.gd 的字串字面（非註解）零出現。★不取全表：RES_LABEL 有 11 個值與 names.tsv 同字（observer_query_api.gd:8-13），姓氏表 person_generator.gd:4 也有「錢」，全表第一天就紅。反向：戰鬥畫面裝備欄與事件句對同一鍵印同一字，用 res_name 比，不寫死字。
 - W：無玩家世界 world-fp 不變（電池內）。
 
 ### 負對照（同 sha 加一處改動，每支必紅）
@@ -176,8 +175,8 @@
 | n3 advisor.tsv 刪一行**會被取用到的**（例 assess_enemy good） | T1 |
 | n4 某句多一個 `{槽}` | T2 |
 | n5 交換畫面改回印原鍵 | T3 |
-| n6 目標隊長換成與成員有 feud 的人（belief 不變） | diplomatic 同 tick 句子不變那格（M3 的守門；本票拿掉 feud 後它應恆綠，n6 是佈置不是改 code：證明 diplomatic 不讀隊長） |
-| n7 拿掉 ADVISOR_NOISE_NS | A9 |
+| n6 注入：diplomatic 臨時改讀「成員對目標隊長的 feud 邊」（R² F2） | A10 |
+| n7 `noise_u` 裡拿掉 ADVISOR_NOISE_NS | A9 |
 
 ## 範圍外（交件信不用做，已記）
 - 三組「主動警報」模板零呼叫者：留在 TEMPLATES 不動、不外置、不刪（藍圖裁：記的是當初想要的行為；已登路線圖板五未規劃「顧問主動警報」）。

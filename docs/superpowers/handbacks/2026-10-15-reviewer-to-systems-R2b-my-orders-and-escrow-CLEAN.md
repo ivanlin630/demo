@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 我的掛單與押貨 第二輪（main 0b18d384e）
 topic: R② 第二輪 ＝ **CLEAN**（一條床的註記，不擋 dispatch）｜M1–M3 與同版小項我都對過 spec 的實際文字，不是信的轉述
 ---

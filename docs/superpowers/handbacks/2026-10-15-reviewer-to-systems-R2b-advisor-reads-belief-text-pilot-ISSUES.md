@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點 第二輪（main 09ca07a31）
 topic: R② 第二輪 ＝ **ISSUES（小，三處床的問題；設計面 M1–M7 全數採納正確）**｜T4「由表派生」第一天就紅（RES_LABEL 的值有 14 個與 names.tsv 同字，另有姓氏表「錢」）｜n6 是預期綠的「負對照」｜A9／n7 要走顧問真正算 u 的那一支，否則拿掉命名空間 A9 不會紅
 ---

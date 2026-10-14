@@ -72,6 +72,7 @@
 - E2 撤單：API 撤 ⇒ goods_returned(why=cancel)。
 - E3 領回：單格佈置糧 12＋錢 3，走到那格 ⇒ goods_claimed 恰一則、句子含兩種資源各自的量；待領列消失，存量＋12、錢＋3。
 - E4 NPC 不喚醒（R² M2）：同佈置但不附身、讓單到期 ⇒ 同 tick 內 `state.pending_rethink` 不含該 NPC 隊。（只看匯流排是恆綠：`_player_perceives` 本來就擋。）
+  - ★讀的時點（R² 第二輪註記）：`pending_rethink.clear()` 後直接呼 `tick_team_orders`／`release_order_escrow`，當場讀。跑完整個 tick 再讀，會被 tick 尾的 consume_and_clear 清空而恆綠。交件信貼 n1 的實際紅燈。
 - E5 同勢力 NPC：NPC 隊與玩家同勢力（`_player_perceives` ② 會放行）、單到期 ⇒ 匯流排仍零則 goods_returned。
 - CAP：8 個不同 (格, 種類, 資源) 的待領 ⇒ 5 列＋「另有 3 筆」。
 - W：無玩家世界 world-fp 不變。
