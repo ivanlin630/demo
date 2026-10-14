@@ -1788,10 +1788,7 @@ const TASK_DISPLAY: Dictionary = {
 	"return_home": "返家",   # TeamData.TASK_RETURN_HOME
 	"rest": "休息",          # TeamData.TASK_REST
 }
-# ★道具 id → 人話（母體 ＝ `_get_team_takeable_items()` 回的那八個）
-#   ★★而它與 `:1127` 那一行的「低武／高武」措辭刻意一致（同一個東西在兩處不要兩種叫法）
-# ★表本身收進 TeamUiHelper.ITEM_NAME（中文名表唯一一份，戰鬥區 §3）；這裡只是同一份的別名，讀者不用改
-const ITEM_DISPLAY: Dictionary = TeamUiHelper.ITEM_NAME
+# ★道具 id → 人話：讀 TeamUiHelper.item_name（→ data/text/names.tsv，顯示名唯一一張表；spec 2026-10-15-advisor §2c）
 
 # 把一個可能是英文識別字的值換成人話（查不到就原樣回 —— ★而「查不到」會被自驗 (d) 咬到，
 # 那正是我們要的：**新增一個 id 的人會被床擋下來**，而不是靜默印一個英文字給玩家）
@@ -2269,7 +2266,7 @@ func _build_inv_str() -> String:
 		var item = inv[i]
 		var sel_idx: int = eq.size() + i
 		var prefix: String = "[%d]*" % (sel_idx + 1) if _inv_selection == sel_idx else "[%d]" % (sel_idx + 1)
-		lines.append("  %s %s × %d" % [prefix, human(ITEM_DISPLAY, item.get("grade", "?")),
+		lines.append("  %s %s × %d" % [prefix, TeamUiHelper.item_name(str(item.get("grade", "?"))),
 			item.get("qty", 0)])
 
 	# ── 從 Team 取出（[G]） ──
@@ -2279,7 +2276,7 @@ func _build_inv_str() -> String:
 		var sel_idx2: int = eq.size() + inv.size() + i
 		var prefix: String = "[%d]*" % (sel_idx2 + 1) if _inv_selection == sel_idx2 else "[%d]" % (sel_idx2 + 1)
 		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
-		lines.append("  %s %s: %d%s" % [prefix, human(ITEM_DISPLAY, team_items[i]),
+		lines.append("  %s %s: %d%s" % [prefix, TeamUiHelper.item_name(str(team_items[i])),
 			qty, "" if qty > 0 else "（灰）"])
 
 	lines.append("── [1-9]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
@@ -3454,20 +3451,36 @@ func _handle_advisor_mode(keycode: int) -> void:
 			_advisor_selection = members[idx].get("id", -1)
 			if _advisor_selection >= 0:
 				var advisor_pid_cap: int = _advisor_selection
-				# ★數字選單（追加三）：集合＝AdvisorSystem.SITUATION_SKILL_MAP 鍵 ∩ TextBank 有 advisor_<鍵> 模板
-				#   ★舊版提示叫玩家打 attack/diplomacy/resource ⇒ 一個都對不上 ⇒ 任何輸入都只拿到預設句（既有活 bug）
+				# ★數字選單：五情境（AdvisorSystem.TEXT_SITUATIONS）；要目標的再開第二層（附身隊 belief 裡未過期的隊）
+				#   ★問顧問＝指令 ask_advisor（入列＋推進 1 tick；spec 2026-10-15-advisor §1a）——結果走 command_results＋事件，不在這裡印
+				#   ★沒有可選目標 ⇒ 不開第二層，直接以 target_id=-1 入列（handler 回「不知道」）
 				var sits: Array = AdvisorSystem.menu_situations()
 				var _cb_in3236 := func(buf: String):
 					var si: int = int(buf) - 1
 					if si < 0 or si >= sits.size():
 						_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, sits.size()])
 						return
-					var advice: String = _bridge.query_advisor_advice(advisor_pid_cap, String(sits[si]))
-					_log_event("[Advisor] 建議：%s" % advice)
-					_set_feedback(true, "顧問：%s" % advice)
+					var sit: String = String(sits[si])
+					var tg: Array = _bridge.query_advisor_targets() if AdvisorSystem.needs_target(sit) else []
+					if tg.is_empty():
+						_ask_advisor(advisor_pid_cap, sit, -1)
+						return
+					var _cb_tg := func(b2: String):
+						var ti: int = int(b2) - 1
+						if ti < 0 or ti >= tg.size():
+							_set_feedback(false, "沒有第 %s 項（1~%d）" % [b2, tg.size()])
+							return
+						_ask_advisor(advisor_pid_cap, sit, int(tg[ti]))
+					_open_input("選目標 (1~%d): " % tg.size(), "numeric", _cb_tg, false,
+						tg.map(func(t): return "Team%d" % int(t)))
 				_open_input("選情境 (1~%d): " % sits.size(), "numeric", _cb_in3236, false,
 					sits.map(func(k): return AdvisorSystem.situation_label(k)))
 	_refresh()
+
+func _ask_advisor(advisor_pid: int, situation: String, target_id: int) -> void:
+	var r: Dictionary = _bridge.command_player("ask_advisor", {"advisor_pid": advisor_pid, "situation": situation, "target_id": target_id})
+	if not bool(r.get("ok", false)):
+		_set_feedback(false, String(r.get("message", "問不了")))
 
 func _build_advisor_str() -> String:
 	var members: Array = _cached_snapshot.get("members_detail", [])
@@ -3661,7 +3674,7 @@ func _build_trade_str() -> String:
 		else:
 			if not shown_want:
 				lines.append("我要（對方物資）："); shown_want = true
-		lines.append("  [%d] %s ×%d (值%.1f)" % [label, row["grade"], int(row["qty"]), float(row["unit_value"])])
+		lines.append("  [%d] %s ×%d (值%.1f)" % [label, TextBank.res_name(String(row["grade"])), int(row["qty"]), float(row["unit_value"])])
 	if rows.size() > 9:
 		lines.append("第 %d/%d 頁 [,]上 [.]下" % [_trade_page + 1, int(ceil(rows.size() / 9.0))])
 	# 當前出價
@@ -3669,9 +3682,9 @@ func _build_trade_str() -> String:
 	var gives: Dictionary = off.get("gives", {})
 	var wants: Dictionary = off.get("wants", {})
 	var go: Array = []
-	for k in gives: go.append("%s×%d" % [k, int(gives[k])])
+	for k in gives: go.append("%s×%d" % [TextBank.res_name(String(k)), int(gives[k])])
 	var wo: Array = []
-	for k in wants: wo.append("%s×%d" % [k, int(wants[k])])
+	for k in wants: wo.append("%s×%d" % [TextBank.res_name(String(k)), int(wants[k])])
 	lines.append("出價：給 %s ⇄ 要 %s" % [
 		"—" if go.is_empty() else "、".join(go),
 		"—" if wo.is_empty() else "、".join(wo)])
