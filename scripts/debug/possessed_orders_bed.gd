@@ -7,6 +7,7 @@ extends SceneTree
 #       押貨進待領帳；押貨帳對帳零違反、貨總量守恆
 #       ★訂單沒有來源欄 ⇒「AI 單」由床在附身【之前】直接呼 post_order 造；驗收不宣稱分得出來源
 #   A3  玩家自己的掛單（player_command_api.post_sell_order → post_order）照常成立
+#   ★到場點名：四格各自報到，末行印「到場 4／4」（expect 釘它）
 #   負對照：拿掉 order_system.tick_team_orders 的 possessed return ⇒ A1／A1b 紅；拿掉 sync_possession 的撤單 ⇒ A2 紅
 # 跑法：.\tools\godot.ps1 --headless --script scripts/debug/possessed_orders_bed.gd
 
@@ -14,6 +15,8 @@ const SEED: int = 1337
 const SURPLUS: float = 400.0
 
 var _errors: int = 0
+var _present: Dictionary = {}
+const CELLS: Array = ["A1", "A1b", "A2", "A3"]
 
 
 func _check(label: String, ok: bool) -> void:
@@ -30,7 +33,14 @@ func _initialize() -> void:
 	_a1b_direct()
 	_a2_expiry_returns()
 	_a3_player_order()
-	print("=== possessed_orders DONE === errors: %d" % _errors)
+	var n: int = 0
+	for c in CELLS:
+		if _present.has(c):
+			n += 1
+		else:
+			push_error("[FAIL] 格 %s 沒有跑完（到場點名缺）" % c)
+			_errors += 1
+	print("=== possessed_orders DONE === 到場 %d／%d errors: %d" % [n, CELLS.size(), _errors])
 	quit(1 if _errors > 0 else 0)
 
 
@@ -73,6 +83,7 @@ func _a1_real_day() -> void:
 	var nt: TeamData = _npc_team(st)
 	_check("★母體地板：玩家隊 possessed＝真、對照隊存在且非附身", pt.possessed and nt != null and not nt.possessed)
 	if nt == null:
+		_present["A1"] = true
 		return
 	_stuff(pt)
 	_stuff(nt)
@@ -91,6 +102,7 @@ func _a1_real_day() -> void:
 		nt.team_id, seen_n.size(), str(seen_n.values())])
 	_check("A1 附身隊推 1 天：新增 AI 單 0", seen_p.is_empty())
 	_check("A1 對照：非附身隊同條件 >0（條件真的會觸發掛單）", seen_n.size() > 0)
+	_present["A1"] = true
 
 
 func _a1b_direct() -> void:
@@ -100,6 +112,7 @@ func _a1b_direct() -> void:
 	var nt: TeamData = _npc_team(st)
 	if nt == null:
 		_check("★對照隊存在", false)
+		_present["A1b"] = true
 		return
 	_stuff(pt)
 	_stuff(nt)
@@ -114,6 +127,9 @@ func _a1b_direct() -> void:
 
 
 # 找一格別隊擁有的據點（寄賣才押貨）
+	_present["A1b"] = true
+
+
 func _foreign_outpost(st: WorldState, tid: int) -> HexTileData:
 	var ids: Array = st.world.tiles.keys()
 	ids.sort()
@@ -144,6 +160,7 @@ func _a2_expiry_returns() -> void:
 	var tile: HexTileData = _foreign_outpost(st, pt.team_id)
 	if tile == null:
 		_check("★母體地板：地圖上有別隊據點可寄賣", false)
+		_present["A2"] = true
 		return
 	pt.tile_pos = tile.tile_pos
 	_stuff(pt)
@@ -178,6 +195,7 @@ func _a2_expiry_returns() -> void:
 	_check("A2 撤後押貨帳對帳零違反（checked=%d：這張單已出帳，0 是預期）" % int(aud["checked"]), _clean(aud))
 	os_.tick_team_orders(st, pt)
 	_check("A2 附身隊 tick_team_orders 之後沒有新的 AI 單", pt.active_orders.is_empty())
+	_present["A2"] = true
 
 
 func _clean(a: Dictionary) -> bool:
@@ -197,3 +215,6 @@ func _a3_player_order() -> void:
 			found = true
 	print("   回傳 %s｜附身隊 active_orders 有那張=%s" % [str(r), str(found)])
 	_check("A3 玩家 post_sell_order 成立、單在附身隊上", found)
+	_present["A3"] = true
+
+
