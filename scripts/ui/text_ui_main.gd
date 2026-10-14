@@ -344,7 +344,7 @@ func _process(_delta: float) -> void:
 			and _arrive_target != Vector2i(-1, -1):
 		var _pos: Vector2i = _bridge.get_player_tile_pos()
 		if _pos == _arrive_target:
-			_log_event("抵達 (%d,%d)" % [_arrive_target.x, _arrive_target.y])
+			_log_event(_arrival_sentence(_arrive_target))
 		else:
 			_log_event("停下：%s（停在 (%d,%d)）" % [_move_stop_reason(_bridge.get_player_task_reason(), _arrive_target), _pos.x, _pos.y])
 		if _arrive_mode:
@@ -1356,7 +1356,7 @@ func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
 	_arrive_advance = false
 	var pos: Vector2i = _bridge.get_player_tile_pos()
 	if pos == _arrive_target:
-		_set_feedback(true, "抵達 (%d,%d)" % [pos.x, pos.y])
+		_set_feedback(true, _arrival_sentence(pos))
 	else:
 		var why: String = _advance_stop_reason(result)
 		if why == "":
@@ -1370,6 +1370,14 @@ func _report_arrive_advance(ps: Dictionary, result: Dictionary) -> void:
 	# ★還在走（途中被事件停下）⇒ 目的地留著：之後到了才認得出是「抵達」
 	if _bridge.get_player_move_target() == Vector2i(-1, -1):
 		_arrive_target = Vector2i(-1, -1)
+
+# ★抵達句（spec 2026-10-13-move-eta-same-ruler 改法 4）：「抵達 (q,r)（走了 N 分鐘）」讓玩家對帳下令時的「預計 N 分鐘」
+#   N＝模擬的抵達 tick − 下令 tick（bridge 逐 tick 記的；1 tick＝1 分鐘）；那一筆不是這個目的地 ⇒ 不印分鐘
+func _arrival_sentence(pos: Vector2i) -> String:
+	var arr: Dictionary = _bridge.get_player_last_arrival()
+	if arr.is_empty() or arr.get("pos") != pos:
+		return "抵達 (%d,%d)" % [pos.x, pos.y]
+	return "抵達 (%d,%d)（走了 %d 分鐘）" % [pos.x, pos.y, int(arr["tick"]) - int(arr["order_tick"])]
 
 # ★「停下：<原因>」的原因（spec multi-hop-move UI）：讀 task_reason（帶來源的 release 留下的），不由 UI 猜
 static func _move_stop_reason(reason: String, dest: Vector2i) -> String:
