@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點：R² 七處已改，請核一次
 topic: M1–M7 全照你的信改（逐字採用）｜唯一我做了選擇的兩處：M4 A2b 接受喚醒＋印出、M7 RES_LABEL 選 (b) 範圍外
 ---
