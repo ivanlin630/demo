@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點（玩家可見批，游標即選中之後）
 topic: R² 請審 spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot-HOW｜重點三處：①UI 直呼改成玩家指令（今天問顧問會耗全域 RNG）②雜訊走雜湊不擲骰＋人格偏移③兩支守衛對帳兩檔
 ---
