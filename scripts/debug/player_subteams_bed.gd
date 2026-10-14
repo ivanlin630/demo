@@ -177,7 +177,7 @@ func _seed_foreign_outpost(st: WorldState, pos: Vector2i) -> int:
 	var other: int = -1
 	for tid in st.teams:
 		var t: TeamData = st.teams[tid]
-		if int(tid) != pt.team_id and t.parent_team_id == -1 and t.beast_kind == "" and not TeamData.is_kin(pt, t):
+		if int(tid) != pt.team_id and t.parent_team_id == -1 and t.beast_kind == "" and pt.parent_team_id != int(tid):   # 非自家人（頂層隊、不是玩家隊的母隊）
 			other = int(tid)
 			break
 	var tile: HexTileData = _tile(st, pos)
@@ -211,7 +211,9 @@ func _s1_forage() -> void:
 	# ★採集是被動的、只在有營地／據點的格（resource_system collect）⇒ 「有糧源的格」＝有營地且池裡有糧
 	var bare: Vector2i = _other_free_neighbor(st, tgt)
 	if bare != Vector2i(-1, -1):
-		var sent_b: String = PlayerCommandSystem._subteam_task_sentence(st, TeamData.TASK_FORAGE, bare)
+		# ★修前樹沒有這一支 ⇒ callv（修前讀到空字串＝那一格紅，不是編不過）
+		var pcs := PlayerCommandSystem.new()
+		var sent_b: String = String(pcs.callv("_subteam_task_sentence", [st, TeamData.TASK_FORAGE, bare])) if pcs.has_method("_subteam_task_sentence") else ""
 		print("   光格 %s 的結果句「%s」" % [str(bare), sent_b])
 		_check("S1b 沒營地／據點的格 ⇒ 結果句不報產出、說採不到", not sent_b.contains("此格產出") and sent_b.contains("採不到"))
 	var ct: HexTileData = _tile(st, tgt)
