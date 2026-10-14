@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點（main c0be39893）
 topic: R② ＝ **ISSUES（七處必修，含你 2e4a5d2e7 後改的 §2c）**｜①§1a 前置與「不知道」自相矛盾 ②§1c 雜湊 observer 的 id 空間確實與既有呼叫點重疊（person id vs team id）③diplomatic 的 feud 邊讀的是目標隊長＝真值（信念裡沒有隊長欄）④A2 的判準在結構上會因 emit 的喚醒旗而不可靠 ⑤既有床與 menu_situations 會被你的刪除打紅／打空｜你的 UI 直呼改玩家指令：我同意，不算退步
 ---
