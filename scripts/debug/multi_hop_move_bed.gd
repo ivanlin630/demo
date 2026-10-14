@@ -1,7 +1,7 @@
 extends SceneTree
 # @bed-kind: invariant
 # 多格移動走一格就停（spec 2026-10-13-multi-hop-move-stops-after-first-tile-HOW）＋不變量 #12（附身隊決策層不得寫）
-#   P1  play.py 同一重現（seed 1337：x w w enter m ＋ x×12 ＋ l）⇒ 最終在 (9,0)、事件流有「抵達 (9,0)」、沒有「抵達 (10,2)」
+#   P1  play.py 同一重現（seed 1337：x w w m ＋ x×12 ＋ l；原串的 enter 只承擔「選格」，游標即選中票拿掉）⇒ 最終在 (9,0)、事件流有「抵達 (9,0)」、沒有「抵達 (10,2)」
 #   P5c 同一輪：抵達後 task＝idle、priority 0
 #   P2  下令到兩格外 ⇒ 走到；途中不印抵達、到了恰一筆
 #   P3  下令到不可達格（六鄰格移出地圖）⇒ 結果行「無法抵達」、move_target 沒被寫
@@ -17,7 +17,7 @@ extends SceneTree
 # 跑法：.\tools\godot.ps1 --headless --script scripts/debug/multi_hop_move_bed.gd
 
 const SEED: int = 1337
-const REPRO_KEYS: Array = ["x", "w", "w", "enter", "m", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "l"]
+const REPRO_KEYS: Array = ["x", "w", "w", "m", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "l"]
 # ★allowlist（P5／P7）：附身隊 task／move_target 的合法寫入來源
 const ALLOWED_SRC: Array = ["arbiter.try_set:player_move", "arbiter.try_set:player_rest", "arbiter.try_set:player_settle",
 	"arbiter.release:arrival", "arbiter.release:player_cancel", "arbiter.release:path_broken", "arbiter.release:construction_done"]
