@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家可見批第 7 張（消滅三漏＋俘虜接帳＋追擊＋combat_end 玩家事件）——R① 前提 factcheck
 topic: R① 請核 note §0／§1a 的 code 前提；我已發現一條疑似不成立（失能者「從不寫回 wounded」），寫 spec 前要先坐實
 ---
