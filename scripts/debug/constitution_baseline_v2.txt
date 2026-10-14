@@ -78,3 +78,4 @@ scripts/simulation/faction_ai_system.gd::_faction_has_workshop::gv_mapscan  # le
 scripts/simulation/faction_ai_system.gd::_find_own_outpost::gv_mapscan  # legit-self: 掃 own outpost
 scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_teamstate  # gray: 同-faction own-member pop(faction 知自家人,可 known_member_states 精修待評)
 scripts/simulation/faction_ai_system.gd::_enemy_outpost_positions::gv_mapscan  # gate-ok(legit,followup-fixed 63d93aab): belief-filtered(owner-belief proxy) 全圖 loop 保留但只避已知敵,非全知(loop 結構 hoist perf 留故 fingerprint 仍在,tracked-legit)
+scripts/simulation/subteam_system.gd::send_home::taskarbiter  # gate-ok: 玩家令 PRIO_PLAYER（召回送達／建設逾時強制併回，spec player-subteams 三；同 _action_order_subteam；交件信呈報 systems）
