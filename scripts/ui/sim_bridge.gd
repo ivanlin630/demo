@@ -13,6 +13,10 @@ var _runner: SimRunner
 var _state: WorldState
 var _ticks_remaining: int = 0
 var _query_api: PlayerQueryApi = PlayerQueryApi.new()
+# ★抵達對帳（spec 2026-10-13-move-eta-same-ruler 改法 4）：玩家隊最近一次走到目的地的 {tick, order_tick, pos}
+#   tick＝模擬清掉 move_target 的那一顆（逐 tick 推進時當場記，不是 UI 輪詢看到的那一顆）
+#   order_tick＝那趟的下令 tick（TASK_TRAVEL 的 task_start_tick；抵達的 release 不改它）
+var _last_arrival: Dictionary = {}
 
 func _init(runner: SimRunner, state: WorldState) -> void:
 	_runner = runner
@@ -117,7 +121,9 @@ func advance_ticks(n: int) -> Dictionary:
 		var snap := _snapshot()
 		var seq0: int = _state.player_event_seq
 		var player_pos: Vector2i = _player_tile()
+		var travel0: Array = _player_travel_snap()
 		var r: String = _runner.advance_tick(_state, player_pos)
+		_note_player_arrival(travel0)
 		if r != "" and stalled_at == -1:
 			stalled_at = _state.world.current_tick
 			stall_reason = r
@@ -156,6 +162,26 @@ func advance_encounter_tick() -> String:
 			return "ongoing"
 
 # ── helpers ───────────────────────────────────────────────
+
+# [move_target, task_start_tick]（沒有玩家隊 ⇒ 空）
+func _player_travel_snap() -> Array:
+	var t: TeamData = _state.teams.get(get_player_team_id())
+	return [t.move_target, t.task_start_tick] if t else []
+
+# 這一顆 tick 玩家隊走到了（目標被清、release 來源＝arrival）⇒ 記下抵達 tick
+#   ★「之前有目標」或「這顆 tick 才下令」（下令與抵達同一顆：整點下令、上一趟餘量夠走一格）兩種都算
+func _note_player_arrival(snap: Array) -> void:
+	var t: TeamData = _state.teams.get(get_player_team_id())
+	if t == null or snap.is_empty():
+		return
+	if t.move_target != Vector2i(-1, -1) or t.task_reason != "arrival":
+		return
+	if snap[0] == Vector2i(-1, -1) and int(snap[1]) == t.task_start_tick:
+		return
+	_last_arrival = {"tick": _state.world.current_tick, "order_tick": t.task_start_tick, "pos": t.tile_pos}
+
+func get_player_last_arrival() -> Dictionary:
+	return _last_arrival
 
 func _player_tile() -> Vector2i:
 	if _state.player_id < 0: return Vector2i.ZERO

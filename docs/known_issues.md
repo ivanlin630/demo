@@ -5678,6 +5678,9 @@ faction_ai_system.gd:7612 `_estimate_eta_to` → PathSystem.eta_ticks(team, path
 物理 movement_system.gd move_cost_pure 另乘晝夜（DayNightSystem.get_speed_mult，夜 0.5）、超載、車輛，且每格用腳下地形。
 玩家側由「移動預計時間＝同一把尺」票修（spec 2026-10-13-move-eta-same-ruler-HOW），AI 側改了動決策與 world-fp ⇒ 歸深層批。
 修法方向：AI 改用同一支 estimate_travel_ticks（該票新增）。
+量（scripts/debug/move_eta_bed.gd AI 格，平原兩格、21:50 下令）：舊估算 480、新估算 670、實走 670 ⇒ 舊估算低估 28.4%。
+  ★這是一格的數，不是 AI 全體的分佈（跨夜比例、窗口相位、地形、超載都會改它）：
+    同床負對照 n1（玩家句改回 eta_ticks）的 10:00 平原兩格是 480 對實走 840（低估 43%）——白天也低估，所以不只是漏晝夜（各項各佔多少沒拆）。
 ```
 
 ## 多格移動下令時的可達判斷讀真地圖：對沒去過的格會洩露地形，且「不可達」近乎不會發生
