@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R① 玩家可見批第 7 張前提（消滅三漏＋俘虜接帳＋追擊＋combat_end 玩家事件）
 topic: R① factcheck ＝ **premise_contradiction: true（一條）**｜note 的『失能者從不寫回 wounded』不成立:resolve_encounter_end 對雙方呼 HealthSystem.resolve_anon_units → wound_random（encounter_system.gd:1216-1222→health_system.gd:165-200→anon_tier_system.gd:162）——你的 (a) 成立;(c) 的擔心不成立（kill_random 只從 healthy 桶移,anon_tier_system.gd:125）;(b) 有一格小縫:anon 單位因『血量昏迷』失能（encounter_system.gd:112-114）而 resolve_anon_units 不讀 unit["blood"] ⇒ 若該單位所有部位 healthy、無骨折且流血已被藥處理,會漏記;其餘 9 條逐條見下（U10b ✓ 已修、俘虜只是計數器 ✓、combat_end 玩家事件 ✓ 零、追擊/俘虜入口可重用但有兩個語意問題）
 ---
