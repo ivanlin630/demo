@@ -125,21 +125,25 @@ static func belief_pos(state: WorldState, observer_id: int, target_id: int) -> V
 	var tgt: TeamData = state.teams.get(target_id)
 	if obs == null or tgt == null:
 		return Vector2i(-1, -1)
-	var now: int = state.world.current_tick
 	# 同-faction → known_member_states 通道（自家人）
 	if tgt.faction_id != -1 and tgt.faction_id == obs.faction_id:
 		var f = state.factions.get(obs.faction_id)
 		if f == null:
 			return Vector2i(-1, -1)
 		var kms: Dictionary = f.known_member_states.get(target_id, {})
-		if kms.is_empty() or now - int(kms.get("last_tick", 0)) > BELIEF_STALE_TICKS:
+		if kms.is_empty() or belief_stale(state, int(kms.get("last_tick", 0))):
 			return Vector2i(-1, -1)
 		return kms.get("tile_pos", Vector2i(-1, -1))
 	# 跨-faction → BeliefSystem last-seen
 	var bel: Dictionary = best_estimate(state, observer_id, target_id)
-	if bel.is_empty() or now - int(bel.get("last_tick", 0)) > BELIEF_STALE_TICKS:
+	if bel.is_empty() or belief_stale(state, int(bel.get("last_tick", 0))):
 		return Vector2i(-1, -1)
 	return bel.get("tile_pos", Vector2i(-1, -1))
+
+# ★位置 belief 的過期線（belief_pos 的兩條通道與玩家情報頁共用這一支；spec 2026-10-13-intel-panel-HOW）
+#   last_tick＝位置年齡的起點（value.last_tick／known_member_states.last_tick）；超過 BELIEF_STALE_TICKS ⇒ 視同不知
+static func belief_stale(state: WorldState, last_tick: int) -> bool:
+	return state.world.current_tick - last_tick > BELIEF_STALE_TICKS
 
 # ★★★【位置估計：事實 ＋ 年齡 ＋ 漂移，判斷交給呼叫端】（spec 2026-09-18 Slice 1）
 #

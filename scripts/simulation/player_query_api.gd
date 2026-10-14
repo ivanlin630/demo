@@ -45,11 +45,19 @@ func get_inquiry_options(state: WorldState, target_id: int) -> Dictionary:
 func get_recruit_menu(state: WorldState, target_id: int) -> Dictionary:
 	return _query_menu(state, target_id, "recruit")
 
-# ★★★記憶頁（spec §3(G)）：打聽寫進去的東西，玩家要【看得見】。
+# ★★★記憶頁（spec §3(G)）：打聽寫進去的東西，玩家要【看得見】。★頁名＝情報（spec 2026-10-13-intel-panel-HOW；函式不改名）
 #   ★沒有它，(A) 做完了玩家也看不見 ⇒ 而【看不見的需求不會回來敲門】：
 #     它會變成「打聽好像沒用」然後沒有人再提。
 #   ★★【唯讀、零寫、零 RNG】—— 它只讀 `state.team_intel[ptid]`（走 BeliefSystem 的
-#     `known_targets()`／`claims()`，不自己解析那個結構：解析兩份會漂）。
+#     `known_targets()`／`claims()`／`best_claim()`，不自己解析那個結構：解析兩份會漂）。
+#   ★★★payload 是 belief 的純函數（I8）：只放【絕對 tick】；「N 分鐘前」與「太久，視同不知」是相對現在的 ⇒ UI 組句時算
+#     （過期謂詞 BeliefSystem.belief_stale，游標處 _remembered_teams_at 經 belief_pos 走同一支）
+#   ★零真值：每一欄都來自 belief／附身隊自己的帳（known_reputations、known_outposts），不讀別隊的 tile_pos 等真值
+#   回 {memory: 隊伍列, outposts: 據點列, faction_relations: [], food_sources: null}
+#     隊伍列：{target_id, claim_count, latest_tick, source, source_id, is_suspicious,
+#              pos（無位置 ⇒ 不帶此鍵）, pos_tick（value.last_tick＝位置年齡）, firsthand, relation（未知 ⇒ 不帶此鍵）,
+#              population_est／armed_est（belief 有才帶）}
+#     據點列：{tile_pos, owner_id, g（附身隊領袖的看法）, type, level, last_tick}
 func query_memory_panel(state: WorldState) -> Dictionary:
 	# ★★★守衛要照【本檔的】慣例：`_check_player_with_team()` 回的 Dictionary【永遠非空】
 	#   （成功時是 `{"code": "ok", ...}`）⇒ 用 `is_empty()` 判會【永遠提早返回】。
@@ -59,6 +67,7 @@ func query_memory_panel(state: WorldState) -> Dictionary:
 	if check["code"] != "ok":
 		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
 	var ptid: int = state.get_player_team_id()
+	var pt: TeamData = state.teams.get(ptid)
 	var rows: Array = []
 	for tgt in BeliefSystem.known_targets(state, ptid):
 		var cs: Array = BeliefSystem.claims(state, ptid, int(tgt))
@@ -73,7 +82,7 @@ func query_memory_panel(state: WorldState) -> Dictionary:
 				src = int(c.get("source_id", -1))
 			if bool(c.get("is_suspicious", false)):
 				suspicious = true
-		rows.append({
+		var row: Dictionary = {
 			"target_id": int(tgt),
 			"claim_count": cs.size(),
 			"latest_tick": latest,
@@ -81,9 +90,43 @@ func query_memory_panel(state: WorldState) -> Dictionary:
 			"source": ("Team%d" % src) if src != -1 else "不明",
 			"source_id": src,
 			"is_suspicious": suspicious,
-		})
+		}
+		# ★位置＝勝出那一筆 claim 的 value（游標處同一支 best_claim）；位置年齡＝value.last_tick（轉述時繼承 giver 的）
+		var bc: Dictionary = BeliefSystem.best_claim(state, ptid, int(tgt))
+		var val: Dictionary = bc.get("value", {})
+		row["firsthand"] = is_firsthand(bc, ptid)
+		if val.has("tile_pos") and val["tile_pos"] is Vector2i and val["tile_pos"] != Vector2i(-1, -1):
+			row["pos"] = val["tile_pos"]
+			row["pos_tick"] = int(val.get("last_tick", 0))
+		for k in ["population_est", "armed_est"]:
+			if val.has(k):
+				row[k] = val[k]
+		# ★關係＝隊層 belief（known_reputations）；沒有這一格 ⇒ 不帶鍵（UI 印「不明」，不補 0.5）
+		if pt != null and pt.known_reputations.has(int(tgt)):
+			row["relation"] = float(pt.known_reputations[int(tgt)])
+		rows.append(row)
 	rows.sort_custom(func(a, b): return int(a["target_id"]) < int(b["target_id"]))
-	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"memory": rows})
+	# ★據點／市集：游標處 F7 同一支（以附身隊呼叫：它讀該隊自己的 known_outposts 與自家勢力名冊）；
+	#   g＝隊的立場（取自隊伍領袖的 relation_edges）⇒ UI 標頭「關係＝你隊伍領袖的看法」
+	var ops: Array = []
+	if pt != null:
+		var meta: Dictionary = {}
+		for rec in BeliefSystem.known_outposts(state, ptid):
+			meta[rec["tile_pos"]] = rec
+		for r in FactionAISystem.shared()._known_outpost_relations(state, pt):
+			var m: Dictionary = meta.get(r["tile_pos"], {})
+			ops.append({"tile_pos": r["tile_pos"], "owner_id": int(r["owner_id"]), "g": float(r["g"]),
+				"type": String(m.get("type", "")), "level": int(m.get("level", 0)), "last_tick": int(m.get("last_tick", 0))})
+	ops.sort_custom(func(a, b): return int(a["last_tick"]) > int(b["last_tick"]) 		or (int(a["last_tick"]) == int(b["last_tick"]) and int(a["owner_id"]) < int(b["owner_id"])))
+	# ★勢力關係：附身隊 belief 沒有勢力層的那一種（只有隊層 known_reputations）⇒ 空 ⇒ UI 印「尚無」
+	# ★糧源：belief 沒有這一種（深層批「糧源情報 kind」）⇒ null ⇒ UI 印「尚無（還沒有這種情報）」，不偽造
+	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"memory": rows, "outposts": ops,
+		"faction_relations": [], "food_sources": null})
+
+# ★親見＝belief_system 的 firsthand 定義（source 是親見且就是自己）；別隊轉述的「親見」對我仍是聽說
+#   游標處 _remembered_teams_at 與情報頁共用這一支（spec 2026-10-13-intel-panel-HOW：重用同一個謂詞，不自寫）
+static func is_firsthand(bc: Dictionary, ptid: int) -> bool:
+	return not bc.is_empty() and String(bc.get("source_type", "")) == "親見" and int(bc.get("source_id", -1)) == ptid
 
 # ★失敗出口也要帶的鍵（故事結束兩鍵＋威脅欄 H0）—— 各自的產生者仍在 mapper，這裡只是組起來
 static func _always_keys(state: WorldState) -> Dictionary:
@@ -474,9 +517,8 @@ static func _remembered_teams_at(state: WorldState, ptid: int, pos: Vector2i, se
 		var bc: Dictionary = BeliefSystem.best_claim(state, ptid, int(tid2))
 		var val: Dictionary = bc.get("value", {})
 		out.append({"id": int(tid2), "tick": int(val.get("last_tick", 0)),
-			# ★親見＝belief_system 的 firsthand 定義（source 是親見且就是自己）；別隊轉述的「親見」對我仍是聽說
-			"heard": not bc.is_empty() and not (String(bc.get("source_type", "")) == "親見"
-				and int(bc.get("source_id", -1)) == ptid)})
+			# ★親見的定義在 is_firsthand（情報頁同一支）；best_claim 空 ⇒ 不算聽說（沿用舊式：空 claim 時 heard＝false）
+			"heard": not bc.is_empty() and not is_firsthand(bc, ptid)})
 	return out
 
 static func _hex(a: Vector2i, b: Vector2i) -> int:
