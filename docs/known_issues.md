@@ -5643,6 +5643,18 @@ owner 是附身隊時＝AI 替玩家定稅率（#12 同族）。玩家沒有調�
 出處：spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW §範圍外。
 ```
 
+## 玩家交出盟主後，他設的勢力目標仍留著驅動 NPC 勢力
+
+狀態：已知未修
+
+回訪：觸發事件 —— 「你領導的勢力不自動定目標」merge 時（同一個 _rebuild_goals 分流，順手判要不要在交出時清）。
+
+```
+FactionData.player_goal_override 唯一寫者 player_command_system.gd:1543；_rebuild_goals:1939 非空就只放它。
+玩家死亡繼位／換附身後，盟主變 NPC，override 仍在 ⇒ NPC 勢力被玩家上一次的令定死、不再依人格產目標。
+出處：R² 2026-10-15-reviewer-to-systems-R2-player-led-faction-ISSUES §3。
+```
+
 ## 掛單與押貨（escrow）對玩家不可見
 
 狀態：已知未修

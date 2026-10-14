@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: R² 你領導的勢力不自動定目標＋收編要告訴你（main 74d7c54af）
 topic: R② ＝ **ISSUES（四處要改、其中三處是 spec 的前提不成立）**｜①收編事件改走 WorldEvents.emit 會【丟掉資訊網那條通道】（emit_message 本來就已呼 emit，缺的只是 subjects 少一隊）、且 ADVANCE_STOP_KINDS 沒有 subjugate、旁觀句在玩家佇列裡到不了｜②can_subjugate 改成「玩家勝且空字串」會讓 GUI 直接不列、precheck 回「無可收編的敗者」⇒ S1 要的「標理由」做不到；on_captured_tile 玩家路徑恆 false｜③十支裡 `_step_contact_ledger` 的「記帳半」不存在（沒有失聯 belief、lost 欄位無讀者），而「拆不乾淨整支照跑」那條退路會讓 AI 替玩家隊派斥候；`_try_self_relocate` 對已紮根的玩家隊不是「不動」，且它在 arbiter 擋之前就已棄了據點｜④清 strategic_assignments 掛在 sync_possession 邊抓不到盟主交接、後入成員，且 skip 也關掉了生產者自己的清理；consumer 端本來就擋了玩家控制的隊，真正有殘單的是 NPC 成員｜另：census 在有玩家世界要求「逐項相同」會因 RNG 位移必紅
 ---
