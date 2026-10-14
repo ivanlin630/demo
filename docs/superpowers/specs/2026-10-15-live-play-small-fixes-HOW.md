@@ -1,6 +1,6 @@
 # 真玩小修（七項）——HOW
 
-狀態：R² ISSUES（2026-10-15-reviewer-to-systems-R2-live-play-small-fixes-ISSUES）已改；§1 審查的 merge_preview 疑點因藍圖裁「整隊或不成」整條路改掉而不再成立（不碰 `_merge_into`）；§1 新簽名與 §5 處置另寄審查核一眼（…-R2b-live-play-small-fixes）
+狀態：**GO**——R² 三輪（ISSUES → §1／§5 ISSUES → §1 俘虜一洞）全改；第三輪審查說補完不需再審
 來源：藍圖真玩 06a40cb3d 歸票（2026-10-14-blueprint-to-systems-TICKETS-live-play-findings…§3,5,7）＋拔擢說餉（2026-10-14-…-TICKET-promote-anon-says-expected-salary…，只收 WHAT 1；「提拔一個身體」歸結構輪）＋頂列截斷裁定（2026-10-14-…-RULING-header-truncation-whole-cell-or-drop）。
 順位：玩家可見批尾，排在「你領導的勢力」之後。
 表：`docs/playtest/2026-10-14-round5-blueprint-live-play.md`（畫面原檔路徑在表內）。
@@ -11,7 +11,7 @@
 - 執行 `_accept_join_request`（:1669-1693）→ `merge_teams`（:1688）→ `_merge_into`（subteam_system.gd:321）：只有 `absorbed.parent_team_id == absorber_id`（自家子隊回來）才搬隊長與記名（:337-347）；求投靠的隊不是子隊 ⇒ **只搬匿名**，且按 `min(pop, 容量)/pop` 比例（:349-352），剩下的另成一隊「部分合併」（:359-361）。糧按實際增量扣（:1689-1691）。
 - ⇒ 列的是全隊、做的是匿名×容量比例。真玩「列 +4 −3.2、做 1 −0.8」吻合。
 改法（藍圖裁 2026-10-15-blueprint-to-systems-RULING-join-request-whole-team-or-nothing-no-half-team：求投靠＝整隊、裝不下＝不成、不切半隊；意圖帳「邀請併入」列 10-07 已寫同秤反向＋整隊走收留同路 ⇒ 今天的「只搬匿名」是缺陷，本項直接把身體改對，不先為缺陷的身體做預覽）：
-- 一支 `SubteamSystem.absorb_whole_team(state, absorber, absorbed) -> {ok:bool, reason:String, moved:int}`＝`absorb_block_reason` 把關 → 呼既有 `merge_teams(state, absorber, absorbed, [absorbed.leader_id] + 記名成員, anon_total)`（subteam_system.gd:235 長分支）。**不另寫搬人實作**：長分支本來就搬光 minor_population（:291-299，用戶裁「小孩跟著大人走」）、掃光 anon_treasury 與資源（:217-229 will_empty）、pop 歸零才 erase。被併隊名下的據點、子隊、勢力身分、captive_groups 的處置＝長分支／erase 既有行為；實作端在交件信逐項列（file:line）它們各去哪，若有一項蒸發就停下回報，不自行補第三份。前置三閘照既有收留路（上限／食物／關係）。**上限塞不下整隊 ⇒ ok:false**，理由「上限 {cap}，現有 {n}，對方 {m} 人」；不切半隊。
+- 一支 `SubteamSystem.absorb_whole_team(state, absorber, absorbed) -> {ok:bool, reason:String, moved:int}`＝`absorb_block_reason` 把關 → 呼既有 `merge_teams(state, absorber, absorbed, [absorbed.leader_id] + 記名成員, anon_total)`（subteam_system.gd:235 長分支）。**不另寫搬人實作**：長分支本來就搬光 minor_population（:291-299，用戶裁「小孩跟著大人走」）、掃光 anon_treasury 與資源（:217-229 will_empty）、pop 歸零才 erase。**俘虜要明寫一步**（R² 第三輪：merge_teams 全函式與 erase_teams 都不碰 captive_groups ⇒ 會整組蒸發）：absorb_whole_team 在呼 merge_teams **之前**把被併隊的 captive_groups 整組轉到 absorber 名下（holder 欄一併改），不讓 erase 順便處理。理由＝整隊加入，隊上押著的人跟著來（與小孩跟著大人走同一句話）。容量：absorber 是玩家隊 ⇒ 照第 7 張戰後收尾 §2c 對玩家 holder 的規則（不自動處置、超額發「看守不足」邊緣事件，玩家自己決定）；第 7 張排在本票之前 merge，本票不另寫容量處置。被併隊名下的據點、子隊、勢力身分的處置＝長分支／erase 既有行為；實作端在交件信逐項列（file:line）它們各去哪，若有一項蒸發就停下回報，不自行補第三份。前置三閘照既有收留路（上限／食物／關係）。**上限塞不下整隊 ⇒ ok:false**，理由「上限 {cap}，現有 {n}，對方 {m} 人」；不切半隊。
 - 配一支純判斷 `absorb_block_reason(state, absorber, absorbed) -> String`：`forced_label`（選單）、`_accept_join_request`（執行）、`absorb_whole_team` 自己都呼它 ⇒ 列的條件＝做的條件。
 - 選單：可 ⇒「收留（+{m} 人，食物 −{0.8m}）」；不可 ⇒ 照列並標「不可：{理由}」，按下回同一句。
 - **不碰 `_merge_into`**（它還服務子隊回歸 subteam_system.gd:212；R² §1）：走的是 `merge_teams` 帶 transfer 清單的長分支，不經 `_merge_into` 的比例分支 ⇒ 子隊回歸與 NPC 合併路逐位不變。
@@ -22,7 +22,7 @@
 驗收：
 - J1（修前紅）：對方 1 隊長＋1 記名＋2 匿名、容量足 ⇒ 選單「+4 人，食物 −3.2」；接受後人口 +4、糧 −3.2、對方隊不存在、隊長與記名在玩家隊名冊。
 - J2（修前紅）：容量只剩 2 ⇒ 選單標「不可：上限…對方 4 人」；按下 ok=false、雙方人口不變、沒有多出一支隊、**強制事件仍在**（可改按婉拒）。
-- J1b 守恆：佈置對方帶 2 小孩、1 組俘虜、coin 與資源、anon_treasury ⇒ 併入前後 人口＋minors＋俘虜＋coin＋各資源 總和相等（全世界加總），沒有人被記成死亡。
+- J1b 守恆：佈置對方帶 2 小孩、1 組俘虜、coin 與資源、anon_treasury、**一個非空據點、一支子隊** ⇒ 併入前後 人口＋minors＋俘虜＋coin＋各資源 總和相等（全世界加總），沒有人被記成死亡；俘虜組在 absorber 名下（負對照：拿掉轉俘虜那一步 ⇒ 俘虜格紅）；據點與子隊的去向照 erase 既有行為（據點 owner→-1、子隊孤兒化）印出來、交件信列，是否該跟著來另轉藍圖，本票不改。
 - J3：子隊回歸三格（容量足／容量不足／capacity<=0 早退 :330-334）修前修後結果逐位相同；NPC 合併 census 逐項相同（`_merge_into` 未改的證明，不只靠 world-fp）。
 - 負對照：forced_label 不呼 block_reason ⇒ J2 紅；`_accept_join_request` 改回 merge_teams ⇒ J1 紅。
 

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 真玩小修 §1 第二輪核對（main e179237ce）
 topic: R② ＝ **ISSUES（極小，一處）**｜搬移改呼 merge_teams 長分支與「不可」保留事件我都核過、對；唯一洞：captive_groups 長分支【不搬】、erase 也不碰 ⇒ 俘虜整組蒸發，J1b 的「俘虜」格必紅——這件事靜態讀就確定了，不用等交件信才「發現」，請現在在 spec 裡決定去向
 ---
