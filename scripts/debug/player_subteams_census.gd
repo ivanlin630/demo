@@ -4,6 +4,7 @@ extends SceneTree
 #   ①NPC 子隊「抵達即歸建」閘（faction_ai `merge.blanket.<task>`）在 30 天世界 fire 幾次、各 task 分佈
 #   ②自家人（譜系 TeamData.is_kin）外交：送出次數（kin.dip_send.<act>）、同格找上門（kin.forced_event.<act>）
 #   ③自家人被選為最大威脅的次數（kin.threat_best）
+#   ④獨立隊自家信使送不到令（herald.kin_nofaction_undelivered；送令只在 same_faction 分支，勢力 -1 永遠進不去）
 #   ★tap 只在 Probe.enabled 時記；修前樹要先打上同一組 tap（只加 tap、不動行為）才比得起來
 #   ★誠實限：default.json、帶玩家（玩家隊不下令＝閒置）；3 個 seed；遭遇以 draw 結束
 # 跑法：.\tools\godot.ps1 --headless --script scripts/debug/player_subteams_census.gd
@@ -46,7 +47,7 @@ func _run(sd: int, days: int) -> void:
 		if ks.begins_with("merge.blanket."):
 			blanket.append("%s=%d" % [ks.trim_prefix("merge.blanket."), int(c[k])])
 			blanket_n += int(c[k])
-		elif ks.begins_with("kin.") and not ks.ends_with("_sample"):
+		elif (ks.begins_with("kin.") or ks == "herald.kin_nofaction_undelivered") and not ks.ends_with("_sample"):
 			kin.append("%s=%d" % [ks, int(c[k])])
 	print("\n── seed %d｜%d 天｜首次未推進 %s ──" % [sd, days, first_stall if first_stall != "" else "無"])
 	print("   ①一律歸建閘 fire %d 次：%s" % [blanket_n, ", ".join(blanket) if not blanket.is_empty() else "（無）"])
