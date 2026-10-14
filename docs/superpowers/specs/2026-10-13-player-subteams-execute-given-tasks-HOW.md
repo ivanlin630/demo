@@ -16,7 +16,7 @@
 - **抵達觸發的生命週期寫入要有具名 EVENT 來源**（R² 擋①）：`start_build`（outpost_system.gd:581 的 `TaskArbiter.transition(…"建設", PRIO_DISPATCH)` 目前用預設來源 "transition"）、`_convert_to_resident`、`establish_crude_camp` 各給具名來源（例 `construction_started`／`resident_converted`／`camp_established`）加進 `EVENT_SOURCES`；**不得把 "transition" 或空字串整類放行**（＝撤守衛）。實作端 grep 這三支以外還有沒有抵達觸發的 transition，一併列。
 - 入口直接跳過（不只靠 arbiter 擋）：`_decide_subteam`（faction_ai_system.gd:4133-4134 → :4326）、loop3 野心層（:1732-1741）、`set_strategic_move`——對玩家子隊 return。外交提案生成同樣跳過。
 - **待機＝原地待命**：task IDLE 且無 move_target；不被任何層改派。
-- **物理與事件＝玩家事件**（藍圖 ③）：被攻擊（戰鬥鎖照舊 ⇒ 自衛自然發生）、糧將盡、紀律失效脫離（`_check_discipline`，randf 合法機率）、CONSTRUCT 10 天未開工強制併回、容量滿分團——每一件 emit 玩家相關事件（subjects 含玩家隊，wake=false），句子帶子隊名與位置，列 `ADVANCE_STOP_KINDS`。
+- **物理與事件＝玩家事件**（藍圖 ③）：被攻擊（戰鬥鎖照舊 ⇒ 自衛自然發生）、糧將盡、紀律失效脫離（`_check_discipline`，randf 合法機率）、CONSTRUCT 10 天未開工（**systems 2026-10-14 改：不強制併回，只發事件＋release `construct_timeout`，子隊在工地待命；玩家子隊只在玩家召回時併回**——不加憲法基準行）、容量滿分團——每一件 emit 玩家相關事件（subjects 含玩家隊，wake=false），句子帶子隊名與位置，列 `ADVANCE_STOP_KINDS`。
 - **逃與求生不自動做**（同附身隊已定規則：威脅／求生決策不放行，用事件通知、玩家決定召回或改令）。藍圖原文寫「被攻擊可自衛或逃」——自衛成立；**藍圖已確認（ce4041e3c）：不自己逃、不自己求生**，自衛照舊，只發事件並停推進。
 
 ## 三、各任務真的執行（缺陷修＋藍圖 ①②）

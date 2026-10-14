@@ -5704,3 +5704,38 @@ R² 2026-10-13 實量：現況一屏約 34 列（並排）；大地圖整寬（�
 faction_ai_system.gd:4126-4131：move_target==-1 且 task≠IDLE ⇒ 抵達即歸建（2026-09-22 measurer tap 已量到，未修；QA 2026-10-13 判決再坐實）。
 覓食／巡邏／偵查子隊因此一到就被叫回，執行端一 tick 都沒跑。玩家子隊票（spec 2026-10-13-player-subteams-execute-given-tasks-HOW）只對玩家子隊拿掉；NPC 照舊，改它會動 NPC 世界。
 ```
+
+## 獨立隊（無勢力）信使送不到自家子隊
+
+狀態：已知未修
+
+回訪：觸發事件 —— tap `herald.kin_nofaction_undelivered` 在任一觀察輪或量測 census 出現非 0；或社交層框架票改信使路由時一併處理。
+
+```
+interaction_system 的信使送令只在 same_faction 分支 ⇒ 勢力 -1 的隊永遠送不到自家子隊。
+玩家子隊票（2026-10-14）只對「收件人是玩家子隊、信使是自家人」放行；NPC 獨立隊同病未動。
+修前 census 3 seed × 30 天 tap 皆 0（自然局沒遇到）。
+```
+
+## 抵達觸發的生命週期寫入仍用預設來源 "transition"
+
+狀態：已知未修
+
+回訪：觸發事件 —— 附身隊或玩家子隊的選單能走到下列任一支時（新動作接上即回訪），先驗 arbiter 會不會擋，再給具名 EVENT 來源。
+
+```
+outpost_system start_upgrade_level:617、_begin_facility_construction:686、start_demolish:704、
+_subteam_upgrade_level:846、demolish_with_control:898；faction_ai _try_resume_construction:5723、
+_trigger_defection_evaluation:8101；interaction _execute_settlement:1771（玩家子隊票 2026-10-14 列出，玩家選單現在走不到）。
+```
+
+## 建到一半召回子隊＝工地與進度丟失
+
+狀態：已知未修
+
+回訪：觸發事件 —— 玩家回報或試玩中出現「召回後工地不見」；或據點維護即物理票動到工地生命週期時。
+
+```
+erase_teams 不清 construction_team_id；outpost tick 懶清（outpost_system.gd:396-399：施工隊不在就清工地）
+⇒ 玩家子隊建到一半被召回，工地與已投入進度一併消失。玩家子隊票 2026-10-14 發現，未改。
+```
