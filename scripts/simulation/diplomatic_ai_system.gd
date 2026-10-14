@@ -185,7 +185,10 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 			_send_diplomacy_message(state, self_team, other, "propose_alliance")
 			return
 		elif score > 0.4:
-			_send_diplomacy_message(state, self_team, other, "propose_trade")
+			# ★過渡暫停（defer token trade-proposal-paused-until-social-layer；藍圖框架票 4761fa563 第 6 條）：
+			#   通商提案目前零後果 ⇒ 不送。★分支【保留】、命中照樣消耗這一輪（return）——
+			#   刪掉它，0.4～0.6 的隊會落到下面的索貢＝暫停善意卻放大敵意（R²）。社交層框架票落地即恢復（屆時由秤決定提不提）
+			if Probe.enabled: Probe.bump("dip.trade_paused")
 			return
 
 		# G3-E leak 1a：power_gap 讀 belief 非 god-view 真值（無估→fallback self_pop=保守等強→gap0→不求貢）

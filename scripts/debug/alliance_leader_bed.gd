@@ -126,7 +126,7 @@ func _r1c_npc_silent() -> void:
 #   L2c F2 成員向 F1 領袖提案、領袖接受 ⇒ 成員照搬入 F1（反向保持）
 #   L5  兩勢力領袖之間 ⇒ 不成立（量測判定不是主要管道；見 alliance_growth_census）
 #   L8  臣服把領袖隊搬走 ⇒ 原勢力繼位或解散，不懸空
-#   L9  NPC 領袖不會對異勢力隊送 propose_alliance（選項層排除）；同輪改提通商
+#   L9  NPC 領袖不會對異勢力隊送 propose_alliance（選項層排除）；同輪改走通商那一支（通商提案暫停中 ⇒ 只記 dip.trade_paused）
 #   R1  玩家據點上的登記居民 R 向異勢力 T 提同盟 ⇒ 被拒（居民綁定），據點仍是玩家的、R 仍在玩家勢力
 #   R1b R 經別的路徑換旗 ⇒ 事件流有「居民 R 改投」
 #   R1d 結盟不轉讓據點：站在玩家據點上的產糧隊（非登記居民）與 T 結盟 ⇒ 據點仍是玩家的（舊 D C1 會送給 T）
@@ -290,9 +290,12 @@ func _l9_option_layer() -> void:
 	Probe.enabled = false
 	var sa: int = int(Probe.counts.get("dip.send.propose_alliance", 0))
 	var stt: int = int(Probe.counts.get("dip.send.propose_trade", 0))
-	print("   score %.2f｜送結盟 %d｜送通商 %d" % [score, sa, stt])
+	var tp: int = int(Probe.counts.get("dip.trade_paused", 0))
+	print("   score %.2f｜送結盟 %d｜送通商 %d｜通商暫停命中 %d" % [score, sa, stt, tp])
 	_check("★母體地板：分數夠高（>0.6，修前會送結盟）", score > 0.6)
-	_check("L9 領袖不對異勢力隊送結盟；同輪改提通商", sa == 0 and stt == 1)
+	# ★通商提案暫停中（defer token trade-proposal-paused-until-social-layer，spec 2026-10-13-player-action-audit ④）：
+	#   「同輪改提通商」＝走到通商那一支；暫停期間那一支不送、只記 dip.trade_paused（token 落地後改回 stt == 1）
+	_check("L9 領袖不對異勢力隊送結盟；同輪改走通商那一支（暫停中不送）", sa == 0 and stt == 0 and tp == 1)
 
 
 func _r1_resident() -> void:

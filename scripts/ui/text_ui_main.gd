@@ -301,6 +301,10 @@ func _process(_delta: float) -> void:
 		if int(r.get("seq", 0)) <= _last_shown_result_seq:
 			continue
 		_last_shown_result_seq = int(r.get("seq", 0))
+		# ★介面內部令（重掃同格對象）不是世界動作（spec 2026-10-13-player-action-audit ③）：
+		#   不進事件流、不進 feed、不蓋結果行；★佇列與世界寫入照舊（2026-09-24 裁：不搬出指令佇列）
+		if SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
+			continue
 		# ★★★形狀要照【這個檔既有的慣例】：`_events` 的元素是 Dictionary
 	#   （`_log_event()`（:1209）就是 `{"type":"ui","msg":msg}`，而讀者 :704／:1032 都用 `e.get("msg")`）
 	#   ★我這裡原本 append 的是【String】⇒ `String` 沒有 `.get()`
@@ -322,9 +326,8 @@ func _process(_delta: float) -> void:
 			"%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
 		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
 		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
-		if not SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
-			_write_feedback(_feedback_text(bool(r.get("ok", false)), String(r.get("text", ""))),
-				_feedback_color(bool(r.get("ok", false))))
+		_write_feedback(_feedback_text(bool(r.get("ok", false)), String(r.get("text", ""))),
+			_feedback_color(bool(r.get("ok", false))))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 	if _feed_rows.size() > 100:
@@ -1838,7 +1841,11 @@ func _build_hover_truth_lines() -> Array:
 
 func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -> Array:
 	var lines: Array = []
-	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
+	# ★玩家設過武裝目標 ⇒ 印「目標 X%／實際 Y%」（武器不夠時兩數不同）；沒設 ⇒ 舊行逐字不變
+	var _arm_tgt: float = float(ct.get("armed_target", -1.0))
+	var _arm_now: int = int(float(ct.get("armed_ratio", 0.0)) * 100.0)
+	var _arm_txt: String = ("比例%d%%" % _arm_now) if _arm_tgt < 0.0 else ("目標 %d%%／實際 %d%%" % [roundi(_arm_tgt * 100.0), _arm_now])
+	lines.append("人口: %d  武裝: %d (%s) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), _arm_txt, ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	# ★`starving` 隨「糧: X 天」那一行搬去生存頁了 ⇒ 這裡不再需要（留著會是未用變數警告）
 	var cap: Dictionary = ct.get("capabilities", {})
