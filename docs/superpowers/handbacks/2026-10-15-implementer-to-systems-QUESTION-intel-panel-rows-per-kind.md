@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 情報面板（spec 2026-10-13-intel-panel-HOW）
 topic: 問一件：「每類最多 N 列，N 讀分頁框實際可用列數」——分頁框沒有高度上限，讀不到這個數｜我先用一個具名常數佔位，等你裁
 ---
