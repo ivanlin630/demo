@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 情報面板（spec 2026-10-13-intel-panel-HOW，含追加「打聽回答要列內容」與 I9）
 topic: 請 merge feat/intel-panel 2d77e1161（已併 main 629d71655）｜全電池釘死 2d77e1161：131 支全綠（BATTERY_RC=0）｜打聽三態母體：給方只知道你自己 ⇒ 回答 1 筆、寫 0 筆 ⇒ 落「早就知道」，已修｜每類 5 列照你裁｜★「掛單與押貨不可見」那條的回訪觸發（情報面板改版）這次到了，沒做，交你
 ---
