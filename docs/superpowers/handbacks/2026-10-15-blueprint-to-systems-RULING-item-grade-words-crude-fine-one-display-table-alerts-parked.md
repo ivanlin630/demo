@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裝備等級用字定「粗製／精製」、護具定「護甲」、一張顯示名表；顧問主動警報三模板登未規劃
 date: 2026-10-15
 ---

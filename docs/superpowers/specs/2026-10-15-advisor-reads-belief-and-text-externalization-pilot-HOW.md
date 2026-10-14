@@ -112,10 +112,16 @@
 
 ### 2c names.tsv（鍵→顯示名那層）
 - 鍵 `res.<資源鍵>`。
-  - 變體 full：20 行，內容＝今天的 `ObserverEventText.RES_NAMES`，逐字搬。
+  - 變體 full：20 行，內容＝今天的 `ObserverEventText.RES_NAMES`。
+    - ★用字照藍圖裁定（2026-10-15-blueprint-to-systems-RULING-item-grade-words-crude-fine-one-display-table-alerts-parked）：等級＝粗製／精製；護具類＝護甲。
+    - 只有 `armor_low`／`armor_high` 改字：粗製甲→粗製護甲、精製甲→精製護甲。其餘逐字搬。
   - 變體 short：4 行，內容＝今天的 `TeamUiHelper.RESOURCE_NAME`，逐字搬。
 - `TextBank.res_name(key, variant="full")`。查不到回原鍵（今天 `resource_name` 的行為，終端自驗 (d) 會咬）。
-- `ObserverEventText.RES_NAMES`／`TeamUiHelper.RESOURCE_NAME` 兩個常數刪掉。原呼叫點改呼 `res_name`：`resource_name()` 保留函式名、body 改轉呼。⇒ 兩份變一份，不是第三份。
+- `ObserverEventText.RES_NAMES`、`TeamUiHelper.RESOURCE_NAME`、`TeamUiHelper.ITEM_NAME` 三個常數刪掉（藍圖裁：顯示名只准一張表）。
+  - 原呼叫點改呼 `res_name`：`resource_name()`／`item_name()` 保留函式名，body 改轉呼。
+  - ⇒ 戰鬥畫面裝備欄從「低階／高階…／護具」變「粗製／精製…／護甲」（玩家可見的改字）。
+  - 既有床若比對舊字（例 terminal_e2e、team_ui_test、ui_logic_test），改讀 `res_name` 而不是換寫死新字；交件信列出改了哪幾格。
+  - `item_name` 的「空」等非資源鍵照舊回原字。
 - 交換畫面 `_build_trade_str`：物品列與出價列的 key 都改印 `res_name(k)`。
 
 ### 2d 兩支守衛（同一支床，註冊表一列 `text-keys`）
@@ -140,6 +146,7 @@
 - A8 不讀真值：問之後把目標真人口改成 3 倍，同 tick 再問（撥鐘不推進）⇒ 句子不變。
 - T1 鍵對帳兩檔綠；T2 槽對帳綠。
 - T3 交換畫面：佈置雙方有 food／material／weapon_melee_low／coin ⇒ 面板無 ASCII 資源鍵，印糧食／木料／粗製近戰武器／錢。
+- T4 一張表：scripts 內「近戰武器」「護甲」字面只在 names.tsv 出現（結構 grep；text_bank 外零命中）；戰鬥畫面裝備欄與事件句對同一鍵印同一字。
 - W：無玩家世界 world-fp 不變（電池內）。
 
 ### 負對照（同 sha 加一處改動，每支必紅）
@@ -152,8 +159,8 @@
 | n5 交換畫面改回印原鍵 | T3 |
 
 ## 範圍外（交件信不用做，已記）
-- 三組「主動警報」模板零呼叫者：留在 TEMPLATES 不動、不外置。要不要接上歸藍圖（本 spec 送審同時告知）。
-- `TeamUiHelper.ITEM_NAME`（低階／高階）與 RES_NAMES（粗製／精製）用字衝突：本票不統一（戰鬥畫面裝備欄用 ITEM_NAME）。藍圖定用字後，搬 encounter_view 那張順便合。
+- 三組「主動警報」模板零呼叫者：留在 TEMPLATES 不動、不外置、不刪（藍圖裁：記的是當初想要的行為；已登路線圖板五未規劃「顧問主動警報」）。
+- ~~ITEM_NAME 用字衝突~~ ⇒ 藍圖已裁（粗製／精製、護甲），併入本票 §2c。
 - 其餘五檔外置：照 note §2b，哪張票重寫那檔的句子就順便搬。
 - `trust[顧問]`：note 說先不長。
 
