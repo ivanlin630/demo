@@ -506,9 +506,11 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 	#     coin 光了 ⇒ 拿走比例 0，但被威脅基底照算 ⇒ 照樣記一筆（被勒索本身就是怨）
 	var taken_ratio: float = float(gained.get("coin", 0.0)) / coin_before if coin_before > 0.0 else 0.0
 	_record_extorted(state, def, atk, taken_ratio)
+	# ★事件行帶對象與結果（改法 4）：句子走 WorldEvents.describe；結果用同一支格式器
 	_msg.emit_message(state, "extortion",
 		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk,
-		{ "origin": str(atk_id), "target": str(def_id) })
+		{ "origin": str(atk_id), "target": str(def_id),
+		  "_event_info": {"aggressor": atk_id, "target": def_id, "got": ResourceFormat.list(gained)} })
 	print("[Extort] Team%d 勒索 Team%d，Team%d 妥協給付" % [atk_id, def_id, def_id])
 	return gained
 
@@ -1525,17 +1527,13 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 
 	# 資源轉移
 	var gained: Dictionary = _resolve_extortion(state, aggressor_id, target_id)
-	if gained.is_empty():
-		return { "ok": true, "accepted": true, "msg": "勒索完成（對方資源耗盡，無所得）" }
-	var parts: Array = []
-	for res in gained:
-		# ★BS v2 D：取整後為 0 的那一份改印一位小數（舊版全部取整為 0 ⇒ 落到「少量資源」，玩家不知道拿了多少）
-		var amt: float = float(gained[res])
-		if amt > 0.0:
-			parts.append("%s+%s" % [TeamUiHelper.resource_name(String(res)),
-				("%d" % int(amt)) if amt >= 1.0 else ("%.1f" % amt)])   # ★D1：結果句進事件流，不印資源鍵
-	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
-	return { "ok": true, "accepted": true, "msg": "勒索完成（%s）" % detail }
+	# ★結果句由【格式後的量】決定，不由 accepted 決定（spec 2026-10-13-extortion-zero-take 改法 2）：
+	#   舊版：gained 空 ⇒「勒索完成（…無所得）」、近 0 正值 ⇒「食+0.0」、全濾掉 ⇒「少量資源」——說「完成」而世界沒變
+	#   ★只用一支格式器（ResourceFormat，0.1 為最小單位）；「得手」不造 sim 欄位
+	var got: String = ResourceFormat.list(gained)
+	if got == "":
+		return { "ok": true, "accepted": true, "gained": gained, "msg": "對方已經沒有東西可給" }
+	return { "ok": true, "accepted": true, "gained": gained, "msg": "勒索到：%s" % got }
 
 # ──────── 援助請求 ────────
 
