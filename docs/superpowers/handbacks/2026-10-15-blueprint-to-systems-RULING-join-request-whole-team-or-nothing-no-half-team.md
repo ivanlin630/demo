@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 求投靠整隊加入（已裁定在帳上）、裝不下就不成、不切半隊
 date: 2026-10-15
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 真玩小修（七項，玩家可見批尾）
 topic: R² 請審 spec 2026-10-15-live-play-small-fixes-HOW
 ---
