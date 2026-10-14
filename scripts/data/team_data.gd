@@ -74,9 +74,11 @@ static func _reset_cross_run() -> Dictionary:
 	var cleared: Dictionary = {}
 	if not swallowed_writes.is_empty(): cleared["TeamData.swallowed_writes"] = swallowed_writes.size()
 	if not swallow_sites.is_empty(): cleared["TeamData.swallow_sites"] = swallow_sites.size()
+	if not mt_hits.is_empty(): cleared["TeamData.mt_hits"] = mt_hits.size()
 	swallowed_writes.clear()
 	swallow_sites.clear()
-	return {"checked": 2, "cleared": cleared}
+	mt_hits.clear()
+	return {"checked": 3, "cleared": cleared}
 
 static func _note_swallowed(prop: String) -> void:
 	swallowed_writes[prop] = int(swallowed_writes.get(prop, 0)) + 1
@@ -168,10 +170,16 @@ var need_urgency: PackedFloat32Array = PackedFloat32Array()
 # 空 {} = 無戰略意圖。SoloAI 日常 task 承諾改用 solo_task_last（下方），不再共用此槽。
 var solo_intent: Dictionary = {}
 var solo_task_last: String = ""   # SoloAI 上次選的 task（承諾慣性；與戰略 intent 分離，F-D4）
-var current_option: String = ""   # 統一決策引擎承諾用（現行 option 名）
+var current_option: String = "":  # 統一決策引擎承諾用（現行 option 名）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("current_option", current_option, v)
+		current_option = v
 # ★持守統一 Slice 1（HOW spec 2026-07-28 §5）：決策層算的持守強度（人格加權沉沒成本+前瞻，progressive-only，
 # clamp≤PERSIST_CAP<危機量級）。取代 5 flat commitment bonus。決策層 rank cadence 算+寫；Slice 2 補進度事件新鮮度。
-var persist_strength: float = 0.0
+var persist_strength: float = 0.0:
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("persist_strength", persist_strength, v)
+		persist_strength = v
 # ★糧流感知 Slice A（HOW spec 2026-07-29 §2）：食物 runway 快取（現有 food / max(-net,ε) 天；net≥0→大值=不缺）。
 # 每日 cadence 算 1 次+快取（harvest-only 內生 inflow − burn）；safe_ratio=runway/ETA 調制 persist（存活持守）。
 var food_runway: float = 9999.0   # default 安全大值（未算前不誤塌 persist；FoodFlow 每日覆寫）
@@ -204,11 +212,20 @@ var current_task: String = TASK_IDLE:
 				"src": TaskArbiter.watch_src if TaskArbiter.watch_src != "" else "直接寫（不經 arbiter）"})
 		current_task = v
 var task_priority: int = 0   # 現任 task 優先權；idle 時 0（TaskArbiter 管理）
-var previous_task: String = ""   # survival override 前的原 task，回復用
+var previous_task: String = "":  # survival override 前的原 task，回復用
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("previous_task", previous_task, v)
+		previous_task = v
 var tax_rate: float = 0.3                    # 收稅率（PRODUCE team 用，0.1-0.7）
 var merchant_inventory: Array = []           # 商隊 inventory，元素: {grade, qty, bought_at, bought_from}
-var occupying_outpost_since: int = -1        # 駐留無人 outpost 起始 tick，達 3 天接管
-var pending_owner_change_tick: int = -1      # 偵測 owner 異動緩衝倒數（7 天）
+var occupying_outpost_since: int = -1:  # 駐留無人 outpost 起始 tick，達 3 天接管
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("occupying_outpost_since", occupying_outpost_since, v)
+		occupying_outpost_since = v
+var pending_owner_change_tick: int = -1:  # 偵測 owner 異動緩衝倒數（7 天）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("pending_owner_change_tick", pending_owner_change_tick, v)
+		pending_owner_change_tick = v
 var unrest_turns: int = 0
 var work_morale: float = 1.0   # 工作態度係數 [0.5,1.5]，reaction 統計寫入，產出系統消費
 var faction_id: int = -1
@@ -258,6 +275,20 @@ static func is_kin(a: TeamData, b: TeamData) -> bool:
 	return a.parent_team_id != -1 and a.parent_team_id == b.parent_team_id
 static var mt_watch_tid: int = -9999
 static var mt_log: Array = []
+# ★寫入觀察擴充（spec 2026-10-13 possessed-team-followups 丙）：上面帶 setter 的那批欄位，被觀察隊每寫一次（含同值）計一次
+#   ★只對 mt_watch_tid 那一隊（預設 -9999 ⇒ 一個整數比較就走、不改值、不耗 RNG）；欄位 → {n, changed, first:[{tick,old,new}]}
+#   ★tick 由床寫進 mt_now（TeamData 拿不到 state）
+static var mt_hits: Dictionary = {}
+static var mt_now: int = -1
+
+static func _mt_hit(field: String, old, v) -> void:
+	var e: Dictionary = mt_hits.get(field, {"n": 0, "changed": 0, "first": []})
+	e["n"] = int(e["n"]) + 1
+	if typeof(old) != typeof(v) or old != v:
+		e["changed"] = int(e["changed"]) + 1
+		if (e["first"] as Array).size() < 5:
+			(e["first"] as Array).append({"tick": mt_now, "old": str(old), "new": str(v), "task": ""})
+	mt_hits[field] = e
 # flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。
 var flee_from_pos: Vector2i = Vector2i(-1, -1)
 # ★settlement S2b：L0→L1 紮根工地位（自己起的 corvee，team 記得自己未完工程=self-knowledge 非 god-view）。
@@ -285,7 +316,10 @@ var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（caden
 # G2 野心階梯（leader values 衍生，單一真值源；見 AmbitionLadder）
 var ambition_archetype: String = ""   # 武力/商業/定居
 var ambition_cap: int = 0             # 終極野心封頂 rung
-var ambition_rung: int = 0            # 當前實際 rung（0 生存…4 稱霸）
+var ambition_rung: int = 0:  # 當前實際 rung（0 生存…4 稱霸）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("ambition_rung", ambition_rung, v)
+		ambition_rung = v
 var ambition_eval_next_tick: int = 0
 # ★★★駐留共位的「環顧四周」排程（spec 2026-09-05-colocation-interact §3 訂正）：
 #   ★機會屬於【這支隊】不屬於【pair】—— pair 沒有天然 owner 存 last_eval，
@@ -307,7 +341,10 @@ var recent_failures: Dictionary = {}
 
 var active_orders: Array = []
 var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
-var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
+var prosperity_target_id: int = -1:  # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("prosperity_target_id", prosperity_target_id, v)
+		prosperity_target_id = v
 # ★S3：獨立定居隊自家基建的【下次評估 tick】—— 同一顆 INFRA_INTERVAL、但 actor 是【隊】不是【勢力】。
 #   ★留著 `% == 0` 的話，那顆常數只搬一半，而獨立隊會重現同一個相位病。
 var indep_infra_next_tick: int = 0
@@ -325,14 +362,23 @@ var solo_think_last_tick: int = 0        # ★上次真的想的 tick —— 驗
 #   ★★★【不】加 pass_last_tick：它的用途是量間距，而 `_last_tick` 不在那三個字尾裡
 #     ⇒ 會進指紋 ⇒ 當場打死 P5。間距直方圖的【上次是哪顆 tick】放 Probe 那一層。
 var pass_next_tick: int = 0
-var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
-var last_decision_tick: int = 0          # ⑦ 統一重評：上次跑決策 tick（directive_fresh 比對基準，截斷死循環）
+var decision_eval_next_tick: int = 0:  # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("decision_eval_next_tick", decision_eval_next_tick, v)
+		decision_eval_next_tick = v
+var last_decision_tick: int = 0:  # ⑦ 統一重評：上次跑決策 tick（directive_fresh 比對基準，截斷死循環）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("last_decision_tick", last_decision_tick, v)
+		last_decision_tick = v
 var crisis_latched: bool = false         # Fix2 crisis edge-trigger：進 crisis fire 一次(latch)，持續期落 cadence，離開解 latch
 var subteam_eval_next_tick: int = 0      # 下次子隊決策 tick（cadence，鏡射 threat_eval_next_tick，A2a）
 var consolidate_target_cache: int = -1   # S-A：整併 target 快取（cadence 節流，防每 tick O(N) _find_absorber）
 var absorb_target_cache: int = -1        # §HOW-7：吸納弱鄰 target 快取（同 cadence 節流）
 var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
-var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
+var residency_eval_next_tick: int = 0:  # 下次 outpost 居民派駐評估 tick（cadence）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("residency_eval_next_tick", residency_eval_next_tick, v)
+		residency_eval_next_tick = v
 var goal_eval_next_tick: int = 0         # ★means-end S7:下次 goal 生成/掛退評估 tick（cadence-gate,鏡射 residency_eval_next_tick;goal_state 持久不需每 decide 重算）
 # ★★★第⑦票（LOD 相位，2026-09-05）：排程事件不得用【精確 modulo】當 pass 內的閘 ——
 #   ★病：far pass 每 FAR_ZONE_INTERVAL(600) 才跑一次，而 `tick % SALARY_INTERVAL(10080) == 0`
@@ -362,18 +408,39 @@ var commit_stall_episode_tick: int = 0   # ★episode 起點：latch 不重置�
 #   判準：「我讀的這個欄位，從事件發生到我讀它，會不會被別人改？」——會 ⇒ 必須快照。
 var commit_stall_id: String = ""       # 開工當下的結構身分（帶下來的，不反解）
 var commit_stall_target: String = ""   # 開工當下的目標
-var survival_committed_option: String = ""   # 現承諾的 survival option 字串（"" = 未承諾/待重蓋）
-var survival_committed_tick: int = 0         # 蓋章 tick（stall 計時 baseline）
-var survival_committed_food: float = 0.0     # 蓋章時 food_days baseline（relief before/after 比基準）
+var survival_committed_option: String = "":  # 現承諾的 survival option 字串（"" = 未承諾/待重蓋）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("survival_committed_option", survival_committed_option, v)
+		survival_committed_option = v
+var survival_committed_tick: int = 0:  # 蓋章 tick（stall 計時 baseline）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("survival_committed_tick", survival_committed_tick, v)
+		survival_committed_tick = v
+var survival_committed_food: float = 0.0:  # 蓋章時 food_days baseline（relief before/after 比基準）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("survival_committed_food", survival_committed_food, v)
+		survival_committed_food = v
 var survival_stall_cooldown: Dictionary = {}  # { option字串: tick_until } stall 硬排除窗（reject_cooldown idiom）
 # crisis-override（跨線危機安全網，泛化 ②）：committed 任何 task 深餓未緩 → force re-rank。
 # baseline lazy 蓋（crisis_committed_tick != task_start_tick → 新 episode 重置）；auto-reset on task change。
-var crisis_committed_food: float = 0.0   # 現 task 蓋章時 food_days baseline
-var crisis_committed_tick: int = -1      # 蓋章對應的 task_start_tick（≠ 則新 task episode，重蓋）
+var crisis_committed_food: float = 0.0:  # 現 task 蓋章時 food_days baseline
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("crisis_committed_food", crisis_committed_food, v)
+		crisis_committed_food = v
+var crisis_committed_tick: int = -1:  # 蓋章對應的 task_start_tick（≠ 則新 task episode，重蓋）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("crisis_committed_tick", crisis_committed_tick, v)
+		crisis_committed_tick = v
 # crisis release 後免疫窗：剛 released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit）
 # → 迫 re-rank 選別的(survival)task 接住餓死隊。measurer 揭 team1/19 等待新領主/team13 FLEE 立刻打回原 task。
-var crisis_released_task: String = ""    # 剛被 crisis-override release 的 task（""=無）
-var crisis_released_until: int = 0        # 免疫窗到期 tick（try_set 內禁此 task 重委派至此）
+var crisis_released_task: String = "":  # 剛被 crisis-override release 的 task（""=無）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("crisis_released_task", crisis_released_task, v)
+		crisis_released_task = v
+var crisis_released_until: int = 0:  # 免疫窗到期 tick（try_set 內禁此 task 重委派至此）
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("crisis_released_until", crisis_released_until, v)
+		crisis_released_until = v
 # 信使外交提案（權威存發起隊，對齊 active_orders pattern）。空 {} = 無在途提案。
 # {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout, gift} — 信使帶 proposal_id ref。
 # gift = 誘因 payload 通用 {res: amount}（發起時已扣，送達轉移目標；本 slice 僅 food，聯姻/財槽未來直插）。
@@ -395,7 +462,10 @@ var wounded: int:
 var equip_order: Dictionary = {
 	"melee_low": 0, "melee_high": 0,
 	"ranged_low": 0, "ranged_high": 0,
-}
+}:
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("equip_order", equip_order, v)
+		equip_order = v
 # ── Anon Tier 系統（取代舊 scalar anon_combat_skill / anon_wage）──
 # Anon Cohort 統一容器（取代舊 anon_tiers）：鍵 "tier|health" → count，稀疏。
 # Phase 2a：只用 health="healthy" 桶；wounded 維度 Phase 2b 啟用。
@@ -448,11 +518,17 @@ var armed_anon_ratio: float = 0.0
 var armed_anon_target: float = -1.0
 var anon_treasury: float = 0.0   # 匿名兵 wage 沉澱
 var fatigue: float = 0.0
-var guard_ratio: float = 0.2
+var guard_ratio: float = 0.2:
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("guard_ratio", guard_ratio, v)
+		guard_ratio = v
 # ★军民混编 Slice B：動員比 [0,1]=戰力配置(當兵)比、labor 配置=1−此(務農/生產)。
 #   charter(TAG 團型)正交、動態從 belief-threat+charter 基底+人格湧現(FactionAISystem._update_mobilization)。
 #   guns-vs-butter：威脅→升(抽勞力當兵→產出掉)、和平→降(解甲回田)。
-var mobilized_fraction: float = 0.0
+var mobilized_fraction: float = 0.0:
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("mobilized_fraction", mobilized_fraction, v)
+		mobilized_fraction = v
 var armor_config: Dictionary = {
 	"head":       "none",
 	"torso":      "low",
@@ -460,13 +536,22 @@ var armor_config: Dictionary = {
 	"left_arm":   "none",
 	"right_leg":  "none",
 	"left_leg":   "none",
-}
+}:
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("armor_config", armor_config, v)
+		armor_config = v
 var known_reputations: Dictionary = {}
 var strategic_assignments: Dictionary = {}
 var parent_team_id: int  = -1
 var subteam_ids:    Array = []
-var order_target_id: int  = -1
-var order_task:     String = ""
+var order_target_id: int  = -1:
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("order_target_id", order_target_id, v)
+		order_target_id = v
+var order_task:     String = "":
+	set(v):
+		if team_id == mt_watch_tid: _mt_hit("order_task", order_task, v)
+		order_task = v
 var player_commanded_task: String = ""
 # 玩家對此 team 的直接指令；"" = 無指令（faction_ai 自動計算）；由 herald 抵達後寫入
 var task_extra_data: Dictionary = {}   # 子隊任務附加數據（build_type/level/facility_type/target_level 等）

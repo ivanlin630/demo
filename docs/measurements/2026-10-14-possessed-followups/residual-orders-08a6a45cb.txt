@@ -1,0 +1,26 @@
+# 原始輸出：pf2-resid.txt｜只留 [TREE]、判準行（PASS／FAIL）、床／量測印的數值行與段落標題；截掉模擬 log（[ 開頭）與開局 MoneyGenesis 對帳區塊（「= Σpop」起四行）｜甲 殘單量測（中途附身代理）× seed 1337,2；樹 08a6a45cb
+[TREE] path=A:\GDS\demo\.worktrees\pf commit=08a6a45cb clean=yes codehash=clean
+=== possessed_residual_orders_census：附身那一刻被 AI 單扣住的比例（線 20%）===
+── seed 1337 ──
+   開局附身：玩家隊 T15 殘單 0 張｜押貨扣住最大 0.0% 
+   第 5 天：候選隊 20｜有殘單 19（共 58 張）｜有押貨 0｜超過 20% 線 0 隊 []
+      最大扣住 0.0%：（沒有任何押貨）
+   第 10 天：候選隊 20｜有殘單 17（共 52 張）｜有押貨 1｜超過 20% 線 1 隊 [14]
+      最大扣住 83.3%：T14：material 1/1=83%｜單 ["buy weapon_melee_low×2", "buy weapon_ranged_low×1", "buy tools×1", "sell material×1"]
+   第 20 天：候選隊 19｜有殘單 16（共 50 張）｜有押貨 2｜超過 20% 線 2 隊 [8, 14]
+      最大扣住 79.0%：T8：material 2/3=79%｜單 ["buy weapon_melee_low×1", "buy weapon_ranged_low×1", "sell material×2"]
+   第 30 天：候選隊 19｜有殘單 17（共 48 張）｜有押貨 1｜超過 20% 線 1 隊 [14]
+      最大扣住 65.9%：T14：material 2/3=66%｜單 ["buy weapon_melee_low×2", "buy weapon_ranged_low×1", "sell material×2"]
+   遭遇 draw 0 次
+── seed 2 ──
+   開局附身：玩家隊 T15 殘單 0 張｜押貨扣住最大 0.0% 
+   第 5 天：候選隊 18｜有殘單 18（共 57 張）｜有押貨 1｜超過 20% 線 1 隊 [7]
+      最大扣住 99.8%：T7：material 18/18=100%｜單 ["buy weapon_melee_low×6", "buy weapon_ranged_low×4", "buy tools×3", "sell material×18"]
+   第 10 天：候選隊 21｜有殘單 16（共 48 張）｜有押貨 1｜超過 20% 線 1 隊 [14]
+      最大扣住 34.2%：T14：material 1/3=34%｜單 ["sell material×1", "buy weapon_melee_low×2", "buy weapon_ranged_low×1", "buy tools×1"]
+   第 20 天：候選隊 22｜有殘單 17（共 55 張）｜有押貨 3｜超過 20% 線 3 隊 [5, 8, 14]
+      最大扣住 70.6%：T14：material 1/1=71%｜單 ["buy weapon_melee_low×2", "buy weapon_ranged_low×1", "buy tools×1", "sell material×1"]
+   第 30 天：候選隊 21｜有殘單 17（共 46 張）｜有押貨 1｜超過 20% 線 1 隊 [14]
+      最大扣住 93.9%：T14：material 11/12=94%｜單 ["buy weapon_melee_low×2", "buy weapon_ranged_low×1", "buy tools×1", "sell material×11"]
+   遭遇 draw 0 次
+=== possessed_residual_orders_census DONE === 全部樣本最大扣住比例 99.8%（>20%  附身時撤）

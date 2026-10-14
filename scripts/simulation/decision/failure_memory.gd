@@ -125,6 +125,7 @@ static func record(state: WorldState, team: TeamData, option: String, target: St
 		ttl_ticks: int, reason: String) -> void:
 	if team == null or ttl_ticks <= 0:
 		return
+	if team.team_id == TeamData.mt_watch_tid: TeamData._mt_hit("FailureMemory.record:" + reason, "", key(option, target))   # ★寫入觀察（附身隊後續 丙）
 	var k: String = key(option, target)
 	var now: int = state.world.current_tick
 	var e: Dictionary = team.recent_failures.get(k, {})
