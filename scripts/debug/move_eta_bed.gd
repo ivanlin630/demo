@@ -68,8 +68,8 @@ func _initialize() -> void:
 func _world() -> Array:
 	seed(SEED)
 	PathSystem._reset_cross_run()
-	var st := WorldState.new()
-	GameSetup.setup(st, GameSetup.load_config("res://config/default.json"))
+	# ★arm 先於世界（bed-arm 閘）；留玩家（這張床量的就是玩家隊）；每格一個新世界 ⇒ Probe 計數從這格開始
+	var st: WorldState = MeasureBedHelper.arm_and_setup("res://config/default.json", false)
 	return [st, SimRunner.new()]
 
 
@@ -347,7 +347,6 @@ func _e6() -> void:
 # ── E7 疲勞 ──────────────────────────────────────────────────────────────────
 func _e7() -> void:
 	print("\n── E7 疲勞 0%：玩家隊 12 小時行進，逐次疲勞 pass ──")
-	Probe.arm()
 	var w: Array = _world()
 	var st: WorldState = w[0]
 	var runner: SimRunner = w[1]
