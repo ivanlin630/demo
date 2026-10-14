@@ -75,6 +75,9 @@ static func extract_buffer(leader: PersonData) -> float:
 static func consider_extraction(state: WorldState, team: TeamData) -> void:
 	if team.anon_treasury <= 0.0: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	if team.leader_id == state.player_id: return   # 玩家手動   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	# ★不變量 #12（spec possessed-followups 丙）：玩家只是成員（隊長是 NPC）時上一行不生效 ⇒ 附身隊一律不自動徵用
+	#   （抽多少＝缺口＋隊長人格 buffer ⇒ AI 評分決定的金額 ⇒ 決策）；玩家自己有 extract_treasury
+	if team.possessed: return   # gate-ok: guard early-return（#12 附身隊排除，非決策閘）
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	# ★de-patch:砍 flat `greed-prud×0.5>0.4` 死常數門檻 → need-driven（有真 coin-用途才取回自己 treasury coin）。

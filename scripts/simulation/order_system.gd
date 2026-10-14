@@ -221,6 +221,24 @@ func release_order_escrow(state: WorldState, o: Dictionary) -> void:
 			else:
 				Probe.bump("mkt.escrow.expire_empty")   # ★已全部賣掉（正常）
 
+# ★附身那一刻撤掉隊上全部掛單（spec 2026-10-13-possessed-team-followups 甲）
+#   ★為什麼撤：殘單量測（中途附身代理）押貨扣住某資源最高 99.8%（線 20%）⇒ 玩家接手時東西被 AI 單鎖住、而他看不到那些單
+#   ★這一刻隊上的單全是 AI 掛的（附身前玩家不操控這隊）⇒ 不需要來源欄
+#   ★撤＝同一條守恆路 release_order_escrow（押貨落該格待領帳）；不記失敗記憶（不是執行失敗）
+#   ★唯一呼叫端＝WorldState.sync_possession 的 false→true 邊；開局附身時隊上 0 張 ⇒ 空轉
+func withdraw_on_possession(state: WorldState, team: TeamData) -> int:
+	var n: int = team.active_orders.size()
+	if n == 0:
+		return 0
+	for o in team.active_orders:
+		release_order_escrow(state, o)
+	team.active_orders = []
+	_sync_board(state, team)
+	if Probe.enabled:
+		Probe.bump("order.withdrawn_on_possession", n)
+	print("[Order] Team%d 被附身：撤掉 AI 殘單 %d 張" % [team.team_id, n])
+	return n
+
 # ★玩家主動撤單（C1 票①）：與過期【共用 escrow 釋放】，★但【不記失敗記憶】——
 #   撤單是玩家的決定，不是執行失敗；記了會讓 AI 折價自己下一輪的「買糧/買料」。
 # 回傳：真的撤掉了才 true（找不到那張單 ⇒ false，★不靜默成功）。

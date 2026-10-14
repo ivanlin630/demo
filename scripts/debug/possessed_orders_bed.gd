@@ -3,10 +3,11 @@ extends SceneTree
 # 附身隊後續 甲（spec 2026-10-13-possessed-team-followups-HOW §甲）：AI 不替附身隊掛買賣單（不變量 #12 的 orders）
 #   A1  附身隊與非附身隊同樣塞滿餘貨、推 1 天 ⇒ 附身隊新增 AI 單 0；非附身隊 >0（同床對照：條件真的會觸發掛單）
 #   A1b 直呼 tick_team_orders（cadence 不論）⇒ 附身隊 0 張、非附身隊 >0
-#   A2  附身前先有一張寄賣（押貨）AI 單 ⇒ 附身後到期照退貨進待領帳；押貨帳對帳零違反、貨總量守恆
+#   A2  附身前先有一張寄賣（押貨）AI 單 ⇒ 附身那一刻撤下（殘單量測任一資源扣住 >20% ⇒ 撤；同一條 release_order_escrow 守恆路）、
+#       押貨進待領帳；押貨帳對帳零違反、貨總量守恆
 #       ★訂單沒有來源欄 ⇒「AI 單」由床在附身【之前】直接呼 post_order 造；驗收不宣稱分得出來源
 #   A3  玩家自己的掛單（player_command_api.post_sell_order → post_order）照常成立
-#   負對照：拿掉 order_system.tick_team_orders 的 possessed return ⇒ A1／A1b 紅
+#   負對照：拿掉 order_system.tick_team_orders 的 possessed return ⇒ A1／A1b 紅；拿掉 sync_possession 的撤單 ⇒ A2 紅
 # 跑法：.\tools\godot.ps1 --headless --script scripts/debug/possessed_orders_bed.gd
 
 const SEED: int = 1337
@@ -137,7 +138,7 @@ func _goods_total(st: WorldState, pt: TeamData, tile: HexTileData) -> float:
 
 
 func _a2_expiry_returns() -> void:
-	print("\n── A2 附身前的寄賣單：附身後到期照退貨、押貨帳零違反、貨總量守恆 ──")
+	print("\n── A2 附身前的寄賣單：附身那一刻撤下（殘單量測 >20% 線）、押貨落待領、押貨帳零違反、貨總量守恆 ──")
 	var st: WorldState = _world()
 	var pt: TeamData = st.teams[st.get_player_team_id()]
 	var tile: HexTileData = _foreign_outpost(st, pt.team_id)
@@ -152,30 +153,30 @@ func _a2_expiry_returns() -> void:
 	st.sync_possession()
 	var os_ := OrderSystem.new()
 	var oid: int = os_.post_order(st, pt, "sell", "goods", 10)
-	st.player_id = pid
-	st.sync_possession()
 	var o: Dictionary = {}
 	for x in pt.active_orders:
 		if int(x.get("order_id", -1)) == oid:
 			o = x
-	_check("★母體地板：那張單真的押了貨（escrowed）且附身已恢復", bool(o.get("escrowed", false)) and pt.possessed)
-	var before: float = _goods_total(st, pt, tile)
 	var esc_before: float = float((tile.market_escrow.get(oid, {}) as Dictionary).get("qty", 0.0))
-	var aud0: Dictionary = OrderSystem.audit_escrow(st)   # ★到期前：母體非空（checked>0）才算對過帳
-	o["expire_tick"] = st.world.current_tick   # 快轉到期（只改壽命，不改內容）
-	os_.tick_team_orders(st, pt)
+	var before: float = _goods_total(st, pt, tile)
+	var aud0: Dictionary = OrderSystem.audit_escrow(st)   # ★附身前：母體非空（checked>0）才算對過帳
+	_check("★母體地板：附身前那張單真的押了貨（escrowed）、對帳母體非空且零違反",
+		bool(o.get("escrowed", false)) and esc_before > 0.0 and not pt.possessed and int(aud0["checked"]) > 0 and _clean(aud0))
+	# 附身（sync_possession 的 false→true 邊）
+	st.player_id = pid
+	st.sync_possession()
 	var after: float = _goods_total(st, pt, tile)
 	var still: bool = false
 	for x in pt.active_orders:
 		if int(x.get("order_id", -1)) == oid:
 			still = true
 	var aud: Dictionary = OrderSystem.audit_escrow(st)
-	print("   押貨 %.1f｜到期後 單還在=%s｜押貨帳還在=%s｜貨總量 %.1f→%.1f｜audit 前 %s 後 %s" % [esc_before, str(still),
-		str(tile.market_escrow.has(oid)), before, after, str(aud0), str(aud)])
-	_check("A2 到期：單撤下、押貨移出", not still and not tile.market_escrow.has(oid))
+	print("   押貨 %.1f｜附身後 possessed=%s 單還在=%s｜押貨帳還在=%s｜貨總量 %.1f→%.1f｜audit 前 %s 後 %s" % [esc_before, str(pt.possessed),
+		str(still), str(tile.market_escrow.has(oid)), before, after, str(aud0), str(aud)])
+	_check("A2 附身那一刻：AI 殘單撤下、押貨移出", pt.possessed and not still and not tile.market_escrow.has(oid))
 	_check("A2 貨總量守恆（隊上＋押貨＋待領）", absf(after - before) < 0.01)
-	_check("★A2 對帳母體非空：到期前 checked>0 且零違反", int(aud0["checked"]) > 0 and _clean(aud0))
-	_check("A2 到期後押貨帳對帳零違反（checked=%d：這張單已出帳，0 是預期）" % int(aud["checked"]), _clean(aud))
+	_check("A2 撤後押貨帳對帳零違反（checked=%d：這張單已出帳，0 是預期）" % int(aud["checked"]), _clean(aud))
+	os_.tick_team_orders(st, pt)
 	_check("A2 附身隊 tick_team_orders 之後沒有新的 AI 單", pt.active_orders.is_empty())
 
 
