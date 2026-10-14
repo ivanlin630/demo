@@ -1,6 +1,6 @@
 # 你領導的勢力不自動定目標＋收編要告訴你——HOW
 
-狀態：R² ISSUES（2026-10-15-reviewer-to-systems-R2-player-led-faction-ISSUES，M1–M5＋同版補）已全數照改；M1／M4 改法另寄審查核一眼（2026-10-15-systems-to-reviewer-R2b-player-led-faction-m1-m4），核過即 GO
+狀態：**GO**——R² 第一輪 ISSUES 全改、第二輪 M1／M4 CLEAN（2026-10-15-reviewer-to-systems-R2b-player-led-faction-m1-m4-CLEAN），兩條小註照字面收進改法 2 與謂詞段
 來源：藍圖票 2026-10-14-blueprint-to-systems-TICKET-player-led-faction-has-no-ai-goals-rule-12-at-faction-level（用戶裁「1」嚴格延伸）＋2026-10-14-…-TICKETS-live-play-findings…§4（收編三件，同一面板併本票）
 順位：玩家可見批尾（第 7 張戰後收尾之後；與真玩小修並列，誰先寫完誰先派）。
 不變量：#12 勢力層那句已在 invariants.md（2026-10-14 補），本票是它的執行。
@@ -34,7 +34,7 @@
 - **面板**：mapper `map_faction_panel`（:1009）`faction_goal = ", ".join(f.goals)`（:1056）；text_ui_main.gd:2827-2830 印「AI 目標: …　玩家目標: （跟隨 AI）」。
 
 ## 謂詞（一支）
-`FactionAiSystem.is_player_led(state, f) -> bool` ＝ 盟主隊存在且 `player_controlled`。勢力層的擋都呼它；隊層的擋直接讀 `team.player_controlled`。
+謂詞本體放 **data 層** `WorldState.is_player_led(f) -> bool` ＝ 盟主隊存在且 `player_controlled`（`set_team_faction` 在 data 層要用）；`FactionAiSystem.is_player_led(state, f)` 只是呼它的薄殼。全專案一支，不內聯第二份。勢力層的擋都呼它；隊層的擋直接讀 `team.player_controlled`。
 
 ## 改法
 1. **目標不自動產**：`_rebuild_goals` 在 :1935（leader_team==null 早退）之後、:1939 override 之前：`is_player_led` ⇒ override 非空就放它；`f.intent = {}`（**不寫守成**——寫了會在玩家交出盟主後被 :1868 committed 當既有承諾偏袒一次；空字典下游全有保護，等價於守成）；`f.strategy = "玩家領導"`；return。
@@ -43,6 +43,7 @@
    - 預期變化（census 印出來，不判相同）：manpower:53 對玩家勢力成員 holder 的厚待加權從此拿不到（intent 空）。
 2. **戰略層：清成員再返回（狀態無關，不掛邊）**：`StrategicAiSystem.tick` 每勢力那一圈，`is_player_led` ⇒ 對 `f.member_team_ids` 逐隊 `strategic_assignments.clear()`（冪等）→ return（不寫 strategic_goals、不寫新指派）。
    - 這樣三條路都接得住：①附身成為盟主 ②盟主繼位交給玩家成員隊（world_state.gd:506 無 hook）③後入成員帶舊勢力指派進來；最長延遲 STRATEGIC_INTERVAL。
+   - ②另補：`succeed_or_disband_faction` 設完 `leader_team_id`（:506）後，若新勢力 `is_player_led` ⇒ 呼**同一支**清成員函式（與 tick 共用，不另寫）⇒ 交接當 tick 清空。
    - 同咽喉補一刀：`set_team_faction` 入**玩家領導的勢力**時清該隊 assignments（與改法 6c 同一處），③就不必等一輪。
    - 整段跳過同時略過 `_evaluate_alliance_need`（只有 print）與 STRATEGIC／ALLIANCE 的 DecisionTier 戳記 ⇒ 玩家交出後該勢力第一輪立刻 due，可接受。
 3. **勢力名義外交不自動提**：`try_proactive_diplomacy` 入口、**:168 的 randf 之前**：`sender.player_controlled ⇒ return`（整支不耗 RNG）。收到提案的找上門流程不動。
@@ -75,7 +76,7 @@
 - F1b override：玩家設「防禦」⇒ goals＝["防禦"] 恆定 30 天、成員 faction_stakes 讀到它。
 - F2 徵收率恆 0.10；對照：玩家按 [B] 設 30 ⇒ 0.30。
 - F3 以玩家盟主隊為 sender 的提案 0 次；對照勢力 >0。
-- F4 strategic_assignments 清空，三格各在 STRATEGIC_INTERVAL 內清空：①附身成為盟主（佈置：成員先有指派）②NPC 盟主死、繼位給玩家成員隊 ③NPC 隊帶指派入玩家勢力（③應當下清）。對照勢力成員 >0。
+- F4 strategic_assignments 清空：①附身成為盟主（佈置：成員先有指派）⇒ STRATEGIC_INTERVAL 內清空 ②NPC 盟主死、繼位給玩家成員隊 ⇒ **繼位那一 tick 清空**（succeed_or_disband 後呼清除）③NPC 隊帶指派入玩家勢力 ⇒ 當下清空。斷言的時窗與機制一致（不寫當 tick 卻只做 hour 級）。對照勢力成員 >0。
 - F5 十支：各支入口的「被呼叫」計數對玩家隊 0；對照 NPC 盟主 >0（不足 >0 的那支印「不可判」，不湊）。
 - F5b 獨立附身隊：同 F5。F5c NPC 勢力裡紮根的玩家成員隊：據點 owner 30 天不變（self_relocate 負對照會紅）。
 - F6 成員照常：玩家勢力兩支成員 `_decide_unified` 次數 >0、有任務變化。

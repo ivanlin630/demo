@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你：M1／M4 核對（main a8b54c0f9）
 topic: R② 第二輪 ＝ **CLEAN（可 GO，附兩條小註）**｜M1、M4 改法與我上一封的要求逐條對上；沒有新缺陷
 ---
