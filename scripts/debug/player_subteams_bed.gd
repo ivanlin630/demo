@@ -44,6 +44,7 @@ func _initialize() -> void:
 	_s9_recall()
 	_s10_at_foot()
 	_s12_autonomous()
+	_s13_kin_and_arbiter()
 	print("   首次未推進：%s" % (_first_stall if _first_stall != "" else "無"))
 	print("=== player_subteams DONE === errors: %d" % _errors)
 	quit(1 if _errors > 0 else 0)
@@ -326,6 +327,14 @@ func _s5_camp() -> void:
 	var t: HexTileData = _tile(st, tgt)
 	_until(st, runner, func(): return t.camp_level > 0, WorldState.TICKS_PER_DAY, "S5 目標格出營地")
 	print("   「%s」｜目標格 camp_level=%d camp_team=%d" % [String(r.get("msg", "")), t.camp_level, t.camp_team_id])
+	# ★途中不得在別格紮營（求生路徑會在 TASK_CAMP 途中踩到可紮的格就地紮；玩家子隊不自動求生）
+	var stray: Array = []
+	for k in st.world.tiles:
+		var tt: HexTileData = st.world.tiles[k]
+		if tt.camp_level > 0 and tt.camp_team_id == sid and tt.tile_pos != tgt:
+			stray.append(tt.tile_pos)
+	print("   途中別格營地：%s" % str(stray))
+	_check("S5b 途中沒有在別格紮營", stray.is_empty())
 	_check("S5 落腳 ⇒ 目標格出現 L0 營地（起建隊＝子隊）", t.camp_level == 1 and t.camp_team_id == sid)
 	# 已有據點的格 ⇒ 不可帶原因
 	var op: Vector2i = _other_free_neighbor(st, tgt)
@@ -549,3 +558,59 @@ func _s12_autonomous() -> void:
 		str(s1.get("player_controlled")) if s1 != null else "-", changes.size(), str(changes.slice(0, 3)), str(s1.tile_pos) if s1 != null else "-"])
 	_check("S12 下令被接受 ⇒ 成為玩家子隊、24 小時無決策層改派、走到了目標格", bool(ok.get("ok", false)) and s1 != null
 		and s1.get("player_controlled") == true and changes.is_empty() and s1.tile_pos == tgt)
+
+
+# ── S13 自家人與 arbiter（負對照補格：決策層入口已跳過玩家子隊 ⇒ 下面三把要直接呼叫才看得到）──
+func _s13_kin_and_arbiter() -> void:
+	print("
+── S13 自家人／arbiter ──")
+	var st: WorldState = _world()
+	var pt: TeamData = _pt(st)
+	# S3b：玩家子隊的 arbiter 擋決策層來源
+	var r: Dictionary = _dispatch(st, TeamData.TASK_IDLE, pt.tile_pos)
+	var ps: TeamData = st.teams.get(int(r.get("sub_id", -1)))
+	var ok_set: bool = TaskArbiter.try_set(st, ps, TeamData.TASK_FORAGE, ps.tile_pos, TaskArbiter.PRIO_DISPATCH, "unified") if ps != null else true
+	print("   玩家子隊 try_set(覓食, unified) ⇒ %s｜task=%s" % [str(ok_set), ps.current_task if ps != null else "-"])
+	_check("S3b 玩家子隊：arbiter 擋決策層來源（unified）", ps != null and not ok_set and ps.current_task == TeamData.TASK_IDLE)
+	# 自主子隊（非玩家派出）站在母隊格
+	var sid: int = SubteamSystem.new().dispatch(st, pt.team_id, _spare_leader(st, pt), 2, TeamData.TASK_IDLE, Vector2i(-1, -1))
+	var sub: TeamData = st.teams.get(sid)
+	if sub == null:
+		_check("★S13 地板：自主子隊派得出", false)
+		return
+	var disc: Array = st.team_discovered.get(sid, [])
+	if not disc.has(pt.team_id):
+		disc.append(pt.team_id)
+	st.team_discovered[sid] = disc
+	var ldr: PersonData = st.persons.get(sub.leader_id)
+	var pl: PersonData = st.persons.get(pt.leader_id)
+	# ★佈置成「不排除自家人就一定會走到提案」：慎重 0（不被人格骰斷）、跟母隊領袖關係滿、名聲滿 ⇒ 分數過 0.4
+	if ldr != null:
+		ldr.values["慎重"] = 0.0
+		ldr.values["義氣"] = 1.0
+		ldr.values["信義"] = 1.0
+		if pl != null:
+			ldr.relations[pl.id] = 1.0
+	sub.known_reputations[pt.team_id] = 1.0
+	# S4b：自主子隊不對母隊走到提案那一步（通商暫停中 ⇒ 數 dip.trade_paused ＋ 找上門 ＋ 送出）
+	var dip := DiplomaticAiSystem.new()
+	var fired: int = 0
+	var tp0: int = int(Probe.counts.get("dip.trade_paused", 0))
+	for i in range(300):
+		st.player_forced_event = {}
+		dip.try_proactive_diplomacy(st, sub)
+		if not st.player_forced_event.is_empty():
+			fired += 1
+	st.player_forced_event = {}
+	var tp: int = int(Probe.counts.get("dip.trade_paused", 0)) - tp0
+	print("   自主子隊同格 300 次 try_proactive_diplomacy ⇒ 找上門 %d 次、走到通商（暫停）%d 次｜Probe.enabled=%s" % [fired, tp, str(Probe.enabled)])
+	_check("★S4b 地板：Probe 有開（不然通商那一格恆 0）", Probe.enabled)
+	_check("S4b 自主子隊不對母隊外交（譜系，不看勢力）", fired == 0 and tp == 0)
+	# S4c：威脅掃描不選母隊 —— 佈置成「不排除自家人就會選它」：親見母隊位置（本 tick firsthand）＋名聲 0（敵意滿）
+	sub.known_reputations[pt.team_id] = 0.0
+	BeliefSystem.record_claim(st, sid, pt.team_id, sid, "firsthand", {"tile_pos": pt.tile_pos, "pop": pt.population}, 1.0, false)
+	var raw: float = ThreatAssessment.score(st, sub, pt)
+	var ctx: DecisionContext = DecisionContext.gather(st, sub)
+	print("   自主子隊對母隊威脅原始分=%.2f｜掃描結果最大威脅 id=%d（母隊 %d）分=%.2f" % [raw, ctx.threat_id, pt.team_id, ctx.threat_react])
+	_check("★S4c 地板：母隊在分數上是威脅（原始分 > 0）", raw > 0.0)
+	_check("S4c 自主子隊威脅掃描不選母隊", ctx.threat_id != pt.team_id)
