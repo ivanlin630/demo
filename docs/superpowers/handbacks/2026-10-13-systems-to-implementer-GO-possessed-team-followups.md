@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 附身隊後續三件（甲 AI 不掛單／乙 挨餓停推進／丙 loop3 寫者分類）
 topic: GO｜spec docs/superpowers/specs/2026-10-13-possessed-team-followups-HOW.md（R² ISSUES 已逐條收進）｜乙先量再動
 ---
