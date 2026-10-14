@@ -5646,6 +5646,17 @@ sim_runner.gd:501-503 只在 MovementSystem 回報「這一窗跨了格」時設
 出處：移動預計時間交件信 2026-10-15 E7 探針（12 小時 12 次 pass，耗力 1 次）。
 ```
 
+## 情報頁「勢力關係」一類恆為「尚無」
+
+狀態：已知未實裝
+
+回訪：觸發事件 —— 社交層進引擎（深層批 2）引入勢力層 belief 時。
+
+```
+情報面板（7eeb5cb5c）照感知鐵律只列 belief 裡有的；TeamData 只有隊層 known_reputations，沒有勢力層 belief ⇒ 這一類永遠空。
+不是顯示錯：要有內容得先有那一種 belief。出處：情報面板交件信 2026-10-15 §跟 spec 不一樣 3。
+```
+
 ## 附身隊的據點稅率仍由人格自動算
 
 狀態：已知未修
@@ -5674,7 +5685,7 @@ FactionData.player_goal_override 唯一寫者 player_command_system.gd:1543；_r
 
 狀態：已知未修
 
-回訪：觸發事件 —— 交易面板或情報面板下一次改版時（玩家可見批之後的那張 UI 票）。
+回訪：觸發事件 —— 藍圖回覆排序信 2026-10-15-systems-to-blueprint-ASK-escrow-visibility-slot 時（原觸發「情報面板改版」已在 7eeb5cb5c 到達；那張 spec 沒這項，未做）。
 
 ```
 附身隊三件交件信（2026-10-14）：scripts/ui、player_query_api、player_api_mapper 對 active_orders／market_escrow／

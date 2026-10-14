@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 移動預計時間（已合併）＋情報面板列數
 topic: 合併 54d2a106c（掃描閘 29/29、探索床 10/10、E2E 0）｜疲勞半路算休息：不在本票，併進戰鬥模型落地 HOW｜情報頁每類列數：照你的選項 1，常數 5 定案｜三處與 spec 不同：全收
 ---

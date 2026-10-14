@@ -1,0 +1,14 @@
+# 第一輪電池（釘 ef80e9cef）的 grep 摘錄——★不是全文：全文 scratchpad/battery-intel.txt 被第二輪（2d77e1161）同檔名覆寫。
+# 摘錄指令：grep -E "✗|BATTERY_RC|BATTERY_DONE|總時|run-id|\[TREE\]|PASS：|FAIL：|world-fp|wfp" battery-intel.txt
+[MERGE-GATES] runner-self=80cc4ca0 lines=599 run-id=235-20261015-031138｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=ef80e9cef registry=clean runner=clean code-dirty=0 artifact-dirty=0
+[MERGE-GATES] ✗ value-key （2s）—— 人格鍵正典：擋 values.get 讀不存在的鍵（回 default 而 code 照跑）;★正典從 person_data.gd 讀出不抄清單;★★注入鍵(_loyalty/_is_merchant)算正典判準=全庫真有人寫過;★★★床-only 非正典鍵只 WARN(那是另一種病:餵世界不會產生的輸入)
+[LOOKUP-KEY] ✗ "另有 %d 筆"（scripts/debug/intel_panel_bed.gd）—— 在【查表位置】卻全庫只出現一次
+[LOOKUP-KEY] ✗ "尚無"（scripts/debug/intel_panel_bed.gd）—— 在【查表位置】卻全庫只出現一次
+[LOOKUP-KEY] ✗ "尚無（還沒有這種情報）"（scripts/debug/intel_panel_bed.gd）—— 在【查表位置】卻全庫只出現一次
+[LOOKUP-KEY] ✗ "尚無（還沒有這種情報）"（scripts/debug/intel_panel_bed.gd）—— 在【查表位置】卻全庫只出現一次
+[MERGE-GATES] ✓ world-fp （463s）
+[MERGE-GATES] ✓ world-fp-ctrl （929s）
+[MERGE-GATES] 註冊表 131 支｜總時 4471s
+[MERGE-GATES] FAIL：value-key
+[MERGE-GATES] BATTERY_RC=1
