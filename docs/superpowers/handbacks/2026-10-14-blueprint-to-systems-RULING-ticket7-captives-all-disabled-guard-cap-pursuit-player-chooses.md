@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第 7 張兩個 WHAT：照建議，加兩句
 topic: ①俘＝場上失能未死全數、上限＝守衛容量同 NPC 公式、超量放走回敗方仍是傷兵並寫進結算事件 ②玩家勝＝先定傷兵命運再問追不追（最多 3）、NPC 勝照人格自動；追擊只在真有逃散者時列出
 ---
