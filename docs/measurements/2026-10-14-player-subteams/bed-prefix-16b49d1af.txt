@@ -1,0 +1,111 @@
+# 原始輸出：pst-bed-prefix.txt｜只留 [TREE]、判準行（PASS／FAIL）、床印的數值行與段落標題；中間模擬 log（以 [ 開頭的行）與開局 MoneyGenesis 對帳區塊截掉
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+=== player_subteams：玩家子隊只做玩家給的任務 ===
+── S1 覓食 ──
+  PASS: ★母體地板：一格外有看得到、有糧的格
+   光格 (8, 2) 的結果句「」
+   派遣「派出子隊 Team16」
+  PASS: ★S1 地板：子隊抵達
+   1 天：子隊在=false 位置 - task=-｜隊上糧 13.1→-1.0（吃 0.0）｜格上糧 167.0→159.0
+── S2 偵查 ──
+   派遣「派出子隊 Team16」
+   抵達=true 位置 (11, 2) task=偵查
+── S3／S4 待機 24 小時 ──
+  PASS: ★S3 地板：派出了
+   24 小時：變化 1440 筆 ["t1 idle (9, 2)", "t2 idle (9, 2)", "t3 idle (9, 2)"]｜子隊找上門 2
+── S5 落腳 ──
+  PASS: ★S5 地板：一格外有可紮營的格
+   S5 目標格出營地：1440 tick 內未成立
+   「派出子隊 Team16」｜目標格 camp_level=0 camp_team=-1
+   途中別格營地：[(9, 2)]
+   已有據點的格 (8, 2)  { "ok": true, "reason": "" }
+── S6 移居自家據點 ──
+  PASS: ★S6 地板：一格外有空格可佈置成自家據點
+   S6 轉居民：36 tick 後成立
+   「派出子隊 Team16」｜子隊 tags=["生產"] parent=-1
+  PASS: S6 移居自家據點  成為居民（生產 tag、脫離母隊）
+   別人的據點 (8, 2)  { "ok": true, "reason": "" }
+── S7 建設 ──
+  PASS: ★S7 地板：一格外有可建的格
+   缺料  {  }
+   派遣「派出子隊 Team16」
+   抵達後 task=建設 工地隊=16｜工量 717→714
+  PASS: S7 抵達後 task＝建設、construction_team_id＝子隊、進度推進
+  PASS: S7c start_build 的 transition 在玩家子隊上不被 deny（具名來源）
+   S7b 完工：58 tick 後成立
+   完工 owner=16（玩家 15）｜召回「目標不是玩家子隊」併回=false｜之後 owner=16
+── S8 被攻擊／紀律脫離 ──
+   事件「」｜停點 kind=｜30 分鐘後 task=idle
+  PASS: S8 不自動逃（task 不是逃跑）
+   紀律脫離 fired=true｜事件「」｜之後 player_controlled=<null>
+── S9 召回 ──
+   召回「目標不是玩家子隊」｜併回=true｜母隊人口 11→11
+── S10 腳下派遣 ──
+   派遣當下 move_target=(9, 2)
+── S12 自主子隊（換附身後繼承來的）──
+   下令「已下令 Team16」｜player_controlled=-｜24 小時改派 1376 筆 ["t65 外交→(9, 2)", "t66 外交→(9, 2)", "t67 外交→(9, 2)"]｜位置 -
+── S13 自家人／arbiter ──
+   玩家子隊 try_set(覓食, unified)  true｜task=覓食
+   自主子隊同格 300 次 try_proactive_diplomacy  找上門 0 次、走到通商（暫停）300 次｜Probe.enabled=true
+  PASS: ★S4b 地板：Probe 有開（不然通商那一格恆 0）
+   自主子隊對母隊威脅原始分=1.00｜掃描結果最大威脅 id=15（母隊 15）分=1.00
+  PASS: ★S4c 地板：母隊在分數上是威脅（原始分 > 0）
+   首次未推進：無
+=== player_subteams DONE === errors: 26
+ERROR: [FAIL] S1b 沒營地／據點的格  結果句不報產出、說採不到
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S1 結果句寫此格產出
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S1 1 天後仍在、仍是玩家子隊、停在目標格
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S1 所在格採集入帳（隊上糧＋吃掉的 > 起點）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S1 母隊到同格  不被 try_merge_back 吞
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S2 子隊選單無「巡邏」
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S2 偵查  停在目標格、結果句「停留觀察」
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S3 待機  24 小時 task／位置不變、不被改派
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S4 整天零「找上門」來自自己的子隊
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S5b 途中沒有在別格紮營
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S5 落腳  目標格出現 L0 營地（起建隊＝子隊）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S5 已有據點的格  不可、帶原因
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S6 非自家據點  不可、原因「不是你的據點」
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: Error calling method from 'callv': 'RefCounted(player_command_system.gd)::precheck_dispatch_task': Method expected 5 arguments, but called with 6.
+   at: (core/object/object.cpp:715)
+ERROR: [FAIL] S7 缺料  不可、帶原因（需…子隊帶…）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S7b 完工 owner＝玩家隊；召回併回後仍是玩家隊
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S8 事件流有「你的子隊…攻擊」且是推進停點
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S8b 紀律失效脫離  玩家事件、不再是玩家子隊
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] ★S9 地板：召回前子隊還在（不是先被歸建閘吞掉）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S9 召回  併回（子隊消失、人回母隊）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S10 腳下派遣  當下就算抵達（不等移動計時）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S12 面板標「自主」（非你派出）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S12 被拒的令不翻（仍自主）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S12 下令被接受  成為玩家子隊、24 小時無決策層改派、走到了目標格
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S3b 玩家子隊：arbiter 擋決策層來源（unified）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S4b 自主子隊不對母隊外交（譜系，不看勢力）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] S4c 自主子隊威脅掃描不選母隊
+   at: push_error (core/variant/variant_utility.cpp:1091)
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=16b49d1af clean=NO code-dirty=1 codehash=3FC4B325A99A
+[TREE]   *** measuring the WORKING TREE, not commit 16b49d1af ***
+[TREE]   ?? scripts/debug/player_subteams_bed.gd

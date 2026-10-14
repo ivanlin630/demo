@@ -5702,5 +5702,11 @@ R² 2026-10-13 實量：現況一屏約 34 列（並排）；大地圖整寬（�
 
 ```
 faction_ai_system.gd:4126-4131：move_target==-1 且 task≠IDLE ⇒ 抵達即歸建（2026-09-22 measurer tap 已量到，未修；QA 2026-10-13 判決再坐實）。
-覓食／巡邏／偵查子隊因此一到就被叫回，執行端一 tick 都沒跑。玩家子隊票（spec 2026-10-13-player-subteams-execute-given-tasks-HOW）只對玩家子隊拿掉；NPC 照舊，改它會動 NPC 世界。
+覓食／巡邏／偵查子隊因此一到就被叫回，執行端一 tick 都沒跑。玩家子隊票（spec 2026-10-13-player-subteams-execute-given-tasks-HOW）只對玩家子隊拿掉；NPC 照舊
+量測（玩家子隊票，2026-10-14，床 player_subteams_census，30 天；tap merge.blanket.<task>；現位置 faction_ai_system.gd:4131-4138）：
+  修前 main 16b49d1af：seed 1337 fire 42（偵查 28、覓食 5、乞食 3、徵收 2、紮營 2、投靠 1、掠奪 1）
+                       seed 2    fire 37（覓食 15、偵查 8、紮營 5、乞食 3、貿易 3、外交 1、投靠 1、逃跑 1）
+                       seed 3    fire 157（偵查 141、外交 4、紮營 3、貿易 3、乞食 2、覓食 2、迎戰 1、逃跑 1）
+  修後 fix/player-subteams：1337＝42、3＝157 分佈逐項相同；seed 2＝17（自家人不當威脅改了 NPC 世界）
+  原始輸出：docs/measurements/2026-10-14-player-subteams/census-*.txt，改它會動 NPC 世界。
 ```

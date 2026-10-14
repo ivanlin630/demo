@@ -1,0 +1,18 @@
+# 原始輸出：pst-census-prefix.txt｜只留 [TREE]、判準行（PASS／FAIL）、床印的數值行與段落標題；中間模擬 log（以 [ 開頭的行）與開局 MoneyGenesis 對帳區塊截掉
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+=== player_subteams_census：30 天 × seed 1337,2,3 ===
+── seed 1337｜30 天｜首次未推進 無 ──
+   一律歸建閘 fire 42 次：乞食=3, 偵查=28, 徵收=2, 投靠=1, 掠奪=1, 紮營=2, 覓食=5
+   自家人：kin.threat_best=542
+   ★tap 掛了嗎：subteam.forage_arrived=5（同一支 _evaluate_subteam 的既有 tap；0  子隊母體空，不是 kin 為 0）
+   樣本 kin.threat_best：[{ "team": 17, "kin": 9, "score": 2, "tick": 1534 }, { "team": 6, "kin": 7, "score": 1.1, "tick": 16304 }, { "team": 6, "kin": 7, "score": 1.1, "tick": 16304 }, { "team": 6, "kin": 7, "score": 1.1, "tick": 16359 }, { "team": 6, "kin": 7, "score": 1.1, "tick": 16427 }]
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=16b49d1af clean=NO code-dirty=7 codehash=A86083DFF66F
+[TREE]   *** measuring the WORKING TREE, not commit 16b49d1af ***
+[TREE]    M scripts/data/team_data.gd
+[TREE]    M scripts/simulation/decision/decision_context.gd
+[TREE]    M scripts/simulation/diplomatic_ai_system.gd
+[TREE]    M scripts/simulation/faction_ai_system.gd
+[TREE]    M scripts/simulation/interaction_system.gd
+[TREE]   ?? scripts/debug/player_subteams_bed.gd
+[TREE]   ?? scripts/debug/player_subteams_census.gd
+# ★這一輪原本三個 seed 一起跑，seed 1337 跑完後撞 wrapper 360s 逾時被殺（原始輸出最後一行：[GODOT TIMEOUT 360s - process killed]）；seed 2、3 另跑（GODOT_TIMEOUT=900）＝同目錄 -s2／-s3 兩檔

@@ -1,0 +1,9 @@
+# 原始輸出：pst-census-post-s3.txt｜只留 [TREE]、判準行（PASS／FAIL）、床印的數值行與段落標題；中間模擬 log（以 [ 開頭的行）與開局 MoneyGenesis 對帳區塊截掉
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+=== player_subteams_census：30 天 × seed 3 ===
+── seed 3｜30 天｜首次未推進 無 ──
+   一律歸建閘 fire 157 次：乞食=2, 偵查=141, 外交=4, 紮營=3, 覓食=2, 貿易=3, 迎戰=1, 逃跑=1
+   自家人：kin.* 全 0（tap 有掛才算數：見下一行）
+   ★tap 掛了嗎：subteam.forage_arrived=2（同一支 _evaluate_subteam 的既有 tap；0  子隊母體空，不是 kin 為 0）
+=== player_subteams_census END ===
+[TREE] path=A:\GDS\demo\.worktrees\pst commit=47fc009da clean=yes codehash=clean
