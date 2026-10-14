@@ -619,10 +619,15 @@ func _consume_player_commands(state: WorldState) -> void:
 		if ok and not bool(res.get("payload", {}).get("accepted", res.get("accepted", true))):
 			say = "%s：%s（%s）" % [PlayerCommandApi.describe(name, args), PlayerApiMapper.DECLINED_WORD,
 				why if why != "" else "沒有給原因"]
-		state.command_results.append({
+		var _cr: Dictionary = {
 			"tick": state.world.current_tick, "seq": int(c.get("seq", 0)), "ok": ok, "name": name,
 			"text": say if ok
-				else _refused_text(name, args, why)})
+				else _refused_text(name, args, why)}
+		# ★打聽回答逐筆列（spec 2026-10-13-intel-panel-HOW 追加）：handler 給了 inquiry_items 才帶（絕對 tick；UI 組「N 分鐘前」）
+		var _items = res.get("payload", {}).get("inquiry_items", null) if res.get("payload", {}) is Dictionary else null
+		if _items is Array and not (_items as Array).is_empty():
+			_cr["items"] = (_items as Array).duplicate(true)
+		state.command_results.append(_cr)
 
 # 失敗那一半的句子。★★★`respond_to_forced` 是【具名例外】，理由是語意：
 #   玩家按了「接受」而世界說「隊伍已滿」⇒ 那不是【被拒絕】（沒有人拒絕他），

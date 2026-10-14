@@ -1623,7 +1623,7 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 		var wrote_gi: int = int(out_gi.get("written", 0))
 		if mode_gi == "silent":
 			msg_gi = "他不願多說"
-		elif wrote_gi <= 0 and _inquiry_payload_empty(result_gi):
+		elif wrote_gi <= 0 and (out_gi.get("items", []) as Array).is_empty() and _inquiry_payload_empty(result_gi, _pt_id):
 			msg_gi = "他也不知道"
 		elif wrote_gi <= 0 and int(out_gi.get("conflicted", 0)) > 0:
 			# ★R² 三態③：他說的跟你知道的不一樣、可信度沒贏 ⇒ 不能說「早就知道了」（那是錯的）
@@ -1638,17 +1638,25 @@ func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamDa
 			msg_gi = "他說了些事情（記下 %d 筆，來自 Team%d）" % [wrote_gi, npc_id_gi]
 	print("[PlayerCmd] gather_intel choice=%s mode=%s 寫入=%d 結果筆數=%d" % [
 		choice_gi, String(out_gi.get("mode", "n/a")), int(out_gi.get("written", 0)), result_gi.size()])
+	# ★逐筆列（spec 2026-10-13-intel-panel-HOW 追加）：寫進你 belief 的每一筆與它的三態 ⇒ 結果句下面逐筆印（年齡在 UI 算）
+	if not (out_gi.get("items", []) as Array).is_empty():
+		result_gi["inquiry_items"] = out_gi["items"]
 	return { "ok": true, "msg": msg_gi, "payload": result_gi }
 
 # ★★★「他也不知道」的判準：不能用 `result_gi.is_empty()` ——
 #   `resolve_inquiry()` 會回 `{"locations": []}` 這種【有 key 但陣列是空的】形狀
 #   ⇒ `is_empty()` 為 false ⇒ 第三句永遠搶在第二句前面（實測 P4 紅）。
 #   ★★所以要看【裡面有沒有東西】，不是【有沒有 key】。
-func _inquiry_payload_empty(p: Dictionary) -> bool:
+#   ★★★而【說的是你自己】的那幾筆不算（打聽三態母體普查 2026-10-15：給方只知道你一隊時，回答有 1 筆＝你的位置，
+#     claims 段跳過自己 ⇒ 寫 0 筆 ⇒ 舊判準說「他說的你早就知道了」——藍圖真玩「我只知一隊卻被判全知道」就是這一格）
+func _inquiry_payload_empty(p: Dictionary, asker_id: int = -1) -> bool:
 	for k in p:
 		var v = p[k]
 		if v is Array:
-			if not (v as Array).is_empty(): return false
+			for e in (v as Array):
+				if e is Dictionary and int((e as Dictionary).get("team_id", -2)) == asker_id:
+					continue
+				return false
 		elif v != null:
 			return false
 	return true

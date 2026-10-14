@@ -324,6 +324,10 @@ func _process(_delta: float) -> void:
 		#   ★不改成讓事件區讀 `_events`（:876 註解：那是另一個區的料，傳了會印兩份）
 		_feed_push(int(r.get("tick", _bridge.get_current_tick())), "指令",
 			"%s%s" % ["" if bool(r.get("ok", false)) else "✗ ", String(r.get("text", ""))])
+		# ★打聽回答逐筆列（spec 2026-10-13-intel-panel-HOW 追加 I9）：結果句下面一筆一行；消息年齡＝回答那一刻 − 那筆的 last_tick
+		for _il in inquiry_item_lines(r.get("items", []) as Array, int(r.get("tick", 0))):
+			_events.append({"type": "cmd", "msg": _il})
+			_feed_push(int(r.get("tick", _bridge.get_current_tick())), "指令", _il)
 		# ★D3（spec 2026-10-07 四缺陷，press-is-do）：令結算之後結果行換成那道令的【完成句或被拒句】
 		#   ★舊版只在失敗時換 ⇒ 成功的令結果行停在「已排入：…」，而事件流同一 tick 已經印了「…：完成」
 		_write_feedback(_feedback_text(bool(r.get("ok", false)), String(r.get("text", ""))),
@@ -511,6 +515,10 @@ func _input(event: InputEvent) -> void:
 			_global_advance_key(KEY_G)
 		ARRIVE_KEY:
 			_global_advance_key(ARRIVE_KEY)   # ★M ②：走到抵達（同族推進鍵，同一支處理函式）
+		INTEL_KEY:
+			# ★情報頁直達鍵（spec 2026-10-13-intel-panel-HOW I1）：分頁跳到情報頁；只換頁、不寫 state
+			_page_idx = UiPages.PAGE_ORDER.find(UiPages.INTEL_PAGE)
+			_refresh()
 		KEY_H:
 			_cursor = _bridge.get_player_tile_pos()
 			_refresh()
@@ -1182,7 +1190,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開",
+	"main":          "[,][.]切頁 [J]情報 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開",
 	"interact":      "[1-9]選目標/行動 [?]展開不可的 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -1279,6 +1287,7 @@ const LETTER_NO_RESPONSE_MSG: String = "現在沒有要回應的事件"
 #   ⇒ 鍵的意思不隨強制事件出現而變（不變量 #10）
 # ★M ②：走到抵達（ARRIVE_KEY）與 Space／X／G 同族 ⇒ 進同一份字表（強制回應字母配發同步跳過它）
 const ARRIVE_KEY: int = KEY_L
+const INTEL_KEY: int = KEY_J   # ★情報頁直達鍵（主畫面原本未綁）
 const GLOBAL_ADVANCE_KEYS: Array = [KEY_SPACE, KEY_X, KEY_G, ARRIVE_KEY]
 # ★自家隊動作一列三項（項間兩格空白）⇒ 每項的寬度預算（reasons ②：原因放不下就截在這裡、以「…」結尾）
 const SELF_ITEM_COLS: int = (TextUiLayout.COLS - 2 * 2) / 3
@@ -1909,26 +1918,101 @@ func _build_page_connected_lines(idx: int, ct: Dictionary) -> Array:
 		4: return _build_memory_lines()
 		_: return []
 
-# ★★★記憶頁（打聽 v1 spec §3(G)）：打聽寫進 belief 的東西要【看得見】。
-#   ★它只接出查詢面供得出的那兩欄（已知情報／傳聞來源）——
-#     「近期事件」「決策紀錄」查詢面沒有 ⇒ ★★仍然印天窗，不許先拿掉再說。
-#   ★★而【唯讀】：這裡呼叫查詢面（同 `_build_hover_truth_lines()` 呼 `query_tile` 的前例），
-#     render 不寫 state。
+# ★★★情報頁（原記憶頁；打聽 v1 spec §3(G) ＋ spec 2026-10-13-intel-panel-HOW）：玩家查得到「我知道什麼」
+#   ★讀查詢面 query_memory_panel（belief 純函數、只給絕對 tick）；「N 分鐘前」「太久，視同不知」在這裡組句時算
+#     （過期謂詞＝BeliefSystem.belief_stale，游標處 _remembered_teams_at 經 belief_pos 走同一支）
+#   ★★【唯讀】：這裡呼叫查詢面（同 `_build_hover_truth_lines()` 呼 `query_tile` 的前例），render 不寫 state
+#   ★每類 0 筆也印一行「尚無」；每類最多 UiPages.INTEL_ROWS_PER_KIND 列，多的印「另有 M 筆」
 func _build_memory_lines() -> Array:
-	var lines: Array = []
 	var env: Dictionary = _bridge.query_memory_panel()
-	var rows: Array = env.get("data", {}).get("memory", [])
+	return intel_lines(env.get("data", {}), _bridge.get_current_tick(), _bridge.get_state())
+
+# 空類與折疊列的字（床讀同一份，不抄字）
+const INTEL_NONE: String = "尚無"
+const INTEL_NONE_NO_SOURCE: String = "尚無（還沒有這種情報）"
+const INTEL_MORE_FMT: String = "另有 %d 筆"
+
+# 純函數（床直接呼）：payload ＋ 現在 tick ⇒ 情報頁的列
+static func intel_lines(data: Dictionary, now: int, state: WorldState) -> Array:
+	var lines: Array = []
+	var rows: Array = (data.get("memory", []) as Array).duplicate()
+	var cap: int = UiPages.INTEL_ROWS_PER_KIND
 	# ★★★0 筆也印一行 —— 常駐：只在非零時才出現的東西，玩家學不會它的意思，
 	#   而「沒看到」與「沒有這個功能」在畫面上長得一樣。
 	lines.append("已知情報：%d 個對象" % rows.size())
+	lines.append("── 隊伍 ──")
 	if rows.is_empty():
-		lines.append("  （還沒有人告訴你任何事）")
-	for r in rows:
-		lines.append("  Team%d：%d 筆｜最新 T%d｜傳聞來源 %s%s" % [
-			int(r.get("target_id", -1)), int(r.get("claim_count", 0)),
-			int(r.get("latest_tick", 0)), String(r.get("source", "不明")),
-			"（有疑點）" if bool(r.get("is_suspicious", false)) else ""])
+		lines.append("  尚無（還沒有人告訴你任何事）")
+	# ★排序：位置 tick 新的在前；沒有位置的排最後（同序以隊號）
+	rows.sort_custom(func(a, b):
+		var ta: int = int(a.get("pos_tick", -1)) if a.has("pos") else -1
+		var tb: int = int(b.get("pos_tick", -1)) if b.has("pos") else -1
+		return ta > tb or (ta == tb and int(a["target_id"]) < int(b["target_id"])))
+	for i in range(mini(rows.size(), cap)):
+		lines.append("  " + intel_team_line(rows[i], now, state))
+	if rows.size() > cap:
+		lines.append("  " + INTEL_MORE_FMT % (rows.size() - cap))
+	lines.append("── 據點與市集（關係＝你隊伍領袖的看法）──")
+	var ops: Array = data.get("outposts", []) as Array
+	if ops.is_empty():
+		lines.append("  " + INTEL_NONE)
+	for i in range(mini(ops.size(), cap)):
+		var o: Dictionary = ops[i]
+		var p: Vector2i = o["tile_pos"]
+		var kind: String = {"civilian": "民用據點", "military": "軍事據點"}.get(String(o.get("type", "")), "據點")
+		lines.append("  (%d,%d) Team%d 的%s（等級 %d）｜關係 %+.2f｜%d 分鐘前看到" % [p.x, p.y, int(o["owner_id"]), kind,
+			int(o.get("level", 0)), float(o["g"]), maxi(now - int(o.get("last_tick", 0)), 0)])
+	if ops.size() > cap:
+		lines.append("  " + INTEL_MORE_FMT % (ops.size() - cap))
+	lines.append("── 勢力關係 ──")
+	var frs: Array = data.get("faction_relations", []) as Array
+	if frs.is_empty():
+		lines.append("  " + INTEL_NONE)
+	for fr in frs.slice(0, cap):
+		lines.append("  " + str(fr))
+	lines.append("── 糧源 ──")
+	lines.append("  " + INTEL_NONE_NO_SOURCE)
 	return lines
+
+# 打聽回答的逐筆列（純函數，床直接呼）：三態各自一句；★「早就知道」只對 refreshed 那幾筆說
+const INQUIRY_STATE_WORD: Dictionary = {
+	"written": "新",
+	"refreshed": "你早就知道了",
+	"conflicted": "他說的跟你知道的不一樣，你沒採信",
+}
+static func inquiry_item_lines(items: Array, at_tick: int) -> Array:
+	var out: Array = []
+	for it in items:
+		var where: String = "位置不明"
+		if (it as Dictionary).get("tile_pos") is Vector2i:
+			var p: Vector2i = it["tile_pos"]
+			where = "在 (%d,%d)" % [p.x, p.y]
+		out.append("　Team%d %s（消息是 %d 分鐘前的）｜%s" % [int(it.get("target_id", -1)), where,
+			maxi(at_tick - int(it.get("last_tick", 0)), 0), String(INQUIRY_STATE_WORD.get(String(it.get("state", "")), "?"))])
+	return out
+
+# 一支隊一列：Team6 (4,7)｜聽說，來自 Team3｜位置是 N 分鐘前的｜關係 不明｜人口約 10
+static func intel_team_line(r: Dictionary, now: int, state: WorldState) -> String:
+	var tid: int = int(r.get("target_id", -1))
+	var where: String = "位置不明"
+	var age: String = ""
+	if r.has("pos"):
+		var p: Vector2i = r["pos"]
+		var pt_tick: int = int(r.get("pos_tick", 0))
+		if state != null and BeliefSystem.belief_stale(state, pt_tick):
+			where = "(%d,%d)（太久，視同不知）" % [p.x, p.y]
+		else:
+			where = "(%d,%d)" % [p.x, p.y]
+		age = "｜位置是 %d 分鐘前的" % maxi(now - pt_tick, 0)
+	var how: String = "親見" if bool(r.get("firsthand", false)) else "聽說，來自 %s" % String(r.get("source", "不明"))
+	var rel: String = ("關係 %.2f" % float(r["relation"])) if r.has("relation") else "關係 不明"
+	var strength: String = ""
+	if r.has("population_est"):
+		strength += "｜人口約 %d" % int(r["population_est"])
+	if r.has("armed_est"):
+		strength += "｜武裝約 %d" % int(roundf(float(r["armed_est"])))
+	return "Team%d %s｜%s%s｜%s%s%s" % [tid, where, how, age, rel, strength,
+		"（有疑點）" if bool(r.get("is_suspicious", false)) else ""]
 
 func _page_skylight_fields(idx: int) -> Array:
 	match idx:

@@ -248,6 +248,10 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 	out["written"] = 0
 	out["refreshed"] = 0    # ★回饋 #6 ②：寫了 claim 但所知的值沒變（只換時間戳）⇒ 計這裡，不算 written
 	out["conflicted"] = 0   # ★R²：他說的跟你所知的不同、而可信度沒贏過你現有的 ⇒ 寫進 claims 但沒採信
+	# ★打聽回答逐筆列（spec 2026-10-13-intel-panel-HOW 追加）：這一趟【寫進接收方】的每一筆 claim 與它落在哪一態
+	#   ★來源是寫進接收方的 entry，不是給方 known_targets（那會洩漏給方知道多少）；只放絕對 tick（年齡在 UI 算）
+	out["items"] = []
+	out["msgs_written"] = 0   # 訊息複製那一段的筆數（written 也含它；逐筆列只列 claim）
 	# ★被問方知道多少（P5 母體地板要的那個數）—— ★在 silent 之前就記，
 	#   否則「他不願多說」與「他什麼都不知道」在卷面上分不出來。
 	out["giver_known"] = BeliefSystem.known_targets(state, giver_id).size()
@@ -278,6 +282,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 		# ★打聽票 I3：訊息也是記下來的東西 ⇒ 每複製一則新訊息 +1（已知的上面就 continue 掉了，不算）
 		#   ★舊版只在 claims 那段 +1 ⇒「近期事件」真的複製進 team_known，結果句卻印「記下 0 筆」
 		out["written"] = int(out.get("written", 0)) + 1
+		out["msgs_written"] = int(out.get("msgs_written", 0)) + 1
 
 	var rep2: float = float(giver.known_reputations.get(receiver_id, 0.5))
 	if rep2 < 0.3 and (giver.faction_id == -1 or giver.faction_id != receiver.faction_id):
@@ -329,12 +334,19 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int,
 		var _before: Dictionary = _known_values(BeliefSystem.best_value_quiet(state, receiver_id, tgt_id))
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
 		var _after: Dictionary = _known_values(BeliefSystem.best_value_quiet(state, receiver_id, tgt_id))
+		var _state3: String = "conflicted"
 		if not _same_knowledge(_after, _before):
 			out["written"] = int(out.get("written", 0)) + 1
+			_state3 = "written"
 		elif _agrees(_known_values(entry), _after):
 			out["refreshed"] = int(out.get("refreshed", 0)) + 1
+			_state3 = "refreshed"
 		else:
 			out["conflicted"] = int(out.get("conflicted", 0)) + 1
+		var _item: Dictionary = {"target_id": int(tgt_id), "state": _state3, "last_tick": int(entry.get("last_tick", 0))}
+		if entry.get("tile_pos") is Vector2i:
+			_item["tile_pos"] = entry["tile_pos"]
+		(out["items"] as Array).append(_item)
 
 # ★claim 的值欄位（明列，R²：value 字典裡本來就帶 last_tick，比整個字典會讓每筆親見都算「有變」）
 #   來源＝record_claim 各呼叫端實際寫的鍵：vision_system.gd:157-192（親見快照）、interaction_system.gd:1467-1490（同格快照）、
