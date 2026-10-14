@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你（玩家可見批尾）
 topic: R² 請審 spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW
 ---
