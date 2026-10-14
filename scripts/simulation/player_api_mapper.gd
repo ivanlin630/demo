@@ -59,8 +59,8 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		"loyalty": p.loyalty,
 		"stress":  p.stress,
 		"skills": _skills,
-		"food_days": _food_days(t) if t != null else 0.0,
-		"starving": (_food_days(t) < 3.0) if t != null else false,
+		"food_days": food_days(t) if t != null else 0.0,
+		"starving": (food_days(t) < 3.0) if t != null else false,
 	}
 
 # ── Controlled team ────────────────────────────────────────────────────────────
@@ -190,8 +190,8 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,
-		"food_days":        _food_days(t),
-		"starving":         _food_days(t) < 3.0,   # WARNING_DAYS=3
+		"food_days":        food_days(t),
+		"starving":         food_days(t) < 3.0,   # WARNING_DAYS=3
 		"task_summary": t.current_task,
 		"capabilities": _team_capabilities(state, t),
 	}
@@ -217,7 +217,8 @@ static func _armed_count(t: TeamData) -> int:
 	var anon_pop: int = maxi(t.population - named_count, 0)
 	return named_count + roundi(float(anon_pop) * float(t.armed_anon_ratio))
 
-static func _food_days(t: TeamData) -> float:
+# ★糧撐天數（頂列與顧問 resources 同一支；spec 2026-10-15-advisor-reads-belief §1b）
+static func food_days(t: TeamData) -> float:
 	var burn: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	return float(t.resources.get("food", 0)) / burn
 
@@ -948,13 +949,37 @@ static func map_threat_line(state: WorldState) -> String:
 		var other: int = state.encounter_defender_id if tid == state.encounter_attacker_id \
 			else state.encounter_attacker_id
 		return THREAT_ENGAGED % _threat_name(state, other)
-	# ②③ 一個迴圈（★P5：本函式體內呼叫 best_estimate 的地方 ＝ 1）
+	# ②③ 一個迴圈（★P5：迴圈在 threat_scan；本函式體內呼叫 best_estimate 的地方 ＝ 0）
+	var sc: Dictionary = threat_scan(state)
+	var n: int = int(sc["n"])
+	var enemy_id: int = int(sc["enemy_id"]) if int(sc["enemy_d"]) <= n else -1
+	var enemy_d: int = int(sc["enemy_d"])
+	var beast_id: int = int(sc["beast_id"]) if int(sc["beast_d"]) <= n else -1
+	var beast_pos: Vector2i = sc["beast_pos"]
+	if enemy_id != -1:
+		return THREAT_ENEMY % [enemy_id, enemy_d]
+	if beast_id != -1:
+		return THREAT_BEAST % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
+	return THREAT_NONE
+
+# ★視野內已知威脅的一次掃描（威脅欄與顧問 strategic 共用一個身體；spec 2026-10-15-advisor-reads-belief §1b）
+#   ★P5：本函式體內呼叫 best_estimate 的地方 ＝ 1；只讀附身隊 belief（best_estimate）＋自家視野
+#   回 {n 視野, enemy_id/enemy_d 最近已知敵對, enemy_n 已知敵對數, beast_id/beast_d/beast_pos 最近已知野獸}；沒有 ⇒ id＝-1
+#   ★不在這裡切視野：顧問要「最近敵對 > 視野 2 倍」；威脅欄自己切（最近者在視野內 ⇔ 視野內有最近者）
+static func threat_scan(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return {"n": 0, "enemy_id": -1, "enemy_d": 1 << 30, "enemy_n": 0, "beast_id": -1, "beast_d": 1 << 30, "beast_pos": Vector2i(-1, -1)}
 	var n: int = VisionSystem.vision_range(state, t, DayNightSystem.new().get_vision_mult(state))
 	var enemy_id: int = -1
 	var enemy_d: int = 1 << 30
 	var beast_id: int = -1
 	var beast_d: int = 1 << 30
 	var beast_pos: Vector2i = Vector2i(-1, -1)
+	var enemy_n: int = 0
 	for tgt in BeliefSystem.known_targets(state, tid):
 		var g: int = int(tgt)
 		if g == tid:
@@ -964,20 +989,16 @@ static func map_threat_line(state: WorldState) -> String:
 			continue
 		var at: Vector2i = bel["tile_pos"]
 		var d: int = _hex_d(t.tile_pos, at)
-		if d > n:
-			continue
 		var tt: TeamData = state.teams.get(g)
 		if tt != null and tt.beast_kind != "":
 			if d < beast_d:
 				beast_d = d; beast_id = g; beast_pos = at
 		elif state.player_hostile_teams.has(g):
+			enemy_n += 1
 			if d < enemy_d:
 				enemy_d = d; enemy_id = g
-	if enemy_id != -1:
-		return THREAT_ENEMY % [enemy_id, enemy_d]
-	if beast_id != -1:
-		return THREAT_BEAST % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
-	return THREAT_NONE
+	return {"n": n, "enemy_id": enemy_id, "enemy_d": enemy_d, "enemy_n": enemy_n,
+		"beast_id": beast_id, "beast_d": beast_d, "beast_pos": beast_pos}
 
 static func _threat_name(state: WorldState, team_id: int) -> String:
 	var tt: TeamData = state.teams.get(team_id)
