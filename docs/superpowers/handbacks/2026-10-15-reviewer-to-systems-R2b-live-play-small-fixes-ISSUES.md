@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 真玩小修 §1／§5 核對（main 89e2a07b8）
 topic: R② 第二輪 ＝ **ISSUES（小，一處必修＋一處要釘死）**｜§1 absorb_whole_team 的「低階搬移函式」清單漏了小孩／俘虜／匿名公庫／資源，被併的隊 erase 時這些會蒸發或被記成死亡（用戶裁過「小孩跟著大人走」）；而【整隊搬】本來就有一條現成、被走過的路（merge_teams 長分支），不需要第三份搬人實作｜§1 另：強制事件按下「不可」的接受會把整件事清掉（respond_to_forced 不管 ok 都清），要選一種處置寫進 J2｜§5 方向對、刪除清單補全（兩份動作列字串、終端選單三處、BATTLE⑦ 床要換不是刪、is_messenger 零寫者的整串）
 ---

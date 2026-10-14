@@ -11,16 +11,18 @@
 - 執行 `_accept_join_request`（:1669-1693）→ `merge_teams`（:1688）→ `_merge_into`（subteam_system.gd:321）：只有 `absorbed.parent_team_id == absorber_id`（自家子隊回來）才搬隊長與記名（:337-347）；求投靠的隊不是子隊 ⇒ **只搬匿名**，且按 `min(pop, 容量)/pop` 比例（:349-352），剩下的另成一隊「部分合併」（:359-361）。糧按實際增量扣（:1689-1691）。
 - ⇒ 列的是全隊、做的是匿名×容量比例。真玩「列 +4 −3.2、做 1 −0.8」吻合。
 改法（藍圖裁 2026-10-15-blueprint-to-systems-RULING-join-request-whole-team-or-nothing-no-half-team：求投靠＝整隊、裝不下＝不成、不切半隊；意圖帳「邀請併入」列 10-07 已寫同秤反向＋整隊走收留同路 ⇒ 今天的「只搬匿名」是缺陷，本項直接把身體改對，不先為缺陷的身體做預覽）：
-- 一支 `SubteamSystem.absorb_whole_team(state, absorber, absorbed) -> {ok:bool, reason:String, moved:int}`：隊長＋記名＋匿名＋資源全數併入（沿用 `_merge_into` 自家子隊回來那一支的搬法，:337-347＋匿名全數），被併的隊消失；前置三閘照既有收留路（上限／食物／關係）。**上限塞不下整隊 ⇒ ok:false**，理由「上限 {cap}，現有 {n}，對方 {m} 人」；不切半隊。
+- 一支 `SubteamSystem.absorb_whole_team(state, absorber, absorbed) -> {ok:bool, reason:String, moved:int}`＝`absorb_block_reason` 把關 → 呼既有 `merge_teams(state, absorber, absorbed, [absorbed.leader_id] + 記名成員, anon_total)`（subteam_system.gd:235 長分支）。**不另寫搬人實作**：長分支本來就搬光 minor_population（:291-299，用戶裁「小孩跟著大人走」）、掃光 anon_treasury 與資源（:217-229 will_empty）、pop 歸零才 erase。被併隊名下的據點、子隊、勢力身分、captive_groups 的處置＝長分支／erase 既有行為；實作端在交件信逐項列（file:line）它們各去哪，若有一項蒸發就停下回報，不自行補第三份。前置三閘照既有收留路（上限／食物／關係）。**上限塞不下整隊 ⇒ ok:false**，理由「上限 {cap}，現有 {n}，對方 {m} 人」；不切半隊。
 - 配一支純判斷 `absorb_block_reason(state, absorber, absorbed) -> String`：`forced_label`（選單）、`_accept_join_request`（執行）、`absorb_whole_team` 自己都呼它 ⇒ 列的條件＝做的條件。
 - 選單：可 ⇒「收留（+{m} 人，食物 −{0.8m}）」；不可 ⇒ 照列並標「不可：{理由}」，按下回同一句。
-- **不碰 `_merge_into`**（它還服務子隊回歸 subteam_system.gd:212，那條路先搬隊長記名才讀 population；R² §1）：`absorb_whole_team` 是新的一支，搬人／搬資源用既有的低階搬移函式（`transfer_proportional` 全數、記名逐一 `set_team`／名冊），不經 `_merge_into` 的比例分支。⇒ 子隊回歸與 NPC 合併路逐位不變。
+- **不碰 `_merge_into`**（它還服務子隊回歸 subteam_system.gd:212；R² §1）：走的是 `merge_teams` 帶 transfer 清單的長分支，不經 `_merge_into` 的比例分支 ⇒ 子隊回歸與 NPC 合併路逐位不變。
+- **按下「不可」的接受**：`respond_to_forced` 今天不論 ok 都清 `player_forced_event`（player_command_system.gd:1828-1829）⇒ 請求被消耗、玩家只看到沒生效。改成比照 choose_heir 不清的先例（:1801-1803）：block_reason 不空 ⇒ 回理由、**事件保留**，玩家可改按婉拒。
 - 整隊 ⇒ 沒有「0 人進」「進位歸零」「留下半隊再來求」：對方 population ≥ 1 才會有求投靠；裝得下就全來，裝不下就不成。舊的「隊伍已滿，無法收留」（:1680-1682）改由 block_reason 的理由句取代。
 - 選單建時（mapper :349-353）、處理前（player_command_system.gd:1741-1745）、執行（:1669-1693）三處都只呼 block_reason，不留第三份算式。
 - 玩家動詞「邀請併入」（意圖帳列，code 尚未落地）將來走同一支 `absorb_whole_team`，一個身體兩個入口；verb-catalog 登一列「併入整隊」記這件事。
 驗收：
 - J1（修前紅）：對方 1 隊長＋1 記名＋2 匿名、容量足 ⇒ 選單「+4 人，食物 −3.2」；接受後人口 +4、糧 −3.2、對方隊不存在、隊長與記名在玩家隊名冊。
-- J2（修前紅）：容量只剩 2 ⇒ 選單標「不可：上限…對方 4 人」；按下 ok=false、雙方人口不變、沒有多出一支隊。
+- J2（修前紅）：容量只剩 2 ⇒ 選單標「不可：上限…對方 4 人」；按下 ok=false、雙方人口不變、沒有多出一支隊、**強制事件仍在**（可改按婉拒）。
+- J1b 守恆：佈置對方帶 2 小孩、1 組俘虜、coin 與資源、anon_treasury ⇒ 併入前後 人口＋minors＋俘虜＋coin＋各資源 總和相等（全世界加總），沒有人被記成死亡。
 - J3：子隊回歸三格（容量足／容量不足／capacity<=0 早退 :330-334）修前修後結果逐位相同；NPC 合併 census 逐項相同（`_merge_into` 未改的證明，不只靠 world-fp）。
 - 負對照：forced_label 不呼 block_reason ⇒ J2 紅；`_accept_join_request` 改回 merge_teams ⇒ J1 紅。
 
@@ -53,7 +55,11 @@
 - 所有命令路徑不呼 `_log`（:995-999）。
 改法（同一判準：沒有消費者就不列；藍圖 2026-10-15 已同意跟隨那半，信使同理已告知）：
 - Z 選單兩種項**都拿掉**；選單因此恆空 ⇒ **Z 鍵與它的提示一起拿掉**（encounter_view 動作列、終端戰鬥畫面鍵列、unbound_key_bed 的鍵表同一 commit），不留一個印「沒有可下令的隊友」的空選單。
-- `_open_sub_command`、`_dispatch_messenger`、`current_order`、`messenger_target_idx` 的寫入一併刪；`is_messenger` → `_messenger_exit` 的死分支（create_subteam）刪掉；`is_messenger` 若因此零寫者，欄位與 :458-459 一起刪（實作端照普查結果列）。
+- 刪除清單（R² 第二輪普查）：
+  - encounter_view：動作列 Z 字串兩份（:114、:226）、未綁鍵回句裡的 Z（:827）、終端選單三處（:33-34、:693-705、:717-725）、`_open_command_menu`／`_on_command_selected`／`_open_sub_command`／`_dispatch_messenger`、`SOUND_RANGE`（只被選單用）、is_messenger 寫入（:550-551）。
+  - encounter_system：`current_order`／`messenger_target_idx`／`is_messenger` 初值與消費（:147、:154、:163、:177、:458-459、:653-666 `_messenger_exit`、:898-906）。
+  - **不動** text_ui_main.gd:607 的 `KEY_Z`（主畫面的 Z，不是戰鬥的）。
+  - 床：terminal_e2e_bed.gd:2274-2282 BATTLE⑦ **改成**「戰鬥畫面按 Z ⇒ 未綁鍵處置」（不是刪掉）。
 - 深層批「戰鬥模型落地」給命令／傳令真消費者時，連同 Z 一起加回（不預留空狀態，同游標票刪 Enter）。
 驗收 B1（修前紅）：戰鬥畫面鍵列與 GUI 動作列無 Z、按 Z 走既有未綁鍵處置；B2 全庫無 `current_order`／`messenger_target_idx`／`create_subteam` 呼叫；B3 world-fp：只有玩家戰鬥畫面能設 is_messenger ⇒ 無玩家世界不變。
 
