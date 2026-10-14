@@ -196,11 +196,11 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 
 定義於 `scripts/simulation/movement_system.gd`。
 
-- 每 Tick 累積 `move_tick_acc`，達 `move_tick_cost` 才走一格
-- 移動成本：`clamp(round(BASE_MOVE_TICKS / _compute_team_speed), MIN_MOVE_TICKS, MAX_MOVE_TICKS)`
-- `_compute_team_speed`：記名 NPC `get_effective_speed()` + 匿名健康=1.0 + 傷者=0.5 的加權均值
-- 路徑：greedy step（選最接近 move_target 的鄰格）
-- 抵達：更新 `occupied_by`，**不**自動建立據點
+- 移動在整點窗口跑：`move_tick_acc` 加上窗口長度，夠付腳下這一格的成本就走一格（餘量帶到下一窗）；單窗算術在 `MovementSystem.run_window`
+- 每格成本：隊速 × 晝夜 × 腳下地形 × 疲勞 × 超載 × 車輛，夾在 [MIN, MAX]（`move_cost_pure`／「在某格」版 `move_cost_at_pure`）
+- 路徑：每走一步從當下位置重新 A*（`find_path`），不沿用起點算的整條路
+- 預計時間：`MovementSystem.estimate_travel_ticks` 用同一支 `run_window` 逐窗走一遍（不另抄公式）；地形讀這支隊知道的，沒去過的格當平原 ⇒ 路上有未知格時結果句說「至少」
+- 抵達：更新 `occupied_by`，**不**自動建立據點；玩家看到「抵達 (q,r)（走了 N 分鐘）」，N＝模擬抵達 tick − 下令 tick
 
 ## 子團自主 AI
 
