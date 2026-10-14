@@ -6,7 +6,7 @@
 - 排位：藍圖 2026-10-14-blueprint-to-systems-RULING-roadmap-board-and-annihilation-captives-rout-order（第 7 張）。
 - 真玩：2026-10-14-blueprint-to-systems-TICKETS-live-play-findings-…①（結算事件）。
 - R①：2026-10-14-reviewer-to-systems-R1-annihilation-captives-premises-FACTCHECK（一條假前提已由藍圖訂正）。
-- 兩個 WHAT＋處置權歸留場方：藍圖 2026-10-14-blueprint-to-systems-RULING-ticket7-captives-all-disabled-guard-cap-pursuit-player-chooses（含末段 e837c1e2f，用戶點出「全數可俘只限於戰勝」）。
+- 兩個 WHAT＋處置權歸留場方：藍圖 2026-10-14-blueprint-to-systems-RULING-ticket7-captives-all-disabled-guard-cap-pursuit-player-chooses（含末段 e837c1e2f「全數可俘只限於戰勝」、再追加 27e53db65「接上既有戰中俘虜」）。
 順位：玩家可見批第 7 張（游標即選中之後）。
 
 ## 事實（main 212e9556d；R① 已核）
@@ -33,13 +33,22 @@
 - 只寫玩家該知道的：敵方數字＝場上看到的（encounter_units 雙方都在場、互見已成立，F2），不讀敵隊整體 population 真值。
 - 判準：結算前後任一方 population 變了而事件流沒有這則 ⇒ 紅。
 
+### 2a. 戰中已被押住的（既有 `_check_prisoners` :596／`_check_rescues` :625，用戶 2026-10-14）
+- 戰中：失能未離場且身旁有敵人 ⇒ 就地 `is_prisoner`（押方＝對方隊）；隊友貼身且無敵看守 ⇒ 救回。這兩支不改。
+- 結算（**兩個方向都算**，現況只數敗方＝漏一邊）：對每個 `is_prisoner` 單位，若押方結算時仍有 `is_combat_capable` 單位在場 ⇒ 被帶走歸押方，**不看誰留場**：
+  - 匿名 ⇒ 押方 `captive_groups`（`absorb_wounded_as_captive`，受同一個 `guard_budget` 上限；押方是玩家時 group 的 treatment＝玩家下一步選，見 2 的「俘虜（厚待／苛待）」；押方是 NPC 時照 manpower 既有）。超過上限的回原隊 wounded 桶、進事件。
+  - 記名 ⇒ 記名俘虜帳不存在（範圍外）⇒ 放回原隊並在結算事件寫「X 被俘後放回（記名俘虜還沒做）」——不憑空消失、不假裝帶走。
+- 押方自己全倒或全離場 ⇒ 被押者等於無人看守 ⇒ 回到下一步（失能者看留場）。
+- 玩家這側每一筆（我方被押走幾人、我方押住幾人、放回幾人）都進 `combat_end` 玩家事件。
+- 這一步先於下一步；下一步的 N 不含已被押走的。
+
 ### 2. 場上傷兵的命運（殺／俘／放）
 - **處置權＝結算時仍留在戰場上的一方**（用戶 2026-10-14）：留場＝該方結算當下仍有 `is_combat_capable` 的單位在場（既有謂詞，不另寫）。以這個謂詞判，不以 result 字串判：
   - 只有玩家方留場 ⇒ 敵方的場上失能者歸玩家處置（下「勝方是玩家」）。
   - 只有敵方留場（玩家離場／潰退／全失能）⇒ 玩家留下的失能者歸敵方處置（下「勝方是 NPC」），寫進玩家結算事件。
   - 雙方都不留場（平手／逾時／雙方都撤）⇒ 各自帶回自己的失能者、零俘虜、無命運步驟、無追擊。
   - 雙方都留場而結算（若有此路徑，實作端普查列出）⇒ 同第三種。
-- 對象：敗方的場上匿名失能者，數 N（第 0 步的謂詞，在結算當下量，寫進 `last_encounter_result.disabled_enemy`）。記名失能敵人：只有「殺」「放」（記名俘虜帳不存在，見範圍外）。
+- 對象：沒被押走（2a 之後）的場上匿名失能者，數 N（第 0 步的謂詞，在結算當下量，寫進 `last_encounter_result.disabled_enemy`）。記名失能敵人：只有「殺」「放」（記名俘虜帳不存在，見範圍外）。
 - **勝方是玩家**：`last_encounter_result` 帶 `fate_pending:true`；自家動作列出現四項（走既有動作列＋precheck，不開新輸入態）：「殺傷兵 N」「俘虜（厚待）」「俘虜（苛待）」「放走」。未決之前：推進鍵回「先決定戰後處置」（列推進停點；不自動選，#12）。
   - 殺 ⇒ `AnonTierSystem.kill_wounded(loser, N)`（只從 wounded 桶）＋記名失能者戰死同 :1233 那段。
   - 俘 ⇒ 上限＝守衛容量（`capture_routed_as_captive` 那條公式，抽成 `AnonTierSystem.guard_budget(state, holder)` 一支，兩處共用）；實俘 k＝min(N, budget) 人**從 wounded 桶**搬進 `holder.captive_groups`（新增 `absorb_wounded_as_captive(holder, loser, k)`，與 `absorb_as_captive` 共用「組 captive_group」那段 helper——**一個 group 形狀一支身體**）；group 帶 `treatment` 欄＝玩家選的厚待／苛待。超量 N−k 留在敗方 wounded 桶（不動＝放走，仍是傷兵、不消失）；結算事件寫「看守不過來，放走 N−k 人」。
@@ -47,7 +56,7 @@
   - 敗方滅團（pop≤0 由 `_on_team_extinct` 收）只可能在「殺」之後；俘／放都不減到 0 以下的未計人——**禁憑空消失**：任何一條路徑 Σ(敗方人口變化) ＝ 殺＋俘，床守恆格驗。
 - **勝方是 NPC（玩家敗）**：結算當下 NPC 立即選：分數 kill＝殘忍、capture＝貪婪（且 guard_budget>0）、release＝義氣，取最大（同分序：放＞俘＞殺；**人格只當權重不當門檻**）。結果進第 1 步的事件。
 - 玩家俘來的 group：`tick_captives` 對玩家 holder **不呼 `decide_treatment`**，讀 group 的 `treatment` 欄（#12：待遇是玩家定的）；看守強度 `_decide_guard_ratio` 讀附身者慎重——同屬決策，玩家 holder 改讀 group 欄 `guard_ratio`（捕獲時預設＝現公式算一次並印在面板，之後只有玩家改；改看守強度的動詞本票不做，列「還沒做」）。缺糧自動「釋放」（food_per_cap<0.5）是物理（養不起）⇒ 對玩家照跑，但發玩家事件「養不起，俘虜被放走 N 人」。
-- `prisoner_population` 計數器退場（寫入點、欄位、指紋那一欄一起拿掉；world-fp 換基準，二分證差異只在這欄＋新帳）。
+- `prisoner_population` 計數器退場（2a 取代它）（寫入點、欄位、指紋那一欄一起拿掉；world-fp 換基準，二分證差異只在這欄＋新帳）。
 
 ### 3. 追擊（第 2 步之後）
 - 逃散者＝敗方 `has_exited` 的單位數 E（離場撤退者）。
@@ -73,6 +82,7 @@
 - A5 俘：captive_groups 增 k、敗方 wounded 減 k；k＝min(N, guard_budget)；超量者仍在敗方 wounded；事件寫放走數。
 - A6 守恆：A4／A5／放 三條各算 Σ 敗方人口變化 ＝ 殺＋俘，任何人不從兩邊同時消失。
 - A7 玩家俘虜待遇：30 天內 `decide_treatment` 對玩家 holder 呼叫 0 次（tap）、group.treatment 只在玩家指令時變；負對照放回 decide_treatment ⇒ 紅。
+- A8c 戰中俘虜：玩家押住敵方匿名 2 人、敵方押住我方 1 人，押方都留場 ⇒ 結算後各自進對方 captive_groups（兩個方向）、事件三筆都有；押方全倒 ⇒ 被押者回留場規則；記名被押 ⇒ 放回、事件寫明（修前：只數敗方、只加計數器、無人員搬移）。
 - A8b 處置權：玩家撤離而敵方留場 ⇒ 玩家留下的失能者由 NPC 處置、進玩家事件；平手／雙方撤 ⇒ 零俘虜、無命運步驟（修前：俘虜計數器在 result 有勝方時就加）。
 - A8 NPC 勝：玩家敗 ⇒ NPC 當場選、無 pending；選擇與人格權重一致（佈置三個極端人格各一場）；事件含 NPC 的命運與追擊結果。
 - A9 追擊列的條件＝做的條件：E=0 或可達閘假 ⇒ 不列；可列且按追 ⇒ 敗方減 min(3, E)。
