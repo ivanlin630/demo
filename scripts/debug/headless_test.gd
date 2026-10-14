@@ -11860,17 +11860,22 @@ func _test_diplomacy_reject_cooldown() -> void:
 	assert(until == 100 + DiplomaticAiSystem.REJECT_COOLDOWN,
 		"reject 應設 cooldown=%d，實際=%d" % [100 + DiplomaticAiSystem.REJECT_COOLDOWN, until])
 	# cooldown 內 try_proactive 不再發 → cooldown 值不被刷新（再發送會被 reject 覆寫成新值）
+	# ★通商提案暫停中（defer token trade-proposal-paused-until-social-layer，spec 2026-10-13-player-action-audit ④）：
+	#   A 對 B 的分數落在通商帶 ⇒ 不送、只記 dip.trade_paused ⇒ 「有沒有走到提案那一步」改讀這一顆（cooldown 內 0、過期 >0）
+	Probe.reset(); Probe.enabled = true
 	state.world.current_tick = 200
 	seed(7)
 	for i in range(50):
 		dip.try_proactive_diplomacy(state, a)
 	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) == until,
 		"cooldown 內不應再發（值被刷新=有發送），實際=%d" % int(a.diplomacy_reject_cooldown.get(1, 0)))
-	# cooldown 過期 → 恢復發送（reject 重設新 cooldown）
+	assert(int(Probe.counts.get("dip.trade_paused", 0)) == 0, "cooldown 內不應走到提案分支")
+	# cooldown 過期 → 恢復走到提案分支
 	state.world.current_tick = until + 1
 	for i in range(50):
 		dip.try_proactive_diplomacy(state, a)
-	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) > until, "cooldown 過期應恢復發送")
+	assert(int(Probe.counts.get("dip.trade_paused", 0)) > 0, "cooldown 過期應恢復發送（暫停中＝走到通商暫停分支）")
+	Probe.reset(); Probe.enabled = false
 	print("EcoFix Task3 OK")
 
 # U20：proactive diplomacy 同格 gate — 遠端已發現隊不得隔空對玩家提案（防 spam）
@@ -11894,18 +11899,22 @@ func _test_u20_proactive_same_tile_gate() -> void:
 	state.team_discovered[5] = [0]
 	var dip := DiplomaticAiSystem.new()
 	# 遠端：呼 50 次，forced_event 須恆空（gate line 52 continue，與 randf 無關）
+	# ★通商提案暫停中（spec 2026-10-13-player-action-audit ④）：這組 values 的分數落在通商帶 ⇒ 正控改讀 dip.trade_paused
+	Probe.reset(); Probe.enabled = true
 	seed(11)
 	for i in range(50):
 		dip.try_proactive_diplomacy(state, state.teams[5])
 	assert(state.player_forced_event.is_empty(),
 		"遠端隊不得隔空對玩家提案（U20 spam）,實際=%s" % str(state.player_forced_event))
+	assert(int(Probe.counts.get("dip.trade_paused", 0)) == 0, "遠端隊不得走到提案分支")
 	# 正控：移同格 → 應發得出（證路徑可觸發,gate 才是擋遠端的關鍵）
 	st.tile_pos = Vector2i(4, 4)
 	var fired: bool = false
 	for i in range(80):
 		dip.try_proactive_diplomacy(state, state.teams[5])
-		if not state.player_forced_event.is_empty():
+		if not state.player_forced_event.is_empty() or int(Probe.counts.get("dip.trade_paused", 0)) > 0:
 			fired = true; break
+	Probe.reset(); Probe.enabled = false
 	assert(fired, "同格時 proactive diplomacy 應發得出（否則遠端測為假陰）")
 	print("U20 same-tile gate OK")
 
@@ -14135,11 +14144,12 @@ func _test_set_armed_ratio() -> void:
 	state.player_state["armed_ratio_input"] = 0.7
 	var r: Dictionary = cmd.execute_action(state, -1, "set_armed_anon_ratio")
 	assert(r.get("ok", false), "應成功")
-	assert(abs(team.armed_anon_ratio - 0.7) < 0.01, "ratio=0.7，實際=%s" % str(team.armed_anon_ratio))
+	# ★玩家只寫目標（spec 2026-10-13-player-action-audit ①）：實際比例由 EquipmentSystem 每日取 min(目標, 可武裝)
+	assert(abs(team.armed_anon_target - 0.7) < 0.01, "target=0.7，實際=%s" % str(team.armed_anon_target))
 	# 越界夾住
 	state.player_state["armed_ratio_input"] = 1.5
 	cmd.execute_action(state, -1, "set_armed_anon_ratio")
-	assert(team.armed_anon_ratio <= 1.0, "夾在 1.0")
+	assert(team.armed_anon_target <= 1.0, "夾在 1.0")
 	print("set_armed_ratio OK")
 
 func _test_equip_member() -> void:

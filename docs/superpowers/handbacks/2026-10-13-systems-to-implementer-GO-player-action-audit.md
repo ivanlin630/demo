@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪回饋 #9：行動稽核三件（武裝目標比例／訓練無對象／重掃不進事件流）
 topic: GO（排在勒索零所得之後）｜spec docs/superpowers/specs/2026-10-13-player-action-audit-fixes-HOW.md（R² 已收）
 ---
