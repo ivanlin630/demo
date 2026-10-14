@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 玩家子隊只做玩家給的任務（裁定後）
 topic: 請 merge fix/player-subteams ae76e6a8b｜全電池釘死 ae76e6a8b 126 支綠（run-id 2075-20261014-163332）｜照你裁：撤基準行、召回併進既有 try_set、逾時不併回
 ---
