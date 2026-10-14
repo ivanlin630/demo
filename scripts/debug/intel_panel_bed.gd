@@ -215,7 +215,7 @@ func _i5_i6() -> void:
 	var l0: Array = _lines(st)
 	var i0: int = l0.find("── 據點與市集（關係＝你隊伍領袖的看法）──")
 	print("   沒有據點時：%s" % (str(l0[i0 + 1]) if i0 >= 0 and i0 + 1 < l0.size() else "（找不到類別）"))
-	_check("I5 沒有已知據點 ⇒「尚無」", i0 >= 0 and String(l0[i0 + 1]).strip_edges() == "尚無")
+	_check("I5 沒有已知據點 ⇒「尚無」", i0 >= 0 and String(l0[i0 + 1]).strip_edges() == TextUiMain.INTEL_NONE)
 	var p: Vector2i = _far_tile(st, 2)
 	var owner: int = ns[0]
 	known[p.x * 1000 + p.y] = {"outpost": {"owner_id": owner, "level": 2, "type": "civilian", "last_tick": st.world.current_tick}}
@@ -227,7 +227,7 @@ func _i5_i6() -> void:
 	_check("I5 類別標頭寫「關係＝你隊伍領袖的看法」", i1 >= 0)
 	_present["I5"] = true
 	var i6: int = l1.find("── 糧源 ──")
-	_check("I6 糧源「尚無（還沒有這種情報）」", i6 >= 0 and String(l1[i6 + 1]).strip_edges() == "尚無（還沒有這種情報）")
+	_check("I6 糧源「尚無（還沒有這種情報）」", i6 >= 0 and String(l1[i6 + 1]).strip_edges() == TextUiMain.INTEL_NONE_NO_SOURCE)
 	_present["I6"] = true
 
 
@@ -401,6 +401,6 @@ func _cap() -> void:
 	print("   %d 隊 ⇒ 隊伍類 %d 行，末行「%s」" % [n, body.size(), str(body.back()) if not body.is_empty() else ""])
 	_check("CAP 母體地板：隊數 %d > 上限 %d" % [n, UiPages.INTEL_ROWS_PER_KIND], n > UiPages.INTEL_ROWS_PER_KIND)
 	_check("CAP 隊伍類＝上限列＋「另有 M 筆」",
-		body.size() == UiPages.INTEL_ROWS_PER_KIND + 1 and String(body.back()).strip_edges() == "另有 %d 筆" % (n - UiPages.INTEL_ROWS_PER_KIND))
+		body.size() == UiPages.INTEL_ROWS_PER_KIND + 1 and String(body.back()).strip_edges() == TextUiMain.INTEL_MORE_FMT % (n - UiPages.INTEL_ROWS_PER_KIND))
 	_check("CAP 排序：位置 tick 新的在前（第一列是 Team%d）" % ns[0], String(body[0]).strip_edges().begins_with("Team%d " % ns[0]))
 	_present["CAP"] = true

@@ -1927,6 +1927,11 @@ func _build_memory_lines() -> Array:
 	var env: Dictionary = _bridge.query_memory_panel()
 	return intel_lines(env.get("data", {}), _bridge.get_current_tick(), _bridge.get_state())
 
+# 空類與折疊列的字（床讀同一份，不抄字）
+const INTEL_NONE: String = "尚無"
+const INTEL_NONE_NO_SOURCE: String = "尚無（還沒有這種情報）"
+const INTEL_MORE_FMT: String = "另有 %d 筆"
+
 # 純函數（床直接呼）：payload ＋ 現在 tick ⇒ 情報頁的列
 static func intel_lines(data: Dictionary, now: int, state: WorldState) -> Array:
 	var lines: Array = []
@@ -1946,11 +1951,11 @@ static func intel_lines(data: Dictionary, now: int, state: WorldState) -> Array:
 	for i in range(mini(rows.size(), cap)):
 		lines.append("  " + intel_team_line(rows[i], now, state))
 	if rows.size() > cap:
-		lines.append("  另有 %d 筆" % (rows.size() - cap))
+		lines.append("  " + INTEL_MORE_FMT % (rows.size() - cap))
 	lines.append("── 據點與市集（關係＝你隊伍領袖的看法）──")
 	var ops: Array = data.get("outposts", []) as Array
 	if ops.is_empty():
-		lines.append("  尚無")
+		lines.append("  " + INTEL_NONE)
 	for i in range(mini(ops.size(), cap)):
 		var o: Dictionary = ops[i]
 		var p: Vector2i = o["tile_pos"]
@@ -1958,15 +1963,15 @@ static func intel_lines(data: Dictionary, now: int, state: WorldState) -> Array:
 		lines.append("  (%d,%d) Team%d 的%s（等級 %d）｜關係 %+.2f｜%d 分鐘前看到" % [p.x, p.y, int(o["owner_id"]), kind,
 			int(o.get("level", 0)), float(o["g"]), maxi(now - int(o.get("last_tick", 0)), 0)])
 	if ops.size() > cap:
-		lines.append("  另有 %d 筆" % (ops.size() - cap))
+		lines.append("  " + INTEL_MORE_FMT % (ops.size() - cap))
 	lines.append("── 勢力關係 ──")
 	var frs: Array = data.get("faction_relations", []) as Array
 	if frs.is_empty():
-		lines.append("  尚無")
+		lines.append("  " + INTEL_NONE)
 	for fr in frs.slice(0, cap):
 		lines.append("  " + str(fr))
 	lines.append("── 糧源 ──")
-	lines.append("  尚無（還沒有這種情報）")
+	lines.append("  " + INTEL_NONE_NO_SOURCE)
 	return lines
 
 # 打聽回答的逐筆列（純函數，床直接呼）：三態各自一句；★「早就知道」只對 refreshed 那幾筆說
