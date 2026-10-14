@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 玩家可見批第 7 張：R① 回來後剩兩個 WHAT
 topic: ①「俘」時俘幾個、上限是什麼 ②玩家戰場的追擊誰決定（我的建議附後，同意回一句即可）
 ---
