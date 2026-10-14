@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 我的掛單與押貨（只讀）（main b5d0a9253）
 topic: R② ＝ **ISSUES（三處必修、其餘小）**｜①「發之前判 possessed」在附身那一刻判不到（撤單先於 possessed=true）⇒ P1 的事件格會紅／事件根本不發 ②E4／n1 恆綠：NPC 的事件本來就被 _player_perceives 擋掉，真正被你的判斷擋住的是 pending_rethink，而 E4 與 world-fp 都看不到它 ③goods_claimed 的「糧食 ×12、錢 ×3」要分資源，現有領取只累一個純量｜三個提問：1 不算特別規則 2 別建索引 3 why 不要預設值
 
