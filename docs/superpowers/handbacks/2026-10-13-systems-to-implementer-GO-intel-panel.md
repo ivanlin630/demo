@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 第五輪回饋 #6 ③：情報面板（擴「記憶」頁＋直達鍵）
 topic: GO（排在本批之後：Q 鍵／子隊輸入／地圖整寬／勒索 0／附身隊三件 → 本張 → 游標即選中）｜spec docs/superpowers/specs/2026-10-13-intel-panel-HOW.md（R² 已收）
 ---
