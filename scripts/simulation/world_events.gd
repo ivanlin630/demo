@@ -76,6 +76,9 @@ const FUNC_KINDS: Array = [
 	#   ★只在玩家相關時 emit、wake_thinking=false（NPC↔NPC 易主不進匯流排）
 	"outpost_owner_changed",
 	"resident_changed_faction",   # ★#8-2 登記居民改投別的勢力（地主要知道；玩家相關才發）
+	# ══ spec 2026-10-13-player-subteams 二：玩家子隊的物理與事件 ＝ 玩家事件（被攻擊／糧將盡／紀律脫離／逾時併回／分團）══
+	#   ★寫入點＝emit_player_subteam（各發生處呼它）；subjects＝[玩家隊, 子隊]、wake_thinking=false
+	"player_subteam",
 ]
 
 # ③狀態跨線型（本刀新增偵測點）
@@ -104,12 +107,13 @@ const KIND_LABEL: Dictionary = {
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
 	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "hostile_adjacent": "敵人逼近",
 	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
+	"player_subteam": "子隊",
 }
 # ══ ★M 票 §2：推進的停點（具名集合，唯一一份）—— 推進碰到這幾種【涉及玩家隊】的事件就停在那一 tick ══════════════
 #   找上門／提案到達（強制事件）、被攻擊或遭遇開始、敵對隊進入同格或相鄰格、成員死亡或離隊
 #   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
 const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "hostile_adjacent",
-	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction"]
+	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction", "player_subteam"]
 
 # 玩家事件匯流排上 seq0 之後第一筆停點事件（kind ∈ ADVANCE_STOP_KINDS 且主體含玩家隊）；沒有 ⇒ {}
 static func stop_event_since(state: WorldState, seq0: int) -> Dictionary:
@@ -132,6 +136,40 @@ static func kind_label(kind: String) -> String:
 # ★★★`wake_thinking` 預設 **true**（票 §10.1）：
 #   ⇒ **任何未來新增的 emit 都會自動維持瞬醒** ＝ 構造保證。
 #   ★反過來設計（預設 false、需要的人自己打開）＝ 清單保證 ⇒ 漏改一處就【靜默失去瞬醒】。
+# ★玩家子隊事件的唯一寫入口（spec player-subteams 二）：what ∈ PLAYER_SUBTEAM_WHAT；句子帶子隊名與位置
+#   ★呼叫端只在「這一隊是玩家子隊」時呼（紀律脫離那一格在脫離前判）；附身隊本身不走這裡
+const PLAYER_SUBTEAM_WHAT: Dictionary = {
+	"attacked": "被 %s 攻擊（照常自衛，不會自己逃；要不要召回由你決定）",
+	"famine": "斷糧了",   # ★掛在 famine_crossed 那一點（famine_days 由 0 轉正），不另算一條「將盡」線
+	"discipline_fail": "紀律失效，脫離成獨立隊",
+	"construct_timeout": "抵達 10 天仍未開工，強制併回",
+	"capacity_split": "人數超過容量，分出 %d 人",
+	"settle_refused": "到了，但那裡已經不是你的據點，原地待命",
+	"camp_refused": "到了，但那格已經有據點或營地，原地待命",
+	"build_refused": "到了，但沒能開工（%s），原地待命",
+}
+
+static func emit_player_subteam(state: WorldState, sub: TeamData, what: String, info: Dictionary = {}) -> void:
+	var ptid: int = state.get_player_team_id()
+	if ptid == -1 or sub == null:
+		return
+	var d: Dictionary = info.duplicate()
+	d["what"] = what
+	d["sub"] = sub.team_id
+	d["pos"] = sub.tile_pos
+	emit(state, "player_subteam", [ptid, sub.team_id], false, d)
+
+static func _player_subteam_sentence(state: WorldState, info: Dictionary) -> String:
+	var what: String = String(info.get("what", ""))
+	var tpl: String = String(PLAYER_SUBTEAM_WHAT.get(what, what))
+	var body: String = tpl
+	match what:
+		"attacked":       body = tpl % _team_name(state, int(info.get("by", -1)))
+		"capacity_split": body = tpl % int(info.get("n", 0))
+		"build_refused":  body = tpl % String(info.get("reason", ""))
+	var p: Vector2i = info.get("pos", Vector2i(-1, -1))
+	return "你的子隊 %s 在 (%d,%d) %s" % [_team_name(state, int(info.get("sub", -1))), p.x, p.y, body]
+
 static func emit(state: WorldState, kind: String, subjects: Array,
 		wake_thinking: bool = true, info: Dictionary = {}) -> void:
 	if state == null or subjects.is_empty():
@@ -378,6 +416,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"combat_engaged":        return "%s 捲進了戰鬥" % who
 		"betrayed":              return "%s 被盟友背叛" % who
 		"outpost_owner_changed": return _owner_change_sentence(state, info)
+		"player_subteam":        return _player_subteam_sentence(state, info)
 		"resident_changed_faction":
 			var rp: Vector2i = info.get("pos", Vector2i(-1, -1))
 			var tf: int = int(info.get("to_faction", -1))

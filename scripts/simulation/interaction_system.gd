@@ -287,6 +287,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 					pass   # 繼續執行到 NPC-NPC 邏輯
 				# 路徑 2：NPC 外交提案
 				elif npc.current_task == TeamData.TASK_DIPLOMACY:
+					if Probe.enabled and TeamData.is_kin(npc, pt): Probe.bump("kin.forced_event.diplomacy")   # ★量測（player-subteams 四）
 					if state.player_forced_event.is_empty():   # 不覆蓋現有強制事件
 						state.set_player_forced_event({
 							"from_id":  npc_id,
@@ -296,6 +297,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 					return
 				# 路徑 3：NPC 勒索
 				elif npc.current_task == TeamData.TASK_LOOT:
+					if Probe.enabled and TeamData.is_kin(npc, pt): Probe.bump("kin.forced_event.extort")   # ★量測（player-subteams 四）
 					if state.player_forced_event.is_empty():
 						state.set_player_forced_event({ "from_id": npc_id, "action": "extort" },
 							str(randi()) + "_" + str(randi()))
@@ -389,6 +391,19 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		_try_merge(state, id_b, id_a)
 		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
+	# ★玩家的召回（spec player-subteams 三 S9）：信使送令只在 same_faction 分支 ⇒ 獨立玩家隊（勢力 -1）派的信使永遠送不到
+	#   ⇒ 收件人是玩家子隊、信使是自家人（is_kin）就送。NPC 獨立隊同病，不在本票改（只量：herald.kin_nofaction_undelivered）
+	if not same_faction:
+		if a.current_task == TeamData.TASK_HERALD and a.order_target_id == id_b and TeamData.is_kin(a, b):
+			if b.player_controlled:
+				_deliver_order(state, id_a, id_b)
+				return
+			if Probe.enabled: Probe.bump("herald.kin_nofaction_undelivered")
+		elif b.current_task == TeamData.TASK_HERALD and b.order_target_id == id_a and TeamData.is_kin(a, b):
+			if a.player_controlled:
+				_deliver_order(state, id_b, id_a)
+				return
+			if Probe.enabled: Probe.bump("herald.kin_nofaction_undelivered")
 	if same_faction:
 		if a.current_task == TeamData.TASK_TRIBUTE:
 			_resolve_tribute(state, id_a, id_b)
@@ -862,7 +877,10 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 			target.player_commanded_task = order
 			state.player_pending_orders.erase(str_target_id)
 			print("[Order] player herald 抵達 Team%d，player_commanded_task = %s" % [target_id, order])
-	if order == TeamData.TASK_IDLE:
+	# ★玩家的召回（spec player-subteams 三）：玩家隊派的信使把「合併」送到玩家子隊 ⇒ 玩家令（不是 NPC 下令）
+	if target.player_controlled and order == TeamData.TASK_MERGE and messenger.parent_team_id == target.parent_team_id:
+		SubteamSystem.send_home(state, target, "player_order")
+	elif order == TeamData.TASK_IDLE:
 		TaskArbiter.release(target)
 	else:
 		# 玩家信使命令 60，NPC 對 NPC 下令 50；被高層擋下時 player_commanded_task
@@ -1776,8 +1794,8 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	state.remove_tag(subteam, TeamData.TAG_SUBTEAM, "convert_resident")
 	state.remove_tag(subteam, "流亡", "convert_resident")
 	# release-first：清 emergency→IDLE@0 過 transition guard，再 set 生產（正當變居民退場）。
-	TaskArbiter.release(subteam)
-	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1))   # A4：轉居民原地生產
+	TaskArbiter.release(subteam, "resident_converted")
+	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT, Vector2i(-1, -1), "resident_converted")   # A4：轉居民原地生產；★具名事件來源（player-subteams 二）
 	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
 	# ★B4：settle 落腳即刷 labor cache（覆蓋所有 _convert_to_resident 呼叫端）→ 新居民同 tick 採糧非硬零(免等 3 天 cadence)。
 	var _settle_tile: HexTileData = state.world.tiles.get(ResourceSystem._pos_to_tile_id(subteam.tile_pos))   # canonical tile-key(非 inline 公式、公式改不靜默斷)

@@ -127,6 +127,8 @@ func check_overflow_for_team(state: WorldState, tid: int) -> void:
 		print("[PopMgmt] Team%d 超額 %d 人，advisor Team%d 帶走" % [tid, overflow, spare_id])
 	else:
 		_create_overflow_team(state, team, overflow)
+	if team.player_controlled and not team.possessed:
+		WorldEvents.emit_player_subteam(state, team, "capacity_split", {"n": overflow})   # ★玩家子隊分團 ⇒ 玩家事件（spec player-subteams 二）
 
 func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: int) -> void:
 	var ot := TeamData.new()

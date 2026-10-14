@@ -7,6 +7,15 @@ const OUTPOST_NAMES: Dictionary = {
 
 # 據點本體建造費（index = level-1）。建造守恆：civilian 純 mat / military mat+tools，
 # 無 coin/weapon（有限資源永不入建造）。TEST VALUES
+# ★可建據點類型的唯一一份（spec player-subteams 三「建設」）：玩家自己建與派子隊建都讀它（[類型, 顯示名]）
+const BUILDABLE_TYPES: Array = [["civilian", "民用"], ["military", "軍事"]]
+
+static func is_buildable_type(t: String) -> bool:
+	for e in BUILDABLE_TYPES:
+		if String(e[0]) == t:
+			return true
+	return false
+
 const OUTPOST_COST: Dictionary = {
 	"civilian": [
 		{ "material": 50,  "tools": 0 },
@@ -432,7 +441,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_level = tile.construction_target["level"]
 			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（完工 0→>0；set_owner 可能因 owner 未變而 early-return，不能依賴它）
-			OutpostOwnerBank.set_owner(state, tile, tile.construction_team_id, "construct")
+			OutpostOwnerBank.set_owner(state, tile, int(tile.construction_target.get("owner", tile.construction_team_id)), "construct")
 			var n: String = get_outpost_name(tile.outpost_type, tile.outpost_level)
 			SimMessageSystem.new().emit_message(state, "outpost_built",
 				TextBank.fmt("outpost_built", "honest", {
@@ -450,7 +459,8 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 					or float(tile.resource_cap.get("ore_silver", 0)) > 0.0):
 				Probe.bump("g1.mine_founded")
 			# C: NPC 建造子隊完工 → 就地安頓（脫離母團、加駐留 tag），outpost 持續存在
-			if team.parent_team_id != -1:
+			# ★玩家子隊不就地安頓：據點已歸母隊，子隊原地待命等召回（spec player-subteams 三）
+			if team.parent_team_id != -1 and not team.player_controlled:
 				_auto_settle_builder(state, team, tile)
 		"upgrade_level":
 			tile.outpost_level = tile.construction_target["level"]
@@ -558,7 +568,8 @@ func _auto_settle_builder(state: WorldState, team: TeamData, tile: HexTileData) 
 
 # ──────── 公開操作 ────────
 
-func start_build(state: WorldState, team: TeamData, type: String, level: int) -> bool:
+# ★owner_id（spec player-subteams 三，R² 擋①）：完工 set_owner 讀 construction_target.owner；-1 ＝ 施工隊自己（NPC 逐字照舊）
+func start_build(state: WorldState, team: TeamData, type: String, level: int, owner_id: int = -1) -> bool:
 	var tile := _get_team_tile(state, team)
 	if tile == null:
 		return false
@@ -576,9 +587,11 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = build_person_hours(type, level)
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
+	if owner_id != -1:
+		tile.construction_target["owner"] = owner_id   # ★玩家子隊建 ⇒ 據點歸母隊（召回後子隊被併掉也不會無主）
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1))   # A4：就地施工（工地在腳下）
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1), "construction_started")   # A4：就地施工（工地在腳下）；★具名事件來源（player-subteams 二）
 	_tap_build_start(state, team, tile, "build")
 	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
@@ -794,7 +807,7 @@ func begin_subteam_construction(state: WorldState, team: TeamData) -> bool:
 		TeamData.TASK_CONSTRUCT:
 			var btype: String = str(extra.get("build_type", "civilian"))
 			var lvl: int = int(extra.get("level", 1))
-			return start_build(state, team, btype, lvl)
+			return start_build(state, team, btype, lvl, int(extra.get("owner", -1)))
 		TeamData.TASK_UPGRADE:
 			var tgt_lvl: int = int(extra.get("target_level", tile.outpost_level + 1))
 			return _subteam_upgrade_level(state, team, tile, tgt_lvl)
@@ -952,16 +965,23 @@ func _get_team_tile(state: WorldState, team: TeamData) -> HexTileData:
 #     ⇒ ★★★`afford.short.wall.* 加總 == wall.reject_cannot_afford` 這條對帳式當場變假，
 #       而它是這顆 tap 唯一的驗收判準。★能對帳的是 `wall` 那一族，不是全部。
 func _can_afford(team: TeamData, tile: HexTileData, cost: Dictionary, site: String = "other") -> bool:
+	var sh: Dictionary = afford_shortfall(tile, team.resources, cost)
+	if not sh.is_empty():
+		# ★就在這裡、就是這個 res —— 一次失敗只記一顆。
+		if Probe.enabled: Probe.bump("afford.short.%s.%s" % [site, String(sh["res"])])
+		return false
+	return true
+
+# ★付不付得起的唯一判斷（純讀）：開工（_can_afford）與派子隊去建的前提共用 ⇒ 第一個不夠的資源 {res, need, have}；夠 ⇒ {}
+#   ★have＝隊上帶的（派遣前提傳「子隊會帶走的那一份」）；tile 公庫照算
+static func afford_shortfall(tile: HexTileData, have: Dictionary, cost: Dictionary) -> Dictionary:
 	for res in cost:
 		if res == "person_hours":
 			continue
-		var avail: float = float(tile.public_storage.get(res, 0)) \
-			+ float(team.resources.get(res, 0))
+		var avail: float = (float(tile.public_storage.get(res, 0)) if tile != null else 0.0) + float(have.get(res, 0))
 		if avail < float(cost.get(res, 0)):
-			# ★就在這裡、就是這個 res —— 迴圈內、return 前，一次失敗只記一顆。
-			if Probe.enabled: Probe.bump("afford.short.%s.%s" % [site, String(res)])
-			return false
-	return true
+			return {"res": String(res), "need": float(cost.get(res, 0)), "have": avail}
+	return {}
 
 func _deduct_cost(team: TeamData, tile: HexTileData, cost: Dictionary) -> void:
 	for res in cost:

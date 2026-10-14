@@ -38,7 +38,7 @@ static func recall_envoy(state: WorldState, envoy: TeamData) -> void:
 func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		pop_count: int, task: String, move_target: Vector2i,
 		order_target_id: int = -1, order_task: String = "",
-		extra_advisor_ids: Array = []) -> int:
+		extra_advisor_ids: Array = [], by_player: bool = false) -> int:
 	var parent: TeamData = state.teams.get(parent_id)
 	if parent == null:
 		return -1
@@ -64,6 +64,11 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.move_target      = move_target
 	sub.order_target_id  = order_target_id
 	sub.order_task       = order_task
+	# ★玩家派遣路徑（spec player-subteams 一）：事實欄＋玩家令的優先級（release 只認具名事件／玩家取消）
+	if by_player:
+		sub.dispatched_by_player = true
+		if task != TeamData.TASK_IDLE:
+			sub.task_priority = TaskArbiter.PRIO_PLAYER
 	# ★★★具名例外（spec 2026-09-30 §3①：不能走 chokepoint 的要就地寫理由）：
 	# named-exemption: subteam-leader-role-unruled
 	#   ★★這一行標記是【給守衛讀的】，理由是給人讀的 —— 兩者分開：
@@ -175,9 +180,17 @@ func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, re
 	state.set_team_faction(sub, parent.faction_id, WorldState.JOIN_SUBTEAM_INHERIT)
 	return sub.team_id
 
+# ★玩家子隊回母隊（spec player-subteams 三）：召回（信使送到）與建設逾時共用——任務＝合併、追母隊（movement 讀 order_target_id）
+static func send_home(state: WorldState, sub: TeamData, source: String) -> bool:
+	sub.order_target_id = sub.parent_team_id
+	return TaskArbiter.try_set(state, sub, TeamData.TASK_MERGE, Vector2i(-1, -1), TaskArbiter.PRIO_PLAYER, source)   # gate-ok: 玩家令（召回）／具名事件（建設逾時）——不是決策層
+
 func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	var sub: TeamData = state.teams.get(sub_id)
 	if sub == null or sub.parent_team_id == -1:
+		return false
+	# ★玩家子隊只在玩家召回時併回（spec player-subteams 三：路過母隊格不得被吞）
+	if sub.player_controlled and sub.current_task != TeamData.TASK_MERGE:
 		return false
 	# 移動中施工/升級/擴建 → 不 merge_back（子隊在 parent tile 出發前避免立即被吸回）
 	# TASK_BUILD/TASK_SETTLE 已到目標格，讓正常邏輯（到 parent 格才 merge）處理即可
