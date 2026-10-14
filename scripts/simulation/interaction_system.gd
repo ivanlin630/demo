@@ -878,17 +878,20 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 			state.player_pending_orders.erase(str_target_id)
 			print("[Order] player herald 抵達 Team%d，player_commanded_task = %s" % [target_id, order])
 	# ★玩家的召回（spec player-subteams 三）：玩家隊派的信使把「合併」送到玩家子隊 ⇒ 玩家令（不是 NPC 下令）
-	if target.player_controlled and order == TeamData.TASK_MERGE and messenger.parent_team_id == target.parent_team_id:
-		SubteamSystem.send_home(state, target, "player_order")
-	elif order == TeamData.TASK_IDLE:
+	#   ⇒ 走下面同一支 try_set（PRIO_PLAYER、來源 player_order——arbiter 對玩家子隊只放行玩家來源），合併追母隊（movement 讀 order_target_id）
+	var is_recall: bool = target.player_controlled and order == TeamData.TASK_MERGE and messenger.parent_team_id == target.parent_team_id
+	if order == TeamData.TASK_IDLE:
 		TaskArbiter.release(target)
 	else:
 		# 玩家信使命令 60，NPC 對 NPC 下令 50；被高層擋下時 player_commanded_task
 		# 仍保留意圖，faction_ai 後續重試
-		var order_prio: int = TaskArbiter.PRIO_PLAYER if is_player_order else TaskArbiter.PRIO_DISPATCH
+		var order_prio: int = TaskArbiter.PRIO_PLAYER if (is_player_order or is_recall) else TaskArbiter.PRIO_DISPATCH
+		if is_recall:
+			target.order_target_id = target.parent_team_id
 		# ★A4：信使只帶任務、不帶目的地 ⇒ 同任務才沿用目的地；換任務 ⇒ (-1,-1)（禁沿用前一個任務的目的地）
 		TaskArbiter.try_set(state, target, order,
-			target.move_target if target.current_task == order else Vector2i(-1, -1), order_prio, "herald_order")
+			target.move_target if target.current_task == order else Vector2i(-1, -1), order_prio,
+			"player_order" if is_recall else "herald_order")
 	TaskArbiter.release(messenger)
 	messenger.order_target_id = -1
 	messenger.order_task      = ""

@@ -4292,17 +4292,17 @@ func _update_escort(state: WorldState, team: TeamData) -> void:
 	team.move_target = target.tile_pos
 
 # ★玩家子隊每 tick（spec 2026-10-13-player-subteams-execute-given-tasks 二三）：
-#   ★只做玩家給的任務、直到玩家召回；物理與事件照舊（紀律、逾時、戰鬥鎖），各自發玩家事件
+#   ★只做玩家給的任務、直到玩家召回；物理與事件照舊（紀律、逾時、戰鬥鎖），各自發玩家事件；★逾時不併回（只有召回併回）
 #   ★不進：一律歸建閘、_decide_subteam、ambient；★待機＝原地待命
 func _tick_player_subteam(state: WorldState, sub: TeamData, _merge_queue: Array) -> void:
 	if sub.current_task == TeamData.TASK_BUILD:
 		return   # 施工中
 	if sub.current_task == TeamData.TASK_CONSTRUCT:
 		if sub.move_target == Vector2i(-1, -1) and state.world.current_tick - sub.task_start_tick > CONSTRUCT_TRANSIT_TIMEOUT:
-			print("[SubAI] 玩家子隊 Team%d 建設抵達後逾時未開工 → 強制併回" % sub.team_id)
+			# ★不強制併回（systems 裁 2026-10-14）：玩家子隊只在玩家召回時併回 ⇒ 原地待命、事件告訴玩家（推進停點）
+			print("[SubAI] 玩家子隊 Team%d 建設抵達後逾時未開工 → 原地待命" % sub.team_id)
 			WorldEvents.emit_player_subteam(state, sub, "construct_timeout")
 			TaskArbiter.release(sub, "construct_timeout")
-			SubteamSystem.send_home(state, sub, "construct_timeout")
 		return
 	if _check_discipline(state, sub):
 		return

@@ -180,11 +180,6 @@ func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, re
 	state.set_team_faction(sub, parent.faction_id, WorldState.JOIN_SUBTEAM_INHERIT)
 	return sub.team_id
 
-# ★玩家子隊回母隊（spec player-subteams 三）：召回（信使送到）與建設逾時共用——任務＝合併、追母隊（movement 讀 order_target_id）
-static func send_home(state: WorldState, sub: TeamData, source: String) -> bool:
-	sub.order_target_id = sub.parent_team_id
-	return TaskArbiter.try_set(state, sub, TeamData.TASK_MERGE, Vector2i(-1, -1), TaskArbiter.PRIO_PLAYER, source)   # gate-ok: 玩家令（召回）／具名事件（建設逾時）——不是決策層
-
 func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	var sub: TeamData = state.teams.get(sub_id)
 	if sub == null or sub.parent_team_id == -1:

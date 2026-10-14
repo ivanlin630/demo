@@ -45,11 +45,11 @@ const PLAYER_SOURCES: Array = ["player_move", "player_rest", "player_settle", "p
 # ★玩家子隊（spec 2026-10-13-player-subteams 二）：抵達觸發的生命週期寫入各給具名來源（不放行 "transition"／空字串整類）
 #   construction_started＝outpost_system start_build 抵達開工｜resident_converted＝_convert_to_resident 移居成居民
 #   ★establish_crude_camp 不寫 task（只寫格子）⇒ 不需要來源
-#   construct_timeout＝建設抵達 10 天未開工 ⇒ 強制回母隊（SubteamSystem.send_home）
-const EVENT_SOURCES: Array = ["construction_started", "resident_converted", "construct_timeout"]
+#   ★construct_timeout 只 release（不寫 task、不併回：systems 裁 2026-10-14）⇒ 只在 RELEASE_SOURCES
+const EVENT_SOURCES: Array = ["construction_started", "resident_converted"]
 # ★release 對附身隊的玩家令：只有抵達與玩家取消放行（其餘 release() 呼叫點預設 "" ⇒ 不生效）
 #   ★path_broken＝途中路斷（movement 的物理，不是決策）｜construction_done＝玩家下的工程完工（事件；outpost_system crude_camp 那一支）
-#   ★玩家子隊（spec player-subteams 二）：resident_converted＝移居成居民｜construct_timeout＝建設抵達 10 天未開工強制併回｜
+#   ★玩家子隊（spec player-subteams 二）：resident_converted＝移居成居民｜construct_timeout＝建設抵達後逾時未開工、原地待命｜
 #     discipline_fail＝紀律失效脫離（randf 合法機率）｜camp_established＝落腳紮營完成——都是事件
 const RELEASE_SOURCES: Array = ["arrival", "player_cancel", "path_broken", "construction_done",
 	"resident_converted", "construct_timeout", "discipline_fail", "camp_established"]

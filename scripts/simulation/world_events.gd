@@ -142,7 +142,7 @@ const PLAYER_SUBTEAM_WHAT: Dictionary = {
 	"attacked": "被 %s 攻擊（照常自衛，不會自己逃；要不要召回由你決定）",
 	"famine": "斷糧了",   # ★掛在 famine_crossed 那一點（famine_days 由 0 轉正），不另算一條「將盡」線
 	"discipline_fail": "紀律失效，脫離成獨立隊",
-	"construct_timeout": "抵達 10 天仍未開工，強制併回",
+	"construct_timeout": "抵達後遲遲沒有開工，停在原地待命（召回才會回來）",
 	"capacity_split": "人數超過容量，分出 %d 人",
 	"settle_refused": "到了，但那裡已經不是你的據點，原地待命",
 	"camp_refused": "到了，但那格已經有據點或營地，原地待命",

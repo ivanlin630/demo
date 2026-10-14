@@ -10,6 +10,7 @@ extends SceneTree
 #   S6  移居自家據點 ⇒ 成為居民；非自家據點 ⇒ 不可帶原因
 #   S7  建設 ⇒ 抵達後 task＝建設、construction_team_id＝子隊、進度推進；缺料 ⇒ 不可帶原因
 #   S7b 完工後召回 ⇒ 據點 owner 仍是玩家隊｜S7c start_build 的 transition 沒被 deny
+#   S7d 建設抵達後逾時未開工 ⇒ 玩家事件（停點）、原地待命、不併回（systems 裁 2026-10-14：只有召回併回）
 #   S8  被攻擊 ⇒ 事件流「你的子隊…攻擊」、是停點；不自動逃｜S8b 紀律脫離 ⇒ 玩家事件
 #   S9  召回 ⇒ 併回
 #   S10 腳下派遣 ⇒ 當下就算抵達（move_target 不留）
@@ -40,6 +41,7 @@ func _initialize() -> void:
 	_s5_camp()
 	_s6_settle()
 	_s7_build()
+	_s7d_construct_timeout()
 	_s8_attacked()
 	_s9_recall()
 	_s10_at_foot()
@@ -417,6 +419,44 @@ func _s7_build() -> void:
 	var merged: bool = _wait_gone(st, runner, sid, 4 * WorldState.TICKS_PER_DAY)
 	print("   完工 owner=%d（玩家 %d）｜召回「%s」併回=%s｜之後 owner=%d" % [owner_done, pt.team_id, String(rec.get("msg", "")), str(merged), t.outpost_owner])
 	_check("S7b 完工 owner＝玩家隊；召回併回後仍是玩家隊", owner_done == pt.team_id and merged and t.outpost_owner == pt.team_id)
+
+
+# ── S7d 建設逾時 ─────────────────────────────────────────────────────────────
+# ★佈置：派建設子隊後把它放到目標格、不留路、開工時間撥到逾時之前（不讓它真的開工：那一支在 movement 抵達）
+func _s7d_construct_timeout() -> void:
+	print("
+── S7d 建設逾時 ──")
+	var st: WorldState = _world()
+	var runner := SimRunner.new()
+	var pt: TeamData = _pt(st)
+	var tgt: Vector2i = _free_neighbor(st)
+	_check("★S7d 地板：一格外有可建的格", tgt != Vector2i(-1, -1))
+	if tgt == Vector2i(-1, -1):
+		return
+	ResourceBank.set_amt(pt, "material", 5000.0, "bed_seed")
+	var r: Dictionary = _dispatch(st, TeamData.TASK_CONSTRUCT, tgt, 3, "civilian")
+	var sid: int = int(r.get("sub_id", -1))
+	var sub: TeamData = st.teams.get(sid)
+	_check("★S7d 地板：建設子隊派出", sub != null and sub.current_task == TeamData.TASK_CONSTRUCT)
+	if sub == null:
+		return
+	sub.tile_pos = tgt
+	sub.move_target = Vector2i(-1, -1)
+	sub.task_start_tick = st.world.current_tick - FactionAISystem.CONSTRUCT_TRANSIT_TIMEOUT - 1
+	var seq0: int = st.player_event_seq
+	var fired: bool = _until(st, runner, func():
+		for e in st.player_events:
+			if int(e.get("seq", 0)) > seq0 and String(e.get("kind", "")) == "player_subteam" and String(e.get("text", "")).contains("沒有開工"):
+				return true
+		return false, WorldState.TICKS_PER_DAY, "S7d 逾時事件")
+	var stop: Dictionary = WorldEvents.stop_event_since(st, seq0)
+	_adv(st, runner, WorldState.TICKS_PER_DAY)   # 之後一天：不得被併回、不得被派別的
+	var s2: TeamData = st.teams.get(sid)
+	print("   事件=%s 停點 kind=%s｜一天後 在=%s task=%s 位置=%s" % [str(fired), String(stop.get("kind", "")),
+		str(s2 != null), s2.current_task if s2 != null else "-", str(s2.tile_pos) if s2 != null else "-"])
+	_check("S7d 逾時 ⇒ 玩家事件「沒有開工」且是推進停點", fired and String(stop.get("kind", "")) == "player_subteam")
+	_check("S7d 逾時後一天仍在、原地待命、不是合併（只有召回併回）", s2 != null and s2.tile_pos == tgt
+		and s2.current_task == TeamData.TASK_IDLE)
 
 
 # ★修前樹沒有 pop_count 參數 ⇒ 走 callv（修前呼不到就回空字典＝那一格紅，不是編不過）
