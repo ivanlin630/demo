@@ -1,0 +1,219 @@
+[TREE] path=A:\GDS\demo\.worktrees\advisor commit=e83838731 clean=NO code-dirty=3 codehash=B04E7874ADF9
+[TREE]   *** measuring the WORKING TREE, not commit e83838731 ***
+[TREE]    M scripts/debug/press_is_one_tick_bed.gd
+[TREE]    M scripts/debug/scripted_exploration_bed.gd
+[TREE]    M scripts/simulation/advisor_system.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=17GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 按一下＝做一顆 tick（#8）===
+
+── P1 按一下＝一顆 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+  PASS: 母體地板 A：造得出玩家隊
+   入列回傳 queued=true｜請求量=1
+  PASS: 入列成功
+  PASS: ★★咽喉自動請求【正好一顆】（實測 1）
+   成功令：tick 0 → 1（+1）｜消費點 ok=true msg=移動到 (17,10)：開始走向 (17,10)，預計 479 分鐘
+  PASS: ★母體地板 B：那道令【真的成功】（ok=true）—— 失敗的令也會 +1
+  PASS: ★★★tick 恰 +1（1）
+  PASS: 消費完頁腳歸零（pending=0）
+   失敗令：tick 1 → 2（+1）｜請求量=1｜消費點 ok=false msg=移動到 (-999,-999)：被拒絕（目標格不在地圖內）
+  PASS: ★★★被拒絕的令【也】+1（＝「+1」本身不足以證明成功；這一行是母體地板的理由）
+  PASS: ★而它的 ok 欄是 false  兩者在卷面上分得開
+
+── P2 未知指令不推進 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+   回傳 ok=false code=unknown_command queued=false｜請求量=0
+  PASS: 母體地板：它真的被擋在入列之前（code=unknown_command）
+  PASS: ★未知指令【沒有】請求推進（請求量 0）
+  PASS: ★★世界沒有動（tick 0）
+
+── P3 推進中是例外 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+  PASS: ★母體地板：真的在推進中（請求量 60）
+   推進中入列：queued=true｜請求量 60（期望仍是 TICKS_PER_HOUR=60）
+  PASS: 推進中的令照舊入列
+  PASS: ★★★長程請求【沒有被踩成 1】（實測 60／期望 60）
+
+── P4 咽喉母體（可達性掃描）──
+   主場景（project.godot run/main_scene）= res://scenes/TextUI.tscn
+  PASS: ★母體地板：讀得到主場景（空的話整格不可判）
+   ★從主場景可達的 UI 檔（掃出來的）= ["encounter_view.gd", "sim_bridge.gd", "team_ui_helper.gd", "text_map_renderer.gd", "text_ui_layout.gd", "text_ui_main.gd", "text_ui_view.gd", "ui_model.gd", "ui_pages.gd"]
+   指名比對：少了 []｜多了 []
+  PASS: ★★★活的 UI 檔集合與【指名】相符（少 0／多 0）
+   活 encounter_view.gd      呼叫點 5 
+   活 sim_bridge.gd          呼叫點 1 （★咽喉自呼，不計入玩家按得到的母體）
+   活 team_ui_helper.gd      呼叫點 0 
+   活 text_map_renderer.gd   呼叫點 0 
+   活 text_ui_layout.gd      呼叫點 0 
+   活 text_ui_main.gd        呼叫點 37 
+   活 text_ui_view.gd        呼叫點 0 
+   活 ui_model.gd            呼叫點 0 
+   活 ui_pages.gd            呼叫點 0 
+   ★活的呼叫點合計 = 42（spec §1 原本寫 36；我回報過 45，而 45 是錯的）
+  PASS: ★★活母體合計與常數相符（42／42）
+  PASS: text_ui_main 的呼叫點數（37／37）
+  PASS: encounter_view 的呼叫點數（5／5）
+   ── 不在可達閉包裡（死樹）而仍有呼叫點的 UI 檔 ──
+     ★判準含【路徑引用】與【class_name 全域】兩輪 —— 少了第二輪的話
+       `sim_bridge.gd` 會被誤判成死樹（第一版就是，而它顯然活著）。
+     main.gd                呼叫點 9
+     popup_layer.gd         呼叫點 4
+     死樹呼叫點合計 = 13  ★這一欄就是「為什麼 45 是錯的」的證據
+  PASS: ★母體地板：死樹那一欄真的非空（空的話它證明不了任何事）
+   sim_bridge 裡 request_advance(1) 出現 1 次
+  PASS: ★咽喉只有一處（1 次）—— 第二處＝有人又貼了一次
+  PASS: ★★UI 端沒有自己貼一份 request_advance(1)
+   ★邊界：本格數的是【呼叫點】不是【按鍵】—— 一個按鍵可能下多道令，
+     而反過來多個呼叫點可能共用同一個鍵；問「涵蓋率」時數的是這一欄。
+
+── P5 濫按母體（20 次連發；只印不判）──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+   靶 = Team0（與玩家同格 (16, 10)）
+  PASS: 母體地板 A：找得到靶
+  PASS: ★母體地板 B：真的要按 20 次（0 次的話下面全是恆綠）
+   ── demand_tribute ×20 ──
+[PlayerCmd] 索貢成功 Team0→玩家 190 coin
+     #01 ok=true  行動：要求納貢：索貢成功（獲得190 幣）
+[PlayerCmd] 索貢成功 Team0→玩家 171 coin
+     #02 ok=true  行動：要求納貢：索貢成功（獲得171 幣）
+[PlayerCmd] 索貢成功 Team0→玩家 154 coin
+     #03 ok=true  行動：要求納貢：索貢成功（獲得154 幣）
+[PlayerCmd] 索貢成功 Team0→玩家 138 coin
+     #04 ok=true  行動：要求納貢：索貢成功（獲得138 幣）
+[PlayerCmd] 索貢成功 Team0→玩家 125 coin
+     #05 ok=true  行動：要求納貢：索貢成功（獲得125 幣）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #06 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #07 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #08 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #09 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #10 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #11 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #12 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #13 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #14 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #15 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #16 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #17 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #18 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #19 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+[PlayerCmd] 索貢遭拒 Team0 unrest+2
+     #20 ok=false 行動：要求納貢：被拒絕（索貢遭拒，關係惡化）
+     小計 ok=5／20
+     ★冷卻欄位 diplomacy_reject_cooldown（玩家隊）= {  }
+     ★冷卻欄位 diplomacy_reject_cooldown（靶隊）= {  }｜現在 tick=20
+   ── propose_alliance ×20 ──
+     #01 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #02 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #03 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #04 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #05 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #06 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #07 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #08 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #09 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #10 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #11 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #12 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #13 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #14 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #15 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #16 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #17 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #18 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #19 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     #20 ok=false 行動：提議同盟：被拒絕（外交結果：拒絕）
+     小計 ok=0／20
+     ★冷卻欄位 diplomacy_reject_cooldown（玩家隊）= {  }
+     ★冷卻欄位 diplomacy_reject_cooldown（靶隊）= {  }｜現在 tick=40
+   ── recruit_anon ×20 ──
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=11
+     #01 ok=true  行動：招募匿名：招到 1 人（花費50 幣，新人口11）
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=12
+     #02 ok=true  行動：招募匿名：招到 1 人（花費50 幣，新人口12）
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=13
+     #03 ok=true  行動：招募匿名：招到 1 人（花費50 幣，新人口13）
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=14
+     #04 ok=true  行動：招募匿名：招到 1 人（花費50 幣，新人口14）
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=15
+     #05 ok=true  行動：招募匿名：招到 1 人（花費50 幣，新人口15）
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=16
+     #06 ok=true  行動：招募匿名：招到 1 人（花費50 幣，新人口16）
+     #07 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #08 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #09 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #10 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #11 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #12 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #13 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #14 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #15 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #16 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #17 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #18 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     #19 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+[Site] 選址 (22, 7) score=507 周邊資源={ "ore_silver": 81, "herb": 20, "wild_horses": 1, "ore_iron": 161 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: 資源不足 1.60x: material 有 80(公庫0+私80) (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.84
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.75
+[Tick 60] Person 119 (leader/team45) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 120 (member/team45) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 121 (member/team45) → P1_comply | stress=0.00 loyalty=0.92
+[Succession] 勢力0 領袖團 0 死 → 2 接位
+[Faction] Team0 脫離勢力0
+[SoloAI] Team45 → 覓食 (覓食)
+     #20 ok=false 行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））
+     小計 ok=6／20
+     ★冷卻欄位 diplomacy_reject_cooldown（玩家隊）= {  }
+     ★冷卻欄位 diplomacy_reject_cooldown（靶隊）= {  }｜現在 tick=60
+   ★★世界走了 60 tick（0 → 60）
+  PASS: ★★★世界沒有崩：tick 真的往前走了
+  PASS: 玩家隊還在
+   ★★★本格【不判】「20 次之後對方該怎樣算合理」—— 那是 WHAT（spec §5）。
+      上面三張表交 blueprint 讀；若看起來不合理，那是設計題不是本票的紅燈。
+=== press_is_one_tick DONE === errors: 0｜到場點名 5／5
+
+[godot.ps1] child exit=0

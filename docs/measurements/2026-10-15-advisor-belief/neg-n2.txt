@@ -1,0 +1,247 @@
+## n2 @ 9a5dddad3
+[TREE] path=A:\GDS\demo\.worktrees\advisor commit=9a5dddad3 clean=NO code-dirty=2 codehash=1F592FC32EEC
+[TREE]   *** measuring the WORKING TREE, not commit 9a5dddad3 ***
+[TREE]    M scripts/simulation/advisor_system.gd
+[TREE]   ?? scripts/simulation/advisor_system.gd.negbak
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=5.9GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== advisor_belief：顧問讀信念、不擲骰 ===
+
+── A1 三帶、人數來自 belief ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: A1 佈置：目標真人口＝40
+   己方上場武裝 3（EncounterSystem.armed_on_field）｜目標 Team0 真人口 40
+   敵估武裝 1.5（人口 3.0） good｜Team0約 3 人，2 人帶兵器——我們親眼看到的，今天。我們佔上風。
+   敵估武裝 3.0（人口 6.0） even｜Team0約 6 人，3 人帶兵器——我們親眼看到的，今天。兩邊差不多，打起來勝負難料。
+  PASS: A1 fact 句人數＝belief 6（不是真值 40）
+   敵估武裝 6.0（人口 12.0） bad｜Team0約 12 人，6 人帶兵器——我們親眼看到的，今天。對方比我們強，不宜正面交手。
+  PASS: A1 三帶依序 good／even／bad（實得 ["good", "even", "bad"]）
+
+── A2a handler 零抽取、同 tick 同句 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   randi 對照 706147463／2652859160｜第一次「Team0約 8 人，4 人帶兵器——我們親眼看到的，今天。兩邊差不多，打起來勝負難料。」｜第二次「Team0約 7 人，4 人帶兵器——我們親眼看到的，今天。兩邊差不多，打起來勝負難料。」
+
+── A2b emit 的 pending_rethink：RNG 位移（只印） ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   玩家隊在勢力：不問 641615738｜問 641615738  相同
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   玩家隊不在勢力：不問 641615738｜問 641615738  相同
+
+── A3 不知道 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   無 belief：ok=true「這我不清楚，沒人去看過。」｜事件依據 { "source_word": "無", "source_id": -1, "tick": 0 }
+  PASS: A3 無 belief  ok:true、不知道句
+  PASS: A3 事件依據「無」
+  PASS: A3 要目標而 target_id=-1  ok:true、不知道句
+   零敵對 strategic：「這我不清楚，沒人去看過。」
+  PASS: A3 strategic 零敵對  不知道
+   零傳聞 intel_read：「這我不清楚，沒人去看過。」
+  PASS: A3 intel_read 零傳聞  不知道
+
+── A4 技能高誤差小 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   平均絕對誤差：技能 0.9  0.511｜技能 0.1  4.118
+  PASS: A4 技能 0.9 的誤差 < 技能 0.1
+
+── A5 好戰者看敵人小 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   好戰：敵估武裝 2.28、帶 good｜慎重：敵估武裝 3.72、帶 even
+  PASS: A5 好戰者敵估 < 慎重者
+  PASS: A5 好戰者判斷帶不劣於慎重者
+
+── A6 事件＋結果句（走真的指令佇列） ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   事件 1 則｜「Team0約 12 人，6 人帶兵器——聽 Team1 說的，2 天前。對方比我們強，不宜正面交手。」｜依據 { "source_word": "聽說", "source_id": 1, "tick": 0 }
+   結果句 問顧問（評估敵情）：玩家：Team0約 12 人，6 人帶兵器——聽 Team1 說的，2 天前。對方比我們強，不宜正面交手。
+  PASS: A6 advice 事件恰好一則
+  PASS: A6 依據：聽說、來源隊、tick
+  PASS: A6 句子帶「2 天前」
+  PASS: A6 command_results 同句
+  PASS: A6 事件 describe＝同一句
+  PASS: A6 UI 檔不再有「[Advisor]」
+
+── A7 選單 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   情境 ["assess_enemy", "diplomatic", "resources", "strategic", "intel_read"]｜目標選單 [0, 1]（有 belief：0、1｜過期：2｜在旁邊沒 belief：3）
+  PASS: A7 五情境都在選單
+  PASS: A7 目標選單＝有 belief 未過期的兩隊
+  PASS: A7 過期的不在列
+  PASS: A7 真在旁邊但沒 belief 的不在列
+
+── A8 不讀真人口／A10 diplomatic 不讀隊長 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: A8 佈置：真人口真的 ×3
+   改真人口前「Team0約 14 人，7 人帶兵器——我們親眼看到的，今天。對方比我們強，不宜正面交手。」
+   改後「Team0約 12 人，6 人帶兵器——我們親眼看到的，今天。對方比我們強，不宜正面交手。」
+   換隊長前「我們跟Team0的交情約 0.69——我們親眼看到的，今天。對方應該願意談。」
+   換成有 feud 的 P1 後「我們跟Team0的交情約 0.67——我們親眼看到的，今天。對方應該願意談。」
+  PASS: A10 母體地板：附身者對新隊長有 feud 邊
+
+── A9 雜訊命名空間 ──
+   noise_u=0.588158｜path_system 同 (tick, 5, -3)=0.571175｜不帶 NS 直呼=0.571175
+  PASS: A9 noise_u 與 path_system 同一 (tick, 數字 id, 數字 id) 不同
+  PASS: A9 不帶 NS 直呼  與 path_system 撞點（相同）
+=== advisor_belief DONE === 到場 11／11 errors: 4
+ERROR: [FAIL] A2a handler 自身零抽取（呼前 seed 後第一個 randi 相同）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] A2a 同 tick 兩次同句
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] A8 真人口 ×3 後同 tick 再問句子不變
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] A10 同 tick 再問 diplomatic 句子不變
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=1
+advisor rc=1
+[TREE] path=A:\GDS\demo\.worktrees\advisor commit=9a5dddad3 clean=NO code-dirty=2 codehash=1F592FC32EEC
+[TREE]   *** measuring the WORKING TREE, not commit 9a5dddad3 ***
+[TREE]    M scripts/simulation/advisor_system.gd
+[TREE]   ?? scripts/simulation/advisor_system.gd.negbak
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=5.7GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== text_keys：外置文本鍵對帳／槽對帳／交換畫面／一張表 ===
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+
+── T1 鍵對帳（執行期兩向）／T2 槽對帳 ──
+   外置：advisor.tsv 28 句、names.tsv 24 句
+  PASS: T1 母體地板：兩檔都讀到（advisor 28、names 24）
+  PASS: T1 外置與 TEMPLATES 同 (鍵,變體) 並存＝0 []
+  PASS: T1 佈置：人格對到語氣 sarcastic
+  PASS: T1 佈置：人格對到語氣 blunt
+  PASS: T1 佈置：人格對到語氣 formal
+  PASS: T1 佈置：人格對到語氣 default
+   compose 跑了 144 組
+  PASS: T1 advisor 落預設句＝0 []
+  PASS: T1 advisor.tsv 每個 (鍵,變體) 至少被取用一次（沒被取用：[]）
+  PASS: T1 names：resources 20 鍵 res_name(full) 落預設＝0 []
+  PASS: T1 names.tsv full 每鍵都在 resources 鍵集合（多出：[]）
+  PASS: T1 names.tsv short  full（short 沒有 full：[]）
+  PASS: T2 每個 (鍵,變體) 的槽集合＝_params_for 的 key 集合（不符：[]）
+
+── T3 交換畫面不印 ASCII 資源鍵 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+── 物物交換 Team0 ──
+我給（我方物資）：
+  [1] 糧食 ×70 (值2.6)
+  [2] 木料 ×25 (值6.0)
+  [3] 粗製近戰武器 ×25 (值0.0)
+  [4] 錢 ×2105 (值1.0)
+我要（對方物資）：
+  [5] 糧食 ×520 (值0.0)
+  [6] 木料 ×100 (值0.0)
+  [7] 粗製近戰武器 ×28 (值0.0)
+  [8] 粗製護甲 ×4 (值20.0)
+  [9] 錢 ×2105 (值1.0)
+出價：給 糧食×2、粗製近戰武器×1  要 木料×3、錢×1
+給值 0.0  要值 1.0  NPC:拒絕
+[1-9]選項 [Enter]送出 [C]清 [Esc]離開
+  PASS: T3 母體地板：面板有列出物品（不是「需同格」）
+  PASS: T3 面板無 ASCII 資源鍵（命中 []）
+  PASS: T3 印 ["糧食", "木料", "粗製近戰武器", "錢"]
+  PASS: T3 出價列也是顯示名（「出價：給 糧食×」）
+
+── T4 顯示名只准一張表 ──
+   母體：["粗製近戰武器", "精製近戰武器", "粗製遠程武器", "精製遠程武器", "粗製護甲", "精製護甲"]
+  PASS: T4 母體地板：weapon_*／armor_* full 值 6 個
+   掃了 690 支 .gd
+  PASS: T4 掃描母體地板：.gd 檔 > 100
+  PASS: T4 六個值在 .gd 字串字面零出現（命中：[]）
+  PASS: T4 反向：裝備欄 item_name 與事件句 res_name 對同一鍵同一字（不同：[]）
+=== text_keys DONE === 到場 4／4 errors: 0
+
+[godot.ps1] child exit=0
+text rc=0
