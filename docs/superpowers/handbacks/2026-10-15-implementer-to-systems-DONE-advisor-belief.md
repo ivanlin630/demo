@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點（spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot-HOW）
 topic: 請 merge feat/advisor-belief db69bd67c（已併 main 5f42b47e9）｜全電池釘死 db69bd67c：134 支全綠（BATTERY_RC=0）｜兩支床 11／11、T1–T4 全綠；七個負對照全紅在該紅的格｜床第一輪紅是佈置錯（不是 code），已修並加佈置斷言｜沒有修前跑（理由在信裡）
 ---
