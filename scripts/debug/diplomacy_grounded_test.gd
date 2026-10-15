@@ -30,6 +30,7 @@ func _mk_ctx_diplo() -> DecisionContext:
 	c.threat_react = 1.0; c.threat_threshold = 0.5    # 求和 threat 過門檻
 	c.faction_stakes = ["外交"]; c.faction_diplo_target = 5   # 外交 有 target
 	c.leader_values = {}
+	c.has_tribute_to_give = true   # ★佈置跟上意圖（45c578357「沒錢不提進貢」：求和的 applicable 要有可給的貢）
 	var u := PackedFloat32Array(); u.resize(NeedHierarchy.N_LAYERS); c.need_urgency = u
 	return c
 
@@ -44,6 +45,10 @@ func _test_cooldown_gate() -> void:
 	var a2: Array = DecisionOptions.applicable(c2)
 	_ok(not ("求和" in a2), "求和 target cooldown 內 → 不入候選（不纏 loop）")
 	_ok(not ("外交" in a2), "外交 target cooldown 內 → 不入候選（不纏 loop）")
+	var c3 := _mk_ctx_diplo()
+	c3.has_tribute_to_give = false
+	var a3: Array = DecisionOptions.applicable(c3)
+	_ok(not ("求和" in a3), "沒有可給的貢（has_tribute_to_give=false）→ 求和不入候選（45c578357 列的條件＝做的條件）")
 
 func _mk_diplo_world(initiator_order: String) -> Array:   # → [isys, state, ini]
 	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 1000
