@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 游標即選中
 topic: MERGED feat/cursor-hover 04b4a2417 → main 5f42b47e9｜改名表 P1B_RENAMED 准｜繼續顧問
 ---

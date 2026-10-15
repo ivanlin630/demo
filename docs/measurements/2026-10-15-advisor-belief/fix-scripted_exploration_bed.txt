@@ -1,0 +1,505 @@
+[TREE] path=A:\GDS\demo\.worktrees\advisor commit=e83838731 clean=NO code-dirty=3 codehash=B04E7874ADF9
+[TREE]   *** measuring the WORKING TREE, not commit e83838731 ***
+[TREE]    M scripts/debug/press_is_one_tick_bed.gd
+[TREE]    M scripts/debug/scripted_exploration_bed.gd
+[TREE]    M scripts/simulation/advisor_system.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=17GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== scripted_exploration bed ===
+★跑的是哪一棵樹：sha = e83838731
+
+── P1 母體：三層三個數 ──
+   層1 動詞：dispatch 的 match 抽出 15 個｜PlayerCommandApi.VERB 有 15 個｜常數 15
+  PASS: ★★層1【異源】一致：match 與 VERB 表逐名相同（只在 match：[]／只在 VERB：[]）
+  PASS: ★層1 的數 ＝ SPEC_VERBS_L1（15／15）
+   層2：registry 鍵 52 個｜with_target 的 case 4 個（不在 registry 的 4 個：["recruit_named", "set_member_salary", "equip_member", "unequip_member"]）
+   ★兩種讀法都印（spec 與派工信不一致，我不猜）：
+     讀法 registry 鍵 ＝ 52（spec §1 的說法）
+     讀法 registry ＋ 不在 registry 的 case ＝ 56（派工信的說法）
+     常數 SPEC_ACTIONS_L2 ＝ 52
+  PASS: ★層2 至少有一種讀法 ＝ SPEC_ACTIONS_L2（52／56／常數 52）
+   層3 forced_event 種類：["diplomacy", "extort", "join_request", "aid_request", "choose_heir"]（5 種｜常數 5）
+  PASS: ★層3 的數 ＝ SPEC_FORCED_L3（5／5）
+   ★★★上游那個「37 動詞」對不上 14／51／5 任何一個 —— 本床不猜它指哪一層，
+     也不拿這三個數去覆蓋它（spec §1 原樣執行）。
+
+── P2 層1：14 個動詞各按一遍 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+  PASS: ★母體地板：本格走的動詞數 ＝ 層1 的常數（15／15）
+   move_to             移動到 (17,10)：開始走向 (17,10)，預計 479 分鐘
+   cancel_move         取消移動：取消移動
+   refresh_targets     重掃同格對象：已重掃同格對象
+   execute_action      行動：忽略：忽略
+   respond_to_forced   
+   equip_item          裝備：主手：被拒絕（無法裝備）
+   unequip_item        卸下：主手：被拒絕（無法卸裝）
+   deposit_item        存入 粗製×1：被拒絕（無法存入）
+   take_team_item      取出 粗製×1：被拒絕（無法取出）
+[Order] Team48 buy food ×1 (oid=1)
+   post_buy_order      掛買單 food×1：完成
+[Order] Team48 sell food ×1 (oid=2)
+   post_sell_order     掛賣單 food×1：完成
+   cancel_order        取消掛單：被拒絕（沒有第 -1 號掛單）
+   ask_advisor         問顧問（資源狀況）：玩家：糧食大約還能撐 4 天——自家帳上的。糧草快撐不住了，得立刻想辦法。
+   possess             附身：完成
+   unpossess           解除附身：完成
+   ★本格走了 15 步（母體地板：0 步的話「沒有矛盾」是恆真）
+
+── P3 層2：每個 action 對同格目標各按一遍 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[CampL0] Team48 紮營 L0 @(16,10)
+[PlayerCmd] 玩家建立勢力8
+[PlayerCmd] 勒索遭拒 Team-1 unrest+1
+[PlayerCmd] set_armed_anon_ratio → target 0.00（可武裝 0.29）
+[PlayerCmd] set_faction_goal → 
+[PlayerCmd] set_tribute_rate → 0.10
+[CorveeL1] Team48 L0→L1 紮根工期 @(16,10) civilian (720 person-ticks)
+   目標 kind=none   走了 52 個 action，其中有症狀的 0 個
+[Encounter] Team48 spawn: 3具名 + 1匿名（武裝率0%，人口10）
+[Encounter] Team0 spawn: 3具名 + 0匿名（武裝率0%，人口9）
+[Encounter] 遭遇戰開始 Team48 vs Team0 (type=normal) units=7
+[PlayerCmd] 玩家發起攻擊 Team48 → Team0
+[Faction] 勢力8 解散
+[PlayerCmd] 玩家背叛勢力8（betrayal_count=1）
+[PlayerCmd] 索貢成功 Team0→玩家 190 coin
+[PlayerCmd] 玩家建立勢力9
+[Extort] Team48 勒索 Team0，Team0 妥協給付
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=11
+[PlayerCmd] set_armed_anon_ratio → target 0.00（可武裝 0.00）
+[PlayerCmd] set_faction_goal → 
+[PlayerCmd] set_tribute_rate → 0.10
+[CorveeL1] Team48 L0→L1 紮根工期 @(16,10) civilian (720 person-ticks)
+   目標 kind=team   走了 52 個 action，其中有症狀的 0 個
+   ★本格走了 104 步（52 個 action × 2 種目標）｜有症狀 0｜完全沒有句子 0
+  PASS: ★母體地板：走過的 action 數 > 0（0 的話本格恆綠）
+
+── P4 層3：五種 forced_event × 每個回應 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+   diplomacy（提案字串 alliance） 回應集 ["accept", "refuse"]（2 個）
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+[Diplomacy] Team48 與 Team0 結盟
+[PlayerCmd] forced_event 回應: 你對Team0 的「提議與你結盟」回應了「接受」：你加入勢力0
+      [accept]  回應事件：你加入勢力0
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+[PlayerCmd] forced_event 回應: 你對Team0 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+      [refuse]  回應事件：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+   diplomacy（提案字串 propose_alliance） 回應集 ["accept", "refuse"]（2 個）
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+[Diplomacy] Team48 與 Team0 結盟
+[PlayerCmd] forced_event 回應: 你對Team0 的「提議與你結盟」回應了「接受」：你加入勢力0
+      [accept]  回應事件：你加入勢力0
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+[PlayerCmd] forced_event 回應: 你對Team0 的「提議與你結盟」回應了「拒絕」：拒絕外交提案
+      [refuse]  回應事件：拒絕外交提案
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：勒索你
+   extort（提案字串 alliance） 回應集 ["pay", "refuse"]（2 個）
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：勒索你
+[Extort] Team0 勒索 Team48，Team48 妥協給付
+[PlayerCmd] forced_event 回應: 你對Team0 的「勒索你」回應了「付錢」：被 Team0 拿走：食 12.5、材 1.3、幣 527.5
+      [pay]  回應事件：被 Team0 拿走：食 12.5、材 1.3、幣 527.5
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：勒索你
+[PlayerCmd] forced_event 回應: 你對Team0 的「勒索你」回應了「拒絕」：拒絕勒索
+      [refuse]  回應事件：拒絕勒索
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：求投靠
+   join_request（提案字串 alliance） 回應集 ["accept", "refuse"]（2 個）
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：求投靠
+[PlayerCmd] forced_event 回應: 你對Team0 的「求投靠」回應了「收留（食物 -7.2,+9 人）」：隊伍已滿，無法收留
+      [accept]  回應事件：你選了「收留（食物 -7.2,+9 人）」，但隊伍已滿，無法收留  沒有生效
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：求投靠
+[PlayerCmd] forced_event 回應: 你對Team0 的「求投靠」回應了「婉拒」：婉拒收留
+      [refuse]  回應事件：婉拒收留
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：向你乞食
+   aid_request（提案字串 alliance） 回應集 ["give", "refuse"]（2 個）
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：向你乞食
+[PlayerCmd] forced_event 回應: 你對Team0 的「向你乞食」回應了「施捨 5 糧」：已處理
+      [give]  回應事件：已處理
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：向你乞食
+[PlayerCmd] forced_event 回應: 你對Team0 的「向你乞食」回應了「拒絕」：已處理
+      [refuse]  回應事件：已處理
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：領袖殞落,要你擇繼承人
+   choose_heir（提案字串 alliance） 回應集 ["heir_128"]（1 個）
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：領袖殞落,要你擇繼承人
+[Heir] 朱平 繼任玩家 (Team48)
+[PlayerCmd] forced_event 回應: 你對Team0 的「領袖殞落,要你擇繼承人」回應了「立 朱平 為繼承人」：朱平 繼任
+      [heir_128]  回應事件：朱平 繼任
+         ★症狀(a) InvariantAudit 回報 1 條違反：roster 反向破 P127 team_id=48 但不在該隊 roster(leader/named)
+   ★本格走了 11 個（事件 × 回應）組合
+  PASS: ★母體地板：組合數 > 0（0 的話「沒有矛盾」恆真）
+
+── P5 四條判準各自咬得動 ──
+   (a) 餵 coin 100 → 90  coin 全域總量從 100.000 變成 90.000（一道指令只該搬動、不該改變總量）
+  PASS: ★(a) 守恆咬得動
+  PASS: ★(a) 不會亂咬：總量沒變、無違反  空
+   (b) 餵 accept ＋ 含「拒絕」的句子  回應是「accept」（接受那一側），而句子說：與 Team3 結盟：你拒絕了這個提議
+  PASS: ★(b) 回應結果不一致咬得動
+  PASS: ★(b) 不會亂咬：refuse ＋ 含「拒絕」  空（那是正確的）
+   (c) 餵空句子  這一道指令【沒有任何句子】（command_results 沒有新增，或新增了空字串）
+  PASS: ★(c) 靜默咬得動
+  PASS: ★(c) 不會亂咬：有句子  空
+   (d) 餵【用戶那一輪真的看到的那一句】「Team11 提議 alliance」  玩家面句子裡有英文識別字 ["alliance"]：Team11 提議 alliance
+  PASS: ★★(d) 英文識別字咬得動（樣本是真實症狀的原文，不是我編的）
+  PASS: ★(d) 不會亂咬：白名單內的 Team11／coin  空
+   ★★★白名單（spec §5 要求印出來）：["team", "tick", "coin", "food", "material", "goods", "heir"]
+     判準＝連續 [a-z_]{4,} 的小寫字母／底線；白名單外的命中才算症狀。
+
+── P7 陽性對照的專用佈置（三件）──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+   [1] 佈置：對方 Team0 同格、匿名人口 6｜玩家 coin 2610、人口 10
+  PASS: ★[1] 母體地板：目標存在且有匿名人口可招（否則這一格測不到東西）
+[Recruit] 匿名 Team48←0, 招到 1 人, 花50 coin, 新人口=11
+   [1] 結果：行動：招募匿名：招到 1 人（花費50 幣，新人口11）｜玩家 coin 2610→2560、人口 10→11
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+   [1b] 佈置：Team0 同格、人口 3（全具名，匿名 0）
+  PASS: ★[1b] 母體地板：找到【人口 > 1 而匿名 0】的目標（找不到的話這一格測不到那個缺陷）
+   [1b] 對匿名人口 0 的隊招募  行動：招募匿名：被拒絕（對方沒有可招募的無名之人（全是具名成員））｜coin 3110→3110、人口 10→10
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+   [1c] 招募不存在的記名成員  行動：招募成員：被拒絕（成員不存在或已離隊）｜coin 2610→2610、人口 10→10
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+[Diplomacy] Team48 與 Team0 結盟
+[PlayerCmd] forced_event 回應: 你對Team0 的「提議與你結盟」回應了「接受」：你加入勢力0
+   [2] 按【接受】之後畫面說：回應事件：你加入勢力0
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+   [3] 面板 message ＝「Team0（勢力0，關係：普通）提議與你結盟」
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+   [4] 打聽近期事件（不誠實、擲骰 seed 3） 第一則 is_distorted ＝ true（原訊息 is_distorted ＝ false）
+  PASS: ★[4] 偽造訊息那一條路走得到且產出失真副本（原訊息不被改）
+   ★★★本格【只印不判】那三件的有無 —— 判它們的是 tsv 裡有沒有那幾列，
+     而兩棵樹（今天／修法前）的差集才是「這支床接上電了」的證據。
+
+── P8 兩讀法對照（步數推到遠超過 TTL）──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[Sub] Team0 派出子隊 Team49 leader=P1 advisors=[] (pop=3 cap=8 task=擴建)
+[Infra] Team0 派擴建子隊 Team49 → (10,19) stable
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.75
+[Tick 60] Person 119 (leader/team45) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 120 (member/team45) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 60] Person 121 (member/team45) → P1_comply | stress=0.00 loyalty=0.92
+[SoloAI] Team45 → 覓食 (覓食)
+[Tick 62] Person 33 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 34 (member/team13) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 62] Person 35 (member/team13) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 62] Person 66 (leader/team25) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 67 (member/team25) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 63] Person 101 (leader/team38) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 63] Person 102 (member/team38) → P1_comply | stress=0.00 loyalty=0.55
+[Tick 63] Person 103 (member/team38) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 64] Person 78 (leader/team30) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 64] Person 79 (member/team30) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 64] Person 80 (member/team30) → P1_comply | stress=0.00 loyalty=0.62
+[Outpost] Team26 設施施工 workshop → Lv1 at (22,4)
+[Tick 65] Person 40 (leader/team16) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 65] Person 41 (member/team16) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 65] Person 42 (member/team16) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 65] Person 49 (leader/team19) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 65] Person 50 (member/team19) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 65] Person 51 (member/team19) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 65] Person 68 (leader/team26) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 65] Person 69 (member/team26) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 65] Person 81 (leader/team31) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 65] Person 82 (member/team31) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 65] Person 83 (member/team31) → P1_comply | stress=0.00 loyalty=0.59
+[Tick 66] Person 46 (leader/team18) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 66] Person 47 (member/team18) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 66] Person 48 (member/team18) → P1_comply | stress=0.00 loyalty=0.90
+[Sub] Team12 派出子隊 Team50 leader=P32 advisors=[] (pop=3 cap=9 task=擴建)
+[Infra] Team12 派擴建子隊 Team50 → (18,1) stable
+[Tick 67] Person 7 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 8 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 67] Person 61 (leader/team23) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 62 (member/team23) → P1_comply | stress=0.00 loyalty=0.71
+[Tick 67] Person 63 (member/team23) → P1_comply | stress=0.00 loyalty=0.90
+[Tag] Team23 +軍隊 -生產
+[Tick 69] Person 73 (leader/team28) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 69] Person 74 (member/team28) → P4_expand | stress=0.00 loyalty=0.68
+[Tick 69] Person 75 (member/team28) → P1_comply | stress=0.00 loyalty=0.78
+[Tag] Team28 +軍隊 -生產
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 71] Person 106 (leader/team40) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 107 (member/team40) → P1_comply | stress=0.00 loyalty=0.72
+[Tick 71] Person 108 (member/team40) → P1_comply | stress=0.00 loyalty=0.79
+[Sub] Team17 派出子隊 Team51 leader=P44 advisors=[] (pop=3 cap=14 task=擴建)
+[Infra] Team17 派擴建子隊 Team51 → (10,5) stable
+[Tick 73] Person 10 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 11 (member/team4) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 73] Person 12 (member/team4) → P1_comply | stress=0.00 loyalty=0.98
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 18 (member/team6) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 74] Person 22 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 23 (member/team8) → P1_comply | stress=0.00 loyalty=0.68
+[Tick 74] Person 24 (member/team8) → P1_comply | stress=0.00 loyalty=0.52
+[Tick 74] Person 84 (leader/team32) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 85 (member/team32) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 74] Person 86 (member/team32) → P1_comply | stress=0.00 loyalty=0.65
+[Tag] Team32 +軍隊 -生產
+[Tick 77] Person 27 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 77] Person 95 (leader/team36) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 96 (member/team36) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 77] Person 97 (member/team36) → P1_comply | stress=0.00 loyalty=0.85
+[Tick 78] Person 98 (leader/team37) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 78] Person 99 (member/team37) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 78] Person 100 (member/team37) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 78] Person 104 (leader/team39) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 78] Person 105 (member/team39) → P1_comply | stress=0.00 loyalty=0.87
+[Site] Faction5 派工失敗: 資源不足 1.62x: material 有 80(公庫0+私80) (需 { "material": 50, "tools": 0 })
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P4_expand | stress=0.00 loyalty=0.97
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.94
+[Site] Faction7 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 81] Person 76 (leader/team29) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 81] Person 77 (member/team29) → P4_expand | stress=0.00 loyalty=0.65
+[Tick 81] Person 117 (leader/team44) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 81] Person 118 (member/team44) → P1_comply | stress=0.00 loyalty=0.85
+[Tag] Team44 +軍隊 -生產
+[Tick 82] Person 58 (leader/team22) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 82] Person 59 (member/team22) → P4_expand | stress=0.00 loyalty=0.83
+[Tick 82] Person 60 (member/team22) → P4_expand | stress=0.00 loyalty=0.59
+[Tick 82] Person 92 (leader/team35) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 82] Person 93 (member/team35) → P1_comply | stress=0.00 loyalty=0.88
+[Tick 82] Person 94 (member/team35) → P1_comply | stress=0.00 loyalty=0.91
+[Tag] Team35 +軍隊 -生產
+[Combat Start] Team-1000000 vs Team9
+[Ambush] NPC Team9 被 boar 伏擊
+[Tick 84] Person 25 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 26 (member/team9) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 84] Person 70 (leader/team27) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 71 (member/team27) → P1_comply | stress=0.00 loyalty=0.61
+[Tick 84] Person 72 (member/team27) → P1_comply | stress=0.00 loyalty=0.59
+[Tag] Team27 +軍隊 -生產
+[Tick 88] Person 43 (leader/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 88] Person 45 (member/team17) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 31 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Reaction] Person129 離團自立流亡 Team52 at (19,8)
+[Tick 89] Person 129 (leader/team52) → N1_flee | stress=0.15 loyalty=0.36
+[Tick 89] Person 87 (leader/team33) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 88 (member/team33) → P1_comply | stress=0.00 loyalty=0.63
+[Tag] Team33 +軍隊 -生產
+[Tick 90] Person 111 (leader/team42) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 90] Person 112 (member/team42) → P1_comply | stress=0.00 loyalty=0.94
+[Tick 90] Person 113 (member/team42) → P1_comply | stress=0.00 loyalty=0.85
+   TTL ＝ 60 tick（sim_runner.RESULT_TTL_TICKS）｜本格走 90 步（★遠超過它）
+   新讀法（比 seq）數到 90／90
+   舊讀法（索引區間）數到 61／90 ← ★少掉的那些就是它當初報成「靜默」的那些
+  PASS: ★★★新讀法在【遠超過 TTL】的輸入上仍然數對（90／90）
+  PASS: ★★舊讀法在【同一個輸入】上數不對（61 < 90）—— 這一條就是那 41 筆的機制證明
+   ★而本格【沒有】改 `RESULT_TTL_TICKS`：動的是輸入（步數），不是事實。
+
+── P11 每個 action id 都有中文 label ──
+   registry 鍵 52 個｜沒有中文 label 的 0 個：[]
+  PASS: ★母體地板：registry 鍵 > 0（0 的話本格恆綠）
+  PASS: ★★★每一個 action id 都有中文 label（缺 0 個）
+   ★而「（未知動作：xxx）」那個 fallback 要留著：它是【不吞掉】那條規矩的執法，
+     而本格保證正常路徑不會走到它。
+
+── P12 (d) 這一族本輪必須 0 筆 ──
+   本輪 (d) ＝ 0 筆（走過 134 步）
+  PASS: ★母體地板：本輪真的走了步數（0 步的話「0 筆」恆真）
+  PASS: ★★★玩家面字串零英文識別字：(d) ＝ 0 筆（實得 0）
+
+── P6 產物：tsv ＋ txt ──
+   ★磁碟上那份 artifact 的 sha ＝ 5c05aa423
+      它落後現在的 HEAD **327 顆 commit**｜是 HEAD 的祖先 ＝ true
+     ★這個數【不設門檻】（門檻會漂）—— 它的用途是讓
+       「那 114 列來自 20 顆 commit 前」這件事不再是靜默的。
+  PASS: ★★★磁碟上那份 artifact 的 sha 必須是 HEAD 的【祖先】（不是  有人手改過它，或它來自一支被丟掉的 branch）
+   ★成因分群：1 筆症狀落在 1 個成因裡（幾件事 ≠ 幾筆症狀）
+     · 1 筆 ← （a 這一條沒有成因分群  每一筆要自己讀）
+   ★設計上的靜默 1 步：["L1:respond_to_forced"]
+   ★★讀法的母體地板：本輪預期 134 句／實得 133 句（差額 1 ＝ 設計上的靜默那幾步）
+  PASS: ★★★讀法沒有漏句：預期  實得 ＝ 設計上的靜默步數（134  133 ＝ 1／靜默 1）
+   落檔：docs/measurements/2026-09-30-scripted-exploration.tsv（1 列資料）／docs/measurements/2026-09-30-scripted-exploration.txt
+  PASS: ★tsv 的列數 ＝ 症狀筆數（1／1）
+  PASS: ★兩份都落地
+  PASS: ★★母體地板：本輪走過的步數 > 0（0 步的話「沒有矛盾」是恆真）
+
+=== scripted_exploration DONE === errors: 0｜到場點名 10／10｜症狀 1 筆｜步數 134
+WARNING: [Outpost] start_build: 資源不足
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+WARNING: [Outpost] start_build: 目標格建設中
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
+[godot.ps1] child exit=0

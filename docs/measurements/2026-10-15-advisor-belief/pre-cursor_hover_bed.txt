@@ -1,0 +1,70 @@
+## cursor_hover_bed @ e83838731
+[TREE] path=A:\GDS\demo\.worktrees\advisor commit=e83838731 clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=2.5GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== cursor_hover：游標即選中＋格脈絡知識閘 ===
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+
+── C1 送 w、不送 enter  明細座標＝游標 ──
+   游標 (9, 2) → (9, 1)｜明細首行「游標處明細: (9,1) 平原」
+  PASS: C1 母體地板：游標真的動了
+  PASS: C1 明細首行座標＝游標「游標處明細: (9,1)」
+
+── C2 三態都從游標移動得到 ──
+  PASS: C2 母體地板：找得到沒去過的格 (2, 6) 與另一格 (4, 9)
+   沒去過 (2, 6)：["游標處明細: (2,6) 沒去過", "糧食跑道（缺趨勢）：尚未提供", "被聚焦的人：尚未提供"]
+   記得 (4, 9)：["游標處明細: (4,9) 平原", "  糧量：未記錄", "糧食跑道（缺趨勢）：尚未提供", "被聚焦的人：尚未提供"]
+   腳下 (9, 2)：["游標處明細: (9,2) 平原", "  農:100%  食:151", "糧食跑道（缺趨勢）：尚未提供", "被聚焦的人：尚未提供"]
+  PASS: C2 沒去過 「沒去過」
+  PASS: C2 記得的格  地形＋「糧量：未記錄」
+  PASS: C2 視野內  糧量數字
+
+── C3 有已知隊伍的格：明細列出、頂部一行同一組隊 ──
+   格 (10, 2)｜看得到 Team0、記得 Team1｜頂部「 游標處 (10,2)：平原｜糧 167｜隊伍：a Team0（現在）、b Team1（記得，第 1 天 00:00）｜最近已知據點 6 格｜紮營：要站上這…」
+   明細 ["游標處明細: (10,2) 平原", "  農:100%  食:167", "  Team0 [?] 人口:?", "  Team1 [?] 人口:?", "糧食跑道（缺趨勢）：尚未提供", "被聚焦的人：尚未提供"]
+  PASS: C3 明細列出看得到的 Team0
+  PASS: C3 明細列出記得在那格的 Team1
+  PASS: C3 頂部與明細隊伍集合相同（頂部 [0, 1]／明細 [0, 1]）
+
+── C4 主畫面 Enter 不再綁 ──
+   鍵列：[,][.]切頁 [J]情報 [WASD]移游標 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開
+  PASS: C4 程式仍在（節點有效）
+  PASS: C4 按 Enter 前後畫面相同
+  PASS: C4 結果行不變
+  PASS: C4 鍵列無「Enter」
+
+── C5 零真值（remembered）／C5b unvisited／C5c visible ──
+  PASS: C5 母體地板：候選格 36 格（離家 vr+3..vr+5、沒去過、belief 沒有隊）
+  PASS: C5b 母體地板：找得到離 X 超過視野的格 (16, 2)
+   X=(2, 6)（離家 7、視野 2）｜真值放 Team0｜payload visibility=remembered occupants=[] food鍵=false
+   明細 ["游標處明細: (2,6) 山地", "  糧量：未記錄", "糧食跑道（缺趨勢）：尚未提供", "被聚焦的人：尚未提供"]
+  PASS: C5 母體地板：Team0 真的站在 X
+  PASS: C5 payload 的格＝X
+  PASS: C5 payload visibility_state＝remembered
+  PASS: C5 payload occupants 不含 Team0
+  PASS: C5 payload 無 food 欄
+  PASS: C5 側欄明細不列 Team0
+   U=(16, 2)｜真值放 Team2｜payload visibility=hidden occupants=[]
+  PASS: C5b payload occupants 空
+  PASS: C5b payload visibility_state＝hidden
+   V=(9, 3)｜真值放 Team3｜payload visibility=visible occupants=[3] food=159
+  PASS: C5c payload visibility_state＝visible
+  PASS: C5c payload occupants 含 Team3
+  PASS: C5c payload food 有值
+
+── PERF 一次游標移動的單幀成本 ──
+   活隊 16、總隊 16｜40 次移動｜中位 8.37 ms｜平均 8.52 ms｜最大 10.93 ms
+=== cursor_hover DONE === 到場 8／8 errors: 0
+
+[godot.ps1] child exit=0
+rc=0

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點
 topic: GO｜spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot-HOW（R² 兩輪，CLEAN）｜順位：游標即選中之後、第 7 張之前
 ---
