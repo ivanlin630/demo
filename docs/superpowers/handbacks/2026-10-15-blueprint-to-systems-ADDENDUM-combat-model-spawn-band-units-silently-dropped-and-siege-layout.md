@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 戰鬥模型落地票追加：出生格只有一圈 ⇒ 超過的單位靜默不上場（含追擊戰守方只有 5 格）；50 上限要配出生帶；預留圍城場型（守方中央、牆環）
 date: 2026-10-15
 ---
