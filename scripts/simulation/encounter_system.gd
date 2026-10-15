@@ -1256,11 +1256,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		if not is_dead(u, state): continue
 		var t: TeamData = state.teams.get(u["team_id"])
 		if t:
-			var dp: PersonData = state.persons.get(u["person_id"])
-			if dp != null: dp.is_dead = true   # 留屍標記：反向 roster audit 跳過（同 famine）
-			if dp != null and am["sides"].has(int(u["team_id"])): (am["sides"][int(u["team_id"])]["dead_named"] as Array).append(dp.person_name)
-			state.remove_member(t, u["person_id"], false)   # 戰死：出 named（team_id 留，同 famine）
-			if t.leader_id == u["person_id"]: t.leader_id = -1
+			var dp_ok: bool = state.persons.get(u["person_id"]) != null
+			var dn: String = kill_named(state, t, u["person_id"])
+			if dp_ok and am["sides"].has(int(u["team_id"])): (am["sides"][int(u["team_id"])]["dead_named"] as Array).append(dn)
 
 	var loser_for_reserve: int = -1
 	if result == "attacker_win": loser_for_reserve = def_id
@@ -1690,20 +1688,31 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 		if Probe.enabled: Probe.bump("res.npc_abandon")
 		_abandon_occupation(state, occupied_tile)
 
+# ★記名陣亡的唯一出口（spec 2026-10-16-aftermath-disposition-transition-7b §一）：戰鬥結算與屠村都呼這一支。
+#   dp 存在 ⇒ 標死（留屍：team_id 留著，反向稽核跳過 is_dead）、出名冊、是隊長則清隊長，回名字；
+#   dp 不存在 ⇒ 仍出名冊（清懸空 pid），回空字串。★不碰戰後帳（dead_named 由戰鬥結算呼叫端記）。
+#   ★壞掉的樣子：屠村後有人「活著、team_id 指向已刪的隊」——稽核那一格會叫「懸空」。
+static func kill_named(state: WorldState, t: TeamData, pid: int) -> String:
+	var dp: PersonData = state.persons.get(pid)
+	var nm: String = ""
+	if dp != null:
+		dp.is_dead = true
+		nm = dp.person_name
+	state.remove_member(t, pid, false)
+	if t.leader_id == pid:
+		t.leader_id = -1
+	return nm
+
 static func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> Dictionary:
 	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
-	# ★systems HOW（2026-10-15）：erase_teams 不碰 persons ⇒ 先讓每個活的記名成員與隊長走既有出口 remove_member，
-	#   不留「活著、team_id 指向不存在的隊」的人。命運＝散（team_id＝-1）：同本票「記名失能者不殺」那條；死／俘／散是 WHAT，等藍圖
-	var scattered: Array = []
+	# ★7b（藍圖 2026-10-16 確認）：過渡期記名同尺＝殺，走戰鬥陣亡同一出口 kill_named（隊長也死、不走繼位：隊緊接著被 erase）
+	var killed_named: Array = []
 	for pid in ([resident.leader_id] as Array) + resident.named_members.duplicate():
 		var p: PersonData = state.persons.get(pid)
 		if p == null or p.is_dead or p.team_id != resident.team_id:
 			continue
-		state.remove_member(resident, pid)
-		scattered.append(p.person_name)
-	if resident.leader_id != -1:
-		state.set_leader(resident, -1)
+		killed_named.append(kill_named(state, resident, pid))
 	var anon_killed: int = AnonTierSystem.total_pop(resident)
 	for k in resident.resources:
 		ResourceBank.add(attacker, k, float(resident.resources[k]), "massacre_loot")
@@ -1715,7 +1724,7 @@ static func _massacre_residents(state: WorldState, attacker: TeamData, resident:
 		NpcAiSystem.FEUD_SEVERITY["massacre"], state.world.current_tick)
 	state.erase_team(rid)   # 清光所有 ref（faction 雙向 + known_member_states + 交叉 + 母子）
 	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])
-	return {"killed": anon_killed, "scattered": scattered, "team_id": rid}
+	return {"killed_anon": anon_killed, "killed_named": killed_named, "team_id": rid}
 
 static func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
 	print("[AbandonOccupation] outpost (%d,%d) 放棄佔領" % [tile.tile_pos.x, tile.tile_pos.y])
@@ -1723,6 +1732,5 @@ static func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
 static func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> void:
 	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
-	var occ_dead: int = resident.population - int(float(resident.population) * 0.8)
-	AnonTierSystem.kill_random(resident, occ_dead, "occupy")
-	print("[ForceOccupy] attacker=Team%d resident=Team%d 強佔 pop-20%%" % [attacker.team_id, resident.team_id])
+	# ★7b：強佔＝易主＋居民留（藍圖：舊「兩成」沒有來源，拿掉）
+	print("[ForceOccupy] attacker=Team%d resident=Team%d 據點易主，居民留下" % [attacker.team_id, resident.team_id])
