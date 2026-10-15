@@ -1681,6 +1681,11 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	var starving: bool = bool(ct.get("starving", false))
 	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
 	lines.append(_member_health_line(ct.get("members", [])))
+	# ★俘虜（spec 2026-10-14-battle-aftermath §5）：有俘虜才印；改看守比的動詞還沒做
+	var cap: Dictionary = ct.get("captives", {})
+	if int(cap.get("total", 0)) > 0:
+		lines.append("俘虜 %d 人（厚待 %d／苛待 %d），每日吃 %.1f 糧｜看守比 %.2f（改看守比還沒做）" % [int(cap["total"]),
+			int(cap["kind"]), int(cap["harsh"]), float(cap["food_per_day"]), float(cap["guard_ratio"])])
 	if ps.get("player_exists", false):
 		lines.append("────────────────")
 		lines.append("玩家: %s  HP:%s" % [ps.get("player_name", ""), ps.get("hp_status", "")])

@@ -194,7 +194,21 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"starving":         _food_days(t) < 3.0,   # WARNING_DAYS=3
 		"task_summary": t.current_task,
 		"capabilities": _team_capabilities(state, t),
+		"captives": map_captives(t),
 	}
+
+# ★俘虜帳（spec 2026-10-14-battle-aftermath §5）：厚待／苛待人數、每日吃的糧（只有厚待撥糧，讀 ManpowerSystem.CAPTIVE_FOOD_RATE）、看守比
+static func map_captives(t: TeamData) -> Dictionary:
+	var kind: int = 0
+	var harsh: int = 0
+	for g in t.captive_groups:
+		var n: int = AnonCohort.total(g.get("cohorts", {}))
+		if String(g.get("treatment", "厚待")) == "苛待":
+			harsh += n
+		else:
+			kind += n
+	return {"total": kind + harsh, "kind": kind, "harsh": harsh,
+		"food_per_day": float(kind) * ManpowerSystem.CAPTIVE_FOOD_RATE, "guard_ratio": float(t.captive_guard_ratio)}
 
 # 隊級能力讀數（按真技能聚合算，非假數字）：狩獵=named avg求生、戰力=武裝+named戰鬥、日耗=pop×2.4
 static func _team_capabilities(state: WorldState, t: TeamData) -> Dictionary:
