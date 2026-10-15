@@ -1076,7 +1076,7 @@ func _test_pages_zero_loss() -> void:
 				want_teams = _kv_int(ln, "teams=")
 				want_persons = _kv_int(ln, "persons=")
 			continue
-		before.append(ln)
+		before.append(_p1b_renamed(ln))
 	# ★★★檔案往返的產物：存檔是一行一個 store_line ⇒ 檔尾有換行 ⇒ split 出一個【尾端空字串】。
 	#   而 `_build_state_str()` 回傳的字串【沒有】尾端換行 ⇒ 新輸出不會有那一個空元素。
 	#   ⇒ ★不處理的話這一格會報「舊 1 次 → 新 0 次：（空行）」，而那不是【少印了一行】。
@@ -1102,11 +1102,11 @@ func _test_pages_zero_loss() -> void:
 		await _free_ui(node)
 		_cell("_test_pages_zero_loss")
 		return
-	# ★★游標也要對回去（沒選格 ⇒ text_ui_main.gd:716 那 ~23 行一行都不會渲染）
+	# ★★游標也要對回去：「前」是選中玩家腳下那格時拍的（#UC 選中格）——游標即選中之後明細跟游標走 ⇒ 游標放回玩家腳下
 	var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
 	var cp: Dictionary = ct.get("position", {})
 	if not cp.is_empty():
-		node._selected = Vector2i(int(cp.get("q", 0)), int(cp.get("r", 0)))
+		node._cursor = Vector2i(int(cp.get("q", 0)), int(cp.get("r", 0)))
 	node._page_idx = 0
 	var same_world: bool = (st.world.current_tick == want_tick
 		and st.teams.size() == want_teams and st.persons.size() == want_persons)
@@ -1148,6 +1148,8 @@ func _test_pages_zero_loss() -> void:
 		print("    [%s] %s" % [String(e["kind"]), String(e["spec"])])
 	for e in P1B_EXCLUDE:
 		print("    排除「%s…」：%s" % [String(e["prefix"]), String(e["why"])])
+	for e in P1B_RENAMED:
+		print("    改名「%s」→「%s」（照比）：%s" % [String(e["old"]), String(e["new"]), String(e["spec"])])
 	before = before2
 	after = after2
 	var cb: Dictionary = {}
@@ -1327,6 +1329,20 @@ func _p1b_structural_kind(line: String) -> String:
 
 func _p1b_structural(line: String) -> bool:
 	return _p1b_structural_kind(line) != ""
+
+# 【改名表】——票本身改了某一行的字（不是搬、不是丟）⇒「前」那一行先換成新字再比，內容照比。
+#   ★不是豁免：豁免是該比而不比（P1B_EXCLUDE 必須空）；這裡那一行【照樣逐字比】，只把被改掉的前綴換成新前綴。
+#   ★每一條指回改它的那張 spec 的那一句；new 讀 UI 的常數，不抄字。
+const P1B_RENAMED: Array = [
+	{"old": "選中: ", "new": TextUiMain.HOVER_DETAIL_HEAD,
+		"spec": "2026-10-14-cursor-hover-shows-known-detail-HOW §1：標頭「選中:」改「游標處明細:」"},
+]
+
+func _p1b_renamed(line: String) -> String:
+	for e in P1B_RENAMED:
+		if line.begins_with(String(e["old"])):
+			return String(e["new"]) + line.substr(String(e["old"]).length())
+	return line
 
 func _p1b_excluded(line: String) -> bool:
 	for e in P1B_EXCLUDE:
@@ -1918,9 +1934,7 @@ func _hover_move(node, key: int) -> void:
 
 # P1[即時]：移動游標【不按 Enter】⇒ 該格真值出現。
 # ★即時性不是新加的機制：`_move_cursor()` 結尾本來就 `_refresh()`
-#   ⇒ 這一格驗的是【那個區塊讀的是 `_cursor` 而不是 `_selected`】。
-# ★★母體地板：游標要【真的動了】（而且 `_selected` 要維持未選狀態，否則印出來的
-#   可能是舊的「選中」區塊，而那一段本來就存在 ⇒ 這一格會在沒做事時也綠）。
+# ★★母體地板：游標要【真的動了】（游標即選中票刪了 `_selected`，舊的「未選」地板跟著拿掉）。
 # 負對照：拿掉 `_move_cursor()` 結尾的 `_refresh()`（＝把即時觸發拿掉） ⇒ 已於 feat/cursor-hover-truth（2026-09-24 這一輪） 實測紅
 func _test_hover_p1_live() -> void:
 	_selftest_gate("_test_hover_p1_live").noop()
@@ -1928,8 +1942,6 @@ func _test_hover_p1_live() -> void:
 ── 懸停 P1 不按 Enter 就出真值 ──")
 	var node = await _make_ui()
 	var c0: Vector2i = node._cursor
-	_check("★★母體地板：起始 _selected 是未選狀態（%s）—— 否則印的可能是舊的選中區塊"
-		% str(node._selected), node._selected == Vector2i(-1, -1))
 	_hover_move(node, KEY_D)
 	_check("★★母體地板：游標真的動了（%s → %s）" % [str(c0), str(node._cursor)],
 		node._cursor != c0)
@@ -1943,8 +1955,6 @@ func _test_hover_p1_live() -> void:
 	_check("★★而畫面上印的是【游標現在那一格】（找 tile_id=%d）"
 		% (node._cursor.x * 1000 + node._cursor.y),
 		s.contains("tile_id=%d" % (node._cursor.x * 1000 + node._cursor.y)))
-	_check("★★★_selected 仍然未選（證明它讀的是 _cursor 不是 _selected）",
-		node._selected == Vector2i(-1, -1))
 	await _free_ui(node)
 	_cell("_test_hover_p1_live")
 

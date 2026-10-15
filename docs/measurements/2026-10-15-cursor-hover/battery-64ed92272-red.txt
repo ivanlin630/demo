@@ -1,0 +1,194 @@
+[MERGE-GATES] ★判決同時寫入 .claude/hooks/.merge-gates-last.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=80cc4ca0 lines=599 run-id=903-20261015-060544｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=64ed92272 registry=clean runner=clean code-dirty=0 artifact-dirty=1
+[MERGE-GATES] ★本次判決適用於 HEAD=64ed92272（註冊表與 runner 皆乾淨）
+comm: file 1 is not in sorted order
+comm: file 2 is not in sorted order
+comm: input is not in sorted order
+comm: file 1 is not in sorted order
+comm: file 2 is not in sorted order
+comm: input is not in sorted order
+[MERGE-GATES] ★本地多出（分叉，非缺失；多半是還沒 push 的新閘）：cursor-hover
+[MERGE-GATES] main 基線紅數 ＝ 0（量於 80d45820f / 2026-09-22T05:11Z；main 之後又走了 2519 個 commit）
+[MERGE-GATES] ★開跑前 FreeMB=17268｜top-5 記憶體：
+[MERGE-GATES]   Memory Compression 875MB
+[MERGE-GATES]   msedge 620MB
+[MERGE-GATES]   MsMpEng 612MB
+[MERGE-GATES]   Discord 572MB
+[MERGE-GATES]   claude 550MB
+[MERGE-GATES]   ★Godot 行程數=0（★開跑前必須是 0）
+[MERGE-GATES] ★記憶體：第 1 支之前 FreeMB=17257
+[MERGE-GATES] ✓ constitution （4s）
+[MERGE-GATES] ✓ bare-tick （9s）
+[MERGE-GATES] ✓ build-duration （4s）
+[MERGE-GATES] ✓ bed-parse （91s）
+[MERGE-GATES] ✓ bed-arm （5s）
+[MERGE-GATES] ★記憶體：第 6 支之前 FreeMB=16981
+[MERGE-GATES] ✓ ki-anchor （4s）
+[MERGE-GATES] ✓ mailbox-integrity （37s）
+[MERGE-GATES] ✓ cherrypick-fidelity （2s）
+[MERGE-GATES] ✓ ki-status （14s）
+[MERGE-GATES] ✓ single-writer （1s）
+[MERGE-GATES] ★記憶體：第 11 支之前 FreeMB=16428
+[MERGE-GATES] ✓ tree-div （0s）
+[MERGE-GATES] ✓ headless （24s）
+[MERGE-GATES] ✓ cross-run-static （12s）
+[MERGE-GATES] ✓ own-camp-link （7s）
+[MERGE-GATES] ✓ zero-caller （4s）
+[MERGE-GATES] ★記憶體：第 16 支之前 FreeMB=16719
+[MERGE-GATES] ✓ exam-freeze （0s）
+[MERGE-GATES] ✓ print-join （0s）
+[MERGE-GATES] ✓ belief-freshness-invariant （7s）
+[MERGE-GATES] ✓ unified-commerce （7s）
+[MERGE-GATES] ✓ defer-open （28s）
+[MERGE-GATES] ★記憶體：第 21 支之前 FreeMB=16438
+[MERGE-GATES] ✓ defer-phrase （1s）
+[MERGE-GATES] ✓ modulo-phase （0s）
+[MERGE-GATES] ✓ ledger-drop-visible （7s）
+[MERGE-GATES] ✓ lod-split （1s）
+[MERGE-GATES] ✓ lod-rate-equivalence （7s）
+[MERGE-GATES] ★記憶體：第 26 支之前 FreeMB=17043
+[MERGE-GATES] ✓ valuation-clamp （52s）
+[MERGE-GATES] ✓ world-schedule-due （7s）
+[MERGE-GATES] ✓ envoy-ptype （7s）
+[MERGE-GATES] ✓ mailbox-size （0s）
+[MERGE-GATES] ✓ mailbox-broadcast （0s）
+[MERGE-GATES] ★記憶體：第 31 支之前 FreeMB=16844
+[MERGE-GATES] ✓ board-price （7s）
+[MERGE-GATES] ✓ swallow-setter （0s）
+[MERGE-GATES] ✓ tier2-sweep-staleness （0s）
+[MERGE-GATES] ✓ minor-merge （7s）
+[MERGE-GATES] ✓ escrow-audit （7s）
+[MERGE-GATES] ★記憶體：第 36 支之前 FreeMB=17204
+[MERGE-GATES] ✓ computed-prop （1s）
+[MERGE-GATES] ✓ bed-kind （14s）
+[MERGE-GATES] ✓ wage-penalty （6s）
+[MERGE-GATES] ✓ payroll-urgency （7s）
+[MERGE-GATES] ✓ merchant-turnover （12s）
+[MERGE-GATES] ★記憶體：第 41 支之前 FreeMB=17352
+[MERGE-GATES] ✓ team-ui （7s）
+[MERGE-GATES] ✓ player-entry-smoke （8s）
+[MERGE-GATES] ✓ ui-flow （17s）
+[MERGE-GATES] ✓ command-replay （24s）
+[MERGE-GATES] ✓ player-event-feed （7s）
+[MERGE-GATES] ★記憶體：第 46 支之前 FreeMB=17273
+[MERGE-GATES] ✓ inquiry-v1 （12s）
+[MERGE-GATES] ✓ success-sentence （8s）
+[MERGE-GATES] ✓ ui-logic （7s）
+[MERGE-GATES] ✓ value-key （2s）
+[MERGE-GATES] ✓ value-key-selfcheck （1s）
+[MERGE-GATES] ★記憶體：第 51 支之前 FreeMB=17295
+[MERGE-GATES] ✓ plan-speed （7s）
+[MERGE-GATES] ✓ material-buy （6s）
+[MERGE-GATES] ✓ gateA （6s）
+[MERGE-GATES] ✓ gateA-hysteresis （6s）
+[MERGE-GATES] ✓ restock-burn （13s）
+[MERGE-GATES] ★記憶體：第 56 支之前 FreeMB=17286
+[MERGE-GATES] ✓ failure-feedback-coverage （8s）
+[MERGE-GATES] ✓ gather-purity （6s）
+[MERGE-GATES] ✓ role-commit-scope （1s）
+[MERGE-GATES] ✓ watchdog-beacon （0s）
+[MERGE-GATES] ✗ live-team-census （2s）—— ★state.teams 迭代站點普查表不得靜默過期:母體=現在真的存在的迴圈站點,判準=每站剛好一列;★涵蓋率=只驗【母體有沒有漏】,★★不驗 class(A/B/C)分得對不對——那是語意,機器判不了,靠 review;★★★成對對照四格(乾淨綠/新站點未登記具名紅/表上刪一列紅/行號漂掉=門牌指錯也紅——後者最重要,因為錨指到別處會讓表【看起來已經維護過】);母體<30 站直接判撈法自己壞了,不判綠
+[FAIL] 普查表指向一個現在撈不到的站點：scripts/simulation/player_api_mapper.gd	map_location_context —— 行號漂了或站點已刪，★表要跟著改
+母體 60 站（grep 命中）／表上 68 列（含手動收錄的 5 類特殊寫法）
+=== DONE === FAILS
+[MERGE-GATES]   ⇒ ★完整輸出已落檔：/a/GDS/demo/docs/measurements/.gate-fail/20261015-061506-live-team-census.txt
+[MERGE-GATES] ★記憶體：第 61 支之前 FreeMB=17150
+[MERGE-GATES] ✓ fp-longwindow （36s）
+[MERGE-GATES] ✓ live-team-ratchet （1s）
+[MERGE-GATES] ✓ grudge-ledger-a （6s）
+[MERGE-GATES] ✓ raid-expected-value （7s）
+[MERGE-GATES] ✓ stale-pos-recon （7s）
+[MERGE-GATES] ★記憶體：第 66 支之前 FreeMB=17417
+[MERGE-GATES] ✓ anchoredness-freshness （7s）
+[MERGE-GATES] ✓ outpost-belief （6s）
+[MERGE-GATES] ✓ sister-sites-outpost （7s）
+[MERGE-GATES] ✓ occupy-target-belief （6s）
+[MERGE-GATES] ✓ phase-tree-net-cost （6s）
+[MERGE-GATES] ★記憶體：第 71 支之前 FreeMB=17391
+[MERGE-GATES] ✓ phase-root-conservation （9s）
+[MERGE-GATES] ✓ fp-gather-sensitivity （35s）
+[MERGE-GATES] ✓ day-length-single-source （11s）
+[MERGE-GATES] ✓ det-observation-noise （7s）
+[MERGE-GATES] ✓ crisis-override （6s）
+[MERGE-GATES] ★記憶體：第 76 支之前 FreeMB=17394
+[MERGE-GATES] ✓ world-fp （467s）
+[MERGE-GATES] ✓ world-fp-ctrl （917s）
+[MERGE-GATES] ✓ intel-wake-godview （3s）
+[MERGE-GATES] ✓ intel-wake-direction （11s）
+[MERGE-GATES] ✓ globalmsg-shape （7s）
+[MERGE-GATES] ★記憶體：第 81 支之前 FreeMB=17460
+[MERGE-GATES] ✓ faction-drive-once （19s）
+[MERGE-GATES] ✓ shape-falsifier （28s）
+[MERGE-GATES] ✓ pass-stagger （63s）
+[MERGE-GATES] ✓ fp-excludes-derived （6s）
+[MERGE-GATES] ✓ player-fp-sentinel （10s）
+[MERGE-GATES] ★記憶體：第 86 支之前 FreeMB=17376
+[MERGE-GATES] ✓ forced-event-panel （9s）
+[MERGE-GATES] ✓ press-is-one-tick （8s）
+[MERGE-GATES] ✓ colocation-gate （8s）
+[MERGE-GATES] ✓ trade-accept （6s）
+[MERGE-GATES] ✓ unbound-key （20s）
+[MERGE-GATES] ★記憶體：第 91 支之前 FreeMB=17386
+[MERGE-GATES] ✓ spam-brake （8s）
+[MERGE-GATES] ✓ scripted-exploration （10s）
+[MERGE-GATES] ✓ leader-chokepoint （9s）
+[MERGE-GATES] ✓ decision-vs-outcome （8s）
+[MERGE-GATES] ✓ npc-tribute-transfer （8s）
+[MERGE-GATES] ★記憶體：第 96 支之前 FreeMB=17351
+[MERGE-GATES] ✓ available-actions （14s）
+[MERGE-GATES] ✓ text-ui-layout （6s）
+[MERGE-GATES] ✓ terminal-selfcheck （15s）
+[MERGE-GATES] ✓ tribute-offer-loop （21s）
+[MERGE-GATES] ✓ play-selfcheck （20s）
+[MERGE-GATES] ★記憶體：第 101 支之前 FreeMB=17380
+[MERGE-GATES] ✓ story-end-physics （8s）
+[MERGE-GATES] ✓ player-team-succession （17s）
+[MERGE-GATES] ✓ threat-column （7s）
+[MERGE-GATES] ✓ claim-own-market （6s）
+[MERGE-GATES] ✓ task-target-handoff （20s）
+[MERGE-GATES] ★記憶體：第 106 支之前 FreeMB=17391
+[MERGE-GATES] ✓ terminal-e2e （196s）
+[MERGE-GATES] ✓ ledger-delta-sum （12s）
+[MERGE-GATES] ✓ fatigue-by-activity （258s）
+[MERGE-GATES] ✓ inquiry-writes （7s）
+[MERGE-GATES] ✓ extortion-brake （7s）
+[MERGE-GATES] ★記憶體：第 111 支之前 FreeMB=17419
+[MERGE-GATES] ✓ a2-trade-no-deal （129s）
+[MERGE-GATES] ✓ tribute-offer-has-something （26s）
+[MERGE-GATES] ✓ a2-fix-mark-written （480s）
+[MERGE-GATES] ✓ f10-whole-map （6s）
+[MERGE-GATES] ✓ play-key-token （1s）
+[MERGE-GATES] ★記憶體：第 116 支之前 FreeMB=17436
+[MERGE-GATES] ✓ f8-camp-settle （7s）
+[MERGE-GATES] ✓ f9-known-outpost-relations （7s）
+[MERGE-GATES] ✓ map-memory （74s）
+[MERGE-GATES] ✓ multi-hop-move （198s）
+[MERGE-GATES] ✓ alliance-leader （256s）
+[MERGE-GATES] ★記憶體：第 121 支之前 FreeMB=17397
+[MERGE-GATES] ✓ play-client-keys （9s）
+[MERGE-GATES] ✓ terminal-input-prompts （10s）
+[MERGE-GATES] ✓ map-pane （7s）
+[MERGE-GATES] ✓ extortion-zero-take （8s）
+[MERGE-GATES] ✗ player-action-audit （257s）—— ★★★執行期錯誤 1 次（★expect 有命中、rc 也是 0，而它【不算綠】）
+      1 SCRIPT ERROR: Invalid call. Nonexistent function 'tile_knowledge' in base 'Nil'.
+[MERGE-GATES]   ⇒ ★一個執行期錯誤可以把【函式從中間砍斷】而讓它回傳空值，
+[MERGE-GATES]     ★★而呼叫端看到的是「這裡沒有東西」——那與「這裡本來就沒有東西」在卷面上長得一樣。
+[MERGE-GATES]   ⇒ ★完整輸出已落檔：/a/GDS/demo/docs/measurements/.gate-fail/20261015-071946-player-action-audit-script-error.txt
+[MERGE-GATES] ★記憶體：第 126 支之前 FreeMB=17446
+[MERGE-GATES] ✓ player-subteams （14s）
+[MERGE-GATES] ✓ possessed-orders （8s）
+[MERGE-GATES] ✓ possessed-famine-stop （10s）
+[MERGE-GATES] ✓ possessed-writers （7s）
+[MERGE-GATES] ✓ move-eta （31s）
+[MERGE-GATES] ★記憶體：第 131 支之前 FreeMB=17442
+[MERGE-GATES] ✓ intel-panel （8s）
+[MERGE-GATES] ✓ cursor-hover （9s）
+───────────────────────────────
+[MERGE-GATES] 註冊表 132 支｜總時 4528s
+[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因： 不在 main
+[MERGE-GATES]   ⇒ ★★這一行必須存在：靜默的【沒有記下來】跟【記下來了】在畫面上長得一樣。
+[MERGE-GATES] FAIL：live-team-census player-action-audit(script-error)
+★註冊表在 docs/process/merge-gates.tsv —— ★★新增閘＝往那裡加一行（★★★含 expect，否則直接 FAIL）
+[MERGE-GATES] ★摘要已落檔：docs/measurements/.battery/903-20261015-060544.txt
+[MERGE-GATES] BATTERY_RC=1

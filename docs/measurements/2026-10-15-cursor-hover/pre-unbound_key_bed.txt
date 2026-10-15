@@ -1,0 +1,207 @@
+[TREE] path=A:\GDS\demo\.worktrees\cursor commit=64ed92272 clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=16.9GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 未綁定鍵＝無作用＋一句回饋（spec 2026-09-30）===
+
+── P2 母體導出（不手挑）──
+   列舉到 14 個模式
+  PASS: ★母體地板 A：模式數與 spec 常數相符（14／14）
+   _advisor_mode          已綁 11 個／候選 42  測 32 個未綁
+  PASS: ★★_advisor_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_advisor_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _faction_mode          已綁 17 個／候選 42  測 26 個未綁
+  PASS: ★★_faction_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_faction_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _input_numeric_mode    已綁 10 個／候選 42  測 32 個未綁
+  PASS: ★★_input_numeric_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_input_numeric_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _input_string_mode     已綁 26 個／候選 42  測 16 個未綁
+  PASS: ★★_input_string_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_input_string_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _intel_mode            已綁 10 個／候選 42  測 33 個未綁
+  PASS: ★★_intel_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_intel_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _interact_mode         已綁 39 個／候選 42  測  5 個未綁
+  PASS: ★★_interact_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_interact_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _inv_mode              已綁 15 個／候選 42  測 28 個未綁
+  PASS: ★★_inv_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_inv_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _member_mode           已綁 11 個／候選 42  測 32 個未綁
+  PASS: ★★_member_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_member_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _outpost_mode          已綁 11 個／候選 42  測 32 個未綁
+  PASS: ★★_outpost_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_outpost_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _pre_encounter_mode    已綁  2 個／候選 42  測 40 個未綁
+  PASS: ★★_pre_encounter_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_pre_encounter_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _recruit_mode          已綁 12 個／候選 42  測 31 個未綁
+  PASS: ★★_recruit_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_recruit_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _storage_mode          已綁 13 個／候選 42  測 30 個未綁
+  PASS: ★★_storage_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_storage_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _subteam_mode          已綁 14 個／候選 42  測 29 個未綁
+  PASS: ★★_subteam_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_subteam_mode：已綁集合非空（空的話那個 handler 抽壞了）
+   _trade_mode            已綁 14 個／候選 42  測 30 個未綁
+  PASS: ★★_trade_mode：測的未綁鍵沒有一個落在已綁集合裡（0 個洩漏）
+  PASS: ★_trade_mode：已綁集合非空（空的話那個 handler 抽壞了）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   ★異源比對：謂詞與機械抽取不一致 0 處
+  PASS: ★★★謂詞與機械抽取逐鍵一致（0 處不一致）
+   ★總計：14 個模式 × 各自的未綁鍵 ＝ 396 次按壓（P1 會跑這麼多次）
+  PASS: ★★★總按壓數 > 0（0 的話 P1 是空跑而它會過）
+
+── P1 三禁逐一 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：fp 產得出來（空的話「前後相同」恆真）
+   按了 396 次
+   禁旗標被關掉          0 個
+   禁fp 變了          0 個
+   回饋句沒出現           0 個
+   禁佇列長度變了         0 個
+  PASS: ★★★禁：沒有任何未綁定鍵關掉模式（0 個違反）
+  PASS: ★★★禁：fp 前後逐位元相同（0 個違反）
+  PASS: ★★★回饋句每一次都出現（0 次沒出現）
+  PASS: ★★★禁的一半：佇列長度不變（0 個違反）
+
+── P3 Esc 不是未綁定鍵 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   按 Esc 之後印了那句回饋的模式 = []（期望空）
+  PASS: ★母體地板：每個模式的旗標都真的被設起來（14／14）
+  PASS: ★★★Esc 沒有被當成未綁定鍵（0 個模式誤印）
+   ★邊界：本格【不】斷言 Esc 之後旗標變成 false —— 各模式的「回上一層」
+     可能是關掉自己、也可能是退回上一層選單（例：interact 的 target 選擇）
+      那是 13 個獨立的語意，不是一條可以一次斷言的規則。
+
+── P4 已綁鍵沒被門死 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   _faction_mode          按 F  關掉=true／被當未綁=false
+   _input_string_mode     按 I  關掉=false／被當未綁=false
+   _interact_mode         按 I  關掉=false／被當未綁=false
+   _inv_mode              按 I  關掉=true／被當未綁=false
+   _outpost_mode          按 O  關掉=true／被當未綁=false
+   ★母體：13 個模式裡有 5 個用「名字首字母」當開關鍵（其餘的開關鍵不同名，本格跳過）
+  PASS: ★母體地板：至少測到 3 個（0 個的話本格什麼都沒驗）
+  PASS: ★★★已綁鍵沒有被統一出口吃掉（0 個被當未綁）
+
+── P6 不在勢力裡，未綁定鍵不得關閉面板 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   玩家隊 faction_id = -1（母體：不在勢力裡）
+  PASS: ★母體地板：玩家真的不在任何勢力裡
+  PASS: 母體地板：找得到 `_faction_mode` 的抽取結果
+   取一個未綁的鍵：H（從導出集合取，不手挑）
+  PASS: ★母體地板：那個鍵真的不在 faction mode 的已綁集合裡
+   按下之後：_faction_mode = true｜回饋句 = 「 此鍵在此模式無作用（勢力）」
+  PASS: ★★★禁：面板【沒有】被關掉（不在勢力裡也一樣）
+  PASS: ★★★回饋句出現
+
+── P7 綁定但當下不允許  給原因（且與不同句）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   佈置：玩家隊 15 在勢力 2｜領袖＝Team7911
+  PASS: ★母體地板 A：玩家真的在勢力裡
+  PASS: ★母體地板 B：玩家真的【不是】領袖（是領袖的話那一支走不到）
+  PASS: ★★母體地板 C：`KEY_A` 在 faction mode 真的有綁（否則這格測的是）
+   按 A（非領袖） 回饋句 = 「 只有勢力領袖能設定目標」
+  PASS: ★★★有話說（不是靜默）
+  PASS: ★★★的句子【不是】那一句（兩種無作用要分得出來）
+  PASS: ★也不改狀態：fp 前後逐位元相同
+  PASS: ★也不關模式
+
+── P9 綁了但現在沒有對象  另一句話 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   佈置：forced_interaction.interaction_id ＝ 「」（要是空的）
+  PASS: ★母體地板 A：真的沒有強制事件（有的話按 A 會送出回應  本格沒有主詞）
+  PASS: ★★母體地板 B：`KEY_A` 在互動模式真的有綁（回 false  本格測的是「沒有綁」那一類）
+   沒有聚焦目標       按 A  回饋句 = 「 現在沒有要回應的事件」
+  PASS: ★沒有聚焦目標：fp 前後逐位元相同（它不准改世界）
+  PASS: ★沒有聚焦目標：佇列長度不變（1）
+  PASS: ★沒有聚焦目標：沒有關掉互動模式（三態之一）
+   聚焦著目標        按 A  回饋句 = 「 現在沒有要回應的事件」
+  PASS: ★聚焦著目標：fp 前後逐位元相同（它不准改世界）
+  PASS: ★聚焦著目標：佇列長度不變（1）
+  PASS: ★聚焦著目標：沒有關掉互動模式（三態之一）
+  PASS: ★★★兩個子情境都說了【綁了但沒有對象】那一句（違反的：[]）
+   ★兩句逐字比對：相同
+  PASS: ★★★★兩個子情境的回饋句【逐字相同】（不同  有人又長了一個 `_interact_target` 分支）
+
+── P8 early return 母體普查（四桶）──
+   總 early return 62
+     有句子（_set_feedback／_log_event／_refuse_unbound_key）＝ 52
+     ★的誠實限：本桶用【文字窗口】判（那個 `return` 前 8 行）
+        句子在**兄弟分支**裡也會被算進來  ★失效方向是【多算】
+        ★★所以  是【上界】不是實數：它答「窗口裡有人說話」，
+         **不答**「走到這個 return 的那條路上有人說話」。
+        ★★★血證（2026-10-01）：互動模式字母鍵沒有回應時是**完全靜默**的 return，
+         而 `_set_feedback` 在兄弟分支裡  它被算進   一個分類器的假綠。
+         ★抓到它的不是本格，是 P9（按鍵讀畫面）—— **讀 code 的桶子讀不出它**。
+     具名例外（gate-ok:）                                  ＝ 1
+     執行了一道令（結果句由消費點產生）                      ＝ 0
+     ★以上皆非（逐站列名）                                  ＝ 9
+        · _handle_input_numeric_mode:718
+        · _handle_input_string_mode:732
+        · _handle_inv_mode:825
+        · _handle_member_mode:2166
+        · _handle_interact_mode:2383
+        · _handle_interact_mode:2548
+        · _handle_interact_mode:2557
+        · _handle_outpost_mode:3004
+        · _handle_subteam_mode:3259
+  PASS: ★母體地板：總數 > 0（0 的話本格什麼都沒驗）
+  PASS: ★★★四數相加 ＝ 總數（52 ＋ 1 ＋ 0 ＋ 9 ＝ 62／62）
+  PASS: ★★具名例外至少一個（0 的話那個標記沒接上）
+   ★★★而「以上皆非」那一桶【不是債】：本輪逐站開檔看過，它們是
+     『做完事就 return』（選了一項／打了一個字／退了一層 —— 畫面已更新）。
+      它們不需要句子，而它們【必須列名】：不列名的話下一次有人往這一桶
+       加進一個【真的靜默拒絕】，那一桶的數字只會 +1 而沒有人看得出差別。
+=== unbound_key DONE === errors: 0｜到場點名 8／8
+
+[godot.ps1] child exit=0

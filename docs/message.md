@@ -110,6 +110,7 @@ C 類退役：舊 `_distort_content` / `_distort_intel_entry` / tier2 內嵌欺�
 
 - **打聽回答逐筆列**：`message_system.gd _exchange_intel` 對每一筆寫進接收方的 claim 記一筆 `out.items`（哪隊、他說的位置、位置 tick、三態 written／refreshed／conflicted）。結果句下面一筆一行；「你早就知道了」只對 refreshed 那幾筆說。清單來源是**寫進接收方**的那幾筆，不是給方的 known_targets（那會洩漏給方知道多少）。
 - **「他也不知道」**：判準不算回答裡關於提問者自己的那幾筆（給方只知道你在哪 ⇒ 沒有東西可記 ⇒「他也不知道」，不是「早就知道」）。
+- **游標處明細**（側欄，跟游標走，不用 Enter）：與頂部「游標處」一行讀同一份 `tile_knowledge`（快照 `location_context.knowledge`）。`location_context` 在來源過知識閘：沒去過＝hidden、只帶記得在那格的隊；記得＝地形＋已知據點＋belief 隊，不帶糧／獵物／掠食者；視野內＝真值。
 - **情報頁**（分頁第 5 頁，原「記憶」；主畫面 `[J]` 直達）：讀 `PlayerQueryApi.query_memory_panel`。payload 是 belief 的純函數，只放絕對 tick；「N 分鐘前」與「太久，視同不知」由 UI 組句時算，過期線是 `BeliefSystem.belief_stale`（游標處經 `belief_pos` 用同一支）。
   - 隊伍：位置／位置年齡（`value.last_tick`，轉述繼承 giver 的）／親見或聽說（`PlayerQueryApi.is_firsthand`，與游標處同一支）／關係（隊層 `known_reputations`，沒有就「不明」）／人口與武裝估。
   - 據點與市集：`FactionAISystem._known_outpost_relations`（游標處同一支）；關係是附身隊領袖的看法。

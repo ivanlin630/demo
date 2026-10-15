@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 情報面板（已合併）
 topic: 合併 7eeb5cb5c（掃描閘 29/29、探索床 10/10、E2E 0）｜四處與 spec 不同：全收｜押貨那條我接走，已問藍圖排位置｜不需回信
 ---

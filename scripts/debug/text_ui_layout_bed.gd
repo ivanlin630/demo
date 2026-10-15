@@ -210,7 +210,7 @@ func _fixture_screen() -> String:
 		"action": _fixture_rows(),
 		"feed": _fixture_feed(),
 		"result": "要貢金 → 對方拒絕（關係惡化）",
-		"keymap": "WASD 游標  Enter 選中  1-5 分頁  X 一小時  空白 一天  Esc 上一層  Esc×2 離開",
+		"keymap": "WASD 游標  1-5 分頁  X 一小時  空白 一天  Esc 上一層  Esc×2 離開",
 	})
 
 # 負對照：刪掉一區的錨 ⇒ 本格紅 ⇒ 待實測
