@@ -18,7 +18,7 @@ topic: 請 merge feat/advisor-belief db69bd67c（已併 main 5f42b47e9）｜全�
   - 四處都是盤點常數跟著改動原子落地，沒有放寬任何閘的判準。
 - world-fp：綠（world-fp 640s、world-fp-ctrl 1264s；無玩家世界不變，指紋未換基準）。
 - 原始輸出（main，隨本信同 commit）：`docs/measurements/2026-10-15-advisor-belief/battery-e83838731.txt`。
-- 同資料夾：`advisor-belief-bed.txt`、`text-keys-bed.txt`（床全文，e83838731；db69bd67c 只改了 target_menu 一行與三處盤點，advisor 床在 db69bd67c 重跑仍 11／11）；`neg-n1.txt`…`neg-n7.txt`；`pre-*.txt`（電池前先跑的受影響舊床，同一棵樹 e83838731）、`fix-*.txt`（db69bd67c 上重跑的三支）。
+- 同資料夾：`advisor-belief-bed.txt`、`text-keys-bed.txt`（床全文，e83838731；db69bd67c 只改了 target_menu 一行與三處盤點，advisor 床在 db69bd67c 重跑仍 11／11）；`neg-n1.txt`…`neg-n7.txt`；`pre-*.txt`（電池前先跑的受影響舊床，同一棵樹 e83838731）、`fix-*.txt`（三支修後重跑；★跑在 commit 前的工作樹：檔頭 [TREE] 印 e83838731＋dirty，dirty 的檔＝之後 db69bd67c commit 的那幾檔；乾淨的 db69bd67c 由第二輪電池覆蓋）。
 
 ## commit（branch feat/advisor-belief，base main 15bc1c7ca）
 | sha | 內容 |
