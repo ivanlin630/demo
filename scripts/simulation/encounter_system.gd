@@ -92,17 +92,17 @@ func hex_dist(a: Vector2i, b: Vector2i) -> int:
 func _is_in_map(pos: Vector2i) -> bool:
 	return hex_dist(Vector2i.ZERO, pos) <= MAP_RADIUS
 
-func _get_body_parts(unit: Dictionary, state: WorldState) -> Dictionary:
+static func _get_body_parts(unit: Dictionary, state: WorldState) -> Dictionary:
 	if unit["person_id"] != -1:
 		var p: PersonData = state.persons.get(unit["person_id"])
 		return p.body_parts if p else {}
 	return unit.get("body_parts", {})
 
-func is_dead(unit: Dictionary, state: WorldState) -> bool:
+static func is_dead(unit: Dictionary, state: WorldState) -> bool:
 	var bp := _get_body_parts(unit, state)
 	return bp.get("torso", {}).get("status", "healthy") == "severed"
 
-func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
+static func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
 	if is_dead(unit, state): return false
 	if unit.get("has_exited", false): return false
 	# 失血/餓暈昏迷：blood < BLOOD_COMA_THRESHOLD → 倒地失能（body parts 全 healthy 仍倒）
@@ -119,6 +119,11 @@ func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
 	if bp.get("left_leg",  {}).get("status") == "critical": legs_critical += 1
 	if legs_critical >= 2: return false
 	return true
+
+# ★場上失能（未死、未離場、不能戰；含血量昏迷而部位全 healthy）——spec 2026-10-14-battle-aftermath §0 的一把判準
+#   結算的傷兵桶（HealthSystem.resolve_anon_units）與戰後命運的 N 都讀這一支
+static func is_disabled(unit: Dictionary, state: WorldState) -> bool:
+	return not is_dead(unit, state) and not bool(unit.get("has_exited", false)) and not is_combat_capable(unit, state)
 
 func _default_body_parts() -> Dictionary:
 	return {

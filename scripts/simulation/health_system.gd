@@ -195,6 +195,10 @@ static func resolve_anon_units(state: WorldState, team_id: int) -> void:
 			injured = true
 		elif bp.values().any(func(x): return x.get("status", "healthy") != "healthy"):
 			injured = true
+		# ★失能也算傷兵（spec 2026-10-14-battle-aftermath §0）：血量昏迷而部位全 healthy 的舊版漏掉（本函式不讀 unit.blood）
+		#   ⇒ 並列同一支謂詞 EncounterSystem.is_disabled，不另寫一份
+		if not injured and EncounterSystem.is_disabled(unit, state):
+			injured = true
 		if injured:
 			wounded_count += 1
 	AnonTierSystem.wound_random(team, wounded_count)
