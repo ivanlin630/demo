@@ -1218,6 +1218,8 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		"tick": state.world.current_tick}   # ★BS2：三條結算路（一般／野獸／平手）都經過這一行
 
 	_return_pool_equipment(state)
+	# ★戰後收尾（spec 2026-10-14-battle-aftermath §1）：結算前後比 ⇒ 玩家事件寫雙方死傷
+	var am: Dictionary = _aftermath_begin(state, atk_id, def_id)
 
 	for team_id in [atk_id, def_id]:
 		if team_id == -1: continue
@@ -1225,6 +1227,8 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		var t: TeamData = state.teams.get(team_id)
 		if t: HealthSystem.resolve_negative_flags(state, t)
 		HealthSystem.resolve_anon_units(state, team_id)
+		if t and am["sides"].has(team_id):
+			am["sides"][team_id]["wounded_mid"] = AnonCohort.by_health(t.anon_cohorts, "wounded")
 
 	var arrows_used: Dictionary = {}
 	for u in state.encounter_units:
@@ -1243,6 +1247,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		if t:
 			var dp: PersonData = state.persons.get(u["person_id"])
 			if dp != null: dp.is_dead = true   # 留屍標記：反向 roster audit 跳過（同 famine）
+			if dp != null and am["sides"].has(int(u["team_id"])): (am["sides"][int(u["team_id"])]["dead_named"] as Array).append(dp.person_name)
 			state.remove_member(t, u["person_id"], false)   # 戰死：出 named（team_id 留，同 famine）
 			if t.leader_id == u["person_id"]: t.leader_id = -1
 
@@ -1258,6 +1263,8 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			onfield_anon += 1
 			if is_dead(u, state): dead_anon += 1
 		var t: TeamData = state.teams.get(team_id)
+		if am["sides"].has(team_id):
+			am["sides"][team_id]["dead_anon"] = dead_anon
 		if t:
 			# reserve 須在上場 kill_random 之前量（量 onfield_anon），故先記
 			AnonTierSystem.kill_random(t, dead_anon, "combat")   # 上場陣亡（cohort 唯一來源）
@@ -1290,6 +1297,8 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var tb: TeamData = state.teams.get(tid_b)
 			if tb: state.clear_combat_target(tb)
 		print("[Encounter] 野獸遭遇戰結算 result=%s" % result)
+		am["beast"] = true
+		_aftermath_emit(state, am, result)
 		_check_player_wiped(state)
 		state.encounter_units.clear()
 		state.encounter_active = false
@@ -1303,6 +1312,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var t: TeamData = state.teams.get(team_id)
 			if t: state.clear_combat_target(t)
 		print("[Encounter] 遭遇戰結算完成 result=%s" % result)
+		_aftermath_emit(state, am, result)
 		_check_player_wiped(state)
 		# 清理 encounter state（draw 也要清，否則 encounter_active 永遠 true）
 		state.encounter_units.clear()
@@ -1326,17 +1336,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			AnonTierSystem.add_exp(winner_team, exp_tier, EXP_SURVIVOR + EXP_VICTORY_BONUS, "combat_survivor_winner")
 		if loser_team_exp != null and AnonTierSystem.tier_count(loser_team_exp, exp_tier) > 0:
 			AnonTierSystem.add_exp(loser_team_exp, exp_tier, EXP_SURVIVOR, "combat_survivor_loser")
-	# 新：俘虜存入 prisoner_population，上限 = winner population
-	for u in state.encounter_units:
-		if not u.get("is_prisoner", false): continue
-		if u["team_id"] != loser_id: continue
-		if winner_team == null: continue
-		if winner_team.prisoner_population < winner_team.population:
-			winner_team.prisoner_population += 1
-			print("[Encounter] 俘虜收押 Team%d（總計 %d）" % [
-				winner_id, winner_team.prisoner_population])
-		else:
-			print("[Encounter] 俘虜超額，釋放")
+	# ★戰後收尾 2a／2／3（spec 2026-10-14-battle-aftermath）：舊的 prisoner_population 計數器退場
+	#   ⇒ 戰中押住的照押方是否留場帶走、場上失能者的命運歸留場方、追擊
+	_aftermath_captives_fate_pursuit(state, am, atk_id, def_id)
 
 	for team_id in [atk_id, def_id]:
 		var t: TeamData = state.teams.get(team_id)
@@ -1378,6 +1380,10 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		"loot_pool": loot,
 		"can_subjugate": is_player_winner
 	}
+	# ★戰後處置 pending（spec 2026-10-14-battle-aftermath §2／§3；結清見 PlayerCommandSystem.settle_pending_aftermath）
+	for _k in ["fate_pending", "disabled_enemy", "fate_victim", "pursuit_possible", "pursuit_e"]:
+		if am.has(_k):
+			state.last_encounter_result[_k] = am[_k]
 	print("[Encounter] 戰鬥結束 winner=Team%d loser=Team%d loot=%s" % [winner_id, loser_id, str(loot)])
 
 	# D B1: 戰勝接管 outpost（敗方所在格據點易主）
@@ -1393,7 +1399,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 
 	# Prosperity: 攻方勝 → 處理被佔 outpost 上的居民團（屠/放棄/強佔）
 	if result == "attacker_win":
-		_process_occupied_residents(state, winner_id, loser_id)
+		_process_occupied_residents(state, winner_id, loser_id, am)
+		if am.has("residents_pending"):
+			state.last_encounter_result["residents_pending"] = am["residents_pending"]
 	# Prosperity: 攻方戰敗 → reaction（loyalty 降 / leader stress 升）
 	elif result == "defender_win" and atk_id != -1:
 		var atk_total: int = 0
@@ -1405,11 +1413,178 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		var ratio: float = float(atk_dead) / maxf(float(atk_total), 1.0)
 		ReactionSystem.new().on_attack_defeat(state, atk_id, ratio)
 
+	am["loot"] = loot
+	_aftermath_emit(state, am, result)
 	_check_player_wiped(state)
 	state.encounter_units.clear()
 	state.encounter_active = false
 	state.encounter_attacker_id = -1
 	state.encounter_defender_id = -1
+
+# ══ 戰後收尾（spec 2026-10-14-battle-aftermath-wounded-captives-pursuit-HOW）═══════════════════
+# 結算前記雙方人口、傷兵桶；記名戰死名單、上場陣亡數在結算迴圈裡填
+static func _aftermath_begin(state: WorldState, atk_id: int, def_id: int) -> Dictionary:
+	var am: Dictionary = {"atk": atk_id, "def": def_id, "sides": {}, "notes": [], "names": {}}
+	for tid in [atk_id, def_id]:
+		var t: TeamData = state.teams.get(tid)
+		am["sides"][tid] = {"pop0": t.population if t != null else 0,
+			"wounded0": AnonCohort.by_health(t.anon_cohorts, "wounded") if t != null else 0,
+			"dead_named": [], "dead_anon": 0, "held_by_enemy": 0, "fate_killed": 0, "fate_captured": 0,
+			"fate_released": 0, "pursuit_killed": 0}
+		am["names"][tid] = PlayerApiMapper._threat_name(state, tid)   # 結算後野獸隊會被清掉 ⇒ 名字先存
+	return am
+
+# 留場＝結算當下仍有能戰的單位在場（既有謂詞；處置權歸留場方，不看 result 字串）
+static func _stays(state: WorldState, tid: int) -> bool:
+	for u in state.encounter_units:
+		if int(u["team_id"]) == tid and is_combat_capable(u, state):
+			return true
+	return false
+
+static func _is_player_team(state: WorldState, tid: int) -> bool:
+	if state.player_id == -1:
+		return false
+	var t: TeamData = state.teams.get(tid)
+	return t != null and t.player_controlled
+
+static func _unit_name(state: WorldState, u: Dictionary) -> String:
+	var pp: PersonData = state.persons.get(int(u.get("person_id", -1)))
+	return pp.person_name if pp != null else "Person%d" % int(u.get("person_id", -1))
+
+# NPC 留場方當場選（三分數取最大；同分序 放＞俘＞殺）：域專判斷器穿人格＋記憶＋現況
+static func npc_fate_choice(state: WorldState, holder: TeamData, victim: TeamData) -> String:
+	var hl: PersonData = state.persons.get(holder.leader_id)
+	var vl_id: int = victim.leader_id if victim != null else -1
+	var edges: Array = hl.relation_edges if hl != null else []
+	var vals: Dictionary = hl.values if hl != null else {}
+	var kill: float = float(vals.get("殘忍", 0.5)) + DiplomaticAiSystem._edge_intensity_to(edges, "feud", vl_id)
+	var cap_ok: bool = ManpowerSystem.captive_room(state, holder) > 0 and ManpowerSystem.captive_food_ok(state, holder)
+	var capture: float = float(vals.get("貪婪", 0.5)) * (1.0 if cap_ok else 0.0)
+	var release: float = float(vals.get("義氣", 0.5)) + DiplomaticAiSystem._edge_intensity_to(edges, "gratitude", vl_id)
+	if release >= capture and release >= kill:
+		return "release"
+	if capture >= kill:
+		return "capture"
+	return "kill"
+
+# 命運的三個做法（玩家指令與 NPC 當場選、被動結清都呼這三支）；回實際人數
+static func fate_kill(holder: TeamData, victim: TeamData, n: int) -> int:
+	return AnonTierSystem.kill_wounded(victim, n) if victim != null else 0
+
+static func fate_capture(state: WorldState, holder: TeamData, victim: TeamData, n: int, treatment: String) -> int:
+	var k: int = mini(n, ManpowerSystem.captive_room(state, holder))
+	return AnonTierSystem.absorb_wounded_as_captive(holder, victim, k, "戰後俘虜", treatment)
+
+static func _aftermath_captives_fate_pursuit(state: WorldState, am: Dictionary, atk_id: int, def_id: int) -> void:
+	var sides: Dictionary = am["sides"]
+	var done: Dictionary = {}   # unit 索引 → true（2a 已處理）
+	# ── 2a 戰中已被押住的：押方結算時仍留場 ⇒ 被帶走歸押方（兩個方向都算），不看誰贏 ──
+	for i in range(state.encounter_units.size()):
+		var u: Dictionary = state.encounter_units[i]
+		if not bool(u.get("is_prisoner", false)) or is_dead(u, state):
+			continue
+		var own: int = int(u["team_id"])
+		var captor: int = def_id if own == atk_id else atk_id
+		if not sides.has(own) or not _stays(state, captor):
+			continue   # 押方自己全倒或全離場 ⇒ 無人看守 ⇒ 回到下一步（失能者看留場）
+		done[i] = true
+		if int(u.get("person_id", -1)) >= 0:
+			(am["notes"] as Array).append("%s 被俘後放回（記名俘虜還沒做）" % _unit_name(state, u))
+			continue
+		var holder: TeamData = state.teams.get(captor)
+		var victim: TeamData = state.teams.get(own)
+		var moved: int = 0
+		if holder != null and victim != null and ManpowerSystem.captive_room(state, holder) > 0:
+			moved = AnonTierSystem.absorb_wounded_as_captive(holder, victim, 1, "戰中俘虜",
+				"厚待" if holder.player_controlled else "")
+		if moved > 0:
+			sides[own]["held_by_enemy"] = int(sides[own]["held_by_enemy"]) + moved
+		else:
+			am["held_overflow_%d" % own] = int(am.get("held_overflow_%d" % own, 0)) + 1
+	# ── 2 場上傷兵的命運：處置權＝結算時仍留在戰場上的一方 ──
+	var sa: bool = _stays(state, atk_id)
+	var sd: bool = _stays(state, def_id)
+	am["stays"] = {atk_id: sa, def_id: sd}
+	if sa == sd:
+		return   # 雙方都不留場 ⇒ 各自帶回自己的失能者、零俘虜、無命運、無追擊（雙方都留場不存在）
+	var hid: int = atk_id if sa else def_id
+	var vid: int = def_id if sa else atk_id
+	var holder2: TeamData = state.teams.get(hid)
+	var victim2: TeamData = state.teams.get(vid)
+	if holder2 == null or victim2 == null:
+		return
+	am["holder"] = hid
+	am["victim"] = vid
+	var n: int = 0
+	var e: int = 0
+	for i in range(state.encounter_units.size()):
+		var u2: Dictionary = state.encounter_units[i]
+		if int(u2["team_id"]) != vid:
+			continue
+		if bool(u2.get("has_exited", false)) and not is_dead(u2, state):
+			e += 1
+		if done.has(i) or not is_disabled(u2, state):
+			continue
+		if int(u2.get("person_id", -1)) >= 0:
+			# 記名失能者（雙方、含玩家本人）一律放：留在原隊當傷兵、走既有恢復
+			(am["notes"] as Array).append("%s 倒在戰場上，對方沒有處置（記名俘虜還沒做）" % _unit_name(state, u2))
+			continue
+		n += 1
+	n = mini(n, AnonCohort.by_health(victim2.anon_cohorts, "wounded"))
+	am["disabled_enemy"] = n
+	am["fate_victim"] = vid
+	var can_pursue: bool = e > 0 and NpcCombatSystem.pursuit_reachable(holder2, victim2)
+	if _is_player_team(state, hid):
+		# 勝方是玩家：動作列出四項（殺／俘厚／俘苛／放）；未決推進＝放走（PlayerCommandSystem.settle_pending_aftermath）
+		if n > 0:
+			am["fate_pending"] = true
+		if can_pursue:
+			am["pursuit_possible"] = true
+			am["pursuit_e"] = e
+		return
+	# 勝方是 NPC：當場選（玩家敗時寫進玩家事件）
+	if n > 0:
+		var choice: String = npc_fate_choice(state, holder2, victim2)
+		am["fate_choice"] = choice
+		match choice:
+			"kill":
+				sides[vid]["fate_killed"] = fate_kill(holder2, victim2, n)
+			"capture":
+				var k: int = fate_capture(state, holder2, victim2, n, "")
+				sides[vid]["fate_captured"] = k
+				sides[vid]["fate_released"] = n - k
+			_:
+				sides[vid]["fate_released"] = n
+	if can_pursue:
+		var kc: int = mini(NpcCombatSystem.pursuit_kill_count(state.persons.get(holder2.leader_id)), e)
+		var killed: Dictionary = AnonTierSystem.kill_random(victim2, mini(kc, AnonCohort.by_health(victim2.anon_cohorts, "healthy")), "pursuit")
+		var kn: int = 0
+		for tier in killed:
+			kn += int(killed[tier])
+		sides[vid]["pursuit_killed"] = kn
+
+# 結算事件（三路都發；只在玩家參戰時發——NPC 對 NPC 不寫玩家事件）
+static func _aftermath_emit(state: WorldState, am: Dictionary, result: String) -> void:
+	var subs: Array = []
+	var player_in: bool = false
+	for tid in [int(am["atk"]), int(am["def"])]:
+		if tid >= 0 and state.teams.has(tid):
+			subs.append(tid)
+			if _is_player_team(state, tid):
+				player_in = true
+	if not player_in:
+		return
+	if not am.has("stays"):
+		am["stays"] = {int(am["atk"]): _stays(state, int(am["atk"])), int(am["def"]): _stays(state, int(am["def"]))}
+	for tid in am["sides"]:
+		var t: TeamData = state.teams.get(tid)
+		var sd: Dictionary = am["sides"][tid]
+		sd["pop1"] = t.population if t != null else 0
+		sd["wounded1"] = AnonCohort.by_health(t.anon_cohorts, "wounded") if t != null else 0
+		sd["is_player"] = _is_player_team(state, int(tid))
+		sd["beast"] = t != null and t.beast_kind != ""
+	am["result"] = result
+	WorldEvents.emit(state, "combat_end", subs, false, {"aftermath": am.duplicate(true)})
 
 # U10b: 玩家隊遭遇戰全滅 → 接既有玩家死亡鏈（繼承/game-over），非靜默退出
 func _check_player_wiped(state: WorldState) -> void:
@@ -1439,7 +1614,7 @@ func _find_resident_team_on_tile(state: WorldState, tile: HexTileData,
 			return t
 	return null
 
-func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: int) -> void:
+func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: int, am: Dictionary = {}) -> void:
 	var attacker: TeamData = state.teams.get(attacker_id)
 	var prey: TeamData = state.teams.get(prey_id)
 	if attacker == null or prey == null: return
@@ -1456,6 +1631,10 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	if accept:
 		OutpostOwnerBank.set_owner(state, occupied_tile, attacker_id, "capture")
 		print("[ResidentAccept] attacker=Team%d resident=Team%d outpost易主" % [attacker_id, resident.team_id])
+		return
+	# ★攻方是玩家 ⇒ 不讀附身者人格（#12）：留 pending 給玩家選（屠村／放棄佔領／強佔；未決推進＝放棄佔領）
+	if attacker.player_controlled and state.player_id != -1:
+		am["residents_pending"] = {"resident_id": resident.team_id, "tile": occupied_tile.tile_pos}
 		return
 	# 攻城方 leader 個性決定
 	var atk_leader: PersonData = state.persons.get(attacker.leader_id)
@@ -1477,7 +1656,7 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	else:
 		_abandon_occupation(state, occupied_tile)
 
-func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
+static func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> void:
 	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
 	for k in resident.resources:
@@ -1491,10 +1670,10 @@ func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamDa
 	state.erase_team(rid)   # 清光所有 ref（faction 雙向 + known_member_states + 交叉 + 母子）
 	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])
 
-func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
+static func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
 	print("[AbandonOccupation] outpost (%d,%d) 放棄佔領" % [tile.tile_pos.x, tile.tile_pos.y])
 
-func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
+static func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> void:
 	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
 	var occ_dead: int = resident.population - int(float(resident.population) * 0.8)
