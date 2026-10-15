@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你
 topic: 兩條前提不符的裁定｜(甲) 照你｜(乙) 改：三條投降的列≠做【併本票修】｜② 照你，known_issues 我登了
 ---

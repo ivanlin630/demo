@@ -1,0 +1,107 @@
+tree f3da28eba8517cbc5f269452ed9f3a16b7dee44f 0
+[MERGE-GATES] ★判決同時寫入 .claude/hooks/.merge-gates-last.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=80cc4ca0 lines=599 run-id=33865-20261016-053155｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=f3da28eba registry=clean runner=clean code-dirty=0 artifact-dirty=0
+[MERGE-GATES] ★本次判決適用於 HEAD=f3da28eba（註冊表與 runner 皆乾淨）
+[MERGE-GATES] ★本地多出（分叉，非缺失；多半是還沒 push 的新閘）：player-led-faction
+[MERGE-GATES] main 基線紅數 ＝ 0（量於 80d45820f / 2026-09-22T05:11Z；main 之後又走了 2588 個 commit）
+[MERGE-GATES] ★開跑前 FreeMB=18424｜top-5 記憶體：
+[MERGE-GATES]   MsMpEng 611MB
+[MERGE-GATES]   Memory Compression 604MB
+[MERGE-GATES]   claude 541MB
+[MERGE-GATES]   Discord 517MB
+[MERGE-GATES]   Code 478MB
+[MERGE-GATES]   ★Godot 行程數=0（★開跑前必須是 0）
+[MERGE-GATES] ★記憶體：第 1 支之前 FreeMB=18419
+[MERGE-GATES] ✓ constitution （4s）
+[MERGE-GATES] ✓ bare-tick （9s）
+[MERGE-GATES] ✓ build-duration （4s）
+[MERGE-GATES] ✓ bed-parse （85s）
+[MERGE-GATES] ✓ bed-arm （4s）
+[MERGE-GATES] ★記憶體：第 6 支之前 FreeMB=18099
+[MERGE-GATES] ✓ ki-anchor （4s）
+[MERGE-GATES] ✓ mailbox-integrity （38s）
+[MERGE-GATES] ✓ cherrypick-fidelity （3s）
+[MERGE-GATES] ✓ ki-status （13s）
+[MERGE-GATES] ✓ single-writer （1s）
+[MERGE-GATES] ★記憶體：第 11 支之前 FreeMB=17354
+[MERGE-GATES] ✓ tree-div （0s）
+[MERGE-GATES] ✓ headless （24s）
+[MERGE-GATES] ✓ cross-run-static （11s）
+[MERGE-GATES] ✓ own-camp-link （7s）
+[MERGE-GATES] ✓ zero-caller （5s）
+[MERGE-GATES] ★記憶體：第 16 支之前 FreeMB=18171
+[MERGE-GATES] ✓ exam-freeze （0s）
+[MERGE-GATES] ✓ print-join （0s）
+[MERGE-GATES] ✓ belief-freshness-invariant （7s）
+[MERGE-GATES] ✓ unified-commerce （7s）
+[MERGE-GATES] ✓ defer-open （24s）
+[MERGE-GATES] ★記憶體：第 21 支之前 FreeMB=18117
+[MERGE-GATES] ✓ defer-phrase （0s）
+[MERGE-GATES] ✓ modulo-phase （1s）
+[MERGE-GATES] ✓ ledger-drop-visible （6s）
+[MERGE-GATES] ✓ lod-split （1s）
+[MERGE-GATES] ✓ lod-rate-equivalence （8s）
+[MERGE-GATES] ★記憶體：第 26 支之前 FreeMB=18013
+[MERGE-GATES] ✓ valuation-clamp （7s）
+[MERGE-GATES] ✓ world-schedule-due （7s）
+[MERGE-GATES] ✓ envoy-ptype （7s）
+[MERGE-GATES] ✓ mailbox-size （0s）
+[MERGE-GATES] ✓ mailbox-broadcast （0s）
+[MERGE-GATES] ★記憶體：第 31 支之前 FreeMB=18157
+[MERGE-GATES] ✓ board-price （7s）
+[MERGE-GATES] ✓ swallow-setter （0s）
+[MERGE-GATES] ✓ tier2-sweep-staleness （0s）
+[MERGE-GATES] ✓ minor-merge （7s）
+[MERGE-GATES] ✓ escrow-audit （6s）
+[MERGE-GATES] ★記憶體：第 36 支之前 FreeMB=18245
+[MERGE-GATES] ✓ computed-prop （1s）
+[MERGE-GATES] ✓ bed-kind （13s）
+[MERGE-GATES] ✓ wage-penalty （7s）
+[MERGE-GATES] ✓ payroll-urgency （7s）
+[MERGE-GATES] ✓ merchant-turnover （13s）
+[MERGE-GATES] ★記憶體：第 41 支之前 FreeMB=17768
+[MERGE-GATES] ✓ team-ui （7s）
+[MERGE-GATES] ✓ player-entry-smoke （8s）
+[MERGE-GATES] ✓ ui-flow （17s）
+[MERGE-GATES] ✓ command-replay （24s）
+[MERGE-GATES] ✓ player-event-feed （8s）
+[MERGE-GATES] ★記憶體：第 46 支之前 FreeMB=18194
+[MERGE-GATES] ✓ inquiry-v1 （12s）
+[MERGE-GATES] ✓ success-sentence （7s）
+[MERGE-GATES] ✓ ui-logic （8s）
+[MERGE-GATES] ✓ value-key （2s）
+[MERGE-GATES] ✓ value-key-selfcheck （0s）
+[MERGE-GATES] ★記憶體：第 51 支之前 FreeMB=18270
+[MERGE-GATES] ✓ plan-speed （7s）
+[MERGE-GATES] ✓ material-buy （7s）
+[MERGE-GATES] ✓ gateA （6s）
+[MERGE-GATES] ✓ gateA-hysteresis （7s）
+[MERGE-GATES] ✓ restock-burn （13s）
+[MERGE-GATES] ★記憶體：第 56 支之前 FreeMB=18074
+[MERGE-GATES] ✓ failure-feedback-coverage （8s）
+[MERGE-GATES] ✓ gather-purity （7s）
+[MERGE-GATES] ✓ role-commit-scope （1s）
+[MERGE-GATES] ✓ watchdog-beacon （1s）
+[MERGE-GATES] ✓ live-team-census （1s）
+[MERGE-GATES] ★記憶體：第 61 支之前 FreeMB=18108
+[MERGE-GATES] ✓ fp-longwindow （39s）
+[MERGE-GATES] ✓ live-team-ratchet （0s）
+[MERGE-GATES] ✓ grudge-ledger-a （7s）
+[MERGE-GATES] ✓ raid-expected-value （7s）
+[MERGE-GATES] ✓ stale-pos-recon （7s）
+[MERGE-GATES] ★記憶體：第 66 支之前 FreeMB=17981
+[MERGE-GATES] ✓ anchoredness-freshness （7s）
+[MERGE-GATES] ✓ outpost-belief （7s）
+[MERGE-GATES] ✓ sister-sites-outpost （7s）
+[MERGE-GATES] ✓ occupy-target-belief （6s）
+[MERGE-GATES] ✓ phase-tree-net-cost （6s）
+[MERGE-GATES] ★記憶體：第 71 支之前 FreeMB=18025
+[MERGE-GATES] ✓ phase-root-conservation （9s）
+[MERGE-GATES] ✓ fp-gather-sensitivity （37s）
+[MERGE-GATES] ✓ day-length-single-source （11s）
+[MERGE-GATES] ✓ det-observation-noise （7s）
+[MERGE-GATES] ✓ crisis-override （6s）
+[MERGE-GATES] ★記憶體：第 76 支之前 FreeMB=18074
+[MERGE-GATES] ✓ world-fp （477s）
+BATTERY_RC=0
