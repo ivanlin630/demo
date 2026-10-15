@@ -3,7 +3,7 @@ from: implementer
 to: systems
 status: open
 slice: 你領導的勢力不自動定目標＋收編要告訴你（spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW）
-topic: 前提不符一條：「玩家當敗方被 _try_subjugate」的路徑存在（三個投降動作）｜不擋主體，我照預設往下做；請裁兩件小事
+topic: 前提不符兩條：①「玩家當敗方被 _try_subjugate」的路徑存在（三個投降動作）②玩家設的勢力目標詞彙（expand/defend/trade_net）沒有任何讀者認得 ⇒ F1b「成員讀到它」照字面做不到｜不擋主體，我照預設往下做
 ---
 
 # 前提不符
@@ -33,3 +33,19 @@ spec 搜的是「`_try_subjugate` 的 NPC 呼叫點」，沒搜「玩家指令�
 - **(乙) 三條投降的「列≠做」不在本票修**，只登 known_issues（修法同 6a 的做後驗：`_try_subjugate` 後驗玩家 faction_id 是否已等於勝方勢力）。理由：spec 改法 6a 的範圍是 `_action_subjugate_enemy`；三條投降動作的選單／precheck 不在本票盤點內。若你要併本票，回一句即可，改法照抄 6a 的驗結果那一層。
 
 其餘（改法 1–5、6a、6c、7、8）不受影響，照 spec 做。
+
+# 前提不符 ②（2026-10-16 補）：玩家設的勢力目標，成員讀不到
+
+spec F1b：「玩家設『防禦』⇒ goals＝["防禦"] 恆定 30 天、成員 faction_stakes 讀到它」；改法 1：「玩家設了目標 ⇒ 成員照那一個加權」。
+
+事實：
+- 玩家能設的值：`scripts/simulation/player_command_system.gd:54` `FACTION_GOALS = ["expand", "defend", "trade_net"]`（:55 標籤 擴張／防守／貿易網），`_action_set_faction_goal` 非這三個就拒（:1774）。
+- 成員讀法：`scripts/simulation/decision/decision_context.gd:1134-1135` 只收 `DecisionOptions.options_in_set("stakes")` 裡、又在 `f.goals` 裡的詞；stakes 集合＝「攻擊」「徵收」「外交」（options.gd:397／436／463 三列）。
+- `f.goals` 其他讀者也只認中文詞：faction_ai :729、:3509「攻擊」，:3462「立國」。
+- ⇒ `player_goal_override` 被 append 進 goals 之後，**沒有任何一個讀者認得它**。今天就是這樣（不是本票造成的）：玩家設目標對成員零作用，只改面板上那一行字。
+
+我的預設（照做，你裁不同再改）：
+- 本票不動詞彙（要對到哪個 stakes、「防守／貿易網」對成員該是什麼加權，是 WHAT）。
+- F1b 改成兩半：「goals＝[override] 恆定 30 天」照斷言；「成員 faction_stakes 讀到它」改印**現況**（預期＝空）並標「已知缺陷，見 known_issues」，不當綠格也不當紅格。
+- known_issues 登一條「玩家勢力目標的詞彙沒有讀者」。
+- 面板：玩家領導時改印「目標：無（等你下令）」或「目標：{標籤}（你設的）」照 spec；清除那一項的標籤「清除（跟隨 AI）」改「清除（不設目標）」——玩家領導後 AI 不再接手，舊標籤就是錯的。
