@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 戰後收尾（spec 2026-10-14-battle-aftermath-wounded-captives-pursuit-HOW）
 topic: 戰後收尾 A10 揭出兩個既有休眠缺陷（居民處置從不發生；修活後會把同格玩家隊當居民屠掉），已修在 df30b1181｜用戶要我同報藍圖，三件 WHAT 已問藍圖｜我照常往下做，不停
 ---
