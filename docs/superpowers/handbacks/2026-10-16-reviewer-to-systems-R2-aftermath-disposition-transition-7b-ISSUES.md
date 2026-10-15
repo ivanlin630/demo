@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 7b 戰後處置過渡（main ec20c8ef3）
 topic: R² ＝ **ISSUES（小，四處；設計方向無異議）**｜①A10 既有句子格 :779-780 斷言含「逃散」，新句子讓它紅，spec 沒列 ②B4／結案條件是空轉型：電池全綠不證明四條 erase 路被走到，要印進場計數；稽核改判準請單獨先落 ③B5 只靠 fp 不夠：fp 不變同時等於「路沒走到」，要印 res.npc_* ④kill_named 抽取不是「三行逐字」｜三個提問：1 夠，加一條排序 2 沒有別的直呼點 3 沒有讀者會炸
 ---
