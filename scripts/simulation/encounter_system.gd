@@ -1621,14 +1621,18 @@ func _find_prey_outpost(state: WorldState, prey: TeamData) -> HexTileData:
 			return tile
 	return null
 
+# same_faction_as：-2＝不限（NPC 攻方舊路，維持 main 行為）；其他值＝居民必須屬這個勢力（玩家攻方的過渡閘）
 func _find_resident_team_on_tile(state: WorldState, tile: HexTileData,
-		exclude_a: int, exclude_b: int) -> TeamData:
+		exclude_a: int, exclude_b: int, same_faction_as: int = -2) -> TeamData:
 	for tid in state.teams:
 		if tid == exclude_a or tid == exclude_b: continue
 		var t: TeamData = state.teams[tid]
 		if t.population <= 0: continue
-		# ★玩家隊不是「居民」：同格的玩家隊會被當成居民整隊屠掉／強佔（戰後收尾 A10 揭出；居民處置那條路修活之後才會走到）
+		# ★玩家隊不是「居民」：同格的玩家隊曾被當成居民整隊屠掉（戰後收尾 A10 揭出）
 		if t.player_controlled: continue
+		# ★過渡閘（藍圖 2026-10-15 屠村裁定）：居民只算敗方勢力的隊 ⇒ 路過的商隊／信使不被當居民；
+		#   敗方無勢力 ⇒ 沒有居民。「以那格為家」那半沒有可靠欄位，未做。正式定義等用戶。
+		if same_faction_as != -2 and (same_faction_as == -1 or t.faction_id != same_faction_as): continue
 		if t.tile_pos == tile.tile_pos:
 			return t
 	return null
@@ -1637,9 +1641,13 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	var attacker: TeamData = state.teams.get(attacker_id)
 	var prey: TeamData = state.teams.get(prey_id)
 	if attacker == null or prey == null: return
-	var occupied_tile: HexTileData = state.world.tiles.get(int(am["captured_tile_id"])) if am.has("captured_tile_id") 		else _find_prey_outpost(state, prey)
+	# ★玩家攻方讀剛被接管的那一格（舊路先易主再找敗方的據點 ⇒ 永遠找不到）。
+	#   ★NPC 攻方維持 main 的舊路（藍圖 2026-10-15 裁：屠村的身體沒驗收前不開給 NPC；開路時床 A10 的休眠對照格會翻紅）
+	var player_atk: bool = attacker.player_controlled and state.player_id != -1
+	var occupied_tile: HexTileData = state.world.tiles.get(int(am["captured_tile_id"])) 		if player_atk and am.has("captured_tile_id") else _find_prey_outpost(state, prey)
 	if occupied_tile == null: return
-	var resident: TeamData = _find_resident_team_on_tile(state, occupied_tile, attacker_id, prey_id)
+	var resident: TeamData = _find_resident_team_on_tile(state, occupied_tile, attacker_id, prey_id,
+		prey.faction_id if player_atk else -2)
 	if resident == null: return
 	if Probe.enabled: Probe.bump("res.seen")
 	# 居民拒投靠判定
@@ -1654,7 +1662,7 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 		print("[ResidentAccept] attacker=Team%d resident=Team%d outpost易主" % [attacker_id, resident.team_id])
 		return
 	# ★攻方是玩家 ⇒ 不讀附身者人格（#12）：留 pending 給玩家選（屠村／放棄佔領／強佔；未決推進＝放棄佔領）
-	if attacker.player_controlled and state.player_id != -1:
+	if player_atk:
 		am["residents_pending"] = {"resident_id": resident.team_id, "tile": occupied_tile.tile_pos}
 		if Probe.enabled: Probe.bump("res.player_pending")
 		return
@@ -1683,8 +1691,20 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 		_abandon_occupation(state, occupied_tile)
 
 static func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
-		tile: HexTileData) -> void:
+		tile: HexTileData) -> Dictionary:
 	OutpostOwnerBank.set_owner(state, tile, attacker.team_id, "capture")
+	# ★systems HOW（2026-10-15）：erase_teams 不碰 persons ⇒ 先讓每個活的記名成員與隊長走既有出口 remove_member，
+	#   不留「活著、team_id 指向不存在的隊」的人。命運＝散（team_id＝-1）：同本票「記名失能者不殺」那條；死／俘／散是 WHAT，等藍圖
+	var scattered: Array = []
+	for pid in ([resident.leader_id] as Array) + resident.named_members.duplicate():
+		var p: PersonData = state.persons.get(pid)
+		if p == null or p.is_dead or p.team_id != resident.team_id:
+			continue
+		state.remove_member(resident, pid)
+		scattered.append(p.person_name)
+	if resident.leader_id != -1:
+		state.set_leader(resident, -1)
+	var anon_killed: int = AnonTierSystem.total_pop(resident)
 	for k in resident.resources:
 		ResourceBank.add(attacker, k, float(resident.resources[k]), "massacre_loot")
 	# 守恆(Bug10)：接收 resident 公庫（原 erase 前未轉 → 銷毀）；移除原 `+= pop×5` 憑空鑄幣
@@ -1695,6 +1715,7 @@ static func _massacre_residents(state: WorldState, attacker: TeamData, resident:
 		NpcAiSystem.FEUD_SEVERITY["massacre"], state.world.current_tick)
 	state.erase_team(rid)   # 清光所有 ref（faction 雙向 + known_member_states + 交叉 + 母子）
 	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])
+	return {"killed": anon_killed, "scattered": scattered, "team_id": rid}
 
 static func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
 	print("[AbandonOccupation] outpost (%d,%d) 放棄佔領" % [tile.tile_pos.x, tile.tile_pos.y])

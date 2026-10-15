@@ -703,7 +703,7 @@ func _a9() -> void:
 
 
 # ── A10 ──────────────────────────────────────────────────────────────────────
-func _resident_setup(st: WorldState, atk: int) -> Dictionary:
+func _resident_setup(st: WorldState, atk: int, same_faction: bool = true) -> Dictionary:
 	var foe: TeamData = st.teams[FOE_ID]
 	var x: Vector2i = foe.tile_pos
 	var tile: HexTileData = st.world.tiles[x.x * 1000 + x.y]
@@ -713,39 +713,88 @@ func _resident_setup(st: WorldState, atk: int) -> Dictionary:
 	var res: TeamData = _foe(st, 6, {"慎重": 1.0}, FOE_ID + 5)
 	res.tile_pos = x
 	res.known_reputations[atk] = 0.9
-	return {"tile": tile, "resident": res}
+	# ★過渡閘（藍圖 2026-10-15）：居民＝敗方勢力的隊 ⇒ 佈置把敗方與居民放進同一個既有勢力（非玩家勢力）
+	var fid: int = -1
+	var pfid: int = _pt(st).faction_id
+	for f in st.factions:
+		if int(f) != pfid:
+			fid = int(f)
+			break
+	st.set_team_faction(foe, fid)
+	if same_faction:
+		st.set_team_faction(res, fid)
+	return {"tile": tile, "resident": res, "fid": fid}
 
-func _a10() -> void:
-	print("\n── A10 居民處置問玩家 ──")
-	var st: WorldState = _world()
+# 活著、team_id 指向不存在的隊的人數（systems HOW：屠村不得留下孤兒）
+static func _dangling(st: WorldState) -> int:
+	var n: int = 0
+	for pid in st.persons:
+		var p: PersonData = st.persons[pid]
+		if not p.is_dead and p.team_id != -1 and not st.teams.has(p.team_id):
+			n += 1
+	return n
+
+func _player_takes_outpost(st: WorldState, same_faction: bool = true) -> Dictionary:
 	var ptid: int = st.get_player_team_id()
 	_foe(st, 4)
-	var rs: Dictionary = _resident_setup(st, ptid)
+	var rs: Dictionary = _resident_setup(st, ptid, same_faction)
 	var enc: EncounterSystem = _fight(st, ptid, FOE_ID)
 	_fine(st, ptid)
 	for u in _units(st, FOE_ID):
 		_kill(st, u)
 	enc.resolve_encounter_end(st, "attacker_win")
+	return rs
+
+func _a10() -> void:
+	print("
+── A10 居民處置問玩家 ──")
+	var st: WorldState = _world()
+	var ptid: int = st.get_player_team_id()
+	_player_takes_outpost(st)
 	var acts: Array = _actions(st)
 	print("   residents_pending=%s｜可做 %s" % [str(st.last_encounter_result.get("residents_pending")), str(acts.filter(func(a): return String(a).begins_with("residents")))])
 	_check("A10 玩家攻佔 ⇒ 三項列出", PlayerCommandSystem.AFTERMATH_RESIDENTS.all(func(a): return acts.has(a)))
 	_advance(st)
 	_check("A10 未決推進＝放棄佔領（pending 清掉、居民還在）", (st.last_encounter_result.get("residents_pending", {}) as Dictionary).is_empty()
 		and st.teams.has(FOE_ID + 5))
-	# NPC 攻方照舊讀人格（殘忍 ⇒ 屠村）
+	# 過渡閘：路過的隊（不屬敗方勢力）不算居民
+	st = _world()
+	_player_takes_outpost(st, false)
+	_check("A10 過渡閘：同格但不屬敗方勢力的隊不算居民（無 pending）",
+		(st.last_encounter_result.get("residents_pending", {}) as Dictionary).is_empty() and st.teams.has(FOE_ID + 5))
+	# 玩家下令屠村：記名先散、零懸空、句子照實
+	st = _world()
+	var rs: Dictionary = _player_takes_outpost(st)
+	var res: TeamData = rs["resident"]
+	var named_alive: int = 0
+	for pid in ([res.leader_id] as Array) + res.named_members:
+		if st.persons.has(pid) and not st.persons[pid].is_dead:
+			named_alive += 1
+	var d0: int = _dangling(st)
+	var r: Dictionary = _exec(st, "residents_massacre")
+	var d1: int = _dangling(st)
+	print("   屠村前居民活的記名 %d 人｜懸空 %d → %d｜%s" % [named_alive, d0, d1, String(r.get("msg", ""))])
+	_check("A10 母體地板：被屠那隊至少一名活的記名成員（%d）" % named_alive, named_alive >= 1)
+	_check("A10 屠村後活人懸空 team_id＝0（%d）" % d1, d1 == 0 and not st.teams.has(FOE_ID + 5))
+	_check("A10 屠村句照實：你下令屠村、逃散、據點易主；不寫成戰鬥", String(r.get("msg", "")).begins_with("你下令屠村")
+		and String(r.get("msg", "")).contains("逃散") and String(r.get("msg", "")).contains("據點易主") and not String(r.get("msg", "")).contains("戰"))
+	# NPC 攻方維持休眠（藍圖 2026-10-15 裁）：攻下有居民的據點 ⇒ 不屠、不強佔、不歸順，與 main 同；開路那天這格翻紅再改
 	st = _world()
 	ptid = st.get_player_team_id()
-	var atk: TeamData = _foe(st, 20, {"殘忍": 1.0}, FOE_ID + 2)
+	_foe(st, 20, {"殘忍": 1.0}, FOE_ID + 2)
 	_foe(st, 4)
 	var rs2: Dictionary = _resident_setup(st, FOE_ID + 2)
-	enc = _fight(st, FOE_ID + 2, FOE_ID)
+	var r2pop: int = (rs2["resident"] as TeamData).population
+	var enc: EncounterSystem = _fight(st, FOE_ID + 2, FOE_ID)
 	_fine(st, FOE_ID + 2)
 	for u in _units(st, FOE_ID):
 		_kill(st, u)
+	Probe.counts.erase("res.seen")
 	enc.resolve_encounter_end(st, "attacker_win")
-	_check("A10 NPC 攻方照舊（殘忍 ⇒ 屠村：居民隊消失、無 pending）", not st.teams.has(FOE_ID + 5)
-		and (st.last_encounter_result.get("residents_pending", {}) as Dictionary).is_empty())
-	# ★缺陷變守衛：居民搜尋曾把同格的玩家隊當居民整隊屠掉（居民處置那條路修活之後才走得到）
+	_check("A10 NPC 攻方休眠對照：居民隊還在、人數不變、無 pending、res.seen＝0", st.teams.has(FOE_ID + 5)
+		and (st.teams[FOE_ID + 5] as TeamData).population == r2pop
+		and (st.last_encounter_result.get("residents_pending", {}) as Dictionary).is_empty()
+		and int(Probe.counts.get("res.seen", 0)) == 0)
 	var x2: Vector2i = (rs2["tile"] as HexTileData).tile_pos
 	_check("A10 佈置：玩家隊站在被佔的那格（%s／%s）" % [str(st.teams[ptid].tile_pos) if st.teams.has(ptid) else "隊已消失", str(x2)],
 		not st.teams.has(ptid) or st.teams[ptid].tile_pos == x2)

@@ -783,8 +783,13 @@ func _residents(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
 		return { "ok": true, "msg": "居民已經不在了" }
 	match aid:
 		"residents_massacre":
-			EncounterSystem._massacre_residents(state, pt, resident, tile)
-			return { "ok": true, "msg": "屠村" }
+			# ★句子照實（藍圖 2026-10-15）：屠村不是一場戰鬥 ⇒ 不寫得像打仗
+			var mr: Dictionary = EncounterSystem._massacre_residents(state, pt, resident, tile)
+			var sc: Array = mr.get("scattered", [])
+			var msg: String = "你下令屠村：Team%d 的 %d 人被殺" % [int(mr.get("team_id", -1)), int(mr.get("killed", 0))]
+			if not sc.is_empty():
+				msg += "，%s 逃散" % "、".join(PackedStringArray(sc))
+			return { "ok": true, "msg": msg + "，據點易主" }
 		"residents_seize":
 			EncounterSystem._force_occupy(state, pt, resident, tile)
 			return { "ok": true, "msg": "強佔" }
