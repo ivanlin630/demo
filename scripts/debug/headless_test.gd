@@ -4075,16 +4075,16 @@ func _run_sim_test() -> void:
 		assert(_u.has("action_timer"), "unit should have action_timer")
 	print("Unit equipment OK — %d units spawned" % _es_state.encounter_units.size())
 
-	# prisoner_population 驗證
-	print("--- prisoner_population ---")
+	# 俘虜帳驗證（★prisoner_population 已退場：spec 2026-10-14-battle-aftermath §2c，俘虜只有 captive_groups 一本帳）
+	print("--- captive_groups ---")
 	var _total_prisoners: int = 0
 	for _tid in state.teams:
 		var _t: TeamData = state.teams[_tid]
-		_total_prisoners += _t.prisoner_population
-		assert(_t.prisoner_population <= _t.population,
-			"prisoner_population 不可超過 population（Team%d）" % _tid)
+		var _tc: int = AnonTierSystem.total_captives(_t)
+		_total_prisoners += _tc
+		assert(_tc >= 0, "captive 數不可為負（Team%d）" % _tid)
 	print("全域俘虜總數: %d" % _total_prisoners)
-	print("prisoner_population OK")
+	print("captive_groups OK")
 
 	# spawn cap 驗證（觀察用）
 	print("--- encounter unit count ---")
@@ -14325,6 +14325,12 @@ func _test_action_ui_coverage() -> void:
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
 		"rest": "interact-self",   # ★票T §1③ 休息（自家隊動作區）
+		# ★戰後收尾（spec 2026-10-14-battle-aftermath）：命運四項／追擊兩項／居民三項只在有 pending 時列；俘虜待遇兩項在有俘虜時列
+		"aftermath_kill": "interact-self", "aftermath_capture_kind": "interact-self",
+		"aftermath_capture_harsh": "interact-self", "aftermath_release": "interact-self",
+		"aftermath_pursue": "interact-self", "aftermath_no_pursue": "interact-self",
+		"residents_massacre": "interact-self", "residents_abandon": "interact-self", "residents_seize": "interact-self",
+		"captive_set_kind": "interact-self", "captive_set_harsh": "interact-self",
 		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",
 		"upgrade_farming": "outpost-panel", "upgrade_manufacturing": "outpost-panel",
 		"demolish_outpost": "outpost-panel", "abandon_outpost": "outpost-panel", "build_facility": "outpost-panel",

@@ -86,6 +86,9 @@ const STATE_KINDS: Array = [
 	"famine_crossed",      # famine_days 由 0 轉正
 	"labor_crisis",        # 共址勞力池危機（食物餘命跌破危機線）
 	"intel_arrived",       # 關鍵情報抵達（belief 更新改變已知威脅/機會）
+	"captive_overguard",   # ★玩家 holder 俘虜超過可看守數（不超額→超額那一次；spec 2026-10-14-battle-aftermath §2c）
+	"captive_unfed",       # ★玩家 holder 養不起俘虜 ⇒ 被放走（與 NPC 缺糧釋放對稱）
+	"aftermath_settled",   # ★戰後沒處置就推進 ⇒ 被動選項結清（PlayerCommandSystem.settle_pending_aftermath）
 	"advice",              # ★PlayerCommandApi.ask_advisor（顧問的回答；你自己這道令的回音，不進停點）
 ]
 
@@ -106,7 +109,7 @@ const KIND_LABEL: Dictionary = {
 	"construction_abandoned": "工地", "plan_invalidated": "計畫", "rung_changed": "野心",
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
-	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "advice": "顧問", "hostile_adjacent": "敵人逼近",
+	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "captive_overguard": "看守不足", "captive_unfed": "俘虜放走", "aftermath_settled": "戰後", "advice": "顧問", "hostile_adjacent": "敵人逼近",
 	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
 	"player_subteam": "子隊",
 }
@@ -116,7 +119,7 @@ const KIND_LABEL: Dictionary = {
 #     不節流：附身 30 天兩世界（待機／每天狩獵）×2 種子，單日最多 1 次（docs/measurements/2026-10-14-possessed-followups/）
 #     ⇒ 若日後出現「一天停好幾次」，那是糧在 0 附近震盪（吃飽／滿足度兩處歸零），回去看那份量測，不要在這裡加冷卻
 #   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
-const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "hostile_adjacent",
+const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "combat_end", "hostile_adjacent",
 	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction", "player_subteam",
 	"famine_crossed"]
 
@@ -430,6 +433,13 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
 				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
 		"intel_arrived":         return _intel_sentence(state, who, info)
+		"combat_end":
+			if info.has("aftermath"):
+				return combat_end_sentence(state, info["aftermath"])
+			return "%s：%s" % [who, kind_label(kind)]   # ★沒帶結算的 combat_end 同預設分支（短名「戰鬥結束」）
+		"captive_overguard":     return "%s：看守不足：俘虜 %d 人、可看守 %d 人" % [who, int(info.get("captives", 0)), int(info.get("cap", 0))]
+		"captive_unfed":         return "%s：養不起，俘虜被放走 %d 人" % [who, int(info.get("n", 0))]
+		"aftermath_settled":     return String(info.get("text", ""))
 		"advice":                return String(info.get("text", ""))   # ★句子由 AdvisorSystem 組（單一產生者）
 		"extortion":
 			if info.has("aggressor"):
@@ -515,6 +525,71 @@ static func _age_text(ticks: int) -> String:
 	if ticks < WorldState.TICKS_PER_DAY:
 		return "%d 小時" % (ticks / WorldState.TICKS_PER_HOUR)
 	return "%d 天" % (ticks / WorldState.TICKS_PER_DAY)
+
+# ★玩家遭遇戰結算句（spec 2026-10-14-battle-aftermath §1：單一產生者；encounter_system 不手寫字串；零英文識別字）
+#   ★只寫玩家該知道的：敵方數字＝場上看到的（上場陣亡、上場受傷、記名戰死），不讀敵隊整體人口
+static func combat_end_sentence(state: WorldState, am: Dictionary) -> String:
+	var sides: Dictionary = am.get("sides", {})
+	var me: int = -1
+	var foe: int = -1
+	for tid in sides:
+		if bool(sides[tid].get("is_player", false)): me = int(tid)
+	for tid in sides:
+		if int(tid) != me: foe = int(tid)
+	var parts: Array = []
+	var stays: Dictionary = am.get("stays", {})
+	var foe_name: String = String(am.get("names", {}).get(foe, "對手"))
+	if bool(am.get("beast", false)):
+		parts.append(("獵得%s" % foe_name) if bool(stays.get(me, false)) else ("被%s擊退" % foe_name))
+	elif stays.is_empty() or (not bool(stays.get(me, false)) and not bool(stays.get(foe, false))):
+		parts.append("雙方都倒下了，各自帶回傷兵")
+	elif bool(stays.get(me, false)):
+		parts.append("你守住了戰場")
+	else:
+		parts.append("你撤出了戰場，%s 留在場上" % foe_name)
+	for pair in [[me, "你方"], [foe, "對方"]]:
+		var sd: Dictionary = sides.get(pair[0], {})
+		if sd.is_empty():
+			continue
+		var dead_named: Array = sd.get("dead_named", [])
+		var dead: int = int(sd.get("dead_anon", 0)) + dead_named.size()
+		var hurt: int = maxi(int(sd.get("wounded_mid", sd.get("wounded0", 0))) - int(sd.get("wounded0", 0)), 0)
+		var line: String = "%s 死 %d 傷 %d" % [pair[1], dead, hurt]
+		if not dead_named.is_empty():
+			line += "（戰死：%s）" % "、".join(PackedStringArray(dead_named))
+		parts.append(line)
+	var mine: Dictionary = sides.get(me, {})
+	var theirs: Dictionary = sides.get(foe, {})
+	if int(theirs.get("held_by_enemy", 0)) > 0:
+		parts.append("你押走 %d 人" % int(theirs["held_by_enemy"]))
+	if int(mine.get("held_by_enemy", 0)) > 0:
+		parts.append("你方被押走 %d 人" % int(mine["held_by_enemy"]))
+	if bool(am.get("fate_pending", false)):
+		parts.append("對方 %d 名傷兵倒在戰場上，等你處置" % int(am.get("disabled_enemy", 0)))
+	if bool(am.get("pursuit_possible", false)):
+		parts.append("對方有 %d 人逃散，可以追擊" % int(am.get("pursuit_e", 0)))
+	if am.has("fate_choice") and int(am.get("victim", -1)) == me:
+		var k: int = int(mine.get("fate_killed", 0))
+		var c: int = int(mine.get("fate_captured", 0))
+		var r: int = int(mine.get("fate_released", 0))
+		var how: Array = []
+		if k > 0: how.append("殺了 %d" % k)
+		if c > 0: how.append("俘走 %d" % c)
+		if r > 0: how.append("放了 %d" % r)
+		parts.append("%s 處置你方傷兵：%s" % [foe_name, "、".join(PackedStringArray(how)) if not how.is_empty() else "沒有傷兵"])
+		if c > 0 and r > 0:
+			parts.append("看守不過來，放走 %d 人" % r)
+	if int(mine.get("pursuit_killed", 0)) > 0:
+		parts.append("撤退時被追擊，又死 %d 人" % int(mine["pursuit_killed"]))
+	var loot: Dictionary = am.get("loot", {})
+	if not loot.is_empty() and bool(stays.get(me, false)):
+		var ls: Array = []
+		for rk in loot:
+			ls.append("%s %.0f" % [TextBank.res_name(String(rk)), float(loot[rk])])
+		parts.append("戰利品可收：%s" % "、".join(PackedStringArray(ls)))
+	for n in am.get("notes", []):
+		parts.append(String(n))
+	return "戰鬥結束：" + "｜".join(PackedStringArray(parts))
 
 static func _team_name(state: WorldState, tid: int) -> String:
 	if tid == -1 or not state.teams.has(tid):

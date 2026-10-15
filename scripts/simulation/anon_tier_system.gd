@@ -256,14 +256,34 @@ static func absorb_as_captive(_state: WorldState, holder: TeamData, loser: TeamD
 			total_captured += real
 	if total_captured <= 0:
 		return 0
-	holder.captive_groups.append({
+	holder.captive_groups.append(_new_captive_group(captured, loser.faction_id, "吸收"))
+	return total_captured
+
+# ★captive group 的組裝【一份】（spec 2026-10-14-battle-aftermath §2）：吸收／潰逃／戰後俘傷兵三條路都呼這支
+static func _new_captive_group(captured: Dictionary, origin_faction: int, entry: String) -> Dictionary:
+	return {
 		"cohorts": captured,
 		"morale": CAPTIVE_INIT_MORALE,
-		"origin_faction": loser.faction_id,
-		"entry": "吸收",
+		"origin_faction": origin_faction,
+		"entry": entry,
 		"treatment_history": [],
-	})
-	return total_captured
+	}
+
+# ★戰後俘傷兵（spec 2026-10-14-battle-aftermath §2／§2a）：從 loser 的 wounded 桶搬 k 人進 holder.captive_groups
+#   （_capture_from_health 的薄包裝；守恆：搬出量＝group 總量）。上限由呼叫端以 ManpowerSystem.captive_room 夾。
+#   treatment：玩家 holder 由玩家選（厚待／苛待）；NPC holder 留空（manpower 照既有讀人格）。回實搬人數。
+static func absorb_wounded_as_captive(holder: TeamData, loser: TeamData, k: int, entry: String, treatment: String = "") -> int:
+	if holder == null or loser == null or k <= 0:
+		return 0
+	var captured: Dictionary = {}
+	var got: int = _capture_from_health(loser.anon_cohorts, "wounded", k, captured)
+	if got <= 0:
+		return 0
+	var g: Dictionary = _new_captive_group(captured, loser.faction_id, entry)
+	if treatment != "":
+		g["treatment"] = treatment
+	holder.captive_groups.append(g)
+	return got
 
 # 潰逃-capture（spec 下燒：潰逃俘擴，讓贏方真得人）：潰逃時勝方控地 → 俘 retreater 殘部一比例。
 # wounded（失能，丟下）全 rate 俘；healthy（隨隊逃，落單者才擒）rate×HEALTHY_ROUT_FACTOR 折扣俘。
@@ -288,11 +308,10 @@ static func capture_routed_as_captive(state: WorldState, winner: TeamData, retre
 	var rate: float = clampf(severity * CAPTURE_GUARD_FACTOR, 0.0, CAPTURE_RATE_MAX)
 	if rate <= 0.0:
 		return 0
-	# guard 餘力 cap（守衛容量；滿則俘不下）
-	var leader = state.persons.get(winner.leader_id) if state != null else null
-	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-	var pop_cap: int = FactionAISystem.effective_pop_cap(state, winner)
-	var budget: int = maxi(pop_cap - winner.population - total_captives(winner), 0)
+	# 看守容量（spec 2026-10-14-battle-aftermath §2c：容量一支，與 _enforce_guard_cap 同一個上限）
+	#   ★舊：人口上限餘裕 effective_pop_cap − population − total_captives ⇒ 與 enforce 的看守上限互相打架
+	#     （俘了、下一個 cadence 被 enforce 殺掉／放掉）
+	var budget: int = ManpowerSystem.captive_room(state, winner)
 	if budget <= 0:
 		return 0
 	var captured: Dictionary = {}   # "tier|health" → count
@@ -309,13 +328,7 @@ static func capture_routed_as_captive(state: WorldState, winner: TeamData, retre
 		total_captured += got_h
 	if total_captured <= 0:
 		return 0
-	winner.captive_groups.append({
-		"cohorts": captured,
-		"morale": CAPTIVE_INIT_MORALE,
-		"origin_faction": retreater.faction_id,
-		"entry": "潰逃-capture",
-		"treatment_history": [],
-	})
+	winner.captive_groups.append(_new_captive_group(captured, retreater.faction_id, "潰逃-capture"))
 	return total_captured
 
 # 從 source 的指定 health 各 tier 桶按 count 比例 remove want 人（守恆，最後桶吸收餘數）。

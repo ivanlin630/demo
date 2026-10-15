@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 遭遇戰結算端（2026-06-07 player pending_action 修；戰後收尾 2026-10-15 只改第 5 段註解）
 # 遭遇戰模擬測試 — 自動跑完一場遭遇戰，印每 tick 狀態，檢查不變量
 # 用法: Godot_v4.2.2-stable_win64_console.exe --headless --script scripts/debug/encounter_sim_test.gd
 #
@@ -246,7 +248,7 @@ func _check_invariants(state: WorldState, enc: EncounterSystem,
 		else:
 			print("  OK: 玩家 action_timer=%d" % t)
 
-	# 5. 俘虜計數一致：prisoner_population 與實際標記數吻合
+	# 5. 戰中被標俘虜的單位（prisoner_population 已退場；結算時照押方是否留場帶走，見 encounter_system 戰後收尾 2a）
 	var marked_prisoners: Dictionary = {}   # team_id → count
 	for u in state.encounter_units:
 		if u.get("is_prisoner", false):

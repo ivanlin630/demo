@@ -194,7 +194,21 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"starving":         food_days(t) < 3.0,   # WARNING_DAYS=3
 		"task_summary": t.current_task,
 		"capabilities": _team_capabilities(state, t),
+		"captives": map_captives(t),
 	}
+
+# ★俘虜帳（spec 2026-10-14-battle-aftermath §5）：厚待／苛待人數、每日吃的糧（只有厚待撥糧，讀 ManpowerSystem.CAPTIVE_FOOD_RATE）、看守比
+static func map_captives(t: TeamData) -> Dictionary:
+	var kind: int = 0
+	var harsh: int = 0
+	for g in t.captive_groups:
+		var n: int = AnonCohort.total(g.get("cohorts", {}))
+		if String(g.get("treatment", "厚待")) == "苛待":
+			harsh += n
+		else:
+			kind += n
+	return {"total": kind + harsh, "kind": kind, "harsh": harsh,
+		"food_per_day": float(kind) * ManpowerSystem.CAPTIVE_FOOD_RATE, "guard_ratio": float(t.captive_guard_ratio)}
 
 # 隊級能力讀數（按真技能聚合算，非假數字）：狩獵=named avg求生、戰力=武裝+named戰鬥、日耗=pop×2.4
 static func _team_capabilities(state: WorldState, t: TeamData) -> Dictionary:
@@ -473,6 +487,17 @@ static func action_label(action_id: String) -> String:
 		#     迴圈只呼這一支 ⇒ 手寫那一份隨之消失。
 		"cancel_move":           return "取消移動"
 		"take_loot":             return "收割戰利品"
+		"aftermath_kill":        return "殺傷兵"
+		"aftermath_capture_kind": return "俘虜（厚待）"
+		"aftermath_capture_harsh": return "俘虜（苛待）"
+		"aftermath_release":     return "放走傷兵"
+		"aftermath_pursue":      return "追擊"
+		"aftermath_no_pursue":   return "不追"
+		"residents_massacre":    return "屠村"
+		"residents_abandon":     return "放棄佔領"
+		"residents_seize":       return "強佔"
+		"captive_set_kind":      return "俘虜改厚待"
+		"captive_set_harsh":     return "俘虜改苛待"
 		"leave_loot":            return "放棄戰利品"
 		"recruit_anon":          return "招募匿名"
 		"invite_settle":         return "邀請定居"

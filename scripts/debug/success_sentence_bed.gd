@@ -39,7 +39,8 @@ const EXPECT_CELLS: Array = [
 #     「改完之後要重跑那支床本身」那條紀律，不是我想起來。
 # ★70 → 71（2026-10-07 票T §2）：新增玩家動作「休息」（_action_rest）多一條成功回傳 ⇒ 重量非放寬
 # ★71 → 72（2026-10-08 友善度 F8）：新增 _action_settle 一條成功回傳 ⇒ 重量非放寬
-const SPEC_SUCCESS_RETURNS: int = 72
+# ★72 → 82（2026-10-15 戰後收尾）：戰後 11 個動作的成功回傳 10 條（player_command_system.gd 行 730 741 753 766 772 783 792 795 797 813；俘虜兩種、居民三項、待遇兩項各共用一支 helper ⇒ 條數≠動作數，從床自己的輸出數的）⇒ 重量非放寬
+const SPEC_SUCCESS_RETURNS: int = 82
 # ★★★★★68 → 70（2026-10-06，進貢提案那張票）——【基準更新】，而它是我造的：
 #   那張票在 `player_command_system` 新增**兩句成功結果句**
 #     ·接受：「收下 Team%d 的貢品（+%.0f 錢）」（還有一條「對方身上沒有錢可以給」）
@@ -60,7 +61,8 @@ const SPEC_SUCCESS_RETURNS: int = 72
 const SPEC_PRECHECK_PREFIX: String = "precheck_"
 # ★50 → 51（2026-10-07 票T §2）：註冊表新增動作 rest（休息）
 # ★51 → 52（2026-10-08 友善度 F8）：註冊表新增動作 settle（紮根）
-const SPEC_REGISTRY_ACTIONS: int = 52
+# ★52 → 63（2026-10-15 戰後收尾）：命運四項＋追擊兩項＋居民三項＋俘虜待遇兩項
+const SPEC_REGISTRY_ACTIONS: int = 63
 # ★★★★★51 → 50（2026-10-01，「直接成交」那條路線退場 ⇒ registry 少一列）——
 #   ★這個數是從**床自己的輸出**抄的（它紅在「50／51」那一行），不是推算的。
 #   ★★而本處值得記：退場票的 spec 用的是【指名清單】（§3 逐一列出要改哪幾處），

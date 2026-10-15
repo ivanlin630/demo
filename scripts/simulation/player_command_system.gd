@@ -241,6 +241,18 @@ func _setup_registry() -> void:
 		"recruit":                _action_recruit,
 		"recruit_anon":           _action_recruit_anon,
 		"take_loot":              _action_take_loot,
+		# ★戰後收尾（spec 2026-10-14-battle-aftermath §2／§3／§4／§5）：走既有動作列＋precheck，不開新輸入態
+		"aftermath_kill":          _action_aftermath_kill,
+		"aftermath_capture_kind":  _action_aftermath_capture_kind,
+		"aftermath_capture_harsh": _action_aftermath_capture_harsh,
+		"aftermath_release":       _action_aftermath_release,
+		"aftermath_pursue":        _action_aftermath_pursue,
+		"aftermath_no_pursue":     _action_aftermath_no_pursue,
+		"residents_massacre":      _action_residents_massacre,
+		"residents_abandon":       _action_residents_abandon,
+		"residents_seize":         _action_residents_seize,
+		"captive_set_kind":        _action_captive_set_kind,
+		"captive_set_harsh":       _action_captive_set_harsh,
 		"leave_loot":             _action_leave_loot,
 		"establish_faction":      _action_establish_faction_cmd,
 		"refresh_targets":        _action_refresh_targets,
@@ -498,6 +510,17 @@ const ACTION_SHAPE: Dictionary = {
 	"surrender_in_encounter":  {"target": "none", "listed": false},
 	"surrender_pre_encounter": {"target": "none", "listed": false},
 	"take_loot":               {"target": "none", "listed": true, "effect": "resources_both"},
+	"aftermath_kill":          {"target": "none", "listed": true, "effect": "encounter_result"},
+	"aftermath_capture_kind":  {"target": "none", "listed": true, "effect": "encounter_result"},
+	"aftermath_capture_harsh": {"target": "none", "listed": true, "effect": "encounter_result"},
+	"aftermath_release":       {"target": "none", "listed": true, "effect": "encounter_result"},
+	"aftermath_pursue":        {"target": "none", "listed": true, "effect": "encounter_result"},
+	"aftermath_no_pursue":     {"target": "none", "listed": true, "effect": "encounter_result"},
+	"residents_massacre":      {"target": "none", "listed": true, "effect": "encounter_result"},
+	"residents_abandon":       {"target": "none", "listed": true, "effect": "encounter_result"},
+	"residents_seize":         {"target": "none", "listed": true, "effect": "encounter_result"},
+	"captive_set_kind":        {"target": "none", "listed": true, "effect": "menu"},
+	"captive_set_harsh":       {"target": "none", "listed": true, "effect": "menu"},
 	"trade":                   {"target": "team", "listed": false, "effect": "menu"},
 	"train":                   {"target": "none", "listed": true, "effect": "resources_self"},
 	"upgrade_farming":         {"target": "none", "listed": false},
@@ -579,7 +602,7 @@ func precheck_establish_faction(_state: WorldState, pt: TeamData) -> Dictionary:
 
 func precheck_take_loot(state: WorldState, _pt: TeamData) -> Dictionary:
 	var res: Dictionary = state.last_encounter_result
-	if res.is_empty() or int(res.get("winner_id", -1)) != _get_player_team_id(state):
+	if res.is_empty() or int(res.get("winner_id", -1)) != _get_player_team_id(state) or bool(res.get("loot_done", false)):
 		# ★措辭用 handler 既有那句（spec §3②「handler 那句人話搬進去」）——
 		#   藍圖裁定裡的「你沒有剛結束的戰鬥」是**例**不是指定，而既有那句更具體。
 		return { "ok": false, "reason": "無可收取戰利品", "hint": "attack" }
@@ -646,6 +669,181 @@ static func precheck_camp_at(state: WorldState, pos: Vector2i) -> Dictionary:
 	return { "ok": true, "reason": "" }
 
 
+# ══ 戰後收尾的玩家動作（spec 2026-10-14-battle-aftermath §2／§2d／§3／§4／§5）═══════════════════
+# ★順序：命運 → 追擊 → 居民（同一個 pending 佇列，一次只列一組）；沒有 pending ⇒ 動作不存在（同紮根的前例）
+const AFTERMATH_FATE: Array = ["aftermath_kill", "aftermath_capture_kind", "aftermath_capture_harsh", "aftermath_release"]
+const AFTERMATH_PURSUIT: Array = ["aftermath_pursue", "aftermath_no_pursue"]
+const AFTERMATH_RESIDENTS: Array = ["residents_massacre", "residents_abandon", "residents_seize"]
+const CAPTIVE_SET: Array = ["captive_set_kind", "captive_set_harsh"]
+
+static func aftermath_stage(state: WorldState) -> String:
+	var res: Dictionary = state.last_encounter_result
+	if bool(res.get("fate_pending", false)): return "fate"
+	if bool(res.get("pursuit_possible", false)): return "pursuit"
+	if not (res.get("residents_pending", {}) as Dictionary).is_empty(): return "residents"
+	return ""
+
+static func aftermath_listed(state: WorldState, pt: TeamData, aid: String) -> bool:
+	if pt == null:
+		return false
+	if CAPTIVE_SET.has(aid):
+		return not pt.captive_groups.is_empty()
+	var st: String = aftermath_stage(state)
+	return (st == "fate" and AFTERMATH_FATE.has(aid)) or (st == "pursuit" and AFTERMATH_PURSUIT.has(aid)) \
+		or (st == "residents" and AFTERMATH_RESIDENTS.has(aid))
+
+func precheck_aftermath_shared(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
+	if pt == null:
+		return { "ok": false, "reason": "找不到玩家隊伍" }
+	if not aftermath_listed(state, pt, aid):
+		return { "ok": false, "reason": "現在沒有要你處置的事" }
+	return { "ok": true, "reason": "" }
+
+func precheck_aftermath_kill(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_kill")
+func precheck_aftermath_release(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_release")
+func precheck_aftermath_capture_kind(state: WorldState, pt: TeamData) -> Dictionary: return _precheck_capture(state, pt, "aftermath_capture_kind")
+func precheck_aftermath_capture_harsh(state: WorldState, pt: TeamData) -> Dictionary: return _precheck_capture(state, pt, "aftermath_capture_harsh")
+func precheck_aftermath_pursue(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_pursue")
+func precheck_aftermath_no_pursue(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_no_pursue")
+func precheck_residents_massacre(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "residents_massacre")
+func precheck_residents_abandon(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "residents_abandon")
+func precheck_residents_seize(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "residents_seize")
+func precheck_captive_set_kind(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "captive_set_kind")
+func precheck_captive_set_harsh(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "captive_set_harsh")
+
+func _precheck_capture(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
+	var r: Dictionary = precheck_aftermath_shared(state, pt, aid)
+	if not bool(r.get("ok", false)):
+		return r
+	if ManpowerSystem.captive_room(state, pt) <= 0:
+		return { "ok": false, "reason": "看守不過來（可看守 0 人）" }
+	return r
+
+func _fate_victim(state: WorldState) -> TeamData:
+	return state.teams.get(int(state.last_encounter_result.get("fate_victim", -1)))
+
+func _action_aftermath_kill(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	var pr: Dictionary = precheck_aftermath_kill(state, pt)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	var n: int = EncounterSystem.fate_kill(pt, _fate_victim(state), int(state.last_encounter_result.get("disabled_enemy", 0)))
+	state.last_encounter_result["fate_pending"] = false
+	return { "ok": true, "msg": "殺了 %d 名傷兵" % n }
+
+func _capture(state: WorldState, pt: TeamData, aid: String, treatment: String) -> Dictionary:
+	var pr: Dictionary = _precheck_capture(state, pt, aid)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	var n: int = int(state.last_encounter_result.get("disabled_enemy", 0))
+	var k: int = EncounterSystem.fate_capture(state, pt, _fate_victim(state), n, treatment)
+	state.last_encounter_result["fate_pending"] = false
+	var msg: String = "俘虜 %d 人（%s）" % [k, treatment]
+	if n - k > 0:
+		msg += "，看守不過來，放走 %d 人" % (n - k)
+	return { "ok": true, "msg": msg }
+
+func _action_aftermath_capture_kind(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _capture(state, pt, "aftermath_capture_kind", "厚待")
+
+func _action_aftermath_capture_harsh(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _capture(state, pt, "aftermath_capture_harsh", "苛待")
+
+func _action_aftermath_release(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	var pr: Dictionary = precheck_aftermath_release(state, pt)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	state.last_encounter_result["fate_pending"] = false
+	return { "ok": true, "msg": "放走 %d 名傷兵" % int(state.last_encounter_result.get("disabled_enemy", 0)) }
+
+func _action_aftermath_pursue(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	var pr: Dictionary = precheck_aftermath_pursue(state, pt)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	var victim: TeamData = _fate_victim(state)
+	var want: int = mini(NpcCombatSystem.PURSUIT_KILL_CAP, int(state.last_encounter_result.get("pursuit_e", 0)))
+	var kn: int = 0
+	if victim != null:
+		var killed: Dictionary = AnonTierSystem.kill_random(victim, mini(want, AnonCohort.by_health(victim.anon_cohorts, "healthy")), "pursuit")
+		for tier in killed:
+			kn += int(killed[tier])
+	state.last_encounter_result["pursuit_possible"] = false
+	return { "ok": true, "msg": "追擊砍倒 %d 人" % kn }
+
+func _action_aftermath_no_pursue(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	var pr: Dictionary = precheck_aftermath_no_pursue(state, pt)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	state.last_encounter_result["pursuit_possible"] = false
+	return { "ok": true, "msg": "不追" }
+
+func _residents(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
+	var pr: Dictionary = precheck_aftermath_shared(state, pt, aid)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	var rp: Dictionary = state.last_encounter_result.get("residents_pending", {})
+	var resident: TeamData = state.teams.get(int(rp.get("resident_id", -1)))
+	var tp: Vector2i = rp.get("tile", Vector2i(-1, -1))
+	var tile: HexTileData = state.world.tiles.get(tp.x * 1000 + tp.y)
+	state.last_encounter_result["residents_pending"] = {}
+	if resident == null or tile == null:
+		return { "ok": true, "msg": "居民已經不在了" }
+	match aid:
+		"residents_massacre":
+			# ★句子照實（藍圖 2026-10-15）：屠村不是一場戰鬥 ⇒ 不寫得像打仗
+			var mr: Dictionary = EncounterSystem._massacre_residents(state, pt, resident, tile)
+			var sc: Array = mr.get("scattered", [])
+			var msg: String = "你下令屠村：Team%d 的 %d 人被殺" % [int(mr.get("team_id", -1)), int(mr.get("killed", 0))]
+			if not sc.is_empty():
+				msg += "，%s 逃散" % "、".join(PackedStringArray(sc))
+			return { "ok": true, "msg": msg + "，據點易主" }
+		"residents_seize":
+			EncounterSystem._force_occupy(state, pt, resident, tile)
+			return { "ok": true, "msg": "強佔" }
+	EncounterSystem._abandon_occupation(state, tile)
+	return { "ok": true, "msg": "放棄佔領" }
+
+func _action_residents_massacre(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _residents(state, pt, "residents_massacre")
+func _action_residents_abandon(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _residents(state, pt, "residents_abandon")
+func _action_residents_seize(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _residents(state, pt, "residents_seize")
+
+func _captive_set(state: WorldState, pt: TeamData, aid: String, treatment: String) -> Dictionary:
+	var pr: Dictionary = precheck_aftermath_shared(state, pt, aid)
+	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
+	var n: int = 0
+	for g in pt.captive_groups:
+		g["treatment"] = treatment
+		n += AnonCohort.total(g.get("cohorts", {}))
+	return { "ok": true, "msg": "俘虜 %d 人改%s" % [n, treatment] }
+
+func _action_captive_set_kind(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _captive_set(state, pt, "captive_set_kind", "厚待")
+func _action_captive_set_harsh(state: WorldState, _t: int, pt: TeamData, _id: int) -> Dictionary:
+	return _captive_set(state, pt, "captive_set_harsh", "苛待")
+
+# ★未決時推進＝不處置（spec 2026-10-14-battle-aftermath §2d）：停點＋推進即取被動選項
+#   ★呼叫點＝SimRunner 推進的那一顆 tick 裡、玩家指令消化之後、世界系統之前（玩家按的「殺」先走完，不被吃掉）
+#   ★被動選項＝不作為（命運＝放走、追擊＝不追、居民＝放棄佔領），不讀任何人格；冪等（pending 已清 ⇒ 什麼都不做）
+#   ★結算那一顆 tick 不結清（玩家還沒看到結算畫面）：只結清比現在早的結果
+static func settle_pending_aftermath(state: WorldState) -> void:
+	var res: Dictionary = state.last_encounter_result
+	if res.is_empty() or aftermath_stage(state) == "" or int(res.get("tick", state.world.current_tick)) >= state.world.current_tick:
+		return
+	var lines: Array = []
+	if bool(res.get("fate_pending", false)):
+		res["fate_pending"] = false
+		lines.append("傷兵被放走（%d 人）" % int(res.get("disabled_enemy", 0)))
+	if bool(res.get("pursuit_possible", false)):
+		res["pursuit_possible"] = false
+		lines.append("沒有追擊")
+	var rp: Dictionary = res.get("residents_pending", {})
+	if not rp.is_empty():
+		res["residents_pending"] = {}
+		var tp: Vector2i = rp.get("tile", Vector2i(-1, -1))
+		var tile: HexTileData = state.world.tiles.get(tp.x * 1000 + tp.y)
+		if tile != null:
+			EncounterSystem._abandon_occupation(state, tile)
+		lines.append("放棄佔領")
+	var ptid: int = state.get_player_team_id()
+	if not lines.is_empty() and ptid != -1:
+		WorldEvents.emit(state, "aftermath_settled", [ptid], false, {"text": "你沒有處置：" + "，".join(PackedStringArray(lines))})
+
 # ★F8：紮根＝玩家把自己的 L0 營地升成 L1 據點（共用 NPC 紮根落地那一支：FactionAISystem.start_settle_construction）
 #   ★只在【自己的 L0 營地】上列出（settle_listed）；施工中不可（不查的話重按會把工期重置）
 static func settle_listed(state: WorldState, pt: TeamData) -> bool:
@@ -709,6 +907,17 @@ func _precheck_for(action: String) -> Callable:
 		"cancel_move":           return precheck_cancel_move
 		"establish_faction":     return precheck_establish_faction
 		"take_loot":             return precheck_take_loot
+		"aftermath_kill":        return precheck_aftermath_kill
+		"aftermath_capture_kind": return precheck_aftermath_capture_kind
+		"aftermath_capture_harsh": return precheck_aftermath_capture_harsh
+		"aftermath_release":     return precheck_aftermath_release
+		"aftermath_pursue":      return precheck_aftermath_pursue
+		"aftermath_no_pursue":   return precheck_aftermath_no_pursue
+		"residents_massacre":    return precheck_residents_massacre
+		"residents_abandon":     return precheck_residents_abandon
+		"residents_seize":       return precheck_residents_seize
+		"captive_set_kind":      return precheck_captive_set_kind
+		"captive_set_harsh":     return precheck_captive_set_harsh
 		"leave_loot":            return precheck_leave_loot
 		"subjugate_enemy":       return precheck_subjugate_enemy
 		"confirm_gather_intel":  return precheck_confirm_gather_intel
@@ -1094,7 +1303,7 @@ func _action_take_loot(state: WorldState, _target_id: int, pt: TeamData, pt_id: 
 		if loser_team != null:
 			ResourceBank.remove(loser_team, rk, amount, "collect_loot_out")
 		ResourceBank.add(pt, rk, amount, "collect_loot_in")
-	state.last_encounter_result = {}
+	_mark_loot_done(state)
 	print("[PlayerCmd] 收取戰利品: %s" % str(loot))
 	return { "ok": true, "msg": "收取戰利品成功",
 			 "payload": {"refresh_required": true} }
@@ -1108,8 +1317,17 @@ func _action_leave_loot(state: WorldState, _target_id: int, pt: TeamData, _pt_id
 	var pre_ll: Dictionary = precheck_leave_loot(state, pt)
 	if not bool(pre_ll.get("ok", false)):
 		return { "ok": false, "msg": String(pre_ll.get("reason", "")) }
-	state.last_encounter_result = {}
+	_mark_loot_done(state)
 	return { "ok": true, "msg": "放棄戰利品" }
+
+# ★收／棄戰利品之後：還有傷兵／追擊／居民 pending ⇒ 只標 loot_done（同一份結果還要給那幾項讀）；
+#   都沒有 ⇒ 照舊清掉整份結果（舊行為；ui-flow 那一格守它）
+static func _mark_loot_done(state: WorldState) -> void:
+	if aftermath_stage(state) == "":
+		state.last_encounter_result = {}
+		return
+	state.last_encounter_result["loot_done"] = true
+	state.last_encounter_result["loot_pool"] = {}
 
 func _action_establish_faction_cmd(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	return establish_faction(state)

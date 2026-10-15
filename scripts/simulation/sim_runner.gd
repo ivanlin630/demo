@@ -655,6 +655,8 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		return result    # propagate to bridge
 	_step1_advance_time(state)
 	_consume_player_commands(state)
+	# ★戰後收尾 §2d：玩家指令消化之後、世界系統之前，把沒處置的戰後 pending 以被動選項結清（冪等）
+	PlayerCommandSystem.settle_pending_aftermath(state)
 	var _t: int = Time.get_ticks_usec() if phase_timing else 0   # 相位計時鏈起點
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
