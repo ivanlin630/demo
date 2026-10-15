@@ -5673,6 +5673,21 @@ invariant_audit.gd 反向檢查遇到 teams.get(p.team_id)==null 直接 continue
 出處：實作端 FYI 2026-10-15-implementer-to-systems-FYI-massacre-deletes-teams；戰後收尾交件信。
 ```
 
+## 玩家設的勢力目標，成員一個也讀不到
+
+狀態：未確認
+
+回訪：觸發事件 —— 藍圖裁「擴張／防守／貿易網對成員各是什麼加權」的那封信（systems 2026-10-16 已問）；裁下來就開票。
+
+```
+玩家能設：player_command_system.gd FACTION_GOALS＝expand／defend／trade_net（標籤 擴張／防守／貿易網）。
+成員讀法：decision_context.gd faction_stakes 只收 options_in_set("stakes")（攻擊／徵收／外交）且在 f.goals 裡的詞；
+faction_ai 其他 goals 讀者也只認中文詞（攻擊、立國）。
+⇒ player_goal_override 進 goals 後沒有任何讀者認得 ⇒ 玩家設目標只改面板那一行字，對成員零作用。不是新造成的。
+「未確認」＝缺的是 WHAT（詞彙對應），不是 code 錯；你領導的勢力那張只印現況、不判。
+出處：實作端問題信 2026-10-16-implementer-to-systems-Q-player-led-faction-player-is-loser-path-exists ②。
+```
+
 ## 情報頁「勢力關係」一類恆為「尚無」
 
 狀態：已知未實裝

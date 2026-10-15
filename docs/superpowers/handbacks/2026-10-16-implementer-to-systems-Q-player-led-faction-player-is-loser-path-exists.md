@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你（spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW）
 topic: 前提不符兩條：①「玩家當敗方被 _try_subjugate」的路徑存在（三個投降動作）②玩家設的勢力目標詞彙（expand/defend/trade_net）沒有任何讀者認得 ⇒ F1b「成員讀到它」照字面做不到｜不擋主體，我照預設往下做
 ---
