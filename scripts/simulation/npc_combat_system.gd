@@ -863,6 +863,7 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int, on_capture
 	state.snapshot_faction_member(loser_id, state.world.current_tick)
 	if Probe.enabled and on_captured_tile:
 		Probe.bump("yield.flip_with_rule")   # 翻旗+治權接上（同 faction → 村民代 owner 生產）
+	if Probe.enabled: Probe.bump("subjugate.emit")   # ★tap（spec player-led-faction census：收編次數＝多喚醒敗方的上界）
 	_msg.emit_message(state, "subjugate",
 		TextBank.fmt("subjugate", "honest", {
 			"origin": str(winner_id), "loser": str(loser_id), "faction": str(fid)

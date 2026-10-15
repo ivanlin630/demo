@@ -1414,6 +1414,7 @@ func _evaluate_loop1_factions(state: WorldState, faction_ids: Array) -> void:
 				if member_team == null: continue
 				# 子隊（TAG_SUBTEAM）不評估背叛：在途建造/安頓子隊若被叛出會廢棄任務且造成孤立 zombie。
 				if member_team.tags.has(TeamData.TAG_SUBTEAM): continue
+				if Probe.enabled: Probe.bump("betray.consider." + ("pc" if member_team.player_controlled else "npc"))
 				DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
 		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
 
@@ -2758,6 +2759,7 @@ func _best_candidate_quality(team: TeamData) -> float:
 # ★主動升匿名決策（§2 領主 deliberate、§3 真代價、§4 第 3 路 anon→named）。
 #   非自動補滿：demand>0 只是入場、須 util>THRESHOLD(人格+候選資質競秤)才提 → 多疑/低需求/無夠格候選照樣不提。
 func _try_promote_advisor(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "promote")
 	var f = state.factions.get(team.faction_id)
 	if f == null or f.leader_team_id != team.team_id:
 		return   # 只領主 deliberate 提拔班底（村副手 parked）
@@ -2834,6 +2836,11 @@ func _apply_promotion_initial_state(state: WorldState, team: TeamData, officer: 
 		Probe.note("promote.init_loyalty", loy)
 		Probe.note("promote.init_stress", officer.stress)
 
+# ★tap（spec 2026-10-15-player-led-faction F5）：十支各自入口的「被呼叫」計數，分玩家控制隊（pc）／NPC 隊（npc）。
+#   ★放在各支第一行（不放在迴圈）：十支另有別的呼叫點（_apply_contact_reaction 內呼 scout／herald），迴圈計數會漏。
+static func _side_tap(team: TeamData, k: String) -> void:
+	if Probe.enabled: Probe.bump("side.call.%s.%s" % [k, "pc" if team.player_controlled else "npc"])
+
 func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
@@ -2859,6 +2866,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 # reuse _distribute_candidates（已 de-scan：belief received_buy_orders + 人格 relief、零 god-view 零死常數）算最佳候選；
 # mini-util=該候選 util（>0 才返候選）；_dispatch_convoy 自 throttle 一 convoy/lord + 內建 distribute.dispatch tap。純算術零 RNG。
 func _try_distribute_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "distribute")
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var cands: Array = GoalResolver._distribute_candidates(state, team, ctx, lv)
@@ -2875,6 +2883,7 @@ const MIGRANT_BATCH: int = 3   # TEST VALUE — 一批移民 anon 數
 const MIGRANT_EXPECT_DAYS: float = 30.0   # TEST VALUE — 移民淨益回收視野（月量級規劃、genuine 非門檻）
 const MIGRANT_MOVE_COST: float = MarginalEconomy.MIGRANT_UPKEEP * float(MIGRANT_BATCH)   # 送 k 人一次性移動成本 proxy（途中食耗、DERIVED 食物常數）
 func _try_migrant_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "migrant")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3071,6 +3080,7 @@ func _best_relocate_target(state: WorldState, faction_id: int, subject: TeamData
 # ★領主下遷村令（§2C、C）：領主秤自家村 relocate_value + 人格 → 下令 = in_transit_letters kind='relocate'
 # payload=target_tile（reuse letter infra、真送達非瞬間、throttle 一令/村）。target 限 own-faction 已知領土（god-view gate）。
 func _try_relocate_order(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "relocate_order")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3144,6 +3154,7 @@ func _deliver_relocate_order(state: WorldState, letter: Dictionary) -> void:
 
 # ★村自願遷（§3）：村秤自身 relocate_value（own-faction 已知領土 target）> 閾 → 自發遷（非領主令、村自主）。
 func _try_self_relocate(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "self_relocate")
 	if team.faction_id == -1 or team.task_reason == "relocate":
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3173,6 +3184,7 @@ func _try_self_relocate(state: WorldState, team: TeamData) -> void:
 #   ★現況陳述（不複述那條錯的耦合）：送料用組 A 上界，村端 `_can_afford` 檢查用 1.0×。
 const INVEST_SAFETY: float = BuildAfford.MARGIN_MAX
 func _try_invest_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "invest")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3222,6 +3234,7 @@ func _try_invest_side(state: WorldState, team: TeamData) -> void:
 
 # 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "herald")
 	if team.population < 2:
 		return   # can_send_herald（pop 1 自己走）
 	if _has_inflight_letter(state, team.team_id):
@@ -3298,6 +3311,7 @@ func _dispatch_named_runner(state: WorldState, team: TeamData, task: String, rea
 
 # 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派記名斥候（§2 named-led、次要記名單人跑腿）。
 func _try_scout_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "scout")
 	if team.population < 2:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -8170,6 +8184,7 @@ const CARE_FIRSTHAND_ORDER_BASE: int = 2_000_000_000   # firsthand 觀察 synth 
 # 記帳點：faction 領主 cadence（info_side_dispatch）ensure-once——每村僅 append 一次（guard by 現有 holding subject）。
 # 零 god-view：dist 讀 belief best_estimate pos（無 belief→dist0 base 週期）、team.tile_pos=自身。
 func _ensure_holding_ledger(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "holding")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -8215,6 +8230,7 @@ func _pick_care_reaction(overdue_ratio: float, lv: Dictionary) -> String:
 
 # ★失聯偵測 + 競爭 react_util 人格反應（母→子、cadence per-team）。
 func _step_contact_ledger(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "contact")
 	if team.dispatch_ledger.is_empty():
 		return
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
