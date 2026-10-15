@@ -73,6 +73,7 @@ static func decide_treatment(state: WorldState, holder: TeamData, group: Diction
 		kind_util += INTENT_ARMY_KIND_BONUS
 	var harsh_util: float = 0.2 + cruelty * 0.7 - ambition * 0.3
 	var treatment: String = "厚待" if kind_util >= harsh_util else "苛待"
+	if Probe.enabled: Probe.bump("mp.decide.%s.%s" % [treatment, itype if itype != "" else "none"])   # ★tap（spec player-led-faction census：意圖加權的處置分布）
 	return {"treatment": treatment, "guard_ratio": guard_ratio}
 
 # ───── 養得起嗎（物理檢查，不讀人格；spec 2026-10-14-battle-aftermath §2c）─────

@@ -52,7 +52,7 @@ static func is_subteam_task(t: String) -> bool:
 
 # ★勢力目標集合（追加三 ③：原本內聯在 _action_set_faction_goal 的字面）；空字串＝清除指定目標
 const FACTION_GOALS: Array = ["expand", "defend", "trade_net"]
-const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（跟隨 AI）"}
+const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（不設目標）"}
 
 static func faction_goal_label(g: String) -> String:
 	return String(FACTION_GOAL_LABELS.get(g, g))
@@ -622,7 +622,22 @@ func precheck_subjugate_enemy(state: WorldState, _pt: TeamData) -> Dictionary:
 	var res: Dictionary = state.last_encounter_result
 	if res.is_empty() or not bool(res.get("can_subjugate", false)):
 		return { "ok": false, "reason": "無可收編的敗者", "hint": "attack" }
+	var why: String = subjugate_block_now(state)
+	if why != "":
+		return { "ok": false, "reason": why }
 	return { "ok": true, "reason": "" }
+
+# ★收編選單的理由【只有一份】（spec player-led-faction 改法 6a）：precheck 與 encounter_view 兩處（GUI、終端）都呼這支。
+#   can_subjugate 不動（＝玩家是勝方，選單照列）；這支補「列了但做不成」的理由。
+#   ★on_captured_tile 固定 false：玩家路恆不走佔村捷徑（npc_combat_system 結算端排除玩家勝方）
+#     ——傳 true 會讓選單說可以、按下去 _try_subjugate 走一般門而做不成。
+static func subjugate_block_now(state: WorldState) -> String:
+	var res: Dictionary = state.last_encounter_result
+	var w: TeamData = state.teams.get(state.get_player_team_id())
+	var l: TeamData = state.teams.get(int(res.get("loser_id", -1)))
+	if w == null or l == null:
+		return ""   # 敗者已消滅 ⇒ 由 _action_subjugate_enemy 自己那句說
+	return NpcCombatSystem.subjugate_block_reason(state, w, l, false)
 
 func precheck_confirm_gather_intel(state: WorldState, _pt: TeamData) -> Dictionary:
 	if not state.player_state.has("pending_intel_target"):
@@ -1602,6 +1617,11 @@ func _action_subjugate_enemy(state: WorldState, _target_id: int, _pt: TeamData, 
 		return { "ok": false, "msg": "敗者已消滅" }
 	_interaction.subjugate_team(state, pt_id, loser_id)
 	state.last_encounter_result["can_subjugate"] = false
+	# ★做後驗（spec player-led-faction 改法 6a）：門預測不了立國失敗 ⇒ 看結果，敗方真的進了玩家勢力才說成功
+	var pt_now: TeamData = state.teams.get(pt_id)
+	if pt_now == null or pt_now.faction_id == -1 or loser.faction_id != pt_now.faction_id:
+		if Probe.enabled: Probe.bump("subjugate.action_failed_after_try")
+		return { "ok": false, "msg": "收編沒有成功" }
 	return { "ok": true, "msg": "收編 Team%d" % loser_id }
 
 func _action_leave_faction(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
@@ -1687,7 +1707,9 @@ func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt
 	state.player_pending_targets.erase(target_id)
 	if resp6 == "accept":
 		_transfer_surrender_assets(pt, tgt6)
-		_interaction.subjugate_team(state, target_id, pt_id)
+		var why6: String = _surrender_subjugate(state, target_id, pt)
+		if why6 != "":
+			return { "ok": false, "msg": "對方接受投降，但沒有收編你：%s" % why6 }
 		print("[PlayerCmd] 玩家投降 Team%d 接受" % target_id)
 		return { "ok": true, "msg": "投降被接受，已被收編" }
 	else:
@@ -1707,12 +1729,28 @@ func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: Team
 	var resp6b: String = _diplomatic.handle_diplomacy_message(state, enemy6, pt, "offer_surrender")
 	if resp6b == "accept":
 		_transfer_surrender_assets(pt, enemy6)
-		_interaction.subjugate_team(state, enemy_id6, pt_id)
+		var why6b: String = _surrender_subjugate(state, enemy_id6, pt)
 		_encounter.cleanup_encounter(state)
+		if why6b != "":
+			return { "ok": false, "msg": "對方接受投降，但沒有收編你：%s" % why6b }
 		print("[PlayerCmd] 玩家戰中投降，Team%d 接受" % enemy_id6)
 		return { "ok": true, "msg": "投降被接受" }
 	else:
 		return { "ok": false, "msg": "對方拒絕" }
+
+# ★投降被接受之後的收編＋做後驗（systems 裁 2026-10-16 (乙)：三條投降併本票修，照抄 6a 驗結果那一層）。
+#   回 ""＝玩家隊真的進了勝方勢力；否則回原因（門的理由，門預測不了的回「收編沒有成功」）。
+#   ★壞掉的樣子：玩家讀到「投降被接受，已被收編」，勢力面板卻還是獨立——_try_subjugate 的門是靜默 return。
+#   ★選單／precheck 不改（列的條件不在本票）；只改「做完說什麼」。
+func _surrender_subjugate(state: WorldState, winner_id: int, pt: TeamData) -> String:
+	var w: TeamData = state.teams.get(winner_id)
+	var why: String = NpcCombatSystem.subjugate_block_reason(state, w, pt, false) if w != null else ""
+	_interaction.subjugate_team(state, winner_id, pt.team_id)
+	var w2: TeamData = state.teams.get(winner_id)
+	if w2 != null and w2.faction_id != -1 and pt.faction_id == w2.faction_id:
+		return ""
+	if Probe.enabled: Probe.bump("subjugate.surrender_failed_after_try")
+	return why if why != "" else "收編沒有成功"
 
 func _action_accept_encounter(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	var pre: Dictionary = state.player_pre_encounter
@@ -1738,7 +1776,9 @@ func _action_surrender_pre_encounter(state: WorldState, _target_id: int, pt: Tea
 	state.player_pre_encounter = {}
 	if resp == "accept":
 		_transfer_surrender_assets(pt, attacker)
-		_interaction.subjugate_team(state, atk_id, pt_id)
+		var why_pre: String = _surrender_subjugate(state, atk_id, pt)
+		if why_pre != "":
+			return { "ok": false, "msg": "對方接受投降，但沒有收編你：%s" % why_pre }
 		print("[PlayerCmd] 玩家預備投降，Team%d 接受" % atk_id)
 		return { "ok": true, "msg": "投降被接受，已被收編" }
 	else:

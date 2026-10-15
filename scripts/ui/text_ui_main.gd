@@ -2933,10 +2933,17 @@ func _build_faction_str() -> String:
 	var lines: Array = []
 	var role_str: String = "Leader" if fp.get("is_leader", false) else "成員"
 	lines.append("── 勢力%d [%s] ──" % [fp.get("faction_id", -1), role_str])
-	lines.append("AI 目標: %s   玩家目標: %s" % [
-		fp.get("faction_goal", "（無）"),
-		fp.get("player_goal_override", "（跟隨 AI）") if not fp.get("player_goal_override", "").is_empty() else "（跟隨 AI）"])
+	# ★spec player-led-faction 改法 7：玩家領導 ⇒ AI 不再定目標，只有你設的那一個；玩家是成員 ⇒ 印勢力（盟主）的目標
+	if fp.get("player_led", false):
+		var _og: String = String(fp.get("player_goal_override", ""))
+		lines.append("目標：無（等你下令）" if _og == "" else "目標：%s（你設的）" % PlayerCommandSystem.faction_goal_label(_og))
+	else:
+		var _fg2: String = String(fp.get("faction_goal", ""))
+		lines.append("勢力目標：%s" % (_fg2 if _fg2 != "" else "（無）"))
 	lines.append("徵收率: %.0f%%" % (fp.get("tribute_rate", 0.0) * 100))
+	var _mv: Array = fp.get("missing_leader_verbs", [])
+	if not _mv.is_empty():
+		lines.append("還沒做的盟主動作：%s" % "、".join(PackedStringArray(_mv)))
 	lines.append("")
 	lines.append("── 成員指令 ──")
 	var member_orders: Array = fp.get("member_orders", [])

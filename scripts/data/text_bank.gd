@@ -3,7 +3,7 @@ class_name TextBank
 const TEMPLATES: Dictionary = {
 	# ── 事件消息 ────────────────────────────────────────────────
 	"subjugate": {
-		"honest":        "Team{origin} 主服 Team{loser}，加入勢力{faction}",
+		"honest":        "Team{loser} 臣服於 Team{origin}，加入勢力{faction}",
 		"unintentional": "聽說 Team{origin} 附近有收編，細節不清",
 		"malicious":     "Team{origin} 被 Team{loser} 吞併（失真）",
 		"vague":         "Team{origin} 附近勢力有變動",
