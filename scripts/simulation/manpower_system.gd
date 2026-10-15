@@ -54,6 +54,8 @@ static func captive_room(state: WorldState, holder: TeamData) -> int:
 # Phase 1 anon batch default（不個別）。回擴 dict {treatment, guard_ratio}。
 # treatment ∈ {"厚待","苛待","釋放"}；guard_ratio ∈ [0, GUARD_RATIO_MAX]（看守強度連續決策）。
 static func decide_treatment(state: WorldState, holder: TeamData, group: Dictionary) -> Dictionary:
+	# ★tap（spec 2026-10-14-battle-aftermath A7）：讀人格的路對玩家 holder 被呼 ＝ 違 #12（應恆 0）
+	if Probe.enabled and holder.player_controlled: Probe.bump("mp.persona_player.decide_treatment")
 	var leader: PersonData = state.persons.get(holder.leader_id)
 	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
 	var cruelty:  float = float(leader.values.get("殘忍", 0.5)) if leader else 0.5
@@ -84,6 +86,7 @@ static func captive_food_ok(state: WorldState, holder: TeamData) -> bool:
 # ───── 看守強度決策（holder-level，連續 0..GUARD_RATIO_MAX）─────
 # driver：leader 慎重（謹慎者多派看守）+ 持有量占比（俘越多越需看守）。TEST VALUE 公式。
 static func _decide_guard_ratio(state: WorldState, holder: TeamData) -> float:
+	if Probe.enabled and holder.player_controlled: Probe.bump("mp.persona_player.decide_guard_ratio")
 	var leader: PersonData = state.persons.get(holder.leader_id)
 	var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
 	var captive_n: int = AnonTierSystem.total_captives(holder)
@@ -267,6 +270,7 @@ static func _enforce_guard_cap(state: WorldState, holder: TeamData) -> void:
 			WorldEvents.emit(state, "captive_overguard", [holder.team_id], false, {"captives": total, "cap": cap})
 		return
 	var excess: int = total - cap
+	if Probe.enabled and holder.player_controlled: Probe.bump("mp.persona_player.enforce_guard_cap")
 	var leader: PersonData = state.persons.get(holder.leader_id)
 	var cruelty: float = float(leader.values.get("殘忍", 0.5)) if leader else 0.5
 	var cruel: bool = cruelty >= 0.5
