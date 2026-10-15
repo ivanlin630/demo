@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 玩家可見批第 7 張：玩家遭遇戰戰後收尾（spec 2026-10-14-battle-aftermath-wounded-captives-pursuit-HOW）
 topic: 請 merge feat/battle-aftermath 9eb616997（已併 main 152dfe5e4）｜全電池釘死 9eb616997：135／135 全綠 RC=0（run-id 272-20261015-223039）｜床 19／19 errors 0；12 個負對照全紅在該紅的格｜world-fp 換基準 4a8102d→34c2804，已證只是欄位（五區 40 點逐字相同、終局拿掉三欄 0 行不同）｜藍圖裁定＋你的 HOW 已照做｜U10b 那格綠
 ---
