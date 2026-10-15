@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 用戶裁定四組：屠村六題、戰後處置單分類可選、圍城＋攻城（牆三級／耐久從材料／門）、戰場放大半徑 20 動作 6 分鐘
 date: 2026-10-15
 ---
