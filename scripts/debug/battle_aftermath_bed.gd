@@ -27,32 +27,42 @@ const FOE_ID: int = 910
 const SEED: int = 20261014
 var _errors: int = 0
 var _present: Dictionary = {}
+var _only: Dictionary = {}
+
+func _on(fn: String) -> bool:
+	return _only.is_empty() or _only.has(fn)
 
 func _initialize() -> void:
 	print("=== battle_aftermath：戰後收尾 ===")
-	_a1()
-	_a2()
-	_a3()
-	await _a3_ui()
-	_a3b()
-	await _a3c()
-	_a3d()
-	_a4_a5_a6()
-	_a7()
-	_a7b()
-	_a7c()
-	_a8c()
-	_a8b()
-	_a8()
-	_a9()
-	_a10()
-	_a11()
-	_a12()
+	# ★BED_ONLY＝只給負對照用（逗號分隔函式名，例 _a4_a5_a6,_a7b）：跑子集時到場點名只點子集，並大字印出【這不是完整一輪】
+	var only: String = OS.get_environment("BED_ONLY")
+	if only != "":
+		for f in only.split(","):
+			_only[String(f).strip_edges()] = true
+		print("★★★BED_ONLY=%s：只跑子集，這一輪不能當驗收" % only)
+	if _on("_a1"): _a1()
+	if _on("_a2"): _a2()
+	if _on("_a3"): _a3()
+	if _on("_a3_ui"): await _a3_ui()
+	if _on("_a3b"): _a3b()
+	if _on("_a3c"): await _a3c()
+	if _on("_a3d"): _a3d()
+	if _on("_a4_a5_a6"): _a4_a5_a6()
+	if _on("_a7"): _a7()
+	if _on("_a7b"): _a7b()
+	if _on("_a7c"): _a7c()
+	if _on("_a8c"): _a8c()
+	if _on("_a8b"): _a8b()
+	if _on("_a8"): _a8()
+	if _on("_a9"): _a9()
+	if _on("_a10"): _a10()
+	if _on("_a11"): _a11()
+	if _on("_a12"): _a12()
 	var miss: Array = []
 	for c in EXPECTED:
 		if not _present.has(c):
 			miss.append(c)
-	if not miss.is_empty():
+	if not miss.is_empty() and _only.is_empty():
 		_check("到場點名缺 %s" % str(miss), false)
 	print("=== battle_aftermath DONE === 到場 %d／%d errors: %d" % [_present.size(), EXPECTED.size(), _errors])
 	quit(1 if _errors > 0 else 0)
@@ -418,8 +428,6 @@ func _a4_a5_a6() -> void:
 	for how in ["aftermath_kill", "aftermath_capture_kind", "aftermath_release"]:
 		var st: WorldState = _world()
 		var pt: TeamData = _pt(st)
-		if how == "aftermath_capture_kind":
-			pt.captive_guard_ratio = 0.02   # 容量壓小 ⇒ k＜N
 		var r: Dictionary = _player_wins(st, 8)
 		var foe: TeamData = r["foe"]
 		var n: int = int(st.last_encounter_result.get("disabled_enemy", 0))
@@ -438,6 +446,7 @@ func _a4_a5_a6() -> void:
 				_check("A4 記名失能者不出隊", foe.named_members.size() + (1 if foe.leader_id != -1 else 0) == named_before)
 			"aftermath_capture_kind":
 				var k: int = mini(n, room)
+				_check("A5 母體地板：0＜k＜N（k=%d N=%d；k＝0 或 k＝N 時「超量仍在」是空轉）" % [k, n], k > 0 and k < n)
 				_check("A5 俘：k＝min(N, captive_room)＝%d" % k, captured == k and k < n)
 				_check("A5 敗方 wounded 減 k、超量仍在 wounded", _wounded(foe) == w1 - k)
 				_check("A5 結果句寫放走數", String(res.get("msg", "")).contains("放走 %d 人" % (n - k)))

@@ -436,6 +436,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"combat_end":
 			if info.has("aftermath"):
 				return combat_end_sentence(state, info["aftermath"])
+			return "%s：%s" % [who, kind_label(kind)]   # ★沒帶結算的 combat_end 同預設分支（短名「戰鬥結束」）
 		"captive_overguard":     return "%s：看守不足：俘虜 %d 人、可看守 %d 人" % [who, int(info.get("captives", 0)), int(info.get("cap", 0))]
 		"captive_unfed":         return "%s：養不起，俘虜被放走 %d 人" % [who, int(info.get("n", 0))]
 		"aftermath_settled":     return String(info.get("text", ""))
