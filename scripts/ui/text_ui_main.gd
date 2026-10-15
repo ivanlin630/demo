@@ -1069,6 +1069,9 @@ func _cursor_knowledge() -> Dictionary:
 	var t: Dictionary = lc.get("tile", {})
 	if lc.has("knowledge") and int(t.get("q", -1)) == _cursor.x and int(t.get("r", -1)) == _cursor.y:
 		return lc["knowledge"]
+	# ★節點退場時 _bridge 已放掉（player_action_audit 床尾端實測 SCRIPT ERROR）⇒ 什麼都不知道
+	if _bridge == null:
+		return {"status": "no_team"}
 	return _bridge.tile_knowledge(_cursor.x, _cursor.y)
 
 # ★F7：游標處一行（主畫面；資料＝PlayerQueryApi.tile_knowledge，只讀附身者知道的）
