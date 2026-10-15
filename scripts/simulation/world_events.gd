@@ -86,6 +86,7 @@ const STATE_KINDS: Array = [
 	"famine_crossed",      # famine_days 由 0 轉正
 	"labor_crisis",        # 共址勞力池危機（食物餘命跌破危機線）
 	"intel_arrived",       # 關鍵情報抵達（belief 更新改變已知威脅/機會）
+	"advice",              # ★PlayerCommandApi.ask_advisor（顧問的回答；你自己這道令的回音，不進停點）
 ]
 
 static func all_kinds() -> Array:
@@ -105,7 +106,7 @@ const KIND_LABEL: Dictionary = {
 	"construction_abandoned": "工地", "plan_invalidated": "計畫", "rung_changed": "野心",
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
-	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "hostile_adjacent": "敵人逼近",
+	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "advice": "顧問", "hostile_adjacent": "敵人逼近",
 	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
 	"player_subteam": "子隊",
 }
@@ -429,6 +430,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
 				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
 		"intel_arrived":         return _intel_sentence(state, who, info)
+		"advice":                return String(info.get("text", ""))   # ★句子由 AdvisorSystem 組（單一產生者）
 		"extortion":
 			if info.has("aggressor"):
 				var got: String = String(info.get("got", ""))

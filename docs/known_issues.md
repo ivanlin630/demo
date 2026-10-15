@@ -5724,9 +5724,9 @@ player_command_system.gd:2043-2046 move_to：PathSystem.find_path 空 ⇒「無�
 修法方向：未知格不判可達、直接接單（物理照走）；句子不指名原因。
 ```
 
-## 顧問 strategic／intel_read 兩種情境沒有文字模板
+## ✅ 顧問 strategic／intel_read 兩種情境沒有文字模板
 
-狀態：已知未修
+狀態：✅已結案（顧問讀信念＋文本外置試點，spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot：五情境句子都在 data/text/advisor.tsv，選單＝AdvisorSystem.TEXT_SITUATIONS；text_keys_bed T1 執行期對帳每個 (鍵,變體) 都被取用、落預設句＝0）
 
 回訪：觸發事件 —— 有人要擴顧問情境或補 TextBank 時。
 

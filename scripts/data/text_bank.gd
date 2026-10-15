@@ -65,29 +65,6 @@ const TEMPLATES: Dictionary = {
 		"bitter":  "果然，信人者死",
 	},
 
-	# ── 副官建議（情境分析） ─────────────────────────────────────
-	"advisor_assess_enemy": {
-		"accurate_strong":     "敵方兵強（{enemy_pop}人），不宜正面，建議{action}",
-		"accurate_weak":       "敵方兵寡（{enemy_pop}人），可以出擊",
-		"wrong_underestimate": "敵方不多，問題不大",
-		"wrong_overestimate":  "敵方恐怕難纏，小心",
-		"biased_attack":       "強敵又如何，打！",
-		"biased_retreat":      "哪怕弱敵，謹慎些好",
-	},
-	"advisor_diplomatic": {
-		"accurate_hostile":  "對方心存敵意，外交恐怕無效",
-		"accurate_friendly": "對方似乎願意合作",
-		"wrong_read":        "對方看起來可以談談",
-		"biased_war":        "管他外交，先打",
-		"biased_peace":      "還是先談談吧",
-	},
-	"advisor_resources": {
-		"accurate_critical":  "糧草撐不過{days}天，需立即處置",
-		"accurate_stable":    "資源充裕，暫無憂慮",
-		"wrong_optimistic":   "糧草沒問題，夠用",
-		"wrong_pessimistic":  "物資快不夠了",
-	},
-
 	# ── UI 文字 ─────────────────────────────────────────────────
 	"ui_action_build_outpost":    { "label": "建造據點",  "desc": "在當格建造據點，需消耗資源" },
 	"ui_action_dispatch_subteam": { "label": "派遣子隊",  "desc": "分出子隊執行任務" },
@@ -100,6 +77,89 @@ const TEMPLATES: Dictionary = {
 	"ui_inquiry_ask_faction_status": { "label": "勢力現況？",     "desc": "詢問勢力相關情報" },
 }
 
+# ── 外置文本（spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot §2a）──────────
+# 每行 `鍵<TAB>變體<TAB>句`，# 開頭為註解。第一次查時讀進 static 快取；外置過的鍵從 TEMPLATES 刪掉。
+#   ★同一 (鍵,變體) 在檔裡與 TEMPLATES 同時存在 ⇒ push_error（第二份真相）
+#   ★其餘五檔搬的時候把檔名加進 EXTERNAL_FILES，text_keys_bed 同一支床就涵蓋
+const EXTERNAL_FILES: Array = ["res://data/text/advisor.tsv", "res://data/text/names.tsv"]
+const FALLBACK_SENTENCE: String = "Team{origin} 有動靜"
+static var _ext: Dictionary = {}          # 鍵 → {變體 → 句}
+static var _ext_src: Dictionary = {}      # 鍵 → 檔名（床對帳用）
+static var _ext_loaded: bool = false
+# ★測試旗（只在床開；production 預設關）：記每一次落到預設句、每一個被取用的 (鍵,變體)
+static var record: bool = false
+static var fallbacks: Array = []
+static var used: Dictionary = {}
+
+# ★跨 run：外置快取重讀（檔可能被改過）；床的取用紀錄清空（CrossRunReset 登記）
+static func _reset_cross_run() -> Dictionary:
+	var cleared: Dictionary = {}
+	if not used.is_empty(): cleared["TextBank.used"] = used.size()
+	if not fallbacks.is_empty(): cleared["TextBank.fallbacks"] = fallbacks.size()
+	used.clear()
+	fallbacks.clear()
+	_ext.clear()
+	_ext_src.clear()
+	_ext_loaded = false
+	return {"checked": 1, "cleared": cleared}
+
+static func _ensure_loaded() -> void:
+	if _ext_loaded:
+		return
+	_ext_loaded = true
+	for path in EXTERNAL_FILES:
+		var f := FileAccess.open(String(path), FileAccess.READ)
+		if f == null:
+			push_error("[TextBank] 讀不到外置文本 %s" % path)
+			continue
+		while not f.eof_reached():
+			var line: String = f.get_line()
+			if line.strip_edges() == "" or line.begins_with("#"):
+				continue
+			var cols: PackedStringArray = line.split(String.chr(9))
+			if cols.size() < 3:
+				push_error("[TextBank] %s 這一行不是 鍵<TAB>變體<TAB>句：%s" % [path, line])
+				continue
+			var k: String = cols[0]
+			var v: String = cols[1]
+			if TEMPLATES.has(k) and (TEMPLATES[k] as Dictionary).has(v):
+				push_error("[TextBank] (%s,%s) 同時在 %s 與 TEMPLATES ⇒ 第二份真相" % [k, v, path])
+			if not _ext.has(k):
+				_ext[k] = {}
+			_ext[k][v] = cols[2]
+			_ext_src[k] = String(path)
+
+static func external() -> Dictionary:
+	_ensure_loaded()
+	return _ext
+
+static func external_source(key: String) -> String:
+	_ensure_loaded()
+	return String(_ext_src.get(key, ""))
+
+# 查句（不 format）：外置表 → TEMPLATES → ""（查不到）
+static func lookup(type: String, variant: String) -> String:
+	_ensure_loaded()
+	if _ext.has(type) and (_ext[type] as Dictionary).has(variant):
+		if record: used["%s|%s" % [type, variant]] = true
+		return String(_ext[type][variant])
+	if TEMPLATES.has(type) and (TEMPLATES[type] as Dictionary).has(variant):
+		if record: used["%s|%s" % [type, variant]] = true
+		return String(TEMPLATES[type][variant])
+	if record: fallbacks.append("%s|%s" % [type, variant])
+	return ""
+
+static func has_text(type: String, variant: String) -> bool:
+	_ensure_loaded()
+	return (_ext.has(type) and (_ext[type] as Dictionary).has(variant)) 		or (TEMPLATES.has(type) and (TEMPLATES[type] as Dictionary).has(variant))
+
 static func fmt(type: String, variant: String, params: Dictionary = {}) -> String:
-	var tmpl: String = TEMPLATES.get(type, {}).get(variant, "Team{origin} 有動靜")
+	var tmpl: String = lookup(type, variant)
+	if tmpl == "" and not has_text(type, variant):
+		tmpl = FALLBACK_SENTENCE
 	return tmpl.format(params)
+
+# 資源鍵 → 玩家畫面顯示名（names.tsv，唯一一張表）；查不到回原鍵（終端自驗 (d) 會咬）
+static func res_name(key: String, variant: String = "full") -> String:
+	var s: String = lookup("res." + key, variant)
+	return s if s != "" else key

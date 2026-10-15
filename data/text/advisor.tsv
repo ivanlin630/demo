@@ -1,0 +1,31 @@
+# 顧問句子（spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot §2b）——句子可以直接改這個檔
+# 格式：鍵<TAB>變體<TAB>句；# 開頭為註解；{槽} 由 AdvisorSystem._params_for 給（槽對帳床會比兩邊）
+# 組句：fact ＋ 判斷句（good／even／bad）＋ 語氣尾；不知道時＝advisor_unknown ＋ 語氣尾
+advisor_assess_enemy	fact	{target}約 {pop} 人，{armed} 人帶兵器——{source}，{age}。
+advisor_assess_enemy	good	我們佔上風。
+advisor_assess_enemy	even	兩邊差不多，打起來勝負難料。
+advisor_assess_enemy	bad	對方比我們強，不宜正面交手。
+advisor_diplomatic	fact	我們跟{target}的交情約 {rep}——{source}，{age}。
+advisor_diplomatic	good	對方應該願意談。
+advisor_diplomatic	even	對方態度不明，談不談得成看運氣。
+advisor_diplomatic	bad	對方心存敵意，外交恐怕無效。
+advisor_resources	fact	糧食大約還能撐 {days} 天——{source}。
+advisor_resources	good	糧草充裕，暫無憂慮。
+advisor_resources	even	糧食還夠，但別揮霍。
+advisor_resources	bad	糧草快撐不住了，得立刻想辦法。
+advisor_strategic	fact	已知敵對 {enemies} 支，最近的是{target}，離我們約 {dist} 格——{source}，{age}。
+advisor_strategic	good	附近沒有迫在眉睫的威脅。
+advisor_strategic	even	有敵人在不遠處，要留意。
+advisor_strategic	bad	敵人就在眼前，而且我們打不過。
+advisor_intel_read	fact	最新的傳聞是關於{target}的，我看可信度約 {cred}——{source}，{age}。
+advisor_intel_read	good	這消息大致可信。
+advisor_intel_read	even	這消息半真半假，別全信。
+advisor_intel_read	bad	這消息靠不住。
+advisor_tone	default	
+advisor_tone	blunt	就這樣。
+advisor_tone	formal	謹此稟報。
+advisor_tone	sarcastic	當然，您也可以不聽我的。
+advisor_unknown	default	這我不清楚，沒人去看過。
+advisor_source	親見	我們親眼看到的
+advisor_source	聽說	聽 {from} 說的
+advisor_source	自家帳	自家帳上的
