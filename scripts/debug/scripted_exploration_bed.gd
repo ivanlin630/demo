@@ -37,7 +37,7 @@ var _errors: int = 0
 var _cells_ran: Array = []
 
 # ── 母體的三個數（spec §2①：常數在這裡，量出來的數跟它比）──────────────────
-const SPEC_VERBS_L1: int = 14
+const SPEC_VERBS_L1: int = 15   # ★14 → 15（2026-10-15 顧問讀信念 §1a）：新增玩家指令 ask_advisor
 const SPEC_ACTIONS_L2: int = 52   # ★50 → 51（2026-10-07 票T §2）：新增玩家動作「休息」｜★51 → 52（2026-10-08 友善度 F8）：新增「紮根」
 # ★★★★★51 → 50（2026-10-01，「直接成交」那條路線退場 ⇒ registry 少一列）——
 #   ★這個數從**床自己的輸出**抄（它印「讀法 registry 鍵 ＝ 50／常數 SPEC_ACTIONS_L2 ＝ 51」）。
@@ -530,6 +530,7 @@ func _test_p2_walk_layer1_verbs() -> void:
 		["post_buy_order", {"res": "food", "qty": 1}, false],
 		["post_sell_order", {"res": "food", "qty": 1}, false],
 		["cancel_order", {"order_id": -1}, false],
+		["ask_advisor", {"advisor_pid": pt.leader_id, "situation": "resources", "target_id": -1}, false],
 		["possess", {"person_id": pt.leader_id}, false],
 		["unpossess", {}, false],
 	]

@@ -58,7 +58,7 @@ static func target_menu(state: WorldState, ptid: int) -> Array:
 	var rows: Array = []
 	for tgt in BeliefSystem.known_targets(state, ptid):
 		var g: int = int(tgt)
-		if g == ptid or not state.teams.has(g):
+		if g == ptid or state.live_team(g) == null:   # ★死隊／待刪隊不上選單
 			continue
 		var bc: Dictionary = BeliefSystem.best_claim(state, ptid, g)
 		if bc.is_empty() or BeliefSystem.belief_stale(state, _claim_tick(bc)):
