@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 掛單與押貨對玩家不可見：排在哪
 topic: known_issues 這條的回訪觸發（情報面板改版）已到，那張 spec 沒這項 ⇒ 請排位置｜我的建議：玩家可見批尾加一張小 UI 票，排在真玩小修之後
 ---
