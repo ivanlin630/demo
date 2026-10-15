@@ -2866,11 +2866,18 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		var team: TeamData = state.teams.get(tid)
 		if team == null or team.parent_team_id != -1 or team.combat_target != -1:
 			continue   # 子隊/戰鬥中不 side-dispatch
-		# ★#12（spec player-led-faction 改法 5）：玩家控制隊整支跳過十支——它們全是決策（派人、寫警戒、遷村），沒有記帳半。
-		#   ★放在 info_eval_next_tick 戳記【之前】：玩家交出控制後第一輪立刻評。
+		# ★#12（spec player-led-faction 改法 5）：玩家控制隊整支跳過十支的【決策】（派人、寫警戒、遷村）。
 		#   ★壞掉的樣子：玩家的隊據點突然沒了（_try_self_relocate 先棄據點、arbiter 才擋遷移）、或自己多派出一支信使。
+		#   ★★但十支裡藏著【記帳半】（spec 說沒有，map-memory 閘證明有）：玩家隊的地圖記憶與市集記憶原本是
+		#     _try_distribute_side → DecisionContext.gather（_harvest_market_known）→ … → find_nearest_known_tile
+		#     （harvest_tile_known）的副作用 ⇒ 整支跳過後玩家隊從此不記得走過的格。
+		#     ⇒ 照同一個 cadence 只做那兩份感知，不做決策。代價：玩家交出控制後第一輪最遲晚一個 cadence。
 		if team.player_controlled:
 			if Probe.enabled: Probe.bump("side.skip_player_controlled")
+			if state.world.current_tick >= team.info_eval_next_tick:
+				team.info_eval_next_tick = state.world.current_tick + INFO_DISPATCH_CADENCE
+				_harvest_market_known(state, team)
+				BeliefSystem.harvest_tile_known(state, team)
 			continue
 		# ★perf：cadence-gate（per-team 錯開）——side-dispatch 每日評一次非每 tick（scout O(teams) 掃 per leader 昂貴）。
 		if state.world.current_tick < team.info_eval_next_tick:
