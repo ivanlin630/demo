@@ -62,7 +62,7 @@ const SPEC_LIVE_UI_FILES: Array = ["encounter_view.gd", "sim_bridge.gd", "team_u
 	"ui_model.gd",   # ★友善度 F6（2026-10-08）：區塊資料層，text_ui_main／text_ui_view 都讀它
 	"ui_pages.gd"]
 const SPEC_CALLSITES_BRIDGE_SELF: int = 1   # ★sim_bridge 內部自呼（不是玩家按得到的呼叫點）
-const SPEC_CALLSITES_TEXT_UI: int = 36      # spec §1① 逐字那一個
+const SPEC_CALLSITES_TEXT_UI: int = 37      # spec §1① 逐字那一個｜★36 → 37（2026-10-15 顧問讀信念 §1a）：顧問改走一道玩家指令 ask_advisor（舊版 UI 直呼 get_advice，零呼叫點）
 const SPEC_CALLSITES_ENCOUNTER: int = 5     # ★text_ui_main:156 動態 load 的活 overlay
 # ★玩家按得到的呼叫點 ＝ 活集合的呼叫點 − bridge 自呼那一個
 const SPEC_LIVE_CALLSITES: int = SPEC_CALLSITES_TEXT_UI + SPEC_CALLSITES_ENCOUNTER
