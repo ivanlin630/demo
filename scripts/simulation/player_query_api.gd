@@ -419,6 +419,10 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 		# ★F8：紮根只在自己的 L0 營地上列出（別處不是「不可」，是這個動作不存在）
 		if aid == "settle" and not PlayerCommandSystem.settle_listed(state, pt):
 			continue
+		# ★戰後收尾的動作：沒有 pending ＝ 這個動作不存在（spec 2026-10-14-battle-aftermath；同紮根的前例）
+		if (PlayerCommandSystem.AFTERMATH_FATE + PlayerCommandSystem.AFTERMATH_PURSUIT + PlayerCommandSystem.AFTERMATH_RESIDENTS
+				+ PlayerCommandSystem.CAPTIVE_SET).has(aid) and not PlayerCommandSystem.aftermath_listed(state, pt, aid):
+			continue
 		var pr: Dictionary = pc.call(state, pt)
 		var kind: String = String((PlayerCommandSystem.ACTION_SHAPE[aid] as Dictionary).get("target", "none"))
 		var args: Dictionary = {

@@ -1378,7 +1378,8 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		"winner_id": winner_id,
 		"loser_id":  loser_id,
 		"loot_pool": loot,
-		"can_subjugate": is_player_winner
+		"can_subjugate": is_player_winner,
+		"tick": state.world.current_tick,   # ★結清只結比現在早的（PlayerCommandSystem.settle_pending_aftermath）
 	}
 	# ★戰後處置 pending（spec 2026-10-14-battle-aftermath §2／§3；結清見 PlayerCommandSystem.settle_pending_aftermath）
 	for _k in ["fate_pending", "disabled_enemy", "fate_victim", "pursuit_possible", "pursuit_e"]:
