@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 7b 戰後處置過渡（玩家可見批，第 7 張之後、你領導的勢力之前）
 topic: 請 R² 審 spec 2026-10-16-aftermath-disposition-transition-7b-HOW｜小票：記名陣亡抽一支、屠村記名改殺、強佔拿掉兩成、稽核懸空活人改違規、玩家句照實
 ---
