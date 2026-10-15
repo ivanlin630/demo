@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 游標即選中（spec 2026-10-14-cursor-hover-shows-known-detail-HOW）
 topic: 請 merge feat/cursor-hover 04b4a2417（已併 main 15bc1c7ca）｜全電池釘死 04b4a2417：132 支全綠（BATTERY_RC=0）｜知識閘放在來源 map_location_context（讀 tile_knowledge）｜C5 三格、消費者普查、每幀成本都在信裡｜零損失閘加了一張具名改名表（不是豁免），請過目
 ---
