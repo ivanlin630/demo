@@ -119,7 +119,8 @@ func _world_a() -> void:
 	print("\n── 世界 A：玩家當盟主 30 天（F1 F2 F3 F4a F4c F5 F6），再 30 天設目標（F1b）──")
 	var bold: Dictionary = {"慎重": 0.05, "野心": 0.8, "好戰": 0.6, "求生欲": 0.5, "義氣": 0.5}
 	var st: WorldState = _mk([
-		_team(0, Vector2i(8, 8), 10, 1, true, {"慎重": 0.5}, {"統領": 0.8}, "plains", ["統領"]),
+		# ★玩家盟主用跟對照勢力同一組大膽人格：AI 一接手就會產 goals ⇒ F1 的「goals 恆空」那一半才分辨得出（n1 血證：慎重 0.5 的人格 AI 本來就產空 goals）
+		_team(0, Vector2i(8, 8), 10, 1, true, bold, {"統領": 0.8}, "plains", ["統領"]),
 		_team(1, Vector2i(10, 8), 8, 1, false, {"慎重": 0.5}, {}, "plains"),
 		_team(2, Vector2i(8, 11), 8, -1, false, {"慎重": 0.5}, {}, "plains"),
 		_team(3, Vector2i(-8, -6), 12, 2, true, bold, {"統領": 0.8}, "plains", ["統領"]),
