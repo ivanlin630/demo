@@ -45,7 +45,7 @@ func _initialize() -> void:
 		var ks: Array = Probe.counts.keys()
 		ks.sort()
 		for k in ks:
-			if String(k).begins_with("asm.") or String(k).begins_with("p1.") or String(k).begins_with("pursuit."):
+			if String(k).begins_with("asm.") or String(k).begins_with("p1.") or String(k).begins_with("pursuit.") or String(k).begins_with("res."):
 				asm.append("%s=%d" % [k, int(Probe.counts[k])])
 		print("seed %d｜tick %d｜潰逃俘虜 %d 次、共 %d 人｜各 entry 新 group 人數 %s" % [sd, st.world.current_tick, events, caps, str(per_entry)])
 		print("   %s" % "  ".join(PackedStringArray(asm)))

@@ -737,7 +737,7 @@ func _a10() -> void:
 	ptid = st.get_player_team_id()
 	var atk: TeamData = _foe(st, 20, {"殘忍": 1.0}, FOE_ID + 2)
 	_foe(st, 4)
-	_resident_setup(st, FOE_ID + 2)
+	var rs2: Dictionary = _resident_setup(st, FOE_ID + 2)
 	enc = _fight(st, FOE_ID + 2, FOE_ID)
 	_fine(st, FOE_ID + 2)
 	for u in _units(st, FOE_ID):
@@ -745,6 +745,11 @@ func _a10() -> void:
 	enc.resolve_encounter_end(st, "attacker_win")
 	_check("A10 NPC 攻方照舊（殘忍 ⇒ 屠村：居民隊消失、無 pending）", not st.teams.has(FOE_ID + 5)
 		and (st.last_encounter_result.get("residents_pending", {}) as Dictionary).is_empty())
+	# ★缺陷變守衛：居民搜尋曾把同格的玩家隊當居民整隊屠掉（居民處置那條路修活之後才走得到）
+	var x2: Vector2i = (rs2["tile"] as HexTileData).tile_pos
+	_check("A10 佈置：玩家隊站在被佔的那格（%s／%s）" % [str(st.teams[ptid].tile_pos) if st.teams.has(ptid) else "隊已消失", str(x2)],
+		not st.teams.has(ptid) or st.teams[ptid].tile_pos == x2)
+	_check("A10 同格的玩家隊不被當居民屠掉", st.teams.has(ptid))
 	_present["A10"] = true
 
 

@@ -1393,7 +1393,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		"tick": state.world.current_tick,   # ★結清只結比現在早的（PlayerCommandSystem.settle_pending_aftermath）
 	}
 	# ★戰後處置 pending（spec 2026-10-14-battle-aftermath §2／§3；結清見 PlayerCommandSystem.settle_pending_aftermath）
-	for _k in ["fate_pending", "disabled_enemy", "fate_victim", "pursuit_possible", "pursuit_e"]:
+	for _k in ["fate_pending", "disabled_enemy", "fate_victim", "fate_choice", "pursuit_possible", "pursuit_e"]:
 		if am.has(_k):
 			state.last_encounter_result[_k] = am[_k]
 	print("[Encounter] 戰鬥結束 winner=Team%d loser=Team%d loot=%s" % [winner_id, loser_id, str(loot)])
@@ -1405,6 +1405,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		var cap_tile: HexTileData = state.world.tiles.get(cap_tid)
 		if cap_tile != null and cap_tile.outpost_level > 0 and cap_tile.outpost_owner != winner_id:
 			var old_cap_owner: int = cap_tile.outpost_owner
+			# ★居民處置讀【這一格】（戰後收尾 A10 揭出：先易主再用 _find_prey_outpost 找敗方的據點 ⇒ 找不到 ⇒ 居民處置在這條路上從不發生）
+			if old_cap_owner == loser_id:
+				am["captured_tile_id"] = cap_tid
 			OutpostOwnerBank.set_owner(state, cap_tile, winner_id, "capture")
 			print("[Capture] Outpost (%d,%d) %d→%d" % [
 				loser_team_cap.tile_pos.x, loser_team_cap.tile_pos.y, old_cap_owner, winner_id])
@@ -1533,7 +1536,8 @@ static func _aftermath_captives_fate_pursuit(state: WorldState, am: Dictionary, 
 		var u2: Dictionary = state.encounter_units[i]
 		if int(u2["team_id"]) != vid:
 			continue
-		if bool(u2.get("has_exited", false)) and not is_dead(u2, state):
+		# ★E 只數匿名：追擊砍的是健康匿名（記名逃走的砍不到），與 N 同形，下面再以真實健康匿名封頂
+		if bool(u2.get("has_exited", false)) and not is_dead(u2, state) and int(u2.get("person_id", -1)) < 0:
 			e += 1
 		if done.has(i) or not is_disabled(u2, state):
 			continue
@@ -1543,6 +1547,7 @@ static func _aftermath_captives_fate_pursuit(state: WorldState, am: Dictionary, 
 			continue
 		n += 1
 	n = mini(n, AnonCohort.by_health(victim2.anon_cohorts, "wounded"))
+	e = mini(e, AnonCohort.by_health(victim2.anon_cohorts, "healthy"))   # ★上場單位數會比真實匿名多（戰場佈置），列的數＝砍得到的數
 	am["disabled_enemy"] = n
 	am["fate_victim"] = vid
 	var can_pursue: bool = e > 0 and NpcCombatSystem.pursuit_reachable(holder2, victim2)
@@ -1622,6 +1627,8 @@ func _find_resident_team_on_tile(state: WorldState, tile: HexTileData,
 		if tid == exclude_a or tid == exclude_b: continue
 		var t: TeamData = state.teams[tid]
 		if t.population <= 0: continue
+		# ★玩家隊不是「居民」：同格的玩家隊會被當成居民整隊屠掉／強佔（戰後收尾 A10 揭出；居民處置那條路修活之後才會走到）
+		if t.player_controlled: continue
 		if t.tile_pos == tile.tile_pos:
 			return t
 	return null
@@ -1630,10 +1637,11 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	var attacker: TeamData = state.teams.get(attacker_id)
 	var prey: TeamData = state.teams.get(prey_id)
 	if attacker == null or prey == null: return
-	var occupied_tile: HexTileData = _find_prey_outpost(state, prey)
+	var occupied_tile: HexTileData = state.world.tiles.get(int(am["captured_tile_id"])) if am.has("captured_tile_id") 		else _find_prey_outpost(state, prey)
 	if occupied_tile == null: return
 	var resident: TeamData = _find_resident_team_on_tile(state, occupied_tile, attacker_id, prey_id)
 	if resident == null: return
+	if Probe.enabled: Probe.bump("res.seen")
 	# 居民拒投靠判定
 	var rep: float = float(resident.known_reputations.get(attacker_id, 0.5))
 	var resident_leader: PersonData = state.persons.get(resident.leader_id)
@@ -1642,11 +1650,13 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	var accept: bool = (fear > caution + 0.2) and rep > 0.3
 	if accept:
 		OutpostOwnerBank.set_owner(state, occupied_tile, attacker_id, "capture")
+		if Probe.enabled: Probe.bump("res.accept")
 		print("[ResidentAccept] attacker=Team%d resident=Team%d outpost易主" % [attacker_id, resident.team_id])
 		return
 	# ★攻方是玩家 ⇒ 不讀附身者人格（#12）：留 pending 給玩家選（屠村／放棄佔領／強佔；未決推進＝放棄佔領）
 	if attacker.player_controlled and state.player_id != -1:
 		am["residents_pending"] = {"resident_id": resident.team_id, "tile": occupied_tile.tile_pos}
+		if Probe.enabled: Probe.bump("res.player_pending")
 		return
 	# 攻城方 leader 個性決定
 	var atk_leader: PersonData = state.persons.get(attacker.leader_id)
@@ -1660,12 +1670,16 @@ func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: i
 	var ambition: float = float(atk_leader.values.get("野心", 0.5))
 	var caution2: float = float(atk_leader.values.get("慎重", 0.5))
 	if cruelty > 0.7 or martial > 0.7:
+		if Probe.enabled: Probe.bump("res.npc_massacre")
 		_massacre_residents(state, attacker, resident, occupied_tile)
 	elif honor > 0.6 or faith > 0.6:
+		if Probe.enabled: Probe.bump("res.npc_abandon")
 		_abandon_occupation(state, occupied_tile)
 	elif ambition > 0.7 and caution2 > 0.5:
+		if Probe.enabled: Probe.bump("res.npc_force")
 		_force_occupy(state, attacker, resident, occupied_tile)
 	else:
+		if Probe.enabled: Probe.bump("res.npc_abandon")
 		_abandon_occupation(state, occupied_tile)
 
 static func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
