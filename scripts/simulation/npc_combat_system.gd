@@ -836,6 +836,18 @@ func _check_night_raid(state: WorldState, attacker: TeamData, defender: TeamData
 	if dns.get_camp_vision_range(state, defender) > 0: return false
 	return true
 
+# ★收編的純門（spec 2026-10-15-player-led-faction 改法 6a）：空字串＝可收編，否則是給玩家看的理由。
+#   _try_subjugate 自己用它（NPC 路逐位相同）；玩家選單經 PlayerCommandSystem.subjugate_block_now 用它。
+#   ★它預測不了「立國失敗」（create_faction 回 -1 只有做了才知道）——那一層由 _action_subjugate_enemy 做後驗。
+static func subjugate_block_reason(_state: WorldState, winner: TeamData, loser: TeamData, on_captured_tile: bool) -> String:
+	if on_captured_tile:
+		return ""   # 佔村立治：治權隨旗，勝方會被授統領、敗方跨勢力也轉入（見 _try_subjugate）
+	if loser.faction_id != -1:
+		return "Team%d 已屬勢力%d，不能收編" % [loser.team_id, loser.faction_id]
+	if not winner.tags.has("統領"):
+		return "要有統領才能收編"
+	return ""
+
 func _try_subjugate(state: WorldState, winner_id: int, loser_id: int, on_captured_tile: bool = false) -> void:
 	var winner: TeamData = state.teams[winner_id]
 	var loser:  TeamData = state.teams[loser_id]
@@ -845,11 +857,14 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int, on_capture
 	if on_captured_tile:
 		if not winner.tags.has("統領"):
 			winner.tags.append("統領")
-	elif loser.faction_id != -1 or not winner.tags.has("統領"):
+	elif subjugate_block_reason(state, winner, loser, false) != "":
+		if Probe.enabled: Probe.bump("subjugate.blocked." + ("in_faction" if loser.faction_id != -1 else "no_command"))
 		return
 	var fid: int = winner.faction_id
+	var founded: bool = false   # ★本次呼叫才立國（事件句用：「成立勢力N，你是領袖」）
 	if fid == -1:
 		fid = state.create_faction(winner_id)
+		founded = fid != -1
 	if fid == -1 or loser.faction_id == fid:
 		return   # 立國失敗 / 已同 faction（與翻旗接治權去重，勿雙 subjugate）
 	# A feud：吞併 → loser leader 結仇 + 原 faction 餘部繼承。
@@ -869,6 +884,9 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int, on_capture
 			"origin": str(winner_id), "loser": str(loser_id), "faction": str(fid)
 		}),
 		winner,
-		{ "origin": str(winner_id), "loser": str(loser_id), "faction": str(fid) })
-	print("[Faction] Team%d 主服 Team%d → 勢力%d%s" % [
+		# ★loser_team：鍵尾命中 ⇒ subjects＝[勝方, 敗方]（敗方也被喚醒、敗方是玩家時進玩家佇列）
+		# ★_event_info：給 WorldEvents.describe 產句（spec player-led-faction 改法 6b）
+		{ "origin": str(winner_id), "loser": str(loser_id), "faction": str(fid), "loser_team": loser_id,
+		  "_event_info": {"founded": founded, "faction": fid, "winner": winner_id, "loser": loser_id} })
+	print("[Faction] Team%d 收編 Team%d → 勢力%d%s" % [
 		winner_id, loser_id, fid, "（佔村立治）" if on_captured_tile else ""])

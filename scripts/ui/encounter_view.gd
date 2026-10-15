@@ -149,7 +149,7 @@ func _refresh_ui() -> void:
 	# U10: 戰後 / 無玩家單位 → 顯戰果 + 離開提示（不可 early-return 成空白凍結畫面）
 	if _post_combat or not state.encounter_active:
 		var res: Dictionary = state.last_encounter_result
-		_lbl_actions.text     = _post_combat_hint(res)
+		_lbl_actions.text     = _post_combat_hint(res, PlayerCommandSystem.subjugate_block_now(state))
 		_lbl_cursor_info.text = "戰果：%s" % _post_combat_summary(res)
 		return
 	var player_unit: Dictionary = _find_player_unit(state)
@@ -197,7 +197,7 @@ func _refresh_ui() -> void:
 	var state_ui: WorldState = _bridge.get_state()
 	var action_hints: String = ACTION_HINTS
 	if not state_ui.encounter_active and state_ui.last_encounter_result.get("can_subjugate", false):
-		action_hints += "\nJ:收編敗者"
+		action_hints += "\nJ:收編敗者" + _subjugate_block_suffix(PlayerCommandSystem.subjugate_block_now(state_ui))
 	_lbl_actions.text = action_hints
 	# ★BS v2 B：目標欄（GUI 的那一格與終端的「── 目標 ──」同一份字）
 	_ensure_target(state)
@@ -1003,13 +1003,17 @@ static func _attack_select_hint(part: String) -> String:
 	return "↑↓選部位:%s  移游標瞄敵  Enter攻擊  Esc取消" % TeamUiHelper.part_name(part)
 
 # U10: 戰後提示組字（static → 可單元測）
-static func _post_combat_hint(res: Dictionary) -> String:
+# ★subj_block＝PlayerCommandSystem.subjugate_block_now 的理由（空＝可收編）：照列、標理由（spec player-led-faction 改法 6a）
+static func _post_combat_hint(res: Dictionary, subj_block: String = "") -> String:
 	var hint: String = "戰鬥結束。按任意鍵離開"
 	if res.get("can_subjugate", false):
-		hint += " / [J]收編敗者"
+		hint += " / [J]收編敗者" + _subjugate_block_suffix(subj_block)
 	if not res.get("loot_pool", {}).is_empty():
 		hint += " / [K]拿戰利品 [L]留下"
 	return hint
+
+static func _subjugate_block_suffix(why: String) -> String:
+	return "" if why == "" else "（%s）" % why
 
 static func _post_combat_summary(res: Dictionary) -> String:
 	if res.is_empty(): return "結束"

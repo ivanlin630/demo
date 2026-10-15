@@ -1414,6 +1414,10 @@ func _evaluate_loop1_factions(state: WorldState, faction_ids: Array) -> void:
 				if member_team == null: continue
 				# 子隊（TAG_SUBTEAM）不評估背叛：在途建造/安頓子隊若被叛出會廢棄任務且造成孤立 zombie。
 				if member_team.tags.has(TeamData.TAG_SUBTEAM): continue
+				# ★#12（spec player-led-faction 改法 4）：AI 不替玩家的隊決定背叛離團。NPC 成員照跑。
+				if member_team.player_controlled:
+					if Probe.enabled: Probe.bump("betray.skip_player_controlled")
+					continue
 				if Probe.enabled: Probe.bump("betray.consider." + ("pc" if member_team.player_controlled else "npc"))
 				DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
 		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
@@ -1934,6 +1938,18 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	f.goal_drivers.clear()
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	if leader_team == null:
+		return
+
+	# ★#12 勢力層（spec 2026-10-15-player-led-faction 改法 1）：玩家當盟主 ⇒ 不依盟主人格產目標、不重選 intent。
+	#   只放玩家設的那一個（沒設就空）；成員照常——goals 空＝沒有勢力義務加權。
+	#   ★intent 寫空字典、不寫守成：寫了守成，玩家交出盟主後 _select_intent 的 committed 滯後會把它當既有承諾偏袒一次；
+	#     空字典下游全有 .get／is_empty 保護（本支 :1993 也把空當守成用）。
+	if state.is_player_led(f):
+		if Probe.enabled: Probe.bump("faction.goals_rebuild_player_led")
+		if not f.player_goal_override.is_empty():
+			f.goals.append(f.player_goal_override)
+		f.intent = {}
+		f.strategy = "玩家領導"
 		return
 
 	# G-09：玩家設定 override → 跳過自動計算，直接套用
@@ -2836,6 +2852,10 @@ func _apply_promotion_initial_state(state: WorldState, team: TeamData, officer: 
 		Probe.note("promote.init_loyalty", loy)
 		Probe.note("promote.init_stress", officer.stress)
 
+# ★薄殼：謂詞本體在 WorldState.is_player_led（data 層要用）；不在這裡內聯第二份。
+static func is_player_led(state: WorldState, f) -> bool:
+	return state.is_player_led(f)
+
 # ★tap（spec 2026-10-15-player-led-faction F5）：十支各自入口的「被呼叫」計數，分玩家控制隊（pc）／NPC 隊（npc）。
 #   ★放在各支第一行（不放在迴圈）：十支另有別的呼叫點（_apply_contact_reaction 內呼 scout／herald），迴圈計數會漏。
 static func _side_tap(team: TeamData, k: String) -> void:
@@ -2846,6 +2866,12 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		var team: TeamData = state.teams.get(tid)
 		if team == null or team.parent_team_id != -1 or team.combat_target != -1:
 			continue   # 子隊/戰鬥中不 side-dispatch
+		# ★#12（spec player-led-faction 改法 5）：玩家控制隊整支跳過十支——它們全是決策（派人、寫警戒、遷村），沒有記帳半。
+		#   ★放在 info_eval_next_tick 戳記【之前】：玩家交出控制後第一輪立刻評。
+		#   ★壞掉的樣子：玩家的隊據點突然沒了（_try_self_relocate 先棄據點、arbiter 才擋遷移）、或自己多派出一支信使。
+		if team.player_controlled:
+			if Probe.enabled: Probe.bump("side.skip_player_controlled")
+			continue
 		# ★perf：cadence-gate（per-team 錯開）——side-dispatch 每日評一次非每 tick（scout O(teams) 掃 per leader 昂貴）。
 		if state.world.current_tick < team.info_eval_next_tick:
 			continue

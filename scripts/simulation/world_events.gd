@@ -121,7 +121,7 @@ const KIND_LABEL: Dictionary = {
 #   ★抵達目的地不走 kind（UI 讀 move_target 邊緣，M 票 §1④）；★看到新的隊伍不是停點
 const ADVANCE_STOP_KINDS: Array = ["forced_event_arrived", "combat_engaged", "combat_start", "combat_end", "hostile_adjacent",
 	"member_died", "member_left", "outpost_owner_changed", "resident_changed_faction", "player_subteam",
-	"famine_crossed"]
+	"famine_crossed", "subjugate"]
 
 # 玩家事件匯流排上 seq0 之後第一筆停點事件（kind ∈ ADVANCE_STOP_KINDS 且主體含玩家隊）；沒有 ⇒ {}
 static func stop_event_since(state: WorldState, seq0: int) -> Dictionary:
@@ -382,6 +382,21 @@ static func _feed_player(state: WorldState, kind: String, subjects: Array, info:
 
 # kind → 人話。★放在本檔＝跟 `MESSAGE_KINDS`／`FUNC_KINDS` 那兩張清單【同一個地方】
 #   ⇒ 新增一個 kind 的人，會在同一個檔裡看到「它還要有一句人話」。
+# ★收編句（spec player-led-faction 改法 6b）：玩家是勝方 ⇒ 第二人稱、分「成立勢力」與「加入你的勢力」；
+#   玩家是敗方（三個投降動作：被接受後走同一支 _try_subjugate）⇒「你臣服於…」；其餘旁觀句。
+static func subjugate_sentence(state: WorldState, info: Dictionary) -> String:
+	var w: int = int(info.get("winner", -1))
+	var l: int = int(info.get("loser", -1))
+	var f: int = int(info.get("faction", -1))
+	var pt: int = state.get_player_team_id()
+	if pt != -1 and w == pt:
+		if bool(info.get("founded", false)):
+			return "你收編了 Team%d，成立勢力%d，你是領袖" % [l, f]
+		return "你收編了 Team%d，它加入你的勢力%d" % [l, f]
+	if pt != -1 and l == pt:
+		return "你臣服於 Team%d，加入勢力%d" % [w, f]
+	return "Team%d 臣服於 Team%d，加入勢力%d" % [l, w, f]
+
 static func describe(state: WorldState, kind: String, subjects: Array, info: Dictionary = {}) -> String:
 	var who: String = _team_name(state, subjects[0] if not subjects.is_empty() else -1)
 	match kind:
@@ -433,6 +448,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
 				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
 		"intel_arrived":         return _intel_sentence(state, who, info)
+		"subjugate":             return subjugate_sentence(state, info) if info.has("loser") else "%s：%s" % [who, kind_label(kind)]
 		"combat_end":
 			if info.has("aftermath"):
 				return combat_end_sentence(state, info["aftermath"])
