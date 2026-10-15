@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: blueprint
-status: open
+status: consumed
 slice: 戰後收尾（spec 2026-10-14-battle-aftermath-wounded-captives-pursuit-HOW）做到 A10 時揭出
 topic: 用戶要我也報你｜NPC 攻下據點後的「屠村」＝不經戰鬥直接刪掉整支隊；它曾會把同格的玩家隊當居民刪掉（已擋）｜這條路以前幾乎從不發生，我修活了 ⇒ 世界行為會變｜三件要你判
 ---
