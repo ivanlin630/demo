@@ -621,6 +621,12 @@ static func forced_label(action: String, rid: String, state: WorldState, evt: Di
 
 # ── Location context ───────────────────────────────────────────────────────────
 
+# ★游標即選中（spec 2026-10-14-cursor-hover-shows-known-detail-HOW §2b）：格脈絡以 tile_knowledge 的結果組——
+#   舊版對任何在圖格回真值（occupants 逐隊比真實 tile_pos、visibility_state 寫死 visible）⇒ 記得但不在視野的格
+#   照列此刻真正站在那裡的隊；本票讓側欄跟游標走後那就是「WASD 掃過就看到每個去過的格上現在有誰」，而且洩在 payload 層
+#   ⇒ unvisited：hidden、只帶 belief 記得在那格的隊｜remembered：地形＋已知據點＋belief 隊，不帶 food／wild_game／predator
+#     ｜visible：今天的真值（tile_knowledge visible 分支本來就含視野內真隊）
+#   ★occupants 一律由 tile_knowledge 的 teams 映射（同一支，不另寫）；★knowledge＝那份結果本身（UI 頂部一行與側欄讀它，不各算一次）
 static func map_location_context(state: WorldState, tile_q: int, tile_r: int) -> Dictionary:
 	var not_visible: Dictionary = {
 		"tile": {"q": tile_q, "r": tile_r},
@@ -637,38 +643,47 @@ static func map_location_context(state: WorldState, tile_q: int, tile_r: int) ->
 	var tile_key: int = tile_q * 1000 + tile_r
 	if not state.world.tiles.has(tile_key):
 		return not_visible
+	var pos: Vector2i = Vector2i(tile_q, tile_r)
+	var k: Dictionary = PlayerQueryApi.tile_knowledge(state, pos, DayNightSystem.new().get_vision_mult(state))
+	var status: String = String(k.get("status", ""))
+	if status in ["off_map", "no_team"]:
+		return not_visible
+	var occupants: Array = []
+	for t in k.get("teams", []):
+		occupants.append({"team_id": int(t["id"]), "team_name": "Team%d" % int(t["id"]), "relation": "unknown",
+			"tick": int(t.get("tick", -1)), "heard": bool(t.get("heard", false))})
 	var pid: int = state.player_id
 	var p: PersonData = state.persons.get(pid) if pid != -1 else null
-	var ptid: int = p.team_id if p != null else -1
+	var pt: TeamData = state.teams.get(p.team_id) if p != null else null
+	var out: Dictionary = {
+		"tile": {"q": tile_q, "r": tile_r},
+		"visibility_state": status if status != "unvisited" else "hidden",
+		"terrain": null,
+		"settlement": null,
+		"occupants": occupants,
+		"is_player_here": pt != null and pt.tile_pos == pos,
+		"hints": [],
+		"knowledge": k,
+	}
+	if status == "unvisited":
+		return out
 	var tile: HexTileData = state.world.tiles[tile_key] as HexTileData
-	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
-	var is_here: bool = pt != null and pt.tile_pos == Vector2i(tile_q, tile_r)
-	var occupants: Array = []
-	for oid in state.teams:
-		if oid == ptid:
-			continue
-		var ot: TeamData = state.teams[oid]
-		if ot.tile_pos == Vector2i(tile_q, tile_r):
-			occupants.append({"team_id": oid, "team_name": "Team%d" % oid, "relation": "unknown"})
-	var settlement = null
+	out["terrain"] = tile.terrain
+	if status == "remembered":
+		if k.has("outpost"):
+			var op: Dictionary = k["outpost"]
+			out["settlement"] = {"id": int(op["owner"]), "name": "", "owner_faction": ""}
+		return out
 	if tile.outpost_type != "" and tile.outpost_owner != -1:
-		settlement = {
+		out["settlement"] = {
 			"id": tile.outpost_owner,
 			"name": "%s Lv%d" % [tile.outpost_type, tile.outpost_level],
 			"owner_faction": ""
 		}
-	return {
-		"tile": {"q": tile_q, "r": tile_r},
-		"visibility_state": "visible",
-		"terrain": tile.terrain,
-		"settlement": settlement,
-		"occupants": occupants,
-		"is_player_here": is_here,
-		"food": int(tile.resources.get("food", 0)),
-		"wild_game": int(tile.resources.get("wild_game", 0)),
-		"predator": _predator_intel(state, tile),
-		"hints": []
-	}
+	out["food"] = int(tile.resources.get("food", 0))
+	out["wild_game"] = int(tile.resources.get("wild_game", 0))
+	out["predator"] = _predator_intel(state, tile)
+	return out
 
 # 玩家對該 tile 掠食者的認知：none(無) / detected(偵測到，預警) / lurking(有但沒察覺)
 static func _predator_intel(state: WorldState, tile: HexTileData) -> String:

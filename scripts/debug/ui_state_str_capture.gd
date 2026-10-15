@@ -159,17 +159,16 @@ func _run() -> void:
 			quit(2)
 			return
 
-	# ★★★把【選中格】那一段也逼出來（text_ui_main.gd:716 `if _selected != Vector2i(-1,-1)`）：
-	#   ★預設 _selected 是 (-1,-1) ⇒ 那 ~23 行【一行都不會渲染】
-	#   ⇒ ★★而 P1 是【前後比對】：沒渲染到的區塊，就算被我改壞也不會紅
-	#   ⇒ ★★★所以「前」要取【蓋得比較廣】的那一份 —— 那個 if 只會【追加】行，
-	#     選中之後的輸出是沒選中的【超集】，不會蓋掉任何東西。
+	# ★★★把【游標處明細】那一段也逼出來：游標放到玩家腳下那格（游標即選中票之前這裡設的是 `_selected`；
+	#   那個變數已刪、明細改跟游標走 ⇒ 設游標就是同一件事）
+	#   ⇒ ★★而 P1 是【前後比對】：沒渲染到的區塊，就算被我改壞也不會紅 ⇒「前」要取【蓋得比較廣】的那一份
 	var did_select: bool = false
 	if OS.get_environment("UC_SELECT") != "0":
 		var ct: Dictionary = node._cached_snapshot.get("controlled_team", {})
 		var cp: Dictionary = ct.get("position", {})
 		if not cp.is_empty():
-			node._selected = Vector2i(int(cp.get("q", 0)), int(cp.get("r", 0)))
+			node._cursor = Vector2i(int(cp.get("q", 0)), int(cp.get("r", 0)))
+			node._refresh_snapshot()
 			did_select = true
 	var s: String = node._build_state_str()
 	var raw_lines: PackedStringArray = s.split("\n")
@@ -200,7 +199,7 @@ func _run() -> void:
 		st.teams.size(), st.factions.size(), st.persons.size()])
 	f.store_line("#UC 逐字原樣；★不 strip、不排序、不去重（P1 用逐行計數比）")
 	f.store_line("#UC 選中格=%s（★關掉的話 :716-738 那 ~23 行不會渲染 ⇒ P1 蓋不到它）" % (
-		str(node._selected) if did_select else "無"))
+		str(node._cursor) if did_select else "無"))
 	f.store_line("#UC 行數=%d" % raw_lines.size())
 	for ln in raw_lines:
 		f.store_line(ln)

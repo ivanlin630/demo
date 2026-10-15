@@ -1632,7 +1632,7 @@ func _r5_cells() -> void:
 	_cells_ran.append("R5F4")
 
 
-# ══ 友善度 F7／F7b：游標處一行、選中區塊——只讀附身者知道的 ═════════════════════════════════════════
+# ══ 友善度 F7／F7b：游標處一行、游標處明細區塊——只讀附身者知道的 ═════════════════════════════════════════
 const R5_CURSOR_HEAD: String = "游標處 "
 
 
@@ -1719,8 +1719,7 @@ func _r5_f7_cells() -> void:
 		bad.append("沒去過：%s" % l4)
 	_check("R5F7 游標處一行在三種格（＋沒去過）內容正確（不對：%s）" % str(bad), bad.is_empty())
 	_cells_ran.append("R5F7")
-	print("\n── R5F7C 選中一個沒去過的遠格 ⇒ 選中區塊不得出現糧量數字｜反向：走過去看見 ⇒ 出現 ──")
-	node._selected = far
+	print("\n── R5F7C 游標移到一個沒去過的遠格 ⇒ 明細區塊不得出現糧量數字｜反向：走過去看見 ⇒ 出現 ──")
 	node._cursor = far
 	node._refresh()
 	var sel1: String = _r5_selected_block(_screen(node))
@@ -1728,7 +1727,7 @@ func _r5_f7_cells() -> void:
 	node._refresh()
 	var sel2: String = _r5_selected_block(_screen(node))
 	print("   沒去過時：「%s」\n   站上去之後：「%s」" % [sel1, sel2])
-	_check("★R5F7C 母體地板：選中區塊有印出來", sel1 != "" and sel2 != "")
+	_check("★R5F7C 母體地板：明細區塊有印出來", sel1 != "" and sel2 != "")
 	_check("R5F7C 沒去過 ⇒ 沒有糧量數字", not RegEx.create_from_string("食[:：] *[0-9]").search(sel1) != null)
 	_check("R5F7C 反向：看得見 ⇒ 有糧量數字", RegEx.create_from_string("食[:：] *[0-9]").search(sel2) != null)
 	_cells_ran.append("R5F7C")
@@ -1815,7 +1814,7 @@ static func _r5_selected_block(screen: String) -> String:
 	var on: bool = false
 	for l in screen.split("\n"):
 		var t: String = l.strip_edges()
-		var i: int = t.find("選中: ")
+		var i: int = t.find(TextUiMain.HOVER_DETAIL_HEAD)
 		if i >= 0:
 			on = true
 			out.append(t.substr(i))
