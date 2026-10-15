@@ -81,6 +81,12 @@ func _claim(st: WorldState, tgt: int, pop: float, armed: float, src: int = -2) -
 		{"tile_pos": st.teams[tgt].tile_pos, "population_est": pop, "armed_est": armed, "last_tick": st.world.current_tick},
 		1.0, false)
 
+# ★population 是計算屬性（賦值會被吞）⇒ 真人口只能從 anon 帳加；回傳加完後的真人口供斷言佈置真的生效
+static func _grow_true_pop(t: TeamData, n: int) -> int:
+	if n > t.population:
+		AnonCohort.add(t.anon_cohorts, "平民", "healthy", n - t.population)
+	return t.population
+
 func _ask(st: WorldState, pid: int, sit: String, tgt: int) -> Dictionary:
 	return PlayerCommandApi.new().dispatch(st, "ask_advisor", {"advisor_pid": pid, "situation": sit, "target_id": tgt})
 
@@ -98,7 +104,7 @@ func _a1() -> void:
 	var pt: TeamData = _pt(st)
 	var a: PersonData = _advisor(st, 1.0)
 	var tgt: int = _npcs(st)[0]
-	st.teams[tgt].population = 40
+	_check("A1 佈置：目標真人口＝40", _grow_true_pop(st.teams[tgt], 40) == 40)
 	var own: int = EncounterSystem.armed_on_field(st, pt)
 	print("   己方上場武裝 %d（EncounterSystem.armed_on_field）｜目標 Team%d 真人口 40" % [own, tgt])
 	var got: Array = []
@@ -258,7 +264,8 @@ func _a7() -> void:
 	_claim(st, ns[0], 10.0, 5.0)
 	_claim(st, ns[1], 10.0, 5.0)
 	# 過期的一筆
-	BeliefSystem.record_claim(st, ptid, ns[2], ptid, "親見", {"tile_pos": st.teams[ns[2]].tile_pos, "population_est": 9.0,
+	# ★來源不能是自己：親見（source==obs）會把 value.last_tick 改寫成當 tick（belief_system 裁A）⇒ 用轉述
+	BeliefSystem.record_claim(st, ptid, ns[2], ns[0], "商旅", {"tile_pos": st.teams[ns[2]].tile_pos, "population_est": 9.0,
 		"last_tick": st.world.current_tick - BeliefSystem.BELIEF_STALE_TICKS - 10}, 1.0, false)
 	# 真在旁邊、沒 belief
 	st.teams[ns[3]].tile_pos = pt.tile_pos
@@ -280,7 +287,8 @@ func _a8_a10() -> void:
 	var tgt: int = _npcs(st)[0]
 	_claim(st, tgt, 14.0, 7.0)
 	var s1: String = _text(_ask(st, a.id, "assess_enemy", tgt))
-	st.teams[tgt].population *= 3
+	var p0: int = st.teams[tgt].population
+	_check("A8 佈置：真人口真的 ×3", _grow_true_pop(st.teams[tgt], p0 * 3) == p0 * 3 and p0 > 0)
 	var s2: String = _text(_ask(st, a.id, "assess_enemy", tgt))
 	print("   改真人口前「%s」\n   改後「%s」" % [s1, s2])
 	_check("A8 真人口 ×3 後同 tick 再問句子不變", s1 != "" and s1 == s2)
