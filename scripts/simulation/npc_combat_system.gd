@@ -606,21 +606,28 @@ func _loot_resources(winner: TeamData, loser: TeamData, cruelty: float) -> void:
 		ResourceBank.add(winner, res, taken, "npc_loot_in")
 		ResourceBank.add(loser, res, -taken, "npc_loot_out")
 
+# ★追擊可達閘（兩個戰場共用；spec 2026-10-14-battle-aftermath §3「列的條件＝做的條件」）
+static func pursuit_reachable(winner: TeamData, loser: TeamData) -> bool:
+	return winner.population >= loser.population * 2
+
+# ★追擊砍數（純函數，兩個戰場共用）：S1 rev3 絕對 straggler-kill（棄 pop-%/累積器：5%×小pop 本質恆~0=organic 全小隊零效）。
+#   殘忍/貪婪 scaled 小整數：慈悲→0、中性→1、軍閥→CAP。scale 無關（小隊也見血）、bounded、人格 gated。
+static func pursuit_kill_count(w_leader: PersonData) -> int:
+	if w_leader == null:
+		return 0
+	var cruelty: float = float(w_leader.values.get("殘忍", 0.5))
+	var greed: float   = float(w_leader.values.get("貪婪", 0.5))
+	return clampi(int(round(cruelty * PURSUIT_CRUELTY_K + greed * PURSUIT_GREED_K)), 0, PURSUIT_KILL_CAP)
+
 func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	if not state.teams.has(winner_id) or not state.teams.has(loser_id):
 		return
 	var winner: TeamData = state.teams[winner_id]
 	var loser:  TeamData = state.teams[loser_id]
-	if winner.population < loser.population * 2:
+	if not pursuit_reachable(winner, loser):
 		return   # reachability gate（保留不動）：追不上就不放血
-	# S1 rev3 絕對 straggler-kill（棄 pop-%/累積器：5%×小pop 本質恆~0=organic 全小隊零效）。
-	# 殘忍/貪婪 scaled 小整數：慈悲→0、中性→1、軍閥→CAP。scale 無關（小隊也見血）、bounded、人格 gated。
 	var w_leader: PersonData = state.persons.get(winner.leader_id)
-	var straggler_kill: int = 0
-	if w_leader != null:
-		var cruelty: float = float(w_leader.values.get("殘忍", 0.5))
-		var greed: float   = float(w_leader.values.get("貪婪", 0.5))
-		straggler_kill = clampi(int(round(cruelty * PURSUIT_CRUELTY_K + greed * PURSUIT_GREED_K)), 0, PURSUIT_KILL_CAP)
+	var straggler_kill: int = pursuit_kill_count(w_leader)
 	var pursuit_loss: int = mini(straggler_kill, loser.population)
 	# 探針：追擊放血人格集中度（勝方領袖殘忍/貪婪加權）
 	if pursuit_loss > 0 and Probe.enabled:
