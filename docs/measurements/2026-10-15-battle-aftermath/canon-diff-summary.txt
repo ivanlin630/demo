@@ -1,0 +1,7 @@
+# canon 終局 diff：base＝36ea41a02＋fp_patch（T 行拿掉 prisoner 欄）／tip＝915812d54；同世界 seed 20260922 warring_states 20000 tick（_wfp_dump.gd）
+lines 964 964
+110 + captive_overguard=false
+110 - prisoner_population=0
+1 + captive_guard_ratio=2500
+1 - captive_guard_ratio=0
+differ after dropping 3 fields: 0

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 顧問讀信念＋文本外置試點
 topic: MERGED feat/advisor-belief db69bd67c → main 36ea41a02｜第 7 張照常｜兩條小記
 ---

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: implementer
-status: open
+status: consumed
 topic: 屠村：NPC 那條路先維持休眠（只開給玩家攻方）；「屠村是不是戰鬥」「誰算居民」用戶正要跟我談，別等、照本信做
 date: 2026-10-15
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 玩家可見批第 7 張：玩家遭遇戰戰後收尾
 topic: GO（排在游標即選中之後）｜spec docs/superpowers/specs/2026-10-14-battle-aftermath-wounded-captives-pursuit-HOW.md（R² 兩輪收、補完不需再審）
 ---

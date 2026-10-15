@@ -1,0 +1,212 @@
+[TREE] path=A:\GDS\demo\.worktrees\aftermath commit=1ed9f6b17 clean=NO code-dirty=6 codehash=680F31846B9B
+[TREE]   *** measuring the WORKING TREE, not commit 1ed9f6b17 ***
+[TREE]    M scripts/debug/encounter_sim_test.gd
+[TREE]    M scripts/debug/headless_test.gd
+[TREE]    M scripts/debug/scripted_exploration_bed.gd
+[TREE]    M scripts/debug/success_sentence_bed.gd
+[TREE]    M scripts/debug/ui_flow_test.gd
+[TREE]    M scripts/simulation/player_command_system.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=10.5GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 成功結果句用 handler 自己的話 ===
+
+── P1 handler 的話到得了玩家 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+  PASS: ★母體地板：有玩家隊（tid=48）
+[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=127 —— 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。
+   結果句：「移動到 (17,10)：開始走向 (17,10)，預計 479 分鐘」
+  PASS: ★母體地板：真的產出了一句結果句（非空）
+  PASS: ★前綴在（玩家分辨得出哪一道指令）
+  PASS: ★★★冒號後面不再是寫死的「完成」（實測「移動到 (17,10)：開始走向 (17,10)，預計 479 分鐘」）
+
+── P2 母體看得見（三欄＋邊界句）──
+  PASS: ★母體地板：讀得到原始碼（132880 字元）
+  PASS: ★母體地板：找得到 registry 的【賦值】處（★不是宣告行的空 {}）
+   欄registry action 數 = 63（spec 說 63）
+  PASS: ★★欄與【spec 的常數】相符（63／63）
+   欄定義 66／registry 值 67  ★差集 3：["_action_set_member_salary", "_action_equip_member", "_action_unequip_member"]
+      ＋早返／inline：choose_heir、ignore
+      ＋第二條分派邊 execute_action_with_target 的 4 個 case
+      ＋轉出別系統 dict：_action_submit_trade_offer（★另一支已退場 2026-10-01）
+        （★列【函式名】不列行號 —— 行號逐樹會飄）
+  PASS: ★★★欄差集與【spec 的常數】相符（3／3）
+   欄母體：掃到 `"ok": true` 共 101 條 ＝ 排除 19 條（純查詢前置檢查）＋ 剩餘 82 條
+   ── 被排除的（逐名；★它們的 `ok:true` 不帶句子  不是結果句）──
+     592: precheck_cancel_move()
+     601: precheck_establish_faction()
+     609: precheck_take_loot()
+     625: precheck_subjugate_enemy()
+     632: precheck_confirm_gather_intel()
+     640: precheck_hunt()
+     648: precheck_hunt_beast()
+     669: precheck_camp_at()
+     700: precheck_aftermath_shared()
+     863: precheck_settle()
+     878: precheck_train()
+     893: precheck_promote_anon()
+     901: precheck_rest()
+     2453: precheck_target()
+     2456: precheck_target()
+     2470: precheck_dispatch_task()
+     2484: precheck_dispatch_task()
+     2516: precheck_subteam_build()
+     2522: precheck_subteam_build()
+   ★★而 `precheck_*` 有 11 支而這裡只排除到 19 條 —— 那個差是**真的**：
+     `precheck_leave_loot` 的成功路徑是 `return precheck_take_loot(state, pt)`
+     （條件共用、不抄第二份） 它**沒有自己的 `"ok": true` 字面**  掃不到它。
+      ★「11 支」與「10 個字面」量綱不同：前者數函式、後者數字面。
+   ★反向掃的母體：掃到 `"ok": true` 101 行  其中「有 `reason` 無 `msg`/`message`」19 行（＝母體） 其中不在 `precheck_*` 內 0 行（＝那個清單）
+      ★`[]` 的意思要看中間那個數：母體 19 > 0  它是「沒有違規」；母體 0  它是「母體為空」。
+  PASS: ★★母體地板：反向掃的母體不是空的（19；0  下面那個 `[]` 什麼都沒說）
+   ★反向掃：帶 `reason` 而不帶 `msg`/`message`、又不在 `precheck_*` 下的 ＝ []
+  PASS: ★★★★反向掃：沒有「長得像前置檢查而不在那個前綴下」的（有  命名慣例有例外或有人改名：[]）
+  PASS: ★母體地板：真的排除到東西（0  這個排除沒有生效而下面那條會拿舊母體去比）
+   欄成功回傳共 82 條（spec 說 82）｜其中【沒有字面文案】8 條
+     323: "msg": "忽略" } 	if _action_registry.is_empty(): 		_setup_registry() 	if not _action_registry.
+     730: "msg": "殺了 %d 名傷兵" % n }  func _capture(state: WorldState, pt: TeamData, aid: String, treatm
+     753: "msg": "放走 %d 名傷兵" % int(state.last_encounter_result.get("disabled_enemy", 0)) }  func _acti
+     766: "msg": "追擊砍倒 %d 人" % kn }  func _action_aftermath_no_pursue(state: WorldState, _t: int, pt:
+     772: "msg": "不追" }  func _residents(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
+     783: "msg": "居民已經不在了" } 	match aid: 		"residents_massacre": 			# ★句子照實（藍圖 2026-10-15）：屠村不是一場戰鬥 
+     795: "msg": "強佔" } 	EncounterSystem._abandon_occupation(state, tile) 	return { "ok": true, "msg":
+     797: "msg": "放棄佔領" }  func _action_residents_massacre(state: WorldState, _t: int, pt: TeamData, _
+     813: "msg": "俘虜 %d 人改%s" % [n, treatment] }  func _action_captive_set_kind(state: WorldState, _t:
+     1003: "msg": "發起獵 %s" % kind, "requires_preview": false }  # 訓練/晉升：一次性花 coin → 給最低非菁英 tier 一批 exp
+     1043: "msg": "拔擢 %s 為記名成員" % p.person_name }  # ★票 T（spec 2026-10-06 ticket-t-fatigue §1）：玩家下令休息
+     1053: "msg": "原地休息（疲勞 %d%%）" % int(round(pt.fatigue * 100.0)) }  # 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）
+     1070: "msg": "在 (%d,%d) 紮營（營地，可再紮根成據點）" % [pt.tile_pos.x, pt.tile_pos.y] }  func _action_settle(st
+     1083: "msg": "開始紮根成%s（%d 人時,免材料）" % [ 		String((OutpostSystem.OUTPOST_NAMES.get(camp_type, ["據點"])
+     1091: "msg": "徵用 %.0f%%" % (ratio * 100) }  func _action_withdraw_from_storage(state: WorldState,
+     1103: "msg": "取 %s × %.0f" % [res, amount] }  func _action_deposit_to_storage(state: WorldState, _
+     1118: "msg": "存 %s × %.0f" % [res, amount] }  func _action_trade(state: WorldState, target_id: int
+     1126: "msg": "等待確認", 			 "requires_preview": true, "preview_target_id": target_id }  func _action_
+     1207: "msg": "索貢成功（獲得%.0f 幣）" % amount } 	else: 		UnrestBank.add(tgt, 2, "player") 		# ★XB：typed
+     1234: "msg": "發起攻擊" }  func _action_extort(state: WorldState, target_id: int, _pt: TeamData, pt_id
+     1274: "msg": "選擇招募方式", 			 "payload": { 				 "empty_reason":        empty_reason, 				 "has_willin
+     1308: "msg": "收取戰利品成功", 			 "payload": {"refresh_required": true} }  func _action_leave_loot(state
+     1321: "msg": "放棄戰利品" }  # ★收／棄戰利品之後：還有傷兵／追擊／居民 pending  只標 loot_done（同一份結果還要給那幾項讀）； #   都沒有  照舊清
+     1337: "msg": "互動目標已更新" }  # ★★★★★【已退場 2026-10-01】「不配對、照預覽價直接成交」那條路線 —— #   藍圖裁 (乙)：世界裡沒有這個機制，只有一條*
+     1367: "msg": "取消貿易" }  func _action_set_tribute_rate(state: WorldState, _target_id: int, pt: TeamD
+     1381: "msg": "徵收率設為 %.0f%%" % (rate * 100) }  # U18：設自隊匿名武裝比例（none-target，比照 set_tribute_rate） fun
+     1392: "msg": "武裝目標設為 %.0f%%（武器只夠 %.0f%%）" % [r * 100.0, can * 100.0] } 	return { "ok": true, "msg"
+     1393: "msg": "武裝比例設為 %.0f%%" % (r * 100.0) }  func _action_build_outpost(state: WorldState, _targe
+     1404: "msg": "開始建造 %s" % outpost_type }  func _action_upgrade_outpost(state: WorldState, _target_i
+     1411: "msg": "開始升級據點" }  func _action_upgrade_farming(state: WorldState, _target_id: int, pt: Team
+     1418: "msg": "開始升級農業" }  func _action_upgrade_manufacturing(state: WorldState, _target_id: int, pt
+     1425: "msg": "開始升級製造" }  # 統一設施擴建入口：依 player_state["facility_type"] 走通用 start_upgrade_facility fun
+     1438: "msg": "開始擴建%s" % PlayerApiMapper.facility_label(facility) }  func _action_demolish_outpost(
+     1451: "msg": "取消施工" } 	if not _os5._has_control(state, pt_id, tile5): 		return { "ok": false, "msg
+     1457: "msg": "開始拆除據點" }  func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: Tea
+     1470: "msg": "已棄置 outpost (%d,%d)" % [pos.x, pos.y] }  func _action_dispatch_subteam(state: WorldS
+     1501: "msg": "派出子隊 Team%d：%s" % [sub_id, _subteam_task_sentence(state, task, move_tgt)], "sub_id":
+     1561: "msg": "已下令 Team%d：%s" % [sub_id2, _subteam_task_sentence(state, new_task, npos)] }  # ★玩家對「
+     1590: "msg": "信使已出發至 Team%d" % recall_sub_id }  func _action_subjugate_enemy(state: WorldState, _t
+     1605: "msg": "收編 Team%d" % loser_id }  func _action_leave_faction(state: WorldState, _target_id: i
+     1623: "msg": "已離開勢力" }  func _action_betray_faction(state: WorldState, _target_id: int, pt: TeamDa
+     1648: "msg": "背叛勢力，原成員已敵對" }  func _action_disband_faction(state: WorldState, _target_id: int, pt:
+     1667: "msg": "勢力已解散" }  # 投降資產轉移：from 隊 30% 指定資源交給 to 隊（收編前戰利品，守恆） func _transfer_surrender_assets
+     1692: "msg": "投降被接受，已被收編" } 	else: 		return { "ok": false, "msg": "對方拒絕接受投降" }
+     1713: "msg": "投降被接受" } 	else: 		return { "ok": false, "msg": "對方拒絕" }
+     1726: "msg": "迎擊！遭遇戰開始" }  func _action_surrender_pre_encounter(state: WorldState, _target_id: int
+     1743: "msg": "投降被接受，已被收編" } 	else: 		# 對方拒絕投降 → 強迫開戰 		_encounter.init_encounter(state, atk_id, pt
+     1796: "msg": "信使 Team%d 已出發至 Team%d" % [herald_id, member_team_id] }  func _action_gather_intel(st
+     1806: "msg": "選擇要打聽的情報", 		"payload": { "inquiry_options": options, "npc_id": target_id } 	}
+     1890: "msg": "已清除 Team%d 的直接指令" % member_id }  # ── 投靠收留（食物軌整團併入）──────────────────────────────
+     1918: "msg": "收留 %d 人（食物 -%.1f）" % [joined, actual_cost], 		"payload": {"joined": joined, "food_co
+     1993: "msg": "婉拒 Team%d 的提案" % int(fe.get("from_id", -1)) \ 						if _settled else "拒絕外交提案" }
+     2001: "msg": "拒絕勒索" } 		"join_request": 			if response == "accept": 				result = _accept_join_requ
+     2006: "msg": "婉拒收留" } 		"aid_request": 			if response == "give": 				state.player_state["aid_respo
+     2026: "msg": "無人可繼承,終局" } 			elif not live.has(response): 				# 單一 stale（選了已死候選）→ 不清 forced,讓玩家重選
+     2174: "msg": "已處理" }  func _action_choose_heir(state: WorldState, _target: int, _pt: TeamData, _pt
+     2204: "msg": "%s 繼任" % heir.person_name }  func _action_invite_settle(state: WorldState, target_id
+     2220: "msg": "Team%d 接受邀請" % target_id } 	return { "ok": true, "msg": "Team%d 拒絕邀請" % target_id, "
+     2221: "msg": "Team%d 拒絕邀請" % target_id, "accepted": false }  func _action_beg(state: WorldState, t
+     2230: "msg": "Team%d 施捨食物 %.0f" % [target_id, float(r.get("amount", 0))] } 	return { "ok": true, "
+     2231: "msg": "Team%d 不予施捨（%s）" % [target_id, r.get("msg", "拒絕")], "accepted": false }  # ── 內部 hel
+     2282: "msg": "與 Team%d 談成通商（名聲互有加分）" % from_id } 		# ══ ★★★★★★【接受 ＝ 收貢】（spec §3，2026-10-01）══════
+     2301: "msg": "Team%d 要進貢，但它身上沒有錢可以給" % from_id } 			return { "ok": true, 				"msg": "收下 Team%d 的貢品
+     2303: "msg": "收下 Team%d 的貢品（+%.0f 錢）" % [from_id, amount] } 	# ★★★注意這裡【以前沒有】`tribute_offer`，而那**曾經
+     2334: "msg": "自立後接納 Team%d，勢力%d" % [from_id, pt.faction_id] }  func _pay_extortion(state: WorldSta
+     2389: "msg": "招到 %d 人（花費%d 幣，新人口%d）" % [ 		moved_n, int(RECRUIT_COST_ANON), pt.population], 		"pay
+     2538: "msg": "已在目標格" } 	# ★多格移動（spec 2026-10-13 multi-hop-move (B)(C)）：玩家的移動是 arbiter 的一筆佔用（TASK_T
+     2555: "msg": "開始走向 (%d,%d)，%s" % [target_pos.x, target_pos.y, travel_eta_phrase(est)] }  # 估算結果 →
+     2576: "msg": "取消移動" }  func establish_faction(state: WorldState) -> Dictionary: 	var pt: TeamData
+     2593: "message": "建立勢力%d" % pt.faction_id, 			 "payload": {"action_id": "establish_faction", "refr
+     2625: "msg": "%s 薪資設為 %.0f" % [m.person_name, m.salary] }  # U13b：從自隊武器池裝備名成員 slot（扣 team 資源；原槽位裝備
+     2646: "msg": "%s 裝備 %s" % [m.person_name, grade] }  # U13b：卸下名成員 slot 裝備，還回 team 武器池。 func _action
+     2662: "msg": "%s 卸下 %s" % [m.person_name, slot] }  func _recruit_named_internal(state: WorldState,
+     2697: "msg": "招募 %s 成功（花費%d 幣）" % [ 		p.person_name, int(RECRUIT_COST_NAMED)], 		"payload": {"refr
+   ── 沒有字面文案的（轉出別人的話／變數）──
+     741: "msg": msg }  func _action_aftermath_capture_kind(state: WorldState, _t: int, pt: TeamData,
+     792: "msg": msg + "，據點易主" } 		"residents_seize": 			EncounterSystem._force_occupy(state, pt, resi
+     989: "msg": r.get("msg", "") }  func _action_hunt_beast(state: WorldState, _target: int, pt: Team
+     1028: "msg": msg, "payload": {"promoted": promoted} }  # 拔擢匿名→記名（對稱性）：玩家版走與 NPC 同一條路徑 PersonGenera
+     1138: "msg": alliance_sentence(state, res, pt.team_id) } 	if String(res.get("action", "")) == "non
+     1764: "msg": msg9 }  func _action_order_faction_member(state: WorldState, _target_id: int, pt: Tea
+     1862: "msg": msg_gi, "payload": result_gi }  # ★★★「他也不知道」的判準：不能用 `result_gi.is_empty()` —— #   `re
+     2344: "msg": ("被 Team%d 拿走：%s" % [from_id, taken]) if taken != "" else "Team%d 沒拿到東西（你已沒有可給的）" % f
+  PASS: ★★★欄條數與【spec 的常數】相符（82／82）
+   ★邊界：本格【沒有】數「收了但沒人轉出」的回傳
+     （例：`_interaction.subjugate_team(...)` 的回傳沒有人轉出  不屬於母體）
+   ★★而邊界非印不可的理由：這份 spec 在這一點上錯過兩次，而【兩次錯的方向相反】
+     （單檔少算漏轉出／五檔加總多算收了沒人轉出的）
+      ★★★一個會往兩個方向錯的量，光看數字永遠判不出它在哪一邊。
+
+── P3 空的仍退回「完成」（注入式）──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+  PASS: ★母體地板a：runner 持有 _cmd_api
+  PASS: ★母體地板b：而 api 持有 _cmd_sys（注入點）
+[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=127 —— 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。
+   假 handler 命中 1 次｜結果句：「行動：收割戰利品：完成」
+  PASS: ★★母體地板：注入的假 handler 真的被呼叫（命中 1 次）
+  PASS: ★★★空 msg  仍印「…：完成」（實測「行動：收割戰利品：完成」）
+  PASS: ★而它沒有印出空的冒號（不是「…：」結尾）
+
+── P4 拒絕那一支逐字不變 ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=127 —— 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。
+   結果句：「移動到 (9999,9999)：被拒絕（目標格不在地圖內）」
+  PASS: ★母體地板：真的被拒絕了（句子非空）
+  PASS: ★★拒絕句的形狀逐字不變（含「：被拒絕（」）
+  PASS: ★★★而它【帶原因】（不是「沒有給原因」）
+
+── P5 結果句的文字不進 fp ──
+[MoneyGenesis] 初始 coin 總量 = 42624.0
+   = Σpop(444) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：49 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 42624.0 vs 推導 42624.0（差 0.0000）
+[GameSetup] 完成：49 teams, 8 factions, 129 persons
+[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=127 —— 該世界仍帶玩家中心行為（豁免 gate 生效、玩家隊 leader 死可凍世界）。觀察者長跑請於 setup 後清 state.player_id=-1（見 exam_12mo_bed._strip_player）。
+   原句「移動到 (17,10)：開始走向 (17,10)，預計 479 分鐘」｜筆數 1（改文字不改筆數）
+   fp fba8fc36ea14… → fba8fc36ea14…
+  PASS: ★母體地板：真的有一筆結果句可以改（1 筆）
+  PASS: ★母體地板：fp 產得出來（非空）
+  PASS: ★★★改結果句的【文字】 world-fp【逐字不變】（改文案不會動世界）
+  PASS: ★★對照：改【筆數】 fp 必須變（證明 fp 真的在讀這個佇列）
+=== success_sentence DONE === errors: 0｜到場點名 5／5
+
+[godot.ps1] child exit=0

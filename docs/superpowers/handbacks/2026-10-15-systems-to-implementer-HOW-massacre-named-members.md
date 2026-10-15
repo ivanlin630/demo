@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 戰後收尾（屠村修活）
 topic: 收到 FYI；照你的預設往下做；但屠村路徑上記名成員必須先處置，A10 加一格「零懸空 team_id」——這是 HOW 硬要求，不等藍圖 WHAT
 ---
