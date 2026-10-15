@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 玩家可見批第 6 張：游標停格即顯示已知（回饋 #4）
 topic: GO（排在情報面板之後）｜spec docs/superpowers/specs/2026-10-14-cursor-hover-shows-known-detail-HOW.md（R² ISSUES 已照建議補，補完不需再審）
 ---

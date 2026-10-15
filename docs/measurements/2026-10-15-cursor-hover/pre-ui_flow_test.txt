@@ -1,0 +1,1603 @@
+[TREE] path=A:\GDS\demo\.worktrees\cursor commit=64ed92272 clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=17GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+
+── harness smoke ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: node 實例化
+  PASS: _state_label 存在
+  PASS: _bridge 存在
+  PASS: _handle_interact_mode 可呼叫
+
+── U19 forced 自動進互動 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: forced 事件 → 自動進互動模式
+
+── U21 互動選單分頁 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: pending_targets >9（造同格隊成功）
+  PASS: ★母體地板：預設在自家隊那一側（否則下面那一按不是『切過去』）
+  PASS: ★★切換鍵真的把數字鍵換到目標那一側
+  PASS: ★★★目標那一側的頁變了，而自家隊那一側的頁【沒有被連動】（1／0）
+  PASS: 分頁後可選第 10+ 項（_interact_target 已設）
+
+── U12 交易顯示有資源 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 交易字串非『無可交換』
+
+── 交易 offer-builder ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 交易字串顯天平(給/要值)
+  PASS: 非舊『無可交換』
+
+── hunt 動作可選 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 玩家腳下 tile 存在
+  PASS: 腳下 wild_game → available_actions 含 hunt
+
+── 自隊武裝數顯示 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 查詢面有 controlled_team（★母體地板：空的話下面全是恆真）
+  PASS: 查詢面的 armed_count 有效（2）
+  PASS: 畫面上的武裝數 2 ＝ 查詢面的 2
+
+── 成員裝備 flow ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★入列成功（★注意：這【不是】「動作成功」，只是排進去了）
+[PlayerCmd] equip_member P99001 slot=hand_1 grade=weapon_melee_low
+  PASS: ★★母體地板：消費點真的吃到了（1 條）
+  PASS: ★★★equip_member 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）
+  PASS: 成員裝上武器
+  PASS: status 含武裝比例（★讀的是指令生效【之後】那一次 render）
+
+── 設武裝比例 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★入列成功（★注意：這【不是】「動作成功」，只是排進去了）
+[PlayerCmd] set_armed_anon_ratio → target 0.60（可武裝 0.25）
+  PASS: ★★母體地板：消費點真的吃到了（1 條）
+  PASS: ★★★set_armed_anon_ratio 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）
+  PASS: 武裝目標設為 0.6
+
+── 公庫面板 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 公庫字串顯存入/取出
+  PASS: 公庫顯 food
+
+── outpost build_facility/abandon ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: outpost 面板顯設施/棄置
+
+── faction extract_treasury ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: faction 面板顯提幣
+
+── U15 overlay 輸入守衛 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: overlay 可見時 KEY_W 被吞（_cursor 不變）
+  PASS: overlay 隱藏時 KEY_W 移游標（_cursor 變）
+
+── 隊能力讀數顯示 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 查詢面有 capabilities（★母體地板）
+  PASS: 查詢面的 combat_power 有效（2）
+  PASS: 畫面上的戰力 2 ＝ 查詢面的 2
+  PASS: 三個欄位名都還在（獵／戰力／日耗）
+
+── join_request 收留 UI ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: forced 的選項【內容】生出來了（載體）
+  PASS: ★forced 顯收留選項（★讀【玩家畫面】）
+
+── Q7-1 forced choose_heir UI ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: forced responses 列候選（非只拒絕）
+[Heir] 秦義 繼任玩家 (Team15)
+[PlayerCmd] forced_event 回應: 你對「領袖殞落,要你擇繼承人」回應了「立 秦義 為繼承人」：秦義 繼任
+  PASS: choose_heir 後 leader 接位
+  PASS: choose_heir 後 forced 清除
+
+── Q7-2 forced aid_request UI ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: forced responses 含 give（非只拒絕）
+[PlayerCmd] forced_event 回應: 你對Team8889 的「向你乞食」回應了「施捨 5 糧」：已處理
+  PASS: aid give 後 beggar 收糧
+  PASS: aid give 守恆
+  PASS: aid 後 forced 清除
+
+── P4-2 互動 self/team 動作分離 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: hunt 在 self-actions（不需先選隊）
+  PASS: 目標選擇階段顯 hunt label
+  PASS: team 行動清單不含 hunt
+
+── A-1 記名招募 TextUI 可達 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 已聚焦 NPC（_interact_target=4321）
+  PASS: team 行動清單含 recruit
+  PASS: ★母體地板：`recruit` 在鍵表裡有鍵（沒有  下面按不到，而那不是本格要測的事）
+  PASS: ★招募子選單的【內容】生出來了（載體）
+  recruit 子選單文字: 第 1 天 00:00 ｜ Team15（人口 10） ｜ 家：（無） ｜ 營地：無 ｜ 糧撐 6.3 天 ｜ 威脅：（無） ｜ 待執行 0 道 | ─ 面板（接管畫面）────────────────────────────────────────────────────────────────────────────────────────────────────── | ── 招募 Team4321 ── | [1] 叛徒 忠誠0.20 戰鬥:0.50（記名 150 幣） | [A] 招募匿名人口（50 幣） | [1~9]記名  [A]匿名  [Esc]取消 | ─ 動作（0／0 可做，未綁鍵 0）─────────────────────────────────────────────────────────────────────────────────────────── |  （沒有可做的動作 —— 先按 [T] 進互動、再選一支同格的隊伍） | ─ 事件（最近 8 條）───────────────────────────────────────────────────────────────────────────────────────────────────── |  （還沒有事件 —— 推進時間之後這裡會有紀錄） | ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── |  結果： 招募 Team4321：選記名成員或 [A] 匿名，[Esc] 取消 |  鍵：[1-9]記名 [A]匿名 [Esc]取消｜待執行 0 道
+  PASS: 進招募子模式（_current_mode_name=recruit）
+  PASS: ★子選單顯記名候選（叛徒）（★讀【玩家畫面】）
+  PASS: ★子選單顯匿名選項（★讀【玩家畫面】）
+[Recruit] Named P43211 (叛徒) Team4321→15
+  PASS: recruit_named 執行：成員轉到玩家隊
+  PASS: recruit_named 執行：coin 扣 150
+
+── 玩家隊狀態 label（非任務）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 找得到狀態列那一行
+  PASS: 狀態列冒號後有內容（「閒置  疲勞: 0%」）
+  PASS: ★回歸守衛：狀態列那一行沒有退回舊措辭「任務:」
+
+── 訓練 self-action 可達 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: train 在 self-actions
+
+── 紮營 self-action 可達 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: camp 在 self-actions（gate 通過時可達）
+   自家隊那一側 11 列：["camp", "confirm_gather_intel", "establish_faction", "hunt", "hunt_beast", "leave_loot", "promote_anon", "rest", "subjugate_enemy", "take_loot", "train"]
+  PASS: ★★★距離太近時 camp **仍然列出**（舊斷言寫的是它消失 ＝ 把 (乙) 的病當預期）
+  PASS: ★★F8：緊鄰據點時 camp 可做（間距規則退場）
+  PASS: ★★腳下已有據點  camp 仍列出而 `enabled==false`
+  PASS: ★★★★而它的原因**非空**（實測「此地已有據點」）
+
+── Q7-3 戰後 take_loot 端到端 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: post-combat hint 含 K/L 戰利品
+  PASS: ★入列成功（★注意：這【不是】「動作成功」，只是排進去了）
+[PlayerCmd] 收取戰利品: { "food": 30 }
+  PASS: ★★母體地板：消費點真的吃到了（1 條）
+  PASS: ★★★take_loot 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）
+  [預測] 食物落差 實測=0.0000｜若這一 tick 剛好扣糧，預測扣掉 0.3333（pop=10）｜方向：只准 0
+  PASS: 玩家食物 +30 入庫
+  PASS: 敗隊食物 -30
+  PASS: last_encounter_result 已清
+
+── Q7-5 子隊派遣帶任務 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 選單字串含覓食
+  PASS: index 2 → 覓食(非 idle)
+  PASS: ★入列成功（★注意：這【不是】「動作成功」，只是排進去了）
+[Sub] Team15 派出子隊 Team16 leader=P95001 advisors=[] (pop=3 cap=32 task=覓食)
+  PASS: ★★母體地板：消費點真的吃到了（1 條）
+  PASS: ★★★dispatch_subteam 在【消費點】成功（讀 command_log 的 ok，不是入列的 ok）
+  PASS: 子隊 current_task = 覓食（非寫死 IDLE）
+
+── Q7-6 faction 設定鈕 gate leader ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 非 leader 不顯 [A]設定目標
+  PASS: 非 leader 不顯 [B]調整徵收率
+  PASS: 非 leader 仍可離開勢力 [C]
+  PASS: leader 顯 [A]設定目標
+  PASS: leader 顯 [B]調整徵收率
+
+── N-1 子隊面板 promote_anon 引導 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 全 anon 隊面板含 promote_anon 引導
+  PASS: 不再只顯舊死路字（需命名非 leader 成員）
+  PASS: anon 已清空
+  PASS: 無 anon 時退回舊死路字
+
+── 票A P1-a 五分頁頁首 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: PAGE_ORDER 有 5 頁（現況 5）
+  PASS: 第 1 頁的頁首出現：── 生存 (1/5) ──
+  PASS: 第 1 頁找得到頁首行
+  PASS: 第 1 頁的【分頁區】非空（20 行）
+  PASS: 第 2 頁的頁首出現：── 經濟 (2/5) ──
+  PASS: 第 2 頁找得到頁首行
+  PASS: 第 2 頁的【分頁區】非空（15 行）
+  PASS: 第 3 頁的頁首出現：── 威脅 (3/5) ──
+  PASS: 第 3 頁找得到頁首行
+  PASS: 第 3 頁的【分頁區】非空（10 行）
+  PASS: 第 4 頁的頁首出現：── 社交 (4/5) ──
+  PASS: 第 4 頁找得到頁首行
+  PASS: 第 4 頁的【分頁區】非空（10 行）
+  PASS: 第 5 頁的頁首出現：── 情報 (5/5) ──
+  PASS: 第 5 頁找得到頁首行
+  PASS: 第 5 頁的【分頁區】非空（17 行）
+
+── 票A P1-b 零損失（raw／逐行計數／不 strip）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 42 (member/team15) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+  世界：tick=120/120 teams=16/16 persons=43/43  對得上
+  ★P1-b 具名排除 0 條規則｜前排除 0 行／後排除 0 行
+  ★結構行（spec 本來就不比）：前 2 行／後 16 行｜規則 3 條，逐條指回 spec：
+    [page_header] 2026-09-23-ui-five-tabs-HOW.md AMEND：「新增的行（頁首、未分類標題、天窗）不在比對範圍內」
+    [unclassified_header] 同上 —— ★而它【帶著行數】，票B 每搬一批必然改變
+    [skylight] 同上 —— 天窗是票A 新增的行，不是舊畫面上的內容
+    改名「選中: 」→「游標處明細: 」（照比）：2026-10-14-cursor-hover-shows-known-detail-HOW §1：標頭「選中:」改「游標處明細:」
+  PASS: 零損失：舊 17 條相異行的出現次數全部相同（不 strip、不用集合）
+  PASS: 「前」的母體非空（17 條相異行，且有重複行才測得出計數）
+  PASS: 「前」裡有重複行（最大 4 次） 逐行計數這件事測得到
+
+── 票A P2 切鍵（真鍵盤路徑）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 連按 5 次回到第 1 頁（走完 [1, 2, 3, 4, 0]）
+  PASS: ★每一步【剛好 +1】（5 步全對；走過 [1, 2, 3, 4, 0]）
+  PASS: ★★母體地板：真的走了 5 步（0 步的話「每一步都對」恆真）
+  PASS: [,] 反向切到最後一頁（idx=4）
+  PASS: overlay 可見時切鍵被吞（頁仍是 2，實得 2）
+  PASS: overlay 收起後切鍵恢復（頁變 3，實得 3）
+
+── 票A P4 天窗 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 第 1 頁（生存）印出的天窗 2 ＝ 宣告未接 2
+  PASS: 第 2 頁（經濟）印出的天窗 3 ＝ 宣告未接 3
+  PASS: 第 3 頁（威脅）印出的天窗 4 ＝ 宣告未接 4
+  PASS: 第 4 頁（社交）印出的天窗 4 ＝ 宣告未接 4
+  PASS: 第 5 頁（情報）印出的天窗 2 ＝ 宣告未接 2
+[UI-SKYLIGHT] count=15 declared=15
+  ★票A 交付時絕大多數格子是天窗（共 15 個）—— 這是預期不是缺陷
+  PASS: 沒有欄位【同時】印值與天窗（0 筆）
+  PASS: 每一個宣告未接的欄位都印出天窗（印 15／宣告 15）
+
+── 票A P3 單一來源 ──
+  PASS: 原始碼撈得到（text_ui 160048 字元／walkthrough 8614 字元）
+  PASS: text_ui_main.gd 沒有頁名字面值 "生存"
+  PASS: text_ui_main.gd 沒有頁名字面值 "經濟"
+  PASS: text_ui_main.gd 沒有頁名字面值 "威脅"
+  PASS: text_ui_main.gd 沒有頁名字面值 "社交"
+  PASS: text_ui_main.gd 沒有頁名字面值 "情報"
+  PASS: c1_walkthrough.gd 不再自帶 PAGE_ORDER
+  PASS: c1_walkthrough.gd 改讀 UiPages.PAGE_ORDER
+
+── 票B Q1 來源走查詢面 ──
+  PASS: 撈得到原始碼（160048 字元）
+  PASS: 找得到 _build_survival_lines
+  PASS: _build_survival_lines 不直接讀 state
+  PASS: _build_survival_lines 不直接持有 runner
+  PASS: 找得到 _build_economy_lines
+  PASS: _build_economy_lines 不直接讀 state
+  PASS: _build_economy_lines 不直接持有 runner
+
+── 票B Q3 世界動了畫面跟著動 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 42 (member/team15) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+  推進實得：[60, 120]（目標 60／120）
+  ★變了 4 行（其中時鐘 有變）：
+    第 5 行：「糧: 6.3 天」→「糧: 6.2 天」
+    第 12 行：「人口: 10  武裝: 2 (比例0%) | 未成年: 0」→「人口: 10  武裝: 4 (比例25%) | 未成年: 0」
+    第 13 行：「狩獵 41%/12糧  戰力 2  日耗 8.0食(撐6天)」→「狩獵 41%/12糧  戰力 4  日耗 8.0食(撐6天)」
+    第 26 行：「Tick: 60  (Day 0)」→「Tick: 120  (Day 0)」
+  PASS: ★時鐘以外還有東西變了（3 行）—— 時鐘不算數
+  PASS: 時鐘確實前進了（兩次不是同一顆 tick）
+
+── 家 P1 天窗消失、改印真值 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 查詢面有 home_pos 這個 key（★母體地板：沒有 key 的話下面全是空談）
+  PASS: 三欄【同時】存在（pos/kind/distance）
+  PASS: 生存頁不再印「位置與家」天窗
+  PASS: 生存頁印出「家：」那一行
+
+── 家 P2 成對對照 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 注射前：不是天窗
+  PASS: 拿掉 home_pos  「位置與家」變回天窗
+  PASS: ★而整頁沒壞：其他行還在（人口／糧）
+
+── 家 P3 沒有據點 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: home_pos 為 null（★不是 (0,0)、不是 (-1,-1)）
+  PASS: 三欄【同時】為 null
+  PASS: 畫面印「家：無」
+  PASS: ★畫面沒有印出 (0,0)
+
+── 家 P4 多據點與【暫代】 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: home_count  2（★母體地板：造不出兩個據點就別談多據點）
+  PASS: 畫面標出「（共 2 處）」
+  PASS: ★★★畫面標出【暫代】—— 本城欄未落地，沒有這兩個字就分不出【這就是家】與【先湊一個】
+
+── 家 P5 半套要看得見地壞 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 半套時印出【半套】而不是崩掉
+  PASS: ★而後面的行還在（函式沒有被砍斷）
+
+── 家 P6 (0,0) 是真座標不是哨兵 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: 三欄同時給、pos=(0,0)  畫面印出座標
+  PASS: ★而【不是】「家：無」（(0,0) 不可被當成沒有家）
+  PASS: ★★也不是【半套】（三欄齊全  不該走降級路徑）
+  PASS: 離家距離照印（7）
+
+── render P1 冪等 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：這一輪真的有資源行（「食:」）—— 沒有的話冪等恆真
+  PASS: 連續兩次 _build_state_str() 逐字相同
+
+── render P1b 陳舊基準：render 只准讀不准寫 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：查詢面真的有資源（11 個欄位）—— 沒有的話下面全是空談
+  PASS: ★★render 沒有改寫基準的【日】（仍是 -999）
+  PASS: ★★render 沒有改寫基準的【值】
+  PASS: ★★★而它讀了：現值低於基準  資源行出現「↓」（實際：有）
+  PASS: 附帶：再畫 4 次，輸出逐字相同（★此項單獨不具鑑別力）
+
+── render P2 豁免清單已清空 ──
+  PASS: P1B_EXCLUDE 是空的（目前 0 條） 零損失比對不再放過任何一行
+  ★★而【結構行】清單（P1B_STRUCTURAL，3 條）是另一件事：那是 spec 本來就不比的，不是債。
+
+── P11 頁腳「待執行 N 道」──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★0 也印（常駐）
+  PASS: 入列一條  「待執行 1 道」
+  PASS: 再入列兩條  「待執行 3 道」
+  PASS: ★★★不推進而連畫 4 次  N 仍是 3（render 不得消費佇列）
+
+── P15 同一條指令的回音  2 次 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：那一條真的走完了入列→消費（消費點吃到 1 條）
+  入列那一句：「 已排入：移動到 (9,2)」｜關鍵字：「移動到 (9,2)」
+  畫面出現次數：入列後 2 次｜消費後 1 次
+  PASS: ★★母體地板：入列之後畫面上【至少講了一次】（2）—— 0 次的話下面恆真
+  PASS: ★★★消費之後，同一條指令的回音  2 次（實測 1）—— 第三次就是沒刪乾淨的那一處
+
+── P17 入列 → 推進 → 再 render ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：消費點真的吃到了（command_log 0 → 1）
+  PASS: ★★母體地板：結果句進了 _events（1 筆命中「移動到 (9,2)」；事件數 0 → 1）
+  PASS: ★★★讀者走得過去且真的有東西：_log_strip_text() 回了 15 字（0 字＝事件流是空的）
+  PASS: ★_build_debug_str() 印了事件段
+  PASS: ★★而那一段裡看得到指令結果（type 標成 cmd）
+  PASS: ★_events 每一個元素都是 Dictionary（★String 混進來就會在讀者身上丟錯）（壞形狀 0／共 1，★共 0 是不可判不是綠）
+
+── 懸停 P1 不按 Enter 就出真值 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★★母體地板：游標真的動了（(9, 2) → (10, 2)）
+  PASS: ★不按 Enter  真值區塊出現在【畫面上】
+  PASS: ★★而畫面上印的是【游標現在那一格】（找 tile_id=10002）
+
+── 懸停 P2 來源標籤 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  標題常數：「真值·debug（非附身者所知）」
+  PASS: ★畫面印出來源標籤
+  PASS: ★★而那句話含「非附身者所知」（★不是隨便一個標題都算）
+
+── 懸停 P3 只准看不准存 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★★母體地板：游標真的走過 4 個【不同】的格（1 個的話 fp 不變恆真）
+  PASS: ★★★連續移動游標 ＋ 每步 render  world-fp 逐字不變（真值沒有被存進 state）
+
+── 懸停 P5 空格與滿格 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：找得到一個沒有隊的格（(0, 8)）
+  PASS: 空格：印得出且說「0 支」
+  PASS: ★★母體地板：世界裡至少有 3 支隊可以擺（16 支）
+  滿格 (2, 13) 上有 3 支
+  PASS: ★★★母體地板：那一格真的有 3 支（3）—— 1 支的話「多隊」沒被測到
+  PASS: 滿格：印出「3 支」
+  PASS: ★★★逐隊都印出來了（3／3）—— 迴圈上限寫死成 1 的話這裡會紅
+
+── 招募：收費與交付必須成對 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：找得到兩支非玩家隊（2）
+  PASS: ★★母體地板：招得到那支真的有匿名（7）
+  PASS: ★★★母體地板：招不到那支真的【沒有】匿名（0）—— 這才是今天的病的樣本
+[Recruit] 匿名 Team15←0, 招到 1 人, 花50 coin, 新人口=11
+  招得到那支：ok=true coin_delta=-50 anon_delta=1
+  PASS: ★招得到：真的搬了人（anon +1）
+  PASS: ★★招得到：收費與交付成對（扣 50 coin ÷ 單價 50 ＝ 1 人，實搬 1 人）
+  招不到那支：ok=false coin_delta=0 anon_delta=0
+  PASS: ★★★招不到：一毛都沒扣（coin_delta=0）—— 這一條就是今天那個缺陷
+  PASS: ★招不到：一個人都沒搬（anon_delta=0）
+  PASS: ★★招不到：消費點回 ok=false（不是「成功」）
+
+── P8 按 X 推進一小時 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：按 X 之後真的在推進中
+   t0=0｜請求量=60（期望 60 ＝ TICKS_PER_HOUR 60  t0 % TICKS_PER_HOUR 0）
+  PASS: ★★按 X  請求量正好吸到下一個整點（實測 60／期望 60）
+  PASS: ★★★吸附量落在 1..TICKS_PER_HOUR（★0 是舊 bug 的長相：站在邊界原地不動）
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+   實際走了 delta=60 frames=1（★ 請求量：事件可以把它截短，不能讓它超過）
+  PASS: ★★★世界走的不超過那個請求（delta=60  60）
+
+── P8s X 那一行的單位（靜態孿生）──
+  PASS: 撈得到原始碼（剝掉整行註解後 113828 字元）
+  PASS: ★母體地板：找得到 _global_advance_key（全域推進鍵的唯一處理函式）
+  PASS: ★母體地板：找得到 KEY_X 那一支（找不到＝不可判，不是綠）
+  PASS: ★母體地板：那一段裡找得到 request_advance( 那一行
+   那一行：_request_key_advance(_snap_to(WorldState.TICKS_PER_HOUR))
+  PASS: ★★寫的是 WorldState.TICKS_PER_HOUR
+  PASS: ★★★沒有裸數字 60（單位只准引用那個唯一自由參數）
+
+── P9 只有一條推進路徑 ──
+  PASS: ★母體地板：剝註解之後還有 code（160048 → 113828 字元）
+   _bridge.request_advance( 出現 2 次
+  PASS: ★母體地板：request_advance( 至少 2 處（SPACE ＋ X）
+  PASS: ★★UI 沒有直接呼叫 runner 推進（advance_tick）
+  PASS: ★★★UI 沒有自己的 advance_ticks 實作（那會是第三條路）
+
+── P10 頁腳 X 那一項 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：頁腳 keymap 裡找得到 [X]（找不到＝不可判）
+   那一項：「到整點 」
+  PASS: ★★那一項寫的是「整點」（#8 吸附語意）
+  PASS: ★★★那一項沒有寫死的 60（用戶逐字：不要寫死60tick）
+
+── P11 Esc 中斷 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：Esc 之前真的在推進中
+  PASS: ★★Esc 之後不再推進
+   Esc 後再跑一幀，delta=0（未中斷會是 60）
+  PASS: ★★★世界沒有走掉那一小時（delta=0 < 60）
+
+── P13 連按 T 去重 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   同名無參數入列三次  待辦 1 道
+  PASS: ★入列三次  待辦 1 道（不是 2 也不是 3）
+  PASS: ★★★而第四次回 merged=true（合併路徑真的走過，不是從數字反推）
+  PASS: ★而它仍然回 queued=true（那一道確實在佇列裡）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   ★對照觀測：連按 KEY_T 三次  待辦 1 道（互動模式接走了後兩次按鍵）
+
+── P14 去重不吃掉有意義的那一個 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   [refresh, move, refresh]  待辦 3 道
+  PASS: ★★★被別的指令隔開的第二個 refresh【要保留】 3 道
+  PASS: ★而它【沒有】被標成 merged（隔開了就不是同一道）
+
+── P15b 頁腳列名與回音同源 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：真的有一道待辦
+   回音：「已排入：移動到 (10,2)」｜describe：「移動到 (10,2)」
+  PASS: ★入列回音含 describe() 那一份字串
+  PASS: ★★頁腳也含同一份字串（「移動到 (10,2)」）
+  PASS: ★母體地板：找得到 pending_command_labels（找不到＝不可判）
+  PASS: ★★★列名走 PlayerCommandApi.describe()（不是另寫一份文案）
+
+── P16b 推進後待辦歸零 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：推進前真的有 1 道（實測 1）
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+   推進前 1 道  推進後 0 道（frames=1）
+  PASS: ★★推進一小時之後待辦歸零
+
+── P18 無界哨兵要有名字 ──
+  PASS: ★母體地板：兩個常數本體都存在（哨兵 ＋ 夾具）
+  PASS: ★★哨兵是從上限衍生的（不是各寫一次同一個數字）
+   UI：哨兵 1 處、夾具 1 處
+  PASS: ★★母體地板：UI 用到哨兵  1 處（實測 1）
+  PASS: ★★母體地板：UI 用到夾具 1 處（實測 1）
+  PASS: ★★★UI 沒有裸的 99999
+
+── #7 強制事件面板三行人話 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7311 找上門：提議與你結盟
+  PASS: ★母體地板：強制事件真的在（forced_event 非空）
+  PASS: ★母體地板：面板拿到同一個 id（fe_ui_1）
+   ── 玩家看到的那幾行 ──
+   |  Team7311（獨立，關係：普通）提議與你結盟
+   |    接受＝你加入 Team7311 新建的勢力（對方當領袖）
+   |    不回應＝下一個整點視同拒絕（最多 1 小時）
+   |    [A] 接受
+   |    [B] 拒絕
+  PASS: 誰：面板有 Team7311
+  PASS: 誰：帶勢力欄（獨立/勢力N）
+  PASS: 誰：帶關係欄
+  PASS: 要什麼：人話「提議與你結盟」
+  PASS: ★★不含原樣 id `propose_alliance`
+  PASS: 接受後果那一行在
+  PASS: 不回應下場那一行在
+  PASS: ★★★人話只印一次（舊版把 message 貼在每一個選項前面）
+  PASS: ★★★回應列在專屬字母鍵上（畫面有 `[A] `）
+  PASS: ★★數字清單不含回應（`[1] ` 那一行不是接受／拒絕）
+
+── #8 P2 吸附兩向 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   X 在格線中間          tick=127    請求量=53    （期望 53）
+  PASS: X 在格線中間：吸到下一條格線（實測 53／期望 53）
+  PASS: X 在格線中間：請求量不是 0（0＝站在線上原地不動的舊 bug 長相）
+   X 剛好在整點上         tick=180    請求量=60    （期望 60）
+  PASS: X 剛好在整點上：吸到下一條格線（實測 60／期望 60）
+  PASS: X 剛好在整點上：請求量不是 0（0＝站在線上原地不動的舊 bug 長相）
+   Space 在格線中間      tick=1447   請求量=1433  （期望 1433）
+  PASS: Space 在格線中間：吸到下一條格線（實測 1433／期望 1433）
+  PASS: Space 在格線中間：請求量不是 0（0＝站在線上原地不動的舊 bug 長相）
+   Space 剛好在日界上     tick=2880   請求量=1440  （期望 1440）
+  PASS: Space 剛好在日界上：吸到下一條格線（實測 1440／期望 1440）
+  PASS: Space 剛好在日界上：請求量不是 0（0＝站在線上原地不動的舊 bug 長相）
+  PASS: ★母體地板：找得到 `_snap_to`（找不到＝下面全是空談）
+   _snap_to 源碼：return c - (_bridge.get_current_tick() % c)
+  PASS: ★★實作端沒有字面 60
+  PASS: ★★實作端沒有字面 1440
+
+── #8 overlay 呼叫點也走咽喉 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：overlay 真的存在（text_ui_main:156 動態 load 的那一個）
+[EncounterView] 已排入：行動：收割戰利品
+   K 撿戰利品         按下後請求量=1（期望 1）
+  PASS: K 撿戰利品：★咽喉沒漏這個檔（請求量 1）
+[PlayerCmd] 收取戰利品: { "food": 10 }
+   K 撿戰利品         tick 0 → 1（+1）｜結果句＝行動：收割戰利品：收取戰利品成功
+  PASS: K 撿戰利品：世界恰好 +1 顆（+1）
+  PASS: K 撿戰利品：結果句出現（非空）
+[EncounterView] 已排入：行動：放棄戰利品
+   L 留下戰利品        按下後請求量=1（期望 1）
+  PASS: L 留下戰利品：★咽喉沒漏這個檔（請求量 1）
+   L 留下戰利品        tick 1 → 2（+1）｜結果句＝行動：放棄戰利品：放棄戰利品
+  PASS: L 留下戰利品：世界恰好 +1 顆（+1）
+  PASS: L 留下戰利品：結果句出現（非空）
+
+── #7′ 按了就結算＋空事件不說否定句 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7411 找上門：提議與你結盟
+  PASS: ★母體地板 A：按第一次【之前】forced_event 非空
+   第一次按：請求量=1（★#8 的咽喉）
+  PASS: 第一次按  咽喉請求一顆
+[Diplomacy] Team15 與 Team7411 結盟
+[PlayerCmd] forced_event 回應: 你對Team7411 的「提議與你結盟」回應了「接受」：你加入勢力2
+   第一次按之後：tick +1｜forced_event 空=true｜結果句 ["回應事件：你加入勢力2"]
+  PASS: ★母體地板 B：按完 forced_event 是空的（＝真的結算了）
+  PASS: ★★同一次按鍵之內世界 +1 顆（+1）
+  PASS: ★★★第一次按【有】結果句（1 句）
+  PASS: 面板消失（forced_interaction 的 id 空了）
+   再按 2 次之後新增的結果句 = []
+  PASS: ★★★spec §7 ′：再按【沒有任何否定句】（被拒絕／無待處理）
+  PASS: ★再按沒有走到強制事件那條路（沒有「回應事件」前綴）
+  PASS: ★★★連按【完全沒有輸出】（新增 0 句，期望 0）—— 專屬鍵位之後兩個母體不共用鍵空間
+
+── 不變量 #10：數字鍵永遠不是回應 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7511 找上門：提議與你結盟
+  PASS: ★母體地板 A：面板真的開著（forced_event 非空）
+   面板開著時的 self-actions 數 = 11｜第一項 = camp
+  PASS: ★母體地板 B：self-actions 非空（空的話下面恆綠）
+   面板開著按 KEY_1  佇列尾端 = ["行動：紮營"]
+  PASS: ★★★面板開著按 KEY_1【不是】回應事件（佇列裡沒有「回應事件」）
+  PASS: ★★而 forced_event 還在（KEY_1 沒有把它消費掉）
+[CampL0] Team15 紮營 L0 @(9,2)
+   結果句 = 行動：紮營：在 (9,2) 紮營（營地，可再紮根成據點） 
+   結果句（按位置 1）＝ 行動：紮營：在 (9,2) 紮營（營地，可再紮根成據點） 
+   自家隊那一側第一頁：["camp(不可)", "confirm_gather_intel(不可)", "establish_faction", "hunt(不可)", "hunt_beast(不可)", "leave_loot(不可)", "promote_anon", "rest(不可)", "settle", "subjugate_enemy(不可)", "take_loot(不可)", "train"]  第一個可做的在位置 3
+  PASS: ★母體地板：第一頁裡至少有一列可做（0  本格測不到「做了一個動作」）
+[PlayerCmd] 玩家建立勢力2
+   結果句（按第一個可做的 [3]）＝ 行動：建立勢力：完成 
+  PASS: ★KEY_3 做的是自家隊動作（結果句有「行動：」前綴）
+
+── 不變量 #10 擴面：字母鍵只在 interact 模式有意義 ──
+   列舉到 14 個 mode：["_advisor_mode", "_faction_mode", "_input_numeric_mode", "_input_string_mode", "_intel_mode", "_interact_mode", "_inv_mode", "_member_mode", "_outpost_mode", "_pre_encounter_mode", "_recruit_mode", "_storage_mode", "_subteam_mode", "_trade_mode"]
+  PASS: ★母體地板 A：列舉到的 mode 數與 spec 常數相符（14／14）
+  PASS: ★母體地板 B：`_interact_mode` 真的在列舉結果裡（否則抽取壞了）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _advisor_mode            旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _faction_mode            旗標(按前)=true（★按 A 之後它自己關掉了） 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _input_numeric_mode      旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _input_string_mode       旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _intel_mode              旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _interact_mode           旗標(按前)=true 按 A  佇列【有回應事件】
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _inv_mode                旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _member_mode             旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _outpost_mode            旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _pre_encounter_mode      旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _recruit_mode            旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _storage_mode            旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _subteam_mode            旗標(按前)=true 按 A  佇列沒有回應事件
+[PlayerCmd] forced_event 到達: Team7611 找上門：提議與你結盟
+   _trade_mode              旗標(按前)=true 按 A  佇列沒有回應事件
+  PASS: ★★★母體地板 C：每一個 mode 的旗標都真的被設起來（14／14）—— `set()` 打錯名字是靜默 no-op
+   ★消費了 forced 回應的 mode ＝ ["_interact_mode"]（期望只有 _interact_mode）
+  PASS: ★★★只有 `_interact_mode` 會吃字母鍵（實測 ["_interact_mode"]）
+
+── P26 展開層堆疊（步 1：只收 SUBMENU_OPENERS 那兩個）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   UI 側宣告 ＝ ["recruit", "gather_intel"]｜引擎側宣告 ＝ ["recruit", "gather_intel"]
+   ★雙向差集：只在 UI ＝ []｜只在引擎 ＝ []
+  PASS: ★母體地板：兩份宣告都不是空的（空  下面的相等恆真）
+  PASS: ★★★兩份獨立宣告集合相等（只在 UI：[]／只在引擎：[]）
+  PASS: ★前提：起始深度是 0（0）
+   `_intel_mode = true` 之後：深度 1｜頂層 `gather_intel`
+  PASS: ★★★賦值真的做事了（深度 0 → 1；沒動  setter 是靜默 no-op）
+  PASS: ★★頂層就是那一層（`gather_intel`）
+  PASS: ★getter 與堆疊同源（`_intel_mode` 讀回 true）
+  PASS: ★★設回 false 之後深度回 0（0）
+   疊兩層  深度 2；pop 一次  彈掉 `gather_intel`、深度 1
+  PASS: ★母體地板：真的疊到兩層（2）
+  PASS: ★★★pop 一次 ＝ 深度 1（不是清空；實測 1）
+  PASS: ★彈掉的是【頂層】那一個（`gather_intel`）
+  PASS: ★母體地板：找到同格目標（-1  下面按不到招募那一列）
+   招募在 team 清單的第 9 列（共 12 列）｜而它的【鍵】是 `4`（★兩者不必相同）
+  PASS: ★母體地板：招募那一列在清單上（-1  按不到  下面兩條沒有主詞）
+  PASS: ★母體地板：`recruit` 在鍵表裡有鍵（`4`）
+   按 [4] 之後：深度 1｜頂層 `recruit`｜`_recruit_mode`=true
+  PASS: ★★★按鍵進招募層  深度 ＝ 1（實測 1）
+   按 Esc 之後：深度 0（按前 1）
+  PASS: ★★★Esc 只回一層  深度 1（1 → 0）
+   ★尚未收進 stack ＝ 11 支（具名）：["_input_mode", "_member_mode", "_inv_mode", "_interact_mode", "_faction_mode", "_outpost_mode", "_subteam_mode", "_advisor_mode", "_storage_mode", "_pre_encounter_mode", "_trade_mode"]
+     ★★而「含有這個字樣」的行有 2 行不是標記（＝描述規則的註解）
+      判準錨在【行首】；今天這一族第四次（另三次：registry 對齊空格／
+       `: bool` 的空白／P5 對整份檔裸搜會命中描述規則的註解）。
+  PASS: ★母體地板：真的數到標記（0  抽取壞了，而那會讓進度看起來已經做完）
+  PASS: ★★★尚未收進 stack 的支數沒有變多（11  11）—— ★下降是進度，靜止也要看得見
+
+── P27 強制事件搶走互動模式／鍵位會說話／信封帶 opens_submenu ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：找到同格目標（-1  下面整格沒有主詞）
+  PASS: ★★母體地板：玩家【真的】聚焦著目標（0）—— 不是 -1 的話這一格測的是舊情境
+[PlayerCmd] forced_event 到達: Team0 找上門：提議與你結盟
+   強制事件到達之後：_interact_mode=true｜_interact_target=-1
+  PASS: ★★★強制事件【無條件】搶走互動模式（原本被 `and not _interact_mode` 擋住）
+  PASS: ★★★它清掉了聚焦目標（-1）—— 否則字母鍵那一支不會處理回應（實測 -1）
+   回應選項 2 個（0  下面那一條沒有主詞）
+  PASS: ★母體地板：真的有回應選項（2）
+   按 A 之後佇列：回應事件
+  PASS: ★★★按 A 真的把回應排進佇列（★不是只看旗標：這一條才是「按得到」）
+   聚焦目標時按 A  回饋行：「 現在沒有要回應的事件」
+  PASS: ★★★聚焦目標時按字母【有話說】（原本是靜默 return）
+  PASS: ★★★而它【不是】「沒有綁」那一句 —— 字母鍵在互動模式是綁著的（實測：「 現在沒有要回應的事件」）
+  PASS: ★★★它是【綁了但現在沒有對象】那一句（床自己持有這份字面：`現在沒有要回應的事件`）
+  PASS: ★而它沒有關掉模式（三態之一）
+  PASS: ★也沒有改掉聚焦目標（三態之二）
+   宣告的入口 ＝ ["recruit", "gather_intel"]｜信封帶著 `opens_submenu=true` 的 ＝ ["gather_intel", "recruit"]｜沒帶的 ＝ []
+  PASS: ★母體地板：宣告不是空的（空  下面兩條恆綠）
+  PASS: ★母體地板：那些入口真的在畫面的列裡（2／2）
+  PASS: ★★★信封把 `opens_submenu` 帶到畫面（沒帶的：[]）—— 原本它被信封吃掉  `` 永遠印不出來
+
+── P28 玩家真的看到合成畫面 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   `_screen_label` 長度 ＝ 6217 字
+  PASS: ★母體地板：那個 Label 存在且非空（空  下面的 count 全部是 0  恆紅或恆綠都沒意義）
+   ｜ 待執行        出現 1 次
+  PASS: ★★★玩家的畫面上 `｜ 待執行 ` 剛好一次（實測 1）
+   ┌─ 地圖（       出現 1 次
+  PASS: ★★★玩家的畫面上 `┌─ 地圖（` 剛好一次（實測 1）
+   ┌─ [         出現 1 次
+  PASS: ★★★玩家的畫面上 `┌─ [` 剛好一次（實測 1）
+   ─ 動作（        出現 1 次
+  PASS: ★★★玩家的畫面上 `─ 動作（` 剛好一次（實測 1）
+   ─ 事件（        出現 1 次
+  PASS: ★★★玩家的畫面上 `─ 事件（` 剛好一次（實測 1）
+    鍵：          出現 1 次
+  PASS: ★★★玩家的畫面上 ` 鍵：` 剛好一次（實測 1）
+   還在顯示的【內容載體】＝ []（應為空）
+  PASS: ★★★舊六個 Label 都不顯示（顯示兩份  兩份欄寬權威，而打起來沒有一格會紅）
+  PASS: ★★內容載體的內容還在（`_state_label` 非空  既有 49 處斷言不會變成空字串比對）
+
+── P29 按畫面印的鍵  執行的就是那一列 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：找到同格目標
+   這一輪 12 列，其中【有鍵】的 9 列：["attack", "demand_tribute", "extort", "gather_intel", "invite_settle", "propose_alliance", "recruit", "recruit_anon", "trade"]
+  PASS: ★★母體地板：有鍵的列 > 0（0  下面的迴圈一次都不跑  本格不可判不是綠）
+   按 [6]（畫面說「attack」） 實際 action_id ＝ 「attack」
+   按 [3]（畫面說「demand_tribute」，不可） 實際 action_id ＝ 「」
+   按 [7]（畫面說「extort」） 實際 action_id ＝ 「extort」
+   按 [5]（畫面說「gather_intel」） 實際 action_id ＝ 「gather_intel」
+   按 [9]（畫面說「invite_settle」，不可） 實際 action_id ＝ 「」
+   按 [2]（畫面說「propose_alliance」） 實際 action_id ＝ 「propose_alliance」
+   按 [4]（畫面說「recruit」） 實際 action_id ＝ 「recruit」
+   按 [8]（畫面說「recruit_anon」） 實際 action_id ＝ 「recruit_anon」
+   按 [1]（畫面說「trade」） 實際 action_id ＝ 「trade」
+  PASS: ★★★★★按下畫面印的鍵  執行的就是那一列（不符的：[]）
+   沒有鍵的列 ＝ ["beg", "ignore", "offer_surrender"]（畫面印「（未綁鍵）」）
+  PASS: ★★(d) 沒有鍵的那些【真的按不到】（反查表裡找不到它們；實測 []）
+   ★★★而「未綁鍵」那個字原本也是謊：改之前 `ignore` 排在位置 1  按 [1] 真的按得到它。
+
+── P30 子模式面板真的進畫面 ──
+   機械數到 `_event_label.text = _build_*_str()` 的賦值點 ＝ 12 個：["pre_encounter", "trade", "interact", "member", "inv", "faction", "outpost", "subteam", "advisor", "storage", "intel", "recruit"]
+  PASS: ★★母體地板：真的數到賦值點（0  下面一次都不跑  本格不可判不是綠）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   pre_encounter  載體首行「！ 遭受攻擊 ！」 在畫面上 ＝ true
+   trade          載體首行「── 物物交換 Team-1 ──」 在畫面上 ＝ true
+   interact       載體首行「── 互動 ──」 在畫面上 ＝ true
+   member         載體首行「==================================」 在畫面上 ＝ true
+   inv            載體首行「── 裝備（[U]卸下選中）──」 在畫面上 ＝ true
+   faction        載體首行「── 勢力面板 ──」 在畫面上 ＝ true
+   outpost        載體首行「── 前哨站 @(9,2) ──」 在畫面上 ＝ true
+   subteam        載體首行「── 子隊 ──」 在畫面上 ＝ true
+   advisor        載體首行「── 顧問 ──」 在畫面上 ＝ true
+   storage        載體首行「── 公庫 ──」 在畫面上 ＝ true
+   intel          載體首行「── 打聽 Team-1 ──」 在畫面上 ＝ true
+   recruit        載體首行「── 招募 Team-1 ──」 在畫面上 ＝ true
+   ── 三數相加 ＝ 母體 ──
+   走到 12 個｜不適用 0 個｜母體 12 個
+  PASS: ★★三數相加 ＝ 母體（12 ＋ 0 ＝ 12）
+  PASS: ★母體地板：這一輪真的走到子模式（12；0  下面那條恆綠）
+  PASS: ★★★★★每一個走到的子模式，它的面板都出現在【玩家畫面】上（不見的：[]）
+   ★★而這一格與 P28 的差別：P28 數六個錨（子模式面板**不在錨的母體裡**）
+      P28 接不到這件事 —— **不是壞掉，是沒被問到**。
+
+── P31（spec P7）Esc 只回一層，而沒有一區被搬動 ──
+   母體（`UI_STACK_LAYERS` 宣告在一處）= ["recruit", "gather_intel"]
+  PASS: ★母體地板：展開層不是空的（空  下面整格不跑）
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：找到同格目標（-1  進不了動作層）
+   recruit        深度 1 -> 0｜四錨 1/1/1/1｜map+pages=false panel=true
+   gather_intel   深度 1 -> 0｜四錨 1/1/1/1｜map+pages=false panel=true
+   -- 走到 2 層｜不適用 0 層｜母體 2 層 --
+  PASS: ★★三數相加 = 母體（2 + 0 = 2）
+  PASS: ★母體地板：真的走到至少一層（0  下面那條恆綠）
+  PASS: ★★★★Esc 只回一層，而沒有一區被搬動（違反的：[]）
+   ★深度 2 佈置：深度 2｜頂層 `gather_intel`
+  PASS: ★★母體地板：真的疊到深度 2（疊不上去  下面兩條沒有主詞）
+   ★按一次 Esc  深度 2 -> 1｜頂層 `gather_intel` -> `recruit`
+  PASS: ★★★★★深度 2 按一次 Esc  深度剛好 1（2 -> 1）—— 不是回到 0
+  PASS: ★★★★★而【下面那一層還在】（頂層 `recruit`；空的話就是全部被彈掉了）
+
+── P32（spec P8）未綁定鍵：動作區不變、無模式關閉 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：找到同格目標（-1  進不了動作層）
+   這一輪清單 12 列｜候選 46 鍵｜謂詞說【沒綁】的 8 鍵 = ["0", "Space", "Minus", "Equal", "Semicolon", "Apostrophe", "Slash", "BackSlash"]
+  PASS: ★★母體地板：未綁的鍵不是空集合（空  下面迴圈一次都不跑  不可判不是綠）
+   按 [0]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [Space]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [Minus]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [Equal]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [Semicolon]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [Apostrophe]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [Slash]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+   按 [BackSlash]  動作區不變=true｜模式還開著=true｜深度 0->0｜回饋「 此鍵在此模式無作用（互動）」
+  PASS: ★★★★按一輪未綁定鍵：動作區不變、無模式關閉、三態 有話說（違反的：[]）
+
+── P33 宣告 vs 畫面（`listed` 要說實話）──
+   宣告側（`target=="none" and listed`）＝ 11 個：["camp", "confirm_gather_intel", "establish_faction", "hunt", "hunt_beast", "leave_loot", "promote_anon", "rest", "subjugate_enemy", "take_loot", "train"]
+  PASS: ★母體地板 A：宣告側不是空的
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★★母體地板 B：畫面上找得到自家隊那一屏的標題（找不到  下面數到 0 而那是假的）
+  PASS: ★★母體地板 B：畫面上找得到自家隊那一屏的標題（找不到  下面數到 0 而那是假的）
+   畫面側（翻完所有頁、從 `_screen_label` 數 `[n]` 那些列）＝ 11 列
+     · 紮營
+     · 建立勢力
+     · 拔擢匿名→記名
+     · 確認打聽（不可：沒有待確認的打聽）
+     · 狩獵（不可：此地無獵物）
+     · 獵猛獸（不可：此地無猛獸可獵）
+     · 放棄戰利品（不可：無可放棄的戰利…）
+     · 休息（不可：隊伍不累，不需要休息）
+     · 收編敗者（不可：無可收編的敗者）
+     · 訓練（-30 幣）
+     · 收割戰利品（不可：無可收取戰利品）
+  PASS: ★★★母體地板 C：畫面側數到東西（0  下面那條會拿 0 跟宣告比而紅得沒有意義）
+  PASS: ★★★★★宣告的列數 ＝ 畫面上按得到的列數（宣告 11／畫面 11）
+   ★誠實限：畫面側比的是**列數**不是**逐名**（畫面印 label、宣告存 id）
+      失效方向：**數字相同而成員不同**時本格綠（那是「數字對而東西不在」那一族）
+      ★而指名那一半由 P16／P18 的反向掃守（它們比的是 id 集合）。
+
+── P34 trade 子模式 [Enter] 送出出價 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板 A：真的在 trade 子模式（否則按 Enter 走的是別的 handler）
+  PASS: ★★母體地板 B：出價真的在 state 裡（空出價時那一支可能早退  本格沒有主詞）
+   按 [Enter]  佇列新增 1 道令：["submit_trade_offer"]
+  PASS: ★★★★★[Enter] 真的把 `submit_trade_offer` 送出去（送出 ≠ 成功；實測 ["submit_trade_offer"]）
+   ★本格不驗成交結果（對方可以拒絕、資源可能不足）—— 它驗的是那道令有沒有被送出。
+
+── P35 面板不得自己印一份動作清單（第三條邊）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板 A：找到同格目標（-1  聚焦分支根本不會跑  本格不可判不是綠）
+  PASS: ★★母體地板 B：真的切得出面板區（切不出  下面那個 0 是假的）
+  PASS: ★★母體地板 C：真的切得出動作區
+   面板區的 `[n]標籤` ＝ 0 個｜動作區的 ＝ 7 個
+  PASS: ★★★【陽性對照】同一個抽取器在動作區抓到 > 0 列（0  下面那個「面板 0 列」沒有意義）
+  PASS: ★★★★★★面板區沒有自己印動作列（有的話逐個指名：[]）
+  PASS: ★★★★面板區仍然存在且仍有出口（`[Esc]返回`）—— 本格守的是【不印第二份】，不是【把面板刪掉】
+
+── P36 同一屏同一標籤只准出現一次（整列相等）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板 A：找到同格目標
+  PASS: ★★母體地板 B：兩區都切得出來（切不出  下面的重複數會是 0 而那是假的）
+   這一屏（面板＋動作）抓到 9 個選項標籤
+  PASS: ★★★母體地板 C：抓到 > 0 個標籤（0  下面「沒有重複」什麼都沒說）
+   動作區抬頭宣告 9 列｜我從動作區的行裡抽到 9 個標籤
+  PASS: ★★母體地板 D：抬頭那個數讀得出來（-1  下面那條沒有主詞）
+  PASS: ★★★★★★抽取式沒有少抓：動作區抬頭宣告的列數 ＝ 我抽到的標籤數（9／9）
+   ★重複的標籤（整列相等，不用子字串）＝ []
+  PASS: ★★★★★★同一屏沒有任何標籤出現兩次（重複的逐個指名：[]）
+
+── P37 「被聚焦的人」天窗：兩個方向 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   沒聚焦時的天窗清單 ＝ ["糧食跑道（缺趨勢）", "被聚焦的人"]
+  PASS: ★母體地板：沒聚焦時清單不是空的（空  下面兩條都在空集合上成立）
+  PASS: ★★★★★方向：沒聚焦  「被聚焦的人」**必須**在天窗清單裡
+   有聚焦時的天窗清單 ＝ ["糧食跑道（缺趨勢）"]
+  PASS: ★★★★★方向：有聚焦  「被聚焦的人」**必須不**在天窗清單裡
+   兩個方向的差 ＝ ["被聚焦的人"]（★必須剛好是那一欄）
+  PASS: ★★★★★★兩個方向的差剛好是「被聚焦的人」一欄（["被聚焦的人"]）
+  PASS: ★★【反向對照】舊 guard 的 `is_empty()` 對【哨兵】也回 false（＝它恆假的證據）
+
+── P38 剝頭要剛好剝掉那一行（跨側）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板（第 1 頁）：載體不是空的（26 行）
+  PASS: ★★第 1 頁：載體裡**有**那一行抬頭
+  PASS: ★★★第 1 頁：合成的 `pages` 裡**沒有**那一行抬頭（它在框標題上）
+  PASS: ★★★★第 1 頁：合成剛好少一行（載體 26 → 合成 25）
+  PASS: ★★★★★★第 1 頁：被拿掉的**剛好是那一行抬頭**（實際拿掉：["── 生存 (1/5) ──"]）
+  PASS: ★母體地板（第 2 頁）：載體不是空的（21 行）
+  PASS: ★★第 2 頁：載體裡**有**那一行抬頭
+  PASS: ★★★第 2 頁：合成的 `pages` 裡**沒有**那一行抬頭（它在框標題上）
+  PASS: ★★★★第 2 頁：合成剛好少一行（載體 21 → 合成 20）
+  PASS: ★★★★★★第 2 頁：被拿掉的**剛好是那一行抬頭**（實際拿掉：["── 經濟 (2/5) ──"]）
+  PASS: ★母體地板（第 3 頁）：載體不是空的（16 行）
+  PASS: ★★第 3 頁：載體裡**有**那一行抬頭
+  PASS: ★★★第 3 頁：合成的 `pages` 裡**沒有**那一行抬頭（它在框標題上）
+  PASS: ★★★★第 3 頁：合成剛好少一行（載體 16 → 合成 15）
+  PASS: ★★★★★★第 3 頁：被拿掉的**剛好是那一行抬頭**（實際拿掉：["── 威脅 (3/5) ──"]）
+  PASS: ★母體地板（第 4 頁）：載體不是空的（16 行）
+  PASS: ★★第 4 頁：載體裡**有**那一行抬頭
+  PASS: ★★★第 4 頁：合成的 `pages` 裡**沒有**那一行抬頭（它在框標題上）
+  PASS: ★★★★第 4 頁：合成剛好少一行（載體 16 → 合成 15）
+  PASS: ★★★★★★第 4 頁：被拿掉的**剛好是那一行抬頭**（實際拿掉：["── 社交 (4/5) ──"]）
+  PASS: ★母體地板（第 5 頁）：載體不是空的（23 行）
+  PASS: ★★第 5 頁：載體裡**有**那一行抬頭
+  PASS: ★★★第 5 頁：合成的 `pages` 裡**沒有**那一行抬頭（它在框標題上）
+  PASS: ★★★★第 5 頁：合成剛好少一行（載體 23 → 合成 22）
+  PASS: ★★★★★★第 5 頁：被拿掉的**剛好是那一行抬頭**（實際拿掉：["── 情報 (5/5) ──"]）
+
+── P19 負對照覆蓋率棘輪 ──
+   available_actions_bed.gd         16（地板 16）
+   colocation_gate_bed.gd           8（地板 8）
+   command_replay_bed.gd            2（地板 2）
+   decision_vs_outcome_bed.gd       2（地板 2）
+   forced_event_panel_bed.gd        10（地板 10）
+   inquiry_v1_bed.gd                7（地板 7）
+   leader_chokepoint_bed.gd         3（地板 3）
+   npc_tribute_transfer_bed.gd      3（地板 3）
+   player_event_feed_bed.gd         7（地板 7）
+   press_is_one_tick_bed.gd         4（地板 4）
+   scripted_exploration_bed.gd      3（地板 3）
+   spam_brake_bed.gd                6（地板 6）
+   success_sentence_bed.gd          5（地板 5）
+   text_ui_layout_bed.gd            4（地板 4）
+   trade_accept_bed.gd              5（地板 5）
+   tribute_offer_loop_bed.gd        4（地板 4）
+   ui_flow_test.gd                  37（地板 37）
+   unbound_key_bed.gd               8（地板 8）
+   ── 表裡 18 支床，已實測紅紀錄合計 134 條 ──
+  PASS: ★母體地板：表不是空的（空  下面整格沒有主詞）
+  PASS: ★★母體地板：合計數得到非零（0  每一條 `>=` 都恆真）
+  PASS: ★★★沒有任何一支床的紀錄數往回走（往回走的：[]）
+   ★反向掃：掃了 560 支 .gd（母體從檔案系統數，不是從表裡數）
+  PASS: ★★母體地板：反向掃真的掃到東西（560 支；0  下面那條恆綠）
+  PASS: ★★★★反向掃：沒有【有紀錄行而不在地板表裡】的床（漏掉的：[]）
+   ★★而這一條抓到的東西不是「有人寫錯」——是**手抄名單的必然**：
+     寫新床的人沒有理由知道有一張表在別的檔裡等他登記。
+
+── P2 推進一天不漏事件 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：有玩家隊（tid=15）
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 42 (member/team15) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team16 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team16 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Harvest] Tick360 季節=春 base=1.1
+[Combat Start] Team-1000000 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[Order] Team11 buy weapon_melee_low ×6 (oid=1)
+[Order] Team11 buy weapon_ranged_low ×5 (oid=2)
+[Order] Team11 buy tools ×3 (oid=3)
+[SoloAI] Team11 → 覓食 (覓食)
+[Order] Team0 sell material ×21 (oid=4)
+[Order] Team0 sell food ×1266 (oid=5)
+[Order] Team0 buy weapon_melee_low ×3 (oid=6)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=7)
+[Order] Team0 buy tools ×4 (oid=8)
+[Order] Team3 buy weapon_melee_low ×5 (oid=9)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=10)
+[Order] Team3 buy tools ×2 (oid=11)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[Order] Team8 buy weapon_melee_low ×4 (oid=12)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=13)
+[Order] Team8 buy tools ×2 (oid=14)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team9 buy weapon_melee_low ×6 (oid=15)
+[Order] Team9 buy weapon_ranged_low ×5 (oid=16)
+[Order] Team9 buy tools ×3 (oid=17)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[Order] Team4 sell material ×23 (oid=18)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=19)
+[Order] Team4 buy tools ×3 (oid=20)
+[Order] Team13 buy weapon_melee_low ×6 (oid=21)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=22)
+[Order] Team13 buy tools ×3 (oid=23)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[Order] Team2 sell material ×30 (oid=24)
+[Order] Team2 buy weapon_melee_low ×5 (oid=25)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=26)
+[Order] Team2 buy tools ×2 (oid=27)
+[Order] Team1 sell material ×30 (oid=28)
+[Order] Team1 buy weapon_melee_low ×5 (oid=29)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=30)
+[Order] Team1 buy tools ×2 (oid=31)
+[Order] Team10 buy weapon_melee_low ×4 (oid=32)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=33)
+[Order] Team10 buy tools ×2 (oid=34)
+[SoloAI] Team10 → 覓食 (覓食)
+[Order] Team12 buy weapon_melee_low ×5 (oid=35)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=36)
+[Order] Team12 buy tools ×2 (oid=37)
+[Tick 1247] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team12 → 覓食 (覓食)
+[Order] Team6 sell material ×30 (oid=38)
+[Order] Team6 buy weapon_melee_low ×5 (oid=39)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=40)
+[Order] Team6 buy tools ×2 (oid=41)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[Order] Team14 buy weapon_melee_low ×6 (oid=42)
+[Order] Team14 buy weapon_ranged_low ×4 (oid=43)
+[Order] Team14 buy tools ×3 (oid=44)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team7 sell material ×30 (oid=45)
+[Order] Team7 buy weapon_melee_low ×6 (oid=46)
+[Order] Team7 buy weapon_ranged_low ×4 (oid=47)
+[Order] Team7 buy tools ×3 (oid=48)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team17 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=393 us max=25184 us ticks=1440 teams=18 factions=2 | ★>2s 幀數=0/1440
+   逐小時各塞 1 件、共 24 小時｜佇列接受 28 件  畫面收到 28 件（★TTL=60 tick）
+  PASS: ★母體地板：真的塞進去了 24 件
+  PASS: ★母體地板：佇列接受的筆數  注入數（28  24）
+  PASS: ★★★整天一件都沒漏（佇列接受 28 ＝ 畫面收到 28）
+
+=== UI Flow Test DONE === errors: 0｜到場點名 81／81
+
+[godot.ps1] child exit=0

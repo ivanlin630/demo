@@ -1,0 +1,185 @@
+[MERGE-GATES] ★判決同時寫入 .claude/hooks/.merge-gates-last.log（外層 shell 若被殺，結論仍在這裡）
+[MERGE-GATES] runner-self=80cc4ca0 lines=599 run-id=2898-20261015-114646｜★兩人對照綠不綠之前，先對這一串；★★同一份檔裡出現兩個不同的 run-id ＝ **兩輪的輸出疊在一起→不可判**
+[MERGE-GATES] [TREE] HEAD=04b4a2417 registry=clean runner=clean code-dirty=0 artifact-dirty=1
+[MERGE-GATES] ★本次判決適用於 HEAD=04b4a2417（註冊表與 runner 皆乾淨）
+comm: file 1 is not in sorted order
+comm: file 2 is not in sorted order
+comm: input is not in sorted order
+comm: file 1 is not in sorted order
+comm: file 2 is not in sorted order
+comm: input is not in sorted order
+[MERGE-GATES] ★本地多出（分叉，非缺失；多半是還沒 push 的新閘）：cursor-hover
+[MERGE-GATES] main 基線紅數 ＝ 0（量於 80d45820f / 2026-09-22T05:11Z；main 之後又走了 2525 個 commit）
+[MERGE-GATES] ★開跑前 FreeMB=16013｜top-5 記憶體：
+[MERGE-GATES]   Memory Compression 1845MB
+[MERGE-GATES]   EscapeFromTarkov 1158MB
+[MERGE-GATES]   msedge 638MB
+[MERGE-GATES]   Discord 585MB
+[MERGE-GATES]   claude 531MB
+[MERGE-GATES]   ★Godot 行程數=0（★開跑前必須是 0）
+[MERGE-GATES] ★記憶體：第 1 支之前 FreeMB=15861
+[MERGE-GATES] ✓ constitution （5s）
+[MERGE-GATES] ✓ bare-tick （8s）
+[MERGE-GATES] ✓ build-duration （4s）
+[MERGE-GATES] ✓ bed-parse （99s）
+[MERGE-GATES] ✓ bed-arm （5s）
+[MERGE-GATES] ★記憶體：第 6 支之前 FreeMB=14911
+[MERGE-GATES] ✓ ki-anchor （4s）
+[MERGE-GATES] ✓ mailbox-integrity （41s）
+[MERGE-GATES] ✓ cherrypick-fidelity （2s）
+[MERGE-GATES] ✓ ki-status （15s）
+[MERGE-GATES] ✓ single-writer （1s）
+[MERGE-GATES] ★記憶體：第 11 支之前 FreeMB=14703
+[MERGE-GATES] ✓ tree-div （0s）
+[MERGE-GATES] ✓ headless （25s）
+[MERGE-GATES] ✓ cross-run-static （12s）
+[MERGE-GATES] ✓ own-camp-link （7s）
+[MERGE-GATES] ✓ zero-caller （4s）
+[MERGE-GATES] ★記憶體：第 16 支之前 FreeMB=14801
+[MERGE-GATES] ✓ exam-freeze （0s）
+[MERGE-GATES] ✓ print-join （0s）
+[MERGE-GATES] ✓ belief-freshness-invariant （7s）
+[MERGE-GATES] ✓ unified-commerce （7s）
+[MERGE-GATES] ✓ defer-open （26s）
+[MERGE-GATES] ★記憶體：第 21 支之前 FreeMB=14812
+[MERGE-GATES] ✓ defer-phrase （1s）
+[MERGE-GATES] ✓ modulo-phase （0s）
+[MERGE-GATES] ✓ ledger-drop-visible （7s）
+[MERGE-GATES] ✓ lod-split （1s）
+[MERGE-GATES] ✓ lod-rate-equivalence （7s）
+[MERGE-GATES] ★記憶體：第 26 支之前 FreeMB=14675
+[MERGE-GATES] ✓ valuation-clamp （8s）
+[MERGE-GATES] ✓ world-schedule-due （7s）
+[MERGE-GATES] ✓ envoy-ptype （7s）
+[MERGE-GATES] ✓ mailbox-size （0s）
+[MERGE-GATES] ✓ mailbox-broadcast （0s）
+[MERGE-GATES] ★記憶體：第 31 支之前 FreeMB=14827
+[MERGE-GATES] ✓ board-price （8s）
+[MERGE-GATES] ✓ swallow-setter （0s）
+[MERGE-GATES] ✓ tier2-sweep-staleness （0s）
+[MERGE-GATES] ✓ minor-merge （7s）
+[MERGE-GATES] ✓ escrow-audit （7s）
+[MERGE-GATES] ★記憶體：第 36 支之前 FreeMB=14738
+[MERGE-GATES] ✓ computed-prop （2s）
+[MERGE-GATES] ✓ bed-kind （14s）
+[MERGE-GATES] ✓ wage-penalty （7s）
+[MERGE-GATES] ✓ payroll-urgency （7s）
+[MERGE-GATES] ✓ merchant-turnover （13s）
+[MERGE-GATES] ★記憶體：第 41 支之前 FreeMB=14915
+[MERGE-GATES] ✓ team-ui （8s）
+[MERGE-GATES] ✓ player-entry-smoke （9s）
+[MERGE-GATES] ✓ ui-flow （19s）
+[MERGE-GATES] ✓ command-replay （26s）
+[MERGE-GATES] ✓ player-event-feed （9s）
+[MERGE-GATES] ★記憶體：第 46 支之前 FreeMB=14672
+[MERGE-GATES] ✓ inquiry-v1 （13s）
+[MERGE-GATES] ✓ success-sentence （8s）
+[MERGE-GATES] ✓ ui-logic （8s）
+[MERGE-GATES] ✓ value-key （2s）
+[MERGE-GATES] ✓ value-key-selfcheck （1s）
+[MERGE-GATES] ★記憶體：第 51 支之前 FreeMB=14596
+[MERGE-GATES] ✓ plan-speed （7s）
+[MERGE-GATES] ✓ material-buy （7s）
+[MERGE-GATES] ✓ gateA （7s）
+[MERGE-GATES] ✓ gateA-hysteresis （6s）
+[MERGE-GATES] ✓ restock-burn （14s）
+[MERGE-GATES] ★記憶體：第 56 支之前 FreeMB=13423
+[MERGE-GATES] ✓ failure-feedback-coverage （9s）
+[MERGE-GATES] ✓ gather-purity （7s）
+[MERGE-GATES] ✓ role-commit-scope （2s）
+[MERGE-GATES] ✓ watchdog-beacon （0s）
+[MERGE-GATES] ✓ live-team-census （2s）
+[MERGE-GATES] ★記憶體：第 61 支之前 FreeMB=9193
+[MERGE-GATES] ✓ fp-longwindow （40s）
+[MERGE-GATES] ✓ live-team-ratchet （1s）
+[MERGE-GATES] ✓ grudge-ledger-a （7s）
+[MERGE-GATES] ✓ raid-expected-value （8s）
+[MERGE-GATES] ✓ stale-pos-recon （8s）
+[MERGE-GATES] ★記憶體：第 66 支之前 FreeMB=10107
+[MERGE-GATES] ✓ anchoredness-freshness （8s）
+[MERGE-GATES] ✓ outpost-belief （8s）
+[MERGE-GATES] ✓ sister-sites-outpost （9s）
+[MERGE-GATES] ✓ occupy-target-belief （7s）
+[MERGE-GATES] ✓ phase-tree-net-cost （7s）
+[MERGE-GATES] ★記憶體：第 71 支之前 FreeMB=10920
+[MERGE-GATES] ✓ phase-root-conservation （12s）
+[MERGE-GATES] ✓ fp-gather-sensitivity （46s）
+[MERGE-GATES] ✓ day-length-single-source （13s）
+[MERGE-GATES] ✓ det-observation-noise （8s）
+[MERGE-GATES] ✓ crisis-override （7s）
+[MERGE-GATES] ★記憶體：第 76 支之前 FreeMB=10052
+[MERGE-GATES] ✓ world-fp （635s）
+[MERGE-GATES] ✓ world-fp-ctrl （1221s）
+[MERGE-GATES] ✓ intel-wake-godview （3s）
+[MERGE-GATES] ✓ intel-wake-direction （14s）
+[MERGE-GATES] ✓ globalmsg-shape （7s）
+[MERGE-GATES] ★記憶體：第 81 支之前 FreeMB=11128
+[MERGE-GATES] ✓ faction-drive-once （21s）
+[MERGE-GATES] ✓ shape-falsifier （31s）
+[MERGE-GATES] ✓ pass-stagger （73s）
+[MERGE-GATES] ✓ fp-excludes-derived （6s）
+[MERGE-GATES] ✓ player-fp-sentinel （11s）
+[MERGE-GATES] ★記憶體：第 86 支之前 FreeMB=10994
+[MERGE-GATES] ✓ forced-event-panel （9s）
+[MERGE-GATES] ✓ press-is-one-tick （9s）
+[MERGE-GATES] ✓ colocation-gate （8s）
+[MERGE-GATES] ✓ trade-accept （7s）
+[MERGE-GATES] ✓ unbound-key （22s）
+[MERGE-GATES] ★記憶體：第 91 支之前 FreeMB=11112
+[MERGE-GATES] ✓ spam-brake （7s）
+[MERGE-GATES] ✓ scripted-exploration （10s）
+[MERGE-GATES] ✓ leader-chokepoint （9s）
+[MERGE-GATES] ✓ decision-vs-outcome （9s）
+[MERGE-GATES] ✓ npc-tribute-transfer （7s）
+[MERGE-GATES] ★記憶體：第 96 支之前 FreeMB=11029
+[MERGE-GATES] ✓ available-actions （16s）
+[MERGE-GATES] ✓ text-ui-layout （6s）
+[MERGE-GATES] ✓ terminal-selfcheck （16s）
+[MERGE-GATES] ✓ tribute-offer-loop （24s）
+[MERGE-GATES] ✓ play-selfcheck （21s）
+[MERGE-GATES] ★記憶體：第 101 支之前 FreeMB=10884
+[MERGE-GATES] ✓ story-end-physics （8s）
+[MERGE-GATES] ✓ player-team-succession （18s）
+[MERGE-GATES] ✓ threat-column （8s）
+[MERGE-GATES] ✓ claim-own-market （8s）
+[MERGE-GATES] ✓ task-target-handoff （23s）
+[MERGE-GATES] ★記憶體：第 106 支之前 FreeMB=10939
+[MERGE-GATES] ✓ terminal-e2e （247s）
+[MERGE-GATES] ✓ ledger-delta-sum （14s）
+[MERGE-GATES] ✓ fatigue-by-activity （336s）
+[MERGE-GATES] ✓ inquiry-writes （9s）
+[MERGE-GATES] ✓ extortion-brake （7s）
+[MERGE-GATES] ★記憶體：第 111 支之前 FreeMB=11901
+[MERGE-GATES] ✓ a2-trade-no-deal （147s）
+[MERGE-GATES] ✓ tribute-offer-has-something （29s）
+[MERGE-GATES] ✓ a2-fix-mark-written （641s）
+[MERGE-GATES] ✓ f10-whole-map （8s）
+[MERGE-GATES] ✓ play-key-token （0s）
+[MERGE-GATES] ★記憶體：第 116 支之前 FreeMB=12218
+[MERGE-GATES] ✓ f8-camp-settle （9s）
+[MERGE-GATES] ✓ f9-known-outpost-relations （8s）
+[MERGE-GATES] ✓ map-memory （100s）
+[MERGE-GATES] ✓ multi-hop-move （225s）
+[MERGE-GATES] ✓ alliance-leader （291s）
+[MERGE-GATES] ★記憶體：第 121 支之前 FreeMB=12929
+[MERGE-GATES] ✓ play-client-keys （10s）
+[MERGE-GATES] ✓ terminal-input-prompts （11s）
+[MERGE-GATES] ✓ map-pane （8s）
+[MERGE-GATES] ✓ extortion-zero-take （8s）
+[MERGE-GATES] ✓ player-action-audit （297s）
+[MERGE-GATES] ★記憶體：第 126 支之前 FreeMB=11109
+[MERGE-GATES] ✓ player-subteams （18s）
+[MERGE-GATES] ✓ possessed-orders （8s）
+[MERGE-GATES] ✓ possessed-famine-stop （10s）
+[MERGE-GATES] ✓ possessed-writers （8s）
+[MERGE-GATES] ✓ move-eta （39s）
+[MERGE-GATES] ★記憶體：第 131 支之前 FreeMB=7986
+[MERGE-GATES] ✓ intel-panel （9s）
+[MERGE-GATES] ✓ cursor-hover （10s）
+───────────────────────────────
+[MERGE-GATES] 註冊表 132 支｜總時 5519s
+[MERGE-GATES] ★本輪【沒有】更新 main 基線紅數 —— 原因： 不在 main
+[MERGE-GATES]   ⇒ ★★這一行必須存在：靜默的【沒有記下來】跟【記下來了】在畫面上長得一樣。
+[MERGE-GATES] PASS：本地這 132 支全部通過｜★本地多出（分叉，非缺失；多半是還沒 push 的新閘）：cursor-hover
+[MERGE-GATES] ★摘要已落檔：docs/measurements/.battery/2898-20261015-114646.txt
+[MERGE-GATES] BATTERY_RC=0
