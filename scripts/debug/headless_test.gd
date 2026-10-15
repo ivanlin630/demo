@@ -14325,6 +14325,12 @@ func _test_action_ui_coverage() -> void:
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
 		"rest": "interact-self",   # ★票T §1③ 休息（自家隊動作區）
+		# ★戰後收尾（spec 2026-10-14-battle-aftermath）：命運四項／追擊兩項／居民三項只在有 pending 時列；俘虜待遇兩項在有俘虜時列
+		"aftermath_kill": "interact-self", "aftermath_capture_kind": "interact-self",
+		"aftermath_capture_harsh": "interact-self", "aftermath_release": "interact-self",
+		"aftermath_pursue": "interact-self", "aftermath_no_pursue": "interact-self",
+		"residents_massacre": "interact-self", "residents_abandon": "interact-self", "residents_seize": "interact-self",
+		"captive_set_kind": "interact-self", "captive_set_harsh": "interact-self",
 		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",
 		"upgrade_farming": "outpost-panel", "upgrade_manufacturing": "outpost-panel",
 		"demolish_outpost": "outpost-panel", "abandon_outpost": "outpost-panel", "build_facility": "outpost-panel",

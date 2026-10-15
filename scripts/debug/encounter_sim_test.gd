@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 遭遇戰結算端（2026-06-07 player pending_action 修；戰後收尾 2026-10-15 只改第 5 段註解）
 # 遭遇戰模擬測試 — 自動跑完一場遭遇戰，印每 tick 狀態，檢查不變量
 # 用法: Godot_v4.2.2-stable_win64_console.exe --headless --script scripts/debug/encounter_sim_test.gd
 #

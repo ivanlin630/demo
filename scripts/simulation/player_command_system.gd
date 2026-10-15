@@ -692,27 +692,27 @@ static func aftermath_listed(state: WorldState, pt: TeamData, aid: String) -> bo
 	return (st == "fate" and AFTERMATH_FATE.has(aid)) or (st == "pursuit" and AFTERMATH_PURSUIT.has(aid)) \
 		or (st == "residents" and AFTERMATH_RESIDENTS.has(aid))
 
-func _aftermath_pre(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
+func precheck_aftermath_shared(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "reason": "找不到玩家隊伍" }
 	if not aftermath_listed(state, pt, aid):
 		return { "ok": false, "reason": "現在沒有要你處置的事" }
 	return { "ok": true, "reason": "" }
 
-func precheck_aftermath_kill(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "aftermath_kill")
-func precheck_aftermath_release(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "aftermath_release")
+func precheck_aftermath_kill(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_kill")
+func precheck_aftermath_release(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_release")
 func precheck_aftermath_capture_kind(state: WorldState, pt: TeamData) -> Dictionary: return _precheck_capture(state, pt, "aftermath_capture_kind")
 func precheck_aftermath_capture_harsh(state: WorldState, pt: TeamData) -> Dictionary: return _precheck_capture(state, pt, "aftermath_capture_harsh")
-func precheck_aftermath_pursue(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "aftermath_pursue")
-func precheck_aftermath_no_pursue(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "aftermath_no_pursue")
-func precheck_residents_massacre(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "residents_massacre")
-func precheck_residents_abandon(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "residents_abandon")
-func precheck_residents_seize(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "residents_seize")
-func precheck_captive_set_kind(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "captive_set_kind")
-func precheck_captive_set_harsh(state: WorldState, pt: TeamData) -> Dictionary: return _aftermath_pre(state, pt, "captive_set_harsh")
+func precheck_aftermath_pursue(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_pursue")
+func precheck_aftermath_no_pursue(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "aftermath_no_pursue")
+func precheck_residents_massacre(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "residents_massacre")
+func precheck_residents_abandon(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "residents_abandon")
+func precheck_residents_seize(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "residents_seize")
+func precheck_captive_set_kind(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "captive_set_kind")
+func precheck_captive_set_harsh(state: WorldState, pt: TeamData) -> Dictionary: return precheck_aftermath_shared(state, pt, "captive_set_harsh")
 
 func _precheck_capture(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
-	var r: Dictionary = _aftermath_pre(state, pt, aid)
+	var r: Dictionary = precheck_aftermath_shared(state, pt, aid)
 	if not bool(r.get("ok", false)):
 		return r
 	if ManpowerSystem.captive_room(state, pt) <= 0:
@@ -772,7 +772,7 @@ func _action_aftermath_no_pursue(state: WorldState, _t: int, pt: TeamData, _id: 
 	return { "ok": true, "msg": "不追" }
 
 func _residents(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
-	var pr: Dictionary = _aftermath_pre(state, pt, aid)
+	var pr: Dictionary = precheck_aftermath_shared(state, pt, aid)
 	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
 	var rp: Dictionary = state.last_encounter_result.get("residents_pending", {})
 	var resident: TeamData = state.teams.get(int(rp.get("resident_id", -1)))
@@ -804,7 +804,7 @@ func _action_residents_seize(state: WorldState, _t: int, pt: TeamData, _id: int)
 	return _residents(state, pt, "residents_seize")
 
 func _captive_set(state: WorldState, pt: TeamData, aid: String, treatment: String) -> Dictionary:
-	var pr: Dictionary = _aftermath_pre(state, pt, aid)
+	var pr: Dictionary = precheck_aftermath_shared(state, pt, aid)
 	if not bool(pr.get("ok", false)): return { "ok": false, "msg": String(pr.get("reason", "")) }
 	var n: int = 0
 	for g in pt.captive_groups:
@@ -1303,9 +1303,7 @@ func _action_take_loot(state: WorldState, _target_id: int, pt: TeamData, pt_id: 
 		if loser_team != null:
 			ResourceBank.remove(loser_team, rk, amount, "collect_loot_out")
 		ResourceBank.add(pt, rk, amount, "collect_loot_in")
-	# ★只標戰利品處理完，不清整個結果（spec 2026-10-14-battle-aftermath：同一份結果還帶著傷兵／追擊／居民的 pending）
-	state.last_encounter_result["loot_done"] = true
-	state.last_encounter_result["loot_pool"] = {}
+	_mark_loot_done(state)
 	print("[PlayerCmd] 收取戰利品: %s" % str(loot))
 	return { "ok": true, "msg": "收取戰利品成功",
 			 "payload": {"refresh_required": true} }
@@ -1319,9 +1317,17 @@ func _action_leave_loot(state: WorldState, _target_id: int, pt: TeamData, _pt_id
 	var pre_ll: Dictionary = precheck_leave_loot(state, pt)
 	if not bool(pre_ll.get("ok", false)):
 		return { "ok": false, "msg": String(pre_ll.get("reason", "")) }
+	_mark_loot_done(state)
+	return { "ok": true, "msg": "放棄戰利品" }
+
+# ★收／棄戰利品之後：還有傷兵／追擊／居民 pending ⇒ 只標 loot_done（同一份結果還要給那幾項讀）；
+#   都沒有 ⇒ 照舊清掉整份結果（舊行為；ui-flow 那一格守它）
+static func _mark_loot_done(state: WorldState) -> void:
+	if aftermath_stage(state) == "":
+		state.last_encounter_result = {}
+		return
 	state.last_encounter_result["loot_done"] = true
 	state.last_encounter_result["loot_pool"] = {}
-	return { "ok": true, "msg": "放棄戰利品" }
 
 func _action_establish_faction_cmd(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	return establish_faction(state)

@@ -3697,6 +3697,11 @@ func _test_p33_listed_matches_the_screen() -> void:
 			#   ⇒ 這一屏（不在自己營地上）本來就不該有它 —— 指名排除，不放寬計數
 			if String(k) == "settle":   # 這一格的 UI 是新建的世界、玩家不在自己的營地上
 				continue
+			# ★戰後收尾（spec 2026-10-14-battle-aftermath）：命運／追擊／居民／俘虜待遇 11 項只在有 pending／有俘虜時列出
+			#   （PlayerCommandSystem.aftermath_listed）⇒ 新建的世界沒有剛結束的戰鬥、玩家沒有俘虜 ⇒ 指名排除，不放寬計數
+			if (PlayerCommandSystem.AFTERMATH_FATE + PlayerCommandSystem.AFTERMATH_PURSUIT
+					+ PlayerCommandSystem.AFTERMATH_RESIDENTS + PlayerCommandSystem.CAPTIVE_SET).has(String(k)):
+				continue
 			declared.append(String(k))
 	declared.sort()
 	print("   宣告側（`target==\"none\" and listed`）＝ %d 個：%s" % [declared.size(), str(declared)])
