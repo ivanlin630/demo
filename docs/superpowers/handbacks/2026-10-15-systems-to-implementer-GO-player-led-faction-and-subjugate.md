@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你（玩家可見批尾）
 topic: GO｜spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW（R² 兩輪 CLEAN）｜順位：第 7 張戰後收尾之後
 ---

@@ -1414,6 +1414,11 @@ func _evaluate_loop1_factions(state: WorldState, faction_ids: Array) -> void:
 				if member_team == null: continue
 				# 子隊（TAG_SUBTEAM）不評估背叛：在途建造/安頓子隊若被叛出會廢棄任務且造成孤立 zombie。
 				if member_team.tags.has(TeamData.TAG_SUBTEAM): continue
+				# ★#12（spec player-led-faction 改法 4）：AI 不替玩家的隊決定背叛離團。NPC 成員照跑。
+				if member_team.player_controlled:
+					if Probe.enabled: Probe.bump("betray.skip_player_controlled")
+					continue
+				if Probe.enabled: Probe.bump("betray.consider." + ("pc" if member_team.player_controlled else "npc"))
 				DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
 		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
 
@@ -1933,6 +1938,18 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	f.goal_drivers.clear()
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	if leader_team == null:
+		return
+
+	# ★#12 勢力層（spec 2026-10-15-player-led-faction 改法 1）：玩家當盟主 ⇒ 不依盟主人格產目標、不重選 intent。
+	#   只放玩家設的那一個（沒設就空）；成員照常——goals 空＝沒有勢力義務加權。
+	#   ★intent 寫空字典、不寫守成：寫了守成，玩家交出盟主後 _select_intent 的 committed 滯後會把它當既有承諾偏袒一次；
+	#     空字典下游全有 .get／is_empty 保護（本支 :1993 也把空當守成用）。
+	if state.is_player_led(f):
+		if Probe.enabled: Probe.bump("faction.goals_rebuild_player_led")
+		if not f.player_goal_override.is_empty():
+			f.goals.append(f.player_goal_override)
+		f.intent = {}
+		f.strategy = "玩家領導"
 		return
 
 	# G-09：玩家設定 override → 跳過自動計算，直接套用
@@ -2758,6 +2775,7 @@ func _best_candidate_quality(team: TeamData) -> float:
 # ★主動升匿名決策（§2 領主 deliberate、§3 真代價、§4 第 3 路 anon→named）。
 #   非自動補滿：demand>0 只是入場、須 util>THRESHOLD(人格+候選資質競秤)才提 → 多疑/低需求/無夠格候選照樣不提。
 func _try_promote_advisor(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "promote")
 	var f = state.factions.get(team.faction_id)
 	if f == null or f.leader_team_id != team.team_id:
 		return   # 只領主 deliberate 提拔班底（村副手 parked）
@@ -2834,11 +2852,33 @@ func _apply_promotion_initial_state(state: WorldState, team: TeamData, officer: 
 		Probe.note("promote.init_loyalty", loy)
 		Probe.note("promote.init_stress", officer.stress)
 
+# ★薄殼：謂詞本體在 WorldState.is_player_led（data 層要用）；不在這裡內聯第二份。
+static func is_player_led(state: WorldState, f) -> bool:
+	return state.is_player_led(f)
+
+# ★tap（spec 2026-10-15-player-led-faction F5）：十支各自入口的「被呼叫」計數，分玩家控制隊（pc）／NPC 隊（npc）。
+#   ★放在各支第一行（不放在迴圈）：十支另有別的呼叫點（_apply_contact_reaction 內呼 scout／herald），迴圈計數會漏。
+static func _side_tap(team: TeamData, k: String) -> void:
+	if Probe.enabled: Probe.bump("side.call.%s.%s" % [k, "pc" if team.player_controlled else "npc"])
+
 func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
 		if team == null or team.parent_team_id != -1 or team.combat_target != -1:
 			continue   # 子隊/戰鬥中不 side-dispatch
+		# ★#12（spec player-led-faction 改法 5）：玩家控制隊整支跳過十支的【決策】（派人、寫警戒、遷村）。
+		#   ★壞掉的樣子：玩家的隊據點突然沒了（_try_self_relocate 先棄據點、arbiter 才擋遷移）、或自己多派出一支信使。
+		#   ★★但十支裡藏著【記帳半】（spec 說沒有，map-memory 閘證明有）：玩家隊的地圖記憶與市集記憶原本是
+		#     _try_distribute_side → DecisionContext.gather（_harvest_market_known）→ … → find_nearest_known_tile
+		#     （harvest_tile_known）的副作用 ⇒ 整支跳過後玩家隊從此不記得走過的格。
+		#     ⇒ 照同一個 cadence 只做那兩份感知，不做決策。代價：玩家交出控制後第一輪最遲晚一個 cadence。
+		if team.player_controlled:
+			if Probe.enabled: Probe.bump("side.skip_player_controlled")
+			if state.world.current_tick >= team.info_eval_next_tick:
+				team.info_eval_next_tick = state.world.current_tick + INFO_DISPATCH_CADENCE
+				_harvest_market_known(state, team)
+				BeliefSystem.harvest_tile_known(state, team)
+			continue
 		# ★perf：cadence-gate（per-team 錯開）——side-dispatch 每日評一次非每 tick（scout O(teams) 掃 per leader 昂貴）。
 		if state.world.current_tick < team.info_eval_next_tick:
 			continue
@@ -2859,6 +2899,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 # reuse _distribute_candidates（已 de-scan：belief received_buy_orders + 人格 relief、零 god-view 零死常數）算最佳候選；
 # mini-util=該候選 util（>0 才返候選）；_dispatch_convoy 自 throttle 一 convoy/lord + 內建 distribute.dispatch tap。純算術零 RNG。
 func _try_distribute_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "distribute")
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var cands: Array = GoalResolver._distribute_candidates(state, team, ctx, lv)
@@ -2875,6 +2916,7 @@ const MIGRANT_BATCH: int = 3   # TEST VALUE — 一批移民 anon 數
 const MIGRANT_EXPECT_DAYS: float = 30.0   # TEST VALUE — 移民淨益回收視野（月量級規劃、genuine 非門檻）
 const MIGRANT_MOVE_COST: float = MarginalEconomy.MIGRANT_UPKEEP * float(MIGRANT_BATCH)   # 送 k 人一次性移動成本 proxy（途中食耗、DERIVED 食物常數）
 func _try_migrant_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "migrant")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3071,6 +3113,7 @@ func _best_relocate_target(state: WorldState, faction_id: int, subject: TeamData
 # ★領主下遷村令（§2C、C）：領主秤自家村 relocate_value + 人格 → 下令 = in_transit_letters kind='relocate'
 # payload=target_tile（reuse letter infra、真送達非瞬間、throttle 一令/村）。target 限 own-faction 已知領土（god-view gate）。
 func _try_relocate_order(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "relocate_order")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3144,6 +3187,7 @@ func _deliver_relocate_order(state: WorldState, letter: Dictionary) -> void:
 
 # ★村自願遷（§3）：村秤自身 relocate_value（own-faction 已知領土 target）> 閾 → 自發遷（非領主令、村自主）。
 func _try_self_relocate(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "self_relocate")
 	if team.faction_id == -1 or team.task_reason == "relocate":
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3173,6 +3217,7 @@ func _try_self_relocate(state: WorldState, team: TeamData) -> void:
 #   ★現況陳述（不複述那條錯的耦合）：送料用組 A 上界，村端 `_can_afford` 檢查用 1.0×。
 const INVEST_SAFETY: float = BuildAfford.MARGIN_MAX
 func _try_invest_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "invest")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -3222,6 +3267,7 @@ func _try_invest_side(state: WorldState, team: TeamData) -> void:
 
 # 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "herald")
 	if team.population < 2:
 		return   # can_send_herald（pop 1 自己走）
 	if _has_inflight_letter(state, team.team_id):
@@ -3298,6 +3344,7 @@ func _dispatch_named_runner(state: WorldState, team: TeamData, task: String, rea
 
 # 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派記名斥候（§2 named-led、次要記名單人跑腿）。
 func _try_scout_side(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "scout")
 	if team.population < 2:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -8170,6 +8217,7 @@ const CARE_FIRSTHAND_ORDER_BASE: int = 2_000_000_000   # firsthand 觀察 synth 
 # 記帳點：faction 領主 cadence（info_side_dispatch）ensure-once——每村僅 append 一次（guard by 現有 holding subject）。
 # 零 god-view：dist 讀 belief best_estimate pos（無 belief→dist0 base 週期）、team.tile_pos=自身。
 func _ensure_holding_ledger(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "holding")
 	if team.faction_id == -1:
 		return
 	var f = state.factions.get(team.faction_id)
@@ -8215,6 +8263,7 @@ func _pick_care_reaction(overdue_ratio: float, lv: Dictionary) -> String:
 
 # ★失聯偵測 + 競爭 react_util 人格反應（母→子、cadence per-team）。
 func _step_contact_ledger(state: WorldState, team: TeamData) -> void:
+	_side_tap(team, "contact")
 	if team.dispatch_ledger.is_empty():
 		return
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)

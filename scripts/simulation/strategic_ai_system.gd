@@ -26,6 +26,11 @@ static func _nearest_valid_tile(state: WorldState, target: Vector2i, fallback: V
     return fallback
 
 func tick(state: WorldState, faction: FactionData) -> void:
+    # ★#12 勢力層（spec player-led-faction 改法 2）：玩家領導 ⇒ 清成員指派（冪等、狀態無關）→ 整段不跑。
+    #   ★放在所有排程戳記之前：玩家交出盟主後第一輪立刻 due。
+    if state.is_player_led(faction):
+        state.clear_member_assignments(faction)
+        return
     # ★S3：`% == 0` → 錯峰排程（同 GOAL）—— 而這一支是【早退式】，排程要在 return 之前做完。
     if faction.strategic_eval_next_tick == 0:
         faction.strategic_eval_next_tick = CadenceStagger.next_tick(

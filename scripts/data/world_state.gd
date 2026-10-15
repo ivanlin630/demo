@@ -505,6 +505,9 @@ func succeed_or_disband_faction(faction_id: int, dead_leader_tid: int, also_dead
 		return
 	f.leader_team_id = best
 	if Probe.enabled: Probe.bump("faction.succession")
+	# ★繼位交給玩家控制隊 ⇒ 當 tick 清成員戰略指派（不等下一輪 StrategicAiSystem.tick；spec player-led-faction 改法 2②）
+	if is_player_led(f):
+		clear_member_assignments(f)
 	print("[Succession] 勢力%d 領袖團 %d 死 → %d 接位" % [faction_id, dead_leader_tid, best])
 
 func disband_faction(faction_id: int) -> void:
@@ -560,6 +563,25 @@ const LEAVE_REASONS: Array = [
 	LEAVE_FACTION_DISSOLVED,
 ]
 
+# ★玩家領導的勢力（spec 2026-10-15-player-led-faction §謂詞）：盟主隊存在且是玩家控制隊。
+#   ★全專案只有這一支；FactionAISystem.is_player_led 是呼它的薄殼。勢力層的擋都呼它，隊層的擋直接讀 team.player_controlled。
+#   ★#12 勢力層：玩家當盟主 ⇒ 不自動產目標、不自動派戰略指派、不以盟主名義自動提外交。
+func is_player_led(f) -> bool:
+	if f == null:
+		return false
+	var lt: TeamData = teams.get(f.leader_team_id)
+	return lt != null and lt.player_controlled
+
+# ★玩家領導的勢力：清掉成員身上的戰略指派（冪等）。三個呼叫點共用這一支：
+#   StrategicAiSystem.tick 每小時（附身成為盟主）、succeed_or_disband_faction 繼位交給玩家隊當下、set_team_faction 入玩家勢力當下。
+#   ★壞掉的樣子：玩家當了盟主，成員卻照 NPC 盟主留下的包圍點在走——不紅不報，只是成員不聽你的。
+func clear_member_assignments(f) -> void:
+	for tid in f.member_team_ids:
+		var t: TeamData = teams.get(tid)
+		if t != null and not t.strategic_assignments.is_empty():
+			t.strategic_assignments.clear()
+			if Probe.enabled: Probe.bump("strategic.clear_player_led")
+
 # 雙向單一入口：team.faction_id ↔ faction.member_team_ids 一處同維護（規則3）。
 # 換 faction 自動退舊團、入新團；idempotent。
 # ★★A#27 tap：掛在【早退之後】—— 早退擋掉 6 顆 `set_team_faction(t, -1)` 的 fresh-team no-op
@@ -584,7 +606,32 @@ func set_team_faction(team: TeamData, fid: int, reason: String = LEAVE_UNSET) ->
 	if fid != -1 and factions.has(fid):
 		if not factions[fid].member_team_ids.has(team.team_id):
 			factions[fid].member_team_ids.append(team.team_id)
+		# ★入【玩家領導的勢力】⇒ 當下清該隊戰略指派（spec player-led-faction 改法 2③：舊勢力的包圍點不帶進來）
+		if is_player_led(factions[fid]) and not team.strategic_assignments.is_empty():
+			team.strategic_assignments.clear()
+			if Probe.enabled: Probe.bump("strategic.clear_player_led")
+		if player_id != -1:
+			_erase_hostile_on_join(team, fid, reason)
 	_on_faction_changed(team, old_fid, fid, reason)
+
+# ★敵對帳跟著勢力走（spec player-led-faction 改法 6c）：同勢力的隊不再算「攻擊過玩家的敵人」。
+#   入的是玩家隊所在勢力 ⇒ 該隊出帳；入勢力的是玩家隊本身 ⇒ 新勢力全員出帳。之後再打起來由既有寫者重新標。
+#   ★壞掉的樣子：收編了 TeamX，威脅欄卻還列著它、同格交換它對你沉默或惡意。
+func _erase_hostile_on_join(team: TeamData, fid: int, reason: String) -> void:
+	var ptid: int = get_player_team_id()
+	var pt: TeamData = teams.get(ptid)
+	if pt == null:
+		return
+	var gone: Array = []
+	if team.team_id == ptid:
+		for m in factions[fid].member_team_ids:
+			if m != ptid and player_hostile_teams.has(m):
+				gone.append(m)
+	elif pt.faction_id == fid and player_hostile_teams.has(team.team_id):
+		gone.append(team.team_id)
+	for m in gone:
+		player_hostile_teams.erase(m)
+		if Probe.enabled: Probe.bump("hostile.erase_on_join." + (reason if reason in JOIN_REASONS else "unknown_reason"))
 
 # ★換勢力的副作用統一掛在這裡（spec 2026-10-13-alliance-never-moves-faction-leader 改法 4＋#8-2）：
 #   ①領袖隊離開舊勢力（任何路徑：結盟、臣服、投降、整併…）⇒ 繼位或解散——不擋任何路徑，只讓勢力不再無頭

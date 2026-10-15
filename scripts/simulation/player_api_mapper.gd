@@ -1067,27 +1067,33 @@ static func _bearing(from: Vector2i, to: Vector2i) -> String:
 
 # ── Faction panel ──────────────────────────────────────────────────────────────
 
+# ★盟主動作「還沒做」清單（spec 2026-10-15-player-led-faction 改法 7）：NPC 盟主會做、玩家沒有指令的那幾件。
+#   ★逐項對過 PlayerCommandSystem 的 action 表（交件信貼核對表）；有玩家指令的不列：
+#     提拔＝promote_anon、偵查＝order_faction_member 的「偵查」、徵收率＝set_tribute_rate、目標＝set_faction_goal、建勢力＝establish_faction。
+#   ★有人補了其中一個動詞 ⇒ 從這裡拿掉；不拿掉的樣子＝面板說「還沒做」而動作列上明明有。
+const MISSING_LEADER_VERBS: Array = ["立國", "派信使傳消息", "分糧給成員", "往據點移民", "投資據點農業", "下遷村令", "以勢力名義遠程外交"]
+
 static func map_faction_panel(state: WorldState) -> Dictionary:
 	var pid: int = state.player_id
 	if pid == -1:
 		return {"in_faction": false, "faction_id": -1, "is_leader": false,
 			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
-			"member_orders": [], "actions": []}
+			"member_orders": [], "actions": [], "player_led": false, "missing_leader_verbs": []}
 	var p: PersonData = state.persons.get(pid)
 	if p == null:
 		return {"in_faction": false, "faction_id": -1, "is_leader": false,
 			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
-			"member_orders": [], "actions": []}
+			"member_orders": [], "actions": [], "player_led": false, "missing_leader_verbs": []}
 	var pt: TeamData = state.teams.get(p.team_id)
 	if pt == null or pt.faction_id == -1:
 		return {"in_faction": false, "faction_id": -1, "is_leader": false,
 			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
-			"member_orders": [], "actions": []}
+			"member_orders": [], "actions": [], "player_led": false, "missing_leader_verbs": []}
 	var f = state.factions.get(pt.faction_id)
 	if f == null:
 		return {"in_faction": false, "faction_id": -1, "is_leader": false,
 			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
-			"member_orders": [], "actions": []}
+			"member_orders": [], "actions": [], "player_led": false, "missing_leader_verbs": []}
 	var is_leader: bool = f.leader_team_id == pt.team_id
 	var pending_orders: Dictionary = state.player_pending_orders
 	var member_orders: Array = []
@@ -1119,6 +1125,8 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 		"tribute_rate": f.tribute_rate,
 		"member_orders": member_orders,
 		"actions": actions,
+		"player_led": state.is_player_led(f),
+		"missing_leader_verbs": MISSING_LEADER_VERBS.duplicate() if state.is_player_led(f) else [],
 	}
 
 # ── Storage panel (公庫) ─────────────────────────────────────────────────────

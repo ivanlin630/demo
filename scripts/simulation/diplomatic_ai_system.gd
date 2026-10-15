@@ -160,6 +160,12 @@ func _calc_diplomacy_score(state: WorldState,
 		0.0, 1.0)
 
 func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
+	# ★#12（spec player-led-faction 改法 3）：玩家控制隊不以勢力名義自動提外交；在 randf 之前 return ⇒ 整支不耗 RNG。
+	#   收到提案的找上門流程不動。
+	if self_team.player_controlled:
+		if Probe.enabled: Probe.bump("diplo.skip_player_controlled")
+		return
+	if Probe.enabled: Probe.bump("dip.proactive_call." + ("pc" if self_team.player_controlled else "npc"))   # ★tap（spec player-led-faction F3）：入口、randf 之前
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
 	if self_leader == null: return
 	# de-patch 閘2b（blueprint 明裁 legit RNG 案③，retry alone）：曲線陡化——慎重推兩端

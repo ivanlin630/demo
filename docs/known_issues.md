@@ -5686,6 +5686,7 @@ faction_ai 其他 goals 讀者也只認中文詞（攻擊、立國）。
 ⇒ player_goal_override 進 goals 後沒有任何讀者認得 ⇒ 玩家設目標只改面板那一行字，對成員零作用。不是新造成的。
 「已知未修」＝讀者不存在已坐實（靜態 grep＋你領導的勢力床 F1b 實測成員 faction_stakes＝[]）；缺的是 WHAT（詞彙對應），裁下來才修。（2026-10-16 由未確認改：ki-status 閘指出未確認的回訪只能是量測窗，而這條缺的不是量測。）
 出處：實作端問題信 2026-10-16-implementer-to-systems-Q-player-led-faction-player-is-loser-path-exists ②。
+交接：玩家交出領導後 player_goal_override 不清，NPC 盟主重建 goals 時照樣附上（faction_ai_system.gd:1956-1957）；今天無讀者所以無作用，詞彙裁下來時一起定交接要不要清。
 ```
 
 ## 情報頁「勢力關係」一類恆為「尚無」
