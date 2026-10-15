@@ -24,7 +24,6 @@ static func _subteam_task_from_index(idx_1based: int) -> String:
 	return SUBTEAM_TASK_CHOICES[i][0]
 
 var _cursor: Vector2i = Vector2i(4, 4)
-var _selected: Vector2i = Vector2i(-1, -1)
 # ★★★分頁 index（spec §2-2）：這是【一個 enum】，不是第 12 個互斥 bool。
 #   ★分頁與模式是【兩個軸】：模式＝疊上去的 overlay（一次一個）；分頁＝右欄常駐的內容選擇，
 #     ★★永遠有一個是選中的 ⇒ 它【不進】_current_mode_name()，也【不加】MODE_KEYMAP 第 13 列。
@@ -233,9 +232,10 @@ func _refresh_snapshot() -> void:
 	var request: Dictionary = {}
 	if _interact_target >= 0:
 		request["focus_team_id"] = _interact_target
-	if _selected != Vector2i(-1, -1):
-		request["cursor_tile_q"] = _selected.x
-		request["cursor_tile_r"] = _selected.y
+	# ★游標即選中（spec 2026-10-14-cursor-hover HOW §2）：格脈絡一律查游標那格（不再等 Enter）；
+	#   知識閘在來源（map_location_context 讀 tile_knowledge），不在這裡
+	request["cursor_tile_q"] = _cursor.x
+	request["cursor_tile_r"] = _cursor.y
 	var _result := _bridge.query_player(request)
 	_cached_snapshot = _result.get("data", {}).get("snapshot", {})
 
@@ -475,9 +475,6 @@ func _input(event: InputEvent) -> void:
 		KEY_S: _move_cursor(Vector2i(0,  1))
 		KEY_A: _move_cursor(Vector2i(-1, 0))
 		KEY_D: _move_cursor(Vector2i( 1, 0))
-		KEY_ENTER:
-			_selected = _cursor
-			_refresh()
 		KEY_M:
 			var r: Dictionary = _bridge.command_player("move_to", {"tile_q": _cursor.x, "tile_r": _cursor.y})
 			if r.get("ok"):
@@ -1061,11 +1058,27 @@ func build_regions(pend_txt: String) -> Dictionary:
 		"battle_keys": _encounter_view.terminal_keys() if _in_battle() else "",
 	}
 
+# 側欄明細區塊的標頭（床找區塊讀同一份）
+const HOVER_DETAIL_HEAD: String = "游標處明細: "
+
+# ★游標處那一格的 tile_knowledge（spec 2026-10-14-cursor-hover HOW §2c）：快照的格脈絡已經算過一次
+#   （map_location_context 帶 knowledge）⇒ 頂部一行、側欄明細、payload occupants 三處讀同一份，不各掃一圈全隊
+#   ★快照查的不是這一格（游標動了快照還沒重查）才自己算——同一支、同一個視野倍率
+func _cursor_knowledge() -> Dictionary:
+	var lc: Dictionary = _cached_snapshot.get("location_context", {})
+	var t: Dictionary = lc.get("tile", {})
+	if lc.has("knowledge") and int(t.get("q", -1)) == _cursor.x and int(t.get("r", -1)) == _cursor.y:
+		return lc["knowledge"]
+	# ★節點退場時 _bridge 已放掉（player_action_audit 床尾端實測 SCRIPT ERROR）⇒ 什麼都不知道
+	if _bridge == null:
+		return {"status": "no_team"}
+	return _bridge.tile_knowledge(_cursor.x, _cursor.y)
+
 # ★F7：游標處一行（主畫面；資料＝PlayerQueryApi.tile_knowledge，只讀附身者知道的）
 func _cursor_line() -> String:
 	if _current_mode_name() != "main" or _in_battle() or _cursor == Vector2i(-1, -1):
 		return ""
-	var k: Dictionary = _bridge.tile_knowledge(_cursor.x, _cursor.y)
+	var k: Dictionary = _cursor_knowledge()
 	var head: String = "游標處 (%d,%d)：" % [_cursor.x, _cursor.y]
 	match String(k.get("status", "")):
 		"off_map": return head + "不在地圖上"
@@ -1190,7 +1203,7 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[,][.]切頁 [J]情報 [WASD]移游標 [Enter]選格 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開",
+	"main":          "[,][.]切頁 [J]情報 [WASD]移游標 [M]移動 [L]走到抵達 [Space]到隔日 [X]到整點 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Esc×2]離開",
 	"interact":      "[1-9]選目標/行動 [?]展開不可的 [A-]回應事件 [Esc]返回",   # ★不變量 #10：回應有專屬鍵位
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
@@ -1661,7 +1674,7 @@ func _build_economy_lines(ct: Dictionary) -> Array:
 # 未分類區塊裡【已判定為跨頁混合】的行：它們因為「搬動不改字」×「一行裡有兩頁的東西」
 # 而【結構上搬不走】—— ★拆行是另一張票（它會改變 P1-b 的判準本身：從「raw 行還在」
 # 變成「內容還在」）⇒ ★★這裡只【具名】，不處理。
-const MIXED_PAGE_LINES: Array = ["人口:", "狩獵 ", "選中: "]
+const MIXED_PAGE_LINES: Array = ["人口:", "狩獵 ", HOVER_DETAIL_HEAD]
 
 func _unclassified_mixed_note(unclassified: Array) -> String:
 	# ★★★這一句只有在【剩下的每一行都是已具名的混合行】時才成立 ——
@@ -1768,7 +1781,7 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 #   ⇒ ★★那一行讓每一次觀察【自帶它的來源標籤】，否則用它得出的每一個
 #     「遊戲合不合理」的結論，都建在一個玩家拿不到的資訊上。
 # ★即時性不是我加的：`_move_cursor()` 本來就在結尾呼叫 `_refresh()`
-#   ⇒ 這個區塊讀 `_cursor`（不是 `_selected`）就自動是【不用按 Enter】的。
+#   ⇒ 這個區塊讀 `_cursor` 就自動是【不用按 Enter】的。
 # ★★誠實限：勢力印的是 `faction_id` 而不是名字 —— `get_teams_at_tile()` 給的是 id，
 #   而畫面上那個好看的 `faction_display` 是【belief 推導的】⇒ 把它混進真值區塊
 #   會讓這一段變成「一半真值一半信念」，那比少一個名字糟。
@@ -1793,10 +1806,7 @@ const TASK_DISPLAY: Dictionary = {
 	"return_home": "返家",   # TeamData.TASK_RETURN_HOME
 	"rest": "休息",          # TeamData.TASK_REST
 }
-# ★道具 id → 人話（母體 ＝ `_get_team_takeable_items()` 回的那八個）
-#   ★★而它與 `:1127` 那一行的「低武／高武」措辭刻意一致（同一個東西在兩處不要兩種叫法）
-# ★表本身收進 TeamUiHelper.ITEM_NAME（中文名表唯一一份，戰鬥區 §3）；這裡只是同一份的別名，讀者不用改
-const ITEM_DISPLAY: Dictionary = TeamUiHelper.ITEM_NAME
+# ★道具 id → 人話：讀 TeamUiHelper.item_name（→ data/text/names.tsv，顯示名唯一一張表；spec 2026-10-15-advisor §2c）
 
 # 把一個可能是英文識別字的值換成人話（查不到就原樣回 —— ★而「查不到」會被自驗 (d) 咬到，
 # 那正是我們要的：**新增一個 id 的人會被床擋下來**，而不是靜默印一個英文字給玩家）
@@ -1879,37 +1889,39 @@ func _build_unclassified_lines(ct: Dictionary, ps: Dictionary, lc: Dictionary) -
 
 
 
-	if _selected != Vector2i(-1, -1):
-		# ★F7b（spec 2026-10-07 round5-friendliness）：選中區塊與游標處那一行同源（只讀附身者知道的）——
-		#   舊版直讀 query_tile（state.world.tiles 真值）⇒ 選一個從沒去過的遠格也印得出它的糧 ＝ 顯示邊界 god-view
-		#   ⇒ 視野內 ⇒ 真值｜記得的格 ⇒ 地形＋「糧量：未記錄」｜沒去過 ⇒「沒去過」（debug pane 那支照舊讀 query_tile）
-		var sel_k: Dictionary = _bridge.tile_knowledge(_selected.x, _selected.y)
-		var sel_tile: Dictionary = {} if String(sel_k.get("status", "")) in ["off_map", "no_team"] else sel_k
-		lines.append("────────────────")
-		if String(sel_k.get("status", "")) == "unvisited":
-			lines.append("選中: (%d,%d) 沒去過" % [_selected.x, _selected.y])
-		elif not sel_tile.is_empty():
-			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, PlayerApiMapper.terrain_label(String(sel_tile.get("terrain", "")))])
-			if sel_tile.has("food"):
-				lines.append("  農:%.0f%%  食:%d" % [float(sel_tile.get("productivity", 0)) * 100, int(sel_tile["food"])])
-			else:
-				lines.append("  糧量：未記錄")
-			var occ: Array = lc.get("occupants", [])
-			if not occ.is_empty():
-				var vts: Array = _cached_snapshot.get("visible_teams", [])
-				for o in occ:
-					var oid: int = o.get("team_id", -1)
-					var f_display: String = "?"
-					var pop: int = 0
-					for vt in vts:
-						if vt.get("id", -1) == oid:
-							f_display = vt.get("faction_display", "?")
-							pop = vt.get("population", 0)
-							break
-					var pop_str: String = ("~%d" % pop) if pop >= 0 else "?"
-					lines.append("  %s [%s] 人口:%s" % [o.get("team_name", "Team?"), f_display, pop_str])
+	# ★F7b（spec 2026-10-07 round5-friendliness）：明細與游標處那一行同源（只讀附身者知道的）——
+	#   舊版直讀 query_tile（state.world.tiles 真值）⇒ 一個從沒去過的遠格也印得出它的糧 ＝ 顯示邊界 god-view
+	#   ⇒ 視野內 ⇒ 真值｜記得的格 ⇒ 地形＋「糧量：未記錄」｜沒去過 ⇒「沒去過」（debug pane 那支照舊讀 query_tile）
+	# ★游標即選中（spec 2026-10-14-cursor-hover HOW §1）：讀 `_cursor`、永遠顯示——舊版讀只在 Enter 時寫的 `_selected`，
+	#   而那是它唯一的效果 ⇒ 變數連 Enter 分支一起刪（不留沒有消費者的「鎖定」狀態）
+	#   ★隊伍讀 occupants（payload 已過知識閘）；人口只從 visible_teams 取，不在視野印「?」（不為補欄位讀真值）
+	var sel_k: Dictionary = _cursor_knowledge()
+	var sel_tile: Dictionary = {} if String(sel_k.get("status", "")) in ["off_map", "no_team"] else sel_k
+	lines.append("────────────────")
+	if String(sel_k.get("status", "")) == "unvisited":
+		lines.append(HOVER_DETAIL_HEAD + "(%d,%d) 沒去過" % [_cursor.x, _cursor.y])
+	elif not sel_tile.is_empty():
+		lines.append(HOVER_DETAIL_HEAD + "(%d,%d) %s" % [_cursor.x, _cursor.y, PlayerApiMapper.terrain_label(String(sel_tile.get("terrain", "")))])
+		if sel_tile.has("food"):
+			lines.append("  農:%.0f%%  食:%d" % [float(sel_tile.get("productivity", 0)) * 100, int(sel_tile["food"])])
 		else:
-			lines.append("選中: (%d,%d) [無效格]" % [_selected.x, _selected.y])
+			lines.append("  糧量：未記錄")
+	else:
+		lines.append(HOVER_DETAIL_HEAD + "(%d,%d) [無效格]" % [_cursor.x, _cursor.y])
+	if not sel_tile.is_empty():
+		var occ: Array = lc.get("occupants", [])
+		var vts: Array = _cached_snapshot.get("visible_teams", [])
+		for o in occ:
+			var oid: int = o.get("team_id", -1)
+			var f_display: String = "?"
+			var pop: int = -1
+			for vt in vts:
+				if vt.get("id", -1) == oid:
+					f_display = vt.get("faction_display", "?")
+					pop = vt.get("population", -1)
+					break
+			var pop_str: String = ("~%d" % pop) if pop >= 0 else "?"
+			lines.append("  %s [%s] 人口:%s" % [o.get("team_name", "Team?"), f_display, pop_str])
 
 	return lines
 
@@ -2274,7 +2286,7 @@ func _build_inv_str() -> String:
 		var item = inv[i]
 		var sel_idx: int = eq.size() + i
 		var prefix: String = "[%d]*" % (sel_idx + 1) if _inv_selection == sel_idx else "[%d]" % (sel_idx + 1)
-		lines.append("  %s %s × %d" % [prefix, human(ITEM_DISPLAY, item.get("grade", "?")),
+		lines.append("  %s %s × %d" % [prefix, TeamUiHelper.item_name(str(item.get("grade", "?"))),
 			item.get("qty", 0)])
 
 	# ── 從 Team 取出（[G]） ──
@@ -2284,7 +2296,7 @@ func _build_inv_str() -> String:
 		var sel_idx2: int = eq.size() + inv.size() + i
 		var prefix: String = "[%d]*" % (sel_idx2 + 1) if _inv_selection == sel_idx2 else "[%d]" % (sel_idx2 + 1)
 		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
-		lines.append("  %s %s: %d%s" % [prefix, human(ITEM_DISPLAY, team_items[i]),
+		lines.append("  %s %s: %d%s" % [prefix, TeamUiHelper.item_name(str(team_items[i])),
 			qty, "" if qty > 0 else "（灰）"])
 
 	lines.append("── [1-9]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
@@ -3459,20 +3471,36 @@ func _handle_advisor_mode(keycode: int) -> void:
 			_advisor_selection = members[idx].get("id", -1)
 			if _advisor_selection >= 0:
 				var advisor_pid_cap: int = _advisor_selection
-				# ★數字選單（追加三）：集合＝AdvisorSystem.SITUATION_SKILL_MAP 鍵 ∩ TextBank 有 advisor_<鍵> 模板
-				#   ★舊版提示叫玩家打 attack/diplomacy/resource ⇒ 一個都對不上 ⇒ 任何輸入都只拿到預設句（既有活 bug）
+				# ★數字選單：五情境（AdvisorSystem.TEXT_SITUATIONS）；要目標的再開第二層（附身隊 belief 裡未過期的隊）
+				#   ★問顧問＝指令 ask_advisor（入列＋推進 1 tick；spec 2026-10-15-advisor §1a）——結果走 command_results＋事件，不在這裡印
+				#   ★沒有可選目標 ⇒ 不開第二層，直接以 target_id=-1 入列（handler 回「不知道」）
 				var sits: Array = AdvisorSystem.menu_situations()
 				var _cb_in3236 := func(buf: String):
 					var si: int = int(buf) - 1
 					if si < 0 or si >= sits.size():
 						_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, sits.size()])
 						return
-					var advice: String = _bridge.query_advisor_advice(advisor_pid_cap, String(sits[si]))
-					_log_event("[Advisor] 建議：%s" % advice)
-					_set_feedback(true, "顧問：%s" % advice)
+					var sit: String = String(sits[si])
+					var tg: Array = _bridge.query_advisor_targets() if AdvisorSystem.needs_target(sit) else []
+					if tg.is_empty():
+						_ask_advisor(advisor_pid_cap, sit, -1)
+						return
+					var _cb_tg := func(b2: String):
+						var ti: int = int(b2) - 1
+						if ti < 0 or ti >= tg.size():
+							_set_feedback(false, "沒有第 %s 項（1~%d）" % [b2, tg.size()])
+							return
+						_ask_advisor(advisor_pid_cap, sit, int(tg[ti]))
+					_open_input("選目標 (1~%d): " % tg.size(), "numeric", _cb_tg, false,
+						tg.map(func(t): return "Team%d" % int(t)))
 				_open_input("選情境 (1~%d): " % sits.size(), "numeric", _cb_in3236, false,
 					sits.map(func(k): return AdvisorSystem.situation_label(k)))
 	_refresh()
+
+func _ask_advisor(advisor_pid: int, situation: String, target_id: int) -> void:
+	var r: Dictionary = _bridge.command_player("ask_advisor", {"advisor_pid": advisor_pid, "situation": situation, "target_id": target_id})
+	if not bool(r.get("ok", false)):
+		_set_feedback(false, String(r.get("message", "問不了")))
 
 func _build_advisor_str() -> String:
 	var members: Array = _cached_snapshot.get("members_detail", [])
@@ -3666,7 +3694,7 @@ func _build_trade_str() -> String:
 		else:
 			if not shown_want:
 				lines.append("我要（對方物資）："); shown_want = true
-		lines.append("  [%d] %s ×%d (值%.1f)" % [label, row["grade"], int(row["qty"]), float(row["unit_value"])])
+		lines.append("  [%d] %s ×%d (值%.1f)" % [label, TextBank.res_name(String(row["grade"])), int(row["qty"]), float(row["unit_value"])])
 	if rows.size() > 9:
 		lines.append("第 %d/%d 頁 [,]上 [.]下" % [_trade_page + 1, int(ceil(rows.size() / 9.0))])
 	# 當前出價
@@ -3674,9 +3702,9 @@ func _build_trade_str() -> String:
 	var gives: Dictionary = off.get("gives", {})
 	var wants: Dictionary = off.get("wants", {})
 	var go: Array = []
-	for k in gives: go.append("%s×%d" % [k, int(gives[k])])
+	for k in gives: go.append("%s×%d" % [TextBank.res_name(String(k)), int(gives[k])])
 	var wo: Array = []
-	for k in wants: wo.append("%s×%d" % [k, int(wants[k])])
+	for k in wants: wo.append("%s×%d" % [TextBank.res_name(String(k)), int(wants[k])])
 	lines.append("出價：給 %s ⇄ 要 %s" % [
 		"—" if go.is_empty() else "、".join(go),
 		"—" if wo.is_empty() else "、".join(wo)])

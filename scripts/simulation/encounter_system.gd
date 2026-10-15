@@ -1098,6 +1098,19 @@ func _sync_back_units(state: WorldState, team_id: int) -> void:
 				if g != "":
 					ResourceBank.add(team, g, item.get("qty", 0), "inventory_return")
 
+# 匿名上場數（E-1：武裝下限堵 0 武裝免疫；每隊上限 ANON_UNIT_CAP）——遭遇戰上場與顧問估己方武裝讀同一支
+static func anon_spawn_count(team: TeamData) -> int:
+	var spawn_ratio: float = maxf(team.armed_anon_ratio, ARMED_RATIO_FLOOR)
+	return mini(int(float(team.population) * spawn_ratio), ANON_UNIT_CAP)
+
+# 己方上場武裝數＝記名（隊長＋named，有人的）＋匿名上場數（_spawn_team_units 同一個算法，不含格位不足）
+static func armed_on_field(state: WorldState, team: TeamData) -> int:
+	var n: int = 0
+	for pid in ([team.leader_id] as Array) + team.named_members:
+		if state.persons.get(pid) != null:
+			n += 1
+	return n + anon_spawn_count(team)
+
 func _spawn_team_units(state: WorldState, team: TeamData,
 		positions: Array) -> void:
 	if team.beast_kind != "":
@@ -1114,9 +1127,7 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		var unit: Dictionary = _create_named_unit(pid, team.team_id, pos, state)
 		_init_named_unit(unit, p, team, state)
 		state.encounter_units.append(unit)
-	var spawn_ratio: float = maxf(team.armed_anon_ratio, ARMED_RATIO_FLOOR)   # E-1：武裝下限堵 0 武裝免疫
-	var armed_count: int = int(float(team.population) * spawn_ratio)
-	var spawn_count: int = mini(armed_count, ANON_UNIT_CAP)
+	var spawn_count: int = anon_spawn_count(team)
 	var weapon_queue: Array = _assign_anon_weapons(team, spawn_count)
 	var spawned_anon: int = 0
 	for _i in range(spawn_count):

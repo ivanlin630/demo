@@ -237,6 +237,7 @@ const VERB: Dictionary = {
 	"post_sell_order": "掛賣單", "cancel_order": "取消掛單",
 	"possess": "附身", "unpossess": "解除附身",
 	"refresh_targets": "重掃同格對象",
+	"ask_advisor": "問顧問",
 }
 
 static func describe(name: String, args: Dictionary) -> String:
@@ -262,6 +263,8 @@ static func describe(name: String, args: Dictionary) -> String:
 			return "%s %s×%d" % [verb, String(args.get("item_grade", "")), int(args.get("qty", 0))]
 		"post_buy_order", "post_sell_order":
 			return "%s %s×%d" % [verb, String(args.get("res", "")), int(args.get("qty", 0))]
+		"ask_advisor":
+			return "%s（%s）" % [verb, AdvisorSystem.situation_label(String(args.get("situation", "")))]
 	return verb
 
 # ★★★重掃同格互動對象（spec §3-3b）：它【寫世界狀態】(`player_pending_targets`)
@@ -306,4 +309,27 @@ func dispatch(state: WorldState, name: String, args: Dictionary) -> Dictionary:
 			return possess(state, args.get("person_id", -1))
 		"unpossess":
 			return unpossess(state)
+		"ask_advisor":
+			return ask_advisor(state, args.get("advisor_pid", -1), args.get("situation", ""), args.get("target_id", -1))
 	return PlayerApiMapper.map_command_result(false, "invalid_request", "unknown command: %s" % name, {})
+
+# ★問顧問（spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot §1a）：一道指令，不是 UI 直呼
+#   ★理由：要出一則事件 ⇒ 寫世界狀態 ⇒ 只能在 sim 裡；舊的 UI 直呼還耗全域 RNG（問一句就改世界亂數序列）
+#   ★前置只有四條會 ok:false（附身隊存在、顧問是附身隊活著的成員、情境在五個裡、target_id 是整數）
+#     ⇒ 過了這四條，其餘一切「答不出來」（沒選目標、沒 belief、過期、入列後那一 tick 被清掉）都走「不知道」（ok:true）
+func ask_advisor(state: WorldState, advisor_pid, situation, target_id) -> Dictionary:
+	var pre := _check_controlled_team(state)
+	if not pre.is_empty():
+		return pre
+	var pt: TeamData = state.teams[state.persons[state.player_id].team_id]
+	var adv: PersonData = state.persons.get(int(advisor_pid)) if (advisor_pid is int) else null
+	if adv == null or adv.is_dead or not (([pt.leader_id] as Array) + pt.named_members).has(adv.id):
+		return PlayerApiMapper.map_command_result(false, "no_advisor", "顧問不在你隊上", {})
+	if not (situation is String) or not AdvisorSystem.TEXT_SITUATIONS.has(String(situation)):
+		return PlayerApiMapper.map_command_result(false, "bad_situation", "沒有這個情境", {})
+	if not (target_id is int):
+		return PlayerApiMapper.map_command_result(false, "bad_target", "目標不是隊伍編號", {})
+	var r: Dictionary = AdvisorSystem.advise(state, adv, String(situation), int(target_id))
+	WorldEvents.emit(state, "advice", [pt.team_id], false, {"advisor": adv.id, "advisor_name": adv.person_name,
+		"situation": String(situation), "target": int(r["target"]), "text": String(r["text"]), "basis": r["basis"]})
+	return PlayerApiMapper.map_command_result(true, "ok", "%s：%s" % [adv.person_name, String(r["text"])], {"advice": r})

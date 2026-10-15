@@ -567,7 +567,8 @@ func dispatch_task_check(q: int, r: int, task: String) -> Dictionary:
 func query_subteam_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_subteam_panel(_state)
 
-func query_advisor_advice(advisor_pid: int, situation: String) -> String:
-	var p: PersonData = _state.persons.get(advisor_pid)
-	if p == null: return "顧問不存在"
-	return AdvisorSystem.new().get_advice(p, situation, {}, _state)
+# ★顧問的目標選單（純讀附身隊 belief；問顧問本身走指令 ask_advisor，不在這裡——舊的直呼耗全域 RNG）
+func query_advisor_targets() -> Array:
+	var p: PersonData = _state.persons.get(_state.player_id)
+	if p == null: return []
+	return AdvisorSystem.target_menu(_state, p.team_id)

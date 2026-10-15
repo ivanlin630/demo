@@ -239,12 +239,18 @@ static func _code_hits(body: String, needle: String) -> int:
 func _p5_one_loop() -> void:
 	print("\n── P5 ②③ 是同一條 best_estimate 迴圈 ──")
 	var text: String = FileAccess.get_file_as_string("res://scripts/simulation/player_api_mapper.gd")
-	var body: String = _func_body(text, "map_threat_line")
+	# ★迴圈抽到 threat_scan（spec 2026-10-15-advisor-reads-belief §1b：威脅欄與顧問 strategic 一個身體）
+	#   ⇒ P5 改指向 threat_scan（＝1），並加一句 map_threat_line 本體＝0（它只呼 threat_scan）
+	var body: String = _func_body(text, "threat_scan")
 	var body_lines: int = body.split("\n").size()
-	_check("★母體地板：切到 map_threat_line 的函式體（%d 行）" % body_lines, body_lines > 20)
+	_check("★母體地板：切到 threat_scan 的函式體（%d 行）" % body_lines, body_lines > 20)
 	var be: int = _code_hits(body, "best_estimate(")
-	print("   函式體內呼叫 best_estimate 的非註解行 ＝ %d" % be)
+	print("   threat_scan 函式體內呼叫 best_estimate 的非註解行 ＝ %d" % be)
 	_check("★★★P5 產生者裡呼叫 best_estimate 的地方 ＝ 1", be == 1)
+	var line_body: String = _func_body(text, "map_threat_line")
+	var be2: int = _code_hits(line_body, "best_estimate(")
+	print("   map_threat_line 函式體內呼叫 best_estimate ＝ %d、呼叫 threat_scan ＝ %d" % [be2, _code_hits(line_body, "threat_scan(")])
+	_check("★★P5 map_threat_line 本體 best_estimate ＝ 0、且呼 threat_scan", be2 == 0 and _code_hits(line_body, "threat_scan(") == 1)
 	# ★反向掃：全 scripts/simulation 與 scripts/ui 裡**寫** "threat_line" 鍵的地方（母體印出來）
 	var writers: Array = []
 	for dir_path in ["res://scripts/simulation", "res://scripts/ui"]:

@@ -1,0 +1,4567 @@
+[TREE] path=A:\GDS\demo\.worktrees\cursor commit=04b4a2417 clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=7GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== player_action_audit：宣稱動作必須改世界 ===
+
+── M1（先量）／A1 武裝比例 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: ★母體地板：玩家隊有匿名人口（>=4，30% 才排得出整數人）
+[PlayerCmd] set_armed_anon_ratio → target 0.50（可武裝 1.00）
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 42 (member/team15) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team16 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team16 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Harvest] Tick360 季節=春 base=1.1
+[Combat Start] Team-1000000 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[Order] Team11 buy weapon_melee_low ×6 (oid=1)
+[Order] Team11 buy weapon_ranged_low ×5 (oid=2)
+[Order] Team11 buy tools ×3 (oid=3)
+[SoloAI] Team11 → 覓食 (覓食)
+[Order] Team0 sell material ×21 (oid=4)
+[Order] Team0 sell food ×1266 (oid=5)
+[Order] Team0 buy weapon_melee_low ×3 (oid=6)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=7)
+[Order] Team0 buy tools ×4 (oid=8)
+[Order] Team3 buy weapon_melee_low ×5 (oid=9)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=10)
+[Order] Team3 buy tools ×2 (oid=11)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[Order] Team8 buy weapon_melee_low ×4 (oid=12)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=13)
+[Order] Team8 buy tools ×2 (oid=14)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team9 buy weapon_melee_low ×6 (oid=15)
+[Order] Team9 buy weapon_ranged_low ×5 (oid=16)
+[Order] Team9 buy tools ×3 (oid=17)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[Order] Team4 sell material ×23 (oid=18)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=19)
+[Order] Team4 buy tools ×3 (oid=20)
+[Order] Team13 buy weapon_melee_low ×6 (oid=21)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=22)
+[Order] Team13 buy tools ×3 (oid=23)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[Order] Team2 sell material ×30 (oid=24)
+[Order] Team2 buy weapon_melee_low ×5 (oid=25)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=26)
+[Order] Team2 buy tools ×2 (oid=27)
+[Order] Team1 sell material ×30 (oid=28)
+[Order] Team1 buy weapon_melee_low ×5 (oid=29)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=30)
+[Order] Team1 buy tools ×2 (oid=31)
+[Order] Team10 buy weapon_melee_low ×4 (oid=32)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=33)
+[Order] Team10 buy tools ×2 (oid=34)
+[SoloAI] Team10 → 覓食 (覓食)
+[Order] Team12 buy weapon_melee_low ×5 (oid=35)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=36)
+[Order] Team12 buy tools ×2 (oid=37)
+[Tick 1247] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team12 → 覓食 (覓食)
+[Order] Team6 sell material ×30 (oid=38)
+[Order] Team6 buy weapon_melee_low ×5 (oid=39)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=40)
+[Order] Team6 buy tools ×2 (oid=41)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[Order] Team14 buy weapon_melee_low ×6 (oid=42)
+[Order] Team14 buy weapon_ranged_low ×4 (oid=43)
+[Order] Team14 buy tools ×3 (oid=44)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team7 sell material ×30 (oid=45)
+[Order] Team7 buy weapon_melee_low ×6 (oid=46)
+[Order] Team7 buy weapon_ranged_low ×4 (oid=47)
+[Order] Team7 buy tools ×3 (oid=48)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team17 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=654 us max=39170 us ticks=1440 teams=18 factions=2 | ★>2s 幀數=0/1440
+   匿名 8｜目標欄 0.5｜「武裝比例設為 50%」｜設完 0.000 → t+1 0.000 → t+2 0.000 → t+3 0.000 → 1 天後 0.500
+  PASS: A1 武器足、設 0.5  1 天後實際 0.5（修前：被庫存重算蓋回 1.0）
+[PlayerCmd] set_armed_anon_ratio → target 0.50（可武裝 0.25）
+[Order] Team5 sell material ×30 (oid=49)
+[Order] Team5 buy weapon_melee_low ×5 (oid=50)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=51)
+[Order] Team5 buy tools ×2 (oid=52)
+[Move] Team 9 抵達 (8,15)
+[Split] Team17 回歸失敗（母團滿員），獨立為新分團
+[Move] Team 3 抵達 (11,5)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 0 抵達 (2,13)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 16 抵達 (2,7)
+[Envoy] Team16 提案送達 Team14 → reject
+[Market] Team9 <-> Team17 巧遇成交
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 14 抵達 (2,7)
+[Sub] Team4 派出子隊 Team18 leader=P12 advisors=[] (pop=3 cap=23 task=擴建)
+[Infra] Team4 派擴建子隊 Team18 → (4,6) stable
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 17 抵達 (8,15)
+[Ambition] Team14 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction1 首要目標: defend target=18
+[SoloAI] Team14 → 覓食 (覓食)
+[Tick 1869] Person 12 (member/team18) → P1_comply | stress=0.00 loyalty=0.79
+[Equip] Team18 裝備 melee_low ×1
+[Order] Team4 buy material ×16 (oid=53)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 7 抵達 (2,7)
+[Move] Team 9 抵達 (8,15)
+[Site] 選址 (10, 9) score=399 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction1 派工失敗: 資源不足 1.40x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team14 → 覓食 (覓食)
+[Tribute] Team4 徵收 Team7 rate=0.01
+[Move] Team 13 抵達 (10,12)
+[Tribute] Team4 徵收 Team7 rate=0.01
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 16 抵達 (5,5)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team18 buy weapon_ranged_low ×1 (oid=54)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[DayNight] Day 2 開始
+[Move] Team 1 抵達 (11,8)
+[Move] Team 7 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=2 avg=748 us max=60130 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/2880
+   武器只夠 25%｜「武裝目標設為 50%（武器只夠 25%）」｜實際 0.250
+  PASS: A1b 武器只夠 25%  實際＝可武裝比例、結果句含「武器只夠 25%」
+   面板：人口: 10  武裝: 4 (目標 50%／實際 25%) | 未成年: 0
+  PASS: A1c 面板印「目標 50%／實際 N%」
+   NPC Team0 目標欄 -1｜實際 0.143（庫存可武裝 0.143）
+  PASS: A2a NPC 目標未設（-1） 實際＝庫存可武裝
+
+── T1／T1b 訓練沒人可練 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   全精銳 8 人｜清單 enabled=false 原因「無可升階對象（匿名兵都已是精銳）」｜執行 ok=false「無可升階對象（匿名兵都已是精銳）」｜幣 1000.0→1000.0
+  PASS: ★母體地板：全精銳、人口 >0、錢夠
+  PASS: T1 無可升階對象  錢不變、ok:false
+  PASS: T1 清單列在不可側並帶原因
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   T1b 先：清單 enabled=true｜移走後執行 ok=false「無可升階對象（匿名兵都已是精銳）」｜幣 1000.0→1000.0
+  PASS: ★T1b 母體地板：移走前清單顯示可做
+  PASS: T1b 移走唯一可升階對象後執行  不扣錢、回原因
+
+── R1 重掃不是世界動作 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Sub] Team0 派出子隊 Team16 leader=P1 advisors=[] (pop=2 cap=2 task=擴建)
+[Infra] Team0 派擴建子隊 Team16 → (2,13) stable
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: 資源不足 1.48x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+   入列後 佇列 1 道、頁腳算 0 道｜tick 0→60｜事件流「重掃」0→0｜feed 0→0｜結果行「」→「 推進到 第 1 天 01:00」
+   player_pending_targets 1 筆 md5=8d5162ca104fa7e79fe80fd92bb657fb（★跨樹比：修前修後須逐字相同）
+  PASS: ★母體地板：同格對象清單更新（客隊 Team0 進了 player_pending_targets）
+  PASS: ★母體地板：重掃真的入了佇列、也真的結算了（tick 前進、佇列清空）
+  PASS: R1 事件流與 feed 不多出「重掃」
+  PASS: R1 結果行不被重掃蓋掉
+  PASS: R1 頁腳待執行不把介面內部令算進去
+
+── P4 通商提案暫停（30 天）──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+  PASS: P4 玩家行動清單無通商
+[Site] 選址 (10, 9) score=427 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction0 派工失敗: pop 不足: 10 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 60] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=1.00
+[Tick 60] Person 1 (member/team0) → P4_expand | stress=0.00 loyalty=0.66
+[Tick 60] Person 2 (member/team0) → P4_expand | stress=0.00 loyalty=0.85
+[Tick 62] Person 35 (leader/team13) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 62] Person 36 (member/team13) → P1_comply | stress=0.00 loyalty=0.74
+[Tick 62] Person 37 (member/team13) → P1_comply | stress=0.00 loyalty=0.70
+[CampL0] Team3 紮營 L0 @(11,5)
+[Tick 67] Person 8 (leader/team3) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 9 (member/team3) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 67] Person 10 (member/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 71] Person 29 (leader/team11) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 71] Person 30 (member/team11) → P1_comply | stress=0.00 loyalty=0.89
+[Tick 71] Person 31 (member/team11) → P1_comply | stress=0.00 loyalty=0.64
+[Tick 73] Person 11 (leader/team4) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 73] Person 12 (member/team4) → P4_expand | stress=0.00 loyalty=0.78
+[Tick 74] Person 16 (leader/team6) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 17 (member/team6) → P1_comply | stress=0.00 loyalty=0.73
+[Tick 74] Person 21 (leader/team8) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 74] Person 22 (member/team8) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 77] Person 26 (leader/team10) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 77] Person 27 (member/team10) → P1_comply | stress=0.00 loyalty=0.53
+[Tick 77] Person 28 (member/team10) → P1_comply | stress=0.00 loyalty=0.96
+[Tick 80] Person 13 (leader/team5) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 80] Person 14 (member/team5) → P1_comply | stress=0.00 loyalty=0.63
+[Tick 80] Person 15 (member/team5) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 84] Person 23 (leader/team9) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 84] Person 24 (member/team9) → P1_comply | stress=0.00 loyalty=0.78
+[Tick 84] Person 25 (member/team9) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 89] Person 32 (leader/team12) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 89] Person 33 (member/team12) → P1_comply | stress=0.00 loyalty=0.92
+[Tick 89] Person 34 (member/team12) → P1_comply | stress=0.00 loyalty=0.99
+[Tag] Team12 +軍隊 -生產
+[Tick 91] Person 3 (leader/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 4 (member/team1) → P1_comply | stress=0.00 loyalty=0.75
+[Tick 96] Person 38 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 39 (member/team14) → P1_comply | stress=0.00 loyalty=0.97
+[Tick 96] Person 40 (member/team14) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 96] Person 41 (leader/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 96] Person 42 (member/team15) → P1_comply | stress=0.00 loyalty=0.66
+[Tick 98] Person 18 (leader/team7) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 98] Person 19 (member/team7) → P1_comply | stress=0.00 loyalty=0.90
+[Tick 98] Person 20 (member/team7) → P1_comply | stress=0.00 loyalty=0.87
+[Tick 114] Person 5 (leader/team2) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 6 (member/team2) → P1_comply | stress=0.00 loyalty=0.84
+[Tick 114] Person 7 (member/team2) → P1_comply | stress=0.00 loyalty=0.77
+[Equip] Team3 裝備 melee_low ×2
+[Equip] Team12 裝備 melee_low ×1
+[Equip] Team6 裝備 melee_low ×2
+[Equip] Team11 裝備 melee_low ×1
+[Equip] Team2 裝備 melee_low ×2
+[Equip] Team5 裝備 melee_low ×2
+[Equip] Team14 裝備 melee_low ×1
+[Equip] Team15 裝備 melee_low ×2
+[Equip] Team1 裝備 melee_low ×2
+[Equip] Team13 裝備 melee_low ×1
+[Equip] Team10 裝備 melee_low ×1
+[Equip] Team7 裝備 melee_low ×2
+[Equip] Team8 裝備 melee_low ×1
+[Equip] Team0 裝備 melee_low ×3
+[Equip] Team4 裝備 melee_low ×2
+[Equip] Team9 裝備 melee_low ×1
+[Sub] Team8 派出子隊 Team16 leader=P22 advisors=[] (pop=1 cap=15 task=信使)
+[IndepStrategy] Team8 野心建國→派信使結盟 Team14 (野心=0.62)
+[SoloAI] Team8 → 覓食 (覓食)
+[Equip] Team16 裝備 melee_low ×1
+[Move] Team 12 抵達 (15,1)
+[Harvest] Tick360 季節=春 base=1.1
+[Combat Start] Team-1000000 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 5 抵達 (5,9)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team11 → 偵查 (偵查)
+[Move] Team 11 抵達 (9,2)
+[Order] Team11 buy weapon_melee_low ×6 (oid=1)
+[Order] Team11 buy weapon_ranged_low ×5 (oid=2)
+[Order] Team11 buy tools ×3 (oid=3)
+[SoloAI] Team11 → 覓食 (覓食)
+[Order] Team0 sell material ×21 (oid=4)
+[Order] Team0 sell food ×1266 (oid=5)
+[Order] Team0 buy weapon_melee_low ×3 (oid=6)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=7)
+[Order] Team0 buy tools ×4 (oid=8)
+[Order] Team3 buy weapon_melee_low ×5 (oid=9)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=10)
+[Order] Team3 buy tools ×2 (oid=11)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 6 抵達 (5,7)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 14 抵達 (2,7)
+[Order] Team8 buy weapon_melee_low ×4 (oid=12)
+[Order] Team8 buy weapon_ranged_low ×3 (oid=13)
+[Order] Team8 buy tools ×2 (oid=14)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 7 抵達 (3,5)
+[Move] Team 9 抵達 (8,15)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team9 buy weapon_melee_low ×6 (oid=15)
+[Order] Team9 buy weapon_ranged_low ×5 (oid=16)
+[Order] Team9 buy tools ×3 (oid=17)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Faction] 立國：勢力0（leader=Team0，4 teams）
+[Move] Team 5 抵達 (5,8)
+[SoloAI] Team8 → 覓食 (覓食)
+[Order] Team4 sell material ×23 (oid=18)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=19)
+[Order] Team4 buy tools ×3 (oid=20)
+[Order] Team13 buy weapon_melee_low ×6 (oid=21)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=22)
+[Order] Team13 buy tools ×3 (oid=23)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[Order] Team2 sell material ×30 (oid=24)
+[Order] Team2 buy weapon_melee_low ×5 (oid=25)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=26)
+[Order] Team2 buy tools ×2 (oid=27)
+[Order] Team1 sell material ×30 (oid=28)
+[Order] Team1 buy weapon_melee_low ×5 (oid=29)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=30)
+[Order] Team1 buy tools ×2 (oid=31)
+[Order] Team10 buy weapon_melee_low ×4 (oid=32)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=33)
+[Order] Team10 buy tools ×2 (oid=34)
+[SoloAI] Team10 → 覓食 (覓食)
+[Order] Team12 buy weapon_melee_low ×5 (oid=35)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=36)
+[Order] Team12 buy tools ×2 (oid=37)
+[Tick 1247] Person 32 (leader/team12) → P4_expand | stress=0.00 loyalty=1.00
+[SoloAI] Team12 → 覓食 (覓食)
+[Order] Team6 sell material ×30 (oid=38)
+[Order] Team6 buy weapon_melee_low ×5 (oid=39)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=40)
+[Order] Team6 buy tools ×2 (oid=41)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 14 抵達 (2,7)
+[Order] Team14 buy weapon_melee_low ×6 (oid=42)
+[Order] Team14 buy weapon_ranged_low ×4 (oid=43)
+[Order] Team14 buy tools ×3 (oid=44)
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team7 sell material ×30 (oid=45)
+[Order] Team7 buy weapon_melee_low ×6 (oid=46)
+[Order] Team7 buy weapon_ranged_low ×4 (oid=47)
+[Order] Team7 buy tools ×3 (oid=48)
+[DayNight] Day 1 開始
+[Sub] Team9 派出子隊 Team17 leader=P24 advisors=[] (pop=2 cap=5 task=idle)
+[PopMgmt] Team9 超額 2 人，advisor Team24 帶走
+[Move] Team 2 抵達 (11,10)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=1 avg=667 us max=39884 us ticks=1440 teams=18 factions=2 | ★>2s 幀數=0/1440
+[Order] Team5 sell material ×30 (oid=49)
+[Order] Team5 buy weapon_melee_low ×5 (oid=50)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=51)
+[Order] Team5 buy tools ×2 (oid=52)
+[Move] Team 9 抵達 (8,15)
+[Split] Team17 回歸失敗（母團滿員），獨立為新分團
+[Move] Team 3 抵達 (11,5)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team14 → 覓食 (覓食)
+[Equip] Team17 裝備 melee_low ×1
+[Move] Team 0 抵達 (2,13)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 16 抵達 (2,7)
+[Envoy] Team16 提案送達 Team14 → reject
+[Market] Team9 <-> Team17 巧遇成交
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 14 抵達 (2,7)
+[Sub] Team4 派出子隊 Team18 leader=P12 advisors=[] (pop=3 cap=23 task=擴建)
+[Infra] Team4 派擴建子隊 Team18 → (4,6) stable
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 17 抵達 (8,15)
+[Ambition] Team14 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction1 首要目標: defend target=18
+[SoloAI] Team14 → 覓食 (覓食)
+[Tick 1869] Person 12 (member/team18) → P1_comply | stress=0.00 loyalty=0.79
+[Equip] Team18 裝備 melee_low ×1
+[Order] Team4 buy material ×16 (oid=53)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 16 抵達 (3,5)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[SoloAI] Team12 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 7 抵達 (2,7)
+[Move] Team 9 抵達 (8,15)
+[Site] 選址 (10, 9) score=399 周邊資源={ "ore_iron": 239, "ore_silver": 48, "herb": 16, "ore_gold": 14 } terrain=mountain 已知據點項=0.0 用到的據點=[]
+[Site] Faction1 派工失敗: 資源不足 1.40x: material 有 40(公庫0+私40) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team14 → 覓食 (覓食)
+[Tribute] Team4 徵收 Team7 rate=0.01
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,12)
+[Tribute] Team4 徵收 Team7 rate=0.01
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 16 抵達 (3,5)
+[Tribute] Team4 徵收 Team7 rate=0.01
+[SoloAI] Team14 → 覓食 (覓食)
+[Order] Team18 buy weapon_ranged_low ×1 (oid=54)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[DayNight] Day 2 開始
+[Move] Team 1 抵達 (11,8)
+[Move] Team 7 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=2 avg=887 us max=72810 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/2880
+[Order] Team17 buy weapon_melee_low ×1 (oid=55)
+[Order] Team17 buy weapon_ranged_low ×1 (oid=56)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 16 抵達 (3,5)
+[SoloAI] Team14 → 外交 (求和)
+[Reaction] Person43 離團自立流亡 Team19 at (2,7)
+[Tick 3055] Person 43 (leader/team19) → N1_flee | stress=0.15 loyalty=0.35
+[Move] Team 14 抵達 (3,7)
+[Diplomacy] Team19 與 Team7 結盟
+[Faction] Team7 外交 Team19 accept → 勢力1
+[StrategicAI] Faction1 首要目標: defend target=19
+[SoloAI] Team14 → 貿易 (貿易)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 17 抵達 (8,15)
+[Market] Team6 <-> Team14 巧遇成交
+[Barter] Team18 33xfood <-> Team14 32xmaterial
+[Market] Team18 <-> Team14 巧遇成交
+[SoloAI] Team14 → 貿易 (貿易)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 18 抵達 (4,6)
+[SoloAI] Team14 → 貿易 (貿易)
+[Order] Team14 sell material ×1 (oid=57)
+[SoloAI] Team14 → 覓食 (覓食)
+[Move] Team 6 抵達 (2,7)
+[SoloAI] Team14 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 11 抵達 (10,2)
+[SoloAI] Team14 → 貿易 (貿易)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 7 抵達 (2,7)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 19 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (貿易)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team12 → 覓食 (覓食)
+[SoloAI] Team10 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 13 抵達 (10,12)
+[Move] Team 9 抵達 (7,16)
+[Move] Team 5 抵達 (2,7)
+[Move] Team 16 抵達 (3,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 12 抵達 (15,2)
+[Tribute] Team4 徵收 Team6 rate=0.04
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 10 抵達 (3,16)
+[Tribute] Team4 徵收 Team5 rate=0.03
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 7 抵達 (2,7)
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 6 抵達 (2,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Tick 3903] Person 43 (leader/team19) → P2_produce | stress=0.15 loyalty=0.25
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 16 抵達 (2,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 13 抵達 (10,12)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team11 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team9 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[DayNight] Day 3 開始
+[Move] Team 17 抵達 (7,16)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=3 avg=1482 us max=75760 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/4320
+[Move] Team 4 抵達 (2,7)
+[Move] Team 16 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Residency] Team4 邀請 Team6 安頓 outpost (4,6)
+[Residency] Team4 邀請 Team7 安頓 outpost (6,10)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 9 抵達 (7,16)
+[Move] Team 11 抵達 (10,2)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Tick 4519] Person 44 (member/team19) → N1_flee | stress=0.15 loyalty=0.38
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Ambition] Team19 rung 0→1 (商業 cap=2)
+[Tick 4560] Person 44 (member/team19) → P4_expand | stress=0.10 loyalty=0.38
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team12 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team10 → 覓食 (覓食)
+[Move] Team 16 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 2 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 偵查 (偵查)
+[Move] Team 10 抵達 (3,16)
+[Move] Team 17 抵達 (7,16)
+[Tribute] Team4 徵收 Team5 rate=0.03
+[SoloAI] Team14 → 偵查 (偵查)
+[Move] Team 5 抵達 (2,7)
+[Move] Team 6 抵達 (4,6)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 16 抵達 (2,7)
+[Settle] Team6 安頓於 (4,6) 變居民
+[SoloAI] Team14 → 貿易 (囤貨)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Tribute] Team4 徵收 Team5 rate=0.03
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 13 抵達 (10,12)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Tribute] Team4 徵收 Team5 rate=0.03
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team11 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 16 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Tribute] Team4 徵收 Team5 rate=0.03
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team9 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 11 抵達 (10,2)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 4 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team8 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team12 → 覓食 (覓食)
+[Order] Team4 buy material ×16 (oid=58)
+[Order] Team19 buy food ×4 (oid=59)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team10 → 覓食 (覓食)
+[DayNight] Day 4 開始
+[Move] Team 9 抵達 (7,16)
+[Move] Team 16 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[Horse] Outpost (4, 6) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=4 avg=2046 us max=123593 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/5760
+[Move] Team 2 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 16 抵達 (2,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 7 抵達 (3,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Sub] Team4 派出子隊 Team20 leader=P45 advisors=[] (pop=1 cap=9 task=偵查)
+[Move] Team 10 抵達 (3,16)
+[StrategicAI] Faction1 首要目標: defend target=20
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Order] Team4 buy material ×29 (oid=60)
+[Outpost] Team6 設施施工 workshop → Lv1 at (4,6)
+[Infra] Team4 令居民 Team6 就地擴建 workshop at (4,6)
+[Move] Team 5 抵達 (3,7)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 17 抵達 (7,16)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 16 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Tribute] Team4 徵收 Team20 rate=0.02
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Tick 6372] Person 45 (member/team20) → P1_comply | stress=0.15 loyalty=0.39
+[SoloAI] Team14 → 貿易 (囤貨)
+[Ambition] Team14 rung 1→2 (商業 cap=2)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 16 抵達 (2,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team9 → 貿易 (囤貨)
+[Market] Team9 <-> Team17 巧遇成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Order] Team20 sell material ×13 (oid=61)
+[Move] Team 11 抵達 (10,2)
+[Market] Team17 <-> Team9 巧遇成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 20 抵達 (3,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 16 抵達 (2,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team12 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team10 → 覓食 (覓食)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 偵查 (偵查)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 7 抵達 (3,7)
+[SoloAI] Team14 → 偵查 (偵查)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 17 抵達 (7,16)
+[SoloAI] Team14 → 偵查 (偵查)
+[SoloAI] Team14 → 偵查 (偵查)
+[SoloAI] Team14 → 偵查 (偵查)
+[DayNight] Day 5 開始
+[Move] Team 10 抵達 (3,16)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 16 抵達 (2,7)
+[SoloAI] Team14 → 偵查 (偵查)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[TickPerf] day=5 avg=1964 us max=100527 us ticks=1440 teams=21 factions=2 | ★>2s 幀數=0/7200
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team14 → 偵查 (偵查)
+[Move] Team 5 抵達 (3,7)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team14 → 貿易 (囤貨)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (10,12)
+[Market] Team5 <-> Team14 巧遇成交
+[Market] Team7 <-> Team14 巧遇成交
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 16 抵達 (2,7)
+[Move] Team 20 抵達 (4,6)
+[Tribute] Team4 徵收 Team19 rate=0.02
+[SoloAI] Team13 → 覓食 (覓食)
+[SoloAI] Team14 → 貿易 (囤貨)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Market] Team5 <-> Team14 巧遇成交
+[Market] Team7 <-> Team14 巧遇成交
+[SoloAI] Team14 → 紮營 (紮營)
+[CampL0] Team14 紮營 L0 @(3,7)
+[Tick 7527] Person 46 (member/team19) → N1_flee | stress=0.15 loyalty=0.39
+[Sub] Team19 派出子隊 Team21 leader=P44 advisors=[] (pop=1 cap=27 task=信使)
+[Sub] Team19 派出子隊 Team22 leader=P46 advisors=[] (pop=1 cap=15 task=信使)
+[CampL0] Team19 紮營 L0 @(2,7)
+[Order] Team21 傳令 Team4 → idle
+[Order] Team22 傳令 Team4 → idle
+[Merge] Team21 ← Team22 完全合併 (absorber_pop=2)
+[SubAI] Team21 引擎→乞食 (乞食)
+[Tick 7615] Person 46 (member/team21) → P1_comply | stress=0.05 loyalty=0.40
+[SoloAI] Team14 → 偵查 (偵查)
+[Order] Team6 buy food ×2 (oid=62)
+[Move] Team 14 抵達 (2,7)
+[Tribute] Team4 徵收 Team19 rate=0.02
+[CorveeL1] Team14 L0→L1 紮根工期 @(2,7) civilian (720 person-ticks)
+[SoloAI] Team14 → 建設 (紮根)
+[Move] Team 16 抵達 (2,7)
+[Move] Team 19 抵達 (3,7)
+[Tag] Team19 -流亡（恢復）
+[Move] Team 11 抵達 (10,2)
+[Tribute] Team4 徵收 Team21 rate=0.03
+[Move] Team 13 抵達 (10,12)
+[Move] Team 21 抵達 (2,7)
+[SoloAI] Team8 → 覓食 (覓食)
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[Tribute] Team4 徵收 Team21 rate=0.03
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 7 抵達 (3,7)
+[Move] Team 14 抵達 (2,7)
+[Move] Team 19 抵達 (2,7)
+[SoloAI] Team10 → 覓食 (覓食)
+[Ambition] Team16 rung 0→1 (商業 cap=2)
+[Order] Team18 buy food ×1 (oid=63)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 16 抵達 (2,7)
+[Move] Team 4 抵達 (2,7)
+[Move] Team 9 抵達 (11,13)
+[Order] Team0 sell food ×1225 (oid=64)
+[Order] Team0 buy weapon_melee_low ×3 (oid=65)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=66)
+[Order] Team0 buy tools ×4 (oid=67)
+[Order] Team3 buy weapon_melee_low ×5 (oid=68)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=69)
+[Order] Team3 buy tools ×2 (oid=70)
+[Survival] Team18 warning days_left=3.0 擴建→idle
+[Move] Team 17 抵達 (9,15)
+[Move] Team 20 抵達 (5,8)
+[SurvivalCamp] team=Team18 → 紮營 @(4,5)
+[Survival] Team18 warning days_left=3.0 偵查→紮營
+[Market] Team8 <-> Team20 巧遇成交
+[Order] Team8 buy weapon_melee_low ×1 (oid=71)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=72)
+[SoloAI] Team8 → 覓食 (覓食)
+[Order] Team13 buy weapon_melee_low ×6 (oid=73)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=74)
+[Order] Team13 buy tools ×3 (oid=75)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 19 抵達 (3,7)
+[Market] Team20 <-> Team8 巧遇成交
+[Move] Team 5 抵達 (3,7)
+[Move] Team 16 抵達 (2,7)
+[Market] Team20 <-> Team8 巧遇成交
+[Order] Team11 buy weapon_melee_low ×6 (oid=76)
+[Order] Team11 buy weapon_ranged_low ×5 (oid=77)
+[Order] Team11 buy tools ×3 (oid=78)
+[SoloAI] Team11 → 覓食 (覓食)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 8 抵達 (5,8)
+[Market] Team20 <-> Team8 巧遇成交
+[DayNight] Day 6 開始
+[Move] Team 10 抵達 (3,16)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[TickPerf] day=6 avg=1476 us max=107551 us ticks=1440 teams=22 factions=2 | ★>2s 幀數=0/8640
+[Move] Team 18 抵達 (4,5)
+[Move] Team 19 抵達 (2,7)
+[Market] Team20 <-> Team8 巧遇成交
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Survival] Team18 warning days_left=2.6 idle→覓食
+[Residency] Team4 邀請 Team16 安頓 outpost (6,10)
+[Order] Team2 sell material ×30 (oid=79)
+[Order] Team2 buy weapon_melee_low ×5 (oid=80)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=81)
+[Order] Team2 buy tools ×2 (oid=82)
+[Move] Team 9 抵達 (11,13)
+[Order] Team14 buy weapon_melee_low ×2 (oid=83)
+[Order] Team14 buy weapon_ranged_low ×1 (oid=84)
+[Order] Team14 buy tools ×1 (oid=85)
+[SoloAI] Team14 → 建設 (紮根)
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Move] Team 13 抵達 (10,12)
+[Move] Team 17 抵達 (9,15)
+[Order] Team5 sell material ×23 (oid=86)
+[Order] Team5 buy weapon_melee_low ×5 (oid=87)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=88)
+[Order] Team5 buy tools ×2 (oid=89)
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Move] Team 11 抵達 (10,2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Order] Team9 buy weapon_melee_low ×5 (oid=90)
+[Order] Team9 buy weapon_ranged_low ×4 (oid=91)
+[Order] Team9 buy tools ×2 (oid=92)
+[SoloAI] Team9 → 貿易 (囤貨)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team6 buy weapon_melee_low ×5 (oid=93)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=94)
+[Order] Team6 buy tools ×2 (oid=95)
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Move] Team 18 抵達 (3,5)
+[Move] Team 19 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Survival] Team18 warning days_left=2.4 idle→覓食
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 7 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team10 → 貿易 (囤貨)
+[SurvivalForage] team=Team18 pop=3 → 覓食 @(3,5)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team14 → 貿易 (貿易)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team17 buy food ×1 (oid=96)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team1 sell material ×30 (oid=97)
+[Order] Team1 buy weapon_melee_low ×5 (oid=98)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=99)
+[Order] Team1 buy tools ×2 (oid=100)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 17 抵達 (9,15)
+[Barter] Team5 8xmaterial <-> Team14 1xarmor_low
+[Market] Team7 <-> Team14 巧遇成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team7 sell material ×49 (oid=101)
+[Order] Team7 buy weapon_melee_low ×4 (oid=102)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=103)
+[Order] Team7 buy tools ×2 (oid=104)
+[Order] Team10 buy weapon_melee_low ×4 (oid=105)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=106)
+[Order] Team10 buy tools ×2 (oid=107)
+[SoloAI] Team10 → 貿易 (囤貨)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 19 抵達 (2,7)
+[Move] Team 20 抵達 (7,8)
+[Market] Team5 <-> Team14 巧遇成交
+[Ambition] Team5 rung 1→2 (定居 cap=2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SubAI] Team20 引擎→徵收 (徵收)
+[Move] Team 18 抵達 (3,5)
+[Market] Team7 <-> Team14 巧遇成交
+[Market] Team14 <-> Team5 巧遇成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team12 buy weapon_melee_low ×5 (oid=108)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=109)
+[Order] Team12 buy tools ×2 (oid=110)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 21 抵達 (4,9)
+[Market] Team5 <-> Team7 巧遇成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team7 <-> Team5 巧遇成交
+[SoloAI] Team14 → 外交 (求和)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Tick 9474] Person 42 (member/team15) → P4_expand | stress=0.70 loyalty=0.92
+[Move] Team 0 抵達 (2,13)
+[Move] Team 17 抵達 (9,15)
+[Market] Team5 <-> Team7 巧遇成交
+[SoloAI] Team17 → 外交 (求和)
+[Tick 9507] Person 41 (leader/team15) → N2_riot | stress=0.80 loyalty=0.91
+[Tick 9507] Person 42 (member/team15) → N2_riot | stress=0.80 loyalty=0.90
+[Move] Team 19 抵達 (3,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team7 <-> Team5 巧遇成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Move] Team 3 抵達 (11,5)
+[Market] Team5 <-> Team7 巧遇成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team7 sell material ×11 (oid=111)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 5 抵達 (2,7)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 外交 (求和)
+[Order] Team5 sell material ×43 (oid=112)
+[Order] Team14 sell material ×1 (oid=113)
+[SoloAI] Team14 → 外交 (求和)
+[Move] Team 7 抵達 (3,7)
+[Move] Team 9 抵達 (11,13)
+[Order] Team4 buy material ×29 (oid=114)
+[Move] Team 17 抵達 (9,15)
+[Move] Team 19 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[DayNight] Day 7 開始
+[Move] Team 8 抵達 (5,9)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 外交 (求和)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[TickPerf] day=7 avg=1946 us max=136055 us ticks=1440 teams=22 factions=2 | ★>2s 幀數=0/10080
+[Salary] Team3 薪水結算 coin=613.9
+[Salary] Team0 薪水結算 coin=2072.5
+[SoloAI] Team9 → 貿易 (囤貨)
+[Move] Team 11 抵達 (10,2)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 19 抵達 (3,7)
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[Salary] Team15 薪水結算 coin=2081.5
+[Salary] Team19 薪水結算 coin=0.0
+[Move] Team 2 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[Extract] Team15 徵用 1 coin (飢餓緊急)
+[Move] Team 10 抵達 (2,13)
+[Move] Team 19 抵達 (2,7)
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[SoloAI] Team8 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 14 抵達 (4,6)
+[Market] Team18 <-> Team21 巧遇成交
+[Market] Team21 <-> Team18 巧遇成交
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[SoloAI] Team13 → 覓食 (覓食)
+[Order] Team21 buy weapon_melee_low ×1 (oid=115)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[SoloAI] Team17 → 覓食 (覓食)
+[SoloAI] Team11 → 覓食 (覓食)
+[Move] Team 3 抵達 (11,5)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 19 抵達 (3,7)
+[SoloAI] Team17 → 覓食 (覓食)
+[SoloAI] Team17 → 覓食 (覓食)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 17 抵達 (10,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[Salary] Team8 薪水結算 coin=676.4
+[Move] Team 10 抵達 (2,13)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[Move] Team 5 抵達 (2,7)
+[Move] Team 13 抵達 (10,12)
+[SoloAI] Team14 → 外交 (求和)
+[SoloAI] Team17 → 覓食 (覓食)
+[Move] Team 19 抵達 (2,7)
+[SoloAI] Team17 → 覓食 (覓食)
+[Site] Faction1 派工失敗: 資源不足 1.40x: material 有 27(公庫0+私27) (需 { "material": 50, "tools": 0 })
+[Move] Team 7 抵達 (3,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Move] Team 8 抵達 (5,9)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Move] Team 11 抵達 (10,2)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 18 抵達 (5,8)
+[Move] Team 19 抵達 (3,7)
+[Move] Team 20 抵達 (3,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Barter] Team20 18xfood <-> Team7 11xmaterial
+[Market] Team20 <-> Team7 巧遇成交
+[SubAI] Team20 引擎→徵收 (徵收)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Order] Team16 sell weapon_melee_low ×1 (oid=116)
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Move] Team 10 抵達 (2,13)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 16 抵達 (6,10)
+[Move] Team 17 抵達 (10,12)
+[Outpost] 設施完工 workshop Lv1 at (4,6)
+[SoloAI] Team13 → 覓食 (覓食)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[TickPerf] day=8 avg=2464 us max=158118 us ticks=1440 teams=22 factions=2 | ★>2s 幀數=0/11520
+[Salary] Team11 薪水結算 coin=615.5
+[Manufacture] Team21 tools worker_rate=0.01
+[SoloAI] Team8 → 覓食 (覓食)
+[Move] Team 2 抵達 (11,10)
+[Move] Team 21 抵達 (3,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team19 ← Team21 完全合併 (pop=3)
+[Tick 11580] Person 41 (leader/team15) → N1_flee | stress=0.70 loyalty=0.20
+[SoloAI] Team12 → 建設 (建設)
+[SoloAI] Team9 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.20
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.20
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 19 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.20
+[Order] Team20 sell material ×11 (oid=117)
+[Move] Team 18 抵達 (5,8)
+[Manufacture] Team6 arrows worker_rate=0.20
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team11 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.20
+[Move] Team 3 抵達 (11,5)
+[Tick 11932] Person 41 (leader/team15) → P4_expand | stress=0.10 loyalty=0.10
+[Reaction] Person42 離團自立流亡 Team23 at (9,2)
+[Tick 11932] Person 42 (leader/team23) → N1_flee | stress=0.70 loyalty=0.06
+[Salary] Team1 薪水結算 coin=549.7
+[Manufacture] Team6 arrows worker_rate=0.20
+[Move] Team 10 抵達 (2,13)
+[Move] Team 20 抵達 (3,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Tick 11962] Person 41 (leader/team15) → N1_flee | stress=0.00 loyalty=0.08
+[Manufacture] Team6 arrows worker_rate=0.20
+[SoloAI] Team23 → 覓食 (覓食)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 19 抵達 (3,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team20 <-> Team7 巧遇成交
+[Equip] Team23 裝備 melee_low ×1
+[SoloAI] Team23 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.20
+[Tick 12030] Person 41 (leader/team15) → P4_expand | stress=0.10 loyalty=0.06
+[Move] Team 12 抵達 (15,2)
+[Move] Team 13 抵達 (10,12)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Salary] Team10 薪水結算 coin=615.6
+[Manufacture] Team6 arrows worker_rate=0.20
+[Tick 12114] Person 41 (leader/team15) → N1_flee | stress=0.00 loyalty=0.04
+[Market] Team20 <-> Team7 巧遇成交
+[Barter] Team20 46xfood <-> Team19 5xmaterial
+[Barter] Team20 5xmaterial <-> Team19 5xfood
+[Tick 12145] Person 41 (leader/team15) → P4_expand | stress=0.10 loyalty=0.02
+[Manufacture] Team6 arrows worker_rate=0.20
+[Move] Team 7 抵達 (2,7)
+[Move] Team 18 抵達 (5,8)
+[Manufacture] Team6 arrows worker_rate=0.20
+[Tick 12222] Person 41 (leader/team15) → N1_flee | stress=0.00 loyalty=0.00
+[Order] Team19 sell material ×11 (oid=118)
+[Move] Team 8 抵達 (5,9)
+[Move] Team 20 抵達 (2,7)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team4 ← Team20 完全合併 (pop=2)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Tick 12259] Person 41 (leader/team15) → P4_expand | stress=0.10 loyalty=0.00
+[Manufacture] Team6 arrows worker_rate=0.20
+[Move] Team 9 抵達 (11,13)
+[Move] Team 11 抵達 (10,2)
+[Move] Team 19 抵達 (2,7)
+[Move] Team 23 抵達 (10,2)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team23 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.20
+[Manufacture] Team6 arrows worker_rate=0.21
+[Move] Team 10 抵達 (2,13)
+[Manufacture] Team6 arrows worker_rate=0.21
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.21
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.21
+[SoloAI] Team13 → rest (休息)
+[Manufacture] Team6 arrows worker_rate=0.21
+[Move] Team 2 抵達 (11,10)
+[Order] Team4 buy tools ×1 (oid=119)
+[Manufacture] Team6 arrows worker_rate=0.21
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 19 抵達 (3,7)
+[Move] Team 23 抵達 (10,2)
+[Manufacture] Team6 arrows worker_rate=0.21
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.21
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.21
+[SoloAI] Team11 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.21
+[DayNight] Day 9 開始
+[Move] Team 9 抵達 (11,13)
+[Move] Team 10 抵達 (2,13)
+[Horse] Outpost (2, 13) 捕野馬 +1
+[TickPerf] day=9 avg=2738 us max=256439 us ticks=1440 teams=21 factions=2 | ★>2s 幀數=0/12960
+[SoloAI] Team10 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.26
+[Move] Team 3 抵達 (11,5)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Salary] Team18 薪水結算 coin=542.0
+[SoloAI] Team9 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.26
+[Residency] Team4 邀請 Team14 安頓 outpost (6,10)
+[Move] Team 19 抵達 (2,7)
+[Manufacture] Team6 arrows worker_rate=0.26
+[Move] Team 12 抵達 (15,2)
+[Move] Team 13 抵達 (10,12)
+[Manufacture] Team6 arrows worker_rate=0.25
+[Manufacture] Team6 arrows worker_rate=0.26
+[Tick 13249] Person 42 (leader/team23) → P4_expand | stress=0.20 loyalty=0.00
+[Manufacture] Team6 arrows worker_rate=0.27
+[Move] Team 9 抵達 (11,13)
+[Salary] Team13 薪水結算 coin=615.0
+[Manufacture] Team6 arrows worker_rate=0.40
+[Move] Team 7 抵達 (2,7)
+[Move] Team 11 抵達 (10,3)
+[Move] Team 19 抵達 (3,7)
+[Manufacture] Team6 arrows worker_rate=0.40
+[Move] Team 10 抵達 (2,13)
+[Manufacture] Team6 arrows worker_rate=0.42
+[Move] Team 18 抵達 (4,6)
+[Tribute] Team18 徵收居民 Team6 rate=0.45
+[Manufacture] Team18 tools worker_rate=0.03
+[SubAI] Team18 引擎→貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.42
+[Market@(4, 6)] Team18  outpost owner Team4 成交
+[Manufacture] Team18 tools worker_rate=0.07
+[Manufacture] Team6 arrows worker_rate=0.45
+[Order] Team6 buy food ×2 (oid=120)
+[Combat Start] Team-1000001 vs Team11
+[Ambush] NPC Team11 被 boar 伏擊
+[Manufacture] Team18 tools worker_rate=0.07
+[Manufacture] Team6 arrows worker_rate=0.45
+[Salary] Team14 薪水結算 coin=465.8
+[Diplomacy] Team5 背叛 Team4
+[SoloAI] Team13 → 偵查 (偵查)
+[Manufacture] Team18 tools worker_rate=0.07
+[Manufacture] Team6 arrows worker_rate=0.45
+[Move] Team 19 抵達 (2,7)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.43
+[Manufacture] Team18 tools worker_rate=0.03
+[Move] Team 9 抵達 (11,13)
+[Market] Team5 <-> Team7 巧遇成交
+[Manufacture] Team6 arrows worker_rate=0.43
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team18 tools worker_rate=0.03
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Market] Team7 <-> Team5 巧遇成交
+[Barter] Team19 30xfood <-> Team5 8xmaterial
+[Barter] Team19 8xmaterial <-> Team5 11xfood
+[Market] Team19 <-> Team5 巧遇成交
+[Manufacture] Team6 arrows worker_rate=0.43
+[Salary] Team9 薪水結算 coin=688.5
+[Manufacture] Team18 tools worker_rate=0.03
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 10 抵達 (2,13)
+[Market] Team5 <-> Team4 巧遇成交
+[Barter] Team5 35xfood <-> Team7 35xmaterial
+[Market] Team5 <-> Team7 巧遇成交
+[Manufacture] Team18 tools worker_rate=0.03
+[Manufacture] Team6 arrows worker_rate=0.43
+[Move] Team 2 抵達 (10,12)
+[Barter] Team7 10xfood <-> Team5 1xarmor_low
+[Market] Team7 <-> Team5 巧遇成交
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team11 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.43
+[Order] Team7 sell material ×54 (oid=121)
+[Market] Team5 <-> Team4 巧遇成交
+[Market] Team5 <-> Team7 巧遇成交
+[Manufacture] Team6 arrows worker_rate=0.43
+[Move] Team 3 抵達 (11,5)
+[Move] Team 13 抵達 (11,11)
+[Move] Team 19 抵達 (3,7)
+[Market] Team7 <-> Team5 巧遇成交
+[Order] Team5 sell material ×4 (oid=122)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.43
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.43
+[Manufacture] Team6 arrows worker_rate=0.44
+[Manufacture] Team6 arrows worker_rate=0.44
+[Manufacture] Team6 arrows worker_rate=0.44
+[DayNight] Day 10 開始
+[MsgPrune] 刪除過期訊息 global=1 known=9
+[Move] Team 7 抵達 (2,7)
+[Move] Team 9 抵達 (11,13)
+[TickPerf] day=10 avg=2445 us max=238727 us ticks=1440 teams=21 factions=2 | ★>2s 幀數=0/14400
+[Order] Team8 buy tools ×2 (oid=123)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team10 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.44
+[Move] Team 10 抵達 (2,13)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.37
+[Move] Team 19 抵達 (2,7)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.38
+[Move] Team 5 抵達 (4,6)
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Order] Team3 sell material ×30 (oid=124)
+[SoloAI] Team9 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.34
+[Move] Team 2 抵達 (10,12)
+[Move] Team 11 抵達 (10,3)
+[Manufacture] Team6 arrows worker_rate=0.34
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team13 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Move] Team 9 抵達 (11,13)
+[Move] Team 18 抵達 (5,8)
+[Move] Team 19 抵達 (3,7)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Ambition] Team7 rung 0→1 (商業 cap=2)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Sub] Team4 派出子隊 Team24 leader=P45 advisors=[] (pop=1 cap=9 task=偵查)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Combat Start] Team-1000002 vs Team11
+[Ambush] NPC Team11 被 boar 伏擊
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Salary] Team6 薪水結算 coin=670.0
+[Move] Team 5 抵達 (4,6)
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.34
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.30
+[Move] Team 19 抵達 (3,7)
+[Barter] Team24 13xmaterial <-> Team7 19xfood
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[Manufacture] Team6 arrows worker_rate=0.30
+[SoloAI] Team11 → rest (休息)
+[Move] Team 3 抵達 (11,5)
+[Barter] Team8 1xfood <-> Team5 1xmaterial
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[Manufacture] Team6 arrows worker_rate=0.32
+[Move] Team 13 抵達 (11,10)
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 3xfood <-> Team8 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[Manufacture] Team6 tools worker_rate=0.34
+[Move] Team 9 抵達 (11,13)
+[Barter] Team5 5xfood <-> Team14 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.34
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team6 tools worker_rate=0.34
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team6 tools worker_rate=0.34
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team19 287xfood <-> Team7 45xmaterial
+[Barter] Team19 45xmaterial <-> Team7 56xfood
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team6 tools worker_rate=0.34
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team24 tools worker_rate=0.01
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Move] Team 5 抵達 (4,6)
+[Move] Team 8 抵達 (4,6)
+[Move] Team 12 抵達 (15,2)
+[Barter] Team19 203xfood <-> Team7 63xmaterial
+[Barter] Team19 9xmaterial <-> Team7 1xarmor_low
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team24 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.34
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[SurvivalCamp] team=Team18 → 紮營 @(7,8)
+[Survival] Team18 warning days_left=3.0 貿易→紮營
+[Manufacture] Team24 tools worker_rate=0.01
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Order] Team0 sell food ×1183 (oid=125)
+[Order] Team0 buy weapon_melee_low ×3 (oid=126)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=127)
+[Order] Team0 buy tools ×4 (oid=128)
+[Manufacture] Team6 arrows worker_rate=0.34
+[Barter] Team19 207xfood <-> Team7 25xmaterial
+[Barter] Team19 29xmaterial <-> Team7 29xfood
+[SoloAI] Team17 → 覓食 (覓食)
+[Order] Team7 sell material ×63 (oid=129)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.34
+[CampL0] Team18 紮營 L0 @(5,6)
+[Manufacture] Team24 tools worker_rate=0.01
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Ambition] Team8 rung 0→1 (商業 cap=3)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team24 tools worker_rate=0.01
+[Manufacture] Team6 arrows worker_rate=0.34
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Order] Team18 buy food ×1 (oid=130)
+[SurvivalLoot] team=Team18 → 掠 Team19
+[Survival] Team18 warning days_left=2.9 貿易→掠奪
+[DayNight] Day 11 開始
+[Move] Team 2 抵達 (10,12)
+[Move] Team 7 抵達 (4,6)
+[Move] Team 11 抵達 (10,3)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (9,11)
+[Move] Team 19 抵達 (4,6)
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[Barter] Team19 36xfood <-> Team14 27xmaterial
+[Market@(4, 6)] Team19  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team7 ← Team19 完全合併 (absorber_pop=13)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 覓食 (覓食)
+[TickPerf] day=11 avg=6441 us max=1467781 us ticks=1440 teams=21 factions=2 | ★>2s 幀數=0/15840
+[Salary] Team17 減薪 97%（本地無幣，不計懲罰）
+[Salary] Team17 薪水結算 coin=0.0
+[Manufacture] Team24 tools worker_rate=0.01
+[Manufacture] Team6 arrows worker_rate=0.34
+[Manufacture] Team7 arrows worker_rate=0.38
+[Survival] Team18 warning days_left=3.0 掠奪→idle
+[SoloAI] Team10 → 貿易 (囤貨)
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 9 抵達 (11,13)
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[CorveeL1] Team18 L0→L1 紮根工期 @(5,6) military (720 person-ticks)
+[Survival] Team18 warning days_left=3.0 貿易→建設
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.39
+[Manufacture] Team24 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.42
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Survival] Team18 warning days_left=3.0 建設→idle
+[Manufacture] Team7 arrows worker_rate=0.42
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team24 tools worker_rate=0.01
+[Manufacture] Team6 arrows worker_rate=0.39
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 24 抵達 (5,6)
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team7 arrows worker_rate=0.42
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SubAI] Team18 引擎→貿易 (maintain_tools:resource)
+[Order] Team5 buy weapon_melee_low ×5 (oid=131)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=132)
+[Order] Team5 buy tools ×2 (oid=133)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Order] Team4 buy material ×50 (oid=134)
+[Order] Team11 buy weapon_melee_low ×6 (oid=135)
+[Order] Team11 buy weapon_ranged_low ×5 (oid=136)
+[Order] Team11 buy tools ×3 (oid=137)
+[SoloAI] Team9 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.36
+[Move] Team 5 抵達 (4,6)
+[Move] Team 8 抵達 (3,7)
+[Barter] Team5 34xfood <-> Team14 35xmaterial
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Barter] Team14 29xfood <-> Team5 32xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team7 arrows worker_rate=0.39
+[Order] Team13 buy weapon_melee_low ×6 (oid=138)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=139)
+[Order] Team13 buy tools ×3 (oid=140)
+[SoloAI] Team13 → 覓食 (覓食)
+[Manufacture] Team6 arrows worker_rate=0.36
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 13 抵達 (11,10)
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 覓食 (覓食)
+[Manufacture] Team7 arrows worker_rate=0.39
+[Manufacture] Team6 arrows worker_rate=0.36
+[Move] Team 7 抵達 (4,6)
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[Manufacture] Team6 arrows worker_rate=0.36
+[Manufacture] Team7 arrows worker_rate=0.39
+[Order] Team2 buy weapon_melee_low ×5 (oid=141)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=142)
+[Order] Team2 buy tools ×2 (oid=143)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Order] Team3 buy weapon_melee_low ×5 (oid=144)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=145)
+[Order] Team3 buy tools ×2 (oid=146)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (9,11)
+[Move] Team 18 抵達 (4,6)
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team6 ← Team18 完全合併 (absorber_pop=11)
+[Succession] Team 6 從匿名晉升新領袖 P47（統領=0.59）
+[Merge] Team7 ← Team6 部分合併 (absorber=19 absorbed=5)
+[Site] Faction-1 派工失敗: 資源不足 1.59x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Order] Team14 buy weapon_melee_low ×2 (oid=147)
+[Order] Team14 buy weapon_ranged_low ×2 (oid=148)
+[Order] Team14 buy tools ×1 (oid=149)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Order] Team8 buy weapon_melee_low ×1 (oid=150)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=151)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.07
+[SubAI] Team6 引擎→貿易 (maintain_tools:resource)
+[Tick 16304] Person 47 (leader/team6) → P2_produce | stress=0.00 loyalty=0.84
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Market@(4, 6)] Team7  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team7 容量已滿，無法合併 Team6
+[Equip] Team7 裝備 melee_low ×3
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.06
+[Move] Team 9 抵達 (11,13)
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Order] Team9 buy weapon_melee_low ×5 (oid=152)
+[Order] Team9 buy weapon_ranged_low ×4 (oid=153)
+[Order] Team9 buy tools ×2 (oid=154)
+[SoloAI] Team9 → 貿易 (囤貨)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.06
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 10 抵達 (2,13)
+[Move] Team 24 抵達 (4,6)
+[Market@(4, 6)] Team24  outpost owner Team4 成交
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team6 ← Team24 完全合併 (absorber_pop=6)
+[Manufacture] Team6 tools worker_rate=0.08
+[Order] Team6 sell material ×1 (oid=155)
+[Order] Team6 buy weapon_melee_low ×3 (oid=156)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=157)
+[Order] Team6 buy tools ×1 (oid=158)
+[Tick 16484] Person 47 (leader/team6) → P4_expand | stress=0.00 loyalty=0.84
+[Manufacture] Team7 arrows worker_rate=0.29
+[Order] Team7 buy weapon_melee_low ×8 (oid=159)
+[Order] Team7 buy weapon_ranged_low ×6 (oid=160)
+[Order] Team7 buy tools ×4 (oid=161)
+[Move] Team 5 抵達 (4,6)
+[Barter] Team6 43xfood <-> Team14 3xmaterial
+[Market@(4, 6)] Team6  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.10
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Outpost] Team6 設施施工 workshop → Lv2 at (4,6)
+[Infra] Team4 令居民 Team6 就地擴建 workshop at (4,6)
+[Manufacture] Team7 arrows worker_rate=0.32
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=0.32
+[Manufacture] Team6 tools worker_rate=0.10
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.31
+[Manufacture] Team6 tools worker_rate=0.09
+[Move] Team 7 抵達 (4,6)
+[Move] Team 12 抵達 (15,2)
+[Barter] Team8 1xfood <-> Team7 1xmaterial
+[Manufacture] Team6 tools worker_rate=0.09
+[Manufacture] Team7 arrows worker_rate=0.31
+[Order] Team8 sell material ×1 (oid=162)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Move] Team 14 抵達 (3,7)
+[Barter] Team8 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Order] Team4 buy material ×50 (oid=163)
+[Manufacture] Team7 arrows worker_rate=0.31
+[Manufacture] Team6 tools worker_rate=0.09
+[Order] Team10 buy weapon_melee_low ×1 (oid=164)
+[Order] Team10 buy weapon_ranged_low ×1 (oid=165)
+[SoloAI] Team10 → 貿易 (囤貨)
+[Order] Team23 buy food ×1 (oid=166)
+[SoloAI] Team23 → 覓食 (覓食)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.31
+[Manufacture] Team6 tools worker_rate=0.09
+[Move] Team 2 抵達 (10,12)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 10 抵達 (2,13)
+[Barter] Team8 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=0.32
+[Manufacture] Team6 tools worker_rate=0.09
+[Manufacture] Team6 tools worker_rate=0.09
+[Manufacture] Team7 arrows worker_rate=0.32
+[Manufacture] Team7 arrows worker_rate=0.32
+[Manufacture] Team6 tools worker_rate=0.09
+[Manufacture] Team6 tools worker_rate=0.09
+[Manufacture] Team7 arrows worker_rate=0.32
+[Move] Team 23 抵達 (10,3)
+[SoloAI] Team23 → 覓食 (覓食)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.32
+[Manufacture] Team6 tools worker_rate=0.09
+[Order] Team14 sell material ×3 (oid=167)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Sub] Team11 派出子隊 Team25 leader=P30 advisors=[] (pop=2 cap=2 task=運輸)
+[Convoy] Team11 派運輸子隊 Team25 送 food×1 → demand 市場(10,2)
+[Manufacture] Team6 tools worker_rate=0.09
+[Order] Team1 buy weapon_melee_low ×5 (oid=168)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=169)
+[Order] Team1 buy tools ×2 (oid=170)
+[Order] Team12 buy weapon_melee_low ×5 (oid=171)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=172)
+[Order] Team12 buy tools ×2 (oid=173)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.41
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SurvivalForage] team=Team25 pop=2 → 覓食 @(10,3)
+[Survival] Team25 urgent days_left=0.6 運輸→覓食
+[Manufacture] Team7 arrows worker_rate=0.41
+[Manufacture] Team6 tools worker_rate=0.12
+[DayNight] Day 12 開始
+[Move] Team 8 抵達 (3,7)
+[TickPerf] day=12 avg=6240 us max=1128754 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/17280
+[Equip] Team25 裝備 melee_low ×1
+[SurvivalForage] team=Team25 pop=2 → 覓食 @(10,3)
+[Manufacture] Team6 tools worker_rate=0.12
+[Manufacture] Team7 arrows worker_rate=0.41
+[Order] Team7 buy food ×4 (oid=174)
+[Manufacture] Team6 tools worker_rate=0.12
+[Manufacture] Team7 arrows worker_rate=0.41
+[Move] Team 5 抵達 (4,6)
+[Move] Team 9 抵達 (11,13)
+[Manufacture] Team7 arrows worker_rate=0.40
+[Manufacture] Team6 tools worker_rate=0.11
+[Move] Team 10 抵達 (2,13)
+[Manufacture] Team6 tools worker_rate=0.11
+[Manufacture] Team7 arrows worker_rate=0.40
+[Order] Team5 buy food ×3 (oid=175)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team9 → 貿易 (囤貨)
+[Move] Team 14 抵達 (4,6)
+[Claim] Team14 於 (4, 6) 領回 coin=0.00 goods=1.0
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.12
+[Manufacture] Team7 arrows worker_rate=0.39
+[Move] Team 8 抵達 (3,7)
+[Move] Team 13 抵達 (11,10)
+[Move] Team 23 抵達 (10,3)
+[Manufacture] Team7 arrows worker_rate=0.36
+[Manufacture] Team6 tools worker_rate=0.12
+[Manufacture] Team7 arrows worker_rate=0.36
+[Manufacture] Team6 tools worker_rate=0.09
+[Move] Team 25 抵達 (10,3)
+[Manufacture] Team7 arrows worker_rate=0.36
+[Manufacture] Team6 tools worker_rate=0.12
+[Merge] Team11 ← Team25 完全合併 (pop=9)
+[Manufacture] Team7 arrows worker_rate=0.36
+[Manufacture] Team6 tools worker_rate=0.12
+[Salary] Team12 薪水結算 coin=614.7
+[Move] Team 10 抵達 (2,13)
+[Move] Team 12 抵達 (15,2)
+[Manufacture] Team7 arrows worker_rate=0.36
+[Manufacture] Team6 tools worker_rate=0.12
+[Move] Team 9 抵達 (11,13)
+[Manufacture] Team7 arrows worker_rate=0.36
+[Manufacture] Team6 tools worker_rate=0.12
+[Move] Team 5 抵達 (4,6)
+[Move] Team 14 抵達 (3,7)
+[Manufacture] Team6 tools worker_rate=0.11
+[Salary] Team5 薪水結算 coin=1257.9
+[Manufacture] Team7 arrows worker_rate=0.36
+[Salary] Team7 薪水結算 coin=1897.4
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.37
+[Manufacture] Team6 tools worker_rate=0.12
+[Order] Team6 buy food ×1 (oid=176)
+[Move] Team 2 抵達 (10,12)
+[Manufacture] Team7 arrows worker_rate=0.37
+[Manufacture] Team6 tools worker_rate=0.10
+[Manufacture] Team6 tools worker_rate=0.11
+[Manufacture] Team7 arrows worker_rate=0.37
+[Manufacture] Team7 arrows worker_rate=0.38
+[Manufacture] Team6 tools worker_rate=0.12
+[Order] Team5 buy food ×3 (oid=177)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 8 抵達 (3,7)
+[Move] Team 10 抵達 (2,13)
+[Manufacture] Team6 tools worker_rate=0.12
+[Manufacture] Team7 arrows worker_rate=0.39
+[Order] Team7 buy food ×8 (oid=178)
+[Sub] Team11 派出子隊 Team26 leader=P31 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team11 派運輸子隊 Team26 送 food×1 → demand 市場(10,2)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team13 → 覓食 (覓食)
+[Manufacture] Team7 arrows worker_rate=0.37
+[SoloAI] Team12 → 建設 (建設)
+[SurvivalCamp] team=Team26 → 紮營 @(11,3)
+[Survival] Team26 urgent days_left=0.6 運輸→紮營
+[Manufacture] Team6 tools worker_rate=0.12
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Manufacture] Team7 arrows worker_rate=0.37
+[Manufacture] Team6 tools worker_rate=0.11
+[CampL0] Team26 紮營 L0 @(10,3)
+[CorveeL1] Team26 L0→L1 紮根工期 @(10,3) civilian (720 person-ticks)
+[SubAI] Team26 引擎→建設 (紮根)
+[SurvivalLoot] team=Team26 → 掠 Team23
+[Survival] Team26 urgent days_left=0.6 建設→掠奪
+[Manufacture] Team6 tools worker_rate=0.11
+[Manufacture] Team7 arrows worker_rate=0.38
+[Move] Team 9 抵達 (11,13)
+[Extort] Team26 勒索 Team11，Team11 妥協給付
+[Extort] Team26 勒索 Team23，Team23 妥協給付
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.37
+[Order] Team17 buy food ×1 (oid=179)
+[Manufacture] Team6 tools worker_rate=0.11
+[Move] Team 5 抵達 (4,6)
+[Extort] Team26 勒索 Team11，Team11 妥協給付
+[Extort] Team26 勒索 Team23，Team23 妥協給付
+[Manufacture] Team6 tools worker_rate=0.12
+[Manufacture] Team7 arrows worker_rate=0.38
+[Combat Start] Team26 vs Team11
+[Manufacture] Team7 arrows worker_rate=0.39
+[Manufacture] Team6 tools worker_rate=0.11
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Capture] Team11 控地俘 Team26 潰逃殘部 +1 (rd=1.00)
+[Combat Start] Team26 vs Team11
+[Manufacture] Team6 tools worker_rate=0.11
+[Manufacture] Team7 arrows worker_rate=0.38
+[DayNight] Day 13 開始
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (3,7)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 torso: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Combat Start] Team26 vs Team11
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[TickPerf] day=13 avg=3856 us max=447868 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/18720
+[Manufacture] Team7 arrows worker_rate=0.27
+[Order] Team16 sell weapon_melee_low ×1 (oid=180)
+[Manufacture] Team6 tools worker_rate=0.08
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 torso: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Combat Start] Team26 vs Team11
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.27
+[Move] Team 10 抵達 (2,13)
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 torso: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Combat Start] Team26 vs Team11
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.08
+[Move] Team 13 抵達 (11,10)
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 torso: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Combat Start] Team26 vs Team11
+[Manufacture] Team6 tools worker_rate=0.08
+[Manufacture] Team7 arrows worker_rate=0.28
+[SoloAI] Team10 → 貿易 (囤貨)
+[Move] Team 9 抵達 (11,13)
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 torso: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Combat Start] Team26 vs Team11
+[Manufacture] Team6 tools worker_rate=0.08
+[Manufacture] Team7 arrows worker_rate=0.27
+[SoloAI] Team9 → 貿易 (囤貨)
+[Move] Team 4 抵達 (4,6)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (3,7)
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 right_leg: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Combat Start] Team26 vs Team11
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Salary] Team4 薪水結算 coin=220.7
+[Survival] Team26 warning days_left=2.0 掠奪→idle
+[Manufacture] Team6 tools worker_rate=0.07
+[Exhaust] Team26 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person31 right_leg: healthy → wounded
+[Pursuit] Team11 追擊 Team26 +1傷亡 (straggler_kill=1)
+[Survival] Team26 warning days_left=1.3 idle→rest
+[Manufacture] Team4 tools worker_rate=0.00
+[Order] Team4 sell material ×25 (oid=181)
+[Order] Team4 sell food ×837 (oid=182)
+[Manufacture] Team6 tools worker_rate=0.07
+[Order] Team5 buy food ×1 (oid=183)
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.26
+[Move] Team 2 抵達 (10,12)
+[Move] Team 8 抵達 (3,7)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=1.4 rest→投靠
+[Manufacture] Team4 tools worker_rate=0.00
+[Survival] Team26 warning days_left=1.5 idle→建設
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 10 抵達 (2,13)
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=1.6 建設→投靠
+[Move] Team 26 抵達 (10,3)
+[SoloAI] Team17 → 乞食 (乞食)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Survival] Team26 warning days_left=1.7 idle→建設
+[SoloAI] Team17 → 覓食 (遷移找糧)
+[SoloAI] Team13 → 覓食 (覓食)
+[Manufacture] Team4 tools worker_rate=0.00
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=1.8 建設→投靠
+[Manufacture] Team7 arrows worker_rate=0.26
+[Order] Team7 buy food ×5 (oid=184)
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team17 → 紮營 (紮營)
+[CampL0] Team17 紮營 L0 @(9,11)
+[Salary] Team16 薪水結算 coin=69.5
+[SoloAI] Team12 → 建設 (建設)
+[Survival] Team26 warning days_left=1.9 idle→建設
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.0 建設→投靠
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 5 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Survival] Team26 warning days_left=2.0 idle→建設
+[Manufacture] Team7 arrows worker_rate=0.26
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.1 建設→投靠
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Survival] Team26 warning days_left=2.2 idle→建設
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 10 抵達 (2,13)
+[Move] Team 26 抵達 (10,3)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.26
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.3 建設→投靠
+[Manufacture] Team6 tools worker_rate=0.07
+[Survival] Team26 warning days_left=2.4 idle→建設
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team6 tools worker_rate=0.07
+[Salary] Team2 薪水結算 coin=685.1
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.4 建設→投靠
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Order] Team7 buy food ×2 (oid=185)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[SubAI] Team26 引擎→貿易 (maintain_food:resource)
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.5 貿易→投靠
+[Move] Team 9 抵達 (11,13)
+[Manufacture] Team6 tools worker_rate=0.06
+[Manufacture] Team7 arrows worker_rate=0.24
+[Survival] Team26 warning days_left=2.6 idle→建設
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.7 建設→投靠
+[Manufacture] Team7 arrows worker_rate=0.24
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.06
+[Site] Faction1 派工失敗: 資源不足 1.40x: material 有 52(公庫0+私52) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.24
+[Manufacture] Team6 tools worker_rate=0.06
+[Survival] Team26 warning days_left=2.7 idle→建設
+[DayNight] Day 14 開始
+[Move] Team 8 抵達 (3,7)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=14 avg=3685 us max=896469 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/20160
+[Manufacture] Team7 arrows worker_rate=0.24
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=2.8 建設→投靠
+[Manufacture] Team6 tools worker_rate=0.06
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team26 warning days_left=2.9 idle→建設
+[Manufacture] Team6 tools worker_rate=0.06
+[Manufacture] Team7 arrows worker_rate=0.24
+[Order] Team5 buy food ×3 (oid=186)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 26 抵達 (10,3)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SurvivalMergeIn] team=Team26 → 併入 Team11
+[Survival] Team26 warning days_left=3.0 建設→投靠
+[Manufacture] Team6 tools worker_rate=0.06
+[Manufacture] Team7 arrows worker_rate=0.24
+[Move] Team 2 抵達 (10,12)
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.06
+[SoloAI] Team10 → 貿易 (貿易)
+[Manufacture] Team7 arrows worker_rate=0.24
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.06
+[Manufacture] Team7 arrows worker_rate=0.24
+[Salary] Team9 薪水結算 coin=681.8
+[SoloAI] Team9 → 貿易 (囤貨)
+[Move] Team 4 抵達 (4,6)
+[Move] Team 8 抵達 (3,7)
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.24
+[Manufacture] Team6 tools worker_rate=0.06
+[Manufacture] Team4 tools worker_rate=0.00
+[SoloAI] Team13 → 覓食 (覓食)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.26
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.26
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.07
+[Order] Team6 buy food ×2 (oid=187)
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 5 抵達 (4,6)
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 2xfood <-> Team6 2xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.26
+[Move] Team 8 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.26
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Site] Faction1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.26
+[Order] Team7 buy food ×3 (oid=188)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 10 抵達 (2,13)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[Order] Team5 buy food ×1 (oid=189)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.27
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.26
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.27
+[Salary] Team17 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team17 薪水結算 coin=0.0
+[Tag] Team23 -流亡（恢復）
+[Market] Team11 <-> Team26 巧遇成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.27
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.27
+[Ambition] Team23 rung 0→1 (商業 cap=2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team13 → rest (休息)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=48 known=184
+[Move] Team 9 抵達 (11,13)
+[Move] Team 14 抵達 (3,7)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=15 avg=3610 us max=386069 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/21600
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 8 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 5 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team10 → 貿易 (囤貨)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team6 tools worker_rate=0.07
+[Order] Team3 sell material ×30 (oid=190)
+[Move] Team 4 抵達 (4,6)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.27
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.06
+[Move] Team 8 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[SoloAI] Team9 → 貿易 (囤貨)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Order] Team6 buy food ×2 (oid=191)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 19xfood <-> Team7 17xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 8 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 12 抵達 (15,2)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.25
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 9 抵達 (11,13)
+[Move] Team 26 抵達 (10,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team4 tools worker_rate=0.00
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team13 → rest (休息)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team4 buy material ×12 (oid=192)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 5 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[Salary] Team5 薪水結算 coin=1343.2
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=9 known=63
+[Move] Team 8 抵達 (3,7)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 17 抵達 (11,10)
+[Move] Team 26 抵達 (11,5)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=16 avg=5401 us max=596063 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/23040
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.25
+[Manufacture] Team6 tools worker_rate=0.07
+[Salary] Team6 薪水結算 coin=704.4
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Site] Faction1 派工失敗: 資源不足 1.40x: material 有 52(公庫0+私52) (需 { "material": 50, "tools": 0 })
+[Manufacture] Team7 arrows worker_rate=0.25
+[Move] Team 8 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.25
+[SoloAI] Team10 → 貿易 (囤貨)
+[Move] Team 4 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.45
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Order] Team13 buy weapon_melee_low ×6 (oid=193)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=194)
+[Order] Team13 buy tools ×3 (oid=195)
+[SoloAI] Team13 → 建設 (建設)
+[Manufacture] Team4 tools worker_rate=0.01
+[Barter] Team14 6xfood <-> Team7 5xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.15
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.44
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.15
+[SoloAI] Team9 → 貿易 (囤貨)
+[Manufacture] Team7 arrows worker_rate=0.40
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 9 抵達 (11,13)
+[Move] Team 12 抵達 (15,2)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.40
+[Order] Team0 sell food ×1139 (oid=196)
+[Order] Team0 buy weapon_melee_low ×3 (oid=197)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=198)
+[Order] Team0 buy tools ×4 (oid=199)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.13
+[Order] Team3 buy weapon_melee_low ×5 (oid=200)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=201)
+[Order] Team3 buy tools ×2 (oid=202)
+[Order] Team14 buy weapon_melee_low ×2 (oid=203)
+[Order] Team14 buy weapon_ranged_low ×1 (oid=204)
+[Order] Team14 buy tools ×1 (oid=205)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Move] Team 8 抵達 (3,7)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.13
+[Manufacture] Team7 arrows worker_rate=0.40
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 10 抵達 (2,13)
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team5 buy weapon_melee_low ×5 (oid=206)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=207)
+[Order] Team5 buy tools ×2 (oid=208)
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.40
+[Manufacture] Team6 tools worker_rate=0.14
+[Salary] Team10 薪水結算 coin=605.6
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 2 抵達 (10,12)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.40
+[Manufacture] Team4 tools worker_rate=0.00
+[Order] Team8 buy weapon_melee_low ×1 (oid=209)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=210)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 arrows worker_rate=0.07
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 arrows worker_rate=0.07
+[Manufacture] Team4 tools worker_rate=0.00
+[Salary] Team0 薪水結算 coin=2057.5
+[Order] Team2 sell material ×30 (oid=211)
+[Order] Team2 buy weapon_melee_low ×5 (oid=212)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=213)
+[Order] Team2 buy tools ×2 (oid=214)
+[Order] Team11 buy weapon_melee_low ×4 (oid=215)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=216)
+[Order] Team11 buy tools ×2 (oid=217)
+[Manufacture] Team7 arrows worker_rate=0.21
+[Order] Team7 buy weapon_melee_low ×3 (oid=218)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=219)
+[Order] Team7 buy tools ×1 (oid=220)
+[Order] Team7 buy food ×2 (oid=221)
+[Move] Team 14 抵達 (3,7)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 arrows worker_rate=0.07
+[Manufacture] Team7 arrows worker_rate=0.21
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.21
+[Manufacture] Team4 tools worker_rate=0.00
+[Manufacture] Team6 arrows worker_rate=0.07
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Move] Team 5 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 arrows worker_rate=0.19
+[Manufacture] Team7 arrows worker_rate=0.55
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 arrows worker_rate=0.19
+[Manufacture] Team7 arrows worker_rate=0.55
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team5 buy food ×1 (oid=222)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 8 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.55
+[Manufacture] Team6 arrows worker_rate=0.21
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 arrows worker_rate=0.21
+[Order] Team6 buy weapon_melee_low ×3 (oid=223)
+[Order] Team6 buy weapon_ranged_low ×2 (oid=224)
+[Order] Team6 buy tools ×1 (oid=225)
+[Manufacture] Team7 arrows worker_rate=0.63
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.63
+[Order] Team9 buy weapon_melee_low ×5 (oid=226)
+[Order] Team9 buy weapon_ranged_low ×4 (oid=227)
+[Order] Team9 buy tools ×2 (oid=228)
+[SoloAI] Team9 → 貿易 (囤貨)
+[Manufacture] Team6 arrows worker_rate=0.21
+[Move] Team 10 抵達 (2,13)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Move] Team 26 抵達 (10,3)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team11 ← Team26 完全合併 (pop=8)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team23 → rest (休息)
+[Manufacture] Team7 arrows worker_rate=0.68
+[Manufacture] Team6 tools worker_rate=0.23
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Claim] Team8 於 (4, 6) 領回 coin=0.00 goods=1.0
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.68
+[Manufacture] Team6 tools worker_rate=0.23
+[Order] Team10 buy weapon_melee_low ×1 (oid=229)
+[Order] Team10 buy weapon_ranged_low ×1 (oid=230)
+[SoloAI] Team10 → 貿易 (囤貨)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.68
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.23
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.23
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.67
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=6 known=29
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=17 avg=5059 us max=588255 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/24480
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.68
+[SoloAI] Team13 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.24
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team6 tools worker_rate=0.25
+[Order] Team12 buy weapon_melee_low ×5 (oid=231)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=232)
+[Order] Team12 buy tools ×2 (oid=233)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.72
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Move] Team 8 抵達 (4,6)
+[Move] Team 10 抵達 (2,13)
+[Move] Team 12 抵達 (15,2)
+[Barter] Team8 9xfood <-> Team7 2xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.24
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.72
+[Order] Team8 sell material ×2 (oid=234)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Move] Team 5 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.76
+[Order] Team4 buy material ×12 (oid=235)
+[Manufacture] Team6 tools worker_rate=0.26
+[Move] Team 4 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.70
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.67
+[Manufacture] Team6 tools worker_rate=0.20
+[Manufacture] Team4 tools worker_rate=0.01
+[Ambition] Team4 rung 0→1 (商業 cap=2)
+[Move] Team 13 抵達 (11,10)
+[Move] Team 17 抵達 (11,10)
+[Move] Team 23 抵達 (10,3)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.67
+[Sub] Team11 派出子隊 Team27 leader=P30 advisors=[] (pop=2 cap=2 task=運輸)
+[Convoy] Team11 派運輸子隊 Team27 送 food×1 → demand 市場(10,2)
+[Manufacture] Team6 tools worker_rate=0.20
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.67
+[SurvivalLoot] team=Team27 → 掠 Team23
+[Survival] Team27 urgent days_left=0.6 運輸→掠奪
+[Manufacture] Team6 tools worker_rate=0.20
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 8 抵達 (3,7)
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.20
+[Equip] Team27 裝備 melee_low ×1
+[Survival] Team27 urgent days_left=0.6 掠奪→idle
+[Manufacture] Team7 arrows worker_rate=0.67
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[SubAI] Team27 引擎→掠奪 (掠奪)
+[Survival] Team27 urgent days_left=0.6 掠奪→idle
+[Order] Team5 buy food ×1 (oid=236)
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.67
+[Order] Team1 buy weapon_melee_low ×5 (oid=237)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=238)
+[Order] Team1 buy tools ×2 (oid=239)
+[Manufacture] Team6 tools worker_rate=0.20
+[Move] Team 10 抵達 (2,13)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.20
+[Order] Team6 buy food ×1 (oid=240)
+[Manufacture] Team7 arrows worker_rate=0.67
+[SurvivalLoot] team=Team27 → 掠 Team23
+[Survival] Team27 urgent days_left=0.6 idle→掠奪
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 17 抵達 (11,10)
+[Extort] Team27 勒索 Team11，Team11 妥協給付
+[Extort] Team27 勒索 Team23，Team23 妥協給付
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.20
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.67
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.67
+[Manufacture] Team6 tools worker_rate=0.20
+[Manufacture] Team4 tools worker_rate=0.01
+[Extort] Team27 勒索 Team11，Team11 妥協給付
+[Extort] Team27 勒索 Team23，Team23 妥協給付
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Salary] Team16 薪水結算 coin=69.5
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.66
+[Tick 25354] Person 42 (leader/team23) → N2_riot | stress=0.00 loyalty=0.00
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.20
+[Order] Team27 buy weapon_melee_low ×1 (oid=241)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.20
+[Manufacture] Team7 arrows worker_rate=0.67
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Combat Start] Team27 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team7 arrows worker_rate=0.79
+[Move] Team 4 抵達 (3,7)
+[Move] Team 8 抵達 (4,6)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Exhaust] Team27 力竭撤退 (rd=1.00 wnd=0)
+[Pursuit] Team11 追擊 Team27 +1傷亡 (straggler_kill=1)
+[Capture] Team11 控地俘 Team27 潰逃殘部 +1 (rd=1.00)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 tools worker_rate=0.24
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Combat Start] Team27 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.82
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Exhaust] Team27 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person30 right_arm: healthy → wounded
+[Pursuit] Team11 追擊 Team27 +1傷亡 (straggler_kill=1)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team13 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Manufacture] Team6 tools worker_rate=0.24
+[Move] Team 10 抵達 (2,13)
+[Combat Start] Team27 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Manufacture] Team6 tools worker_rate=0.24
+[Salary] Team14 減薪 95%（本地無幣，不計懲罰）
+[Salary] Team14 薪水結算 coin=0.0
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Exhaust] Team27 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person30 left_leg: healthy → wounded
+[Pursuit] Team11 追擊 Team27 +1傷亡 (straggler_kill=1)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.82
+[Move] Team 5 抵達 (4,6)
+[Combat Start] Team27 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 tools worker_rate=0.24
+[Exhaust] Team27 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person30 right_leg: healthy → wounded
+[Pursuit] Team11 追擊 Team27 +1傷亡 (straggler_kill=1)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Manufacture] Team6 tools worker_rate=0.24
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=8 known=49
+[Move] Team 17 抵達 (11,10)
+[Combat Start] Team27 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=18 avg=7406 us max=1037714 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/25920
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.82
+[Salary] Team2 薪水結算 coin=675.0
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Exhaust] Team27 力竭撤退 (rd=1.00 wnd=0)
+[Hit] Person30 head: healthy → wounded
+[Pursuit] Team11 追擊 Team27 +1傷亡 (straggler_kill=1)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Order] Team14 sell material ×1 (oid=242)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.25
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Move] Team 27 抵達 (10,3)
+[Combat Start] Team27 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Order] Team17 buy food ×5 (oid=243)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.83
+[Merge] Team11 ← Team27 完全合併 (pop=7)
+[Move] Team 8 抵達 (3,7)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 13 抵達 (11,10)
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Salary] Team12 薪水結算 coin=603.8
+[Manufacture] Team6 tools worker_rate=0.24
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 10 抵達 (2,13)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.82
+[Order] Team4 buy tools ×1 (oid=244)
+[SoloAI] Team10 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.82
+[Move] Team 4 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.72
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 紮營 (紮營)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team7 arrows worker_rate=0.72
+[CampL0] Team17 紮營 L0 @(11,10)
+[SoloAI] Team9 → 貿易 (囤貨)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Move] Team 12 抵達 (15,2)
+[CorveeL1] Team17 L0→L1 紮根工期 @(11,10) civilian (720 person-ticks)
+[SoloAI] Team17 → 建設 (紮根)
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Move] Team 9 抵達 (11,13)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team7 arrows worker_rate=0.72
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team6 tools worker_rate=0.23
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 10 抵達 (2,13)
+[Outpost] 設施完工 workshop Lv2 at (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.46
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.78
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team13 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.78
+[Salary] Team7 薪水結算 coin=2489.4
+[Move] Team 14 抵達 (3,7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team12 → 建設 (建設)
+[Salary] Team11 薪水結算 coin=605.8
+[Manufacture] Team7 arrows worker_rate=0.78
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Move] Team 8 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.78
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Move] Team 5 抵達 (4,6)
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.79
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 9 抵達 (11,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.78
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.78
+[Manufacture] Team6 tools worker_rate=0.25
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.78
+[Manufacture] Team6 tools worker_rate=0.26
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 tools worker_rate=0.26
+[Sub] Team11 派出子隊 Team28 leader=P31 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team11 派運輸子隊 Team28 送 food×1 → demand 市場(10,2)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 tools worker_rate=0.26
+[Salary] Team23 薪水結算 coin=0.0
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.80
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team10 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.80
+[DayNight] Day 19 開始
+[MsgPrune] 刪除過期訊息 global=4 known=28
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=19 avg=7330 us max=950771 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/27360
+[Salary] Team15 薪水結算 coin=2082.7
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team6 tools worker_rate=0.26
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team6 tools worker_rate=0.26
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.84
+[Manufacture] Team6 tools worker_rate=0.27
+[Move] Team 9 抵達 (11,13)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team7 arrows worker_rate=0.84
+[Move] Team 5 抵達 (4,6)
+[Move] Team 28 抵達 (10,2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.84
+[Order] Team8 buy food ×2 (oid=245)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Order] Team5 buy food ×3 (oid=246)
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Manufacture] Team6 tools worker_rate=0.27
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Barter] Team8 4xfood <-> Team5 3xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team7 arrows worker_rate=0.86
+[Move] Team 4 抵達 (4,6)
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team4 sell material ×145 (oid=247)
+[Order] Team4 sell food ×841 (oid=248)
+[Order] Team4 sell tools ×2 (oid=249)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.88
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.29
+[Ambition] Team14 rung 0→1 (商業 cap=2)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.87
+[SoloAI] Team13 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.29
+[Manufacture] Team7 arrows worker_rate=0.87
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team9 → 偵查 (偵查)
+[Move] Team 28 抵達 (10,3)
+[Merge] Team11 ← Team28 完全合併 (pop=7)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.29
+[Manufacture] Team7 arrows worker_rate=0.87
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.29
+[Manufacture] Team7 arrows worker_rate=0.87
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 24xfood <-> Team7 4xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 8 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.79
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 9 抵達 (10,12)
+[Move] Team 13 抵達 (11,10)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 7xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.79
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team13 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.82
+[Salary] Team1 薪水結算 coin=542.9
+[Move] Team 5 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team7 arrows worker_rate=0.82
+[Salary] Team8 減薪 81%（本地無幣，不計懲罰）
+[Salary] Team8 薪水結算 coin=0.0
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team10 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.28
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.84
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Salary] Team13 薪水結算 coin=604.3
+[Manufacture] Team7 arrows worker_rate=0.84
+[Manufacture] Team6 tools worker_rate=0.28
+[Barter] Team14 5xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.28
+[Manufacture] Team7 arrows worker_rate=0.85
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.28
+[Manufacture] Team7 arrows worker_rate=0.84
+[Move] Team 12 抵達 (15,2)
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.28
+[Manufacture] Team7 arrows worker_rate=0.85
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.28
+[Manufacture] Team7 arrows worker_rate=0.84
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[SoloAI] Team8 → 貿易 (貿易)
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Sub] Team11 派出子隊 Team29 leader=P30 advisors=[] (pop=2 cap=2 task=運輸)
+[Convoy] Team11 派運輸子隊 Team29 送 food×1 → demand 市場(10,2)
+[Manufacture] Team7 arrows worker_rate=0.84
+[Manufacture] Team6 tools worker_rate=0.28
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=26 known=107
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=20 avg=8179 us max=1361357 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/28800
+[Manufacture] Team7 arrows worker_rate=0.84
+[Manufacture] Team6 tools worker_rate=0.28
+[Survival] Team29 urgent days_left=0.6 運輸→乞食
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Equip] Team29 裝備 melee_low ×1
+[SurvivalLoot] team=Team29 → 掠 Team23
+[Manufacture] Team6 tools worker_rate=0.28
+[Combat Start] Team29 vs Team11
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.28
+[Survival] Team29 urgent days_left=0.6 掠奪→idle
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Exhaust] Team29 力竭撤退 (rd=1.00 wnd=0)
+[Pursuit] Team11 追擊 Team29 +1傷亡 (straggler_kill=1)
+[Capture] Team11 控地俘 Team29 潰逃殘部 +1 (rd=1.00)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team9 → 偵查 (偵查)
+[SubAI] Team29 引擎→乞食 (乞食)
+[Manufacture] Team6 tools worker_rate=0.28
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.28
+[Survival] Team29 warning days_left=1.8 idle→乞食
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.86
+[Manufacture] Team6 tools worker_rate=0.28
+[Move] Team 4 抵達 (4,6)
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team29 warning days_left=1.9 idle→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.83
+[Manufacture] Team6 tools worker_rate=0.27
+[Barter] Team8 1xfood <-> Team5 1xmaterial
+[Barter] Team8 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.84
+[Survival] Team29 warning days_left=2.0 idle→乞食
+[Move] Team 17 抵達 (11,10)
+[Move] Team 29 抵達 (10,3)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Merge] Team11 ← Team29 完全合併 (pop=6)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.84
+[Move] Team 5 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.84
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.26
+[Order] Team3 sell material ×30 (oid=250)
+[SoloAI] Team10 → 建設 (建設)
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team4 sell tools ×1 (oid=251)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Ambition] Team17 rung 0→1 (商業 cap=2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.85
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.85
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Salary] Team3 薪水結算 coin=602.0
+[Manufacture] Team7 arrows worker_rate=0.85
+[Move] Team 9 抵達 (11,10)
+[SoloAI] Team13 → 建設 (建設)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.86
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.86
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.85
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.26
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.26
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team9 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.26
+[Salary] Team4 薪水結算 coin=20.0
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.95
+[Barter] Team8 1xfood <-> Team5 1xmaterial
+[Barter] Team8 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.94
+[Manufacture] Team6 tools worker_rate=0.28
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.95
+[Manufacture] Team6 tools worker_rate=0.29
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=44 known=180
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=21 avg=17913 us max=1223860 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/30240
+[Manufacture] Team7 arrows worker_rate=0.93
+[Manufacture] Team6 tools worker_rate=0.28
+[Barter] Team8 1xfood <-> Team5 1xmaterial
+[Barter] Team8 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.94
+[Manufacture] Team6 tools worker_rate=0.28
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.28
+[Sub] Team11 派出子隊 Team30 leader=P31 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team11 派運輸子隊 Team30 送 food×1 → demand 市場(10,2)
+[Manufacture] Team7 arrows worker_rate=0.95
+[Move] Team 9 抵達 (11,10)
+[Move] Team 13 抵達 (11,10)
+[Barter] Team8 1xfood <-> Team5 1xmaterial
+[Barter] Team8 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.28
+[Survival] Team30 urgent days_left=0.6 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.94
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.94
+[Residency] Team4 邀請 Team8 安頓 outpost (6,10)
+[Manufacture] Team6 tools worker_rate=0.28
+[Move] Team 5 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.94
+[Manufacture] Team6 tools worker_rate=0.28
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 4 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team10 → 建設 (建設)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.28
+[Manufacture] Team7 arrows worker_rate=0.94
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.86
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Move] Team 8 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.87
+[Move] Team 12 抵達 (15,2)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.24
+[Manufacture] Team7 arrows worker_rate=0.83
+[Move] Team 17 抵達 (11,10)
+[Move] Team 30 抵達 (10,3)
+[Barter] Team14 3xfood <-> Team5 2xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.21
+[Manufacture] Team7 arrows worker_rate=0.75
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team14 buy weapon_melee_low ×2 (oid=252)
+[Order] Team14 buy weapon_ranged_low ×1 (oid=253)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Manufacture] Team7 arrows worker_rate=0.75
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.21
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.21
+[Order] Team3 buy weapon_melee_low ×5 (oid=254)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=255)
+[Order] Team3 buy tools ×2 (oid=256)
+[Manufacture] Team7 arrows worker_rate=0.75
+[Order] Team7 buy weapon_melee_low ×3 (oid=257)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=258)
+[Order] Team7 buy tools ×1 (oid=259)
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team13 buy weapon_melee_low ×6 (oid=260)
+[Order] Team13 buy weapon_ranged_low ×5 (oid=261)
+[Order] Team13 buy tools ×3 (oid=262)
+[SoloAI] Team13 → 建設 (建設)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.21
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.75
+[Move] Team 14 抵達 (4,6)
+[Barter] Team8 2xfood <-> Team5 1xmaterial
+[Barter] Team8 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.75
+[Order] Team11 buy weapon_melee_low ×2 (oid=263)
+[Order] Team11 buy weapon_ranged_low ×2 (oid=264)
+[Order] Team11 buy tools ×1 (oid=265)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.21
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.21
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team9 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.74
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Survival] Team30 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.74
+[Manufacture] Team6 tools worker_rate=0.21
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 30 抵達 (10,3)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.74
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.21
+[Merge] Team11 ← Team30 完全合併 (pop=6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.75
+[Order] Team5 buy weapon_melee_low ×5 (oid=266)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=267)
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Manufacture] Team6 tools worker_rate=0.22
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team8 buy weapon_melee_low ×1 (oid=268)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=269)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Order] Team0 sell food ×1096 (oid=270)
+[Order] Team0 buy weapon_melee_low ×3 (oid=271)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=272)
+[Order] Team0 buy tools ×4 (oid=273)
+[Manufacture] Team7 arrows worker_rate=0.76
+[Manufacture] Team6 tools worker_rate=0.22
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team2 sell material ×30 (oid=274)
+[Order] Team2 buy weapon_melee_low ×5 (oid=275)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=276)
+[Order] Team2 buy tools ×2 (oid=277)
+[Manufacture] Team7 arrows worker_rate=0.76
+[Manufacture] Team6 tools worker_rate=0.22
+[Move] Team 9 抵達 (11,10)
+[Move] Team 17 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.76
+[Move] Team 13 抵達 (11,10)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team10 buy weapon_melee_low ×1 (oid=278)
+[Order] Team10 buy weapon_ranged_low ×1 (oid=279)
+[Order] Team10 buy food ×4 (oid=280)
+[SoloAI] Team10 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.76
+[Move] Team 5 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.22
+[Order] Team4 buy material ×12 (oid=281)
+[Manufacture] Team7 arrows worker_rate=0.76
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=2 known=7
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 迎戰 (迎戰)
+[TickPerf] day=22 avg=17626 us max=1359246 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/31680
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.76
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.76
+[Manufacture] Team6 tools worker_rate=0.22
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.77
+[Manufacture] Team6 tools worker_rate=0.22
+[Salary] Team11 薪水結算 coin=596.4
+[Move] Team 8 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Order] Team9 buy weapon_melee_low ×3 (oid=282)
+[Order] Team9 buy weapon_ranged_low ×2 (oid=283)
+[Order] Team9 buy tools ×1 (oid=284)
+[SoloAI] Team9 → 建設 (建設)
+[Manufacture] Team7 arrows worker_rate=0.76
+[Manufacture] Team6 tools worker_rate=0.22
+[Order] Team6 buy weapon_melee_low ×3 (oid=285)
+[Order] Team6 buy weapon_ranged_low ×2 (oid=286)
+[Order] Team6 buy tools ×1 (oid=287)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.77
+[Manufacture] Team6 tools worker_rate=0.22
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.29
+[Manufacture] Team7 arrows worker_rate=1.00
+[Order] Team12 buy weapon_melee_low ×5 (oid=288)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=289)
+[Order] Team12 buy tools ×2 (oid=290)
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 4 抵達 (4,6)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=1.00
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.22
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team6 tools worker_rate=0.25
+[Move] Team 10 抵達 (2,13)
+[Move] Team 14 抵達 (4,6)
+[Claim] Team8 於 (4, 6) 領回 coin=0.00 goods=2.0
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.80
+[Move] Team 8 抵達 (4,6)
+[Move] Team 9 抵達 (11,10)
+[Move] Team 17 抵達 (10,12)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team4 sell tools ×1 (oid=291)
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Sub] Team11 派出子隊 Team31 leader=P30 advisors=[] (pop=2 cap=2 task=運輸)
+[Convoy] Team11 派運輸子隊 Team31 送 food×1 → demand 市場(10,2)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Salary] Team17 減薪 100%（本地無幣，不計懲罰）
+[Salary] Team17 薪水結算 coin=0.0
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.26
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Survival] Team31 urgent days_left=0.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.81
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Equip] Team31 裝備 melee_low ×1
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.80
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 迎戰 (迎戰)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.82
+[Manufacture] Team6 tools worker_rate=0.26
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[CrudeCamp] Team9 玩家紮營完工 @(11,10) → civilian
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 8 抵達 (4,6)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.80
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[SoloAI] Team10 → 建設 (建設)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Order] Team17 buy material ×63 (oid=292)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.81
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.81
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 tools worker_rate=0.26
+[Salary] Team5 薪水結算 coin=976.1
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.80
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.82
+[Move] Team 31 抵達 (10,3)
+[SoloAI] Team17 → 逃跑 (survival)
+[Order] Team1 buy weapon_melee_low ×5 (oid=293)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=294)
+[Order] Team1 buy tools ×2 (oid=295)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Manufacture] Team6 tools worker_rate=0.26
+[Merge] Team11 ← Team31 完全合併 (pop=6)
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=5 known=30
+[Move] Team 5 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[TickPerf] day=23 avg=20085 us max=1465309 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/33120
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.81
+[Move] Team 14 抵達 (4,6)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.81
+[Salary] Team2 薪水結算 coin=664.9
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.81
+[Move] Team 8 抵達 (4,6)
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.82
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.82
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.82
+[Manufacture] Team6 wagons worker_rate=0.26
+[Ambition] Team23 rung 1→0 (商業 cap=2)
+[Move] Team 4 抵達 (4,6)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.66
+[Salary] Team13 薪水結算 coin=593.6
+[Ambition] Team13 rung 0→1 (定居 cap=2)
+[SoloAI] Team13 → rest (休息)
+[Move] Team 9 抵達 (10,12)
+[Market] Team9 <-> Team2 巧遇成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.63
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.22
+[Order] Team5 sell material ×1 (oid=296)
+[SoloAI] Team5 → 貿易 (maintain_food:resource)
+[Manufacture] Team4 tools worker_rate=0.01
+[Sub] Team11 派出子隊 Team32 leader=P31 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team11 派運輸子隊 Team32 送 food×1 → demand 市場(10,2)
+[Manufacture] Team7 arrows worker_rate=0.63
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.23
+[Survival] Team32 urgent days_left=0.6 運輸→乞食
+[Order] Team14 sell material ×1 (oid=297)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team2 sell material ×30 (oid=298)
+[Manufacture] Team7 arrows worker_rate=0.64
+[Claim] Team14 於 (4, 6) 領回 coin=0.00 goods=1.0
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.63
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.63
+[Manufacture] Team6 tools worker_rate=0.22
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 9 抵達 (10,12)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team10 → 紮營 (紮營)
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team4 tools worker_rate=0.01
+[Site] Faction1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Manufacture] Team7 arrows worker_rate=0.63
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.63
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.63
+[Move] Team 13 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.63
+[Manufacture] Team4 tools worker_rate=0.01
+[Salary] Team8 減薪 79%（本地無幣，不計懲罰）
+[Salary] Team8 薪水結算 coin=0.0
+[Move] Team 32 抵達 (10,3)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.63
+[Order] Team32 buy food ×3 (oid=299)
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.22
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.63
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 4 抵達 (4,6)
+[SoloAI] Team17 → 逃跑 (survival)
+[Order] Team12 buy food ×1 (oid=300)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.22
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.63
+[Move] Team 5 抵達 (4,6)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.63
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.22
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.22
+[Manufacture] Team7 arrows worker_rate=0.64
+[Survival] Team32 warning days_left=1.6 運輸→乞食
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team7 arrows worker_rate=0.64
+[Ambition] Team14 rung 1→2 (商業 cap=2)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team32 warning days_left=1.5 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.64
+[Manufacture] Team6 tools worker_rate=0.23
+[Salary] Team14 減薪 83%（本地無幣，不計懲罰）
+[Salary] Team14 薪水結算 coin=0.0
+[Survival] Team32 warning days_left=1.5 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team32 warning days_left=1.5 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.63
+[Manufacture] Team6 tools worker_rate=0.23
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=5 known=28
+[Move] Team 10 抵達 (3,13)
+[TickPerf] day=24 avg=18946 us max=1977650 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/34560
+[Manufacture] Team7 arrows worker_rate=0.64
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team32 warning days_left=1.5 運輸→乞食
+[CampL0] Team10 紮營 L0 @(3,13)
+[Manufacture] Team6 tools worker_rate=0.23
+[Move] Team 32 抵達 (10,3)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.64
+[Merge] Team11 ← Team32 完全合併 (pop=6)
+[Manufacture] Team6 tools worker_rate=0.23
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.23
+[Order] Team17 sell food ×65 (oid=301)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.64
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.64
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.23
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.23
+[Order] Team9 buy food ×3 (oid=302)
+[Manufacture] Team7 arrows worker_rate=0.64
+[Manufacture] Team4 tools worker_rate=0.01
+[Residency] Team4 邀請 Team5 安頓 outpost (6,10)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.23
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 12 抵達 (15,2)
+[Barter] Team14 1xfood <-> Team8 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[SoloAI] Team10 → 貿易 (maintain_food:resource)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.72
+[Move] Team 10 抵達 (2,13)
+[Move] Team 17 抵達 (11,10)
+[Market@(2, 13)] Team10  outpost owner Team0 成交
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.72
+[SoloAI] Team8 → 建設 (建設)
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 14 抵達 (4,6)
+[Order] Team8 buy food ×2 (oid=303)
+[SoloAI] Team8 → 迎戰 (迎戰)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.72
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.72
+[Manufacture] Team4 tools worker_rate=0.01
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team12 → 紮營 (紮營)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=0.73
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[CampL0] Team12 紮營 L0 @(15,2)
+[Manufacture] Team6 tools worker_rate=0.26
+[SoloAI] Team8 → 紮營 (紮營)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.73
+[Move] Team 10 抵達 (2,13)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.72
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team4 sell material ×187 (oid=304)
+[Order] Team4 sell food ×699 (oid=305)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Salary] Team3 薪水結算 coin=590.1
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 tools worker_rate=0.26
+[Sub] Team11 派出子隊 Team33 leader=P30 advisors=[] (pop=2 cap=2 task=運輸)
+[Convoy] Team11 派運輸子隊 Team33 送 food×1 → demand 市場(10,2)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team33 urgent days_left=0.6 運輸→乞食
+[Manufacture] Team7 arrows worker_rate=0.73
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Equip] Team33 裝備 melee_low ×1
+[SurvivalLoot] team=Team33 → 掠 Team23
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Combat Start] Team33 vs Team11
+[Manufacture] Team7 arrows worker_rate=0.73
+[Survival] Team33 urgent days_left=0.6 掠奪→idle
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.26
+[Exhaust] Team33 力竭撤退 (rd=1.00 wnd=0)
+[Pursuit] Team11 追擊 Team33 +1傷亡 (straggler_kill=1)
+[Capture] Team11 控地俘 Team33 潰逃殘部 +1 (rd=1.00)
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team6 wagons worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[SubAI] Team33 引擎→乞食 (乞食)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=18 known=46
+[Move] Team 10 抵達 (2,13)
+[Move] Team 12 抵達 (15,2)
+[SoloAI] Team17 → 逃跑 (survival)
+[GuardCap] Team11 超限 total=4 cap=3 → 強制處置 excess=1 (釋放)
+[TickPerf] day=25 avg=9081 us max=836823 us ticks=1440 teams=21 factions=2 | ★>2s 幀數=0/36000
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.73
+[Survival] Team33 warning days_left=1.8 idle→乞食
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Treat] Team34 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 wagons worker_rate=0.26
+[CampL0] Team8 紮營 L0 @(5,7)
+[Manufacture] Team7 arrows worker_rate=0.73
+[Extinct] Team34 滅團清除（遺財已路由）
+[Outpost] Team4 設施施工 apothecary → Lv1 at (4,6)
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team33 warning days_left=1.9 idle→乞食
+[Manufacture] Team7 arrows worker_rate=0.73
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.73
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.01
+[Survival] Team33 warning days_left=1.9 idle→乞食
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.73
+[Move] Team 33 抵達 (10,3)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[SoloAI] Team5 → 貿易 (maintain_tools:resource)
+[Manufacture] Team7 arrows worker_rate=0.74
+[Merge] Team11 ← Team33 完全合併 (pop=5)
+[Manufacture] Team7 arrows worker_rate=0.74
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.26
+[SoloAI] Team12 → 建設 (建設)
+[Move] Team 8 抵達 (5,7)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team7 arrows worker_rate=0.73
+[Salary] Team7 薪水結算 coin=3013.5
+[Manufacture] Team4 tools worker_rate=0.01
+[Salary] Team16 薪水結算 coin=69.5
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team8 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.26
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.73
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.74
+[Manufacture] Team6 tools worker_rate=0.27
+[Move] Team 14 抵達 (4,6)
+[SoloAI] Team8 → 貿易 (貿易)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.74
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team4 tools worker_rate=0.01
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.74
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.74
+[Manufacture] Team6 tools worker_rate=0.26
+[Salary] Team6 薪水結算 coin=699.5
+[Sub] Team13 派出子隊 Team35 leader=P36 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team13 派運輸子隊 Team35 送 food×1 → demand 市場(9,11)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.74
+[SurvivalCamp] team=Team35 → 紮營 @(10,11)
+[Survival] Team35 urgent days_left=0.6 運輸→紮營
+[Manufacture] Team6 tools worker_rate=0.26
+[Salary] Team15 薪水結算 coin=2082.7
+[Equip] Team35 裝備 melee_low ×1
+[Move] Team 17 抵達 (11,10)
+[Manufacture] Team6 tools worker_rate=0.27
+[Salary] Team0 薪水結算 coin=2042.3
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.74
+[Market@(11, 10)] Team35  outpost owner Team17 成交
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.27
+[Manufacture] Team7 arrows worker_rate=0.74
+[Merge] Team13 ← Team35 完全合併 (pop=9)
+[Move] Team 5 抵達 (4,6)
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team5  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.69
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.69
+[Move] Team 12 抵達 (15,2)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.69
+[Order] Team3 sell material ×30 (oid=306)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.69
+[Move] Team 14 抵達 (4,6)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.70
+[Manufacture] Team6 tools worker_rate=0.25
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.70
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Barter] Team14 46xfood <-> Team5 2xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team7 arrows worker_rate=0.69
+[Sub] Team11 派出子隊 Team36 leader=P31 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team11 派運輸子隊 Team36 送 food×1 → demand 市場(10,2)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.69
+[Survival] Team36 urgent days_left=0.6 運輸→乞食
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=72 known=339
+[Move] Team 8 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[SoloAI] Team17 → 逃跑 (survival)
+[GuardCap] Team11 超限 total=3 cap=1 → 強制處置 excess=2 (釋放)
+[TickPerf] day=26 avg=7714 us max=1068566 us ticks=1440 teams=22 factions=2 | ★>2s 幀數=0/37440
+[Survival] Team36 warning days_left=1.6 運輸→乞食
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.69
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.25
+[Barter] Team8 2xfood <-> Team7 2xmaterial
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Treat] Team37 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[Treat] Team38 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.70
+[Manufacture] Team6 tools worker_rate=0.25
+[Extinct] Team37 滅團清除（遺財已路由）
+[SoloAI] Team12 → 建設 (建設)
+[Extinct] Team38 滅團清除（遺財已路由）
+[Manufacture] Team4 tools worker_rate=0.01
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.70
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.25
+[Move] Team 5 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Salary] Team4 薪水結算 coin=5.9
+[Manufacture] Team7 arrows worker_rate=0.70
+[Move] Team 4 抵達 (4,6)
+[Manufacture] Team6 tools worker_rate=0.25
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.69
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.69
+[Manufacture] Team6 tools worker_rate=0.25
+[Order] Team36 buy weapon_melee_low ×1 (oid=307)
+[Move] Team 36 抵達 (10,3)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.69
+[Sub] Team13 派出子隊 Team39 leader=P37 advisors=[] (pop=2 cap=9 task=運輸)
+[Convoy] Team13 派運輸子隊 Team39 送 food×1 → demand 市場(9,11)
+[Manufacture] Team6 tools worker_rate=0.25
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.86
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.33
+[SurvivalCamp] team=Team39 → 紮營 @(10,11)
+[Survival] Team39 urgent days_left=0.6 運輸→紮營
+[Move] Team 8 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.86
+[Manufacture] Team6 tools worker_rate=0.33
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 tools worker_rate=0.33
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.86
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 tools worker_rate=0.33
+[Manufacture] Team7 arrows worker_rate=0.85
+[Move] Team 14 抵達 (4,6)
+[Move] Team 39 抵達 (10,11)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.86
+[Manufacture] Team6 tools worker_rate=0.33
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=0.85
+[Manufacture] Team6 tools worker_rate=0.33
+[Manufacture] Team4 tools worker_rate=0.01
+[Move] Team 12 抵達 (15,2)
+[Move] Team 36 抵達 (10,3)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.31
+[Merge] Team11 ← Team36 完全合併 (pop=5)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team10 → 覓食 (覓食)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team11 buy weapon_melee_low ×3 (oid=308)
+[Order] Team11 buy weapon_ranged_low ×2 (oid=309)
+[Order] Team11 buy tools ×1 (oid=310)
+[Manufacture] Team6 wagons worker_rate=0.31
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.31
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 8 抵達 (4,6)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team6 wagons worker_rate=0.31
+[Manufacture] Team4 tools worker_rate=0.01
+[Order] Team3 buy weapon_melee_low ×5 (oid=311)
+[Order] Team3 buy weapon_ranged_low ×4 (oid=312)
+[Order] Team3 buy tools ×2 (oid=313)
+[Ambition] Team12 rung 0→1 (武力 cap=4)
+[SoloAI] Team12 → 建設 (建設)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 wagons worker_rate=0.31
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.81
+[Order] Team14 buy weapon_melee_low ×2 (oid=314)
+[Order] Team14 buy weapon_ranged_low ×1 (oid=315)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.31
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team7 arrows worker_rate=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Order] Team39 buy food ×5 (oid=316)
+[Manufacture] Team6 wagons worker_rate=0.31
+[Move] Team 39 抵達 (11,10)
+[Merge] Team13 ← Team39 完全合併 (pop=9)
+[Sub] Team13 派出子隊 Team40 leader=P36 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team13 派運輸子隊 Team40 送 food×5 → demand 市場(10,11)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.31
+[Manufacture] Team7 arrows worker_rate=0.81
+[Order] Team7 buy weapon_melee_low ×3 (oid=317)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=318)
+[Order] Team7 buy tools ×1 (oid=319)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Order] Team13 buy weapon_melee_low ×4 (oid=320)
+[Order] Team13 buy weapon_ranged_low ×3 (oid=321)
+[Order] Team13 buy tools ×2 (oid=322)
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.31
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team7 arrows worker_rate=0.81
+[Equip] Team40 裝備 melee_low ×1
+[Manufacture] Team4 tools worker_rate=0.01
+[Manufacture] Team6 wagons worker_rate=0.31
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 wagons worker_rate=0.31
+[Manufacture] Team7 arrows worker_rate=0.81
+[Manufacture] Team4 tools worker_rate=0.01
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=10 known=43
+[Move] Team 10 抵達 (2,14)
+[Move] Team 17 抵達 (11,10)
+[Barter] Team14 2xfood <-> Team5 2xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[TickPerf] day=27 avg=15202 us max=917548 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/38880
+[Manufacture] Team7 arrows worker_rate=0.82
+[SurvivalCamp] team=Team40 → 紮營 @(10,11)
+[Survival] Team40 warning days_left=3.0 運輸→紮營
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 wagons worker_rate=0.54
+[Salary] Team23 薪水結算 coin=0.0
+[Order] Team8 buy weapon_melee_low ×1 (oid=323)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=324)
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.40
+[Manufacture] Team6 tools worker_rate=0.54
+[Move] Team 8 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market@(11, 10)] Team40  outpost owner Team17 成交
+[Manufacture] Team7 arrows worker_rate=1.40
+[Salary] Team12 薪水結算 coin=592.9
+[Manufacture] Team6 wagons worker_rate=0.54
+[Manufacture] Team4 tools worker_rate=0.02
+[Merge] Team13 ← Team40 完全合併 (pop=9)
+[Order] Team5 buy weapon_melee_low ×5 (oid=325)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=326)
+[SoloAI] Team5 → 建設 (建設)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Order] Team2 buy weapon_melee_low ×5 (oid=327)
+[Order] Team2 buy weapon_ranged_low ×4 (oid=328)
+[Order] Team2 buy tools ×2 (oid=329)
+[Manufacture] Team7 arrows worker_rate=1.39
+[Manufacture] Team6 tools worker_rate=0.54
+[Manufacture] Team4 tools worker_rate=0.02
+[Move] Team 12 抵達 (15,2)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.53
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.38
+[Move] Team 5 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.53
+[Manufacture] Team7 arrows worker_rate=1.38
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.41
+[Manufacture] Team6 wagons worker_rate=0.54
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.44
+[Order] Team0 sell food ×1008 (oid=330)
+[Order] Team0 buy weapon_melee_low ×3 (oid=331)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=332)
+[Order] Team0 buy tools ×4 (oid=333)
+[Order] Team9 buy weapon_melee_low ×2 (oid=334)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=335)
+[Order] Team9 buy tools ×1 (oid=336)
+[Manufacture] Team6 tools worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[CampL0] Team9 紮營 L0 @(10,12)
+[Manufacture] Team7 arrows worker_rate=1.44
+[SoloAI] Team10 → 覓食 (覓食)
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.43
+[Order] Team10 buy weapon_melee_low ×1 (oid=337)
+[Order] Team10 buy weapon_ranged_low ×1 (oid=338)
+[SoloAI] Team10 → 覓食 (覓食)
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.55
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 8 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.46
+[Manufacture] Team6 wagons worker_rate=0.56
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Salary] Team1 薪水結算 coin=536.0
+[Manufacture] Team6 tools worker_rate=0.56
+[Manufacture] Team7 arrows worker_rate=1.46
+[Move] Team 9 抵達 (10,12)
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.45
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[Move] Team 10 抵達 (2,14)
+[Move] Team 14 抵達 (4,6)
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.45
+[Manufacture] Team6 tools worker_rate=0.56
+[Move] Team 17 抵達 (14,10)
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.44
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 wagons worker_rate=0.56
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.55
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.43
+[Sub] Team13 派出子隊 Team41 leader=P37 advisors=[] (pop=2 cap=9 task=運輸)
+[Convoy] Team13 派運輸子隊 Team41 送 food×5 → demand 市場(10,11)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 wagons worker_rate=0.55
+[Salary] Team9 薪水結算 coin=696.8
+[Manufacture] Team7 arrows worker_rate=1.42
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.42
+[Manufacture] Team6 tools worker_rate=0.55
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.42
+[Manufacture] Team6 wagons worker_rate=0.55
+[Manufacture] Team4 tools worker_rate=0.02
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 tools worker_rate=0.55
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.41
+[Survival] Team41 warning days_left=3.0 運輸→idle
+[Move] Team 8 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[SubAI] Team41 引擎→貿易 (maintain_food:resource)
+[Survival] Team41 warning days_left=2.9 貿易→idle
+[Manufacture] Team7 arrows worker_rate=1.41
+[Manufacture] Team6 wagons worker_rate=0.55
+[Order] Team12 buy weapon_melee_low ×5 (oid=339)
+[Order] Team12 buy weapon_ranged_low ×4 (oid=340)
+[Order] Team12 buy tools ×2 (oid=341)
+[SoloAI] Team12 → 建設 (建設)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.54
+[Order] Team6 buy weapon_melee_low ×3 (oid=342)
+[Order] Team6 buy weapon_ranged_low ×2 (oid=343)
+[Order] Team6 buy tools ×1 (oid=344)
+[SurvivalCamp] team=Team41 → 紮營 @(10,11)
+[Survival] Team41 warning days_left=2.9 偵查→紮營
+[Manufacture] Team7 arrows worker_rate=1.40
+[SoloAI] Team5 → 建設 (建設)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.43
+[Manufacture] Team6 wagons worker_rate=0.56
+[Salary] Team10 薪水結算 coin=595.6
+[Manufacture] Team4 tools worker_rate=0.02
+[Order] Team4 sell tools ×1 (oid=345)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.43
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.56
+[Order] Team1 buy weapon_melee_low ×5 (oid=346)
+[Order] Team1 buy weapon_ranged_low ×4 (oid=347)
+[Order] Team1 buy tools ×2 (oid=348)
+[Ambition] Team23 rung 0→1 (商業 cap=2)
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=7 known=31
+[Move] Team 14 抵達 (4,6)
+[Move] Team 41 抵達 (10,11)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[TickPerf] day=28 avg=15791 us max=950938 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/40320
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.46
+[Manufacture] Team6 wagons worker_rate=0.57
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.56
+[Manufacture] Team7 arrows worker_rate=1.45
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team7 arrows worker_rate=1.45
+[Manufacture] Team4 tools worker_rate=0.02
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[Manufacture] Team6 tools worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.44
+[Move] Team 0 抵達 (2,13)
+[Move] Team 1 抵達 (11,8)
+[Move] Team 8 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team9 <-> Team2 巧遇成交
+[Manufacture] Team7 arrows worker_rate=1.47
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 wagons worker_rate=0.57
+[SoloAI] Team10 → 紮營 (紮營)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[CampL0] Team10 紮營 L0 @(2,14)
+[Manufacture] Team4 tools worker_rate=0.02
+[Ambition] Team12 rung 1→2 (武力 cap=4)
+[SoloAI] Team12 → 建設 (建設)
+[Manufacture] Team6 tools worker_rate=0.57
+[Manufacture] Team7 arrows worker_rate=1.47
+[Move] Team 14 抵達 (4,6)
+[Move] Team 41 抵達 (11,10)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Merge] Team13 ← Team41 完全合併 (pop=9)
+[Market] Team9 <-> Team2 巧遇成交
+[Manufacture] Team7 arrows worker_rate=1.47
+[Manufacture] Team6 wagons worker_rate=0.57
+[Manufacture] Team4 tools worker_rate=0.02
+[Order] Team9 sell material ×30 (oid=349)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.57
+[Manufacture] Team7 arrows worker_rate=1.46
+[Move] Team 5 抵達 (4,6)
+[Move] Team 12 抵達 (15,2)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.45
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[Move] Team 10 抵達 (2,14)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.45
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 wagons worker_rate=0.56
+[SoloAI] Team8 → 貿易 (maintain_tools:resource)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Sub] Team13 派出子隊 Team42 leader=P36 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team13 派運輸子隊 Team42 送 food×5 → demand 市場(10,11)
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.44
+[Manufacture] Team6 tools worker_rate=0.56
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Order] Team17 buy material ×63 (oid=350)
+[SoloAI] Team17 → 逃跑 (survival)
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team7 arrows worker_rate=1.43
+[Order] Team2 sell material ×30 (oid=351)
+[Manufacture] Team4 tools worker_rate=0.02
+[Move] Team 8 抵達 (4,6)
+[Move] Team 17 抵達 (11,10)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Equip] Team42 裝備 melee_low ×1
+[Manufacture] Team7 arrows worker_rate=1.43
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team6 tools worker_rate=0.56
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.42
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team4 tools worker_rate=0.02
+[SurvivalCamp] team=Team42 → 紮營 @(10,11)
+[Survival] Team42 warning days_left=3.0 運輸→紮營
+[Manufacture] Team7 arrows worker_rate=1.42
+[Manufacture] Team6 tools worker_rate=0.55
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team4 tools worker_rate=0.02
+[Manufacture] Team7 arrows worker_rate=1.44
+[Move] Team 42 抵達 (11,10)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market@(11, 10)] Team42  outpost owner Team17 成交
+[Market] Team9 <-> Team2 巧遇成交
+[Merge] Team13 ← Team42 完全合併 (pop=9)
+[Manufacture] Team7 tools worker_rate=1.45
+[SoloAI] Team5 → 建設 (建設)
+[Manufacture] Team6 wagons worker_rate=0.58
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[Manufacture] Team7 arrows worker_rate=1.48
+[Manufacture] Team6 wagons worker_rate=0.58
+[Manufacture] Team4 tools worker_rate=0.02
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team9 <-> Team2 巧遇成交
+[Manufacture] Team6 tools worker_rate=0.57
+[Manufacture] Team7 tools worker_rate=1.46
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[Manufacture] Team6 wagons worker_rate=0.57
+[Manufacture] Team7 arrows worker_rate=1.46
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team9 <-> Team2 巧遇成交
+[Manufacture] Team6 wagons worker_rate=0.57
+[Manufacture] Team7 tools worker_rate=1.45
+[Salary] Team8 減薪 1%（本地無幣，不計懲罰）
+[Salary] Team8 薪水結算 coin=0.0
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team6 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[Manufacture] Team7 tools worker_rate=1.49
+[Manufacture] Team6 wagons worker_rate=0.58
+[Order] Team14 sell material ×2 (oid=352)
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Move] Team 0 抵達 (2,13)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Claim] Team14 於 (4, 6) 領回 coin=0.00 goods=1.0
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team9 <-> Team2 巧遇成交
+[Manufacture] Team6 wagons worker_rate=0.57
+[Manufacture] Team7 arrows worker_rate=1.45
+[SoloAI] Team10 → 貿易 (囤貨)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Market] Team2 <-> Team9 巧遇成交
+[Manufacture] Team7 tools worker_rate=1.44
+[Manufacture] Team6 wagons worker_rate=0.56
+[Order] Team2 sell material ×30 (oid=353)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=4 known=24
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team8  outpost owner Team4 成交
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 3xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[TickPerf] day=29 avg=16711 us max=1121296 us ticks=1440 teams=19 factions=2 | ★>2s 幀數=0/41760
+[Manufacture] Team7 arrows worker_rate=1.44
+[Manufacture] Team6 wagons worker_rate=0.56
+[SoloAI] Team14 → 貿易 (maintain_tools:resource)
+[Barter] Team14 1xfood <-> Team5 1xmaterial
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.43
+[Salary] Team15 薪水結算 coin=2082.7
+[Manufacture] Team6 wagons worker_rate=0.56
+[Salary] Team6 薪水結算 coin=682.4
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team7 tools worker_rate=1.42
+[Move] Team 10 抵達 (2,13)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.46
+[Manufacture] Team6 wagons worker_rate=0.57
+[Move] Team 5 抵達 (4,6)
+[Move] Team 9 抵達 (11,13)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.57
+[Sub] Team13 派出子隊 Team43 leader=P37 advisors=[] (pop=2 cap=9 task=運輸)
+[Convoy] Team13 派運輸子隊 Team43 送 food×5 → demand 市場(10,11)
+[Manufacture] Team7 tools worker_rate=1.46
+[Move] Team 17 抵達 (14,10)
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.57
+[Manufacture] Team7 arrows worker_rate=1.45
+[Barter] Team14 1xfood <-> Team7 1xmaterial
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team6 wagons worker_rate=0.56
+[Manufacture] Team7 tools worker_rate=1.44
+[Move] Team 8 抵達 (4,6)
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.44
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.43
+[Survival] Team43 warning days_left=3.0 運輸→idle
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.66
+[SoloAI] Team8 → 建設 (建設)
+[SubAI] Team43 引擎→貿易 (maintain_food:resource)
+[Survival] Team43 warning days_left=2.9 貿易→idle
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[SurvivalCamp] team=Team43 → 紮營 @(10,11)
+[Survival] Team43 warning days_left=2.9 偵查→紮營
+[Manufacture] Team7 arrows worker_rate=1.65
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.65
+[CampL0] Team43 紮營 L0 @(11,11)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 9 抵達 (11,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.63
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.63
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Ambition] Team10 rung 0→1 (商業 cap=2)
+[SoloAI] Team10 → 貿易 (貿易)
+[Manufacture] Team7 arrows worker_rate=1.67
+[Move] Team 14 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.65
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.66
+[Move] Team 0 抵達 (2,13)
+[Move] Team 8 抵達 (4,6)
+[Move] Team 43 抵達 (10,12)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Order] Team4 sell material ×142 (oid=354)
+[Order] Team4 sell food ×702 (oid=355)
+[Manufacture] Team7 tools worker_rate=1.64
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.64
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.68
+[Order] Team43 buy weapon_melee_low ×1 (oid=356)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Order] Team9 buy food ×4 (oid=357)
+[Manufacture] Team7 arrows worker_rate=1.67
+[Salary] Team16 薪水結算 coin=69.5
+[Ambition] Team16 rung 1→0 (商業 cap=2)
+[Move] Team 10 抵達 (2,13)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.67
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 arrows worker_rate=1.67
+[Salary] Team7 薪水結算 coin=3033.6
+[Move] Team 5 抵達 (4,6)
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Manufacture] Team7 tools worker_rate=1.65
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=6 known=28
+[Market@(4, 6)] Team14  outpost owner Team4 成交
+[Outpost] 設施完工 apothecary Lv1 at (4,6)
+[Horse] Outpost (10, 6) 捕野馬 +1
+[Horse] Outpost (11, 10) 捕野馬 +1
+[TickPerf] day=30 avg=8933 us max=555639 us ticks=1440 teams=20 factions=2 | ★>2s 幀數=0/43200
+   送出 propose_trade 0｜demand_tribute 0｜propose_alliance 0｜暫停命中 2（★demand_tribute 跨樹比：修前修後須相同）
+  PASS: P4 30 天 propose_trade 送出 0 次
+  PASS: ★P4 母體地板：暫停分支真的被走到（>0）
+=== player_action_audit DONE === errors: 0
+
+[godot.ps1] child exit=0

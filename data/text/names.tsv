@@ -1,0 +1,27 @@
+# 鍵→玩家畫面顯示名（spec 2026-10-15-advisor-reads-belief-and-text-externalization-pilot §2c）
+# 格式：鍵<TAB>變體<TAB>顯示名；# 開頭為註解。顯示名只准這一張表（藍圖裁 2026-10-15：等級＝粗製／精製；護具類＝護甲）
+# full＝全名（事件句、交換畫面、裝備欄）；short＝狀態列那種擠一行的單字（只有四鍵）
+res.food	full	糧食
+res.material	full	木料
+res.coin	full	錢
+res.goods	full	貨品
+res.gem	full	寶石
+res.ore_iron	full	鐵礦
+res.ore_steel	full	鋼
+res.ore_gold	full	金礦
+res.ore_silver	full	銀礦
+res.weapon_melee_low	full	粗製近戰武器
+res.weapon_melee_high	full	精製近戰武器
+res.weapon_ranged_low	full	粗製遠程武器
+res.weapon_ranged_high	full	精製遠程武器
+res.mounts	full	馬匹
+res.wagons	full	貨車
+res.arrows	full	箭矢
+res.medicine	full	藥品
+res.tools	full	工具
+res.armor_low	full	粗製護甲
+res.armor_high	full	精製護甲
+res.food	short	食
+res.coin	short	幣
+res.material	short	材
+res.goods	short	貨

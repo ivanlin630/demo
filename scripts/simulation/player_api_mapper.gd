@@ -59,8 +59,8 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		"loyalty": p.loyalty,
 		"stress":  p.stress,
 		"skills": _skills,
-		"food_days": _food_days(t) if t != null else 0.0,
-		"starving": (_food_days(t) < 3.0) if t != null else false,
+		"food_days": food_days(t) if t != null else 0.0,
+		"starving": (food_days(t) < 3.0) if t != null else false,
 	}
 
 # ── Controlled team ────────────────────────────────────────────────────────────
@@ -190,8 +190,8 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,
-		"food_days":        _food_days(t),
-		"starving":         _food_days(t) < 3.0,   # WARNING_DAYS=3
+		"food_days":        food_days(t),
+		"starving":         food_days(t) < 3.0,   # WARNING_DAYS=3
 		"task_summary": t.current_task,
 		"capabilities": _team_capabilities(state, t),
 		"captives": map_captives(t),
@@ -231,7 +231,8 @@ static func _armed_count(t: TeamData) -> int:
 	var anon_pop: int = maxi(t.population - named_count, 0)
 	return named_count + roundi(float(anon_pop) * float(t.armed_anon_ratio))
 
-static func _food_days(t: TeamData) -> float:
+# ★糧撐天數（頂列與顧問 resources 同一支；spec 2026-10-15-advisor-reads-belief §1b）
+static func food_days(t: TeamData) -> float:
 	var burn: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	return float(t.resources.get("food", 0)) / burn
 
@@ -646,6 +647,12 @@ static func forced_label(action: String, rid: String, state: WorldState, evt: Di
 
 # ── Location context ───────────────────────────────────────────────────────────
 
+# ★游標即選中（spec 2026-10-14-cursor-hover-shows-known-detail-HOW §2b）：格脈絡以 tile_knowledge 的結果組——
+#   舊版對任何在圖格回真值（occupants 逐隊比真實 tile_pos、visibility_state 寫死 visible）⇒ 記得但不在視野的格
+#   照列此刻真正站在那裡的隊；本票讓側欄跟游標走後那就是「WASD 掃過就看到每個去過的格上現在有誰」，而且洩在 payload 層
+#   ⇒ unvisited：hidden、只帶 belief 記得在那格的隊｜remembered：地形＋已知據點＋belief 隊，不帶 food／wild_game／predator
+#     ｜visible：今天的真值（tile_knowledge visible 分支本來就含視野內真隊）
+#   ★occupants 一律由 tile_knowledge 的 teams 映射（同一支，不另寫）；★knowledge＝那份結果本身（UI 頂部一行與側欄讀它，不各算一次）
 static func map_location_context(state: WorldState, tile_q: int, tile_r: int) -> Dictionary:
 	var not_visible: Dictionary = {
 		"tile": {"q": tile_q, "r": tile_r},
@@ -662,38 +669,47 @@ static func map_location_context(state: WorldState, tile_q: int, tile_r: int) ->
 	var tile_key: int = tile_q * 1000 + tile_r
 	if not state.world.tiles.has(tile_key):
 		return not_visible
+	var pos: Vector2i = Vector2i(tile_q, tile_r)
+	var k: Dictionary = PlayerQueryApi.tile_knowledge(state, pos, DayNightSystem.new().get_vision_mult(state))
+	var status: String = String(k.get("status", ""))
+	if status in ["off_map", "no_team"]:
+		return not_visible
+	var occupants: Array = []
+	for t in k.get("teams", []):
+		occupants.append({"team_id": int(t["id"]), "team_name": "Team%d" % int(t["id"]), "relation": "unknown",
+			"tick": int(t.get("tick", -1)), "heard": bool(t.get("heard", false))})
 	var pid: int = state.player_id
 	var p: PersonData = state.persons.get(pid) if pid != -1 else null
-	var ptid: int = p.team_id if p != null else -1
+	var pt: TeamData = state.teams.get(p.team_id) if p != null else null
+	var out: Dictionary = {
+		"tile": {"q": tile_q, "r": tile_r},
+		"visibility_state": status if status != "unvisited" else "hidden",
+		"terrain": null,
+		"settlement": null,
+		"occupants": occupants,
+		"is_player_here": pt != null and pt.tile_pos == pos,
+		"hints": [],
+		"knowledge": k,
+	}
+	if status == "unvisited":
+		return out
 	var tile: HexTileData = state.world.tiles[tile_key] as HexTileData
-	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
-	var is_here: bool = pt != null and pt.tile_pos == Vector2i(tile_q, tile_r)
-	var occupants: Array = []
-	for oid in state.teams:
-		if oid == ptid:
-			continue
-		var ot: TeamData = state.teams[oid]
-		if ot.tile_pos == Vector2i(tile_q, tile_r):
-			occupants.append({"team_id": oid, "team_name": "Team%d" % oid, "relation": "unknown"})
-	var settlement = null
+	out["terrain"] = tile.terrain
+	if status == "remembered":
+		if k.has("outpost"):
+			var op: Dictionary = k["outpost"]
+			out["settlement"] = {"id": int(op["owner"]), "name": "", "owner_faction": ""}
+		return out
 	if tile.outpost_type != "" and tile.outpost_owner != -1:
-		settlement = {
+		out["settlement"] = {
 			"id": tile.outpost_owner,
 			"name": "%s Lv%d" % [tile.outpost_type, tile.outpost_level],
 			"owner_faction": ""
 		}
-	return {
-		"tile": {"q": tile_q, "r": tile_r},
-		"visibility_state": "visible",
-		"terrain": tile.terrain,
-		"settlement": settlement,
-		"occupants": occupants,
-		"is_player_here": is_here,
-		"food": int(tile.resources.get("food", 0)),
-		"wild_game": int(tile.resources.get("wild_game", 0)),
-		"predator": _predator_intel(state, tile),
-		"hints": []
-	}
+	out["food"] = int(tile.resources.get("food", 0))
+	out["wild_game"] = int(tile.resources.get("wild_game", 0))
+	out["predator"] = _predator_intel(state, tile)
+	return out
 
 # 玩家對該 tile 掠食者的認知：none(無) / detected(偵測到，預警) / lurking(有但沒察覺)
 static func _predator_intel(state: WorldState, tile: HexTileData) -> String:
@@ -973,13 +989,37 @@ static func map_threat_line(state: WorldState) -> String:
 		var other: int = state.encounter_defender_id if tid == state.encounter_attacker_id \
 			else state.encounter_attacker_id
 		return THREAT_ENGAGED % _threat_name(state, other)
-	# ②③ 一個迴圈（★P5：本函式體內呼叫 best_estimate 的地方 ＝ 1）
+	# ②③ 一個迴圈（★P5：迴圈在 threat_scan；本函式體內呼叫 best_estimate 的地方 ＝ 0）
+	var sc: Dictionary = threat_scan(state)
+	var n: int = int(sc["n"])
+	var enemy_id: int = int(sc["enemy_id"]) if int(sc["enemy_d"]) <= n else -1
+	var enemy_d: int = int(sc["enemy_d"])
+	var beast_id: int = int(sc["beast_id"]) if int(sc["beast_d"]) <= n else -1
+	var beast_pos: Vector2i = sc["beast_pos"]
+	if enemy_id != -1:
+		return THREAT_ENEMY % [enemy_id, enemy_d]
+	if beast_id != -1:
+		return THREAT_BEAST % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
+	return THREAT_NONE
+
+# ★視野內已知威脅的一次掃描（威脅欄與顧問 strategic 共用一個身體；spec 2026-10-15-advisor-reads-belief §1b）
+#   ★P5：本函式體內呼叫 best_estimate 的地方 ＝ 1；只讀附身隊 belief（best_estimate）＋自家視野
+#   回 {n 視野, enemy_id/enemy_d 最近已知敵對, enemy_n 已知敵對數, beast_id/beast_d/beast_pos 最近已知野獸}；沒有 ⇒ id＝-1
+#   ★不在這裡切視野：顧問要「最近敵對 > 視野 2 倍」；威脅欄自己切（最近者在視野內 ⇔ 視野內有最近者）
+static func threat_scan(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return {"n": 0, "enemy_id": -1, "enemy_d": 1 << 30, "enemy_n": 0, "beast_id": -1, "beast_d": 1 << 30, "beast_pos": Vector2i(-1, -1)}
 	var n: int = VisionSystem.vision_range(state, t, DayNightSystem.new().get_vision_mult(state))
 	var enemy_id: int = -1
 	var enemy_d: int = 1 << 30
 	var beast_id: int = -1
 	var beast_d: int = 1 << 30
 	var beast_pos: Vector2i = Vector2i(-1, -1)
+	var enemy_n: int = 0
 	for tgt in BeliefSystem.known_targets(state, tid):
 		var g: int = int(tgt)
 		if g == tid:
@@ -989,20 +1029,16 @@ static func map_threat_line(state: WorldState) -> String:
 			continue
 		var at: Vector2i = bel["tile_pos"]
 		var d: int = _hex_d(t.tile_pos, at)
-		if d > n:
-			continue
 		var tt: TeamData = state.teams.get(g)
 		if tt != null and tt.beast_kind != "":
 			if d < beast_d:
 				beast_d = d; beast_id = g; beast_pos = at
 		elif state.player_hostile_teams.has(g):
+			enemy_n += 1
 			if d < enemy_d:
 				enemy_d = d; enemy_id = g
-	if enemy_id != -1:
-		return THREAT_ENEMY % [enemy_id, enemy_d]
-	if beast_id != -1:
-		return THREAT_BEAST % [_bearing(t.tile_pos, beast_pos), _threat_name(state, beast_id)]
-	return THREAT_NONE
+	return {"n": n, "enemy_id": enemy_id, "enemy_d": enemy_d, "enemy_n": enemy_n,
+		"beast_id": beast_id, "beast_d": beast_d, "beast_pos": beast_pos}
 
 static func _threat_name(state: WorldState, team_id: int) -> String:
 	var tt: TeamData = state.teams.get(team_id)

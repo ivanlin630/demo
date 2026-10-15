@@ -281,15 +281,18 @@ func _p1h_menus() -> void:
 	await _press(node, "1")
 	var v3: Dictionary = _view(node)
 	var sits: Array = AdvisorSystem.menu_situations()
-	_check("★顧問：數字選單、項目＝AdvisorSystem 鍵 ∩ TextBank 模板（%s）" % str(sits), bool(node._input_mode) and sits.size() == 3 and String(v3.get("panel", "")).contains("[1] "))
+	_check("★顧問：數字選單、項目＝AdvisorSystem.TEXT_SITUATIONS（%s）" % str(sits), bool(node._input_mode) and sits.size() == AdvisorSystem.TEXT_SITUATIONS.size() and String(v3.get("panel", "")).contains("[1] "))
 	await _press(node, "esc")
 	var fallback: String = TextBank.fmt("advisor_no_such_situation", "x")
 	var bad: Array = []
 	for i in range(sits.size()):
 		await _press(node, "1")
 		await _press_all(node, [str(i + 1), "enter"])
+		# ★要目標的情境（spec 2026-10-15-advisor §1b）會再開一層目標選單；有就選第一個
+		if bool(node._input_mode):
+			await _press_all(node, ["1", "enter"])
 		var fbk: String = String(node._feedback_line.text)
-		if not fbk.begins_with("✓ 顧問：") or fbk.contains(fallback) or fbk.contains("有動靜"):
+		if not fbk.begins_with("✓ 問顧問") or fbk.contains(fallback) or fbk.contains("有動靜"):
 			bad.append("%s ⇒ %s" % [sits[i], fbk])
 	print("   顧問各選項：預設句 %d 個 %s" % [bad.size(), str(bad)])
 	_check("P1h 顧問每個選項的輸出都不是預設句", bad.is_empty())

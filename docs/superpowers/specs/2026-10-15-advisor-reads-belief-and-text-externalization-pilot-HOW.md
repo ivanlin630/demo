@@ -25,29 +25,29 @@
 - 資源中文名今天有**兩份**：
   - `ObserverEventText.RES_NAMES`（全名，20 鍵，與 `TeamData.resources` 預設鍵同集合）
   - `TeamUiHelper.RESOURCE_NAME`（短名 4 鍵：食／幣／材／貨）
-  - 另有 `TeamUiHelper.ITEM_NAME`（低階／高階近戰武器…）與 RES_NAMES 的「粗製／精製」**用字衝突**，見 §範圍外。
+  - 另有 `TeamUiHelper.ITEM_NAME`（低階／高階近戰武器…）與 RES_NAMES 的「粗製／精製」用字衝突（藍圖已裁，§2c）。
+  - 另有觀測專用的 `ObserverQueryApi.RES_LABEL`（observer_query_api.gd:7-14，材料／近戰武器(低)…，R² M7 指出），見 §範圍外。
 - 決定性雜訊已有：`PathSystem.observation_noise01(tick, observer_id, target_id)` 走雜湊、零 RNG。另有 `BeliefSystem.observation_noise(base, skill)` 把技能換成雜訊幅度。
 
 ## 一、顧問讀信念（不擲骰）
 
 ### 1a 入口：一道玩家指令，不是 UI 直呼
-- 新動詞 `ask_advisor {advisor_pid, situation, target_id}` 進 `PlayerCommandApi.VERB`／`dispatch`／`describe`。照例走 `command_player`（入列＋推進 1 tick，與打聽同形）。
+- 新動詞 `ask_advisor {advisor_pid, situation, target_id}` 進 `PlayerCommandApi.VERB`（中文「問顧問」）、`dispatch` 的 match、`describe`（三處同 commit；P9 異源比對 VERB ≡ dispatch，sim_bridge.gd:448）。照例走 `command_player`（入列＋推進 1 tick）。
+  - 「與打聽同形」只指入列＋推進一 tick；打聽本身走 execute_action，不是 VERB（R² 指正）。
 - 理由：ledger 要求「出一則事件」，事件寫進世界狀態 ⇒ 只能在 sim 裡寫。UI 直呼＝今天那條改世界亂數的路。
 - 刪 `sim_bridge.query_advisor_advice` 與 `_log_event("[Advisor]…")`，結果只走一條路：`command_results` ＋ 事件。
-- 前置（handler 內，不在入列時）：
-  - 附身隊存在。
-  - `advisor_pid` 是附身隊活著的成員（顧問在身邊＝感知鐵律的 proximity）。
-  - situation ∈ 五情境。
-  - 需要目標的情境，`target_id` 在附身隊的 belief 裡。
-  - 不過 ⇒ ok:false＋理由句。
+- 前置（handler 內，不在入列時；R² M1）：
+  - 只有四條會 ok:false＋理由句：附身隊存在、`advisor_pid` 是附身隊活著的成員（顧問在身邊＝感知鐵律的 proximity）、situation ∈ 五情境、target_id 是整數。
+  - ★優先序一句話：**過了這四條，其餘一切「答不出來」都走「不知道」分支（ok:true）**。需要目標而 target_id=-1、目標無 belief、已過期，全部算在內。
+  - 包括「選單列出時有 belief、入列後那一 tick 被別的事件清掉」⇒ 也是不知道，不是 ok:false（選單列出的 ≡ handler 接受的）。
 
 ### 1b 五情境各讀什麼（★全部只讀附身隊自己的帳）
 | 情境 | 技能 | 讀 | 目標 |
 |---|---|---|---|
 | assess_enemy | 戰術 | `BeliefSystem.best_claim(附身隊, tgt)` 的 `population_est`、`estimate_armed(bel, pop_est, 顧問.values)`。己方用自家真值（自知合法）：武裝人數＝與遭遇戰同一支己方武裝計數，實作端交件信列出用了哪支。 | 要選 |
-| diplomatic | 交涉 | 附身隊 `known_reputations.get(tgt, 0.5)`。加上：附身隊成員的 `relation_edges` 有沒有對 tgt 隊長的 feud 邊（自家人的仇＝自知）。 | 要選 |
+| diplomatic | 交涉 | **只讀**附身隊 `known_reputations.get(tgt, 0.5)`（R² M3：「對目標隊長的 feud 邊」要知道目標隊長是誰，而 belief 沒有隊長欄＝god-view ⇒ 拿掉。自家人的仇要進顧問，得先有「隊長身分」這種 belief，屬 WHAT，不在本票）。 | 要選 |
 | resources | 生產 | 糧撐天數。★與頂列同一支：`PlayerApiMapper._food_days` 改公開為 `food_days`，兩處都呼它。 | 無 |
-| strategic | 計謀 | 已知敵對隊。★把 `map_threat_line` 那個 best_estimate 迴圈抽成 `PlayerApiMapper.threat_scan(state) -> {enemy_id, enemy_d, enemy_n, beast_id, …}`，威脅欄與顧問都呼它（一個身體；P5「本函式體內 best_estimate 呼叫＝1」那條守衛改指向 threat_scan）。 | 無（取最近敵對） |
+| strategic | 計謀 | 已知敵對隊。★把 `map_threat_line` 那個 best_estimate 迴圈抽成 `PlayerApiMapper.threat_scan(state) -> {enemy_id, enemy_d, enemy_n, beast_id, …}`，威脅欄與顧問都呼它（一個身體；P5「本函式體內 best_estimate 呼叫＝1」那條守衛改指向 threat_scan，並加一句 map_threat_line 本體＝0）。 | 無（取最近敵對） |
 | intel_read | 偵查 | 附身隊所有 claim 裡**最新一筆非親見**（`!PlayerQueryApi.is_firsthand`）的 `effective_credibility`。 | 無（取最新傳聞） |
 
 - 目標選單：assess_enemy／diplomatic 選完情境，再開第二層數字選單。
@@ -58,8 +58,10 @@
 
 ### 1c 準不準＝雜訊，偏頗＝偏移（★零 RNG）
 - 估計值 `x'` ＝ `x × (1 + (2u − 1) × amp)`：
-  - `u = PathSystem.observation_noise01(tick, advisor_pid, salt)`。
-  - salt＝target_id；無目標的情境用 `-(情境序號+1)`。
+  - `u = AdvisorSystem.noise_u(tick, advisor_pid, target_id, situation)`，內部＝`PathSystem.observation_noise01(tick, advisor_pid + ADVISOR_NOISE_NS, salt)`（R² M2／F3：顧問算 u 只准經這一支）。
+    - `ADVISOR_NOISE_NS`＝`1 << 40`，具名常數。理由：唯一的既有生產呼叫點 path_system.gd:302 傳的是 (tick, 隊 id, 隊 id)，person id 與隊 id 都從 0 起 ⇒ 不加命名空間，兩個系統的雜訊會相關。
+    - salt＝`target_id * 8 + 情境序`；target 為 -1 時取 `-(情境序 + 1)`。兩段值域互斥，同一目標的五個情境各拿各的 u。
+    - 不動 `observation_noise01` 本體（它有跨語言釘值床）。
   - `amp = BeliefSystem.observation_noise(0.0, 顧問該技能)`。技能 1.0 ⇒ 0；技能 0 ⇒ `OBS_SKILL_NOISE_GAIN`。
   - 同一 tick 問同一件事，答案相同；隔 tick 可不同。
 - 人格偏移：`bias = (好戰 − 慎重) × ADVISOR_BIAS_GAIN`（新具名常數，TEST VALUE 0.3）。
@@ -71,21 +73,28 @@
   | 情境 | 優 | 劣 | 其餘＝均 |
   |---|---|---|---|
   | assess_enemy | 己方武裝 ÷ 敵估 ≥ 1.3 | ≤ 0.77 | |
-  | diplomatic | 名聲 ≥ 0.6 且無 feud | ≤ 0.4 或有 feud | |
+  | diplomatic | 名聲 ≥ 0.6 | ≤ 0.4 | |
   | resources | ≥ 10 天 | < 5 天（沿用舊句門檻） | |
-  | strategic | 最近敵對 > 視野 2 倍 | 最近敵對在視野內且 assess 判劣 | |
+  | strategic | 最近敵對 > 視野 2 倍 | 最近敵對在視野內，且以**它**為目標跑 assess 的同一支算式判劣 | |
   | intel_read | 可信度 ≥ 0.6 | ≤ 0.3 | |
   - 帶寬全是具名常數（TEST VALUE），放 AdvisorSystem 檔頭。
 - 「不知道」：需要目標而 `best_claim` 空、或 `BeliefSystem.uncertainty ≥ ADVISOR_UNKNOWN_U`（0.8）、或 strategic 已知敵對 0 支、或 intel_read 沒有任何非親見 claim ⇒ 印「不知道」句。
   - ★它不是失敗：ok:true、事件照發，依據欄寫「無」。
 - 刪：`_advice_is_accurate`、`_pick_variant`、兩處 `randf()`、TextBank 的 `wrong_*`／`biased_*`。
+- 連帶要改的既有東西（R² M5，同 commit）：
+  - `headless_test.gd:4511-4523` 呼舊簽名 `get_advice(person, sit, {…}, state)` ⇒ 改呼新入口。這是 merge-gate 的床，簽名一變就是 script error。
+  - `terminal_input_prompts_bed.gd:283-284` 斷言 `menu_situations().size()==3` ⇒ 改成 `== TEXT_SITUATIONS.size()`（不寫死 5）。
+  - `menu_situations()`（advisor_system.gd:16-21）今天是「SITUATION_SKILL_MAP 鍵 ∩ TEMPLATES 有 advisor_<鍵>」。advisor_* 搬出 TEMPLATES 後交集變空、選單恆空 ⇒ 改成回 `TEXT_SITUATIONS`（AdvisorSystem 常數）。原本「∩ 有模板」守的那件事，改由 §2d 的執行期對帳守。
+  - 全 scripts grep `TEMPLATES.has`／`TEMPLATES.get`，結果貼交件信（distortion_engine.gd:43 那種「用 TEMPLATES 判鍵存在」的地方，外置後都要逐一看）。
 
 ### 1d 出口：一則事件＋結果句
 - `world_events.emit(state, "advice", [附身隊], false, info)`。
   - info＝{advisor, situation, target, text, basis:{source_word, source_id, tick}}。
   - `describe` 加 `advice` 分支 ⇒ 回 info.text。
+  - `advice` 進 `FUNC_KINDS`＋`KIND_LABEL`（短名「顧問」）。all_kinds()（world_events.gd:91）與 E2E 格 a 會逐一驗每個 kind 有短名（R² M5）。
   - 不進 ADVANCE_STOP_KINDS（是你自己這道令的回音）。
 - `command_results` 帶同一句 text ⇒ 結果行「{顧問名}：{text}」。
+  - 事件流與結果行各印一次＝設計（結果行是這道令的回音，事件流是紀錄；其他指令同形）。A6 斷言恰好這兩處、各一次。
 - 依據：`source_word` 與情報頁同一個分類（親見／聽說，來自 TeamN）。
   - 該分類若能分出「打聽」寫入的 claim ⇒ 三個來源詞；分不出 ⇒ 兩個，交件信列出。
   - 「幾天前」＝ `(now − claim.tick) / TICKS_PER_DAY`，不到一天印「今天」。
@@ -119,17 +128,21 @@
 - `TextBank.res_name(key, variant="full")`。查不到回原鍵（今天 `resource_name` 的行為，終端自驗 (d) 會咬）。
 - `ObserverEventText.RES_NAMES`、`TeamUiHelper.RESOURCE_NAME`、`TeamUiHelper.ITEM_NAME` 三個常數刪掉（藍圖裁：顯示名只准一張表）。
   - 原呼叫點改呼 `res_name`：`resource_name()`／`item_name()` 保留函式名，body 改轉呼。
+    - ★`resource_name()` 轉呼 **short** 變體，short 查不到 ⇒ 回原鍵，不退回 full（R²：退 full 會讓 ResourceFormat 面板 resource_format.gd:26 每格變寬，被 foot_block 裁寬吃字）。
+    - `item_name()` 轉呼 full。
+  - `text_ui_main.gd:1794 const ITEM_DISPLAY = TeamUiHelper.ITEM_NAME`：刪 ITEM_NAME 後這行是 parse error ⇒ 刪掉 ITEM_DISPLAY；讀者 :2272、:2282 的 `human(ITEM_DISPLAY, …)` 改呼 `item_name`。
   - ⇒ 戰鬥畫面裝備欄從「低階／高階…／護具」變「粗製／精製…／護甲」（玩家可見的改字）。
-  - 既有床若比對舊字（例 terminal_e2e、team_ui_test、ui_logic_test），改讀 `res_name` 而不是換寫死新字；交件信列出改了哪幾格。
+  - R² 全樹 grep：舊字（低階／高階／護具／粗製甲／精製甲）只出現在兩張生產表本身，沒有床比對它們。交件信貼實際 grep（含 tools/、docs 的鍵表）。
   - `item_name` 的「空」等非資源鍵照舊回原字。
 - 交換畫面 `_build_trade_str`：物品列與出價列的 key 都改印 `res_name(k)`。
 
 ### 2d 兩支守衛（同一支床，註冊表一列 `text-keys`）
-- **鍵對帳**：
-  - advisor：code 端的鍵集合＝AdvisorSystem 的 `TEXT_KEYS` 常數（組鍵只准從它來）。結構 grep：scripts 內除 text_bank.gd 與 TEXT_KEYS 定義行外，零個 `"advisor_` 字面。它與 advisor.tsv 的 (鍵,變體) 兩向相等。
-  - names：`TeamData.new().resources.keys()` 與 names.tsv full 兩向相等；short 是 full 的子集。
-  - 少一邊、多一邊都紅，紅時印出是哪一個。
-- **槽對帳**：
+- **鍵對帳＝執行期**（R² M6：結構 grep 兩向都守不住。字面前綴會擋掉合法組鍵，字串拼接又能繞過；真正的失效是 `fmt` 查不到時靜默回預設句，text_bank.gd:104）：
+  - `TextBank` 加測試旗（只在床開，production 預設關），開著時記錄每一次「落到預設句」與每一個被取用的 (鍵,變體)。
+  - advisor：床跑 五情境 × {優,均,劣,不知道} × 四語氣 × 各來源詞。斷言①落預設句＝0；②advisor.tsv 的每個 (鍵,變體) 至少被取用一次。兩向。
+  - names：`TeamData.new().resources.keys()` 每鍵呼 `res_name(k,"full")` ⇒ 落預設＝0；names.tsv full 的每鍵都在 resources 鍵集合裡；short 是 full 的子集。
+  - 紅時印出是哪一個 (鍵,變體)。
+- **槽對帳**（`String.format` 缺槽時原樣保留 `{槽}`、不報錯 ⇒ 這是唯一看得見它的地方；別拿 A1「句子有人數」當它的覆蓋）：
   - 對每個 (鍵,變體)，從句子 regex 取 `{槽}` 集合。
   - 把 AdvisorSystem 組 params 的那一支（`_params_for(situation, …)`，唯一一支）在床的佈置上跑一遍，取它回的 key 集合。兩者相等；多給、少給都紅。
   - names 句無槽，斷言槽集合為空。
@@ -137,16 +150,21 @@
 
 ## 驗收（床 `advisor_belief_bed.gd`＋`text_keys_bed.gd`，修前跑：A1／A2／A6／T3 修前紅）
 - A1 三帶：同一目標佈置三組 belief（己方 10 武裝，敵估 5／10／20）⇒ 判斷句分別是 good／even／bad。fact 句的人數＝belief 值經雜訊，不是真值：真值設 40，句子印的落在 belief×(1±amp)。
-- A2 不擲骰：同 tick 問兩次句子相同。問之前、之後各取 `randi()` 與不問的對照世界相等（全域 RNG 沒被動到）。
+- A2a 不擲骰（R² M4）：直接呼 dispatch 的 handler，前後各取一次 `randi()` ⇒ handler 自身零抽取；同 tick 兩次同句。
+- A2b 誠實的另一半：emit 會無條件標 `pending_rethink`（world_events.gd:185），玩家隊在勢力內時，該勢力那一 tick 會多想一輪（多抽 RNG）。
+  - **systems 裁：接受**。與 09-25 那四種玩家事件同一先例，不在 emit 前判掉。
+  - 床印出兩種佈置（玩家隊在勢力內／外）下，對照世界推進同一 tick 的 RNG 位移結果，只印不斷言。
 - A3 不知道：目標無 belief ⇒ 不知道句、ok:true、事件依據「無」。strategic 零敵對、intel_read 零傳聞同樣。
 - A4 技能：同 belief，技能 0.9 與 0.1 各問 30 個 tick ⇒ 平均絕對誤差前者小於後者（印兩個數）。
 - A5 偏頗：同 belief、同技能，好戰 0.9／慎重 0.1 對好戰 0.1／慎重 0.9。前者的敵估 < 後者，判斷帶不劣於後者（印數字）。
 - A6 事件：一則 `advice` 進玩家事件流，帶依據（來源詞、幾天前）；`command_results` 同句；畫面不再出現「[Advisor]」。
 - A7 選單：五情境都在；目標選單只列 belief 裡未過期的隊。佈置一支真在旁邊、但附身隊沒 belief 的隊 ⇒ 不在列。
-- A8 不讀真值：問之後把目標真人口改成 3 倍，同 tick 再問（撥鐘不推進）⇒ 句子不變。
+- A8 不讀真值：問之後把目標真人口改成 3 倍，同 tick 再問 ⇒ 句子不變。★「同 tick」必須直呼 dispatch 或走 `_enqueue_command`，不經 `command_player`（它會 request_advance，sim_bridge.gd:437）。
+- A10 diplomatic 不讀隊長（R² M3）：把目標隊長換成與附身隊成員有 feud 的人（belief 不變），同 tick 再問 ⇒ 句子不變。
+- A9 雜訊命名空間（R² F3）：顧問算 u 只准經**一支**函式 `AdvisorSystem.noise_u(tick, advisor_pid, target_id, situation)`（NS 與 salt 都在它裡面）。床呼 `noise_u` 與 path_system 那條同一 (tick, 數字 id, 數字 id) 比 ⇒ 不同；另以不帶 NS 的直呼證明撞點存在（相同）。
 - T1 鍵對帳兩檔綠；T2 槽對帳綠。
 - T3 交換畫面：佈置雙方有 food／material／weapon_melee_low／coin ⇒ 面板無 ASCII 資源鍵，印糧食／木料／粗製近戰武器／錢。
-- T4 一張表：scripts 內「近戰武器」「護甲」字面只在 names.tsv 出現（結構 grep；text_bank 外零命中）；戰鬥畫面裝備欄與事件句對同一鍵印同一字。
+- T4 一張表（R² M7＋F1）：母體＝names.tsv 中 `weapon_*`／`armor_*` 的 6 個 full 值（粗製／精製 近戰武器、遠程武器、護甲），斷言這些整句值在 scripts/**/*.gd 的字串字面（非註解）零出現。★不取全表：RES_LABEL 有 11 個值與 names.tsv 同字（observer_query_api.gd:8-13），姓氏表 person_generator.gd:4 也有「錢」，全表第一天就紅。反向：戰鬥畫面裝備欄與事件句對同一鍵印同一字，用 res_name 比，不寫死字。
 - W：無玩家世界 world-fp 不變（電池內）。
 
 ### 負對照（同 sha 加一處改動，每支必紅）
@@ -154,13 +172,16 @@
 |---|---|
 | n1 assess 改讀 `state.teams[tgt].population` | A1 的「不是真值」格、A8 |
 | n2 噪聲改回 `randf()` | A2 |
-| n3 advisor.tsv 刪一行 | T1 |
+| n3 advisor.tsv 刪一行**會被取用到的**（例 assess_enemy good） | T1 |
 | n4 某句多一個 `{槽}` | T2 |
 | n5 交換畫面改回印原鍵 | T3 |
+| n6 注入：diplomatic 臨時改讀「成員對目標隊長的 feud 邊」（R² F2） | A10 |
+| n7 `noise_u` 裡拿掉 ADVISOR_NOISE_NS | A9 |
 
 ## 範圍外（交件信不用做，已記）
 - 三組「主動警報」模板零呼叫者：留在 TEMPLATES 不動、不外置、不刪（藍圖裁：記的是當初想要的行為；已登路線圖板五未規劃「顧問主動警報」）。
 - ~~ITEM_NAME 用字衝突~~ ⇒ 藍圖已裁（粗製／精製、護甲），併入本票 §2c。
+- `ObserverQueryApi.RES_LABEL`（observer_query_api.gd:7-14）：觀測專用 god-view 儀器（ObserverMain，不是玩家畫面 TextUI）的資源標籤，本票不併。藍圖「只准一張表」管的是玩家看到的顯示名；儀器標籤要不要併，等搬 observer 那幾檔時一起判（systems 裁，已告知藍圖）。
 - 其餘五檔外置：照 note §2b，哪張票重寫那檔的句子就順便搬。
 - `trust[顧問]`：note 說先不長。
 
@@ -169,3 +190,5 @@
 - 來源詞是兩個還是三個。
 - A4／A5 的數字。
 - threat_scan 抽出後，威脅欄的 E2E 格逐字不變。
+- `TEMPLATES.has`／`TEMPLATES.get` 全 scripts grep 結果。
+- A2b 兩種佈置的 RNG 位移。

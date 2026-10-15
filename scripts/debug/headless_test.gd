@@ -4509,16 +4509,14 @@ func _run_sim_test() -> void:
 		print("  %s tick=%d data=%s" % [a["type"], a["tick"], str(a["data"])])
 
 	print("--- AdvisorSystem 驗證 ---")
-	var _adv_sys = AdvisorSystem.new()
+	# ★新入口（spec 2026-10-15-advisor-reads-belief §1c）：AdvisorSystem.advise(state, 顧問, 情境, 目標)；零 RNG
 	var test_person: PersonData = state.persons.get(0)
-	if test_person:
+	if test_person and state.teams.has(test_person.team_id):
 		test_person.skills["戰術"] = 0.0
-		var wrong_advice: String = _adv_sys.get_advice(test_person, "assess_enemy",
-			{"enemy_pop": 20, "self_pop": 5}, state)
+		var wrong_advice: String = String(AdvisorSystem.advise(state, test_person, "resources", -1)["text"])
 		print("  低技能建議: %s" % wrong_advice)
 		test_person.skills["戰術"] = 1.0
-		var right_advice: String = _adv_sys.get_advice(test_person, "assess_enemy",
-			{"enemy_pop": 20, "self_pop": 5}, state)
+		var right_advice: String = String(AdvisorSystem.advise(state, test_person, "resources", -1)["text"])
 		print("  高技能建議: %s" % right_advice)
 	print("  AdvisorSystem 驗證通過")
 

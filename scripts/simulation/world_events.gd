@@ -89,6 +89,7 @@ const STATE_KINDS: Array = [
 	"captive_overguard",   # ★玩家 holder 俘虜超過可看守數（不超額→超額那一次；spec 2026-10-14-battle-aftermath §2c）
 	"captive_unfed",       # ★玩家 holder 養不起俘虜 ⇒ 被放走（與 NPC 缺糧釋放對稱）
 	"aftermath_settled",   # ★戰後沒處置就推進 ⇒ 被動選項結清（PlayerCommandSystem.settle_pending_aftermath）
+	"advice",              # ★PlayerCommandApi.ask_advisor（顧問的回答；你自己這道令的回音，不進停點）
 ]
 
 static func all_kinds() -> Array:
@@ -108,7 +109,7 @@ const KIND_LABEL: Dictionary = {
 	"construction_abandoned": "工地", "plan_invalidated": "計畫", "rung_changed": "野心",
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
-	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "captive_overguard": "看守不足", "captive_unfed": "俘虜放走", "aftermath_settled": "戰後", "hostile_adjacent": "敵人逼近",
+	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "captive_overguard": "看守不足", "captive_unfed": "俘虜放走", "aftermath_settled": "戰後", "advice": "顧問", "hostile_adjacent": "敵人逼近",
 	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
 	"player_subteam": "子隊",
 }
@@ -438,6 +439,7 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 		"captive_overguard":     return "%s：看守不足：俘虜 %d 人、可看守 %d 人" % [who, int(info.get("captives", 0)), int(info.get("cap", 0))]
 		"captive_unfed":         return "%s：養不起，俘虜被放走 %d 人" % [who, int(info.get("n", 0))]
 		"aftermath_settled":     return String(info.get("text", ""))
+		"advice":                return String(info.get("text", ""))   # ★句子由 AdvisorSystem 組（單一產生者）
 		"extortion":
 			if info.has("aggressor"):
 				var got: String = String(info.get("got", ""))

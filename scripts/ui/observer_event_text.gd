@@ -3,14 +3,7 @@
 # 已人話者直用；未知 type fallback description。read-only。
 class_name ObserverEventText
 
-const RES_NAMES: Dictionary = {
-	"food": "糧食", "material": "木料", "coin": "錢", "goods": "貨品", "gem": "寶石",
-	"ore_iron": "鐵礦", "ore_steel": "鋼", "ore_gold": "金礦", "ore_silver": "銀礦",
-	"weapon_melee_low": "粗製近戰武器", "weapon_melee_high": "精製近戰武器",
-	"weapon_ranged_low": "粗製遠程武器", "weapon_ranged_high": "精製遠程武器",
-	"mounts": "馬匹", "wagons": "貨車", "arrows": "箭矢", "medicine": "藥品",
-	"tools": "工具", "armor_low": "粗製甲", "armor_high": "精製甲",
-}
+# ★資源顯示名：只准一張表 data/text/names.tsv（TextBank.res_name；藍圖裁 2026-10-15）
 
 static func stamp(msg: MessageData) -> String:
 	var month: int = msg.origin_tick / WorldState.TICKS_PER_MONTH + 1
@@ -84,7 +77,7 @@ static func _body(state: WorldState, msg: MessageData) -> String:
 		"replace":
 			return "%s 領袖遭替換" % _tl(state, org)
 		"order_buy", "order_sell":
-			var res_n: String = RES_NAMES.get(String(p.get("res", "")), String(p.get("res", "?")))
+			var res_n: String = TextBank.res_name(String(p.get("res", "?")))
 			var verb: String = "收購" if msg.type == "order_buy" else "出售"
 			return "%s 張貼%s%s×%d 訂單" % [_tl(state, org), verb, res_n, int(p.get("qty", 0))]
 		_:
