@@ -2353,7 +2353,7 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **根因**：`text_ui_main._process`（154-160）pre_encounter/encounter_active 有自動進模式，**一般 `forced_interaction` 無對等自動進選單** → 只顯「⚠強制事件」hint，玩家無從回應
 - **修向**：`_process` 偵測 `forced_interaction` 非空 → `cancel_advance` + 進 forced-response 模式（仿 pre_encounter）；新 `_forced_mode` + handler 列 `forced_interaction.responses` 供選
 
-### U10b. 全 Team 死亡直接退出（edge，2026-06-14 run-verify）
+### ✅ U10b. 全 Team 死亡直接退出（edge，2026-06-14 run-verify）— 已結案 2026-10-16：第 7 張戰後收尾合併 `b35535bfa`，床 A11（玩家全隊陣亡 ⇒ `handle_player_succession`）綠
 - **症狀**：遭遇戰中玩家全隊死亡 → 直接退出（應走 game-over / choose_heir）
 - **修向**：encounter 結算偵測玩家隊全滅 → 接 `_handle_player_leader_death`/game-over，非靜默退出。低頻 edge
 
@@ -5657,6 +5657,35 @@ encounter_system.gd _spawn_team_units：位置用完就 break（記名迴圈與�
 出生＝每方半徑 8 一圈去共用角 25 格；追擊戰守方只給中央 5 格（同檔 combat_type=="pursuit" 分支）。
 ⇒ 記名多的隊、追擊戰被追的隊：沒上場的人仍在隊上，但打不到、俘不到、傷不到；結算母體與場上不一致。
 顧問估己方武裝（EncounterSystem.armed_on_field）刻意不扣格位不足這段 ⇒ 顧問說的己方人數可能多於真上場的。
+```
+
+## 刪隊時隊上記名的人不會被處理，稽核也看不到
+
+狀態：已知未修
+
+回訪：觸發事件 —— 7b 戰後處置過渡寫 HOW 時一起開（那張本來就要改屠村的記名命運；systems 在該 HOW 盤點全部 erase_team 呼叫點）。
+
+```
+world_state.gd erase_teams 只清隊的參照（母子、勢力、情報、格子），不碰 persons。
+invariant_audit.gd 反向檢查遇到 teams.get(p.team_id)==null 直接 continue（註解：由 remove_member 語意保證不生）。
+⇒ 任何呼 erase_team 之前沒先 remove_member 的路，都會留下「活著、team_id 指向不存在的隊」的記名人物，零紅燈。
+第 7 張已修屠村那一條（erase 前逐人 remove_member，床 A10 懸空＝0 格＋負對照 n10）；其他呼叫點沒逐條查。
+出處：實作端 FYI 2026-10-15-implementer-to-systems-FYI-massacre-deletes-teams；戰後收尾交件信。
+```
+
+## 玩家設的勢力目標，成員一個也讀不到
+
+狀態：未確認
+
+回訪：觸發事件 —— 藍圖裁「擴張／防守／貿易網對成員各是什麼加權」的那封信（systems 2026-10-16 已問）；裁下來就開票。
+
+```
+玩家能設：player_command_system.gd FACTION_GOALS＝expand／defend／trade_net（標籤 擴張／防守／貿易網）。
+成員讀法：decision_context.gd faction_stakes 只收 options_in_set("stakes")（攻擊／徵收／外交）且在 f.goals 裡的詞；
+faction_ai 其他 goals 讀者也只認中文詞（攻擊、立國）。
+⇒ player_goal_override 進 goals 後沒有任何讀者認得 ⇒ 玩家設目標只改面板那一行字，對成員零作用。不是新造成的。
+「未確認」＝缺的是 WHAT（詞彙對應），不是 code 錯；你領導的勢力那張只印現況、不判。
+出處：實作端問題信 2026-10-16-implementer-to-systems-Q-player-led-faction-player-is-loser-path-exists ②。
 ```
 
 ## 情報頁「勢力關係」一類恆為「尚無」
