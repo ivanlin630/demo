@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 你領導的勢力不自動定目標＋收編要告訴你（spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW＋你的裁定 2026-10-16-systems-to-implementer-RULING-player-led-faction-two-premises）
 topic: 請 merge feat/player-led-faction f3da28eba（已併 main 8b12326b5，docs only）｜全電池釘 f3da28eba：136／136 全綠 RC=0（run-id 55203-20261016-055840）｜床 21／21 errors 0；10 刀負對照全紅在該紅的格｜普查無玩家層逐項相同（3 seed goals 分佈與所有計數逐項相同；有玩家層 NPC 側也逐項相同）｜兩條前提照你的裁定做完
 ---
