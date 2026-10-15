@@ -5646,6 +5646,19 @@ sim_runner.gd:501-503 只在 MovementSystem 回報「這一窗跨了格」時設
 出處：移動預計時間交件信 2026-10-15 E7 探針（12 小時 12 次 pass，耗力 1 次）。
 ```
 
+## 遭遇戰出生格不夠時，多出來的人靜默不上場（追擊戰被追的一方最多 5 人）
+
+狀態：已知未修
+
+回訪：觸發事件 —— 深層批「戰鬥模型落地」寫 HOW 時一起開（藍圖追加信 2026-10-15-blueprint-to-systems-ADDENDUM-combat-model-spawn-band-units-silently-dropped-and-siege-layout：出生圈改出生帶、追擊守方改中央盤、上場名單數＝場上單位數為驗收格）。
+
+```
+encounter_system.gd _spawn_team_units：位置用完就 break（記名迴圈與匿名迴圈各一處，註解「no more spawn slots」），不報、不算。
+出生＝每方半徑 8 一圈去共用角 25 格；追擊戰守方只給中央 5 格（同檔 combat_type=="pursuit" 分支）。
+⇒ 記名多的隊、追擊戰被追的隊：沒上場的人仍在隊上，但打不到、俘不到、傷不到；結算母體與場上不一致。
+顧問估己方武裝（EncounterSystem.armed_on_field）刻意不扣格位不足這段 ⇒ 顧問說的己方人數可能多於真上場的。
+```
+
 ## 情報頁「勢力關係」一類恆為「尚無」
 
 狀態：已知未實裝
