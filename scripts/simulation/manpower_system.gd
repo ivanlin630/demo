@@ -58,12 +58,7 @@ static func decide_treatment(state: WorldState, holder: TeamData, group: Diction
 	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
 	var cruelty:  float = float(leader.values.get("殘忍", 0.5)) if leader else 0.5
 	var guard_ratio: float = _decide_guard_ratio(state, holder)
-	# 無力養（缺糧）→ 釋放（守恆：captive 離開，不白增）
-	var captive_n: int = AnonTierSystem.total_captives(holder)
-	var food_per_cap: float = ResourceSystem.effective_food(state, holder) \
-		/ maxf(holder.population + captive_n, 1)
-	if food_per_cap < 0.5:   # TEST VALUE：養不起
-		return {"treatment": "釋放", "guard_ratio": guard_ratio}
+	# ★無力養（缺糧）→ 釋放：搬出成物理檢查 captive_food_ok（tick_all 在 decide 之前、同一個 group 迴圈位置呼）
 	# 厚待 util（壯兵意圖）vs 苛待 util（殘忍/速用）
 	var kind_util: float  = 0.3 + ambition * 0.6 - cruelty * 0.4
 	# 壯兵 intent→厚待加權（藍圖 2026-07-03 asm-knobs：待遇接回 means-end——征服/擴張/建國要兵=消化俘虜;
@@ -77,6 +72,14 @@ static func decide_treatment(state: WorldState, holder: TeamData, group: Diction
 	var harsh_util: float = 0.2 + cruelty * 0.7 - ambition * 0.3
 	var treatment: String = "厚待" if kind_util >= harsh_util else "苛待"
 	return {"treatment": treatment, "guard_ratio": guard_ratio}
+
+# ───── 養得起嗎（物理檢查，不讀人格；spec 2026-10-14-battle-aftermath §2c）─────
+# 從 decide_treatment 搬出：NPC 與玩家 holder 都經這一支；守恆：captive 離開，不白增
+static func captive_food_ok(state: WorldState, holder: TeamData) -> bool:
+	var captive_n: int = AnonTierSystem.total_captives(holder)
+	var food_per_cap: float = ResourceSystem.effective_food(state, holder) \
+		/ maxf(holder.population + captive_n, 1)
+	return food_per_cap >= 0.5   # TEST VALUE：養不起
 
 # ───── 看守強度決策（holder-level，連續 0..GUARD_RATIO_MAX）─────
 # driver：leader 慎重（謹慎者多派看守）+ 持有量占比（俘越多越需看守）。TEST VALUE 公式。
@@ -251,10 +254,17 @@ static func _spawn_breakaway(state: WorldState, holder: TeamData, detached: Dict
 # ───── guard-cap：captive_cap = guard_n × GUARD_CAP_MULT，超限強制處置超額（逼決策別囤）─────
 # means-end：殘忍 leader → 苛用（部分戰損處置）；否則 → 釋放（全數保留成流民）。守恆：走既有 detach/breakaway 路由。
 static func _enforce_guard_cap(state: WorldState, holder: TeamData) -> void:
-	var guard_n: float = float(AnonTierSystem.total_pop(holder)) * float(holder.captive_guard_ratio)
-	var cap: int = int(floor(guard_n * GUARD_CAP_MULT))
+	var cap: int = guard_cap(holder, float(holder.captive_guard_ratio))   # ★容量一支（同 captive_room）
 	var total: int = AnonTierSystem.total_captives(holder)
 	if total <= cap:
+		holder.captive_overguard = false
+		return
+	# ★玩家 holder 超額 ⇒ 不處置（不讀人格）；邊緣觸發一則玩家事件，持續超額的後果由既有逃跑機率承擔
+	if holder.player_controlled:
+		Probe.bump("asm.guardcap_player_excess")
+		if not holder.captive_overguard:
+			holder.captive_overguard = true
+			WorldEvents.emit(state, "captive_overguard", [holder.team_id], false, {"captives": total, "cap": cap})
 		return
 	var excess: int = total - cap
 	var leader: PersonData = state.persons.get(holder.leader_id)
@@ -296,13 +306,25 @@ static func tick_all(state: WorldState) -> void:
 		if holder.captive_groups.is_empty():
 			continue
 		# 看守決策（holder-level）：guard_ratio 連續 → 記 holder.captive_guard_ratio
-		holder.captive_guard_ratio = _decide_guard_ratio(state, holder)
+		#   ★玩家 holder 不呼 _decide_guard_ratio（不讀附身者人格）：看守比留在 holder 層那一欄
+		if not holder.player_controlled:
+			holder.captive_guard_ratio = _decide_guard_ratio(state, holder)
 		# guard-cap：超限強制處置超額（在待遇前，逼決策別囤）
 		_enforce_guard_cap(state, holder)
-		# 每 group 各自待遇決策（means-end driver）+ tick
+		# 每 group：先物理（養得起嗎）再待遇決策（NPC 讀人格；玩家讀 group 的 treatment 欄）
+		#   ★序＝ratio → enforce → captive_food_ok → decide；NPC 行為與舊版逐位相同（缺糧釋放原本就在 decide 第一步）
 		for group in holder.captive_groups.duplicate():
 			if not holder.captive_groups.has(group):
 				continue
-			var decision: Dictionary = decide_treatment(state, holder, group)
-			_apply_treatment(state, holder, group, decision["treatment"])
-			_check_trajectory(state, holder, group, decision["treatment"])
+			var treatment: String
+			if not captive_food_ok(state, holder):
+				treatment = "釋放"
+				if holder.player_controlled:
+					WorldEvents.emit(state, "captive_unfed", [holder.team_id], false,
+						{"n": AnonCohort.total(group.get("cohorts", {}))})
+			elif holder.player_controlled:
+				treatment = String(group.get("treatment", "厚待"))
+			else:
+				treatment = String(decide_treatment(state, holder, group)["treatment"])
+			_apply_treatment(state, holder, group, treatment)
+			_check_trajectory(state, holder, group, treatment)

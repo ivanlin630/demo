@@ -137,6 +137,8 @@ var captive_groups: Array = []
 # ③ asm 看守強度：holder 撥多少比例 anon 當看守（連續 0..0.5，ManpowerSystem 每日決策寫）。
 # 驅動 flee 機率 + guard-cap（captive 上限 ∝ guard_n）。TEST VALUE 公式見 ManpowerSystem。
 var captive_guard_ratio: float = 0.0
+# ★玩家 holder 看守不足的邊緣狀態（spec 2026-10-14-battle-aftermath §2c）：不超額→超額那一次發玩家事件，持續超額不重發
+var captive_overguard: bool = false
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）
 # R2 食物流訊號（flow-not-stock 成長）：日均淨食物流 (income − consumption) EMA。
