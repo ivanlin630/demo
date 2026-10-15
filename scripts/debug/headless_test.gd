@@ -4075,16 +4075,16 @@ func _run_sim_test() -> void:
 		assert(_u.has("action_timer"), "unit should have action_timer")
 	print("Unit equipment OK — %d units spawned" % _es_state.encounter_units.size())
 
-	# prisoner_population 驗證
-	print("--- prisoner_population ---")
+	# 俘虜帳驗證（★prisoner_population 已退場：spec 2026-10-14-battle-aftermath §2c，俘虜只有 captive_groups 一本帳）
+	print("--- captive_groups ---")
 	var _total_prisoners: int = 0
 	for _tid in state.teams:
 		var _t: TeamData = state.teams[_tid]
-		_total_prisoners += _t.prisoner_population
-		assert(_t.prisoner_population <= _t.population,
-			"prisoner_population 不可超過 population（Team%d）" % _tid)
+		var _tc: int = AnonTierSystem.total_captives(_t)
+		_total_prisoners += _tc
+		assert(_tc >= 0, "captive 數不可為負（Team%d）" % _tid)
 	print("全域俘虜總數: %d" % _total_prisoners)
-	print("prisoner_population OK")
+	print("captive_groups OK")
 
 	# spawn cap 驗證（觀察用）
 	print("--- encounter unit count ---")

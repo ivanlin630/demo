@@ -246,7 +246,7 @@ func _check_invariants(state: WorldState, enc: EncounterSystem,
 		else:
 			print("  OK: 玩家 action_timer=%d" % t)
 
-	# 5. 俘虜計數一致：prisoner_population 與實際標記數吻合
+	# 5. 戰中被標俘虜的單位（prisoner_population 已退場；結算時照押方是否留場帶走，見 encounter_system 戰後收尾 2a）
 	var marked_prisoners: Dictionary = {}   # team_id → count
 	for u in state.encounter_units:
 		if u.get("is_prisoner", false):
