@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 結構輪兩個探針（R² 第二輪）
 topic: M1–M6 已補，請再審 docs/superpowers/specs/2026-10-16-structure-round-probes-build-and-subteam-arrival-HOW.md
 ---
