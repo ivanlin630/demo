@@ -203,7 +203,7 @@ static func parse_screen(screen: String) -> Dictionary:
 func _p0_parser() -> void:
 	print("\n── P0 解析器（三個鍵位空間）──")
 	var self_screen: String = "\n".join([
-		"第 1 天 00:00 ｜ Team15（人口 10） ｜ 家：（無） ｜ 糧撐 6.3 天 ｜ 威脅：（無） ｜ 待執行 1 道",
+		"第 1 天 00:00 ｜ Team15 ｜ 人口 10 ｜ 家：（無） ｜ 糧撐 6.3 天 ｜ 威脅：（無） ｜ 待執行 1 道",
 		"─ 面板（接管畫面）──────",
 		"── 互動 ──",
 		"⚠ Team3 要求你繳貢",
@@ -1378,7 +1378,7 @@ func _fr_cells() -> void:
 	_check("★FR1 母體地板：四種強制事件都有回應可按（共 %d 個）" % total, total >= FR_KINDS.size() * 2)
 	_check("FR1 每一個回應按下之後結果行＝真結果句（不對：%s）" % str(bad), bad.is_empty() and total > 0)
 	_cells_ran.append("FR1")
-	print("\n── FR2 人口滿上限、接受求投靠 ⇒ 結果行說「隊伍已滿，無法收留」、人口不變 ──")
+	print("\n── FR2 人口滿上限、接受求投靠 ⇒ 結果行說「上限…對方…人」、人口不變 ──")
 	var wf: Dictionary = _new_w(await _build(SEED_A))
 	var stf: WorldState = wf["node"]._bridge._state
 	var ptf: TeamData = stf.teams[stf.get_player_team_id()]
@@ -1398,7 +1398,8 @@ func _fr_cells() -> void:
 	if acc != "":
 		var pr: Array = await _fr_press(wf, acc)
 		print("   按收留 ⇒ 結果行「%s」｜人口 %d → %d" % [pr[0], pop0, ptf.population])
-		_check("FR2 結果行說「隊伍已滿，無法收留」、人口不變", String(pr[0]).contains("隊伍已滿") and ptf.population == pop0)
+		# ★live-play-small-fixes §一：舊句「隊伍已滿，無法收留」改由 absorb_block_reason 的理由句取代（「上限 {cap}，現有 {n}，對方 {m} 人」）
+		_check("FR2 結果行說「上限…對方…人」、人口不變", String(pr[0]).contains("上限") and String(pr[0]).contains("對方") and ptf.population == pop0)
 	_cells_ran.append("FR2")
 	await _drop(wf["node"])
 
@@ -2270,15 +2271,16 @@ func _battle_cells() -> void:
 	var c1: int = int(view.handle_key_calls)
 	print("   ⑥GUI 廣播一次按鍵（主節點 _input ＋ encounter_view _input）⇒ _handle_key 被呼 %d 次" % (c1 - c0))
 	_check("BATTLE⑥ GUI 一次按鍵 ⇒ 戰鬥分派只被呼一次（%d）" % (c1 - c0), c1 - c0 == 1)
-	# ⑦Z 命令選單（spec §1④）：終端看不到 GUI 彈窗 ⇒ 項目要印進戰鬥區（或說出「沒有可下令的隊友」），Esc 收起
+	# ⑦Z（spec 2026-10-15-live-play-small-fixes §五）：命令／派信使沒有消費者，Z 連同提示一起拿掉
+	#   ⇒ 戰鬥畫面按 Z 走既有未綁鍵處置（說出為什麼、不靜默），鍵列上沒有 Z
 	if _screen(node).contains(TextUiView.BATTLE_TITLE):
+		var zs0: String = _screen(node)
 		await _press(w, "z")
 		var zs: String = _screen(node)
-		var z_ok: bool = zs.contains("── 命令（按數字選；Esc 取消）──") or zs.contains("沒有可下令的隊友")
-		await _press(w, "esc")
-		var z_closed: bool = not _screen(node).contains("── 命令（按數字選；Esc 取消）──")
-		print("   ⑦Z ⇒ 選單印出或說明 %s｜Esc 後收起 %s" % [str(z_ok), str(z_closed)])
-		_check("BATTLE⑦ Z 命令選單：項目印進戰鬥區（或說明沒有隊友），Esc 收起", z_ok and z_closed)
+		var z_ok: bool = zs.contains("此鍵在戰鬥中無作用")
+		var z_no_hint: bool = not zs0.contains("Z:命令") and not zs.contains("Z:命令") and not zs.contains("Z 命令")
+		print("   ⑦Z ⇒ 未綁鍵處置 %s｜鍵列無 Z %s" % [str(z_ok), str(z_no_hint)])
+		_check("BATTLE⑦ 戰鬥畫面按 Z ⇒ 未綁鍵處置（說出為什麼），鍵列上沒有 Z", z_ok and z_no_hint)
 	# ①續：用畫面印的鍵打完 ⇒ 回主畫面
 	var back: bool = await _to_main(w)
 	print("   ①打完之後回主畫面 %s｜交戰中 %s" % [str(back), str(node._bridge._state.encounter_active)])

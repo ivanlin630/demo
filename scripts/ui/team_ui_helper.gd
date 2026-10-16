@@ -178,6 +178,11 @@ static func render_quick_card(member: Dictionary) -> Array:
 	lines.append("價值觀: " + ", ".join(top_vals))
 	var top_skills: Array = _top3_dict(member.get("skills", {}))
 	lines.append("技能: " + ", ".join(top_skills))
+	# ★餉（spec live-play-small-fixes §二）：現 < 期望且有領餉 ⇒ 標「欠」（發餉時 wage_ratio<1 每 7 天掉忠誠）
+	if member.has("fair_salary") and not bool(member.get("wage_skipped", false)):
+		var sal: float = float(member.get("salary", 0.0))
+		var fair: float = float(member.get("fair_salary", 0.0))
+		lines.append("餉 %.1f／期望 %.1f%s" % [sal, fair, "  欠（每 7 天掉忠誠）" if sal < fair else ""])
 	return lines
 
 # Build the full three-column member mode string.

@@ -149,14 +149,11 @@ func _create_named_unit(pid: int, team_id: int, pos: Vector2i,
 		"team_id":      team_id,
 		"pos":          pos,
 		"stamina":      SimRunner.stamina_factor(t),   # ★票 T §7（原本 clamp(1−f, 0.1, 1)）
-		"is_messenger": false,
 		"has_exited":   false,
 		"escort_target": -1,
 		"action_timer":         BASE_ACTION_TICKS,
 		"stance":               "walk",
 		"pending_dodge":        false,
-		"current_order":        { "type": "none", "target": -1 },
-		"messenger_target_idx": -1,
 	}
 
 func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
@@ -165,7 +162,6 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"team_id":      team.team_id,
 		"pos":          pos,
 		"stamina":      SimRunner.stamina_factor(team),   # ★票 T §7
-		"is_messenger": false,
 		"has_exited":   false,
 		"escort_target": -1,
 		"body_parts":   _default_body_parts(),
@@ -178,8 +174,6 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"action_timer":         BASE_ACTION_TICKS,
 		"stance":               "walk",
 		"pending_dodge":        false,
-		"current_order":        { "type": "none", "target": -1 },
-		"messenger_target_idx": -1,
 	}
 
 const MAP_RADIUS: int = 12
@@ -459,10 +453,8 @@ func _decide_action(unit_idx: int, state: WorldState,
 			return { "type": "move", "target_idx": rescue_idx,
 				"move_to": _calc_next_step(unit["pos"], rpos), "attack_part": "" }
 
-	# 3. 傳令
-	if unit.get("is_messenger", false):
-		return { "type": "messenger_exit", "target_idx": -1,
-			"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+	# ★3. 傳令：已拿掉（spec 2026-10-15-live-play-small-fixes §五）——它呼的建子隊函式全庫不存在（has_method 永遠假），
+	#   真效果只是把一名記名戰鬥員拖出戰場；深層批「戰鬥模型落地」給傳令真消費者時再加回
 
 	# 4. 護送
 	var escort_idx: int = _should_escort(unit_idx, state)
@@ -654,21 +646,6 @@ func _get_enemy_team_id(own_team_id: int, state: WorldState) -> int:
 		if u["team_id"] != own_team_id and not is_dead(u, state):
 			return u["team_id"]
 	return -1
-
-func _messenger_exit(state: WorldState, unit: Dictionary,
-		parent_team: TeamData) -> void:
-	unit["has_exited"] = true
-	if unit["person_id"] == -1: return
-	var sub_sys := SubteamSystem.new()
-	var sub_data: Dictionary = {
-		"leader_id":      unit["person_id"],
-		"parent_team_id": parent_team.team_id,
-		"tile_pos":       parent_team.tile_pos,
-		"task":           "傳令",
-	}
-	print("[Encounter] Person%d 傳令兵退出，建立子隊" % unit["person_id"])
-	if sub_sys.has_method("create_subteam"):
-		sub_sys.create_subteam(state, sub_data)
 
 func _base_speed(unit: Dictionary, state: WorldState) -> float:
 	var p: PersonData = state.persons.get(unit.get("person_id", -1))
@@ -900,15 +877,12 @@ func advance_encounter_tick(state: WorldState) -> String:
 				unit["stamina"] = maxf(float(unit.get("stamina", 1.0)) - stamina_cost * drain_mult, 0.0)
 				if action["type"] == "start_escort":
 					unit["escort_target"] = action["target_idx"]
-			"retreat", "messenger_exit":
+			"retreat":
 				unit["pos"]     = action["move_to"]
 				unit["stamina"] = maxf(float(unit.get("stamina", 1.0)) - 0.03, 0.0)
 				if hex_dist(Vector2i.ZERO, unit["pos"]) > MAP_RADIUS:
 					unit["has_exited"] = true
 					_enc_log(state, "%s 撤出戰場" % _unit_ref(unit, state))
-					if action["type"] == "messenger_exit":
-						var parent: TeamData = state.teams.get(unit["team_id"])
-						if parent: _messenger_exit(state, unit, parent)
 
 		# ★BS v2「戰報每拍一句」：玩家那一隊的移動與玩家的待機也記（攻擊那幾句在 resolve_attack）
 		#   ★只記我方：敵方的移動看得到的已畫在地圖上，看不到的不能寫進戰報（感知鐵律）

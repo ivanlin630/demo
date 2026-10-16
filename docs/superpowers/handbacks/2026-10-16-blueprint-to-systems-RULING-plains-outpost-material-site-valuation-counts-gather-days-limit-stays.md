@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針一「建點」（L1 要材料、就地採）
 topic: 用戶裁 2026-10-16 乙＋丙：採段期限 30 日不動；選址估值把採料天數（扣帶料）算進去；前提＝NPC 派隊要能真的帶料
 ---
