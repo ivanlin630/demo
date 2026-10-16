@@ -1906,13 +1906,20 @@ func _update_goals(state: WorldState, f) -> void:
 	var _prev_goals: Array = f.goals.duplicate()
 	var _prev_drivers: Dictionary = f.goal_drivers.duplicate(true)
 	_rebuild_goals(state, f)
+	# ★玩家令比【現值 vs 上次套用】（spec 2026-10-16-player-faction-goal-engine-vocabulary §二 R² M2）：
+	#   玩家領導時 drivers 空、goals 只有詞 ⇒「攻擊 X」改「攻擊 Y」goals 集合不變 ⇒ 不比對象就不蓋戳記、成員不醒
+	#   ★比在重建之後：重建可能把令清掉（交接、舊詞），那也是一次變化
+	var _player_order_changed: bool = String(f.player_goal_override) != String(f.applied_goal_override) \
+		or int(f.player_goal_target) != int(f.applied_goal_target)
 	# ★T3 比對範圍＝語意欄（goals 集合 + goal_drivers 的 intent/why/mode）；不比 tick 類附帶欄。
 	# ★偽陰性（命令真變卻不喚醒）比偽陽性嚴重 → 不確定時判「變了」。
-	if _goals_changed(_prev_goals, _prev_drivers, f):
+	if _goals_changed(_prev_goals, _prev_drivers, f) or _player_order_changed:
 		f.directive_change_tick = state.world.current_tick
 		if Probe.enabled: Probe.bump("directive.stamp")
 	elif Probe.enabled:
 		Probe.bump("directive.restate_no_stamp")   # 純重申：不蓋戳記＝成員不被喚醒（省下的正是 churn）
+	f.applied_goal_override = f.player_goal_override
+	f.applied_goal_target = f.player_goal_target
 
 # 語意比對：goals 集合（順序無關）+ 每個 goal 的 driver 三欄。
 static func _goals_changed(prev_goals: Array, prev_drivers: Dictionary, f) -> bool:
@@ -1946,16 +1953,24 @@ func _rebuild_goals(state: WorldState, f) -> void:
 	#     空字典下游全有 .get／is_empty 保護（本支 :1993 也把空當守成用）。
 	if state.is_player_led(f):
 		if Probe.enabled: Probe.bump("faction.goals_rebuild_player_led")
+		# ★殘留舊詞（expand／defend／trade_net）沒有讀者 ⇒ 清掉，不放進 goals（spec §一）
+		if not f.player_goal_override.is_empty() and not (f.player_goal_override in PlayerCommandSystem.FACTION_GOALS):
+			if Probe.enabled: Probe.bump("faction.override_cleared_stale_word")
+			f.player_goal_override = ""
+			f.player_goal_target = -1
 		if not f.player_goal_override.is_empty():
 			f.goals.append(f.player_goal_override)
 		f.intent = {}
 		f.strategy = "玩家領導"
 		return
 
-	# G-09：玩家設定 override → 跳過自動計算，直接套用
-	if not f.player_goal_override.is_empty():
-		f.goals.append(f.player_goal_override)
-		return
+	# ★交接清掉玩家的令（spec §四）：舊 G-09 支「override 非空 ⇒ goals＝[override]、return」刪掉——
+	#   它只在玩家交出盟主之後才走得到 ⇒ NPC 新盟主從此不重建目標、永遠執行前任玩家最後一道令。
+	#   ⇒ 兩欄清空、往下走正常重建
+	if f.player_goal_override != "" or f.player_goal_target != -1:
+		if Probe.enabled: Probe.bump("faction.override_cleared_on_handover")
+		f.player_goal_override = ""
+		f.player_goal_target = -1
 
 	var leader_p = state.persons.get(leader_team.leader_id)
 	var ambition: float = float(leader_p.values.get("野心",   0.5)) if leader_p else 0.5
@@ -1972,14 +1987,10 @@ func _rebuild_goals(state: WorldState, f) -> void:
 		_emit_goal(state, f, "徵收", "守成", "缺糧 survival override", "survival")  # driver mode=survival
 		return
 
-	# 立國 gate（既有分離，非意圖集；不在 means-end argmax）
-	if not f.is_established and f.member_team_ids.size() >= 2 and leader_p != null:
-		var cmd: float = float(leader_p.skills.get("統領", 0.0))
-		var ambition_discount: float = (ambition - 0.5) * 0.2
-		if cmd >= ESTABLISH_COMMAND - ambition_discount \
-				and ambition >= ESTABLISH_AMBITION - 0.1 \
-				and leader_team.readiness >= ESTABLISH_READINESS:
-			_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
+	# 立國 gate（既有分離，非意圖集；不在 means-end argmax）——條件抽成 establish_block_reason（玩家選立國走同一支）
+	#   ★呼叫位置留在 survival override 的 return 之後（NPC 餓了先 return、不進閘；玩家路不看糧）
+	if establish_block_reason(state, f, false) == "":
+		_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
 
 	# ── 步驟 2：意圖選擇（cadence-gate，藍圖 #3：1 日重選，cadence 內沿用 f.intent）──
 	# ★★★S4b：①事件瞬醒短路 + ②cadence 遷 T3。★★兩件必須同時 —— 只做②＝把重選拉長到 3 日
@@ -5151,6 +5162,62 @@ func _has_independent(state: WorldState, from_team_id: int) -> bool:
 			return true
 	return false
 
+# ★勢力義務的對象【全專案唯一一支】（spec 2026-10-16-player-faction-goal-engine-vocabulary §二）：
+#   呼叫點＝decision_context gather 兩處（攻擊、外交）＋DecisionOptions「外交」.to_task（門與執行讀同一個對象）。
+#   玩家指定了對象 ⇒ 回它，但要過【成員自己】的感知（存在、仍獨立、成員對它有 belief 位置）；不過 ⇒ -1，
+#   ★不 fallback 到最近者：玩家說打 X，成員不知道 X 在哪就不該去打 Y。
+#   否則（NPC 勢力恆走這裡）⇒ _nearest_independent（現況逐字）。f == null（獨立隊直呼外交 to_task）⇒ 一樣退回最近者。
+static func faction_directive_target(state: WorldState, team: TeamData, f, word: String) -> int:
+	if f != null and int(f.player_goal_target) != -1 and String(f.player_goal_override) == word:
+		var x: int = int(f.player_goal_target)
+		if not state.teams.has(x) or (state.teams[x] as TeamData).faction_id != -1:
+			if Probe.enabled: Probe.bump("directive.pinned.invalid")
+			return -1
+		if BeliefSystem.belief_pos(state, team.team_id, x) == Vector2i(-1, -1):
+			if Probe.enabled: Probe.bump("directive.pinned.unknown_to_member")
+			return -1
+		if Probe.enabled: Probe.bump("directive.pinned.used")
+		return x
+	return shared()._nearest_independent(state, team)
+
+# ★玩家選單／action 驗證的對象候選（spec §二）：與 _nearest_independent 同一個母體過濾（獨立隊＋你有情報）
+static func directive_target_candidates(state: WorldState, pt: TeamData) -> Array:
+	var out: Array = []
+	if pt == null:
+		return out
+	for tid in state.team_discovered.get(pt.team_id, []):
+		var t: TeamData = state.teams.get(tid)
+		if t == null or t.faction_id != -1 or t.team_id == pt.team_id:
+			continue
+		if BeliefSystem.belief_pos(state, pt.team_id, t.team_id) == Vector2i(-1, -1):
+			continue
+		out.append(int(tid))
+	out.sort()
+	return out
+
+# ★立國閘的理由（spec §三）：空字串＝過。NPC（for_player=false）逐字照舊條件；
+#   玩家（for_player=true）不看野心（藍圖裁 4b77e0823：野心是 NPC 的「想不想」，玩家的想就是按下去那一下），
+#   統領門檻用不打折的 ESTABLISH_COMMAND。★理由句印【實際用的門檻】
+static func establish_block_reason(state: WorldState, f, for_player: bool) -> String:
+	var lt: TeamData = state.teams.get(f.leader_team_id)
+	var lp: PersonData = state.persons.get(lt.leader_id) if lt != null else null
+	if lp == null:
+		return "盟主隊長不存在"   # ★原式 leader_p == null 時整段不進 ⇒ 這裡必須回非空，不可用預設值放行
+	if f.is_established:
+		return "已經立國了"
+	if f.member_team_ids.size() < 2:
+		return "勢力至少要 2 隊（現 %d）" % f.member_team_ids.size()
+	var ambition: float = float(lp.values.get("野心", 0.5))
+	var cmd: float = float(lp.skills.get("統領", 0.0))
+	var cmd_need: float = ESTABLISH_COMMAND - (0.0 if for_player else (ambition - 0.5) * 0.2)
+	if cmd < cmd_need:
+		return "盟主統領 %.2f 未達 %.2f" % [cmd, cmd_need]
+	if not for_player and ambition < ESTABLISH_AMBITION - 0.1:
+		return "盟主野心 %.2f 未達 %.2f" % [ambition, ESTABLISH_AMBITION - 0.1]
+	if lt.readiness < ESTABLISH_READINESS:
+		return "盟主隊準備度 %.2f 未達 %.2f" % [lt.readiness, ESTABLISH_READINESS]
+	return ""
+
 func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
 	var best_id: int = -1
 	var best_d: int  = 999
@@ -7969,6 +8036,9 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 	f.is_established = true
 	f.faction_name   = "勢力%d" % f.faction_id
 	f.goals.erase("立國")
+	# ★玩家令「立國」一次性（spec §三）：不清的話下一小時 _rebuild_goals 又放回 goals ⇒ 每小時再宣告一次
+	if f.player_goal_override == "立國":
+		f.player_goal_override = ""
 	SimMessageSystem.new().emit_message(state, "faction_establish",
 		TextBank.fmt("faction_establish", "honest", {
 			"origin": str(f.leader_team_id), "name": f.faction_name

@@ -59,8 +59,12 @@ func _run() -> void:
 		"★真變化蓋戳記（stamp=%d＝當前 tick）" % f.directive_change_tick)
 	_ok(fai._directive_fresh(s, mem), "★成員當輪被喚醒（directive_fresh=true）")
 	# ③ 玩家 override 改變 → 蓋戳記（該路不經 _emit_goal）
+	#   ★佈置改成玩家領導（spec 2026-10-16-player-faction-goal-engine-vocabulary §驗收：舊版用 NPC 盟主＋直寫 override，
+	#     走的是 §四 刪掉的 G-09 支）；詞換成引擎詞（舊「防衛／擴張」已被用戶裁掉）
 	var w3 := _mk(); var s3: WorldState = w3[0]; var f3 = w3[1]; var mem3: TeamData = w3[2]
-	f3.player_goal_override = "防衛"
+	s3.player_id = 700
+	s3.sync_possession()   # 盟主隊 Team7 變成玩家控制 ⇒ is_player_led
+	f3.player_goal_override = "徵收"
 	fai._update_goals(s3, f3)
 	var st3: int = f3.directive_change_tick
 	_ok(st3 == s3.world.current_tick, "★玩家 override 首次設定 → 蓋戳記（今天這條路完全不蓋＝下令沒人理）")
@@ -68,7 +72,7 @@ func _run() -> void:
 	fai._update_goals(s3, f3)   # override 沒變 → 不蓋
 	_ok(f3.directive_change_tick == st3, "玩家 override 未變 → 不重蓋（重申不喚醒一致）")
 	s3.world.current_tick += 100
-	f3.player_goal_override = "擴張"
+	f3.player_goal_override = "攻擊"
 	fai._update_goals(s3, f3)
 	_ok(f3.directive_change_tick == s3.world.current_tick, "★玩家 override 改變 → 蓋戳記")
 	mem3.last_decision_tick = st3

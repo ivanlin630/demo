@@ -201,23 +201,24 @@ func _world_a() -> void:
 	_check("F2 徵收率 30 天恆 0.10（偏離 %d tick）；玩家設 30 ⇒ %.2f（%s）" % [ticks[3], pf.tribute_rate, str(r2)],
 		ticks[3] == 0 and absf(pf.tribute_rate - 0.30) < 0.0001)
 	_cell("F2")
-	# F1b：玩家設「防守」⇒ goals＝["defend"] 恆定 30 天
-	st.player_state["faction_goal_input"] = "defend"
+	# F1b：玩家設「徵收」⇒ goals＝["徵收"] 恆定 30 天，成員 faction_stakes 讀得到（spec player-faction-goal：詞換成引擎詞，原本只印不判那半改成真斷言）
+	st.player_state["faction_goal_input"] = "徵收"
 	var rg: Dictionary = cmd.execute_action(st, -1, "set_faction_goal")
 	# ★設下去到下一次每小時重建之間 goals 還是舊值（_rebuild_goals 每勢力每小時）⇒ 從第一次到位起算「恆定」，到位本身要在一小時內
 	var off: Array = [0, 0, -1]   # 到位後偏離 tick、到位後 tick 數、到位 tick
 	var tg0: int = st.world.current_tick
 	var sample_b := func() -> void:
 		if st.is_player_led(pf):
-			if off[2] == -1 and pf.goals == ["defend"]: off[2] = st.world.current_tick
+			if off[2] == -1 and pf.goals == ["徵收"]: off[2] = st.world.current_tick
 			if off[2] != -1:
 				off[1] += 1
-				if pf.goals != ["defend"]: off[0] += 1
+				if pf.goals != ["徵收"]: off[0] += 1
 	_run(st, DAYS * WorldState.TICKS_PER_DAY, sample_b)
 	var stakes: Array = DecisionContext.gather(st, m1).faction_stakes
-	print("    F1b 現況：成員 faction_stakes＝%s（★已知缺陷：玩家目標詞彙 expand/defend/trade_net 不在 stakes 集合，見 known_issues；不判）" % str(stakes))
-	_check("F1b 玩家設「防守」（%s）⇒ %d tick 後到位（≤ 一小時）、之後 goals＝[defend] 恆定（偏離 %d／%d tick）" % [str(rg), off[2] - tg0, off[0], off[1]],
-		off[2] != -1 and off[2] - tg0 <= WorldState.TICKS_PER_HOUR and off[1] >= DAYS * WorldState.TICKS_PER_DAY - WorldState.TICKS_PER_HOUR and off[0] == 0)
+	print("    F1b 成員 faction_stakes＝%s" % str(stakes))
+	_check("F1b 玩家設「徵收」（%s）⇒ %d tick 後到位（≤ 一小時）、之後 goals＝[徵收] 恆定（偏離 %d／%d tick）、成員 faction_stakes 讀到它" % [str(rg), off[2] - tg0, off[0], off[1]],
+		off[2] != -1 and off[2] - tg0 <= WorldState.TICKS_PER_HOUR and off[1] >= DAYS * WorldState.TICKS_PER_DAY - WorldState.TICKS_PER_HOUR and off[0] == 0
+		and stakes.has("徵收"))
 	_cell("F1b")
 
 # ── 世界 B：玩家隊是 NPC 勢力裡紮根的成員（F5c、F7）─────────────────────────────

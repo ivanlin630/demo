@@ -1079,7 +1079,20 @@ static func _bearing(from: Vector2i, to: Vector2i) -> String:
 #   ★逐項對過 PlayerCommandSystem 的 action 表（交件信貼核對表）；有玩家指令的不列：
 #     提拔＝promote_anon、偵查＝order_faction_member 的「偵查」、徵收率＝set_tribute_rate、目標＝set_faction_goal、建勢力＝establish_faction。
 #   ★有人補了其中一個動詞 ⇒ 從這裡拿掉；不拿掉的樣子＝面板說「還沒做」而動作列上明明有。
-const MISSING_LEADER_VERBS: Array = ["立國", "派信使傳消息", "分糧給成員", "往據點移民", "投資據點農業", "下遷村令", "以勢力名義遠程外交"]
+const MISSING_LEADER_VERBS: Array = ["派信使傳消息", "分糧給成員", "往據點移民", "投資據點農業", "下遷村令", "以勢力名義遠程外交"]
+
+# ★玩家指定的對象已失效 ⇒ 原因（只覆蓋【玩家這邊】的失效；某個成員不知道 X 在哪只有 Probe）；沒失效 ⇒ ""
+static func _goal_target_invalid(state: WorldState, f, pt: TeamData) -> String:
+	var x: int = int(f.player_goal_target)
+	if x == -1:
+		return ""
+	if not state.teams.has(x):
+		return "對方已不存在"
+	if (state.teams[x] as TeamData).faction_id != -1:
+		return "對方已加入勢力"
+	if BeliefSystem.belief_pos(state, pt.team_id, x) == Vector2i(-1, -1):
+		return "你不知道它在哪"
+	return ""
 
 static func map_faction_panel(state: WorldState) -> Dictionary:
 	var pid: int = state.player_id
@@ -1130,6 +1143,10 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 		"is_leader": is_leader,
 		"faction_goal": ", ".join(f.goals) if f.goals.size() > 0 else "",
 		"player_goal_override": f.player_goal_override,
+		"player_goal_target": f.player_goal_target,   # ★絕對 id（spec player-faction-goal §一）
+		"goal_target_invalid": _goal_target_invalid(state, f, pt),
+		"directive_candidates": FactionAISystem.directive_target_candidates(state, pt) if is_leader else [],
+		"establish_block": FactionAISystem.establish_block_reason(state, f, true) if is_leader else "",
 		"tribute_rate": f.tribute_rate,
 		"member_orders": member_orders,
 		"actions": actions,

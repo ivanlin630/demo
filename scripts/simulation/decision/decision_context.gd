@@ -1134,14 +1134,14 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			for g in DecisionOptions.options_in_set("stakes"):
 				if g in f.goals: c.faction_stakes.append(g)
 			if "攻擊" in c.faction_stakes:
-				var _at: int = _fa._nearest_independent(state, team)
+				var _at: int = FactionAISystem.faction_directive_target(state, team, f, "攻擊")   # ★唯一一支（玩家指定對象或最近獨立隊）
 				c.faction_attack_target = _at
 			if "徵收" in c.faction_stakes:
 				var _rt: int = _fa._richest_member(state, f)
 				if _rt == team.team_id: _rt = -1   # 不對自己徵收（_richest_member 未排自身）
 				c.faction_tribute_target = _rt
 			if "外交" in c.faction_stakes:
-				var _dt: int = _fa._nearest_independent(state, team)
+				var _dt: int = FactionAISystem.faction_directive_target(state, team, f, "外交")   # ★同上
 				c.faction_diplo_target = _dt
 	# diplomacy grounded look-before-leap：求和(threat_id)/外交(faction_diplo_target) target 在
 	# reject_cooldown 內 → flag（被拒不再纏；純讀自隊記憶，非 god-view）。

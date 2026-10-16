@@ -251,12 +251,13 @@ func _p1h_menus() -> void:
 	await _press(node, "f")
 	await _press(node, "a")
 	var v: Dictionary = _view(node)
-	_check("★勢力目標：開了數字輸入、選單印在面板上", bool(node._input_mode) and node._input_mode_type == "numeric" and String(v.get("panel", "")).contains("[1] 擴張"))
+	_check("★勢力目標：開了數字輸入、選單印在面板上", bool(node._input_mode) and node._input_mode_type == "numeric" and String(v.get("panel", "")).contains("[1] 攻擊"))
 	await _press(node, "x")
 	_check("P1h 勢力目標送字母 ⇒ 回句", node._input_reply != "")
 	await _press_all(node, ["2", "enter"])
 	print("   勢力目標 ⇒ player_goal_override=%s｜結果列「%s」" % [f.player_goal_override, node._feedback_line.text])
-	_check("P1h 勢力目標送數字 ⇒ 生效（防守）", f.player_goal_override == "defend")
+	# ★詞換成引擎詞（spec player-faction-goal-engine-vocabulary）：第 2 項＝徵收（不需對象）
+	_check("P1h 勢力目標送數字 ⇒ 生效（徵收）", f.player_goal_override == "徵收")
 	# 下令成員隊任務
 	if mate != null:
 		await _press(node, "1")
