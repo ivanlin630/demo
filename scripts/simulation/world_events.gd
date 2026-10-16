@@ -33,6 +33,8 @@ const MESSAGE_KINDS: Array = [
 # ②函式 chokepoint 型（不經訊息層）
 const FUNC_KINDS: Array = [
 	"combat_engaged",      # NpcCombatSystem.start_combat（被襲）
+	"goods_returned",      # ★OrderSystem.release_order_escrow（押貨退回落格待領；只對玩家隊發）
+	"goods_claimed",       # ★InteractionSystem._claim_pending_here（到場領回；只對玩家隊發）
 	"leader_death",        # EventSystem.on_leader_death
 	"team_extinct",        # FactionAISystem._on_team_extinct（目睹）
 	"teams_erased",        # WorldState.erase_teams（同批死亡）
@@ -109,7 +111,7 @@ const KIND_LABEL: Dictionary = {
 	"construction_abandoned": "工地", "plan_invalidated": "計畫", "rung_changed": "野心",
 	"member_left": "離隊", "member_died": "死亡", "came_of_age": "成年", "member_joined": "招募",
 	"forced_event_arrived": "找上門", "forced_event_resolved": "回應", "forced_event_timeout": "逾時",
-	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "captive_overguard": "看守不足", "captive_unfed": "俘虜放走", "aftermath_settled": "戰後", "advice": "顧問", "hostile_adjacent": "敵人逼近",
+	"famine_crossed": "饑荒", "labor_crisis": "勞力危機", "intel_arrived": "情報", "captive_overguard": "看守不足", "goods_returned": "退貨", "goods_claimed": "領回", "captive_unfed": "俘虜放走", "aftermath_settled": "戰後", "advice": "顧問", "hostile_adjacent": "敵人逼近",
 	"outpost_owner_changed": "據點易主", "resident_changed_faction": "居民改投",
 	"player_subteam": "子隊",
 }
@@ -397,6 +399,28 @@ static func subjugate_sentence(state: WorldState, info: Dictionary) -> String:
 		return "你臣服於 Team%d，加入勢力%d" % [w, f]
 	return "Team%d 臣服於 Team%d，加入勢力%d" % [l, w, f]
 
+# ★押貨退回／到場領回（spec 2026-10-15-my-orders-and-escrow-readonly §二）：資源名走 TextBank.res_name（names.tsv 唯一一張）
+#   ★原因字中性：解除附身再附身同一隊時，撤的可能包括玩家先前自己掛的單 ⇒ 不說「AI 的」
+const GOODS_WHY_WORD: Dictionary = {"expire": "到期", "cancel": "你撤了單", "possession": "附身時撤下隊上的單"}
+
+static func qty_text(q: float) -> String:
+	return "%d" % int(q) if absf(q - roundf(q)) < 0.001 else "%.1f" % q
+
+static func goods_returned_sentence(info: Dictionary) -> String:
+	var p: Vector2i = info.get("pos", Vector2i(-1, -1))
+	return "你的 %s ×%s 退回 (%d,%d) 待領（%s）" % [TextBank.res_name(String(info.get("res", ""))),
+		qty_text(float(info.get("qty", 0.0))), p.x, p.y, String(GOODS_WHY_WORD.get(String(info.get("why", "")), "原因不明"))]
+
+static func goods_claimed_sentence(info: Dictionary) -> String:
+	var p: Vector2i = info.get("pos", Vector2i(-1, -1))
+	var items: Dictionary = info.get("items", {})
+	var keys: Array = items.keys()
+	keys.sort()
+	var parts: Array = []
+	for k in keys:
+		parts.append("%s ×%s" % [TextBank.res_name(String(k)), qty_text(float(items[k]))])
+	return "在 (%d,%d) 領回 %s" % [p.x, p.y, "、".join(PackedStringArray(parts))]
+
 static func describe(state: WorldState, kind: String, subjects: Array, info: Dictionary = {}) -> String:
 	var who: String = _team_name(state, subjects[0] if not subjects.is_empty() else -1)
 	match kind:
@@ -448,6 +472,8 @@ static func describe(state: WorldState, kind: String, subjects: Array, info: Dic
 			return "你據點 (%d,%d) 的居民 %s 改投%s" % [rp.x, rp.y, _team_name(state, int(info.get("resident", -1))),
 				("勢力%d" % tf) if tf != -1 else "自立（離開勢力）"]
 		"intel_arrived":         return _intel_sentence(state, who, info)
+		"goods_returned":        return goods_returned_sentence(info)
+		"goods_claimed":         return goods_claimed_sentence(info)
 		"subjugate":             return subjugate_sentence(state, info) if info.has("loser") else "%s：%s" % [who, kind_label(kind)]
 		"combat_end":
 			if info.has("aftermath"):

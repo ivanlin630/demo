@@ -2004,7 +2004,41 @@ static func intel_lines(data: Dictionary, now: int, state: WorldState) -> Array:
 		lines.append("  " + str(fr))
 	lines.append("── 糧源 ──")
 	lines.append("  " + INTEL_NONE_NO_SOURCE)
+	# ★第五類：我的掛單與待領（spec 2026-10-15-my-orders-and-escrow-readonly §一）——掛單在前、待領在後，共用每類上限
+	lines.append("── 我的掛單與待領 ──")
+	var mo: Dictionary = data.get("my_orders", {}) as Dictionary
+	var mrows: Array = []
+	for o in mo.get("orders", []):
+		mrows.append(my_order_line(o, now))
+	for c in mo.get("claims", []):
+		mrows.append(my_claim_line(c))
+	if mrows.is_empty():
+		lines.append("  " + INTEL_NONE)
+	for i in range(mini(mrows.size(), cap)):
+		lines.append("  " + String(mrows[i]))
+	if mrows.size() > cap:
+		lines.append("  " + INTEL_MORE_FMT % (mrows.size() - cap))
 	return lines
+
+# 掛單一列（純函數）：「賣 糧食 ×12｜押在 (14,2)｜還有 3 天 4 小時到期」
+static func my_order_line(o: Dictionary, now: int) -> String:
+	var verb: String = "賣" if String(o.get("kind", "")) == "sell" else "買"
+	var where: String = "沒上板（只靠碰面傳出去）"
+	if o.get("pos") is Vector2i:
+		var p: Vector2i = o["pos"]
+		where = ("押在 (%d,%d)" % [p.x, p.y]) if String(o.get("where", "")) == "escrow" else ("掛在 (%d,%d) 自家市集" % [p.x, p.y])
+	var rem: int = int(o.get("expire_tick", 0)) - now
+	var when: String = "已到期"
+	if rem > 0:
+		when = "還有 %d 天 %d 小時到期" % [rem / WorldState.TICKS_PER_DAY, (rem % WorldState.TICKS_PER_DAY) / WorldState.TICKS_PER_HOUR]
+	return "%s %s ×%d｜%s｜%s" % [verb, TextBank.res_name(String(o.get("res", ""))), int(o.get("qty", 0)), where, when]
+
+# 待領一列（純函數）：「待領 糧食 ×12｜在 (14,2)｜第 3 天 08:00 起」；款項 ＝「待領 錢 ×N」
+static func my_claim_line(c: Dictionary) -> String:
+	var p: Vector2i = c.get("pos", Vector2i(-1, -1))
+	var res: String = "coin" if String(c.get("kind", "")) == "coin" else String(c.get("res", ""))
+	return "待領 %s ×%s｜在 (%d,%d)｜第 %s 起" % [TextBank.res_name(res), WorldEvents.qty_text(float(c.get("amt", 0.0))),
+		p.x, p.y, PlayerApiMapper.tick_clock(int(c.get("since_tick", 0)))]
 
 # 打聽回答的逐筆列（純函數，床直接呼）：三態各自一句；★「早就知道」只對 refreshed 那幾筆說
 const INQUIRY_STATE_WORD: Dictionary = {

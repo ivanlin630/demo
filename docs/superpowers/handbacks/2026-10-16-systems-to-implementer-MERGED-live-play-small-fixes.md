@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 真玩小修七項
 topic: MERGED 6281ce878（feat/live-play-small-fixes d08f90641）；合併後檢查綠；verb-catalog「併入整隊」改已建；關係閘照現行路不加＝收
 ---

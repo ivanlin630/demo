@@ -1,0 +1,104 @@
+tree fa6b732179a9619e77a7d7f57ac8ee02c63b966d
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=fa6b73217 clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=15.3GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== my_orders_panel：我的掛單與押貨 ===
+
+── P1 附身撤單  待領列＋事件 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Order] Team940 sell food ×12 (oid=1)
+   佈置：Team940 在 Team941 的市集 (0,8) 寄賣糧 12，押貨 { "res": "food", "qty": 12, "owner_team": 940, "since_tick": 0 }
+  PASS: P1 佈置：真押貨 12
+[Order] Team940 被附身：撤掉 AI 殘單 1 張
+   情報頁第五類 ["待領 糧食 ×12｜在 (0,8)｜第 1 天 00:00 起"]｜事件 ["你的 糧食 ×12 退回 (0,8) 待領（附身時撤下隊上的單）"]
+  PASS: P1 情報頁有「待領 糧食 ×12｜在 (0,8)」、不列同格別隊的待領
+  PASS: P1 事件流一則 goods_returned（why=possession）
+
+── P2／P3 掛單列、E1 到期、E2 撤單 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Order] Team15 sell food ×12 (oid=1)
+   P2 賣 糧食 ×12｜押在 (0,8)｜還有 5 天 0 小時到期｜剩 7200 tick  5 天
+   P2 撥鐘一天  賣 糧食 ×12｜押在 (0,8)｜還有 4 天 0 小時到期
+  PASS: P2 掛單列「押在 (q,r)｜還有 5 天…到期」；撥鐘一天  4 天
+[Order] Team15 sell material ×7 (oid=2)
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Order] Team15 sell food ×4 (oid=1)
+   P3 ["賣 糧食 ×12｜押在 (0,8)｜還有 4 天 0 小時到期", "賣 木料 ×7｜掛在 (0,9) 自家市集｜還有 5 天 0 小時到期"]｜["賣 糧食 ×4｜沒上板（只靠碰面傳出去）｜還有 5 天 0 小時到期"]
+  PASS: P3 三種位置字：押在、掛在 … 自家市集、沒上板（只靠碰面傳出去）
+   E1 事件 ["你的 糧食 ×12 退回 (0,8) 待領（到期）"]｜第五類 ["賣 木料 ×7｜掛在 (0,9) 自家市集｜還有 1 天 0 小時到期", "待領 糧食 ×12｜在 (0,8)｜第 6 天 00:00 起"]
+  PASS: E1 到期  goods_returned(why=expire)、待領列出現、糧那張掛單列消失
+[Order] Team15 sell material ×3 (oid=3)
+   E2 撤 #3  true｜事件 ["你的 木料 ×3 退回 (0,8) 待領（你撤了單）"]
+  PASS: E2 API 撤單  goods_returned(why=cancel)
+
+── E3 到場領回 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Claim] Team15 於 (0, 8) 領回 coin=3.00 goods=12.0
+   E3 前 ["待領 糧食 ×12｜在 (0,8)｜第 1 天 00:00 起", "待領 錢 ×3｜在 (0,8)｜第 1 天 00:00 起"]｜事件 ["在 (0,8) 領回 錢 ×3、糧食 ×12"]｜後 ["尚無"]｜糧 +12.0 錢 +3.0
+  PASS: E3 goods_claimed 恰一則、句含「糧食 ×12」與「錢 ×3」；待領列消失、糧＋12、錢＋3
+
+── E4／E5 NPC 單到期 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Order] Team940 sell food ×12 (oid=1)
+   獨立：退貨落格 true｜pending_rethink 含 Team940=false｜玩家匯流排 goods_returned 0 則
+  PASS: E4 NPC 單到期（退貨落格 true） 同 tick pending_rethink 不含該 NPC 隊
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+[Order] Team940 sell food ×12 (oid=1)
+   同勢力：退貨落格 true｜pending_rethink 含 Team940=false｜玩家匯流排 goods_returned 0 則
+  PASS: E5 同勢力 NPC 單到期  匯流排零則 goods_returned
+
+── CAP 每類上限、SCAN 掃描時間 ──
+[MoneyGenesis] 初始 coin 總量 = 14112.0
+   = Σpop(147) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：16 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 14112.0 vs 推導 14112.0（差 0.0000）
+[GameSetup] 完成：16 teams, 2 factions, 43 persons
+   CAP ["待領 糧食 ×2｜在 (0,8)｜第 1 天 00:00 起", "待領 木料 ×2｜在 (0,9)｜第 1 天 00:01 起", "待領 工具 ×2｜在 (0,10)｜第 1 天 00:02 起", "待領 藥品 ×2｜在 (0,11)｜第 1 天 00:03 起", "待領 糧食 ×2｜在 (0,12)｜第 1 天 00:04 起", "另有 3 筆"]
+  PASS: CAP 8 筆不同（格、種類、資源）的待領  5 列＋「另有 3 筆」
+   SCAN 地圖 217 格｜query_memory_panel 一次 172～279 μs｜其中 my_orders（全圖掃待領）平均 171 μs（只記錄）
+=== my_orders_panel DONE === 到場 10／10 errors: 0
+
+[godot.ps1] child exit=0
+rc=0
