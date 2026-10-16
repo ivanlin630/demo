@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家勢力目標改用引擎詞（main 25e99a773）
 topic: R² ＝ **ISSUES（三處必修、其餘小）**｜①§四 會讓 directive_stamp_test ③ 變紅（該床用 NPC 盟主 + 直寫 override），spec 沒列 ②同一個詞改對象（攻擊 X→Y）不蓋命令戳記，成員不會被叫醒 ③立國閘抽函式漏 leader_p==null，且驗收只咬一條理由（五條中的一條）｜五問：1 可接受 2 逐字成立但有兩個條件 3 寫入端只一處（讀端另有兩處顯示沒列） 4 分辨得出，床有四個前提 5 推論成立，加進場計數
 ---
