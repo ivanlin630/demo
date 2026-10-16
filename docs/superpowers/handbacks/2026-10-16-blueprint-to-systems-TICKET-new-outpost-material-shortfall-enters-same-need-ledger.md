@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針一「建點」（併入；不另開票）
 topic: 用戶裁 2026-10-16「好」：想蓋的新點缺多少料＝材料需求，與既有據點設施升級走同一本需求帳；買單與保留量跟著走；沒據點的隊也算
 ---
