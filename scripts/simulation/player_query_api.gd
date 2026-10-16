@@ -52,7 +52,8 @@ func get_recruit_menu(state: WorldState, target_id: int) -> Dictionary:
 #     `known_targets()`／`claims()`／`best_claim()`，不自己解析那個結構：解析兩份會漂）。
 #   ★★★payload 是 belief 的純函數（I8）：只放【絕對 tick】；「N 分鐘前」與「太久，視同不知」是相對現在的 ⇒ UI 組句時算
 #     （過期謂詞 BeliefSystem.belief_stale，游標處 _remembered_teams_at 經 belief_pos 走同一支）
-#   ★零真值：每一欄都來自 belief／附身隊自己的帳（known_reputations、known_outposts），不讀別隊的 tile_pos 等真值
+#   ★零真值：每一欄都來自 belief／附身隊自己的帳（known_reputations、known_outposts、my_orders），不讀別隊的 tile_pos 等真值
+#     ★my_orders 是自知帳、讀法是全圖掃 tile.pending_claims（只取屬主＝附身隊的條目），標 gate-ok（spec my-orders-and-escrow §一）
 #   回 {memory: 隊伍列, outposts: 據點列, faction_relations: [], food_sources: null}
 #     隊伍列：{target_id, claim_count, latest_tick, source, source_id, is_suspicious,
 #              pos（無位置 ⇒ 不帶此鍵）, pos_tick（value.last_tick＝位置年齡）, firsthand, relation（未知 ⇒ 不帶此鍵）,
@@ -121,7 +122,45 @@ func query_memory_panel(state: WorldState) -> Dictionary:
 	# ★勢力關係：附身隊 belief 沒有勢力層的那一種（只有隊層 known_reputations）⇒ 空 ⇒ UI 印「尚無」
 	# ★糧源：belief 沒有這一種（深層批「糧源情報 kind」）⇒ null ⇒ UI 印「尚無（還沒有這種情報）」，不偽造
 	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"memory": rows, "outposts": ops,
-		"faction_relations": [], "food_sources": null})
+		"faction_relations": [], "food_sources": null, "my_orders": my_orders(state, pt)})
+
+# ★我的掛單與待領（spec 2026-10-15-my-orders-and-escrow-readonly §一）：附身隊【自己的帳】（自己掛的單、自己的貨落在哪是規則決定的）
+#   ＝自知合法，不是 god-view。★payload 只放絕對 tick（expire_tick、since_tick）；「還有 N 天」由 UI 用 now 組句（I8）。
+#   orders：{order_id, kind, res, qty, expire_tick, where ∈ escrow／board／none, pos（where≠none 才帶）}
+#   claims：{kind, res, amt, pos, since_tick}（since_tick＝該列最早一筆：add_pending_claim 同 owner＋kind＋res 合併、保留最早）
+#   ★待領要掃全圖 tile（不建索引：add_pending_claim 是 static 拿不到 state、床直接 append 會繞過索引）；只在情報頁 render 時算
+static func my_orders(state: WorldState, pt: TeamData) -> Dictionary:
+	var orders: Array = []
+	var claims: Array = []
+	if pt == null:
+		return {"orders": orders, "claims": claims}
+	var mp: Vector2i = OrderSystem.new().market_pos(state, pt)
+	var mtile: HexTileData = state.world.tiles.get(mp.x * 1000 + mp.y)
+	for o in pt.active_orders:
+		var row: Dictionary = {"order_id": int(o.get("order_id", -1)), "kind": String(o.get("kind", "")),
+			"res": String(o.get("res", "")), "qty": int(o.get("qty_remaining", 0)), "expire_tick": int(o.get("expire_tick", 0)),
+			"where": "none"}
+		if bool(o.get("escrowed", false)):
+			var et: HexTileData = state.world.tiles.get(int(o.get("escrow_tile", -1)))
+			if et != null:
+				row["where"] = "escrow"
+				row["pos"] = et.tile_pos
+		if String(row["where"]) == "none" and mtile != null and mtile.outpost_owner == pt.team_id:
+			for e in mtile.market_orders:
+				if int(e.get("order_id", -1)) == int(row["order_id"]) and int(e.get("origin_team", -1)) == pt.team_id:
+					row["where"] = "board"
+					row["pos"] = mp
+					break
+		orders.append(row)
+	for tid in state.world.tiles:   # gate-ok: 自知帳（屬主＝附身隊自己的待領）；全圖掃描只在情報頁 render 時發生（spec §一 成本）
+		var tile: HexTileData = state.world.tiles[tid]
+		for c in tile.pending_claims:
+			if int(c.get("owner_team", -1)) != pt.team_id:
+				continue
+			claims.append({"kind": String(c.get("kind", "")), "res": String(c.get("res", "")), "amt": float(c.get("amt", 0.0)),
+				"pos": tile.tile_pos, "since_tick": int(c.get("since_tick", 0))})
+	claims.sort_custom(func(a, b): return int(a["since_tick"]) < int(b["since_tick"]))
+	return {"orders": orders, "claims": claims}
 
 # ★親見＝belief_system 的 firsthand 定義（source 是親見且就是自己）；別隊轉述的「親見」對我仍是聽說
 #   游標處 _remembered_teams_at 與情報頁共用這一支（spec 2026-10-13-intel-panel-HOW：重用同一個謂詞，不自寫）
