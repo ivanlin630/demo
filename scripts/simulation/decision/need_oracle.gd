@@ -250,6 +250,8 @@ static func _new_outpost_need(state: WorldState, team: TeamData, res: String) ->
 			_new_outpost_tap_day[key] = day
 			Probe.bump("need.new_outpost." + String(c["kind"]))
 			Probe.bump("need.new_outpost.%s.%s" % [String(c["kind"]), "sub" if team.parent_team_id != -1 else "main"])
+			if String(c["kind"]) == "gather" and (c["tile"] as HexTileData).construction_team_id != team.team_id:
+				Probe.bump("need.new_outpost.gather.not_ct")   # ★N3b 雙算殘差：同工地另一支也滿足謂詞
 	return q
 
 # ★結構輪 §三之三：建造需求＝新點那一支＋設施那一支；上限分配＝已承諾的新點先占，設施吃剩下的額度。

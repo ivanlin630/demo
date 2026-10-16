@@ -24,6 +24,11 @@ extends SceneTree
 #   S3  子隊段（_evaluate_subteam／_tick_player_subteam）不再直呼 _convert_to_resident、establish_crude_camp
 #   S4  S1③ 的 NPC 子隊下一 tick 進 merge_queue
 #   S5  NPC SETTLE 子隊途中（move_target≠-1）站在外勢力格與自家據點格 N tick ⇒ 仍 SETTLE、不 merge、不轉居民
+# 新點缺料進同一本需求帳（N，§三之三）：
+#   N1 在路上（主隊走回營地／子隊建造在途）⇒ 新點那一支＝整筆成本、料單 for=new_outpost｜N2 沒承諾 0｜N2b 三種非①的 TASK_BUILD 0
+#   N3 採段 ⇒ gather_left（子隊 tile_pos／母隊 corvee_site，①②互斥）｜N3b 雙算殘差印數｜N4／N4b 施工隊（含接手工人）帶的料抵進工地
+#   N5 (a) reserve＝need_keep×只看糧急 (b) ②去交易不賣料｜N6 買料效用｜N6b 迫切隨進度降｜N6c 新點先占上限｜N8 承諾不被換掉
+#   N7＝既有床 material_hold_test 照綠（不在本床）
 # 跑法：.\tools\godot.ps1 --headless --script scripts/debug/build_verb_one_body_bed.gd
 #   BED_ONLY=_v1,_s1 只跑點名的格（負對照用）
 
@@ -59,7 +64,8 @@ func _initialize() -> void:
 		_only = Array(env.split(","))
 	print("=== build_verb_one_body：建點一支身體＋子隊到場一支身體 ===")
 	var cells: Array = ["_v1", "_v2", "_v3", "_v4", "_v5", "_v5b", "_v6", "_v6b", "_v7", "_v8b", "_v9", "_g9", "_v10", "_v11", "_v11b", "_p1",
-		"_s1", "_s2", "_s3", "_s4", "_s5"]
+		"_s1", "_s2", "_s3", "_s4", "_s5",
+		"_n1", "_n2", "_n2b", "_n3", "_n3b", "_n4", "_n4b", "_n5", "_n6", "_n6b", "_n6c", "_n8"]
 	for c in cells:
 		if _want(c):
 			call(c)
@@ -792,3 +798,343 @@ func _s5() -> void:
 	print("    20 tick 交替站在自家／外勢力據點、仍在路上 ⇒ 偏離 %d、轉居民 %d" % [bad, conv])
 	_cell("_s5")
 	_check("S5 途中仍 SETTLE、不 merge、不轉居民", bad == 0 and conv == 0 and st.teams.has(sub.team_id))
+
+# ══ §三之三 新點缺料進同一本需求帳（N）══════════════════════════════════════
+const CAMP_C: Vector2i = Vector2i(9, 6)
+
+# 沒據點的主隊 N 走回自己的營地（_commit_settle_site 走回那一支的狀態）、身上料 mat
+func _walker(mat: float) -> Array:
+	var st: WorldState = _mk(false, Vector2i(6, 6))
+	var n: TeamData = st.teams[N]
+	var camp := _site(st, CAMP_C, "forest", 150.0, 0.9, N)
+	n.current_task = TeamData.TASK_BUILD
+	n.move_target = CAMP_C
+	n.task_extra_data = {"settle_site": CAMP_C}
+	ResourceBank.set_amt(n, "material", mat, "bed_seed")
+	return [st, n, camp]
+
+func _lvn(st: WorldState, t: TeamData) -> Dictionary:
+	return TradeValuation.leader_vals(st, t)
+
+func _cost(type: String) -> float:
+	return float((OutpostSystem.OUTPOST_COST[type][0] as Dictionary).get("material", 0))
+
+func _n1() -> void:
+	print("\n── N1 在路上的承諾進需求帳 ──")
+	var w: Array = _walker(0.0)
+	var st: WorldState = w[0]; var n: TeamData = w[1]
+	var walk0: int = int(Probe.counts.get("need.new_outpost.walk", 0))
+	var ctype: String = FactionAISystem.settle_camp_type(st, n)
+	var nk: float = NeedOracle.need_keep(st, n, "material", _lvn(st, n))
+	var nn: float = NeedOracle._new_outpost_need(st, n, "material")
+	var fac: float = NeedOracle._construction_facility_need(st, n, "material", _lvn(st, n))
+	var rsv: float = TradeValuation.reserve(n, "material", _lvn(st, n), st)
+	var sb0: int = int(Probe.counts.get("g1.shortage_buy.new_outpost", 0))
+	OrderSystem.new().tick_team_orders(st, n)
+	var od: Dictionary = {}
+	for o in n.active_orders:
+		if String(o["kind"]) == "buy" and String(o["res"]) == "material":
+			od = o
+	print("    主隊走回營地｜型別 %s 成本 %.0f｜新點那一支 %.1f 設施那一支 %.1f｜need_keep %.1f｜reserve %.1f｜買單 qty=%s for=%s｜walk +%d" % [
+		ctype, _cost(ctype), nn, fac, nk, rsv, str(od.get("qty_remaining", "—")), str(od.get("for", "—")),
+		int(Probe.counts.get("need.new_outpost.walk", 0)) - walk0])
+	_cell("_n1")
+	_check("N1 主隊在路上 ⇒ 新點那一支＝L1 成本、need_keep ≥ 成本", is_equal_approx(nn, _cost(ctype)) and nk >= _cost(ctype))
+	_check("N1 料單 for=new_outpost、量＝reserve−持有（★reserve＝need_keep×液化係數）", String(od.get("for", "")) == "new_outpost"
+		and int(od.get("qty_remaining", -1)) == int(rsv) and int(Probe.counts.get("g1.shortage_buy.new_outpost", 0)) == sb0 + 1)
+	_check("N1 need.new_outpost.walk 有數", int(Probe.counts.get("need.new_outpost.walk", 0)) > walk0)
+	# 另一列：派出的子隊在路上（任務＝建造 TASK_CONSTRUCT）
+	var st2: WorldState = _mk(false, Vector2i(6, 6))
+	var n2: TeamData = st2.teams[N]
+	var tgt := Vector2i(8, 6)
+	_site(st2, tgt, "forest", 150.0, 0.9)
+	var ok: bool = FactionAISystem.shared()._dispatch_builder(st2, n2, tgt, "civilian", 1)
+	var sub: TeamData = null
+	for cid in n2.subteam_ids:
+		var c: TeamData = st2.teams.get(cid)
+		if c != null and c.current_task == TeamData.TASK_CONSTRUCT:
+			sub = c
+	var sn: float = NeedOracle._new_outpost_need(st2, sub, "material") if sub != null else -1.0
+	print("    子隊在路上｜派出=%s｜task=%s move_target=%s 帶料 %.1f｜新點那一支 %.1f" % [str(ok), sub.current_task if sub else "—",
+		str(sub.move_target) if sub else "—", _mat(sub) if sub else -1.0, sn])
+	_check("N1 子隊在路上 ⇒ 新點那一支＝整筆成本（不扣持有）", sub != null and is_equal_approx(sn, _cost("civilian")))
+
+func _n2() -> void:
+	print("\n── N2 沒承諾就不算 ──")
+	var ok: bool = true
+	for task in [TeamData.TASK_IDLE, TeamData.TASK_FORAGE]:
+		var w: Array = _walker(0.0)
+		var st: WorldState = w[0]; var n: TeamData = w[1]
+		n.current_task = task
+		var nn: float = NeedOracle._new_outpost_need(st, n, "material")
+		var cn: float = NeedOracle._construction_need(st, n, "material", _lvn(st, n))
+		var fac: float = NeedOracle._construction_facility_need(st, n, "material", _lvn(st, n))
+		print("    task=%s｜新點 %.1f｜_construction_need %.1f == 設施那一支 %.1f" % [task, nn, cn, fac])
+		ok = ok and nn == 0.0 and cn == fac
+	_cell("_n2")
+	_check("N2 任務不是 TASK_BUILD ⇒ 新點 0、建造需求與修前同式（只剩設施那一支）", ok)
+
+func _n2b() -> void:
+	print("\n── N2b 三種不是①的 TASK_BUILD ──")
+	var vals: Array = []
+	# ①「建設」選項：目標＝腳下
+	var w: Array = _walker(0.0)
+	var st: WorldState = w[0]; var n: TeamData = w[1]
+	_put(st, n, CAMP_C)
+	n.move_target = CAMP_C
+	vals.append(["目標＝腳下", NeedOracle._new_outpost_need(st, n, "material")])
+	# ②復工工人：目標格有別隊的工地
+	w = _walker(0.0); st = w[0]; n = w[1]
+	(w[2] as HexTileData).construction_team_id = F
+	vals.append(["目標格有別隊工地", NeedOracle._new_outpost_need(st, n, "material")])
+	# ③升級設施：目標格 outpost_level > 0
+	w = _walker(0.0); st = w[0]; n = w[1]
+	(w[2] as HexTileData).outpost_level = 1
+	vals.append(["目標格已是據點", NeedOracle._new_outpost_need(st, n, "material")])
+	var ok: bool = true
+	for v in vals:
+		print("    %s ⇒ 新點 %.1f" % [v[0], v[1]])
+		ok = ok and float(v[1]) == 0.0
+	_cell("_n2b")
+	_check("N2b 三種都是 0", ok)
+
+# 森林工地（採段中，gather_left gl、site_stock need−gl），工地登記 ct
+func _gather_site(st: WorldState, pos: Vector2i, ct: int, gl: float, type: String = "civilian") -> HexTileData:
+	var tile := _site(st, pos, "forest", 150.0, 0.9)
+	var need: float = _cost(type)
+	tile.construction_team_id = ct
+	tile.construction_ticks_left = OutpostSystem.build_person_hours(type, 1)
+	tile.construction_target = {"action": "build", "type": type, "level": 1, "owner": ct, "need": need, "carried": 0.0,
+		"gather_left": {"material": gl}, "site_stock": {"material": maxf(need - gl, 0.0)}, "start_pop": 6}
+	tile.construction_started_tick = st.world.current_tick
+	tile.construction_last_progress_tick = st.world.current_tick
+	return tile
+
+func _n3() -> void:
+	print("\n── N3 採段的需求＝剩下的缺口 ──")
+	var g0: int = int(Probe.counts.get("need.new_outpost.gather", 0))
+	# 子隊：站在工地上（讀 tile_pos）
+	var st: WorldState = _mk(false, Vector2i(6, 6))
+	var n: TeamData = st.teams[N]
+	var sub: TeamData = _npc_sub(st, n, TeamData.TASK_BUILD)
+	var site := Vector2i(8, 6)
+	_gather_site(st, site, sub.team_id, 30.0)
+	_put(st, sub, site)
+	sub.current_task = TeamData.TASK_BUILD
+	var a: float = NeedOracle._new_outpost_need(st, sub, "material")
+	# 母隊：離格（讀 corvee_site），同時 move_target 指向另一座自家營地（①若不互斥會再加 50）
+	var w: Array = _walker(0.0)
+	var st2: WorldState = w[0]; var n2: TeamData = w[1]
+	var site2 := Vector2i(6, 9)
+	_gather_site(st2, site2, N, 30.0)
+	n2.corvee_site = site2
+	var b: float = NeedOracle._new_outpost_need(st2, n2, "material")
+	print("    子隊在格 ⇒ %.1f｜母隊離格（corvee_site）＋move_target 指向自家營地 ⇒ %.1f｜gather +%d" % [a, b,
+		int(Probe.counts.get("need.new_outpost.gather", 0)) - g0])
+	_cell("_n3")
+	_check("N3 子隊讀 tile_pos ⇒ 30", is_equal_approx(a, 30.0))
+	_check("N3 母隊讀 corvee_site ⇒ 30、不再加①的整筆", is_equal_approx(b, 30.0))
+	_check("N3 need.new_outpost.gather 有數", int(Probe.counts.get("need.new_outpost.gather", 0)) > g0)
+
+func _n3b() -> void:
+	print("\n── N3b 雙算殘差可見（不斷言值）──")
+	var w: Array = _walker(0.0)
+	var st: WorldState = w[0]; var n: TeamData = w[1]
+	var site := Vector2i(6, 9)
+	_gather_site(st, site, N, 30.0)
+	n.corvee_site = site
+	var f: TeamData = st.teams[F]
+	_add_named(st, f, 2)
+	var wk: TeamData = _npc_sub(st, f, TeamData.TASK_BUILD, 3)
+	_put(st, wk, site)
+	wk.current_task = TeamData.TASK_BUILD
+	var nc0: int = int(Probe.counts.get("need.new_outpost.gather.not_ct", 0))
+	var cnt: int = 0
+	for t in [n, wk]:
+		if NeedOracle._new_outpost_need(st, t, "material") > 0.0:
+			cnt += 1
+	print("    同一工地滿足施工隊謂詞的隊數 %d｜need.new_outpost.gather.not_ct +%d" % [cnt, int(Probe.counts.get("need.new_outpost.gather.not_ct", 0)) - nc0])
+	_cell("_n3b")
+	_check("N3b 計數被印出（>0）", cnt > 0)
+
+func _n4() -> void:
+	print("\n── N4 採段吃帶來的料 ──")
+	var w: Array = _forest_site(0.0, 0.0)   # 池 0 ⇒ 本 tick 採不到，變化全是抵料
+	var st: WorldState = w[0]; var tile: HexTileData = w[1]; var pt: TeamData = w[2]
+	ResourceBank.set_amt(pt, "material", 20.0, "bed_seed")
+	var g0: float = _gl(tile); var s0: float = _ss(tile); var m0: float = _mat(pt)
+	var os := OutpostSystem.new()
+	os._tick_construction(st, tile)
+	var dg: float = g0 - _gl(tile); var ds: float = _ss(tile) - s0; var dm: float = m0 - _mat(pt)
+	var inv: Array = InvariantAudit.check(st)
+	print("    帶 20 ⇒ gather_left %.1f→%.1f｜site_stock +%.1f｜隊上 −%.1f｜InvariantAudit 違反 %d（★它沒有材料守恆項，守恆用三量相等驗）" % [g0, _gl(tile), ds, dm, inv.size()])
+	_cell("_n4")
+	_check("N4 gather_left −20、site_stock +20、隊上 −20", is_equal_approx(dg, 20.0) and is_equal_approx(ds, 20.0) and is_equal_approx(dm, 20.0) and inv.is_empty())
+	ResourceBank.set_amt(pt, "material", 100.0, "bed_seed")
+	var k0: int = tile.construction_ticks_left
+	os._tick_construction(st, tile)
+	print("    帶 100 ≥ 剩 %.1f ⇒ gather_left=%.1f｜ticks_left %d→%d｜隊上剩 %.1f" % [g0 - 20.0, _gl(tile), k0, tile.construction_ticks_left, _mat(pt)])
+	_check("N4 帶的料 ≥ gather_left ⇒ 當 tick 轉築段", _gl(tile) == 0.0 and tile.construction_ticks_left < k0 and is_equal_approx(_mat(pt), 100.0 - (g0 - 20.0)))
+
+func _n4b() -> void:
+	print("\n── N4b 接手的工人也吃料 ──")
+	var st: WorldState = _mk(false, Vector2i(6, 6))
+	var n: TeamData = st.teams[N]
+	var site := Vector2i(8, 6)
+	var tile := _gather_site(st, site, N, 40.0)
+	tile.resources["material"] = 0.0
+	n.corvee_site = site   # 原施工隊離格（在 (6,6)）、身上 0 料
+	ResourceBank.set_amt(n, "material", 0.0, "bed_seed")
+	var f: TeamData = st.teams[F]
+	_add_named(st, f, 2)
+	var wk: TeamData = _npc_sub(st, f, TeamData.TASK_BUILD, 3)
+	_put(st, wk, site)
+	wk.current_task = TeamData.TASK_BUILD
+	ResourceBank.set_amt(wk, "material", 20.0, "bed_seed")
+	var g0: float = _gl(tile); var s0: float = _ss(tile)
+	OutpostSystem.new()._tick_construction(st, tile)
+	print("    工人（非原施工隊）帶 20 ⇒ gather_left %.1f→%.1f｜site_stock +%.1f｜工人剩 %.1f｜原施工隊剩 %.1f" % [g0, _gl(tile), _ss(tile) - s0, _mat(wk), _mat(n)])
+	_cell("_n4b")
+	_check("N4b 接手工人帶的料抵進工地、工人 −20", is_equal_approx(g0 - _gl(tile), 20.0) and is_equal_approx(_ss(tile) - s0, 20.0) and is_equal_approx(_mat(wk), 0.0)
+		and InvariantAudit.check(st).is_empty())
+
+# coin 急（有 payroll、coin 0）而糧不急
+func _coin_urgent(st: WorldState, t: TeamData) -> void:
+	ResourceBank.set_amt(t, "coin", 0.0, "bed_seed")
+
+func _n5() -> void:
+	print("\n── N5 守料 ──")
+	# (a) 斷言值
+	var w: Array = _walker(0.0)
+	var st: WorldState = w[0]; var n: TeamData = w[1]
+	_coin_urgent(st, n)
+	var lv: Dictionary = _lvn(st, n)
+	var nk: float = NeedOracle.need_keep(st, n, "material", lv)
+	var r: float = TradeValuation.reserve(n, "material", lv, st)
+	var ffo: float = TradeValuation._reserve_factor_food_only(n, lv, st)
+	var fall: float = TradeValuation._reserve_factor(n, lv, st)
+	var w2: Array = _walker(0.0)
+	var st2: WorldState = w2[0]; var n2: TeamData = w2[1]
+	n2.current_task = TeamData.TASK_IDLE
+	_coin_urgent(st2, n2)
+	var r2: float = TradeValuation.reserve(n2, "material", _lvn(st2, n2), st2)
+	print("    (a) 有承諾：reserve %.2f｜need_keep %.2f × 只看糧急 %.3f ＝ %.2f（全急迫係數 %.3f）｜沒承諾 reserve %.2f" % [r, nk, ffo, nk * ffo, fall, r2])
+	_cell("_n5")
+	_check("N5(a) 有承諾 ⇒ reserve＝need_keep×只看糧急係數；沒承諾不同", is_equal_approx(r, nk * ffo) and not is_equal_approx(r, r2))
+	# (b) 斷言行為：②（corvee_site 工地 gather_left>0）、隊暫時去交易、coin 急而糧不急 ⇒ 賣盤不發 material
+	#   ★持料取 25（< reserve）：規格寫 60，但 reserve＝need_keep×0.6（RESERVE_BASE，中性人格）＝30 ⇒ 60 會賣出 30（見交件信）
+	var sold: Array = []
+	for committed in [true, false]:
+		var w3: Array = _walker(0.0)
+		var st3: WorldState = w3[0]; var n3: TeamData = w3[1]
+		var site := Vector2i(6, 9)
+		_gather_site(st3, site, N if committed else -1, 50.0)
+		n3.corvee_site = site if committed else Vector2i(-1, -1)
+		n3.current_task = TeamData.TASK_TRADE
+		n3.move_target = Vector2i(-1, -1)
+		_coin_urgent(st3, n3)
+		ResourceBank.set_amt(n3, "material", 25.0, "bed_seed")
+		OrderSystem.new().tick_team_orders(st3, n3)
+		var s: int = 0
+		for o in n3.active_orders:
+			if String(o["kind"]) == "sell" and String(o["res"]) == "material":
+				s += int(o["qty_remaining"])
+		print("    (b) %s｜持料 25｜reserve %.2f｜賣盤 material %d" % ["②工地 gather_left 50" if committed else "沒工地（對照）", TradeValuation.reserve(n3, "material", _lvn(st3, n3), st3), s])
+		sold.append(s)
+	_check("N5(b) ②狀態去交易 ⇒ 賣盤不發 material；沒工地的對照會賣", int(sold[0]) == 0 and int(sold[1]) > 0)
+
+func _drive(st: WorldState, t: TeamData) -> float:
+	var c := DecisionContext.new()
+	var need: float = NeedOracle.need_keep(st, t, "material", _lvn(st, t))
+	c.material_need_total = need
+	c.material_shortfall = maxf(need - ResourceSystem.effective_holding(st, t, "material"), 0.0)
+	c.material_build_urgency = NeedOracle.material_build_urgency(st, t)
+	c.has_material_market = true
+	c.has_specie = true
+	return DecisionTerms.eval("buymaterial_drive", c, "買料")
+
+func _n6() -> void:
+	print("\n── N6 買料效用 ──")
+	var w: Array = _walker(0.0)
+	var st: WorldState = w[0]; var n: TeamData = w[1]
+	var d0: float = _drive(st, n)
+	var u0: float = NeedOracle.material_build_urgency(st, n)
+	var w2: Array = _walker(200.0)
+	var d1: float = _drive(w2[0], w2[1])
+	var w3: Array = _walker(0.0)
+	_site(w3[0], CAMP_C, "plains", 12.0, 1.1, N)
+	var up: float = NeedOracle.new_outpost_urgency(w3[0], w3[1])
+	print("    在路上料 0：urgency %.3f drive %.3f｜帶 200：drive %.3f｜平原營地 urgency %.3f" % [u0, d0, d1, up])
+	_cell("_n6")
+	_check("N6 在路上料 0 ⇒ drive > 0", d0 > 0.0)
+	_check("N6 帶料 ≥ 成本 ⇒ drive 0", d1 == 0.0)
+	_check("N6 平原目標（採不完）⇒ urgency 1", up == 1.0)
+
+func _n6b() -> void:
+	print("\n── N6b 採段中迫切隨進度降 ──")
+	var u: Array = []
+	for gl in [70.0, 5.0]:
+		var st: WorldState = _mk(false, Vector2i(6, 6))
+		var n: TeamData = st.teams[N]
+		var sub: TeamData = _npc_sub(st, n, TeamData.TASK_BUILD)
+		var site := Vector2i(8, 6)
+		_gather_site(st, site, sub.team_id, gl, "military")   # military L1 需 80 ⇒ gather_left 70 合法
+		_put(st, sub, site)
+		sub.current_task = TeamData.TASK_BUILD
+		var v: float = NeedOracle.new_outpost_urgency(st, sub)
+		print("    gather_left=%.0f ⇒ 新點迫切 %.4f" % [gl, v])
+		u.append(v)
+	_cell("_n6b")
+	_check("N6b gather_left 5 的迫切嚴格小於 70、且 ≥ 0", float(u[1]) < float(u[0]) and float(u[1]) >= 0.0)
+
+func _n6c() -> void:
+	print("\n── N6c 上限分配（新點先占）──")
+	# 主隊 N 腳下有軍用 L1 據點（設施那一支 = weaponsmith 等 → 撞上限）＋自己離格的採段工地 gather_left 80
+	var st: WorldState = _mk(false, Vector2i(6, 6))
+	var n: TeamData = st.teams[N]
+	var own: HexTileData = _tile(st, Vector2i(6, 6))
+	own.outpost_type = "military"; own.outpost_level = 1
+	OutpostOwnerBank.set_owner(st, own, N, "bed_seed")
+	OwnerOutpostIndex.invalidate()
+	n.armed_anon_ratio = 0.0
+	var lv: Dictionary = _lvn(st, n)
+	var site := Vector2i(6, 9)
+	_gather_site(st, site, N, 80.0, "military")
+	n.corvee_site = site
+	n.current_task = TeamData.TASK_BUILD
+	var nn: float = NeedOracle._new_outpost_need(st, n, "material")
+	var fac: float = NeedOracle._construction_facility_need(st, n, "material", lv)
+	var cn: float = NeedOracle._construction_need(st, n, "material", lv)
+	print("    新點 %.1f｜設施（原值）%.1f｜_construction_need %.1f（上限 %.0f）" % [nn, fac, cn, NeedOracle.CONSTRUCTION_MATERIAL_NEED_CAP])
+	_cell("_n6c")
+	_check("N6c 新點 80 全留、設施得剩下的 20、合計 100", is_equal_approx(nn, 80.0) and fac >= 20.0 and is_equal_approx(cn, 100.0))
+
+func _n8() -> void:
+	print("\n── N8 承諾不被自己的需求換掉 ──")
+	var w: Array = _walker(0.0)
+	var st: WorldState = w[0]; var n: TeamData = w[1]
+	n.goal_eval_next_tick = 0
+	GoalResolver.ensure_maintain_goals(st, n)
+	var mm: String = ""
+	for g in n.goal_state:
+		if String(g.get("goal_type", "")) == "maintain_material":
+			mm = String(g.get("status", ""))
+	var hold0: int = int(Probe.counts.get("persist.hold", 0))
+	var runner := SimRunner.new()
+	var swapped: String = ""
+	var ticks: int = 0
+	for i in range(3 * WorldState.TICKS_PER_DAY):
+		runner.advance_tick(st, Vector2i(-1, -1))
+		ticks += 1
+		if not st.teams.has(N):
+			break
+		if n.current_task != TeamData.TASK_BUILD:
+			swapped = n.current_task
+			break
+		if n.move_target == Vector2i(-1, -1) or n.tile_pos == CAMP_C:
+			break
+	print("    maintain_material=%s｜跑 %d tick｜task 換成=%s｜persist.hold +%d｜到營地=%s" % [mm, ticks, swapped if swapped != "" else "（沒換）",
+		int(Probe.counts.get("persist.hold", 0)) - hold0, str(n.tile_pos == CAMP_C)])
+	_cell("_n8")
+	_check("N8 maintain_material active", mm == "active")
+	_check("N8 TASK_BUILD 沒被換掉（或 persist.hold 有增）", swapped == "" or int(Probe.counts.get("persist.hold", 0)) > hold0)

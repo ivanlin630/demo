@@ -142,7 +142,7 @@ func _initialize() -> void:
 		["①-b need_keep（＝下面三個加數）", GoalResolver.rp_nk_n, GoalResolver.rp_nk_us],
 		["　├ _self_use", NeedOracle.nk_self_n, NeedOracle.nk_self_us],
 		["　├ _supply_chain", NeedOracle.nk_supply_n, NeedOracle.nk_supply_us],
-		["　└ _construction_facility_need", NeedOracle.nk_constr_n, NeedOracle.nk_constr_us]]
+		["　└ _construction_need（新點＋設施，結構輪 §三之三）", NeedOracle.nk_constr_n, NeedOracle.nk_constr_us]]
 	for row in nk:
 		if int(row[1]) == 0:
 			print("%-40s %10s %12.3f %14s" % [row[0], "★0 次", float(row[2]) / 1e6, "不可判"])

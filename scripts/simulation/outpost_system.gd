@@ -486,7 +486,6 @@ func _absorb_carried(state: WorldState, tile: HexTileData, team: TeamData) -> fl
 	if Probe.enabled:
 		Probe.bump("construct.absorb")
 		Probe.add_amount("construct.absorbed", k)
-		if team.team_id != tile.construction_team_id: Probe.bump("construct.absorb.not_ct")
 		if left == 0.0: Probe.bump("construct.gather_done")
 	return left
 
