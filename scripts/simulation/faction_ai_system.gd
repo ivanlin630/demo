@@ -4169,14 +4169,14 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 		_tick_convoy(state, sub, merge_queue)
 		return
 	if sub.current_task == TeamData.TASK_SETTLE:
-		# 抵達自家 faction outpost → 就地安頓（無需 co-located team；獨自抵達即轉居民）
-		# 未到則保持 移動/安頓 task，不進 merge_queue（避免被召回母團）
-		var settle_tile: HexTileData = state.world.tiles.get(
-			sub.tile_pos.x * 1000 + sub.tile_pos.y)
-		if settle_tile != null and settle_tile.outpost_owner != -1:
-			var o: TeamData = state.teams.get(settle_tile.outpost_owner)
-			if o != null and o.faction_id == sub.faction_id:
-				InteractionSystem.new()._convert_to_resident(state, sub)
+		# ★結構輪探針 §五（M4）：到了才判（同玩家側）——修前途中每 tick 判腳下那格，途經自家勢力據點也會當場轉居民
+		if sub.move_target != Vector2i(-1, -1):
+			return
+		# 到場一支身體（同玩家子隊）；腦只決定留或回：住不進去 ⇒ 回母隊（修前什麼都不做、永遠卡在 SETTLE）
+		var arr: Dictionary = SubteamSystem.on_arrival(state, sub)
+		if String(arr["outcome"]) == "refused":
+			TaskArbiter.release(sub, "arrival")
+			merge_queue.append(sub.team_id)
 		return
 	if sub.current_task == TeamData.TASK_ESCORT:
 		_update_escort(state, sub)
@@ -4365,20 +4365,16 @@ func _tick_player_subteam(state: WorldState, sub: TeamData, _merge_queue: Array)
 	if sub.move_target != Vector2i(-1, -1):
 		return   # 還在路上
 	match sub.current_task:
-		TeamData.TASK_CAMP:
-			# 落腳＝到了就紮 L0 營地（同玩家紮營那一支）；前提在出發時判過，到了再判一次（途中可能被別人先佔）
-			if establish_crude_camp(state, sub):
+		TeamData.TASK_CAMP, TeamData.TASK_SETTLE:
+			# ★結構輪探針 §五：到場一支身體（SubteamSystem.on_arrival，同 NPC 子隊）；這裡只留腦：事件＋release
+			#   落腳＝到了就紮 L0 營地；移居＝到了就轉居民；前提在出發時判過，到了再判一次（途中可能被別人先佔／地主換人）
+			var arr: Dictionary = SubteamSystem.on_arrival(state, sub)
+			var camp: bool = sub.current_task == TeamData.TASK_CAMP
+			if String(arr["outcome"]) == "refused":
+				WorldEvents.emit_player_subteam(state, sub, "camp_refused" if camp else "settle_refused")
+				TaskArbiter.release(sub, "arrival")
+			elif camp:
 				TaskArbiter.release(sub, "camp_established")
-			else:
-				WorldEvents.emit_player_subteam(state, sub, "camp_refused")
-				TaskArbiter.release(sub, "arrival")
-		TeamData.TASK_SETTLE:
-			# 移居自家據點＝到了就轉居民（既有 _convert_to_resident）；地主途中換人 ⇒ 不轉、說原因
-			if PlayerCommandSystem.own_outpost_reason(state, state.teams.get(sub.parent_team_id), sub.tile_pos) == "":
-				InteractionSystem.new()._convert_to_resident(state, sub)
-			else:
-				WorldEvents.emit_player_subteam(state, sub, "settle_refused")
-				TaskArbiter.release(sub, "arrival")
 		_:
 			pass   # 待機／覓食／偵查：停在那一格（覓食產出由所在格決定；偵查提供視野）
 
@@ -5451,6 +5447,8 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	#   「通過前幾道閘的嘗試」，不是嘗試。Probe-gated、零 RNG、純觀測。
 	if Probe.enabled:
 		Probe.bump("dispatch_builder.attempt")
+		var _att_t: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
+		Probe.bump("dispatch_builder.attempt.terrain." + (_att_t.terrain if _att_t != null else "none"))   # ★結構輪探針 V8：按目標地形拆
 		# ★★★逐筆身分（systems 派 2026-08-26）：counter 說得出「嘗試 39 次」，說不出
 		#   ★【誰】在嘗試 —— 而逐隊分布顯示 material≥50 的只有 4/12 隊、前 3 隊吃走 80.8%、一隊是 0
 		#   ⇒ 「39 次來自沒料的那 8 隊」與「來自有料的那 3-4 隊」是【完全不同的 arc 方向】
@@ -5495,25 +5493,20 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	var vault: Dictionary = {}
 	if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
 		vault = home_tile.public_storage
-	# ★★三閘收斂（2026-08-26）：緩衝倍率不再是全域 1.5，改由領袖人格連續調變（★中性零漂＝1.5）。
-	var _lv: Dictionary = TradeValuation.leader_vals(state, leader_team)
-	var _short: Dictionary = BuildAfford.shortfall(cost, [vault, leader_team.resources], _lv)
-	if not _short.is_empty():
-		var k: String = String(_short["res"])
-		var avail: float = float(_short["avail"])
-		if Probe.enabled:   # ★measurer L3 tap(2026-08-21,blueprint建材depletion trace票)：短缺資源種類+周邊生產中性trace
-			Probe.bump_sample("dispatch_fail.material_detail", {"team": leader_team.team_id,
-				"resource": k, "need": float(_short["need"]), "margin": float(_short["margin"]), "avail": avail,
-				"vault": float(vault.get(k, 0)), "private": float(leader_team.resources.get(k, 0)),
-				"home_mfg_level": (home_tile.manufacturing_level if home_tile != null else -1),
-				"tick": state.world.current_tick}, 30)
+	# ★結構輪探針 §三：材料閘退場（L1 要材料、缺的就地採）。★取代它的是物理：帶得出多少料（fundable_carry，
+	#   與下方實際撥料同呼）＋目標地形先驗 ⇒ 採段天數；超過採段期限（INF）⇒ 這格蓋不成 ⇒ site_barren。
+	#   ★L1 兩型的成本只剩 material（軍用 tools 已歸零）⇒ 不再有別的資源要先備。
+	var _carry: Dictionary = fundable_carry(vault, leader_team.resources, {}, cost)
+	var _carried_m: float = float(_carry.get("material", 0.0))
+	var _site: Dictionary = OutpostSystem.site_prior(target_tile.terrain if target_tile != null else "")
+	var _gather_d: float = OutpostSystem.gather_eta_days(state, leader_team, float(cost.get("material", 0)), _carried_m, _site)
+	if _gather_d == INF:
 		_log_dispatch_fail(leader_team.faction_id,
-			"資源不足 %.2fx: %s 有 %.0f(公庫%.0f+私%.0f)" % [float(_short["margin"]), k, avail,
-			float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
-		# ★逐【資源種類】分開：「缺料」與「缺糧」是不同的病，合成一個 counter 就分不出
+			"地禿: 帶料 %.0f／需 %.0f，%s 先驗採不完（期限 %.0f 天）" % [_carried_m, float(cost.get("material", 0)),
+			target_tile.terrain if target_tile != null else "?", OutpostSystem.gather_window_days()], cost)
 		if Probe.enabled:
-			Probe.bump("funnel.build_gate.cost")
-			Probe.bump("funnel.build_gate.cost." + String(k))
+			Probe.bump("funnel.build_gate.site_barren")   # ★同族計數：六道閘照樣能相加對帳
+			Probe.bump("funnel.build_gate.site_barren." + (target_tile.terrain if target_tile != null else "none"))
 		return false
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1:
@@ -5541,8 +5534,8 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	var _eta_travel: float = float(_hex_dist(leader_team.tile_pos, target_pos)) / FOOD_BRIDGE_MOVE_PER_DAY
 	# ★工期單一真相源（2026-08-25）：舊式漏除每日推進窗數 ⇒ 高估 24× ⇒ 糧橋門檻過嚴。
 	# ★S6 phase2：改讀唯一入口（原本讀【另一張表】⇒ 錨推不動它）
-	var _eta_build: float = OutpostSystem.build_eta_days(
-		OutpostSystem.build_person_hours(outpost_type, level), pop)
+	# ★結構輪探針 §三：新點總天數＝採段＋築段（carried 與實際撥料同呼 fundable_carry）。上面已濾掉 INF。
+	var _eta_build: float = OutpostSystem.build_eta_total_days(state, leader_team, outpost_type, level, pop, _carried_m, _site)
 	var _need_food: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
 		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
@@ -5613,7 +5606,9 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	print("[Infra] Team%d 派建造子隊 Team%d → (%d,%d) %s Lv%d" % [
 		leader_team.team_id, sub_id, target_pos.x, target_pos.y, outpost_type, level])
 	# ★成功端也要計：沒有它，六道閘相加對不上 attempt ⇒ 對帳式失效
-	if Probe.enabled: Probe.bump("funnel.build_gate.dispatched")
+	if Probe.enabled:
+		Probe.bump("funnel.build_gate.dispatched")
+		Probe.bump("funnel.build_gate.dispatched.terrain." + (target_tile.terrain if target_tile != null else "none"))   # ★結構輪探針 V8
 	return true
 
 # 派升級子隊（task="升級"，附 target_level）
@@ -5954,15 +5949,36 @@ func _load_convoy_cargo(owner: TeamData, sub: TeamData, home_tile: HexTileData, 
 # 僅當「公庫 + 子隊私產」不足時，owner 私產補差額（守恆：純轉移）。
 # tile 可能為 null（無 outpost 目標格）→ 退化為純 owner 私產補足。
 func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, tile, cost: Dictionary) -> void:
+	# ★結構輪探針 M7：撥多少走 fundable_split（同 fundable_carry）；目標格公庫算進子隊「已有」
 	for k in cost:
 		if k == "person_hours": continue
-		var vault: float = float(tile.public_storage.get(k, 0)) if tile != null else 0.0
-		var have: float = vault + float(sub.resources.get(k, 0))
-		var need: float = maxf(float(cost[k]) - have, 0.0)
-		if need <= 0.0: continue
-		var transfer: float = minf(need, float(owner_team.resources.get(k, 0)))
+		var have: Dictionary = {k: (float(tile.public_storage.get(k, 0)) if tile != null else 0.0) + float(sub.resources.get(k, 0))}
+		var sp: Dictionary = fundable_split(k, cost, {}, owner_team.resources, have)
+		if float(sp["need"]) <= 0.0: continue
+		var transfer: float = float(sp["owner"])
 		ResourceBank.add(sub, k, transfer, "fund_sub_in")
 		ResourceBank.add(owner_team, k, -transfer, "fund_sub_out")
+
+# ★結構輪探針 M7：撥料量一支純函式。估算（_dispatch_builder 的採段天數／糧橋、選址 gather_term、擴點估值）
+#   與實際撥料（_fund_subteam_from_vault／_fund_subteam_cost）同呼 ⇒ 估的就是會帶的。★禁止估算端另寫一份 min()。
+#   回 {res: 子隊會從公庫＋母隊私產拿到的量}（vault 先、私產補，同 _fund_subteam_from_vault 的次序）。
+static func fundable_carry(vault: Dictionary, owner_res: Dictionary, sub_res: Dictionary, cost: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k in cost:
+		if k == "person_hours": continue
+		var sp: Dictionary = fundable_split(k, cost, vault, owner_res, sub_res)
+		out[k] = float(sp["vault"]) + float(sp["owner"])
+	return out
+
+# 單一資源的撥料拆解：need＝成本減子隊已有；vault＝從公庫拿的；owner＝從母隊私產補的；need_after_vault 給撥料端保留原呼叫形狀
+static func fundable_split(k, cost: Dictionary, vault: Dictionary, owner_res: Dictionary, sub_res: Dictionary) -> Dictionary:
+	var need: float = maxf(float(cost[k]) - float(sub_res.get(k, 0)), 0.0)
+	if need <= 0.0:
+		return {"need": need, "vault": 0.0, "owner": 0.0, "need_after_vault": 0.0}
+	var from_vault: float = minf(need, float(vault.get(k, 0)))
+	var rest: float = need - from_vault if from_vault > 0.0 else need
+	var from_owner: float = minf(rest, float(owner_res.get(k, 0))) if rest > 0.0 else 0.0
+	return {"need": need, "vault": maxf(from_vault, 0.0), "owner": from_owner, "need_after_vault": rest}
 
 # 腳下公庫撥付（caravan-load 新據點）：home_tile 公庫優先裝車，差額補 owner 私產。
 # 新據點目標格無公庫 → 子隊背 cost 上路，抵達後 start_build fallback 子隊私產扣款。守恆純轉移。
@@ -5972,15 +5988,15 @@ func _fund_subteam_from_vault(_state: WorldState, owner: TeamData, sub: TeamData
 		and home_tile.outpost_owner == owner.team_id) else {}
 	for k in cost:
 		if k == "person_hours": continue
-		var need: float = maxf(float(cost[k]) - float(sub.resources.get(k, 0)), 0.0)
-		if need <= 0.0: continue
-		var from_vault: float = minf(need, float(vault.get(k, 0)))
+		# ★結構輪探針 M7：量走 fundable_split（估算端同呼 fundable_carry）；撥料的呼叫形狀照舊
+		var sp: Dictionary = fundable_split(k, cost, vault, owner.resources, sub.resources)
+		if float(sp["need"]) <= 0.0: continue
+		var from_vault: float = float(sp["vault"])
 		if from_vault > 0.0:
 			vault[k] = float(vault.get(k, 0)) - from_vault
 			ResourceBank.add(sub, k, from_vault, "fund_vault_in")
-			need -= from_vault
-		if need > 0.0:
-			var t: float = minf(need, float(owner.resources.get(k, 0)))
+		if float(sp["need_after_vault"]) > 0.0:
+			var t: float = float(sp["owner"])
 			ResourceBank.add(owner, k, -t, "fund_vault_owner_out")
 			ResourceBank.add(sub, k, t, "fund_vault_owner_in")
 
@@ -6029,8 +6045,28 @@ const SITE_RES_BONUS: Dictionary = {
 }
 
 # ★F9′：候選格的分數（一支；選址迴圈與床同呼 ⇒ 床驗的是【真的加進分數】那一項，不只項本身）
+const SITE_DAY_COST: float = 5.0   # TEST VALUE — 結構輪探針 §三之二：採段每日的選址扣分（與「每格距離 −5」同量級）
+
+# ★結構輪探針 §三之二：選址秤讀採料天數。gather_days＝build_eta_total_days 的採段那一半（採段 gather_eta_days），
+#   carried＝fundable_carry（母隊此刻撥得出多少）、site＝site_prior(地形)。夾在期限；w＝0.5＋野心（中性 1.0）。
+#   回 INF ⇔ 採不完（選址迴圈先濾掉，同 _dispatch_builder 的 site_barren 判準）。
+func site_gather_days(state: WorldState, leader_team: TeamData, tile: HexTileData, cost: Dictionary) -> float:
+	var vault: Dictionary = _home_vault(state, leader_team)
+	var carried: float = float(fundable_carry(vault, leader_team.resources, {}, cost).get("material", 0.0))
+	return OutpostSystem.gather_eta_days(state, leader_team, float(cost.get("material", 0)), carried, OutpostSystem.site_prior(tile.terrain))
+
+static func site_gather_term(gather_days: float, ambition: float) -> float:
+	return -minf(gather_days, OutpostSystem.gather_window_days()) * SITE_DAY_COST * (0.5 + ambition)
+
+# 母隊站在自家據點上 ⇒ 公庫；否則空（同 _dispatch_builder 的 vault 判法）
+func _home_vault(state: WorldState, leader_team: TeamData) -> Dictionary:
+	var home_tile: HexTileData = state.world.tiles.get(leader_team.tile_pos.x * 1000 + leader_team.tile_pos.y)
+	if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
+		return home_tile.public_storage
+	return {}
+
 func _site_candidate_score(state: WorldState, tile: HexTileData, dist: int, greed_ambition: float,
-		known_rels: Array, site_w: float) -> Dictionary:
+		known_rels: Array, site_w: float, gather_term: float = 0.0) -> Dictionary:
 	var score: float = float(tile.productivity) * 100.0
 	score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
 	score -= float(dist) * 5.0
@@ -6047,7 +6083,8 @@ func _site_candidate_score(state: WorldState, tile: HexTileData, dist: int, gree
 	var known_term: float = known_outpost_term(known_rels, tile.tile_pos, site_w)
 	score += known_term
 	if Probe.enabled: Probe.note("site.known_outpost_term", known_term)   # ★觀測不耗 RNG
-	return {"score": score, "known_term": known_term}
+	score += gather_term   # ★結構輪探針 §三之二（≤0）
+	return {"score": score, "known_term": known_term, "gather_term": gather_term}
 
 # ★F8：選址候選的距離條件（只剩搜尋半徑；min_dist 間距退場）——一支函式，床直接驗
 static func _site_candidate_ok(dist: int, is_ore_mountain: bool) -> bool:
@@ -6078,6 +6115,8 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	var known_rels: Array = _known_outpost_relations(state, leader_team)
 	var site_w: float = site_persona_w(float(ldr.values.get("慎重", 0.5)) if ldr != null else 0.5,
 		float(ldr.values.get("好戰", 0.5)) if ldr != null else 0.5)
+	# ★結構輪探針 §三之二：選址時型別還沒定（_pick_outpost_type 在選址之後）⇒ 用 L1 民用的料數估（L1 兩型差 30 料，同量級）
+	var _site_cost: Dictionary = OutpostSystem.OUTPOST_COST["civilian"][0]
 	for tile_id in state.world.tiles:   # gate-ok: 同上
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0: continue
@@ -6093,20 +6132,31 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 		# ★F8：min_dist（距中心至少 2 格、礦山 1 格）退場——那是據點間距規則的第三處（用戶裁 e1a09f429）；
 		#   候選格本來就 `outpost_level > 0 ⇒ continue`（同格已排除）。max_dist 是搜尋半徑不是間距，留。
 		if not _site_candidate_ok(dist, is_ore_mountain): continue
-		var sc: Dictionary = _site_candidate_score(state, tile, dist, greed_ambition, known_rels, site_w)
+		# ★結構輪探針 M8：採不完的格不進候選（判準＝_dispatch_builder 的 site_barren 那道物理，提前用同一支）
+		var gdays: float = site_gather_days(state, leader_team, tile, _site_cost)
+		if gdays == INF:
+			if Probe.enabled: Probe.bump("site.filtered_barren")
+			continue
+		var gterm: float = site_gather_term(gdays, ldr_ambition)
+		var sc: Dictionary = _site_candidate_score(state, tile, dist, greed_ambition, known_rels, site_w, gterm)
 		var score: float = float(sc["score"])
 		var known_term: float = float(sc["known_term"])
+		if Probe.enabled: Probe.bump("site.candidates_scored")
 		if score >= MIN_BUILD_SCORE:
-			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile, "known_term": known_term })
+			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile, "known_term": known_term, "gather_term": gterm })
+	if Probe.enabled: Probe.add_amount("site.candidates_kept", float(candidates.size()))   # ★結構輪探針：選址候選數（過 MIN_BUILD_SCORE 的）
 	if candidates.is_empty(): return {}   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	candidates.sort_custom(func(a, b): return a.score > b.score)
 	var best: Dictionary = candidates[0]
+	if Probe.enabled:   # ★結構輪探針 V8：選出那一格的 gather_term（按地形累加，平均＝amount／次數）
+		Probe.bump("site.best.terrain." + String(best.tile.terrain))
+		Probe.add_amount("site.best_gather_term.terrain." + String(best.tile.terrain), float(best.get("gather_term", 0.0)))
 	var sig: String = "%d_%d" % [best.pos.x, best.pos.y]
 	if _last_site_sig.get(leader_team.faction_id, "") != sig:
 		_last_site_sig[leader_team.faction_id] = sig
-		print("[Site] 選址 %s score=%.0f 周邊資源=%s terrain=%s 已知據點項=%.1f 用到的據點=%s" % [
+		print("[Site] 選址 %s score=%.0f 周邊資源=%s terrain=%s 已知據點項=%.1f 採料項=%.1f 用到的據點=%s" % [
 			str(best.pos), best.score, str(_site_resources_nearby(state, best.pos)), best.tile.terrain,
-			float(best.get("known_term", 0.0)), str(_rels_near(known_rels, best.pos))])
+			float(best.get("known_term", 0.0)), float(best.get("gather_term", 0.0)), str(_rels_near(known_rels, best.pos))])
 	return best
 
 func _site_resource_bonus(state: WorldState, pos: Vector2i) -> float:
@@ -7274,6 +7324,13 @@ func _survival_food_days(state: WorldState, team: TeamData) -> float:
 # 若副作用先寫，會留下「tile 已標記施工、隊卻沒進 TASK_BUILD」的永久 zombie 工地
 # （_tick_construction 只在施工隊已死才清 orphan，隊活著只會一直「無施工隊、暫停」）。
 # 純寫自己站上的 tile + 自己的 corvee_site 記憶，零 RNG。
+# 建點 type by leader 好戰/野心（沿用 establish_crude_camp 慣例、非新旋鈕）——一支：落地與估算（decision_context）同呼
+static func settle_camp_type(state: WorldState, team: TeamData) -> String:
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
+	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
+	return "military" if (martial > 0.6 or ambition > 0.7) else "civilian"
+
 func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> void:
 	if not td.has("settle_site"):
 		# ★注意：本 hook 對【每個成功 try_set】都會被呼叫，所以這顆若不過濾就會把所有非紮根 commit 也算進來
@@ -7306,30 +7363,11 @@ func _commit_settle_site(state: WorldState, team: TeamData, td: Dictionary) -> v
 			var _why: String = "no_camp" if tile.camp_level != 1 else ("already_outpost" if tile.outpost_level > 0 else "occupied_by_other")
 			Probe.bump("root.commit_drop." + _why)
 		return   # 情境已變（他隊先蓋/已升級）→ 不落地（下 cadence 重評）
-	# 建點 type by leader 好戰/野心（沿用 establish_crude_camp 慣例、非新旋鈕）
-	var leader: PersonData = state.persons.get(team.leader_id)
-	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
-	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
-	var camp_type: String = "military" if (martial > 0.6 or ambition > 0.7) else "civilian"
-	start_settle_construction(state, team, tile, camp_type)
+	var camp_type: String = settle_camp_type(state, team)
+	# ★結構輪探針 §一：建點一支身體（start_build）；紮根原本那支專用開工函式退場
+	if OutpostSystem.new().start_build(state, team, camp_type, 1, team.team_id):
+		if Probe.enabled: Probe.bump("settlement.l0_to_l1_start")
 
-
-# ★F8：紮根落地段（L0 營地 → crude_camp 工程，完工晉 L1）——NPC（_commit_settle_site）與玩家（_action_settle）同呼一支
-#   ★type 參數化：NPC 照 leader 價值、玩家照 build_type；工期＝settle、免材料（藍圖定：成本就是時間）
-#   ★crude_camp 工程設點只准這一處（F8 床 P8f 數它）
-func start_settle_construction(state: WorldState, team: TeamData, tile: HexTileData, camp_type: String) -> void:
-	# ★person_hours 記進 target（S6 phase2）：記的是【實際扣了多少】，不是第二張表
-	tile.construction_target = {"action": "crude_camp", "type": camp_type, "level": 1, "owner": team.team_id,
-		"person_hours": OutpostSystem.build_person_hours("settle", 1)}
-	# ★★★S6 phase2：CORVEE 常數退場 —— 常數不存在，就沒有第二個語意可黏
-	tile.construction_ticks_left = OutpostSystem.build_person_hours("settle", 1)
-	tile.construction_team_id = team.team_id
-	tile.construction_started_tick = state.world.current_tick
-	tile.construction_last_progress_tick = state.world.current_tick
-	team.corvee_site = tile.tile_pos   # ★記工地（recovery 憑此回頭）
-	if Probe.enabled: Probe.bump("settlement.l0_to_l1_start")
-	print("[CorveeL1] Team%d L0→L1 紮根工期 @(%d,%d) %s (%d person-ticks)" % [
-		team.team_id, tile.tile_pos.x, tile.tile_pos.y, camp_type, tile.construction_ticks_left])
 
 # ★T2 churn 根修 (3)：arrival-fail 釋放（撲空/timeout）復用既有 rejection-learning（零新機制）——
 # 寫 join_rejected memory（同 interaction._resolve_join:1280 拒收路），decision_context:530

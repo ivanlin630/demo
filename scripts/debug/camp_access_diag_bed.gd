@@ -159,9 +159,9 @@ func _run() -> void:
 		lines.append("  #5求生蓋田閘 pass=%d/%d(樣本,預測變嚴=pass率該降,非死水閘沒執行) reject=%d" % [fp, fc.size(), fc.size()-fp])
 	else:
 		lines.append("  #5求生蓋田閘：本輪無sample(閘完全沒執行到,非『擋住』)")
-	lines.append("  #1/#2/#6紮根funnel：root.won_argmax=%d settlement.l0_to_l1_start=%d construct.complete_crude_camp=%d" % [
+	lines.append("  #1/#2/#6紮根funnel：root.won_argmax=%d settlement.l0_to_l1_start=%d outpost.l0_to_l1=%d" % [
 		int(Probe.counts.get("root.won_argmax", 0)), int(Probe.counts.get("settlement.l0_to_l1_start", 0)),
-		int(Probe.counts.get("construct.complete_crude_camp", 0))])
+		int(Probe.counts.get("outpost.l0_to_l1", 0))])
 	# ★systems票(exact-pair-hitrate)：root.lost_to逐筆(team,winner,target)，算distinct-target數(母體vs樣本分開報)
 	lines.append("★★★exact-pair命中率：root.lost_to逐筆(team,winner,target)：")
 	if Probe.samples.has("root.lost_to.pair"):

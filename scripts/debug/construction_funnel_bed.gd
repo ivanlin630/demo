@@ -13,7 +13,7 @@ const RANK_BUCKETS: Array = ["funnel.cand.best_rank.0_won", "funnel.cand.best_ra
 const BRANCHES: Array = ["funnel.delegate.branch_convoy", "funnel.delegate.branch_build",
 	"funnel.delegate.branch_facility", "funnel.delegate.branch_generic"]
 const GATES: Array = ["funnel.build_gate.busy_subteam", "funnel.build_gate.tile_occupied",
-	"funnel.build_gate.cost", "funnel.build_gate.no_advisor", "funnel.build_gate.pop",
+	"funnel.build_gate.site_barren", "funnel.build_gate.no_advisor", "funnel.build_gate.pop",   # ★結構輪探針：cost 閘退場 ⇒ site_barren
 	"funnel.build_gate.food_bridge", "funnel.build_gate.subteam_dispatch",
 	"funnel.build_gate.dispatched"]
 const STAGE2_OUTCOME: Array = ["delegate.build_ok", "delegate.build_fail",
@@ -105,7 +105,7 @@ func _run() -> void:
 		gsum += vg
 		lines.append("  %-40s = %d" % [String(kg), vg])
 	for kg2 in Probe.counts.keys():
-		if String(kg2).begins_with("funnel.build_gate.cost."):
+		if String(kg2).begins_with("funnel.build_gate.site_barren."):
 			lines.append("      %-36s = %d" % [String(kg2), int(Probe.counts[kg2])])
 	lines.append("  %-40s = %d" % ["dispatch_builder.attempt（分母）", att])
 	lines.append("  ⇒ ★對帳：七閘＋成功 %d vs attempt %d ⇒ %s" % [gsum, att,

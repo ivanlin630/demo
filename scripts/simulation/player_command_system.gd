@@ -861,7 +861,7 @@ static func settle_pending_aftermath(state: WorldState) -> void:
 	if not lines.is_empty() and ptid != -1:
 		WorldEvents.emit(state, "aftermath_settled", [ptid], false, {"text": "你沒有處置：" + "，".join(PackedStringArray(lines))})
 
-# ★F8：紮根＝玩家把自己的 L0 營地升成 L1 據點（共用 NPC 紮根落地那一支：FactionAISystem.start_settle_construction）
+# ★F8：紮根＝玩家把自己的 L0 營地升成 L1 據點（共用 NPC 紮根落地那一支：OutpostSystem.start_build，結構輪探針起紮根與建設同一支）
 #   ★只在【自己的 L0 營地】上列出（settle_listed）；施工中不可（不查的話重按會把工期重置）
 static func settle_listed(state: WorldState, pt: TeamData) -> bool:
 	if pt == null:
@@ -1072,7 +1072,7 @@ func _action_rest(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int)
 		return { "ok": false, "msg": "現在停不下來（有更急的事）" }
 	return { "ok": true, "msg": "原地休息（疲勞 %d%%）" % int(round(pt.fatigue * 100.0)) }
 
-# 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
+# 紮營（Y 版,生存落腳）：營地不收料（L0 當場立；升 L1 的紮根才要材料）+ 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
 # 玩家發起的限時建造令（設玩家隊 task=建設,PRIO_PLAYER）→ construction 推進 → 完工釋放回 idle。
 func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	# ★前置檢查【只有一份】（spec §3②）：條件與人話都在 `precheck_camp()` 裡，
@@ -1096,12 +1096,14 @@ func _action_settle(state: WorldState, _target_id: int, pt: TeamData, _pt_id: in
 	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
 	if camp_type not in ["civilian", "military"]:
 		camp_type = "civilian"
-	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
-	# ★成本＝NPC 紮根今天的成本：settle 工期、免材料（藍圖：成本就是時間）
-	FactionAISystem.shared().start_settle_construction(state, pt, tile, camp_type)
+	# ★結構輪探針 §一：建點一支身體（start_build，同 NPC 紮根）；L1 要材料，帶來的先抵、缺的腳下採
+	#   ★順序照舊：先開工（內部 transition PRIO_DISPATCH），再以 PRIO_PLAYER 蓋上（G9）
+	var plan: String = OutpostSystem.build_plan_sentence(state, pt, camp_type, pt.tile_pos, pt.population, float(pt.resources.get("material", 0)), "腳下")
+	if not OutpostSystem.new().start_build(state, pt, camp_type, 1, pt.team_id):
+		return { "ok": false, "msg": "無法紮根（%s）" % OutpostSystem.build_block_reason(state, pt) }
 	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_settle")   # gate-ok: 玩家指令設任務（同 _action_rest；舊 _action_camp 那一行搬到這裡）
-	return { "ok": true, "msg": "開始紮根成%s（%d 人時,免材料）" % [
-		String((OutpostSystem.OUTPOST_NAMES.get(camp_type, ["據點"]) as Array)[0]), OutpostSystem.build_person_hours("settle", 1)] }
+	return { "ok": true, "msg": "開始紮根成%s：%s" % [
+		String((OutpostSystem.OUTPOST_NAMES.get(camp_type, ["據點"]) as Array)[0]), plan] }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
@@ -1417,11 +1419,16 @@ func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt
 	if not OutpostSystem.is_buildable_type(outpost_type):
 		return { "ok": false, "msg": "無效據點類型" }
 	var _os := OutpostSystem.new()
+	var plan: String = OutpostSystem.build_plan_sentence(state, pt, outpost_type, pt.tile_pos, pt.population, float(pt.resources.get("material", 0)), "腳下")
 	var ok: bool = _os.start_build(state, pt, outpost_type, 1)
 	if not ok:
-		return { "ok": false, "msg": "無法建造（資源不足）" }
+		# ★結構輪探針 M5：start_build 不再因料回 false ⇒ 印真因（已有據點／正在施工；L2+ 軍用缺工具才是資源）
+		return { "ok": false, "msg": "無法建造（%s）" % OutpostSystem.build_block_reason(state, pt) }
+	# ★G9：玩家建設施工中仍是玩家優先序（start_build 內部 transition 是 PRIO_DISPATCH）
+	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_command")   # gate-ok: 玩家指令設任務（同紮根那一行）
 	print("[PlayerCmd] build_outpost type=%s" % outpost_type)
-	return { "ok": true, "msg": "開始建造 %s" % outpost_type }
+	return { "ok": true, "msg": "開始建 %s：%s" % [
+		String((OutpostSystem.OUTPOST_NAMES.get(outpost_type, [outpost_type]) as Array)[0]), plan] }
 
 func _action_upgrade_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var _os2 := OutpostSystem.new()
@@ -1514,11 +1521,14 @@ func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, 
 	if sub_id == -1:
 		return { "ok": false, "msg": "派遣失敗" }
 	var sub: TeamData = state.teams[sub_id]
+	var plan: String = ""
 	if task == TeamData.TASK_CONSTRUCT:
 		sub.task_extra_data = {"build_type": _sub_build_type(state), "level": 1, "owner": pt_id}
+		plan = "（%s）" % OutpostSystem.build_plan_sentence(state, sub, _sub_build_type(state), sub.tile_pos if at_foot else move_tgt,
+			sub.population, float(sub.resources.get("material", 0)), "腳下" if at_foot else "那裡")
 		if at_foot:
 			OutpostSystem.new().begin_subteam_construction(state, sub)   # 同抵達那一支（movement._on_arrival）
-	return { "ok": true, "msg": "派出子隊 Team%d：%s" % [sub_id, _subteam_task_sentence(state, task, move_tgt)], "sub_id": sub_id }
+	return { "ok": true, "msg": "派出子隊 Team%d：%s%s" % [sub_id, _subteam_task_sentence(state, task, move_tgt), plan], "sub_id": sub_id }
 
 static func _sub_build_type(state: WorldState) -> String:
 	var bt: String = str(state.player_state.get("sub_build_type", "civilian"))
@@ -2513,27 +2523,15 @@ static func precheck_dispatch_task(state: WorldState, pt: TeamData, pos: Vector2
 			if not bool(cc["ok"]):
 				return {"ok": false, "reason": "(%d,%d) %s" % [pos.x, pos.y, String(cc["reason"])]}
 		TeamData.TASK_SETTLE:
-			var why: String = own_outpost_reason(state, pt, pos)
+			var why: String = SubteamSystem.settle_refuse_reason(state, pt, pos)
 			if why != "":
 				return {"ok": false, "reason": why}
 		TeamData.TASK_CONSTRUCT:
 			return precheck_subteam_build(state, pt, pos, pop_count, sub)
 	return {"ok": true, "reason": ""}
 
-# ★移居自家據點的前提（純讀；派遣時與抵達時共用）：地主＝玩家隊或同勢力的據點；否則回原因
-static func own_outpost_reason(state: WorldState, pt: TeamData, pos: Vector2i) -> String:
-	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
-	var not_own: String = "(%d,%d) 不是你的據點" % [pos.x, pos.y]
-	if pt == null or tile == null or tile.outpost_level <= 0 or tile.outpost_owner == -1:
-		return not_own
-	if tile.outpost_owner == pt.team_id:
-		return ""
-	var owner: TeamData = state.teams.get(tile.outpost_owner)
-	if owner != null and pt.faction_id != -1 and owner.faction_id == pt.faction_id:
-		return ""
-	return not_own
-
-# ★子隊建設的前提：格子可開工（同 start_build 的兩條）＋料（同開工那一支 OutpostSystem.afford_shortfall）
+# ★子隊建設的前提：只剩格子三條（不在地圖、已有據點、正在施工）。★結構輪探針 M5：料門退場（缺的到了就地採）。
+#   回句（note）走 §四 同一套「需材／帶料抵／可採約」；可採讀遠端先驗（子隊還沒站上去）。
 static func precheck_subteam_build(state: WorldState, pt: TeamData, pos: Vector2i, pop_count: int, sub: TeamData) -> Dictionary:
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null:
@@ -2542,21 +2540,16 @@ static func precheck_subteam_build(state: WorldState, pt: TeamData, pos: Vector2
 		return {"ok": false, "reason": "(%d,%d) 已有據點" % [pos.x, pos.y]}
 	if tile.construction_team_id != -1:
 		return {"ok": false, "reason": "(%d,%d) 正在施工" % [pos.x, pos.y]}
-	var have: Dictionary = {}
+	var carried: float = 0.0
+	var pop: int = maxi(pop_count, 1)
+	var builder: TeamData = sub if sub != null else pt
 	if sub != null:
-		have = sub.resources
+		carried = float(sub.resources.get("material", 0))
+		pop = sub.population
 	elif pop_count > 0 and pt != null and pt.population > 0:
-		var frac: float = float(pop_count) / float(pt.population)
-		for res in pt.resources:
-			have[res] = float(pt.resources[res]) * frac
-	else:
-		return {"ok": true, "reason": ""}
+		carried = float(pt.resources.get("material", 0)) * float(pop_count) / float(pt.population)
 	var bt: String = _sub_build_type(state)
-	var sh: Dictionary = OutpostSystem.afford_shortfall(tile, have, OutpostSystem.OUTPOST_COST[bt][0])
-	if not sh.is_empty():
-		return {"ok": false, "reason": "建%s據點需%s %s，子隊帶 %s" % [_build_type_label(bt),
-			TeamUiHelper.resource_name(String(sh["res"])), ResourceFormat.panel(float(sh["need"])), ResourceFormat.panel(float(sh["have"]))]}
-	return {"ok": true, "reason": ""}
+	return {"ok": true, "reason": "", "note": OutpostSystem.build_plan_sentence(state, builder, bt, pos, pop, carried, "那裡")}
 
 static func _task_label(task: String) -> String:
 	for e in SUBTEAM_TASKS + ORDERABLE_TASKS:

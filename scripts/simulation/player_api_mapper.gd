@@ -1218,6 +1218,12 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 		"has_control": has_ctrl,
 		"construction_in_progress": in_progress,
 		"ticks_left": tile.construction_ticks_left,
+		# ★結構輪探針 §四：工地分兩段（採料／建造）；gather_left、site_stock、need 讀 construction_target（腳下工地＝親見）
+		"phase": ("gather" if float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", 0.0)) > 0.0 else "build") if in_progress else "",
+		"gather_left": float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", 0.0)),
+		"site_stock": float((tile.construction_target.get("site_stock", {}) as Dictionary).get("material", 0.0)),
+		"need": float(tile.construction_target.get("need", 0.0)),
+		"ticks_total": OutpostSystem.construction_ticks_total(tile) if in_progress else 0,
 		"farming_level": tile.farming_level,
 		"farming_max": farming_max,
 		"manufacturing_level": tile.manufacturing_level,

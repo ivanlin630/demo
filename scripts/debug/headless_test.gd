@@ -14060,12 +14060,14 @@ func _test_precarity_dto() -> void:
 	print("precarity DTO OK")
 
 func _test_player_camp() -> void:
-	print("--- 玩家紮營（Y 版:免材料/無即時糧/抬cap）---")
+	print("--- 玩家紮營（Y 版:紮營免料、紮根要材料/無即時糧/抬cap）---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
 	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 4)
-	pt.tile_pos = Vector2i(4,4); pt.resources = {}   # 免材料:刻意空
+	# ★結構輪探針（spec 2026-10-16-structure-round-probes）：紮營免料（L0 營地當場立）；紮根要材料（L1 民用 50）
+	#   ⇒ 帶 50 料 ⇒ 開工全抵、不用採（這塊平原格沒有料可採）。改的是被用戶裁掉的值（免材料→要材料），不是放寬。
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"material": 50.0}
 	pt.tags = ["流亡"]
 	state.teams[0] = pt
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
@@ -14075,11 +14077,13 @@ func _test_player_camp() -> void:
 	var cs := PlayerCommandSystem.new()
 	var food_before: float = float(tile.resources.get("food", 0))
 	var r: Dictionary = cs._action_camp(state, -1, pt, 0)
-	assert(r.get("ok", false), "紮營應成功（免材料）:%s" % str(r))
+	assert(r.get("ok", false), "紮營應成功（紮營免料）:%s" % str(r))
 	# ★F8（spec 2026-10-07 round5 §F8）：紮營＝當場立 L0 營地；升 L1 是第二步「紮根」（工期＝settle）
 	assert(tile.camp_level == 1 and tile.camp_team_id == 0, "紮營應當場立 L0 營地,camp_level=%d" % tile.camp_level)
 	var r2: Dictionary = cs._action_settle(state, -1, pt, 0)
-	assert(r2.get("ok", false), "紮根應成功（免材料）:%s" % str(r2))
+	assert(r2.get("ok", false), "紮根應成功（帶料開工）:%s" % str(r2))
+	assert(float(pt.resources.get("material", 0)) <= 0.001, "紮根扣帶來的料（50 全抵）,剩=%s" % str(pt.resources.get("material", 0)))
+	assert(float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", -1.0)) == 0.0, "帶夠料 ⇒ gather_left=0")
 	assert(pt.current_task == TeamData.TASK_BUILD, "紮根中玩家隊 task=建設,實際=%s" % pt.current_task)
 	assert(tile.construction_ticks_left > 0, "應設施工 ticks")
 	var os := OutpostSystem.new()

@@ -23,7 +23,7 @@ const OUTPOST_COST: Dictionary = {
 		{ "material": 400, "tools": 0 },
 	],
 	"military": [
-		{ "material": 80,  "tools": 3 },
+		{ "material": 80,  "tools": 0 },   # ★結構輪探針：L1 工具歸零（工具在腳下採不到＝硬門；值是測試值）
 		{ "material": 200, "tools": 6 },
 		{ "material": 500, "tools": 10 },
 	],
@@ -262,6 +262,11 @@ func tick_all(state: WorldState) -> void:
 					produce_stable_day(state, tile, day_fraction)
 		if tile.construction_team_id == -1:
 			continue
+		# ★結構輪探針：新點（L0）工地也要查逾時與採段期限。
+		#   ★修前全庫唯一呼叫點在 faction_ai 的基建迴圈，而那個迴圈只掃 outpost_level>0 的格
+		#     ⇒ 新點工地從來不逾時。L1+ 照舊由 faction_ai 那一處查（不重複查）。
+		if tile.outpost_level == 0 and check_construction_timeout(state, tile):
+			continue
 		_tick_construction(state, tile)
 
 
@@ -410,11 +415,17 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	tile.construction_team_id = active_team.team_id
 	if tile.construction_started_tick == -1:
 		tile.construction_started_tick = state.world.current_tick
-	tile.construction_last_progress_tick = state.world.current_tick
 	# ★★★動工當下 pop 凍結（S6 phase2 §5 硬條款）：timeout 用它算預期工期。
 	#   ★取【真的有工人推進的第一個 tick】而不是 dispatch 當下 —— 派工的隊未必是施工的隊。
+	#   ★結構輪探針：移到採段之前 ⇒ 採段期間 construction_timeout_days 也有值。
 	if not tile.construction_target.has("start_pop"):
 		tile.construction_target["start_pop"] = maxi(active_team.population, 1)
+	# ★結構輪探針 §二 採段：還缺料 ⇒ 這一 tick 只採、不築（ticks_left 不動）。
+	#   ★gain>0 才刷新 last_progress ⇒ 池被別人採光時照既有停工逾時；採太久由 check_construction_timeout 的採段期限取消。
+	if float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", 0.0)) > 0.0:
+		_tick_gather(state, tile, active_team)
+		return
+	tile.construction_last_progress_tick = state.world.current_tick
 	# ★票 T §7：施工進度 × 體力係數（累了做得慢；四捨五入、至少 1）
 	tile.construction_ticks_left -= maxi(roundi(float(maxi(active_team.population, 1)) * SimRunner.stamina_factor(active_team)), 1)
 	# ★持守統一 Slice 2 新鮮度：construction 進度變 → 即重算施工隊 persist_strength（sunk 升），
@@ -424,6 +435,169 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	if tile.construction_ticks_left <= 0:
 		_complete_construction(state, tile, active_team)
 
+# ★結構輪探針 §二：工地採段一 tick。料從腳下 tile 進 site_stock（不進任何 bank）。
+#   ★係數只走 ResourceSystem.material_gain（與 _collect_from_tile、build_eta_total_days 同一支）。
+#   ★人數不進式子（非工位格 labor_mult 中性 LABOR_SCALE、labor_share 1.0、outpost_mult 1.0）。
+func _tick_gather(state: WorldState, tile: HexTileData, team: TeamData) -> void:
+	var gl: Dictionary = tile.construction_target["gather_left"]
+	var left: float = float(gl.get("material", 0.0))
+	var cur: float = float(tile.resources.get("material", 0))
+	var bf: Dictionary = builder_factors(state, team)
+	var gain: float = ResourceSystem.material_gain(tile.productivity, cur, 1.0 / build_ticks_per_day(),
+		1.0, LaborSystem.LABOR_SCALE, 1.0, float(bf["morale"]), float(bf["eng"]))
+	gain = minf(gain, minf(cur, left))
+	if Probe.enabled:
+		Probe.bump("construct.gather_ticks")
+		Probe.bump("construct.gather_ticks.terrain." + tile.terrain)   # ★V8 按地形拆
+	if gain <= 0.0:
+		return
+	TileBank.pool_set(tile, "material", cur - gain, "site_gather")
+	left -= gain
+	if left <= 0.000001:
+		left = 0.0
+	gl["material"] = left
+	var ss: Dictionary = tile.construction_target.get("site_stock", {})
+	ss["material"] = float(ss.get("material", 0.0)) + gain
+	tile.construction_target["site_stock"] = ss
+	tile.construction_last_progress_tick = state.world.current_tick
+	if Probe.enabled:
+		Probe.add_amount("construct.gathered", gain)
+		if left == 0.0: Probe.bump("construct.gather_done")
+
+# 施工隊的士氣與隊長工程（material_gain 的兩個隊相依係數；同 resource_system 採集呼叫端 :107 讀隊長）
+static func builder_factors(state: WorldState, team: TeamData) -> Dictionary:
+	if team == null:
+		return {"morale": 1.0, "eng": 0.0}
+	var leader = state.persons.get(team.leader_id)
+	return {"morale": team.work_morale, "eng": float(leader.skills.get("工程", 0.0)) if leader else 0.0}
+
+# ★結構輪探針 §二 採段期限：採多久算蓋不成（天）。★藍圖改值只動這一支（WHAT 邊緣，已轉藍圖）。
+static func gather_window_days() -> float:
+	return CONSTRUCTION_TIMEOUT_CEIL_DAYS
+
+# ★結構輪探針 §三 地形先驗（遠端選點用；隊的格記憶沒有材料存量 ⇒ 常識「森林有木頭」）：
+#   cap＝生成區間中點、productivity＝生成區間中點。★估算器不得自己再讀那兩張表。
+#   ★誠實限：被採光的格、老林覆寫的格，先驗會錯 ⇒ 到場後被採段期限取消（construct.gather_abort）。
+const _WORLDGEN := preload("res://scripts/simulation/world_generator.gd")
+static func site_prior(terrain: String) -> Dictionary:
+	var prof: Dictionary = _WORLDGEN.RESOURCE_PROFILE.get(terrain, {})
+	var mr: Array = prof.get("material", [0, 0])
+	var pr: Array = _WORLDGEN.PRODUCTIVITY_RANGE.get(terrain, [0.0, 0.0])
+	return {"cap": (float(mr[0]) + float(mr[1])) * 0.5, "productivity": (float(pr[0]) + float(pr[1])) * 0.5}
+
+# 站在格上：腳下真值（親見）
+static func site_of_tile(tile: HexTileData) -> Dictionary:
+	return {"cap": float(tile.resource_cap.get("material", 0)), "productivity": tile.productivity}
+
+# ★結構輪探針 §三：採段天數（貼上限模型）。★前提：材料池一直貼著上限（回生每小時、不乘 day_fraction，
+#   遠大於上限）⇒ 不模擬回生；床 V6b 證明（停採 24 小時，池回到 cap）。
+#   ★係數只呼 ResourceSystem.material_gain（禁手抄）。超過 gather_window_days ⇒ INF（同執行端期限）。
+static func gather_eta_days(state: WorldState, team: TeamData, need_material: float, carried_material: float, site: Dictionary) -> float:
+	var need_left: float = maxf(need_material - carried_material, 0.0)
+	if need_left <= 0.0:
+		return 0.0
+	var bf: Dictionary = builder_factors(state, team)
+	var daily: float = ResourceSystem.material_gain(float(site.get("productivity", 0.0)), float(site.get("cap", 0.0)), 1.0,
+		1.0, LaborSystem.LABOR_SCALE, 1.0, float(bf["morale"]), float(bf["eng"]))
+	if daily <= 0.0:
+		return INF
+	var d: float = need_left / daily
+	return INF if d > gather_window_days() else d
+
+# ★結構輪探針 §三：新點總天數＝採段＋築段。凡是估「一座還沒開工的新點」的都讀這支。
+static func build_eta_total_days(state: WorldState, team: TeamData, type: String, level: int, pop: int,
+		carried_material: float, site: Dictionary) -> float:
+	var need: float = float((OUTPOST_COST[type][level - 1] as Dictionary).get("material", 0))
+	var g: float = gather_eta_days(state, team, need, carried_material, site)
+	if g == INF:
+		return INF
+	return g + build_eta_days(build_person_hours(type, level), pop)
+
+# ★結構輪探針 §三：估「一座還沒開工的新點」給效用用的天數（decision_context 紮根／擴點／紮營靶、goal_resolver）。
+#   site 的來源（感知鐵律）：站在那一格上 ⇒ 腳下真值（親見）；遠端 ⇒ 地形先驗。
+#   ★採不完（INF）⇒ 採段夾到期限（給效用的是有限數，不讓 INF 進除法）；要不要去由效用自己秤。
+static func new_site_eta_days(state: WorldState, team: TeamData, type: String, pos: Vector2i, pop: int, carried_material: float) -> float:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	var site: Dictionary
+	if tile == null:
+		site = {"cap": 0.0, "productivity": 0.0}
+	elif team != null and team.tile_pos == pos:
+		site = site_of_tile(tile)
+	else:
+		site = site_prior(tile.terrain)
+	var d: float = build_eta_total_days(state, team, type, 1, pop, carried_material, site)
+	if d == INF:
+		d = gather_window_days() + build_eta_days(build_person_hours(type, 1), pop)
+	return d
+
+# ★結構輪探針 §四：玩家面的建點回句（紮根、建設、派子隊建設同一套）。
+#   「需材 N，帶料抵 K，{where}可採約 M 天，之後築約 D 天」；M＝INF ⇒「{where}的料 {窗} 天內採不夠，不帶料會被取消」（不擋）。
+#   site：builder 站在 pos 上 ⇒ 腳下真值；否則地形先驗（子隊還沒站上去）。
+static func build_plan_sentence(state: WorldState, builder: TeamData, type: String, pos: Vector2i, pop: int, carried_material: float, where: String) -> String:
+	var need: float = float((OUTPOST_COST[type][0] as Dictionary).get("material", 0))
+	var k: float = minf(maxf(carried_material, 0.0), need)
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	var site: Dictionary = {"cap": 0.0, "productivity": 0.0}
+	if tile != null:
+		site = site_of_tile(tile) if (builder != null and builder.tile_pos == pos) else site_prior(tile.terrain)
+	var m: float = gather_eta_days(state, builder, need, k, site)
+	var d: float = build_eta_days(build_person_hours(type, 1), pop)
+	var s: String = "需材 %d，帶料抵 %d，" % [int(need), int(floor(k))]
+	if m == INF:
+		s += "%s的料 %d 天內採不夠，不帶料會被取消；" % [where, int(gather_window_days())]
+	else:
+		s += "%s可採約 %.1f 天，" % [where, m]
+	return s + "之後築約 %.1f 天" % d
+
+# ★結構輪探針 M5：start_build 回 false 的真因（給玩家回句；料不再是原因，除非 L2+ 軍用缺工具）
+static func build_block_reason(state: WorldState, team: TeamData) -> String:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null:
+		return "不在地圖上"
+	if tile.outpost_level > 0:
+		return "這格已有據點"
+	if tile.construction_team_id != -1:
+		return "這格正在施工"
+	return "缺工具"
+
+# ★結構輪探針 §三：進行中工地的剩餘總天數（採段剩下＋築段剩下）。need 讀 construction_target.need、carried＝site_stock。
+static func site_eta_remaining_days(state: WorldState, team: TeamData, tile: HexTileData, pop: int, site: Dictionary) -> float:
+	var need: float = float(tile.construction_target.get("need", 0.0))
+	var stock: float = float((tile.construction_target.get("site_stock", {}) as Dictionary).get("material", 0.0))
+	var g: float = gather_eta_days(state, team, need, stock, site)
+	if g == INF:
+		return INF
+	return g + build_eta_days(tile.construction_ticks_left, pop)
+
+# ★結構輪探針 §三（persist_strength._progress）：分子分母都含採段。
+#   總量＝採段天數(need 全採)＋築段天數；已完成＝site_stock 對應天數＋已築天數。
+#   ★天數用施工隊本身的係數 × 腳下真值（工地就在腳下）；隊不在 ⇒ 中性係數。
+static func construction_progress(state: WorldState, tile: HexTileData) -> float:
+	var total_ticks: int = construction_ticks_total(tile)
+	if total_ticks <= 0:
+		return 0.0
+	var need: float = float(tile.construction_target.get("need", 0.0))
+	var stock: float = float((tile.construction_target.get("site_stock", {}) as Dictionary).get("material", 0.0))   # ＝帶來的＋採到的
+	var carried0: float = float(tile.construction_target.get("carried", 0.0))
+	if need <= carried0:
+		# 沒有採段（升級／擴建、或帶夠料的新點）⇒ 照改制前的 person-tick 比（逐位元同式）
+		return clampf(float(total_ticks - tile.construction_ticks_left) / float(total_ticks), 0.0, 1.0)
+	var pop0: int = maxi(int(tile.construction_target.get("start_pop", 1)), 1)
+	var build_total: float = build_eta_days(total_ticks, pop0)
+	var build_done: float = build_total - build_eta_days(maxi(tile.construction_ticks_left, 0), pop0)
+	var team: TeamData = state.teams.get(tile.construction_team_id)
+	var site: Dictionary = site_of_tile(tile)
+	var g_total: float = gather_eta_days(state, team, need, carried0, site)
+	var g_left: float = gather_eta_days(state, team, need, stock, site)
+	if g_total == INF:
+		g_total = gather_window_days()
+	if g_left == INF:
+		g_left = minf(g_total, gather_window_days())
+	var tot: float = g_total + build_total
+	if tot <= 0.0:
+		return 0.0
+	return clampf((g_total - g_left + build_done) / tot, 0.0, 1.0)
+
 func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData) -> void:
 	var action: String = tile.construction_target.get("action", "")
 	# ★complete tap（純觀測）：completion 事件（A1 measure=0 的正向對照）。
@@ -431,17 +605,26 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 		Probe.bump("construct.complete")
 		# ★持守統一 Slice 4：per-action-type completion 計數（A1 閉環硬確認：'build'=新 outpost founding vs upgrade_*）。
 		Probe.bump("construct.complete_" + str(action))
+		if action == "build": Probe.bump("construct.complete_build.terrain." + tile.terrain)   # ★結構輪探針 V8
 		Probe.bump_sample("construct.complete", {
 			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
 			"action": action, "team": team.team_id,
 		})
 	match action:
 		"build":
+			# ★結構輪探針 §一：完工只剩這一支（原本建設、紮根兩支副作用取聯集）
 			tile.outpost_type  = tile.construction_target["type"]
 			tile.outpost_level = tile.construction_target["level"]
 			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
 			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（完工 0→>0；set_owner 可能因 owner 未變而 early-return，不能依賴它）
 			OutpostOwnerBank.set_owner(state, tile, int(tile.construction_target.get("owner", tile.construction_team_id)), "construct")
+			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP（原紮根支）
+			if tile.camp_level > 0:
+				tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
+				tile.camp_team_id = -1     # ★§4c：L0 生命週期結束（升 L1）→ 清起建隊欄
+				tile.camp_ticks_left = 0
+				OwnerCampIndex.invalidate()   # ★own-camp chokepoint③（清）：L0 消融進 L1 ⇒ 姊妹索引失效
+				if Probe.enabled: Probe.bump("outpost.l0_to_l1")   # ★gate3：晉級率（真的長成村，不是蓋了就丟）
 			var n: String = get_outpost_name(tile.outpost_type, tile.outpost_level)
 			SimMessageSystem.new().emit_message(state, "outpost_built",
 				TextBank.fmt("outpost_built", "honest", {
@@ -462,6 +645,15 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			# ★玩家子隊不就地安頓：據點已歸母隊，子隊原地待命等召回（spec player-subteams 三）
 			if team.parent_team_id != -1 and not team.player_controlled:
 				_auto_settle_builder(state, team, tile)
+			else:
+				# 主隊、玩家子隊（原紮根支）：加型別 tag、去流亡、清工地記憶、釋放
+				var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE
+				if not team.tags.has(camp_tag):
+					team.tags.append(camp_tag)
+				team.tags.erase("流亡")
+				if team.corvee_site == tile.tile_pos:
+					team.corvee_site = Vector2i(-1, -1)   # ★S2b：工程完成→清工地記憶
+				TaskArbiter.release(team, "construction_done")   # ★明傳來源：附身隊的玩家令只認 RELEASE_SOURCES
 		"upgrade_level":
 			tile.outpost_level = tile.construction_target["level"]
 			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
@@ -479,27 +671,6 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				FacilityExistenceIndex.invalidate()   # ★設施 0→1 不動 owner、不讓 outpost_level 跨 0 ⇒ 共用 epoch 抓不到
 				print("[Outpost] 設施完工 %s Lv%d at (%d,%d)" % [
 					fac, int(tile.get(key)), tile.tile_pos.x, tile.tile_pos.y])
-		"crude_camp":
-			# 玩家紮營完工（Y 版）：免材料,只抬 food cap（regen 才產糧）,絕不送即時糧（去剝削）
-			tile.outpost_type  = str(tile.construction_target.get("type", "civilian"))
-			tile.outpost_level = 1
-			state.outpost_epoch += 1   # ★market-known 快取失效鍵（世界 tile 的 outpost_level 變了）
-			OwnerOutpostIndex.invalidate()   # ★效能 arc B chokepoint②：outpost_level 跨 0（紮營完工 0→1）
-			OutpostOwnerBank.set_owner(state, tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
-			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
-			tile.camp_level = 0        # ★S2b：L0 消融進 L1（完工清 camp flag、L1 outpost_level 接手）
-			if Probe.enabled: Probe.bump("outpost.l0_to_l1")   # ★gate3：晉級率（真的長成村，不是蓋了就丟）
-			tile.camp_team_id = -1     # ★§4c：L0 生命週期結束（升 L1）→ 清起建隊欄
-			OwnerCampIndex.invalidate()   # ★own-camp chokepoint③（清）：L0 消融進 L1 ⇒ 姊妹索引失效
-			tile.camp_ticks_left = 0
-			team.corvee_site = Vector2i(-1, -1)   # ★S2b：工程完成→清工地記憶
-			var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE
-			if not team.tags.has(camp_tag):
-				team.tags.append(camp_tag)
-			team.tags.erase("流亡")
-			TaskArbiter.release(team, "construction_done")   # 紮營完工 → 釋放玩家隊回 idle（否則永卡 task=建設）；★明傳來源：附身隊的玩家令只認 RELEASE_SOURCES
-			print("[CrudeCamp] Team%d 玩家紮營完工 @(%d,%d) → %s" % [
-				team.team_id, tile.tile_pos.x, tile.tile_pos.y, tile.outpost_type])
 		"demolish":
 			print("[Outpost] Team%d 拆除 %s at (%d,%d)" % [
 				team.team_id, get_outpost_name(tile.outpost_type, tile.outpost_level),
@@ -580,22 +751,50 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int, ow
 		push_warning("[Outpost] start_build: 目標格建設中")
 		return false
 	var cost: Dictionary = OUTPOST_COST[type][level - 1]
-	if not _can_afford(team, tile, cost, "start_build"):
-		push_warning("[Outpost] start_build: 資源不足")
-		return false
-	_deduct_cost(team, tile, cost)
+	# ★結構輪探針 §一：開工不查有沒有料。帶來的先抵（公庫優先順序照 _deduct_cost），抵不完的 material 進 gather_left
+	#   在腳下採；★只有 material 能就地採 ⇒ 其他資源抵不完（只剩 L2+ 軍用 tools）⇒ 開工回 false。
+	var paid: Dictionary = {}
+	var short: Dictionary = {}
+	for res in cost:
+		if res == "person_hours":
+			continue
+		var need_r: float = float(cost.get(res, 0))
+		if need_r <= 0.0:
+			continue
+		var avail: float = float(tile.public_storage.get(res, 0)) + float(team.resources.get(res, 0))
+		var pay: float = minf(avail, need_r)
+		if pay < need_r:
+			if res != "material":
+				push_warning("[Outpost] start_build: 缺 %s（只有 material 能就地採）" % res)
+				if Probe.enabled: Probe.bump("afford.short.start_build." + String(res))
+				return false
+			short[res] = need_r - pay
+		if pay > 0.0:
+			paid[res] = pay
+	_deduct_cost(team, tile, paid)
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = build_person_hours(type, level)
-	tile.construction_target    = { "action": "build", "type": type, "level": level }
+	var carried_m: float = float(paid.get("material", 0.0))
+	tile.construction_target    = { "action": "build", "type": type, "level": level,
+		"need": float(cost.get("material", 0)), "carried": carried_m,
+		"gather_left": {"material": float(short.get("material", 0.0))},
+		"site_stock": {"material": carried_m} }
 	if owner_id != -1:
 		tile.construction_target["owner"] = owner_id   # ★玩家子隊建 ⇒ 據點歸母隊（召回後子隊被併掉也不會無主）
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
+	# ★結構輪探針 §一：身體一律記工地（原本只有紮根寫）；★限主隊——子隊另有 task_extra_data 與召回路
+	if team.parent_team_id == -1:
+		team.corvee_site = tile.tile_pos
 	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH, Vector2i(-1, -1), "construction_started")   # A4：就地施工（工地在腳下）；★具名事件來源（player-subteams 二）
 	_tap_build_start(state, team, tile, "build")
-	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
+	if Probe.enabled:   # ★結構輪探針 V8：開工按地形、按入口（主隊在營地格＝紮根）、帶料 >0 的比例
+		Probe.bump("construct.start_build.terrain." + tile.terrain)
+		var _entry: String = "settle" if (tile.camp_level > 0 and team.parent_team_id == -1) else ("subteam" if team.parent_team_id != -1 else "main")
+		Probe.bump("construct.start_build.%s.carried_%s" % [_entry, "pos" if carried_m > 0.0 else "zero"])
+	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks，需材 %d 帶料抵 %d 待採 %d）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
-		tile.construction_ticks_left])
+		tile.construction_ticks_left, int(cost.get("material", 0)), int(carried_m), int(ceil(float(short.get("material", 0.0))))])
 	return true
 
 func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
@@ -739,10 +938,6 @@ static func construction_ticks_total(tile: HexTileData) -> int:
 		"demolish":
 			if tile.outpost_level > 0:
 				return build_person_hours(tile.outpost_type, tile.outpost_level) / 2
-		"crude_camp":
-			# ★紮根(faction_ai)與玩家紮營都叫 crude_camp 但工期不同 ⇒ 讀起工時記下的實付工量。
-			#   ★★改制前這裡沒有分支 ⇒ 兩者都回 0 ⇒ persist_strength/commitment 的 sunk 恆 0（既有 bug）。
-			return int(tile.construction_target.get("person_hours", 0))
 	return 0
 
 # 工地 30 天無實際進度 → 取消、退 50% 料給施工團、tile 釋放。回傳 true = 已取消。
@@ -756,8 +951,16 @@ func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
 			tile.construction_started_tick = state.world.current_tick
 		return false
 	var _timeout_ticks: int = int(round(construction_timeout_days(tile) * float(WorldState.TICKS_PER_DAY)))
-	if state.world.current_tick - tile.construction_last_progress_tick <= _timeout_ticks:
+	# ★結構輪探針 §二 採段期限：池一直貼上限 ⇒ 採段每 tick gain>0 ⇒ 停工逾時永遠不響 ⇒ 另設期限。
+	#   ★寫在這裡不寫在 _tick_construction：它在無施工隊時早退，隊被召走的工地會看不到期限。
+	var _gather_abort: bool = float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", 0.0)) > 0.0 \
+		and tile.construction_started_tick != -1 \
+		and state.world.current_tick - tile.construction_started_tick > int(round(gather_window_days() * float(WorldState.TICKS_PER_DAY)))
+	if not _gather_abort and state.world.current_tick - tile.construction_last_progress_tick <= _timeout_ticks:
 		return false
+	if _gather_abort and Probe.enabled:
+		Probe.bump("construct.gather_abort")
+		Probe.bump("construct.gather_abort.terrain." + tile.terrain)
 	# ★timeout cancel tap（純觀測）：工地逾時取消（stall 未被召回→逾時=一階/二階失效證）。
 	if Probe.enabled:
 		Probe.bump("construct.timeout_cancel")
@@ -767,7 +970,10 @@ func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
 			"stall_ticks": state.world.current_tick - tile.construction_last_progress_tick,
 		})
 	var ct: TeamData = state.teams.get(tile.construction_team_id)
+	# ★結構輪探針：新點（"build"）開工不再一次扣滿 ⇒ 退工地裡實際有的（site_stock）的一半；其他工地照舊退成本表的一半
 	var cost: Dictionary = construction_cost_of(tile)
+	if str(tile.construction_target.get("action", "")) == "build":
+		cost = tile.construction_target.get("site_stock", {})
 	if ct != null:
 		for k in cost:
 			if k == "person_hours": continue

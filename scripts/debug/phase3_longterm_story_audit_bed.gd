@@ -111,7 +111,7 @@ func _initialize() -> void:
 		"a2.invite_range_pass", "a2.invite_accept", "a2.invite_reject", "a2.invite_task_settle_set",
 		"a2.convert_via_subteam_arrival", "a2.convert_via_pair_interaction",
 		"worldgen.build_outpost", "convert_via_settle", "settlement.camp_l0",
-		"settlement.l0_to_l1_start", "construct.complete_crude_camp", "construct.complete",
+		"settlement.l0_to_l1_start", "outpost.l0_to_l1", "construct.complete",
 		# try_set共根diagnostic(2026-08-13,measurer):A2 invite_settle + A3 unified建設(TASK_BUILD) return-false分歸因。
 		"tryset.blocked_combat_lock", "tryset.blocked_crisis_immune", "tryset.blocked_persist_hold",
 		"tryset.blocked_final_priority_lower", "tryset.blocked_final_equal_priority_source_gated",

@@ -97,7 +97,7 @@ const PROBE_KEYS: Array = [
 	"construct.complete", "construct.timeout_cancel",
 	# ★持守統一 Slice 4：per-action-type completion（A1 閉環硬確認 build vs upgrade_*）+ persist 門檻擋搶班計數
 	"construct.complete_build", "construct.complete_upgrade_facility",
-	"construct.complete_upgrade_level", "construct.complete_demolish", "construct.complete_crude_camp",
+	"construct.complete_upgrade_level", "construct.complete_demolish", "outpost.l0_to_l1",
 	"persist.hold",
 	"foodflow.update",   # ★糧流感知 Slice A：runway 感官每日算次數（tap 禁 RNG）
 	"bridge.no_go_food", "bridge.topup",   # ★糧流 Slice B1：糧橋 no-go/top-up（A1 子隊配糧）

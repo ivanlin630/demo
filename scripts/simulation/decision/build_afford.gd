@@ -49,16 +49,3 @@ static func can_afford(cost: Dictionary, pools: Array, leader_values: Dictionary
 		if avail < float(cost[k]) * margin:
 			return false
 	return true
-
-# ★短缺明細（給既有的 depletion tap 用；★純讀，不做判斷）：回第一個不足的資源與數字。
-static func shortfall(cost: Dictionary, pools: Array, leader_values: Dictionary) -> Dictionary:
-	var margin: float = margin_of(leader_values)
-	for k in cost:
-		if k == "person_hours":
-			continue
-		var avail: float = 0.0
-		for p in pools:
-			avail += float((p as Dictionary).get(k, 0))
-		if avail < float(cost[k]) * margin:
-			return {"res": String(k), "need": float(cost[k]) * margin, "avail": avail, "margin": margin}
-	return {}
