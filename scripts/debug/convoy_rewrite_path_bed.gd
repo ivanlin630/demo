@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # convoy-return-task-authority 第一趟：**RETURN 期間 `current_task` 被改寫時走哪一條路**。
 #
 # ★systems 明示：**這一格定了，原本那兩個假說才輪得到。**

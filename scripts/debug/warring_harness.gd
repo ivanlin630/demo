@@ -1,4 +1,6 @@
 class_name WarringHarness
+# @bed-kind: pending —— ★本檔【不是床】：共用 harness（同 MeasureBedHelper），自己不判決
+# blocker: bed-kind-has-no-slot-for-shared-helpers
 
 # Seeded warring 回歸 harness 共用 runner（純 debug/infra，零 sim 邏輯變）。
 # seed() 播 global RNG（runtime randf/randi） + config.seed 播 setup RNG（map/team/person gen）

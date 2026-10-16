@@ -7944,6 +7944,9 @@ func _test_evaluate_outpost_location() -> void:
 	state.world = WorldData.new()
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
+	# ★結構輪探針 M8（spec 2026-10-16 §三之二）：選址先濾「採不完」的格（母隊撥得出的料＋地形先驗採 30 天內不夠）
+	#   ⇒ 場景補世界事實：母隊帶一座 L1 民用的料（50）⇒ 採段 0、gather_term 0、分數與修前同（本測驗的是分數其他項）
+	leader_team.resources = {"material": 50.0}
 	state.teams[0] = leader_team
 	for x in range(-3, 4):
 		for y in range(-3, 4):
@@ -12032,10 +12035,16 @@ func _test_outpost_cost_no_finite() -> void:
 		assert(not lvl_cost.has("coin") or int(lvl_cost.get("coin", 0)) == 0)
 		assert(int(lvl_cost.get("weapon", 0)) == 0)
 		assert(int(lvl_cost.get("tools", 0)) == 0, "civilian 純 mat")
-	for lvl_cost in OutpostSystem.OUTPOST_COST["military"]:
+	# ★結構輪探針（spec 2026-10-16 §一）：L1 軍用 tools 歸零（工具在腳下採不到＝硬門）；L2+ 仍要 tools
+	var _mil: Array = OutpostSystem.OUTPOST_COST["military"]
+	for _li in range(_mil.size()):
+		var lvl_cost: Dictionary = _mil[_li]
 		assert(int(lvl_cost.get("coin", 0)) == 0)
 		assert(int(lvl_cost.get("weapon", 0)) == 0, "weapon 成本移除")
-		assert(int(lvl_cost.get("tools", 0)) > 0, "military 要 tools")
+		if _li == 0:
+			assert(int(lvl_cost.get("tools", 0)) == 0, "L1 military tools 歸零")
+		else:
+			assert(int(lvl_cost.get("tools", 0)) > 0, "military L%d 要 tools" % (_li + 1))
 	print("Facility Task2 OK")
 
 func _make_mfg_state(facility_levels: Dictionary) -> Array:
@@ -12744,6 +12753,9 @@ func _test_siting_resource_weight() -> void:
 	state.world = WorldData.new()
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(5, 5)
+	# ★結構輪探針 M8（spec 2026-10-16 §三之二）：選址先濾「採不完」的格（母隊撥得出的料＋地形先驗採 30 天內不夠）
+	#   ⇒ 場景補世界事實：母隊帶一座 L1 民用的料（50）⇒ 採段 0、gather_term 0、分數與修前同（本測驗的是分數其他項）
+	leader_team.resources = {"material": 50.0}
 	state.teams[0] = leader_team
 	# 兩候選同 productivity/terrain/dist：A=(7,5) 鄰藥草林、B=(3,5) 無
 	for pos in [Vector2i(7, 5), Vector2i(3, 5)]:
@@ -12769,6 +12781,9 @@ func _test_siting_multi_center() -> void:
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
 	leader_team.faction_id = 1
+	# ★結構輪探針 M8（spec 2026-10-16 §三之二）：選址先濾「採不完」的格（母隊撥得出的料＋地形先驗採 30 天內不夠）
+	#   ⇒ 場景補世界事實：母隊帶一座 L1 民用的料（50）⇒ 採段 0、gather_term 0、分數與修前同（本測驗的是分數其他項）
+	leader_team.resources = {"material": 50.0}
 	state.teams[0] = leader_team
 	# faction 第二 outpost 在 (10,10)，富點候選 (12,10) 距 leader 22 / 距 outpost 2
 	var op := HexTileData.new()
@@ -12795,6 +12810,9 @@ func _test_site_diff_print() -> void:
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
 	leader_team.faction_id = 1
+	# ★結構輪探針 M8（spec 2026-10-16 §三之二）：選址先濾「採不完」的格（母隊撥得出的料＋地形先驗採 30 天內不夠）
+	#   ⇒ 場景補世界事實：母隊帶一座 L1 民用的料（50）⇒ 採段 0、gather_term 0、分數與修前同（本測驗的是分數其他項）
+	leader_team.resources = {"material": 50.0}
 	state.teams[0] = leader_team
 	for x in range(-3, 4):
 		for y in range(-3, 4):
@@ -16168,6 +16186,9 @@ func _test_g1a_mining_site() -> void:
 	state.world = WorldData.new()
 	# 貪婪 leader 在 (0,0)；放含金礦山 (3,0) 和競爭平原 (0,3)
 	var greedy_team := _mk_team_with_greedy_leader(state, Vector2i(0, 0))
+	# ★結構輪探針 M8（spec 2026-10-16 §三之二）：選址先濾「採不完」的格（母隊撥得出的料＋地形先驗採 30 天內不夠）
+	#   ⇒ 場景補世界事實：母隊帶一座 L1 民用的料（50）⇒ 採段 0、gather_term 0、分數與修前同（本測驗的是分數其他項）
+	greedy_team.resources["material"] = 50.0
 	_force_gold_mountain(state, Vector2i(3, 0))
 	var plains_t := HexTileData.new()
 	plains_t.tile_id = 0 * 1000 + 3; plains_t.tile_pos = Vector2i(0, 3)
@@ -16181,6 +16202,7 @@ func _test_g1a_mining_site() -> void:
 	var state2 := WorldState.new()
 	state2.world = WorldData.new()
 	var meek_team := _mk_team_with_meek_leader(state2, Vector2i(0, 0))
+	meek_team.resources["material"] = 50.0   # ★同上（結構輪 M8）
 	_force_gold_mountain(state2, Vector2i(3, 0))
 	var plains_t2 := HexTileData.new()
 	plains_t2.tile_id = 0 * 1000 + 3; plains_t2.tile_pos = Vector2i(0, 3)
@@ -16631,6 +16653,10 @@ func _test_join_vs_camp_law() -> void:
 	# 方向 A：host 是張好飯票（L2、pop 16 ⇒ 人均高）→ 同一個義氣隊必須【投靠】
 	var sa := WorldState.new(); sa.world = WorldData.new()
 	var ja := _mk_unified_desperate_team(sa, Vector2i(2,2), vals)
+	# ★結構輪探針（spec 2026-10-16 §三之二）：紮營靶的延遲＝距離＋新點總天數（採段＋築段）；紮根改要材料（用戶裁）
+	#   ⇒ 自立那一側要「蓋得起」才是本法條的場景（兩場景只差 host 品質）⇒ 兩隊都帶一座 L1 民用的料。
+	#   ★帶 0 料時（逐選項 dump）：camp_flow_delay 3→33 天、紮營 1.5325→1.3018，B 翻成投靠（交件信列）。
+	ja.resources["material"] = 50.0
 	_mk_strong_neighbor_team(sa, Vector2i(3,2), ja, 2, 16)
 	var ctx_a := DecisionContext.gather(sa, ja)
 	FactionAISystem.new()._decide_unified(sa, ja)
@@ -16639,6 +16665,7 @@ func _test_join_vs_camp_law() -> void:
 	# 方向 B：host 擁擠（L1、pop 30 ⇒ 人均低）→ 同一個義氣隊必須【自立】
 	var sb := WorldState.new(); sb.world = WorldData.new()
 	var jb := _mk_unified_desperate_team(sb, Vector2i(2,2), vals)
+	jb.resources["material"] = 50.0   # ★同上
 	_mk_strong_neighbor_team(sb, Vector2i(3,2), jb, 1, 30)
 	var ctx_b := DecisionContext.gather(sb, jb)
 	FactionAISystem.new()._decide_unified(sb, jb)

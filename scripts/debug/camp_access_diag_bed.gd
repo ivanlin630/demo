@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # 接入 arc §3 三分流診斷床（★診斷先行、只產分流證據）。
 # 報：零採集總數（母/子）、三分流計數、★逐隊歸格（不得只給總數）、camp.applicable_but_idle、
 #     pop=1 村數、紮營/L0→L1/L0 廢棄 相關 tap（供後續 gate3 對照）。

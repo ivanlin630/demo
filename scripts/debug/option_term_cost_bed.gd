@@ -291,7 +291,7 @@ func _initialize() -> void:
 		"ON" if probe_on else "OFF"])
 	if not probe_on:
 		print("★fp=%s" % StateFingerprint.compute(st))
-		print("=== DONE === SECTIONS=1/1 FAILS=0（★Probe 關 ⇒ 只有這一支碼表有數字）")
+		print("=== DONE === SECTIONS=1/1（★Probe 關 ⇒ 只有這一支碼表有數字）")
 		quit()
 	var calls: int = int(Probe.counts.get("optterm.calls", 0))
 	var opt_rows: Array = []
@@ -378,5 +378,5 @@ func _initialize() -> void:
 			Probe.amount("ctxseg.sort." + sn2) / n3,
 			Probe.amount("ctxseg.options." + sn2) / n3])
 	print("★★★fp=%s" % StateFingerprint.compute(st))
-	print("=== DONE === SECTIONS=1/1 FAILS=0")
+	print("=== DONE === SECTIONS=1/1")
 	quit()

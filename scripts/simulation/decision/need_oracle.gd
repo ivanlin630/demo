@@ -291,10 +291,10 @@ static func new_outpost_urgency(state: WorldState, team: TeamData) -> float:
 
 # ★結構輪 §三之三：買料 util 的建設迫切＝max(設施迫切, 新點迫切)（原 max_material_facility_desire 改名）。
 static func material_build_urgency(state: WorldState, team: TeamData) -> float:
-	return maxf(_facility_build_desire(state, team), new_outpost_urgency(state, team))
+	return maxf(max_material_facility_desire(state, team), new_outpost_urgency(state, team))
 
-# 設施那一支（舊 max_material_facility_desire 本體，逐字不變）
-static func _facility_build_desire(state: WorldState, team: TeamData) -> float:
+# 設施那一支（舊名舊本體，逐字不變；★名字留舊的：改成 _facility_ 開頭會掉進憲法閘的決策函式名單，把既有比較算成新閘）
+static func max_material_facility_desire(state: WorldState, team: TeamData) -> float:
 	if state == null:
 		return 0.0
 	var own_pos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)

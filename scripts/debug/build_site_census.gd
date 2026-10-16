@@ -23,14 +23,12 @@ func _run() -> void:
 	var sd: int = int(_env("PERF_SEED", "1337"))
 	print("=== build_site_census：config=%s days=%d seed=%d ===" % [cfg, days, sd])
 	seed(sd)
-	Probe.enabled = true
-	Probe.reset()
 	FactionAISystem._a2b_remote_tribute_payers.clear()
-	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg)
 	config["seed"] = sd
-	GameSetup.setup(state, config)
+	# ★arm 先於 setup（順序寫死在 helper）；不拆玩家（與電池世界同）
+	var state: WorldState = MeasureBedHelper.arm_and_setup(config, false)
 	var terr_of: Dictionary = {}
 	for tid in state.world.tiles:
 		var t: HexTileData = state.world.tiles[tid]
@@ -76,6 +74,9 @@ func _run() -> void:
 	print("V8|  site.candidates_scored=%d｜site.candidates_kept 累計=%.0f｜site.filtered_barren=%d｜infra.stop.3_loc_empty=%d｜infra.stop.3_reached_dispatch_builder=%d" % [
 		_c("site.candidates_scored"), Probe.amount("site.candidates_kept"), _c("site.filtered_barren"), _c("infra.stop.3_loc_empty"),
 		_c("infra.stop.3_reached_dispatch_builder")])
+	# ★attempt 從哪條路來（goal 委派 branch_build／擴點選址快取），選址迴圈這一窗跑了幾次
+	print("V8|  attempt 來源：funnel.delegate.branch_build=%d｜delegate.build_ok=%d｜delegate.build_fail=%d｜gather.write.expand_site_cached.advance=%d" % [
+		_c("funnel.delegate.branch_build"), _c("delegate.build_ok"), _c("delegate.build_fail"), _c("gather.write.expand_site_cached.advance")])
 	print("V8|--- 採段與完工 ---")
 	print("V8|  construct.start=%d｜construct.gather_ticks=%d｜gather_done=%d｜gather_abort=%d｜gathered 累計=%.1f｜timeout_cancel=%d｜complete_build=%d｜outpost.l0_to_l1=%d｜settlement.l0_to_l1_start=%d" % [
 		_c("construct.start"), _c("construct.gather_ticks"), _c("construct.gather_done"), _c("construct.gather_abort"), Probe.amount("construct.gathered"),

@@ -1109,7 +1109,8 @@ func _n6c() -> void:
 	var cn: float = NeedOracle._construction_need(st, n, "material", lv)
 	print("    新點 %.1f｜設施（原值）%.1f｜_construction_need %.1f（上限 %.0f）" % [nn, fac, cn, NeedOracle.CONSTRUCTION_MATERIAL_NEED_CAP])
 	_cell("_n6c")
-	_check("N6c 新點 80 全留、設施得剩下的 20、合計 100", is_equal_approx(nn, 80.0) and fac >= 20.0 and is_equal_approx(cn, 100.0))
+	# ★誠實限：n＋min(f, cap−n) ≡ f＋min(n, cap−f) ≡ min(n＋f, cap) ⇒ 分配順序在總和上對稱，且沒有消費端讀分帳 ⇒「新點先占」不可觀測（負對照 n26 不紅，交件信列）
+	_check("N6c 新點 80＋設施 100 ⇒ 合計夾上限 100（只驗總和）", is_equal_approx(nn, 80.0) and fac >= 20.0 and is_equal_approx(cn, 100.0))
 
 func _n8() -> void:
 	print("\n── N8 承諾不被自己的需求換掉 ──")

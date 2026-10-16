@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 
 # [measurer持久fixture 2026-08-12] ③長期故事驗證 first-pass story-audit(整系統believability)。
 # ticket:docs/superpowers/handbacks/2026-08-12-systems-to-measurer-phase3-longterm-story-audit.md

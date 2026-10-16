@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: settlement S2b 紮根工期（結構輪探針後：紮根走 start_build、action build、要材料）
 # settlement S2b TDD — L0→L1 紮根工期（複用 construction spine）。
 # ①站自己 L0 viable→設 construction_target level:1+ticks+TASK_BUILD ②非站 L0/瀕餓不啟
 # ③工期 tick 推 ticks 遞減 ④完工→outpost_level=1+owner+camp_level 清0+居民 tag+fp 反映

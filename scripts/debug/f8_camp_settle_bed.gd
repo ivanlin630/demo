@@ -121,6 +121,9 @@ func _p8a_p8b_p8d_p8e() -> void:
 	var has_settle_cmd: bool = cs.has_method("_action_settle")
 	_check("★P8b：紮根有自己的動作（_action_settle）", has_settle_cmd)
 	if has_settle_cmd:
+		# ★結構輪（spec 2026-10-16 §一）：紮根改走 start_build、要材料（用戶裁「成本就是時間」→「要料」）⇒ 帶滿料，採段為 0，完工只看築段
+		var need_mat: float = float((OutpostSystem.OUTPOST_COST["civilian"][0] as Dictionary).get("material", 0))
+		ResourceBank.set_amt(pt, "material", maxf(need_mat, float(pt.resources.get("material", 0.0))), "bed_seed")
 		var rs: Dictionary = cs.call("_action_settle", st, -1, pt, ptid)
 		var want: int = OutpostSystem.build_person_hours("settle", 1)
 		print("   紮根 ⇒ %s｜construction_ticks_left=%d（settle 工期 %d）" % [str(rs), camp_tile.construction_ticks_left, want])
@@ -218,7 +221,8 @@ func _p8f() -> void:
 	var pats: Array = ["MIN_DIST" + "_", "_check" + "_distance", "山地無法" + "紮營"]
 	var hits: Dictionary = {}
 	var setpoints: Array = []
-	var crude_pat: String = "\"action\": \"crude" + "_camp\""
+	# ★結構輪（spec 2026-10-16 §一）：crude_camp 工程退場、紮根併進 start_build ⇒ 數的是唯一建點寫入 "action": "build"
+	var crude_pat: String = "\"action\": \"bui" + "ld\""
 	for f in _gd_files("res://scripts"):
 		var txt: String = FileAccess.get_file_as_string(f)
 		for p in pats:
@@ -230,7 +234,7 @@ func _p8f() -> void:
 	print("   命中：%s" % str(hits))
 	print("   crude_camp 工程設點：%s" % str(setpoints))
 	_check("P8f 間距常數／距離檢查／山地禁紮那一句在 scripts/ 出現 0 次（%d 處）" % hits.size(), hits.is_empty())
-	_check("P8f crude_camp 工程設點只准一處（共用函式）（%d）" % setpoints.size(), setpoints.size() == 1)
+	_check("P8f 建點工程設點只准一處（共用函式 start_build）（%d）" % setpoints.size(), setpoints.size() == 1)
 
 
 static func _gd_files(dir: String) -> Array:
