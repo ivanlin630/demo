@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: trade-loop-ignition（spec 2026-07-04-trade-loop-ignition；2026-10-16 只跟著 OrderSystem.market_pos 改名）
 
 # trade_funnel_bed：貿易環六站漏斗 measure harness（純 debug/infra，零 sim 邏輯變）。
 # 六站：張貼→收到→選中→dispatch/被誰打斷→到場→成交（spec 2026-07-04-trade-loop-ignition）。
