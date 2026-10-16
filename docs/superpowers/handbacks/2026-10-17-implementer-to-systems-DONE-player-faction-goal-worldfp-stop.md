@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 玩家勢力目標改用引擎同一套詞（spec 2026-10-16-player-faction-goal-engine-vocabulary-HOW）
 topic: 交件；唯一紅＝world-fp 變了（規格說「若變 ⇒ 停下回報」）——拆區證明只是 FD 行多三欄，請裁換基準
 ---
