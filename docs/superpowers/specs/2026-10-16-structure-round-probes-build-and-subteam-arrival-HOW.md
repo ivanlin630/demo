@@ -4,7 +4,7 @@
 > WHAT：
 > - 藍圖 2026-10-14-blueprint-to-systems-RULING-structure-round-before-deep-batch-one-verb-one-body-events-carry-source（結構輪範圍五條、探針兩個、停損）。
 > - 藍圖 2026-10-14-blueprint-to-systems-TICKET-L1-needs-material-gathered-on-site-and-three-entries-merge-into-one-verb（用戶裁「L1 要材料」、就地採不是備料、三入口一個動詞）。
-> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。§三之二（用戶裁乙＋丙）R²c M8＋兩條已補，審查註明補完不需再審。§三之三（用戶裁「好」：新點缺料進同一本需求帳，藍圖 2026-10-16-blueprint-to-systems-TICKET-new-outpost-material-shortfall-enters-same-need-ledger）待 R²d。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
+> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。§三之二（用戶裁乙＋丙）R²c M8＋兩條已補，審查註明補完不需再審。§三之三（用戶裁「好」：新點缺料進同一本需求帳，藍圖 2026-10-16-blueprint-to-systems-TICKET-new-outpost-material-shortfall-enters-same-need-ledger）R²d ISSUES M9–M13＋小項已補，待審查再看 §三之三 diff。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
 > 位置：玩家可見批（真玩小修、我的掛單與押貨、玩家勢力目標）之後，深層批之前。
 > 本票只做兩個探針。結構輪第 ③④ 條（玩家事件帶來源、子隊事件走信使）是下一張，不在本票。
 
@@ -169,40 +169,62 @@
 
 ### 三之三、新點缺料進同一本需求帳（藍圖 TICKET 2026-10-16-blueprint-to-systems-TICKET-new-outpost-material-shortfall-enters-same-need-ledger，用戶裁「好」）
 
-**現況（本輪已讀）**
+**現況（本輪已讀；R²d 補）**
 - 材料買單：`order_system.gd:327-338`，缺口＝`TradeValuation.reserve − effective_holding`，material 在名單裡。
 - `reserve`（`trade_valuation.gd:127-141`）讀 `NeedOracle.need_keep`。material 有建造需求時改用「只看糧急」的液化係數（:134-136，material-hold-protection），判斷式呼 `_construction_facility_need > 0`。
 - 建造需求只有一支：`need_oracle.gd:154 _construction_facility_need`。它先找自家據點，找不到回 0（:160-164），只算既有據點的設施升級。
 - 買料選項的效用（`terms.gd:595-602 buymaterial_drive`）＝`缺口占比 × material_build_urgency`。urgency 讀 `NeedOracle.max_material_facility_desire`（`need_oracle.gd:197`），同樣沒據點就回 0（:201-203）。
-- 賣盤：施工隊整個不賣（`order_system.gd:317`）；其他隊賣 `holding − reserve` 的餘量（:319-325）。
-- **「想蓋」在今天存在哪裡**：建點的四條入口（擴點 `options.gd:352-380`、harvest 委派 `goal_resolver.gd:1175`、勢力 infra 段 (3) `faction_ai_system.gd:6433`、紮根 `options.gd:350`）都在**選定的同一 tick 就派出或開工**。`goal_state` 沒有建點類慾望（`goal_registry.gd` 只有 maintain／build_facility）。
-  - 所以腦選定之後留下來的只有兩樣：①施工隊身上的 `TASK_BUILD` 任務，還沒開工（在路上）；②已開工、還在採段的工地。
-  - 本節讀的就是這兩樣，不另估一次，也不讀「可能想蓋」。
+- 賣盤：`order_system.gd:311` 的 `is_constructing` 含 `TASK_BUILD`，施工隊的賣盤在 :317 整段跳過，不呼 `reserve`。其他隊賣 `holding − reserve` 的餘量（:319-325）。
+- **`need_keep(material)` 的讀者**（R²d M11，審查端掃過全庫 24 處）。這次改動會影響的有五個：
+  - `goal_resolver.gd:44`：maintain_material 目標的 active／satisfied（持有 < need_keep ⇒ active）。
+  - `goal_resolver.gd:1007`：資源前置的解，產生買／採／製造候選。
+  - `labor_system.gd:174`：gather:material 的勞力權重＝全勢力各隊 need_keep 加總，**不扣持有**。
+  - `decision_context.gd:1032`：買料效用的分子分母。
+  - `trade_valuation.gd:138／141`：reserve。
+  - 其餘讀的是設施產出的資源或 food，不受影響。material 是純中間品（`need_oracle.gd:227`），沒有「新點需求 → 設施缺口 → 設施需求」的回饋環。
+  - 預期效果：有新點承諾的隊多一個 active 的 maintain_material 目標，會為它產生買料／採料候選，進同一個 argmax。這與設施那一支今天的行為同形，就是「同一本帳」的意思。不另加門；它會不會把已承諾的 `TASK_BUILD` 換掉，由持守決定，N8 驗。
+  - labor 那一支不扣持有：已經撥滿料、在路上的子隊，也會讓全勢力的 gather:material 權重加上整筆成本，持續整趟路。設施那一支同語意，照留；交件信印修前修後。
+- `coin_treasury.gd:54` 的存幣門檻讀 `_construction_facility_need`。本票改讀 `_construction_need`：同一本帳，要買新點料的隊也替買料留錢。
+- **「想蓋」在今天存在哪裡**：擴點（`options.gd:373-380`）、harvest 委派（`goal_resolver.gd:1168-1175`）、勢力 infra 段 (3)（`faction_ai_system.gd:6441`）都在選定的同一 tick 呼 `_dispatch_builder`。在路上的承諾者是派出去的**子隊**（`faction_ai_system.gd:5847-5849`）。
+  - 紮根 `_commit_settle_site`（`faction_ai_system.gd:7277-7316`）分三支：復工（:7289-7295）、走回自己的營地（:7300-7307，設 `move_target`，要走多 tick）、就地開工（:7316）。母隊真的「在路上」的只有走回營地那一支。
+  - `goal_state` 沒有建點類慾望（`goal_registry.gd:16-21`）。
+  - 所以腦選定之後留下來的只有兩樣：①走向空地、還沒開工的施工隊；②已開工、還在採段的工地。本節只讀這兩樣，不另估一次，也不讀「可能想蓋」。
 
 **改法**
-- `NeedOracle._new_outpost_need(state, team, res) -> float`（新），只算這支隊**自己承諾的那一座**：
-  - ① 在路上：`team.current_task == TASK_BUILD`，目標格 `outpost_level == 0`，任務不是設施（`task_extra_data` 沒有 `facility_type`），而且目標格還沒有這支隊的工地。
-    - 量＝`OUTPOST_COST[type][level][res]` 整筆。`type`／`level` 讀 `task_extra_data` 的 `build_type`／`level`；紮根沒帶的就用 §一 紮根開工時用的那一組（實作端以 §一 落地的值為準，不另寫一份）。
-    - 用整筆、不先扣持有：與設施那一支同語意（need_keep 是「要留多少」，扣持有是讀者的事：買單 `reserve − holding`、買料效用 `need − holding`）。
-  - ② 採段中：這支隊的工地 `gather_left.material > 0`。
-    - 主隊讀 `team.corvee_site` 那格；子隊讀 `construction_team_id == team.team_id` 那格。實作端以兩欄的實際語意為準，交件信寫明各讀哪一欄。
-    - 量＝`gather_left[res]`（開工時已經抵掉帶來的料，剩下的才是缺口）。
+- `NeedOracle._new_outpost_need(state, team, res) -> float`（新），只算這支隊**自己承諾的那一座**。兩樣都是 O(1)，不掃全圖（`need_keep` 是熱路徑）。
+  - **① 在路上**（R²d M9：收緊成「這格現在完全沒有工地，而這支隊正走向它」）。全部成立才算：
+    - `team.current_task == TASK_BUILD`；
+    - `team.move_target ≠ (-1,-1)` 且 `≠ team.tile_pos`（真的在走；`TaskArbiter.try_set` 在目標＝腳下時也會把 `move_target` 設成腳下，`task_arbiter.gd:98-99`）；
+    - 目標格 `outpost_level == 0` 且 `construction_team_id == -1`（任何隊都沒有工地 ⇒ 排掉去接手別人工地的復工工人，`faction_ai_system.gd:5777-5779`）；
+    - 承諾來源：子隊 ⇒ `task_extra_data` 有 `build_type`；母隊 ⇒ 目標格 `camp_team_id == 本隊`、`camp_level == 1`（與 `_commit_settle_site` :7300 同判準）。
+    - 這樣排掉三群：「建設」「自救建田」選項（`options.gd:70-77`／`:89-99`，目標＝腳下、沒有工地）、復工工人、升級設施（目標格 `outpost_level > 0`）。
+    - 量＝`OUTPOST_COST[type][level][res]` 整筆。`type`／`level`：子隊讀 `task_extra_data` 的 `build_type`／`level`；母隊走營地那一支，讀 §一 紮根開工時用的那一組（同一個常數，不另寫一份）。
+    - 用整筆、不先扣持有：與設施那一支同語意。need_keep 是「要留多少」，扣持有是讀者的事（買單 `reserve − holding`、買料效用 `need − holding`）。
+  - **② 採段中**（R²d M12）：
+    - 讀哪一格：子隊讀 `team.tile_pos` 那格（子隊站在工地上採料、不離格）；母隊讀 `team.corvee_site` 那格（可能已離格去買料）。
+    - 條件：那格 `construction_target` 的 `gather_left.material > 0`，而且本隊是那格的施工隊。「施工隊」的定義與 `_tick_construction` 找 `active_team` 的方式同一個（`outpost_system.gd:376-381`：同格的 `TASK_BUILD` 隊；母隊離格時以 `corvee_site` 認領）。實作端把這個認定抽成一支，兩邊都呼它，不各寫一份。
+    - 量＝`gather_left[res]`。開工時已抵掉帶來的料，剩下的才是缺口。
     - ①②互斥：有工地就只算②。
   - 感知：兩樣都是隊自己的承諾與自己的工地帳。`gather_left` 只在施工隊在格時才會變（§二），隊不在格時讀到的就是它離開時的數，不是 god-view。
-- `NeedOracle._construction_need(state, team, res) ＝ min(_construction_facility_need + _new_outpost_need, CONSTRUCTION_MATERIAL_NEED_CAP)`。
+- `NeedOracle._construction_need(state, team, res)`＝新點那一支＋設施那一支，**上限分配：已承諾的新點先占，設施吃剩下的額度**。
+  - 寫法：`n = minf(_new_outpost_need, CAP)`；`f = minf(_construction_facility_need, CAP − n)`；回 `n + f`。
+  - 理由：免得一座還沒開工的設施把已經上路的新點削掉。今天兩支的母體不重疊（設施那一支要自家據點 `outpost_level > 0`），但規則先寫下來。
   - `need_keep` 的第三個加數改呼它（`need_oracle.gd:122`）。
-  - 設施那一支的「沒據點回 0」照留：那是設施升級本身的前提。新點那一支不經過它（藍圖：「:165 早返回對新點不適用」）。
-  - 上限照舊一個，兩支加總後一起夾。
+  - 設施那一支的「沒據點回 0」照留，那是設施升級本身的前提。新點那一支不經過它（藍圖：「:165 早返回對新點不適用」）。
   - 碼表 `nk_constr_*` 量的是整個 `_construction_need`，名稱不改。
-- `trade_valuation.gd:135` 的判斷改呼 `_construction_need`。⇒ 要蓋新點的料一樣用「只看糧急」的係數守住，不會因為缺錢被賣掉。
+- `trade_valuation.gd:135` 與 `coin_treasury.gd:54` 的判斷改呼 `_construction_need`。
 - 買料效用的 urgency：`max_material_facility_desire` 改名 `material_build_urgency(state, team)`，取 `max(設施迫切, 新點迫切)`。`decision_context.gd:1035` 改呼它。
-  - **新點迫切＝採段天數 ÷ 總天數**，用 `build_eta_total_days` 的兩半，`carried` 讀隊自己的 material，`site` 照 §三：站在格上讀真值，否則用先驗。INF 時為 1。
+  - **新點迫切＝採段天數 ÷ 總天數**，兩半都用 `build_eta_total_days` 算，INF 時為 1。`carried` 的取法（R²d M10）：
+    - ①：`carried` 傳隊自己的 material；`site` 照 §三（站在格上讀真值，否則用先驗）。
+    - ②：照 §三 進行中工地的既有規則，`carried` 傳 `site_stock`。`site_stock ＝ need − gather_left`，所以採段天數隨 `gather_left` 變小；快採完時迫切接近 0。不另加參數。
   - 意思是「這座點的工期有幾成卡在缺料」。帶夠了就是 0（不買），全靠採就接近 1。它是估算器算出來的值，不是手填的權重。
   - 不用 `persist_strength`：它只隨進度增加，剛承諾、還沒開工的時候接近 0，正好是最該買的時候。
-- **採段吃隊上帶的料**（§二 補一行）：每個採段 tick 先把施工隊 `resources.material` 抵進 `gather_left`（同開工時的抵法：`min(帶的, gather_left)`，`site_stock` 加同量），再採。
+- **採段吃施工隊帶的料**（§二 補一行；R²d M12）：每個採段 tick，`_tick_construction` 找到的 `active_team` 先把自己 `resources.material` 抵進 `gather_left`（同開工時的抵法：`min(帶的, gather_left)`，`site_stock` 加同量），再採。
+  - 吃料的是 `active_team`，不只認 `construction_team_id`：接手的復工工人帶的料一樣進工地。它自己的需求只在它自己身上算（②的「本隊是施工隊」）。
   - 沒有這一行，採段中買到的料不會進工地，②那一支的需求就沒有意義。
-  - 這把 §四 原本「開工後再搬料進工地不在本票」改成：施工隊自己帶回來的料會進工地；別隊送料進工地仍不在本票。
-- 賣盤不另改：施工隊本來就整個不賣（:317）；在路上的隊走 `reserve`，而 `reserve` 已經含新點那一筆。
+  - 這把 §四 原本「開工後再搬料進工地不在本票」改成：施工隊自己帶進工地的料會用上；別隊送料進工地仍不在本票。
+- 賣盤：施工隊照舊整段不賣（:317）。`reserve` 改動真正有感的是兩處：買單缺口（:334）；以及隊暫時離開 `TASK_BUILD`（例如走去市集買料，`is_constructing` 為假）時的賣盤。
+- 訂單 dict 多一個 `"for"` 鍵：實作端確認 `order_system.gd:302 _sync_board` 與存檔序列化不受多出的鍵影響，交件信寫一句。
 - Probe：
   - `need.new_outpost.walk`／`need.new_outpost.gather`：每隊每日一次，按①／②分。
   - 材料買單在新點那一支 >0 時發出 ⇒ 訂單 dict 帶 `"for": "new_outpost"`，並 bump `g1.shortage_buy.new_outpost`。
@@ -210,7 +232,7 @@
 
 **誠實限**
 - 本節只讓需求存在、進買單與買料效用。買不買得到、買到之後怎麼領，照貿易現有路（領貨要到市集，`claim_on_arrival`）。NPC 子隊的任務是固定的，它發了買單也不會離開路線去領 ⇒ 子隊這一支多半只在數字上存在。主隊（紮根）會離格去買、再回工地續建（`settle_resume_site`）。
-- **它不會讓「想去平原開點」出現。** 四條入口選定即出發，而 §三之二 M8 把採不完的格剔掉了 ⇒ 母隊沒料時平原根本不會被選，也就沒有承諾可讀。要「先買料、再去平原」，得有一份跨 tick 的建點慾望（例如 `goal_state` 裡的建點目標）。這是 WHAT，另寄藍圖，本票不做。
+- **它不會讓「想去平原開點」出現。** 四條入口選定即出發，而 §三之二 M8 把採不完的格剔掉了 ⇒ 母隊沒料時平原根本不會被選，也就沒有承諾可讀。要「先買料、再去平原」，得有一份跨 tick 的建點慾望（例如 `goal_state` 裡的建點目標）。這是 WHAT，已另寄藍圖（2026-10-16-systems-to-blueprint-Q-founding-desire-across-ticks-for-buy-then-go），本票不做。
 - 合併後量一次（藍圖要的）：發了 `for: new_outpost` 買單的隊，有幾成在該單到期前成交；以及這些隊的工地，有幾成在採段期限內轉進築段。
 
 ### 四、玩家面
@@ -275,13 +297,20 @@
   - 決勝格：佈置兩格使 `gather_term` 以外的分數差小於 `gather_term` 之差 ⇒ 料 0 時選森林；料 ≥ need 時選另一格。
 - **V11b 採不完不進候選**（M8）：母隊料 0、範圍內只有平原格（含草藥鄰格）⇒ `_evaluate_new_outpost_location` 回空、`site.filtered_barren > 0`、沒有 `site_barren` 派遣失敗；母隊料 ≥ need ⇒ 同一格回得出來。
 - **V10 玩家子隊建設不擋料**（M5）：玩家子隊帶 0 料派往森林格 ⇒ `precheck_subteam_build` ok，回句含「需材」「可採約」。
-- **N1 在路上的承諾進需求帳**（§三之三）：沒據點的主隊，`TASK_BUILD` 往一格空地、身上料 0 ⇒ `need_keep(material) ≥ L1 成本`；有市集時 `tick_team_orders` 發出 material 買單、`"for": "new_outpost"`，量＝成本。
+- **N1 在路上的承諾進需求帳**（§三之三）：沒據點的主隊走回自己的營地（`_commit_settle_site` 走回那一支）、身上料 0 ⇒ `need_keep(material) ≥ L1 成本`；有市集時 `tick_team_orders` 發出 material 買單、`"for": "new_outpost"`，量＝成本；`need.new_outpost.walk > 0`。另一列：派出的子隊在路上 ⇒ 同樣算整筆。
 - **N2 沒承諾就不算**：同一支隊、任務不是 `TASK_BUILD`（例如閒置或採集）⇒ 新點那一支為 0，`need_keep(material)` 與修前逐數相同。
-- **N3 採段的需求＝剩下的缺口**：工地 `gather_left=30` ⇒ 新點那一支＝30；同時不再加①的整筆。
-- **N4 採段吃帶來的料**：採段中施工隊帶 20 料 ⇒ 那一 tick `gather_left −20`、`site_stock +20`、隊上 material −20，總量守恆；帶的料 ≥ `gather_left` ⇒ 當 tick 轉築段。
-- **N5 守料**：在路上的隊持料 60、成本 80、`coin` 急但糧不急 ⇒ `reserve(material)` 用「只看糧急」的係數，賣盤不賣這 60。
+- **N2b 三種不是①的 `TASK_BUILD` ⇒ 新點那一支＝0**（M9）：①「建設」選項、目標＝腳下、`outpost_level == 0`；②復工工人，目標格有別隊的工地；③升級設施，目標格 `outpost_level > 0`。
+- **N3 採段的需求＝剩下的缺口**：工地 `gather_left=30` ⇒ 新點那一支＝30；同時不再加①的整筆；`need.new_outpost.gather > 0`。子隊讀 `tile_pos`、母隊離格讀 `corvee_site`，兩列都測。
+- **N4 採段吃帶來的料**：採段中施工隊帶 20 料 ⇒ 那一 tick `gather_left −20`、`site_stock +20`、隊上 material −20；帶的料 ≥ `gather_left` ⇒ 當 tick 轉築段。守恆走 `InvariantAudit`，不手算加總。
+- **N4b 接手的工人也吃料**（M12）：復工工人（不是 `construction_team_id`）帶 20 料站上別隊的採段工地 ⇒ 抵進該工地、隊上 −20；同樣走 `InvariantAudit`。
+- **N5 守料**（M13 拆兩格）：
+  - (a) 斷言值：有新點承諾時 `reserve(material) == need_keep × 只看糧急的係數`（`coin` 急而糧不急時不降），沒承諾時不同。
+  - (b) 斷言行為：②狀態（`corvee_site` 工地 `gather_left > 0`），隊暫時去做交易類任務、持料 60、`coin` 急而糧不急 ⇒ 賣盤不發 material。
 - **N6 買料效用**：同一支在路上的隊、有市集有錢 ⇒ `buymaterial_drive > 0`；帶料 ≥ 成本 ⇒ 0。平原目標（採不完）⇒ urgency 為 1。
+- **N6b 採段中迫切隨進度降**（M10）：同一個森林工地，`gather_left = 70` 與 `5` ⇒ 後者迫切嚴格較小、且 ≥ 0。
+- **N6c 上限分配**：強造重疊（設施 80＋新點 80）⇒ `_construction_need == 100`，新點那一筆 80 全留、設施得 20。
 - **N7 設施那一支不變**：既有床 `material_hold_test.gd` 與設施買料相關斷言照綠、不改。
+- **N8 承諾不被自己的需求換掉**（M11）：走回營地的母隊 ⇒ `goal_resolver` 的 maintain_material 變 active，且 `TASK_BUILD` 在接下來的決策輪不因此被換掉（task 不變，或 `persist.hold` 計數有增）。
 - **P1 持守看得到採段**（M3）：同一支隊、`food_runway` 固定，兩個進行中工地：`gather_left=0` 與 `gather_left=need` ⇒ 後者 `safe_factor` 較小、`_progress` 較小。
 
 ### 子隊到場（同床，S 開頭）
@@ -324,8 +353,12 @@
 | n18 `_construction_need` 不加新點那一支 | N1、N3 |
 | n19 新點那一支不看承諾、對每支隊都算 L1 成本 | N2 |
 | n20 採段不抵隊上帶的料 | N4 |
-| n21 `trade_valuation` 照舊只看設施那一支 | N5 |
+| n21 `trade_valuation` 照舊只看設施那一支 | N5 (a)(b) |
 | n22 新點迫切改讀 `persist_strength` | N6（剛承諾時為 0） |
+| n23 ①不看 `move_target`／`construction_team_id` | N2b |
+| n24 ②迫切的 `carried` 傳 0（不傳 `site_stock`） | N6b |
+| n25 吃料只認 `construction_team_id` | N4b |
+| n26 上限改成先設施後新點 | N6c |
 
 ## 給藍圖（已另寄）
 - L1 要材料＋就地採＋現在的生成上限 ⇒ 新點只有森林（約 7 日）、山地（約 22 日）採得夠；平原約 72 日，超過 30 日採段期限 ⇒ 不帶料就蓋不成。
@@ -359,3 +392,4 @@
 - world-fp：抽取那輪（應不變）與全量那輪的新舊值、兩輪 run-id。
 - n1–n7 紅燈原文。
 - §三之三：電池裡 `need.new_outpost.walk`／`.gather` 隊日數、`g1.shortage_buy.new_outpost` 次數、`order.new_outpost.filled`／`.abandoned` 與成交比例；這些隊的工地在採段期限內轉進築段的比例。主隊與子隊分開列。
+- §三之三 讀者：有新點承諾的隊日數 × maintain_material active 的隊日數；labor gather:material 權重修前修後（同種子）；`_sync_board`／存檔對 `"for"` 鍵的確認。

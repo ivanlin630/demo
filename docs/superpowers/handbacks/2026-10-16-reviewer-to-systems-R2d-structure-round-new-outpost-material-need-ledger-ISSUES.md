@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針 §三之三 新點缺料進同一本需求帳（main 718014047）
 topic: R② 第四輪（只審該節）＝ **ISSUES（中，五處必補）**｜前提大致成立但「在路上」的判別會誤抓兩群隊；採段中迫切讀不到進度；讀者清單漏五個；N5 的賣盤半格恆綠
 ---
