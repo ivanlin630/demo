@@ -81,13 +81,14 @@ static func _team(id: int, pos: Vector2i, pop: int, fid: int, leader: bool, vals
 		"leader": {"name": "L%d" % id, "skills": {"統領": 0.6}, "values": vals}}
 
 # 玩家 P、NPC 主隊 N、同勢力 F、外勢力 X、獨立 I1／I2。★所有隊的隊長人格中性（紮根型別＝民用）
-func _mk(player: bool = true, n_pos: Vector2i = SITE, p_pos: Vector2i = Vector2i(4, 4)) -> WorldState:
+func _mk(player: bool = true, n_pos: Vector2i = SITE, p_pos: Vector2i = Vector2i(4, 4), n_indep: bool = false) -> WorldState:
 	seed(SEED)
+	NeedOracle._new_outpost_tap_day.clear()   # ★觀測去重表是 static（每隊每日一次）：每格開新世界、同隊號同一天 ⇒ 不清就吃到前一格的記號
 	var cfg: Dictionary = {"seed": SEED, "mode": "explicit", "max_ticks": 100000, "map": {"radius": 12, "resource_richness": 5},
 		"teams": [
 			_team(P, p_pos, 10, 1, false),
-			_team(N, n_pos, 20, 1, true),
-			_team(F, Vector2i(10, 4), 8, 1, false),
+			_team(N, n_pos, 20, -1 if n_indep else 1, not n_indep),
+			_team(F, Vector2i(10, 4), 8, -1 if n_indep else 1, false),
 			_team(X, Vector2i(2, 10), 8, 2, true),
 			_team(I1, Vector2i(12, 2), 8, -1, false),
 			_team(I2, Vector2i(2, 2), 8, -1, false),
@@ -229,7 +230,8 @@ func _v1() -> void:
 	tile = _site(st, SITE, "forest", 150.0, 0.9)
 	ResourceBank.set_amt(pt, "material", 200.0, "bed_seed")   # 子隊按人數比例分到料；派遣後再把子隊的料設成 20 不行（腳下派遣當場開工）⇒ 比例 3/10 ⇒ 200×0.3＝60，見下
 	# ★腳下派遣當場開工 ⇒ 子隊帶的料＝母隊按人數比例那一份；要它剛好 20 ⇒ 母隊 20 / (3/10)
-	ResourceBank.set_amt(pt, "material", 20.0 * 10.0 / 3.0, "bed_seed")
+	ResourceBank.set_amt(pt, "material", 20.0 * float(pt.population) / 3.0, "bed_seed")   # ★人數讀現值（_add_named 加了具名成員；第一跑寫死 10 ⇒ 實際 3/13 ⇒ 帶 15.4）
+	print("    ⑤派遣前 母隊 pop=%d 料=%.2f" % [pt.population, _mat(pt)])
 	var r5: Dictionary = _player_dispatch(st, TeamData.TASK_CONSTRUCT, SITE, 3)
 	var sub5: TeamData = st.teams.get(int(r5.get("sub_id", -1)))
 	print("    玩家子隊派遣回句：%s" % String(r5.get("msg", "")))
@@ -527,14 +529,14 @@ func _v9() -> void:
 	st.player_state["build_type"] = "civilian"
 	var r: Dictionary = PlayerCommandSystem.new()._action_settle(st, -1, pt, P)
 	var msg: String = String(r.get("msg", ""))
-	var op: Dictionary = PlayerApiMapper.map_outpost_panel(st) if PlayerApiMapper.has_method("map_outpost_panel") else {}
+	var op: Dictionary = PlayerApiMapper.map_outpost_panel(st)
 	var line_g: String = TextUiMain.construction_progress_line(op)
 	var os := OutpostSystem.new()
 	for i in range(3000):
 		if _gl(tile) <= 0.0: break
 		os._tick_construction(st, tile)
 	os._tick_construction(st, tile)
-	var op2: Dictionary = PlayerApiMapper.map_outpost_panel(st) if PlayerApiMapper.has_method("map_outpost_panel") else {}
+	var op2: Dictionary = PlayerApiMapper.map_outpost_panel(st)
 	var line_b: String = TextUiMain.construction_progress_line(op2)
 	print("    回句：%s" % msg)
 	print("    phase=%s「%s」→ phase=%s「%s」" % [String(op.get("phase", "?")), line_g, String(op2.get("phase", "?")), line_b])
@@ -803,8 +805,8 @@ func _s5() -> void:
 const CAMP_C: Vector2i = Vector2i(9, 6)
 
 # 沒據點的主隊 N 走回自己的營地（_commit_settle_site 走回那一支的狀態）、身上料 mat
-func _walker(mat: float) -> Array:
-	var st: WorldState = _mk(false, Vector2i(6, 6))
+func _walker(mat: float, indep: bool = false) -> Array:
+	var st: WorldState = _mk(false, Vector2i(6, 6), Vector2i(4, 4), indep)
 	var n: TeamData = st.teams[N]
 	var camp := _site(st, CAMP_C, "forest", 150.0, 0.9, N)
 	n.current_task = TeamData.TASK_BUILD
@@ -1111,7 +1113,8 @@ func _n6c() -> void:
 
 func _n8() -> void:
 	print("\n── N8 承諾不被自己的需求換掉 ──")
-	var w: Array = _walker(0.0)
+	# ★N 用獨立隊：盟主版第一跑在 175 tick 被自家勢力目標「徵收」的義務分量（u 0.654）換走——那是另一個原因，不是本格要量的「被自己的料需求換掉」
+	var w: Array = _walker(0.0, true)
 	var st: WorldState = w[0]; var n: TeamData = w[1]
 	n.goal_eval_next_tick = 0
 	GoalResolver.ensure_maintain_goals(st, n)
@@ -1130,6 +1133,13 @@ func _n8() -> void:
 			break
 		if n.current_task != TeamData.TASK_BUILD:
 			swapped = n.current_task
+			var fz = st.factions.get(n.faction_id)
+			print("    換掉那一刻：faction=%d goals=%s stakes=%s｜need material=%.1f｜urgency=%.3f" % [n.faction_id,
+				str(fz.goals) if fz != null else "-", str(n.faction_stakes) if "faction_stakes" in n else "-",
+				NeedOracle._new_outpost_need(st, n, "material"), NeedOracle.material_build_urgency(st, n)])
+			var rk: Array = DecisionEngine.rank_scored(st, n, "bed_n8_dump")
+			for j in range(mini(8, rk.size())):
+				print("      rank%d %s" % [j, str(rk[j])])
 			break
 		if n.move_target == Vector2i(-1, -1) or n.tile_pos == CAMP_C:
 			break
