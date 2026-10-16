@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 我的掛單與押貨（只讀，玩家可見批尾最後一張）
 topic: GO｜spec 2026-10-15-my-orders-and-escrow-readonly-HOW（R² 兩輪，CLEAN）｜順位：真玩小修之後；必須在顧問那張之後（讀 res_name）
 ---
