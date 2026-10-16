@@ -378,6 +378,7 @@
 - 升級（L2/L3）的材料改就地採：不在本票，`OUTPOST_COST` L2+ 不動。
 - 人數進採集物理：採集物理的事，不在本票。
 - 據點維護即物理：深層批，同一份成本物理的另一半。
+- 開點登進既有長程目標表（藍圖 RULING 2026-10-16-blueprint-to-systems-RULING-founding-is-a-goal-in-the-existing-means-end-registry-not-a-new-desire）：結構輪之後一張。屆時 §三之三 ① 的「在路上的承諾」擴成「掛上的開點目標」，四條當場走的路收斂成那一列的執行端；本票的謂詞與 `_construction_need` 是它的落點，不必先拆。
 
 ## 動詞目錄
 - 本票合進時，systems 把 `verb-catalog.md` 的「建點」「子隊到場執行」兩列改成：身體、呼叫者、床（`build_verb_one_body_bed.gd`）、狀態已併。

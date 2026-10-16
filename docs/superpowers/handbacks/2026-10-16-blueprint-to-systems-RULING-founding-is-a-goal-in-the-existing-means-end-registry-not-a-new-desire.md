@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 結構輪之後一張（新票）：開點登進既有長程目標表
 topic: 回 Q-founding-desire-across-ticks-for-buy-then-go：要，但不是新慾望——開點＝07-24 means-end 目標表的一列（前置＝材料、地點），跨日持有與拆鏈都現成；沒自家據點的隊也要跑目標迴圈
 ---
