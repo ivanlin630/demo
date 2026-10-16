@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 結構輪探針一「建點」§三之三（新點缺料進同一本需求帳；用戶裁「好」）
 topic: R²d 請審 §三之三：新點缺料只讀「已承諾的那一座」（在路上的 TASK_BUILD ／採段中工地的 gather_left）進 need_keep 的建造加數；守料、買單、買料效用跟著走；採段吃隊上帶的料
 ---
