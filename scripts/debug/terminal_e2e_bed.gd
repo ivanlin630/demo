@@ -2271,15 +2271,16 @@ func _battle_cells() -> void:
 	var c1: int = int(view.handle_key_calls)
 	print("   ⑥GUI 廣播一次按鍵（主節點 _input ＋ encounter_view _input）⇒ _handle_key 被呼 %d 次" % (c1 - c0))
 	_check("BATTLE⑥ GUI 一次按鍵 ⇒ 戰鬥分派只被呼一次（%d）" % (c1 - c0), c1 - c0 == 1)
-	# ⑦Z 命令選單（spec §1④）：終端看不到 GUI 彈窗 ⇒ 項目要印進戰鬥區（或說出「沒有可下令的隊友」），Esc 收起
+	# ⑦Z（spec 2026-10-15-live-play-small-fixes §五）：命令／派信使沒有消費者，Z 連同提示一起拿掉
+	#   ⇒ 戰鬥畫面按 Z 走既有未綁鍵處置（說出為什麼、不靜默），鍵列上沒有 Z
 	if _screen(node).contains(TextUiView.BATTLE_TITLE):
+		var zs0: String = _screen(node)
 		await _press(w, "z")
 		var zs: String = _screen(node)
-		var z_ok: bool = zs.contains("── 命令（按數字選；Esc 取消）──") or zs.contains("沒有可下令的隊友")
-		await _press(w, "esc")
-		var z_closed: bool = not _screen(node).contains("── 命令（按數字選；Esc 取消）──")
-		print("   ⑦Z ⇒ 選單印出或說明 %s｜Esc 後收起 %s" % [str(z_ok), str(z_closed)])
-		_check("BATTLE⑦ Z 命令選單：項目印進戰鬥區（或說明沒有隊友），Esc 收起", z_ok and z_closed)
+		var z_ok: bool = zs.contains("此鍵在戰鬥中無作用")
+		var z_no_hint: bool = not zs0.contains("Z:命令") and not zs.contains("Z:命令") and not zs.contains("Z 命令")
+		print("   ⑦Z ⇒ 未綁鍵處置 %s｜鍵列無 Z %s" % [str(z_ok), str(z_no_hint)])
+		_check("BATTLE⑦ 戰鬥畫面按 Z ⇒ 未綁鍵處置（說出為什麼），鍵列上沒有 Z", z_ok and z_no_hint)
 	# ①續：用畫面印的鍵打完 ⇒ 回主畫面
 	var back: bool = await _to_main(w)
 	print("   ①打完之後回主畫面 %s｜交戰中 %s" % [str(back), str(node._bridge._state.encounter_active)])
