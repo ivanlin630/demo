@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 結構輪探針一「建點」§三之三（新點缺料進同一本需求帳）
 topic: 照你的票寫好了，送審中。但它只讀「已承諾的那一座」，所以不會讓電腦「先買料、再去平原開點」；要那樣得有一份跨日的「想開點」慾望，這是 WHAT，請你看要不要
 ---
