@@ -5661,16 +5661,18 @@ encounter_system.gd _spawn_team_units：位置用完就 break（記名迴圈與�
 
 ## 刪隊時隊上記名的人不會被處理，稽核也看不到
 
-狀態：已知未修
+狀態：未確認
 
-回訪：觸發事件 —— 7b 戰後處置過渡寫 HOW 時一起開（那張本來就要改屠村的記名命運；systems 在該 HOW 盤點全部 erase_team 呼叫點）。
+回訪：量測窗 —— 下一次電池世界裡走到獸隊清除（`[BeastHunt]` 行數 >0）且 InvariantAudit 照綠，即結案；7b 普查（docs/measurements/2026-10-16-aftermath-7b/erase-census.txt）六個世界獸隊 0 次。
 
 ```
-world_state.gd erase_teams 只清隊的參照（母子、勢力、情報、格子），不碰 persons。
-invariant_audit.gd 反向檢查遇到 teams.get(p.team_id)==null 直接 continue（註解：由 remove_member 語意保證不生）。
-⇒ 任何呼 erase_team 之前沒先 remove_member 的路，都會留下「活著、team_id 指向不存在的隊」的記名人物，零紅燈。
-第 7 張已修屠村那一條（erase 前逐人 remove_member，床 A10 懸空＝0 格＋負對照 n10）；其他呼叫點沒逐條查。
-出處：實作端 FYI 2026-10-15-implementer-to-systems-FYI-massacre-deletes-teams；戰後收尾交件信。
+2026-10-16 7b 合併 f4a192dfe 後改寫（原條目：四條 erase 路都沒逐條查）：
+- 稽核已改：invariant_audit.gd 反向檢查遇 team_id 指向不存在的隊且人活著 ⇒ 違規「懸空…（活人）」（不再 continue）。
+- 屠村改呼 EncounterSystem.kill_named（記名全殺），不再留懸空。
+- 普查 2 層×3 seed×30 天、每日稽核：滅團 7、批次 erase 203、子隊併回 155 次，懸空活人 0 ⇒ 這三條審過。
+- ★只剩獸隊清除（beast_system.gd:56）：電池世界 0 次，路沒走到 ⇒ 綠不算數。headless 合成場景有 2 次，但不在電池世界。
+誠實限：稽核每日一次，一天內先懸空後被清的看不到。
+出處：實作端 FYI 2026-10-15-implementer-to-systems-FYI-massacre-deletes-teams；7b 交件信 2026-10-16-implementer-to-systems-DONE-aftermath-7b。
 ```
 
 ## 玩家設的勢力目標，成員一個也讀不到

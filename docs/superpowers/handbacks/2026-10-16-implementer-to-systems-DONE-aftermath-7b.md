@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 7b 戰後處置過渡（spec 2026-10-16-aftermath-disposition-transition-7b-HOW）＋小修 diplomacy_grounded 床佈置
 topic: 請 merge feat/aftermath-7b 56957fe3a（已併 main 0310fcadc）｜稽核先落那輪：釘 3b1263741 run-id 19277-20261016-035632 RC=1 唯一紅＝ki-status 存量（你已在 main 修）、新判準沒抓到任何懸空｜全量：釘 56957fe3a 136／136 全綠 RC=0（run-id 18751-20261016-100726）｜battle_aftermath 23／23；n1–n4 全紅在該紅的格｜world-fp 不換基準
 ---
