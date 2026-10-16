@@ -2,7 +2,7 @@
 
 > systems 2026-10-16。
 > WHAT：藍圖票 2026-10-16-blueprint-to-systems-TICKET-player-faction-goal-uses-engine-vocabulary（用戶裁「好」）。
-> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-player-faction-goal-engine-vocabulary-ISSUES）M1–M3＋同版項已補，待審查核修訂處。藍圖 2026-10-16 同意 §二 對象母體、外交不含「不先動手」、§四 交接清令（b073eb826）。
+> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-player-faction-goal-engine-vocabulary-ISSUES）M1–M3＋同版項已補；R²b（…-R2b-…-ISSUES）M2 改「上次套用」兩欄已補，審查註明補完不需再審 ⇒ GO。藍圖 2026-10-16 同意 §二 對象母體、外交不含「不先動手」、§四 交接清令（b073eb826）。
 > 位置：玩家可見批尾，我的掛單與押貨之後。
 > 關 known_issues「玩家設的勢力目標，成員一個也讀不到」（含其「交接」一行，見 §四）。
 
@@ -48,10 +48,11 @@
 - NPC 勢力 `player_goal_target` 恆 -1 ⇒ 走原路，逐位不變。
 - `faction_directive_target` 容忍 `f == null`（獨立隊直呼 `外交.to_task`）⇒ 退回 `_nearest_independent`；`外交.to_task` 自己 `state.factions.get(team.faction_id)`。實作端 grep 全部 `to_task` 呼叫並貼。
 - 「全專案唯一一支」指的是**勢力義務的對象**；`_nearest_independent` 其他使用者（faction_ai_system.gd:1859 盟主意圖 target、:2245 結盟候選；strategic_ai_system.gd:107／146 另一份同名函式）不歸它管，交件信列出。
-- ★命令戳記（R² M2）：`_update_goals` 外殼（faction_ai_system.gd:1905-1933）的前後快照加 `player_goal_override` 與 `player_goal_target`——今天只比 goals 集合＋drivers，而玩家領導時 drivers 空、goals 只有詞 ⇒「攻擊 X」改「攻擊 Y」不算變 ⇒ `directive_change_tick` 不動 ⇒ 成員不被叫醒（:1899-1904 註解那個病換一個欄位重現）。
+- ★命令戳記（R² M2，第二輪改法）：`FactionData` 加「上次套用」兩欄 `applied_goal_override`／`applied_goal_target`；`_update_goals` 外殼（faction_ai_system.gd:1905-1933）比**現值 vs 上次套用**，不同即 changed，蓋完戳記再把現值寫進上次套用。（不能用外殼內前後快照：action 在 player_command_system.gd:1801 先寫了欄位，進外殼時前後已相同。）理由——今天只比 goals 集合＋drivers，而玩家領導時 drivers 空、goals 只有詞 ⇒「攻擊 X」改「攻擊 Y」不算變 ⇒ `directive_change_tick` 不動 ⇒ 成員不被叫醒（:1899-1904 註解那個病換一個欄位重現）。
 
 ### 三、立國：同一道閘，玩家選了不過要說
-- 把 :1975-1982 的條件抽成 `FactionAISystem.establish_block_reason(state, f) -> String`（空字串＝過）：
+- 把 :1975-1982 的條件抽成 `FactionAISystem.establish_block_reason(state, f, for_player: bool) -> String`（空字串＝過）：
+  - ★藍圖裁 2026-10-16（4b77e0823）：**玩家不看野心**——野心是 NPC 的「想不想」，玩家的想就是按下去那一下。`for_player` ⇒ 跳過野心那條，統領門檻用不打折的 `ESTABLISH_COMMAND`（0.4，即 ambition_discount＝0）；理由句不出現野心。NPC（`for_player=false`）逐字照舊。
   - 盟主隊長不存在（leader_p == null）⇒「盟主隊長不存在」（R² M3：原式 null 時整段不進；抽成理由函式時 null 必須回非空，不可用預設值放行）
   - 已立國 ⇒「已經立國了」
   - 成員 <2 ⇒「勢力至少要 2 隊（現 {n}）」
@@ -78,11 +79,12 @@
 - ★G1／G1b／G1c 共用四個前提（R² 第 4 問；缺一則綠得太容易）：a 盟主隊 `player_controlled`（否則 is_player_led 假）；b 設完要呼該勢力 `_update_goals` 再 gather（action 只寫 override）；c 成員隊有 leader PersonData（decision_context.gd:1179 的 `if ldr != null`）；d 設前地板格：「攻擊」不在 faction_stakes、faction_duty 攻擊分量＝0。
 - G1 攻擊 X：玩家盟主＋≥1 成員，成員對 X 有 belief、對另一獨立隊 Y 也有且 Y 比 X 近（**用成員的 belief 位置排距離**，faction_ai_system.gd:5163-5165）。床註解寫明：咬 n1 的是 `attack_target_id == X` 那格，faction_duty 變化咬不到 n1。設前 dump 成員 per-option util（`攻擊` 項值＋`attack_target_id`）；設「攻擊 X」後同一成員再 dump ⇒ `攻擊` 項的 `faction_duty` 分量由 0 變 `FACTION_DUTY_DRIVE`、`attack_target_id == X`（不是更近的 Y）。印前後兩組原始 util。
 - G1b 成員不知道 X：先斷言 `belief_pos(成員, X) != (-1,-1)`（地板），再用實作端寫明的 API 清掉該成員對 X 的 belief ⇒ `faction_attack_target == -1`、`faction_duty` 攻擊分量 0、Probe `directive.pinned.unknown_to_member` ≥1（勢力義務不 fallback 到 Y；成員仍可能因自己的獵物／仇打 Y——斷言的是 faction_duty＝0，不是「不會打 Y」）。
-- G1c 改對象叫醒成員（R² M2）：設「攻擊 X」→ 成員決策過一輪（`last_decision_tick` 追上）→ 改「攻擊 Y」→ `_update_goals` 後 `_directive_fresh(成員) == true`，下一次 gather `attack_target_id == Y`。
+- G1c 改對象叫醒成員（R² M2）：設「攻擊 X」→ 成員決策過一輪（`last_decision_tick` 追上）→ 改「攻擊 Y」→ **先斷言 `_update_goals` 前 `_directive_fresh(成員) == false`（地板）**→ `_update_goals` 後 `_directive_fresh(成員) == true`，下一次 gather `attack_target_id == Y`。
 - G2 徵收：設「徵收」⇒ 非最富成員的 `徵收` 項 applicable 且 `faction_duty` 分量變 `FACTION_DUTY_DRIVE`。
 - G3 外交 X：設「外交 X」⇒ 成員 `外交` 項 applicable、`faction_diplo_target == X`，且 `外交.to_task` 回的目標位置＝成員對 X 的 belief 位置（門與執行同一個對象）。
 - G4 立國閘不過：佈置盟主統領低於門檻 ⇒ 回 `{ok:false, msg: "盟主統領 … 未達 …"}`、override 不變、30 天 `is_established` 仍 false。
-- G4c 理由逐條表（R² M3）：六列各佈置「只有這一條不過」（隊長不存在／已立國／成員 <2／統領／野心／準備度），斷言回句含該條關鍵字；另一列全過 ⇒ 空字串。野心兩格放在 0.6 邊界兩側（0.59 不過、0.60 過）。
+- G4c 理由逐條表（R² M3）：NPC 版（`for_player=false`）六列各佈置「只有這一條不過」（隊長不存在／已立國／成員 <2／統領／野心／準備度），斷言回句含該條關鍵字；另一列全過 ⇒ 空字串。野心兩格放在 0.6 邊界兩側（0.59 不過、0.60 過）。
+  - 玩家版（`for_player=true`）：盟主野心 0.3、其餘全過 ⇒ 空字串（不看野心）；統領 0.39 ⇒ 不過、0.40 ⇒ 過（門檻不打折）；所有不過的回句都不含「野心」。
 - G4d 抽前抽後：同一組五個邊界佈置（每個連言一個），NPC 路 `_rebuild_goals` 後「立國」in goals 在抽前樹與抽後樹逐格相同；交件信印兩組。
 - G4b 立國閘過：⇒ 下一個 `_assign_tasks` 後 `is_established`、override 清空；之後 3 天 `g2.faction_found` 只 +1（不每小時重宣告）。
 - G5 交接：玩家盟主設「攻擊 X」後把盟主交給 NPC 隊 ⇒ 下一次重建後 override＝""、target＝-1，且 `goal_drivers` 非空（NPC 重建才寫 driver；G-09 舊支與玩家領導支都不寫）。
@@ -98,9 +100,10 @@
 | n2 pinned 失效時 fallback 到最近 | G1b |
 | n3 `外交.to_task` 改回自己呼 `_nearest_independent` | G3 to_task 那半 |
 | n4 action 不呼 `establish_block_reason` | G4 |
+| n4b 玩家路傳 `for_player=false` | G4c 玩家版野心 0.3 那格 |
 | n5 `_declare_established` 不清 override | G4b（found 次數 >1） |
 | n6 G-09 支放回 | G5（新版 directive_stamp_test ③ 走玩家領導，**不會**紅——不是雙守） |
-| n7 外殼快照不比 `player_goal_target` | G1c |
+| n7 外殼不比 `player_goal_target`（或不更新「上次套用」） | G1c |
 
 ## 範圍外
 - 目標強度／期限、成員違抗目標的忠誠帳（藍圖票明列）。

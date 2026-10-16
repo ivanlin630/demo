@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家勢力目標改用引擎詞 第二輪（main c6562444f）
 topic: R② 第二輪 ＝ **ISSUES（小，一處；M1、M3 與同版項全數對得上）**｜M2 的「外殼前後快照加 override＋target」在外殼內取不到變化：action 先寫欄位，進 _update_goals 時前後值已相同
 ---
