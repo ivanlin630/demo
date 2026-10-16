@@ -1795,7 +1795,9 @@ func _test_join_request_cap_capped() -> void:
 	assert(actual_joined == 0, "撞滿不應併入任何人,實際併入=%d" % actual_joined)
 	assert(abs(spent) < 0.01, "撞滿食物不應蒸發,實扣=%.2f" % spent)
 	assert(not r.get("ok", false), "撞滿應回 ok=false(拒收),實際=%s" % str(r))
-	# 部分容量 case: cap 還剩 3 → 來源 8 人 → 只進 3,食物只扣 3 人份
+	# 部分容量 case: cap 還剩 3 → 來源 8 人 → ★整隊或不成（藍圖裁 2026-10-15 join-request-whole-team-or-nothing；
+	#   spec live-play-small-fixes §一）：裝不下就不成、不切半隊 ⇒ 0 人進、食物不扣、ok=false
+	#   ★舊斷言「只進 3、扣 3 人份」守的是被藍圖裁掉的半隊行為；改的是那個值，不是放寬
 	var pt2 := TeamData.new(); pt2.team_id = 2; pt2.leader_id = 2; _seed_pop(pt2, cap - 3)
 	pt2.tile_pos = Vector2i(5,5); pt2.resources = {"food": 200.0}
 	var leader2 := PersonData.new(); leader2.id = 2; leader2.team_id = 2; leader2.skills = {"統領": 0.15}
@@ -1812,10 +1814,10 @@ func _test_join_request_cap_capped() -> void:
 	var spent2: float = food_before2 - float(pt2.resources.get("food", 0))
 	print("  部分 case: ok=%s joined_reported=%d actual=%d food_spent=%.2f" % [
 		str(r2.get("ok", false)), reported2, actual_joined2, spent2])
-	assert(actual_joined2 == 3, "部分容量應只進 3,實際=%d" % actual_joined2)
-	assert(reported2 == actual_joined2, "msg/payload 報的 joined 應=實際併入 (報=%d 實=%d)" % [reported2, actual_joined2])
-	assert(abs(spent2 - PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3) < 0.01,
-		"食物應只扣 3 人份=%.2f,實扣=%.2f" % [PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3, spent2])
+	assert(actual_joined2 == 0, "容量不足整隊應不成(0 人進),實際=%d" % actual_joined2)
+	assert(not r2.get("ok", false), "容量不足整隊應回 ok=false,實際=%s" % str(r2))
+	assert(abs(spent2) < 0.01, "不成時食物不應扣,實扣=%.2f" % spent2)
+	assert(ds2.population == 8 and state.teams.has(3), "不成時對方隊應原封不動(8 人),實際=%d" % ds2.population)
 	print("投靠撞 pop_cap 守恆 OK")
 
 func _test_accept_join_request() -> void:
