@@ -749,7 +749,7 @@ func _test_i_story_end_column() -> void:
 			at != -1 and body != "" and reason.begins_with(body))
 	_check("★母體地板：已結束走法數 ＝ 2（%d）" % ended, ended == 2)
 	# ★反向對照：同一個判準（contains 欄標）在乾淨合成字串上 0、塞進去之後 1
-	var clean: String = "第 1 天 00:00 ｜ 灰狼隊（人口 14） ｜ 威脅：（無）"
+	var clean: String = "第 1 天 00:00 ｜ 灰狼隊 ｜ 人口 14 ｜ 威脅：（無）"
 	_check("★★【反向對照】乾淨輸入不含欄標", not clean.contains(label))
 	_check("★★★【反向對照】塞進欄標之後必須含", (clean + label).contains(label))
 	_cell("_test_i_story_end_column")

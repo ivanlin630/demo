@@ -203,7 +203,7 @@ static func parse_screen(screen: String) -> Dictionary:
 func _p0_parser() -> void:
 	print("\n── P0 解析器（三個鍵位空間）──")
 	var self_screen: String = "\n".join([
-		"第 1 天 00:00 ｜ Team15（人口 10） ｜ 家：（無） ｜ 糧撐 6.3 天 ｜ 威脅：（無） ｜ 待執行 1 道",
+		"第 1 天 00:00 ｜ Team15 ｜ 人口 10 ｜ 家：（無） ｜ 糧撐 6.3 天 ｜ 威脅：（無） ｜ 待執行 1 道",
 		"─ 面板（接管畫面）──────",
 		"── 互動 ──",
 		"⚠ Team3 要求你繳貢",

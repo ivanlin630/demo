@@ -55,7 +55,7 @@ const A_FIRST3: String = "─ 你現在能做的（"
 # [key, kind("regex"|"literal"), 錨, 說明]
 const TOP_FIELDS: Array = [
 	["clock",   "regex",   "^第 [0-9]+ 天 [0-9][0-9]:[0-9][0-9]", "日期時刻"],
-	["team",    "literal", "（人口 ",   "隊名人口"],
+	["pop",     "literal", " ｜ 人口 ", "人口（★live-play-small-fixes §七：隊名與人口拆成兩格，錨改成人口格自己的字面）"],
 	["home",    "literal", "家：",      "家"],
 	["food",    "literal", "糧撐 ",     "糧撐幾天"],
 	["threat",  "literal", "威脅：",    "威脅一句（★唯一長度無界的欄）"],
@@ -150,38 +150,49 @@ static func map_pages_box(map_body: String, pages_body: String,
 
 # ══ ①頂列：忠於稿子（前兩欄無欄標、欄間 ` ｜ `）═══════════════════════════════
 # ★只有【威脅】那一欄會被 clip（見誠實限 2）。
-static func top_row(v: Dictionary) -> String:
-	var story_end0: String = String(v.get("story_end", ""))
-	var names: Array = _fit_names(v, story_end0)
-	var head: Array = [
-		"第 %s" % String(v.get("clock", "—")),
-		"%s（人口 %s）" % [String(names[0]), String(v.get("pop", "—"))],
-		"家：%s" % String(names[1]),
-		# ★F8 營地欄：沒有寫入者（鍵缺席）⇒「？」；寫入者說沒有 ⇒「無」（兩句不同的話）
-		"營地：%s" % String(names[2]),
-		"糧撐 %s" % String(v.get("food", "—")),
-	]
-	var tail: String = "待執行 %s" % String(v.get("pending", "—"))
-	var sep: String = " ｜ "
-	var used: int = TextUiLayout.display_width(sep.join(PackedStringArray(head)))
-	used += TextUiLayout.display_width(sep) * 2
-	# ══ ★★★★★【故事結束 ⇒ 取代威脅欄】（票 #2 刀 0，寬度預算 systems 裁 (甲)）═══════════
-	#   ·威脅欄是頂列**唯一無界欄**、吃剩餘並被 clip ⇒ 原因字串（≈30 cols）放這裡**有預算**
-	#   ·故事結束之後「威脅」一句沒有意義 ⇒ **取代而非新增**
-	#   ·★★「既有床零影響」的條件①：這一欄**只在 `story_end` 非空時**出現
-	#     （常駐「故事：進行中」會讓釘頂列字面的床全變）
+# ══ ★頂列：整格或不顯示（spec 2026-10-15-live-play-small-fixes §七，藍圖裁 2026-10-14 header-truncation-whole-cell-or-drop）══
+#   ·八格各自獨立：時間、隊名、人口、家、營地、糧撐、威脅句（或故事結束句）、待執行（隊名與人口分開）
+#   ·放不下時【整格拿掉】，順序＝TOP_DROP_ORDER；時間、威脅句、待執行永遠整句
+#   ·★不留截字路徑：舊版把隊名／家／營地截成「…」、極端值時連威脅句也截 ⇒ 玩家看到半個名字還以為那就是名字
+#   ·★「時間＋最寬威脅句＋待執行 99＋分隔 ≤ COLS」由床斷言保證（threat_reserve 實測）；那才是會紅的位置
+#     ⇒ 若哪天斷言紅了：去縮句子或改版面，不要在這裡加回截字
+const TOP_DROP_ORDER: Array = ["home", "camp", "team", "pop", "food"]
+const TOP_ORDER: Array = ["time", "team", "pop", "home", "camp", "food", "threat", "pending"]
+const TOP_SEP: String = " ｜ "
+
+static func top_cells(v: Dictionary) -> Dictionary:
 	var story_end: String = String(v.get("story_end", ""))
-	var label: String = STORY_END_LABEL if story_end != "" else "威脅："
-	var body: String = story_end if story_end != "" else String(v.get("threat", "—"))
-	used += TextUiLayout.display_width(label) + TextUiLayout.display_width(tail)
-	var budget: int = TextUiLayout.COLS - used
-	# ★威脅句永不被截（改法 3）：它有界、寬度已在 _fit_names 預留 ⇒ 原樣放；故事結束那句照舊吃剩餘並截
-	var threat: String = label + (TextUiLayout.clip_to(body, maxi(budget, 0)) if story_end != "" else body)
-	# ★列寬上限比「威脅句整句」硬：名字三欄都讓到最小仍超過 COLS（極端值：999 天／人口 9999／待執行 99 道）
-	#   ⇒ 才截威脅句、帶截斷記號（不靜默截）。威脅欄床 P6 守這一格；真實開局走不到這裡（輸入床 P3 守）
-	if story_end == "" and TextUiLayout.display_width(body) > budget:
-		threat = label + TextUiLayout.clip_mark(body, maxi(budget, 1))
-	return sep.join(PackedStringArray(head + [threat, tail]))
+	return {
+		"time": "第 %s" % String(v.get("clock", "—")),
+		"team": String(v.get("team_name", "—")),
+		"pop": "人口 %s" % String(v.get("pop", "—")),
+		"home": "家：%s" % String(v.get("home", "—")),
+		# ★F8 營地欄：沒有寫入者（鍵缺席）⇒「？」；寫入者說沒有 ⇒「無」（兩句不同的話）
+		"camp": "營地：%s" % String(v.get("camp", "？")),
+		"food": "糧撐 %s" % String(v.get("food", "—")),
+		# ★故事結束 ⇒ 取代威脅欄（票 #2 刀 0）：只在 story_end 非空時出現
+		"threat": (STORY_END_LABEL + story_end) if story_end != "" else ("威脅：" + String(v.get("threat", "—"))),
+		"pending": "待執行 %s" % String(v.get("pending", "—")),
+	}
+
+# 實際顯示哪幾格（床逐格比對原值用）
+static func top_shown(v: Dictionary) -> Array:
+	var cells: Dictionary = top_cells(v)
+	var shown: Array = TOP_ORDER.duplicate()
+	if _top_width(cells, shown) <= TextUiLayout.COLS:
+		return shown
+	for k in TOP_DROP_ORDER:
+		shown.erase(k)
+		if _top_width(cells, shown) <= TextUiLayout.COLS:
+			return shown
+	return shown   # 時間＋威脅句＋待執行仍超過 COLS ⇒ 床斷言紅（不在這裡截字）
+
+static func _top_width(cells: Dictionary, shown: Array) -> int:
+	return TextUiLayout.display_width(TOP_SEP.join(PackedStringArray(shown.map(func(k): return String(cells[k])))))
+
+static func top_row(v: Dictionary) -> String:
+	var cells: Dictionary = top_cells(v)
+	return TOP_SEP.join(PackedStringArray(top_shown(v).map(func(k): return String(cells[k]))))
 
 # 威脅句的最長可能寬度（模板以最長可能值填入）——床用它驗「最寬的威脅句也放得進一列」
 #   隊號取 5 位、距離取 2 位（視野半徑遠小於 99）；方位、野獸名取各自集合裡最寬的那一個
@@ -200,52 +211,6 @@ static func threat_reserve() -> int:
 			PlayerApiMapper.THREAT_NONE, "尚未提供", "—"]:
 		w = maxi(w, TextUiLayout.display_width(String(s)))
 	return w
-
-# ★頂列的可截欄：隊名、家名、營地（依序讓出）——威脅句整句優先，其餘欄吃【威脅句實際寬度之後】剩下的
-#   ★偏離 spec「按模板預留」的理由（交件信呈報）：固定欄＋最長模板預留（30）在真實開局就佔 117 欄
-#     ⇒ 隊名永遠被截成「…」（開局頂列實際只有 96 欄）；而營地有值又看到敵人時，就算隊名家名截光整列仍超過 120
-#   ⇒ 改成按威脅句【實際】寬度讓位：列寬恆 ≤ COLS、威脅句恆整句；代價＝威脅句變長時名字那幾欄跟著縮（列數不變）
-static func _fit_names(v: Dictionary, story_end: String) -> Array:
-	var tn: String = String(v.get("team_name", "—"))
-	var hm: String = String(v.get("home", "—"))
-	var cp: String = String(v.get("camp", "？"))
-	if story_end != "":
-		return [tn, hm, cp]   # 故事結束那句吃剩餘並截（舊行為）⇒ 其餘照原樣
-	var sep: String = " ｜ "
-	var fixed: Array = [
-		"第 %s" % String(v.get("clock", "—")),
-		"（人口 %s）" % String(v.get("pop", "—")),
-		"家：",
-		"營地：",
-		"糧撐 %s" % String(v.get("food", "—")),
-		"威脅：" + String(v.get("threat", "—")),
-		"待執行 %s" % String(v.get("pending", "—")),
-	]
-	var used: int = TextUiLayout.display_width(sep) * 6
-	for f in fixed:
-		used += TextUiLayout.display_width(String(f))
-	var left: int = TextUiLayout.COLS - used
-	var parts: Array = [tn, hm, cp]
-	var widths: Array = parts.map(func(x): return TextUiLayout.display_width(String(x)))
-	if int(widths[0]) + int(widths[1]) + int(widths[2]) <= left:
-		return parts
-	# 營地最後讓：先給營地它要的（最多一半），剩下隊名家名平分、短的讓給長的
-	var bc: int = mini(int(widths[2]), maxi(left, 0) / 2)
-	var rest: int = maxi(left - bc, 0)
-	var bt: int = rest / 2
-	var bh: int = rest - bt
-	if int(widths[0]) < bt:
-		bh += bt - int(widths[0])
-		bt = int(widths[0])
-	elif int(widths[1]) < bh:
-		bt += bh - int(widths[1])
-		bh = int(widths[1])
-	var out: Array = [tn, hm, cp]
-	var budgets: Array = [bt, bh, bc]
-	for i in range(3):
-		if int(widths[i]) > int(budgets[i]):
-			out[i] = TextUiLayout.clip_mark(String(parts[i]), maxi(int(budgets[i]), 1))
-	return out
 
 # ★故事結束那一欄的欄標（床的 P0 斷言這個字面 ⇒ 給它名字，不在兩處各寫一次）
 const STORY_END_LABEL: String = "故事已結束："
