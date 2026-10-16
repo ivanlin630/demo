@@ -85,6 +85,7 @@
 - G4 立國閘不過：佈置盟主統領低於門檻 ⇒ 回 `{ok:false, msg: "盟主統領 … 未達 …"}`、override 不變、30 天 `is_established` 仍 false。
 - G4c 理由逐條表（R² M3）：NPC 版（`for_player=false`）六列各佈置「只有這一條不過」（隊長不存在／已立國／成員 <2／統領／野心／準備度），斷言回句含該條關鍵字；另一列全過 ⇒ 空字串。野心兩格放在 0.6 邊界兩側（0.59 不過、0.60 過）。
   - 玩家版（`for_player=true`）：盟主野心 0.3、其餘全過 ⇒ 空字串（不看野心）；統領 0.39 ⇒ 不過、0.40 ⇒ 過（門檻不打折）；所有不過的回句都不含「野心」。
+  - G4e 走 action 路徑（R²c）：玩家領導、盟主野心 0.3、其餘全過 ⇒ `set_faction_goal` 立國回 ok:true（G4c 直呼函式咬不到 action 傳錯參數）。
 - G4d 抽前抽後：同一組五個邊界佈置（每個連言一個），NPC 路 `_rebuild_goals` 後「立國」in goals 在抽前樹與抽後樹逐格相同；交件信印兩組。
 - G4b 立國閘過：⇒ 下一個 `_assign_tasks` 後 `is_established`、override 清空；之後 3 天 `g2.faction_found` 只 +1（不每小時重宣告）。
 - G5 交接：玩家盟主設「攻擊 X」後把盟主交給 NPC 隊 ⇒ 下一次重建後 override＝""、target＝-1，且 `goal_drivers` 非空（NPC 重建才寫 driver；G-09 舊支與玩家領導支都不寫）。
@@ -100,7 +101,7 @@
 | n2 pinned 失效時 fallback 到最近 | G1b |
 | n3 `外交.to_task` 改回自己呼 `_nearest_independent` | G3 to_task 那半 |
 | n4 action 不呼 `establish_block_reason` | G4 |
-| n4b 玩家路傳 `for_player=false` | G4c 玩家版野心 0.3 那格 |
+| n4b 玩家路傳 `for_player=false` | G4e |
 | n5 `_declare_established` 不清 override | G4b（found 次數 >1） |
 | n6 G-09 支放回 | G5（新版 directive_stamp_test ③ 走玩家領導，**不會**紅——不是雙守） |
 | n7 外殼不比 `player_goal_target`（或不更新「上次套用」） | G1c |

@@ -800,14 +800,16 @@ func _residents(state: WorldState, pt: TeamData, aid: String) -> Dictionary:
 		"residents_massacre":
 			# ★句子照實（藍圖 2026-10-15）：屠村不是一場戰鬥 ⇒ 不寫得像打仗
 			var mr: Dictionary = EncounterSystem._massacre_residents(state, pt, resident, tile)
-			var sc: Array = mr.get("scattered", [])
-			var msg: String = "你下令屠村：Team%d 的 %d 人被殺" % [int(mr.get("team_id", -1)), int(mr.get("killed", 0))]
-			if not sc.is_empty():
-				msg += "，%s 逃散" % "、".join(PackedStringArray(sc))
+			# ★7b：回傳 key 換成 killed_anon／killed_named（舊 key 用 get 讀會靜默變 0——同 commit 改讀）
+			var kn: Array = mr["killed_named"]
+			var msg: String = "你下令屠村：Team%d 的 %d 人被殺" % [int(mr["team_id"]), int(mr["killed_anon"]) + kn.size()]
+			if not kn.is_empty():
+				msg += "（含 %s）" % "、".join(PackedStringArray(kn))
 			return { "ok": true, "msg": msg + "，據點易主" }
 		"residents_seize":
+			var rtid: int = resident.team_id
 			EncounterSystem._force_occupy(state, pt, resident, tile)
-			return { "ok": true, "msg": "強佔" }
+			return { "ok": true, "msg": "據點易主，Team%d 的 %d 人留在原地" % [rtid, resident.population] }
 	EncounterSystem._abandon_occupation(state, tile)
 	return { "ok": true, "msg": "放棄佔領" }
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 7b 戰後處置過渡
 topic: GO｜spec 2026-10-16-aftermath-disposition-transition-7b-HOW（R² ISSUES 四處已補，審查註明補完免再審）｜順位：你領導的勢力之前（做完手上那張就換這張也可以，兩張不碰同檔）
 ---

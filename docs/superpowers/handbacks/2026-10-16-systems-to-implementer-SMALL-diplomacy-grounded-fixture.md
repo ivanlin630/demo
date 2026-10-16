@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 小修（插在當前票的下一個 commit 即可，不另開分支也行；不影響排序）
 topic: tier2 全掃 綠→紅 1 支 diplomacy_grounded_test.gd ＝床佈置過期，不是引擎回歸｜補一個欄位＋一個負對照
 ---
