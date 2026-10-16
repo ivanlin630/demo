@@ -164,7 +164,7 @@ for ($i = 0; $i -lt ($args.Count - 1); $i++) {
 }
 try {
     $provSha = (& git -C $provPath rev-parse --short HEAD 2>$null)
-    $provDirty = @(& git -C $provPath status --porcelain 2>$null)
+    $provDirty = @(& git --no-optional-locks -C $provPath status --porcelain 2>$null)   # no-optional-locks: shared main dir, a bare status writes index.lock (systems 2026-10-17)
     if ($provSha) {
         # Only dirt that can change the RUN matters. Docs churn is constant here
         # (six sessions share this repo), and a stamp that shouts every time is a

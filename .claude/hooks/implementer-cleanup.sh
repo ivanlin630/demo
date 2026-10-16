@@ -40,7 +40,7 @@ bn=$(basename "$hit")
 _slice=$(head -12 "$hit" 2>/dev/null | grep -iE "^slice:" | head -1 | sed -e "s/^[Ss]lice:[[:space:]]*//" -e "s/[[:space:]]*<!--.*//" | tr -d " ")
 _wt_msg=""
 if [ -n "$_slice" ] && [ -d "${_MAIN}/.worktrees/${_slice}" ]; then
-  _dirty=$(git -C "${_MAIN}/.worktrees/${_slice}" status --porcelain 2>/dev/null | head -3)
+  _dirty=$(git --no-optional-locks -C "${_MAIN}/.worktrees/${_slice}" status --porcelain 2>/dev/null | head -3)
   if [ -n "$_dirty" ]; then
     _wt_msg=" ④★worktree .worktrees/${_slice} 還在【而且有未 commit 的東西】——先確認那些改動要不要留（別直接拆），處理完再 git worktree remove。"
   else
