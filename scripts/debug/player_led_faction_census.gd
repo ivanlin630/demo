@@ -57,5 +57,11 @@ func _initialize() -> void:
 			print("   NPC 勢力 goals（小時×勢力）：%s｜空 %d" % ["  ".join(PackedStringArray(gs)), empty_hours])
 			print("   玩家領導勢力：小時 %d｜goals %s" % [pl_hours, str(pl_goal_hist)])
 			print("   %s" % "  ".join(PackedStringArray(parts)))
+			# ★玩家勢力目標票 §驗收 world-fp 段：玩家指定對象／交接清令的計數【逐鍵印、缺鍵印 0】（無玩家世界應全 0；不靠前綴過濾的「沒出現」）
+			var dk: Array = []
+			for k in ["directive.pinned.used", "directive.pinned.invalid", "directive.pinned.unknown_to_member",
+					"faction.override_cleared_on_handover", "faction.override_cleared_stale_word", "directive.stamp", "directive.restate_no_stamp"]:
+				dk.append("%s=%d" % [k, int(Probe.counts.get(k, 0))])
+			print("   DIRECTIVE｜%s" % "  ".join(PackedStringArray(dk)))
 	print("=== player_led_faction census DONE ===")
 	quit()

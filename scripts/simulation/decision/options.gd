@@ -467,8 +467,8 @@ static var REGISTRY: Dictionary = {
 			return "外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1 \
 					and not ctx.diplo_target_on_cooldown,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			# 派系指定最近獨立隊外交（非戰，不設 combat_target）。
-			var dt: int = FactionAISystem.shared()._nearest_independent(state, team)
+			# 派系指定對象外交（非戰，不設 combat_target）。★門與執行讀同一個對象（spec player-faction-goal §二；同「攻擊」那一刀）
+			var dt: int = FactionAISystem.faction_directive_target(state, team, state.factions.get(team.faction_id), "外交")
 			if dt == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			var dt_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, dt)   # 外交 target(跨-faction)走 belief last-seen
 			if dt_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
