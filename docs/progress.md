@@ -1311,6 +1311,7 @@ reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權�
         ③玩家事件匯流排加「怎麼知道的」必填（親見／信使／傳聞），缺＝拒收 ④子隊事件走信使（距離延遲、視野內即時、召回令也送達）
         ⑤動詞目錄（verb-catalog.md）＝驗收，每併一個登一列
   探針：前兩個動詞＝建點（三入口）＋子隊到場執行（NPC 腦內那段＋玩家殼合一）；拆不開／床紅收不回 ⇒ 回報用戶決定重開
+        HOW 2026-10-16-structure-round-probes-build-and-subteam-arrival-HOW R² 兩輪後 GO；平原採料期限三選一待藍圖
   安全網：126 支床；邊拆邊跑；fp 變＝intended 要逐格說
 
 二、深層批（結構輪之後，順序）

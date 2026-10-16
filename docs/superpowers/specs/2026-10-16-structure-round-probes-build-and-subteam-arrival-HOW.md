@@ -4,7 +4,7 @@
 > WHAT：
 > - 藍圖 2026-10-14-blueprint-to-systems-RULING-structure-round-before-deep-batch-one-verb-one-body-events-carry-source（結構輪範圍五條、探針兩個、停損）。
 > - 藍圖 2026-10-14-blueprint-to-systems-TICKET-L1-needs-material-gathered-on-site-and-three-entries-merge-into-one-verb（用戶裁「L1 要材料」、就地採不是備料、三入口一個動詞）。
-> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補，待再審。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
+> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
 > 位置：玩家可見批（真玩小修、我的掛單與押貨、玩家勢力目標）之後，深層批之前。
 > 本票只做兩個探針。結構輪第 ③④ 條（玩家事件帶來源、子隊事件走信使）是下一張，不在本票。
 
@@ -104,6 +104,7 @@
   - **採段期限**（M2）：池一直貼上限 ⇒ 每 tick 的 gain 都 >0 ⇒ 停工逾時永遠不響。所以另設期限：
     - `OutpostSystem.gather_window_days()`＝`CONSTRUCTION_TIMEOUT_CEIL_DAYS`（30 日），不新增旋鈕。
     - `gather_left > 0` 且 `今 tick − construction_started_tick > gather_window_days × TICKS_PER_DAY` ⇒ 取消，走既有退料（退 `site_stock` 50%），Probe `construct.gather_abort`。
+    - 落點：寫在 `check_construction_timeout`（`outpost_system.gd:749`，掃 tile、不看隊在不在），不寫在 `_tick_construction`（它在無施工隊時早退 :383-400，隊被召走的工地會看不到期限）。
     - 估算器的上限讀同一支（§三）⇒ 估算器回 INF ⇔ 實跑會在窗內取消。
     - 30 日是「採多久算蓋不成」，屬 WHAT 邊緣，已轉藍圖（§給藍圖）。藍圖改值只動這一支。
   - 開始採之前凍結 `start_pop`（同築段 :416 那行，移到採段之前），讓採段期間 `construction_timeout_days` 也有值。
@@ -134,12 +135,15 @@
 - 改讀新函式的呼叫點（凡是估「一座還沒開工的新點」的）：`decision_context.gd:876/915/931`、`goal_resolver.gd:1587`、`faction_ai_system.gd:5544`。
   - `:6702` 實作端讀過再判，在交件信說它估的是什麼。
   - **`persist_strength.gd:95`（糧門）改讀 `build_eta_total_days`**（M3）：採段期間 `ticks_left` 還是整張 720，只讀它就看不到 7～22 日的採段 ⇒ 隊以為糧夠、不放手。
+    - `site` 參數：隊站在工地上 ⇒ 腳下真值；隊離開（`corvee_site` 那條路）⇒ `site_prior`。
   - **`persist_strength.gd:111-113`（`_progress`）**：分子分母都含採段。總量＝採段天數＋築段天數，已完成＝`site_stock` 對應天數＋已築天數；實作端寫成一支 `OutpostSystem.construction_progress(tile)`，不在 persist 裡另算。
   - `outpost_system.gd:85`（停工逾時的預期工期）不改；採段由 §二 的期限另管。
 - `_dispatch_builder` 的材料閘（`:5497-5517`，`BuildAfford.shortfall` 那段＋`funnel.build_gate.cost*`）**退場**。
   - 糧橋的 `_eta_build`（:5544）改用 `build_eta_total_days`。路遠、地禿 ⇒ ETA 長 ⇒ 要的糧多 ⇒ 糧橋本來就會拒——這是物理，不是新門。
   - `INF` ⇒ 記 `funnel.build_gate.site_barren` 並回 false（同族計數，六道閘照樣能相加對帳）。
-  - `_fund_subteam_from_vault`／`:5960-5965` 的撥料不改形：今天就是 `min(need, 有的)`，帶多少算多少。
+  - **撥料量抽成一支純函式**（R²b M7）：`FactionAISystem.fundable_carry(vault, owner_res, sub_res, cost) -> {res: 量}`。`_fund_subteam_from_vault`（:5973-5985）與 `:5960-5965` 的撥料改呼它；糧橋前的估算（:5544）也呼它，`carried_material` ＝它回的 material。
+    - 理由：估算在撥料（:5564）之前。傳 0 ⇒ 母隊庫存夠的平原派遣也被判 `site_barren`；實際撥料後 `gather_left` 是 0。
+    - 禁止估算端另寫一份 `min()`。
   - 刪 **`BuildAfford.shortfall` 這個函式**（非 debug 碼只有 :5500 呼叫）。`BuildAfford` 這個檔留著：`can_afford` 還有 `faction_ai_system.gd:5662/5998/6503/6598` 四處、`:3218` 讀 `MARGIN_MAX`、`build_afford_persona_test.gd`。
 
 ### 四、玩家面
@@ -197,6 +201,7 @@
   - 修前（81／81 倒在材料閘）並排。
 - **V9 玩家面**：玩家紮根回句含「需材」「可採約」，不含「免材料」；頂列 `phase` 兩段印得出來。
 - **G9 玩家優先序**：玩家紮根、建設之後，施工中 `task_priority == PRIO_PLAYER`。
+- **V8b 撥料與估算同源**（M7）：同一個平原目標，母隊庫存 0 ⇒ `site_barren`；庫存 ≥ need ⇒ 過這道閘、子隊開工時 `gather_left == 0`。
 - **V10 玩家子隊建設不擋料**（M5）：玩家子隊帶 0 料派往森林格 ⇒ `precheck_subteam_build` ok，回句含「需材」「可採約」。
 - **P1 持守看得到採段**（M3）：同一支隊、`food_runway` 固定，兩個進行中工地：`gather_left=0` 與 `gather_left=need` ⇒ 後者 `safe_factor` 較小、`_progress` 較小。
 
@@ -231,7 +236,8 @@
 | n9 採段每 tick 都刷新 `last_progress`（不看 gain>0） | V5 |
 | n10 執行端不加採段期限 | V5b |
 | n11 `persist_strength` 只讀 `ticks_left` | P1 |
-| n12 `on_arrival` SETTLE 另寫一份判準（不呼 `settle_refuse_reason`） | S1 ④ |
+| n12 `on_arrival` SETTLE 改回舊 NPC 判準（`faction_id` 相等，含 -1 == -1） | S1 ④ |
+| n14 糧橋估算 `carried` 傳 0（不呼 `fundable_carry`） | V8b 後者 |
 | n13 `precheck_subteam_build` 留著料門 | V10 |
 
 ## 給藍圖（已另寄）

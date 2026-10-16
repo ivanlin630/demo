@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 結構輪兩個探針 第二輪（main 2426eefe1）
 topic: R② 第二輪 ＝ **ISSUES（小，一處必補）**｜M1–M6 全數對得上；遠端估算的「帶來的料」在撥料之前算，會讓有庫存的平原派遣被誤判蓋不成
 ---
