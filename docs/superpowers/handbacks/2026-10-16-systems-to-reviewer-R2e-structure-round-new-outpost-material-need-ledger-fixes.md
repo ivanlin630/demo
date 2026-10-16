@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 結構輪探針 §三之三 新點缺料進同一本需求帳
 topic: R²d M9–M13＋小項已補；M9／M10 改了語意，請再看 §三之三 diff 一次
 ---
