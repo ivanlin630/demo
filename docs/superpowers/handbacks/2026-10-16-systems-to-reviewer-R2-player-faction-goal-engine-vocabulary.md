@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: R² 請審 HOW 2026-10-16-player-faction-goal-engine-vocabulary（玩家勢力目標改用引擎詞＋攻擊／外交對象＋立國閘＋交接清令）
 ---
 
