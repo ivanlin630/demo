@@ -9819,10 +9819,12 @@ func _test_occupy_force() -> void:
 		{ "野心": 0.8, "慎重": 0.6, "殘忍": 0.1, "好戰": 0.1, "義氣": 0.1, "信義": 0.1 }, 0.2, 0.5)
 	var state: WorldState = d["state"]
 	var tile: HexTileData = d["tile"]
+	# ★7b：記呼叫前的人口再比（舊斷言寫「10→8」，而佈置當下其實是 11、11−3＝8 碰巧對上）
+	var occ_pop0: int = state.teams[2].population
 	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
 	assert(tile.outpost_owner == 0, "強佔後 outpost 易主，實際=%d" % tile.outpost_owner)
 	assert(state.teams.has(2), "強佔後居民團應存活")
-	assert(state.teams[2].population == 10, "強佔人口應不變（10；7b 藍圖拿掉沒有來源的兩成），實際=%d" % state.teams[2].population)
+	assert(state.teams[2].population == occ_pop0, "強佔人口應不變（7b 藍圖拿掉沒有來源的兩成），前 %d 後 %d" % [occ_pop0, state.teams[2].population])
 	print("Prosperity Task6d OK")
 
 func _test_conquest_flip_governance() -> void:
