@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: diplomacy-grounded（spec 2026-07-15-diplomacy-grounded；2026-10-16 佈置補 has_tribute_to_give 跟上 45c578357，tier2 全掃覆蓋，不註冊）
 
 # 求和/外交 grounded TDD（slice: diplomacy-grounded）
 # spec: docs/superpowers/specs/2026-07-15-diplomacy-grounded.md
