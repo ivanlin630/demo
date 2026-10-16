@@ -4,7 +4,7 @@
 > WHAT：
 > - 藍圖 2026-10-14-blueprint-to-systems-RULING-structure-round-before-deep-batch-one-verb-one-body-events-carry-source（結構輪範圍五條、探針兩個、停損）。
 > - 藍圖 2026-10-14-blueprint-to-systems-TICKET-L1-needs-material-gathered-on-site-and-three-entries-merge-into-one-verb（用戶裁「L1 要材料」、就地採不是備料、三入口一個動詞）。
-> 狀態：待 R²。
+> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補，待再審。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
 > 位置：玩家可見批（真玩小修、我的掛單與押貨、玩家勢力目標）之後，深層批之前。
 > 本票只做兩個探針。結構輪第 ③④ 條（玩家事件帶來源、子隊事件走信使）是下一張，不在本票。
 
@@ -25,10 +25,14 @@
   - `"crude_camp"`（:482-504）：設型別、L1、`set_owner`、food cap 抬到 40、清營地欄（`camp_level`／`camp_team_id`／`camp_ticks_left`、`OwnerCampIndex.invalidate`）、清 `corvee_site`、加型別 tag、去「流亡」、`TaskArbiter.release`。不發訊息。
 - 派子隊這條路量過：`founding-silence-recheck-30d` 81 次嘗試全倒在材料閘；`construction-funnel-team0-3` 26／26 同（藍圖票）。
 - 採集物理（`resource_system.gd:82-121`）只在 `outpost_level>0` 的格跑 `_collect_from_tile`。L0 格只跑營地覓糧（:84-94）。**今天沒有任何一條路能在 L0 格採材料**——就地採需要新開一條。
-- 材料採集量（`_collect_from_tile` :386-404 的 material 那一支）：
+- 材料採集量（`_collect_from_tile` :390 起算，material 乘工程在 :403-404）：
   `productivity × current × COLLECT_RATE × day_fraction × outpost_mult × labor_mult × labor_share × work_morale × (1 + 工程 × 0.3)`。
-  - 非工位格的 `labor_mult` 用中性 `LaborSystem.LABOR_SCALE`＝1.0（:400）。**人數不在這條式子裡**。
-- 回生：`ResourceSystem.REGEN_RATE`（:55-59）material：平原 0.5、森林 12、山地 2。生成池（`world_generator.gd:9-11`）material：平原 5-20、森林 80-220、山地 30-100。
+  - `labor_mult`：格的 `labor_alloc` 有這個工位才讀它，否則中性 `LaborSystem.LABOR_SCALE`＝1.0（:393-395）。L0 工地格 `labor_alloc` 是空的 ⇒ 中性。**人數不在這條式子裡**。
+- 回生（`resource_system.gd:148-178 regenerate_tiles`）：material 每次呼叫加 `REGEN_RATE[terrain].material`，**不乘 day_fraction**（:151 註解、:174）；這一步每小時跑一次（`sim_runner.gd:263` grp "hour"）。
+  - ⇒ 每日回生＝24 × 平原 0.5／森林 12／山地 2，遠大於各自的上限（`world_generator.gd:9-11`：平原 5-20、森林 80-220、山地 30-100）。
+  - ⇒ **材料池實際上一直貼著上限**。採料速率 ≈ `productivity × cap × COLLECT_RATE` 每日，不會「池小採得慢、靠回生補」。
+  - 量級（審查端用區間中點估）：森林約 6.8／日、山地約 2.3／日、平原約 0.7／日 ⇒ 缺 50 料：森林約 7 日、山地約 22 日、平原約 72 日。
+- 逾時取消（`outpost_system.gd:66-86`）：窗＝3 × 預期工期，夾在 5～30 日；`start_pop` 還沒凍結時直接回上限 30 日（:81-84）。
 - 逾時取消（`outpost_system.gd:748-781`）退 `construction_cost_of(tile)` 的 50% 給施工隊；`construction_cost_of` 對 `"crude_camp"` 回 `{}`（不退）。
 - 估算器讀工期的地方（`build_eta_days(` 呼叫點）：
   - `decision_context.gd:876`（紮根 `settle_eta_days`）、`:915`、`:931`
@@ -46,7 +50,10 @@
   - SETTLE（:4171-4180）：格的據點主人存在且同勢力 ⇒ `_convert_to_resident`。**不成就什麼都不做**，下一 tick 再判。
   - CONSTRUCT 抵達逾時（:4158-4166）：release＋進 `merge_queue`。
 - 兩邊的 CONSTRUCT 開工都走同一支 `begin_subteam_construction`（`movement_system.gd:497`、玩家腳下 `:1517`）——這一段已經是一支。
-- 移居的判準兩份不同：玩家＝「母隊自己的據點」；NPC＝「同勢力的據點」。
+- 移居判準：
+  - 玩家：`PlayerCommandSystem.own_outpost_reason`（`player_command_system.gd:2529-2539`）＝格有據點（level>0）且主人是自己，或主人同勢力且勢力≠-1。出發前（:2521）與到場（`faction_ai:4377`）呼同一支。
+  - NPC（:4176-4179）：主人存在且 `faction_id` 相同（兩邊都是 -1 也算）、不看 level、**沒有「到了」的判斷**——途中每一 tick 都判腳下那格；「未到不動」靠的是途中格剛好不是同勢力據點。
+- 玩家派子隊建設出發前的材料門：`precheck_subteam_build`（`player_command_system.gd:2542-2563`，`afford_shortfall`）。
 
 ## 改法
 
@@ -67,7 +74,7 @@
 - **開工不查有沒有料**（`action:"build"` 的開工）：
   - `need` ＝ 成本表那一列。
   - 帶來的料先抵：從施工隊私產扣 `min(帶的, need)`，逐種資源走 `ResourceBank`。今天 `_deduct_cost` 的公庫優先順序照舊——站在自己據點上時公庫先扣，新點沒有公庫就只扣私產。
-  - 抵不完的部分記進 `construction_target["gather_left"]`。**只有 material 可以進 gather_left**；其他資源（只剩 L2+ 軍用的 tools）抵不完 ⇒ 開工回 false（升級才會遇到，本票不改）。
+  - 抵不完的部分記進 `construction_target["gather_left"]`，並記 `construction_target["need"]`（成本表那一列的材料數，玩家面與持守讀它）。**只有 material 可以進 gather_left**；其他資源（只剩 L2+ 軍用的 tools）抵不完 ⇒ 開工回 false（升級才會遇到，本票不改）。
   - 實際放進工地的量記進 `construction_target["site_stock"]`（帶來的＋採到的，見 §二）。
   - 工期 `construction_ticks_left = build_person_hours(type, level)`。L1 兩型都是 720，等於今天紮根的工期，所以紮根的築段時間不變。
   - **`corvee_site`**：今天只有紮根會寫。改成身體一律寫 `team.corvee_site = tile.tile_pos`，**限定 `team.parent_team_id == -1`**（主隊）。子隊另有 `task_extra_data` 跟召回路，不寫。
@@ -80,6 +87,11 @@
     - 玩家子隊今天走「原地待命等召回」，release 後仍站在原地，結果一樣。實作端確認玩家子隊沒有被 release 改成別的任務。
   - ★world-fp 會變（紮根完工多發一則訊息、建設完工多做 release 與 tag）。這是預期的改變。
 - **逾時退料**：`"build"` 退 `site_stock` 的 50%（今天退成本表的 50%）。理由：開工不再一次扣滿，工地裡實際有多少料就退多少的一半。`construction_cost_of` 其他讀者不動。
+- **料的帳**：採到的料從 tile（`pool_set` reason `"site_gather"`）進 `site_stock`，不在任何 bank。完工時消耗、逾時時退一半。實作端確認有沒有材料守恆的稽核會把它看成憑空消失；有的話給「完工消耗」「逾時退料」各一個具名 reason，沒有就在交件信寫「沒有」。
+- **其他材料門一起退**（M5）：
+  - `player_command_system.gd:2542-2563 precheck_subteam_build`：只留格子三條（不在地圖、已有據點、正在施工），拿掉 `afford_shortfall` 那段。出發回句改走 §四 的「需材／帶料抵／可採約」。
+  - `:1419`「無法建造（資源不足）」：`start_build` 不再因料回 false，改印真因（已有據點／正在施工；L2+ 軍用缺工具時才是資源）。
+  - `outpost_system.gd:960-965` 的 tap 註解把 `start_build` 列為 `afford.short.<site>` 的呼叫點，同步改註解與對帳說明。
 
 ### 二、採段：在 `_tick_construction` 裡，築段之前
 - 有施工隊在格、`gather_left.material > 0` ⇒ 這一 tick 只採、不築：
@@ -87,56 +99,74 @@
   - `gain = min(gain, tile 材料現量, gather_left)`
   - `TileBank.pool_set(tile, "material", 現量 - gain, "site_gather")`
   - `gather_left -= gain`、`site_stock += gain`
-  - `gain > 0` 才刷新 `construction_last_progress_tick`。地採空了 ⇒ 不刷新 ⇒ 照既有逾時取消。這就是「蓋不成」，不另寫判斷。
+  - `gain > 0` 才刷新 `construction_last_progress_tick`（池被別人採光時照既有停工逾時）。
   - `ticks_left` 不動。
+  - **採段期限**（M2）：池一直貼上限 ⇒ 每 tick 的 gain 都 >0 ⇒ 停工逾時永遠不響。所以另設期限：
+    - `OutpostSystem.gather_window_days()`＝`CONSTRUCTION_TIMEOUT_CEIL_DAYS`（30 日），不新增旋鈕。
+    - `gather_left > 0` 且 `今 tick − construction_started_tick > gather_window_days × TICKS_PER_DAY` ⇒ 取消，走既有退料（退 `site_stock` 50%），Probe `construct.gather_abort`。
+    - 估算器的上限讀同一支（§三）⇒ 估算器回 INF ⇔ 實跑會在窗內取消。
+    - 30 日是「採多久算蓋不成」，屬 WHAT 邊緣，已轉藍圖（§給藍圖）。藍圖改值只動這一支。
+  - 開始採之前凍結 `start_pop`（同築段 :416 那行，移到採段之前），讓採段期間 `construction_timeout_days` 也有值。
 - `gather_left == 0` ⇒ 照今天築（`ticks_left -= pop × 體力`）。
 - **`ResourceSystem.material_gain` 是從 `_collect_from_tile` :386-404 抽出來的純函式**：
   - 只算 material 那一支的係數：`productivity × current × COLLECT_RATE × day_fraction × outpost_mult × labor_mult × labor_share × work_morale × (1+工程×0.3)`。
   - `_collect_from_tile` 的 material 分支改呼它。**既有採集逐數不變**，G7 world-fp 對照咬這條；fp 若因此變了，就是抽錯。
   - 工程技能讀施工隊隊長，同 `_collect_from_tile` 的呼叫端（:107）。
-- `day_fraction`：用 `_tick_construction` 實際呼叫的間隔。實作端讀它的呼叫端：每 tick 叫就是 `1/TICKS_PER_DAY`；隔 N tick 叫就用 N 去除，不要寫死。
+- `day_fraction`＝`1.0 / OutpostSystem.build_ticks_per_day()`（:172-177，`build_eta_days` 已用同一支）。`_tick_construction` 的簽名不帶 day_fraction，不要另外傳。
 - **人數不進採段**。今天的採集物理在非工位格就是這樣（:400 中性 `LABOR_SCALE`）。要讓人數進來是改採集物理，不在本票。交件信寫明。
-- 回生照既有 tile 回生（`REGEN_RATE`），採段不另算。
+- 回生照既有 tile 回生（每小時一次、不乘 day_fraction），採段不另算。
+- Probe：`construct.gather_ticks`、`construct.gather_done`（採段轉築段）、`construct.gather_abort`，以及 `construct.gathered` 累計量（`add_amount`）。V8 靠它們分辨「真的採了」與「每個都帶夠料」。
 - 採集期間施工隊在 L0 格上，`resource_system` 不會另外採材料（:82 那一支只做營地覓糧），所以不會重複入帳。
 
 ### 三、估算器同源：`OutpostSystem.build_eta_total_days`
 - 新函式 `build_eta_total_days(type, level, pop, carried_material: float, site: Dictionary) -> float` ＝ 採段天數 ＋ `build_eta_days(build_person_hours(type, level), pop)`。
-  - 採段天數：`need_left = max(need - carried, 0)`。逐日模擬：每日用**同一支** `ResourceSystem.material_gain`（day_fraction＝1）採，再加**同一份** `REGEN_RATE[terrain].material` 回生（cap 照 site 的 cap）。
-  - 跑到 `need_left` 歸零為止。上限＝該工地的逾時窗（`construction_timeout_days` 的同一個 k）；到上限還沒採夠 ⇒ 回 `INF`。
-  - **禁手抄**：估算器裡不得出現 0.05、12.0 這類數字，只能呼叫那兩個真相源。
-  - 回生若在 tile 回生系統裡是 inline 寫的，抽成 `ResourceSystem.regen_step(terrain, current, cap, days)` 給兩邊共用。
+  - 採段天數（貼上限模型，R² M1 選 a）：`need_left = max(need - carried, 0)`；`每日量 = ResourceSystem.material_gain(..., current = cap, day_fraction = 1.0)`；`天數 = need_left / 每日量`。
+  - 不模擬回生。前提「池一直貼上限」寫進函式註解，並由床 V6b 證明（停採 24 小時，池回到 cap）。
+  - 天數 > `gather_window_days()` ⇒ 回 `INF`（同 §二 執行端的期限）。
+  - **禁手抄**：估算器裡不得出現 0.05、12.0 這類數字，只能呼叫 `material_gain` 與 `site_prior`。
+  - 進行中的工地也用它：`carried` 傳 `site_stock`，need 讀 `construction_target["need"]`（剩下的就是 `gather_left`）。
 - `site` 的來源（感知鐵律）：
   - **站在那一格上**（紮根、玩家建設、玩家紮根）：讀腳下真值＝親見。
   - **遠端選點**（`_dispatch_builder`、`decision_context` 與 `goal_resolver` 估新點的地方）：隊的格記憶沒有材料存量 ⇒ 讀**地形先驗**。
-    - 池與 cap 取 `world_generator.RESOURCE_PROFILE[terrain].material` 區間中點。
-    - productivity 取 `PRODUCTIVITY_RANGE` 中點。
-    - 這是「森林有木頭」那種常識，不是真值；測試值，寫在一支 `OutpostSystem.site_prior(terrain)`。
+    - `OutpostSystem.site_prior(terrain)` 只回 `{cap, productivity}`：cap 取 `world_generator.RESOURCE_PROFILE[terrain].material` 區間中點，productivity 取 `PRODUCTIVITY_RANGE` 中點。估算器不得自己再讀那兩張表。
+    - 先例：`decision_context.gd:908/925` 以地形當公共地理估新點。這是「森林有木頭」那種常識，不是真值。
+    - 誠實限：被採光的格、老林（`world_generator` 覆寫）的格，先驗會錯；錯了 ⇒ 隊到場後被採段期限取消。交件信印 `construct.gather_abort` 次數。
 - 改讀新函式的呼叫點（凡是估「一座還沒開工的新點」的）：`decision_context.gd:876/915/931`、`goal_resolver.gd:1587`、`faction_ai_system.gd:5544`。
   - `:6702` 實作端讀過再判，在交件信說它估的是什麼。
-  - `persist_strength.gd:95`、`outpost_system.gd:85` 讀進行中的工地，不改。
+  - **`persist_strength.gd:95`（糧門）改讀 `build_eta_total_days`**（M3）：採段期間 `ticks_left` 還是整張 720，只讀它就看不到 7～22 日的採段 ⇒ 隊以為糧夠、不放手。
+  - **`persist_strength.gd:111-113`（`_progress`）**：分子分母都含採段。總量＝採段天數＋築段天數，已完成＝`site_stock` 對應天數＋已築天數；實作端寫成一支 `OutpostSystem.construction_progress(tile)`，不在 persist 裡另算。
+  - `outpost_system.gd:85`（停工逾時的預期工期）不改；採段由 §二 的期限另管。
 - `_dispatch_builder` 的材料閘（`:5497-5517`，`BuildAfford.shortfall` 那段＋`funnel.build_gate.cost*`）**退場**。
   - 糧橋的 `_eta_build`（:5544）改用 `build_eta_total_days`。路遠、地禿 ⇒ ETA 長 ⇒ 要的糧多 ⇒ 糧橋本來就會拒——這是物理，不是新門。
   - `INF` ⇒ 記 `funnel.build_gate.site_barren` 並回 false（同族計數，六道閘照樣能相加對帳）。
   - `_fund_subteam_from_vault`／`:5960-5965` 的撥料不改形：今天就是 `min(need, 有的)`，帶多少算多少。
-  - `BuildAfford.shortfall` 若沒有其他呼叫者 ⇒ 連檔一起刪；有 ⇒ 留著並在交件信列出呼叫者。
+  - 刪 **`BuildAfford.shortfall` 這個函式**（非 debug 碼只有 :5500 呼叫）。`BuildAfford` 這個檔留著：`can_afford` 還有 `faction_ai_system.gd:5662/5998/6503/6598` 四處、`:3218` 讀 `MARGIN_MAX`、`build_afford_persona_test.gd`。
 
 ### 四、玩家面
 - 紮根與建設的回句：「開始建 {名}：需材 {N}，帶料抵 {K}，腳下可採約 {M} 天，之後築約 {D} 天」。
-  - `M` 用 `build_eta_total_days` 的採段那一半（站在格上 ⇒ 真值）；`M=INF` ⇒「腳下的料採不夠，蓋不成」，開工照樣成立（不擋，玩家自己決定要不要等或搬料）。
+  - `M` 用 `build_eta_total_days` 的採段那一半（站在格上 ⇒ 真值）；`M=INF` ⇒「腳下的料 {窗} 天內採不夠，不帶料會被取消」，開工照樣成立（不擋）。要蓋得成就開工前帶料；開工後再搬料進工地的動作不在本票。
   - 拿掉「免材料」字樣（`player_command_system.gd:1100` 一帶）。全庫 grep「免材料」，床同 commit 改。
+  - 玩家派子隊建設（`precheck_subteam_build`）的出發回句同一套，`M` 讀遠端先驗（子隊還沒站上去）。
 - 頂列進度分兩段：mapper 的工地資料加 `phase`（`"gather"`／`"build"`）、`gather_left`、`site_stock`。UI 印「採料 {site_stock}/{need}」或「建造 {百分比}」。顯示點由實作端 grep 現在印施工進度的地方，兩處以上一起改。
 
 ### 五、子隊到場一支身體：`SubteamSystem.on_arrival(state, sub) -> Dictionary`
 - 回 `{outcome: "done"|"refused"|"none", reason: String}`。**只做世界動作，不發事件、不 release、不排併回**（那些是腦的事）。
   - CAMP：`FactionAISystem.establish_crude_camp(state, sub)`；false ⇒ `refused`，reason 用它今天的拒因。
-  - SETTLE：判準一份 ⇒ 格的據點主人存在，且（主人＝母隊 **或** 主人同勢力且勢力≠-1）⇒ `_convert_to_resident` ⇒ `done`；否則 `refused`，reason 照實。
-    - 這一份是兩份現有判準的聯集。對玩家，多出「同勢力別人的據點」可以移居；出發前的 `own_outpost_reason` 是玩家選單的前置判斷，不改。理由：到場判的是「這裡能不能住」，是物理；出發判的是玩家要什麼。
+  - SETTLE（M6）：**直接用既有那一支** `own_outpost_reason`，不寫第三份。
+    - 把它從 `PlayerCommandSystem` 搬到 `SubteamSystem.settle_refuse_reason(state, team, pos)`（不依賴玩家層）；`PlayerCommandSystem.own_outpost_reason` 刪掉，出發前（:2521）與 `on_arrival` 都呼新位置。
+    - 母隊不存在時，用子隊自己的 `faction_id` 比（不要一律 refused）；母隊在就照今天用母隊。
+    - `""` ⇒ `_convert_to_resident` ⇒ `done`；否則 `refused`，reason 就是它回的字串。
+    - 玩家側沒有行為改變（今天就收同勢力）。
+    - **NPC 側的行為改變**（列進交件信，新舊結果並排）：獨立隊（faction -1）的子隊不再能移居到別的獨立隊據點；要求 `outpost_level > 0`；母隊已亡時照子隊勢力判。
   - CONSTRUCT／UPGRADE／EXPAND：`none`。開工已經是一支（movement 抵達 → `begin_subteam_construction`），不重複。
   - 其他任務：`none`。
 - 呼叫端（腦）只決定留或回：
   - 玩家 `_tick_player_subteam` 的 CAMP／SETTLE 兩支改成：呼 `on_arrival`；`refused` ⇒ 發原本的事件＋release（照今天）；`done` ⇒ CAMP release（照今天）。
-  - NPC `:4171-4180` 改成：呼 `on_arrival`；`refused` ⇒ release＋進 `merge_queue`（今天是什麼都不做、下一 tick 再判，等於永遠卡在 SETTLE 等一個可能不會回來的主人）。
-    - ★NPC 側行為改變，是刻意的：到了、住不進去 ⇒ 回母隊。交件信印電池裡 `refused` 的次數。
+  - NPC `:4171-4180` 改成：**先加「到了」的門**（M4）——`sub.move_target != Vector2i(-1, -1)` ⇒ return，同玩家側 :4365-4366。到了才呼 `on_arrival`；`refused` ⇒ release＋進 `merge_queue`（今天是什麼都不做、下一 tick 再判，等於永遠卡在 SETTLE 等一個可能不會回來的主人）。
+    - ★NPC 側兩個行為改變，都是刻意的：
+      - 到了、住不進去 ⇒ 回母隊。
+      - 今天 NPC 移居子隊**途經**自家勢力據點也會當場轉居民；加門之後只在目的地轉。
+- Probe 進場計數：`subteam.arrival.{camp,settle}.{done,refused,none}`，NPC／玩家分鍵或分 sample 欄位。交件信從這裡讀 `refused` 次數。
   - CONSTRUCT 抵達逾時的兩種處置（NPC 併回、玩家待命）是腦的差別，留在兩邊。
 - 事件（`emit_player_subteam` 直發）不動，第 ③④ 條才改。
 
@@ -150,25 +180,32 @@
 - **V2 寫入點只有一處**：`scripts/simulation` 內 grep `"action": "build"` 的寫入＝1 處；`start_settle_construction` 0 處；`"crude_camp"` 0 處。
 - **V3 採段守恆、採段不築**：`gather_left>0` 的每一 tick，`ticks_left` 不變；`tile 材料減少量 == gather_left 減少量 == site_stock 增加量`。採完之後 `ticks_left` 開始減。
 - **V4 帶夠就跳過採段**：帶 ≥ need ⇒ 開工當下 `gather_left == 0`，第一個推進 tick 就築。
-- **V5 地禿蓋不成**：材料池 0、回生 0 的格（床內直接設 terrain 與池）⇒ `build_eta_total_days == INF`；實跑 ⇒ 逾時取消，退 `site_stock` 的 50%。
-- **V6 估算器同源**：V1 佈置的採段天數，估算值與實跑天數差 ≤1 日。
-  - 另佈一格讓回生參與（平原、池 5、need 50），同樣 ≤1 日。
+- **V5 池被採光**：池 0 且停回生（床內直接設）⇒ 不刷新 `last_progress` ⇒ 停工逾時取消，退 `site_stock` 的 50%。
+- **V5b 平原蓋不成**（M2）：真平原格（生成的 cap 與 productivity）、need 50、帶 0 ⇒ `build_eta_total_days == INF`；實跑 ⇒ 在 `gather_window_days` 內被取消（`construct.gather_abort` +1），退 `site_stock` 的 50%。
+- **V6 估算器同源**：V1 佈置（森林）的採段天數，估算值與實跑天數差 ≤1 日。地板格印兩個數。
+- **V6b 池貼上限**：採走一半後停採 24 小時 ⇒ 池回到 cap；回補量＝回生呼叫次數 × `REGEN_RATE`（鎖單位）。這格守住估算器「不模擬回生」的前提。
 - **V7 完工一支**：
   - 營地格（`camp_level=1`）完工 ⇒ 營地四欄清掉、food cap ≥40、有 `outpost_built` 訊息、owner 對、主隊被 release。
   - 非營地格完工 ⇒ 營地欄不被碰。
   - NPC 子隊 ⇒ `_auto_settle_builder` 有跑（tag）。
 - **V8 派子隊這條路活了**（量測，不是床）：電池世界 30 天：
   - `funnel.build_gate.cost` 鍵不存在；
-  - `dispatch_builder.attempt > 0` 且真的派出 > 0（`construct.complete_build` 中由子隊完成的 > 0，或至少開工 > 0）。
-  - 派出 = 0 ⇒ 不算過。交件信印六道閘各自的數，跟修前（81／81 倒在材料閘）並排。
+  - **按目標地形拆**：平原／森林／山地各一列，印 attempt、派出、`site_barren`、開工、`construct.gather_ticks`、`gather_abort`、完工。
+  - 過關＝森林或山地至少一列「派出 > 0 且 `gather_ticks > 0`」（後者排除「每個都帶夠料、採段從沒跑」）。
+  - 平原若 100% `site_barren`：不算 bug，是 §給藍圖 那個後果；照實印出。
+  - 全部地形派出都是 0 ⇒ 不算過，停下回報（NPC 選址若幾乎只挑平原，就會這樣——那也是藍圖要看的）。
+  - 修前（81／81 倒在材料閘）並排。
 - **V9 玩家面**：玩家紮根回句含「需材」「可採約」，不含「免材料」；頂列 `phase` 兩段印得出來。
 - **G9 玩家優先序**：玩家紮根、建設之後，施工中 `task_priority == PRIO_PLAYER`。
+- **V10 玩家子隊建設不擋料**（M5）：玩家子隊帶 0 料派往森林格 ⇒ `precheck_subteam_build` ok，回句含「需材」「可採約」。
+- **P1 持守看得到採段**（M3）：同一支隊、`food_runway` 固定，兩個進行中工地：`gather_left=0` 與 `gather_left=need` ⇒ 後者 `safe_factor` 較小、`_progress` 較小。
 
 ### 子隊到場（同床，S 開頭）
-- **S1 同佈置兩種子隊同結果**：NPC 子隊與玩家子隊各一支，SETTLE 到：①母隊的據點 ⇒ 兩邊都 `done`；②同勢力別隊的據點 ⇒ 兩邊都 `done`；③外勢力據點 ⇒ 兩邊都 `refused` 且 reason 相同。
+- **S1 同佈置兩種子隊同結果**：NPC 子隊與玩家子隊各一支，SETTLE 到：①母隊的據點 ⇒ 兩邊都 `done`；②同勢力別隊的據點 ⇒ 兩邊都 `done`；③外勢力據點 ⇒ 兩邊都 `refused` 且 reason 相同；④獨立（faction -1）NPC 子隊到另一獨立隊的據點 ⇒ `refused`（今天會轉，新舊並排印）；⑤母隊已亡、同勢力據點 ⇒ `done`。
 - **S2 CAMP**：空地 ⇒ `done`；已有營地的格 ⇒ `refused`。玩家側 `refused` 有發 `camp_refused` 事件。
 - **S3 寫入點**：子隊路徑上呼 `_convert_to_resident`、`establish_crude_camp` 的只剩 `on_arrival`（grep `faction_ai_system.gd` 的子隊段）。
 - **S4 NPC 住不進去就回**：S1 ③ 的 NPC 子隊在下一 tick 進 `merge_queue`。
+- **S5 途中不判**（M4）：NPC SETTLE 子隊 `move_target ≠ (-1,-1)`，連續 N tick 站在外勢力格與自家勢力據點格 ⇒ 仍是 TASK_SETTLE、不在 `merge_queue`、沒有轉居民。
 
 ### 舊床同 commit 改
 - `s6_phase2_single_source_bed.gd`、`settlement_s2b_test.gd`：`crude_camp` → `build`；紮根「免材料、零扣料」的斷言改成「扣帶來的、餘數進 gather_left」。改的是被用戶裁掉的那個值（免材料→要材料），不是放寬。
@@ -190,6 +227,17 @@
 | n5 完工拿掉 `camp_level>0` 那段 | V7 營地格 |
 | n6 NPC SETTLE 不呼 `on_arrival`、保留 inline | S3、S4 |
 | n7 `on_arrival` SETTLE 不看勢力（只看母隊） | S1 ② |
+| n8 NPC SETTLE 不加「到了」的門 | S5 |
+| n9 採段每 tick 都刷新 `last_progress`（不看 gain>0） | V5 |
+| n10 執行端不加採段期限 | V5b |
+| n11 `persist_strength` 只讀 `ticks_left` | P1 |
+| n12 `on_arrival` SETTLE 另寫一份判準（不呼 `settle_refuse_reason`） | S1 ④ |
+| n13 `precheck_subteam_build` 留著料門 | V10 |
+
+## 給藍圖（已另寄）
+- L1 要材料＋就地採＋現在的生成上限 ⇒ 新點只有森林（約 7 日）、山地（約 22 日）採得夠；平原約 72 日，超過 30 日採段期限 ⇒ 不帶料就蓋不成。
+- 這是 WHAT 後果，不是 bug：農地開不出新點，除非先備料。NPC 選址偏農地（`decision_context.gd:868`）⇒ V8 可能大半倒在 `site_barren`。
+- 規格照現值寫（期限 30 日、不連動選址）；藍圖若要改，只動 `gather_window_days` 或選址的估值，身體不變。
 
 ## 範圍外
 - 玩家事件帶來源、子隊事件走信使、回報對象改母隊：結構輪第 ③④ 條，下一張。
@@ -205,9 +253,10 @@
 
 ## 交件信要列
 - V1 五列實數、V6 估算與實跑天數兩組、V8 六道閘修前修後並排。
-- `corvee_site` 30 個讀點的逐一判斷（一行一個）。
+- `corvee_site` 讀點的逐一判斷（以實際 grep 為準，一行一個）。`decision_context.gd:831-835` 的 recovery（有 corvee_site 就 `settle_resume_site`）會多吃「主隊建設」這一類來源，那一格要寫判斷。
 - `:6702` 估的是什麼、改了沒有。
 - `BuildAfford.shortfall` 刪了沒有，沒刪的話誰在用。
-- 電池裡 S 系列 NPC `refused` 的次數。
+- 電池裡 `subteam.arrival.*` 各鍵次數（NPC `refused` 單獨列）。
+- 三種地形缺 50 料的採段天數（用真函式、真先驗算），給藍圖。
 - world-fp：抽取那輪（應不變）與全量那輪的新舊值、兩輪 run-id。
 - n1–n7 紅燈原文。

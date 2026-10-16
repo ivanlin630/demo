@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 結構輪兩個探針：建點一支身體（L1 要材料、就地採）＋子隊到場一支身體（main a8cffbd8d）
 topic: R② ＝ **ISSUES（四條擋 dispatch、兩條必補）**｜回生單位寫錯 ⇒ 估算器與床的數字全偏；採段無期限 ⇒ 「蓋不成」只在估算器裡成立；持守的糧門看不到採段；NPC 到場分支沒有「到了」的判斷
 ---
