@@ -12829,11 +12829,12 @@ func _test_site_diff_print() -> void:
 	var best2: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
 	assert(best2.pos == best1.pos, "同世界同址")
 	assert(fai._last_site_sig.get(1, "") == sig1, "同址 sig 不變（diff print 不重印）")
-	# 派工失敗原因記錄：無資源 → 資源不足；同原因連續 dedupe
+	# 派工失敗原因記錄：無資源 → 地禿（結構輪 §三：材料閘退場，取代它的是「帶料＋地形先驗採不完」⇒ 地禿）；同原因連續 dedupe
+	leader_team.resources = {"material": 0.0}
 	var ok: bool = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
 	assert(not ok, "無資源應失敗")
 	var reason: String = fai._last_dispatch_fail.get(1, "")
-	assert(reason.begins_with("資源不足"), "應記資源不足，實際=%s" % reason)
+	assert(reason.begins_with("地禿"), "應記地禿，實際=%s" % reason)
 	ok = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
 	assert(not ok and fai._last_dispatch_fail.get(1, "") == reason, "同原因 dedupe")
 	print("Malthus Task1 OK")
@@ -12872,7 +12873,8 @@ func _test_construction_timeout() -> void:
 	tile.tile_pos = Vector2i(2, 2)
 	tile.construction_team_id = 7
 	tile.construction_ticks_left = 50
-	tile.construction_target = { "action": "build", "type": "civilian", "level": 1 }
+	# ★結構輪探針 §三：新點開工不再一次扣滿 ⇒ 逾時退「工地裡實際有的」（site_stock）一半 ⇒ 場景補工地已有一座 L1 民用的料（50）
+	tile.construction_target = { "action": "build", "type": "civilian", "level": 1, "site_stock": {"material": 50.0} }
 	tile.construction_started_tick = 0
 	tile.construction_last_progress_tick = 0
 	state.world.tiles[2 * 1000 + 2] = tile
