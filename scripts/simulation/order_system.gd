@@ -78,7 +78,7 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	# active_orders 內部記帳不變；只改傳播副本的會合 pos。
 	_msg.emit_message(state, "order_" + kind, desc, team, {
 		"order_id": oid, "res": res, "qty": qty,
-		"origin_team": team.team_id, "origin_pos": _market_pos(state, team),
+		"origin_team": team.team_id, "origin_pos": market_pos(state, team),
 		"expire_tick": expire, "price": declared_price,
 	})
 	# WS-2b：登錄市集看板（破可見性死鎖）。在 _market_pos 對應的市集 outpost tile 上掛一筆 board entry，
@@ -118,7 +118,7 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 		tile = here
 		if Probe.enabled: Probe.bump("mkt.post.consign")
 	else:
-		var mpos: Vector2i = _market_pos(state, team)
+		var mpos: Vector2i = market_pos(state, team)
 		tile = state.world.tiles.get(mpos.x * 1000 + mpos.y)
 		# 僅在「自家市集 outpost」掛單；漫遊隊（無 outpost → _market_pos 回隊位、該 tile 非自家 outpost）不登錄。
 		if tile == null or tile.outpost_level <= 0 or tile.outpost_owner != team.team_id:
@@ -173,7 +173,7 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 # 已過期/已滿足(qty_remaining≤0)/已不在 active_orders 的本隊 entry → 移除；存活的更新 qty_remaining。
 # 他隊 entry 不動（由各自 tick_team_orders 維護）。
 func _sync_board(state: WorldState, team: TeamData) -> void:
-	var mpos: Vector2i = _market_pos(state, team)
+	var mpos: Vector2i = market_pos(state, team)
 	var tid: int = mpos.x * 1000 + mpos.y
 	var tile: HexTileData = state.world.tiles.get(tid)
 	if tile == null or tile.outpost_level <= 0 or tile.outpost_owner != team.team_id:
@@ -202,7 +202,9 @@ func _sync_board(state: WorldState, team: TeamData) -> void:
 #   ★★★而 `FailureMemory.record` 【故意不在這裡】：
 #     過期 ＝ 執行失敗（該折價、下輪別再撞）；★主動撤單 ＝ 玩家的決定，不是失敗。
 #     共用的話，【玩家取消自己的訂單會讓 AI 以為這條路失敗了而折價下一輪決策】。
-func release_order_escrow(state: WorldState, o: Dictionary) -> void:
+# ★why（spec 2026-10-15-my-orders-and-escrow-readonly §二）：必填、不給預設值——漏改的呼叫點直接 parse 錯
+#   ∈ {expire, cancel, possession}；落了一筆待領、而屬主是玩家隊 ⇒ 發 goods_returned（玩家才知道貨躺在哪）
+func release_order_escrow(state: WorldState, o: Dictionary, why: String) -> void:
 	if bool(o.get("escrowed", false)):
 		var _etid: int = int(o.get("escrow_tile", -1))
 		var _etile: HexTileData = state.world.tiles.get(_etid)
@@ -212,9 +214,16 @@ func release_order_escrow(state: WorldState, o: Dictionary) -> void:
 			var _e: Dictionary = _etile.market_escrow.get(int(o["order_id"]), {})
 			var _q: float = float(_e.get("qty", 0.0))
 			if _q > 0.0:
+				var _owner: int = int(_e.get("owner_team", -1))
 				InteractionSystem.add_pending_claim(_etile, "goods", String(_e.get("res", "")), _q,
-					int(_e.get("owner_team", -1)), state.world.current_tick)
+					_owner, state.world.current_tick)
 				_etile.market_escrow.erase(int(o["order_id"]))
+				# ★只對玩家隊發（spec §二 R² M1）：判準＝get_player_team_id()，不是 .possessed——
+				#   附身那一刻 sync_possession 先撤單、後設 possessed ⇒ 判 possessed 必為假、主格一則都不發。
+				#   ★對 NPC 發會無條件寫 pending_rethink（多想一輪）；NPC 的事件本來就進不了玩家匯流排，這裡擋的是喚醒。
+				if _owner != -1 and _owner == state.get_player_team_id():
+					WorldEvents.emit(state, "goods_returned", [_owner], true,
+						{"res": String(_e.get("res", "")), "qty": _q, "pos": _etile.tile_pos, "why": why})
 				if Probe.enabled:
 					Probe.bump("mkt.escrow.expire_to_claim")
 					Probe.add_amount("mkt.escrow.expire_qty", _q)
@@ -231,7 +240,7 @@ func withdraw_on_possession(state: WorldState, team: TeamData) -> int:
 	if n == 0:
 		return 0
 	for o in team.active_orders:
-		release_order_escrow(state, o)
+		release_order_escrow(state, o, "possession")
 	team.active_orders = []
 	_sync_board(state, team)
 	if Probe.enabled:
@@ -248,7 +257,7 @@ func cancel_order(state: WorldState, team: TeamData, order_id: int) -> bool:
 	for o in team.active_orders:
 		if int(o.get("order_id", -1)) == order_id:
 			found = true
-			release_order_escrow(state, o)
+			release_order_escrow(state, o, "cancel")
 			if Probe.enabled:
 				Probe.bump("order.cancelled_by_player")
 			continue
@@ -274,7 +283,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 			#   賣家不在場，貨【不得】直接回到他的 resources，否則就是【貨物瞬移】。
 			#   ⇒ 落【待領貨帳】，與待領款共用同一個 pending_claims 結構。
 			#   ★而這裡【不】把 escrow 直接刪掉：刪掉 = 貨消失，而守恆會在 audit 裡紅。
-			release_order_escrow(state, o)
+			release_order_escrow(state, o, "expire")
 			# ★執行失敗反饋鐵律 T4 示範接線：買單到期沒人填 ＝ 執行失敗，不准靜默丟棄。
 			# 記隊層失敗記憶 → 下輪「買糧/買料」（＝依賴市場供貨的決策）折價；TTL 用 ORDER_LIFETIME
 			# ＝該動作的自然重試週期（相對錨定，不新增全域絕對天數常數）。
@@ -676,7 +685,8 @@ func settle_orders(team: TeamData, before: Dictionary, _tick: int) -> bool:
 
 # WS-2：訂單會合市集 pos = 下單隊最近自家 outpost tile（固定會合點，商隊去得到、人在那）。
 # god-view scan = 下單隊「自家」outpost，屬自知資訊（非偷看他隊）。無 outpost → fallback team.tile_pos。
-func _market_pos(state: WorldState, team: TeamData) -> Vector2i:
+# ★公開（spec my-orders-and-escrow §一：情報頁「掛在 (q,r) 自家市集」讀同一支）
+func market_pos(state: WorldState, team: TeamData) -> Vector2i:
 	var best_pos: Vector2i = team.tile_pos
 	var best_d: int = 1 << 30
 	for tile_id in state.world.tiles:

@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 我的掛單與押貨（只讀；spec 2026-10-15-my-orders-and-escrow-readonly-HOW）
 topic: 請 merge feat/my-orders-escrow 7293c1894（已併 main 6281ce878）｜全電池釘 7293c1894：138／138 全綠 RC=0（run-id 1427-20261016-170918）｜床 10／10 errors 0；4 刀負對照全紅在該紅的格｜全圖掃描 161 µs／217 格｜world-fp 不換
 ---

@@ -1139,6 +1139,9 @@ static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTile
 	var kept: Array = []
 	var got_coin: float = 0.0
 	var got_goods: float = 0.0
+	# ★逐資源（spec my-orders-and-escrow §二 R² M3）：只對玩家隊累——判斷放在建 dict 之前（NPC 每次到場都走這裡）
+	var is_player: bool = team.team_id == state.get_player_team_id()
+	var got_by_res: Dictionary = {}
 	for c in tile.pending_claims:
 		if int(c.get("owner_team", -1)) != team.team_id:
 			kept.append(c)
@@ -1149,10 +1152,15 @@ static func _claim_pending_here(state: WorldState, team: TeamData, tile: HexTile
 		if String(c.get("kind", "")) == "coin":
 			ResourceBank.add(team, "coin", amt, "claim_coin")
 			got_coin += amt
+			if is_player: got_by_res["coin"] = float(got_by_res.get("coin", 0.0)) + amt
 		else:
 			ResourceBank.add(team, String(c.get("res", "")), amt, "claim_goods")
 			got_goods += amt
+			if is_player: got_by_res[String(c.get("res", ""))] = float(got_by_res.get(String(c.get("res", "")), 0.0)) + amt
 	tile.pending_claims = kept
+	# ★到場領回（玩家隊）：函式尾一則；沒領到不發；同一 tick 兩格各一則、不折疊
+	if is_player and not got_by_res.is_empty():
+		WorldEvents.emit(state, "goods_claimed", [team.team_id], true, {"pos": tile.tile_pos, "items": got_by_res})
 	if (got_coin > 0.0 or got_goods > 0.0):
 		print("[Claim] Team%d 於 %s 領回 coin=%.2f goods=%.1f" % [team.team_id, str(tile.tile_pos), got_coin, got_goods])
 		if Probe.enabled:
