@@ -123,7 +123,7 @@ func _scan_contradictions(state: WorldState, month: int) -> void:
 			if String(o["kind"]) != "buy":
 				continue
 			var res: String = String(o["res"])
-			var meet: Vector2i = _order_sys._market_pos(state, team)
+			var meet: Vector2i = _order_sys.market_pos(state, team)
 			if not _supply_reachable(state, tid, res, meet):
 				continue   # 供給不在/不可達 → 非有效想要，不入分母
 			m_den += 1
