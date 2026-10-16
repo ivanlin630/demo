@@ -5170,7 +5170,8 @@ func _has_independent(state: WorldState, from_team_id: int) -> bool:
 static func faction_directive_target(state: WorldState, team: TeamData, f, word: String) -> int:
 	if f != null and int(f.player_goal_target) != -1 and String(f.player_goal_override) == word:
 		var x: int = int(f.player_goal_target)
-		if not state.teams.has(x) or (state.teams[x] as TeamData).faction_id != -1:
+		var _xt: TeamData = state.live_team(x)
+		if _xt == null or _xt.faction_id != -1:
 			if Probe.enabled: Probe.bump("directive.pinned.invalid")
 			return -1
 		if BeliefSystem.belief_pos(state, team.team_id, x) == Vector2i(-1, -1):

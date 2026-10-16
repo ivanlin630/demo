@@ -10,3 +10,5 @@
 你收編了 Team4，它加入你的勢力%d	allow	-	player_led_faction_bed 的 S2 期望值（WorldEvents.subjugate_sentence「已有勢力」那句）；★刻意寫字面不引用產生者（引用＝同源比較恆真）；它配的是被測 code 回的字串，打錯會【當場紅】而不是靜默
 你臣服於 Team2，加入勢力9	allow	-	player_led_faction_bed 的 S2 期望值（WorldEvents.describe 玩家是敗方那句，純函式輸入是床給的 Team2／勢力9）；★刻意寫字面；它配的是被測 code 回的字串，打錯會【當場紅】而不是靜默
 收留（+4 人，食物 −3.2）	allow	-	live_play_small_fixes_bed 的 J1 期望值（PlayerApiMapper.forced_label 收留項）；★刻意寫字面不引用產生者（引用＝同源比較恆真）；它配的是被測 code 回的字串，打錯會【當場紅】而不是靜默
+攻擊（不可：你知道位置的獨立隊伍：0）	allow	-	player_faction_goal_bed 的 G7 期望值（TextUiMain.goal_menu_label 攻擊沒有候選那一項）；★刻意寫字面不引用產生者（引用＝同源比較恆真）；它配的是被測 code 回的字串，打錯會【當場紅】而不是靜默
+立國（不可：盟主統領 0.20 未達 0.40）	allow	-	player_faction_goal_bed 的 G7 期望值（TextUiMain.goal_menu_label 立國閘不過那一項，理由句由 establish_block_reason 給、床佈置統領 0.20）；★刻意寫字面；它配的是被測 code 回的字串，打錯會【當場紅】而不是靜默

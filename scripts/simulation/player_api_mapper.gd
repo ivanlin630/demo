@@ -1086,9 +1086,10 @@ static func _goal_target_invalid(state: WorldState, f, pt: TeamData) -> String:
 	var x: int = int(f.player_goal_target)
 	if x == -1:
 		return ""
-	if not state.teams.has(x):
+	var _xt: TeamData = state.live_team(x)
+	if _xt == null:
 		return "對方已不存在"
-	if (state.teams[x] as TeamData).faction_id != -1:
+	if _xt.faction_id != -1:
 		return "對方已加入勢力"
 	if BeliefSystem.belief_pos(state, pt.team_id, x) == Vector2i(-1, -1):
 		return "你不知道它在哪"

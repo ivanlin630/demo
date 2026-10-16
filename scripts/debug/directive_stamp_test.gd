@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: 命令戳記誠實化（玩家勢力目標票 spec 2026-10-16-player-faction-goal 改「上次套用」比對時一起改）
 # 命令戳記誠實化 TDD。
 # ①★重申不喚醒：連續兩輪產出完全相同 → 第二輪不蓋戳記、成員不被 directive_fresh 喚醒
 # ②★真變化仍喚醒：任一語意欄（goals 集合 / intent / why / mode）變 → 蓋、成員當輪喚醒

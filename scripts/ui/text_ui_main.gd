@@ -2881,8 +2881,11 @@ func _handle_faction_mode(keycode: int) -> void:
 						cands.map(func(t): return "Team%d" % int(t)))
 					return
 				_send_goal.call(word, -1)
-			_open_input("選勢力目標 (1~%d): " % goals.size(), "numeric", _cb_in2627, false,
-				goals.map(func(g): return goal_menu_label(String(g), cands, est_block)))
+			# ★選單項用迴圈組（lambda 裡呼本類 static 回 null ⇒ :921 String(null) 腳本錯，terminal_input_prompts P1h 紅）
+			var gmenu: Array = []
+			for g in goals:
+				gmenu.append(goal_menu_label(String(g), cands, est_block))
+			_open_input("選勢力目標 (1~%d): " % goals.size(), "numeric", _cb_in2627, false, gmenu)
 		KEY_B:   # 調整徵收率（Q7-6：僅 leader）
 			if not is_faction_leader:
 				_refresh()
