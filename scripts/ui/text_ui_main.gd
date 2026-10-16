@@ -156,6 +156,10 @@ var _pre_encounter_mode: bool = false
 var _trade_mode: bool = false
 var _trade_target_id: int = -1
 var _trade_page: int = 0   # offer-builder 清單分頁（>9 項翻頁）
+# ★送出的出價在等哪一筆結果（spec live-play-small-fixes §四）：command_player 回的是【排入佇列】的回覆（恆 ok），
+#   真成交／拒絕在消費點的 command_results 裡 ⇒ 用 seq 找那一筆；-1＝沒有在等。
+#   ★不看 pending_trade_target：它也會被換格、取消移動清掉 ⇒ 會把拒絕誤判成成交
+var _trade_wait_seq: int = -1
 var _input_mode_allow_empty: bool = false
 
 var _cached_snapshot: Dictionary = {}
@@ -301,6 +305,11 @@ func _process(_delta: float) -> void:
 		if int(r.get("seq", 0)) <= _last_shown_result_seq:
 			continue
 		_last_shown_result_seq = int(r.get("seq", 0))
+		# ★交換面板等的那一筆到了（spec live-play-small-fixes §四）：成交 ⇒ 關；被拒 ⇒ 照開、出價保留（理由走下面的失敗回句）
+		if _trade_wait_seq != -1 and int(r.get("seq", 0)) == _trade_wait_seq:
+			_trade_wait_seq = -1
+			if bool(r.get("ok", false)) and _trade_mode:
+				_trade_mode = false; _trade_target_id = -1; _trade_page = 0
 		# ★介面內部令（重掃同格對象）不是世界動作（spec 2026-10-13-player-action-audit ③）：
 		#   不進事件流、不進 feed、不蓋結果行；★佇列與世界寫入照舊（2026-09-24 裁：不搬出指令佇列）
 		if SimBridge.UI_INTERNAL_COMMANDS.has(String(r.get("name", ""))):
@@ -2553,6 +2562,7 @@ func _handle_interact_mode(keycode: int) -> void:
 					_bridge.set_player_input("trade_offer", {"player_gives": {}, "player_wants": {}})
 					_trade_page = 0
 					_trade_mode = true
+					_trade_wait_seq = -1   # ★新的一次交換：不等上一次的結果
 					_interact_mode = false
 					_refresh()
 					return
@@ -3634,7 +3644,7 @@ func _handle_trade_mode(keycode: int) -> void:
 						"member_id": -1, "tile_q": -1, "tile_r": -1}})
 		_bridge.set_player_input("trade_offer", {})
 		_log_event("[交易] 已離開")
-		_trade_mode = false; _trade_target_id = -1; _trade_page = 0
+		_trade_mode = false; _trade_target_id = -1; _trade_page = 0; _trade_wait_seq = -1
 		_refresh(); return
 	# 清空出價
 	if keycode == KEY_C:
@@ -3652,8 +3662,9 @@ func _handle_trade_mode(keycode: int) -> void:
 		#   ★★留下這段字是硬條件：一個被刪掉的東西如果沒有留下它在哪的紀錄，下一個人會以為它從來不存在。
 		#   ★★★而真正守它的是 P15（同一條指令的回音 ≤ 2 次）—— 不是靠這段註解。
 		_set_feedback(r.get("ok", false), r.get("message", ""))
-		if r.get("ok", false):
-			_trade_mode = false; _trade_target_id = -1; _trade_page = 0
+		# ★面板保持開：排入佇列不等於成交（舊版看到 queued 的 ok 就關 ⇒ 被拒時玩家只看到面板消失）
+		if bool(r.get("queued", false)):
+			_trade_wait_seq = int(r.get("seq", -1))
 		_refresh(); return
 	# 數字選項 → 選清單某項 → 收數量
 	if keycode < KEY_1 or keycode > KEY_9:
