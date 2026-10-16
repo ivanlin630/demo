@@ -107,7 +107,11 @@ static func _check_roster_bidir(state: WorldState, out: Array[String]) -> void:
 			continue
 		var t: TeamData = state.teams.get(p.team_id)
 		if t == null:
-			continue   # 懸空 team_id 由 remove_member 語意保證不生（此網不重複審）
+			# ★活人的 team_id 指向已不存在的隊＝違規（spec 2026-10-16-aftermath-disposition-transition-7b §四）。
+			#   「不會發生」的保證就是這一格；舊版在這裡 continue（註解說由 remove_member 語意保證），而刪隊路徑若沒先處理記名，
+			#   那個人就靜默懸空、稽核看不到。死者留屍（is_dead）上面已跳過。
+			out.append("懸空 P%d team_id=%d 隊已不存在（活人）" % [pid, p.team_id])
+			continue
 		if t.leader_id != pid and pid not in t.named_members:
 			out.append("roster 反向破 P%d team_id=%d 但不在該隊 roster(leader/named)" % [pid, p.team_id])
 

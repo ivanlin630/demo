@@ -21,8 +21,13 @@ extends SceneTree
 #   A10 居民：玩家攻佔 ⇒ 三項列出、未決推進＝放棄佔領；NPC 攻方照舊讀人格
 #   A11 玩家全隊陣亡 ⇒ 繼承或 game_over，不靜默結束
 #   A12 帶團頁一行的日耗＝manpower 實際扣的糧
+#   ── 7b 戰後處置過渡（spec 2026-10-16-aftermath-disposition-transition-7b-HOW）──
+#   B1  屠村記名全死：隊長＋≥2 名活記名 ⇒ 每人 is_dead、活人懸空 0、句子人數＝匿名＋記名且含每個名字
+#   B2  強佔不殺：居民隊人口前後相等、隊仍在、據點屬玩家、句子含「留在原地」
+#   B3  記名陣亡一個出口：戰鬥中記名戰死 ⇒ is_dead、出名冊、team_id 留、是隊長則清隊長、combat_end 的 dead_named 含名字
+#   B4  稽核會紅：活人 team_id 指向不存在的隊 ⇒ InvariantAudit 違規含「懸空」；刪掉那個人 ⇒ 0
 
-const EXPECTED: Array = ["A1", "A2", "A3", "A3b", "A3c", "A3d", "A4", "A5", "A6", "A7", "A7b", "A7c", "A8c", "A8b", "A8", "A9", "A10", "A11", "A12"]
+const EXPECTED: Array = ["A1", "A2", "A3", "A3b", "A3c", "A3d", "A4", "A5", "A6", "A7", "A7b", "A7c", "A8c", "A8b", "A8", "A9", "A10", "A11", "A12", "B1", "B2", "B3", "B4"]
 const FOE_ID: int = 910
 const SEED: int = 20261014
 var _errors: int = 0
@@ -58,6 +63,7 @@ func _initialize() -> void:
 	if _on("_a10"): _a10()
 	if _on("_a11"): _a11()
 	if _on("_a12"): _a12()
+	if _on("_b7"): _b7()
 	var miss: Array = []
 	for c in EXPECTED:
 		if not _present.has(c):
@@ -776,8 +782,13 @@ func _a10() -> void:
 	print("   屠村前居民活的記名 %d 人｜懸空 %d → %d｜%s" % [named_alive, d0, d1, String(r.get("msg", ""))])
 	_check("A10 母體地板：被屠那隊至少一名活的記名成員（%d）" % named_alive, named_alive >= 1)
 	_check("A10 屠村後活人懸空 team_id＝0（%d）" % d1, d1 == 0 and not st.teams.has(FOE_ID + 5))
-	_check("A10 屠村句照實：你下令屠村、逃散、據點易主；不寫成戰鬥", String(r.get("msg", "")).begins_with("你下令屠村")
-		and String(r.get("msg", "")).contains("逃散") and String(r.get("msg", "")).contains("據點易主") and not String(r.get("msg", "")).contains("戰"))
+	# ★7b：散→殺（藍圖 2026-10-16 確認）⇒「含逃散」換成「含被殺＋（有記名時）每個記名名字」；其餘三條照舊
+	var _a10_ok_names: bool = true
+	for nm in (r.get("msg", "") as String).split("（含 ").slice(1):
+		_a10_ok_names = _a10_ok_names and nm != ""
+	_check("A10 屠村句照實：你下令屠村、被殺、（有記名）含名字、據點易主；不寫成戰鬥", String(r.get("msg", "")).begins_with("你下令屠村")
+		and String(r.get("msg", "")).contains("被殺") and (named_alive == 0 or String(r.get("msg", "")).contains("（含 ")) and _a10_ok_names
+		and String(r.get("msg", "")).contains("據點易主") and not String(r.get("msg", "")).contains("戰"))
 	# NPC 攻方維持休眠（藍圖 2026-10-15 裁）：攻下有居民的據點 ⇒ 不屠、不強佔、不歸順，與 main 同；開路那天這格翻紅再改
 	st = _world()
 	ptid = st.get_player_team_id()
@@ -847,3 +858,86 @@ func _a12() -> void:
 	_check("A12 帶團頁有俘虜那一行", line != "" and line.contains("每日吃 %.1f 糧" % float(cap["food_per_day"])))
 	_check("A12 日耗數字＝manpower 實際扣的糧", absf((f0 - f1) - float(cap["food_per_day"])) < 0.01)
 	_present["A12"] = true
+
+# ── 7b B1–B4 ─────────────────────────────────────────────────────────────────
+static func _add_named(st: WorldState, t: TeamData, pid: int, nm: String) -> void:
+	var p := PersonData.new()
+	p.id = pid
+	p.person_name = nm
+	st.persons[pid] = p
+	st.add_member(t, pid)
+
+func _b7() -> void:
+	print("
+── 7b B1–B4 ──")
+	# B1 屠村記名全死
+	var st: WorldState = _world()
+	var rs: Dictionary = _player_takes_outpost(st)
+	var res: TeamData = rs["resident"]
+	_add_named(st, res, (FOE_ID + 5) * 10 + 2, "甲記名")
+	_add_named(st, res, (FOE_ID + 5) * 10 + 3, "乙記名")
+	var who: Array = []
+	for pid in ([res.leader_id] as Array) + res.named_members:
+		if st.persons.has(pid) and not st.persons[pid].is_dead:
+			who.append(pid)
+	var anon0: int = AnonTierSystem.total_pop(res)
+	var np0: int = st.persons.size()
+	var r: Dictionary = _exec(st, "residents_massacre")
+	var all_dead: bool = true
+	var names: Array = []
+	for pid in who:
+		all_dead = all_dead and st.persons[pid].is_dead
+		names.append(st.persons[pid].person_name)
+	var msg: String = String(r.get("msg", ""))
+	var names_in: bool = names.all(func(n): return msg.contains(n))
+	print("   B1 地板：隊長＋活記名 %d 人、匿名 %d｜len(persons) %d → %d｜%s" % [who.size(), anon0, np0, st.persons.size(), msg])
+	_check("B1 母體地板：隊長＋≥2 名活記名（%d）" % who.size(), who.size() >= 3)
+	_check("B1 屠村後每個記名 is_dead（%s）、活人懸空 0（%d）" % [str(all_dead), _dangling(st)], all_dead and _dangling(st) == 0)
+	_check("B1 句子：人數＝匿名＋記名、含每個記名名字（%s）" % msg, msg.contains("的 %d 人被殺" % (anon0 + who.size())) and names_in and msg.contains("據點易主"))
+	_present["B1"] = true
+	# B2 強佔不殺
+	st = _world()
+	rs = _player_takes_outpost(st)
+	res = rs["resident"]
+	var pop0: int = res.population
+	var r2: Dictionary = _exec(st, "residents_seize")
+	var tile: HexTileData = rs["tile"]
+	print("   B2 %s｜人口 %d → %d" % [String(r2.get("msg", "")), pop0, res.population if st.teams.has(res.team_id) else -1])
+	_check("B2 強佔：居民隊仍在、人口不變、據點屬玩家、句子含「留在原地」", st.teams.has(res.team_id) and res.population == pop0
+		and tile.outpost_owner == st.get_player_team_id() and String(r2.get("msg", "")).contains("留在原地"))
+	_present["B2"] = true
+	# B3 記名陣亡一個出口：戰鬥中敵隊長戰死
+	st = _world()
+	var ptid: int = st.get_player_team_id()
+	var foe: TeamData = _foe(st, 6)
+	var lid: int = foe.leader_id
+	var enc: EncounterSystem = _fight(st, ptid, FOE_ID)
+	_fine(st, ptid)
+	for u in _units(st, FOE_ID):
+		_kill(st, u)
+	var seq0: int = st.player_event_seq
+	enc.resolve_encounter_end(st, "attacker_win")
+	var ev: Array = _events(st, "combat_end", seq0)
+	var dn: Array = []
+	if not ev.is_empty():
+		var am: Dictionary = (ev[0]["info"] as Dictionary).get("aftermath", {})
+		dn = ((am.get("sides", {}) as Dictionary).get(FOE_ID, {}) as Dictionary).get("dead_named", [])
+	var lp: PersonData = st.persons.get(lid)
+	print("   B3 敵隊長 P%d：is_dead=%s team_id=%d｜隊長欄 %d｜dead_named %s" % [lid, str(lp.is_dead if lp else "?"), lp.team_id if lp else -9,
+		foe.leader_id, str(dn)])
+	_check("B3 戰死記名：is_dead、出名冊、team_id 留、隊長欄清空、dead_named 含名字", lp != null and lp.is_dead and lp.team_id == FOE_ID
+		and not foe.named_members.has(lid) and foe.leader_id == -1 and dn.has(lp.person_name))
+	_present["B3"] = true
+	# B4 稽核會紅（陽性對照）
+	st = _world()
+	var ghost := PersonData.new()
+	ghost.id = 987654
+	ghost.person_name = "懸空者"
+	ghost.team_id = 876543
+	st.persons[ghost.id] = ghost
+	var v1: Array = InvariantAudit.check(st).filter(func(s): return String(s).contains("懸空"))
+	st.persons.erase(ghost.id)
+	var v0: Array = InvariantAudit.check(st).filter(func(s): return String(s).contains("懸空"))
+	print("   B4 造懸空 ⇒ %s｜刪掉 ⇒ %d 筆" % [str(v1), v0.size()])
+	_check("B4 稽核：懸空活人 ⇒ 違規含「懸空」（%d 筆）；刪掉 ⇒ 0（%d）" % [v1.size(), v0.size()], v1.size() == 1 and v0.size() == 0)
+	_present["B4"] = true
