@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 勢力目標票 HOW 已寫、送 R²｜兩處與你的 WHAT 不同（照「成員讀法完全一樣」推出來的），你不同意回一句｜另：交接那條我上一版判錯
 ---
 
