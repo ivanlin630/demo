@@ -1,0 +1,26 @@
+tree e89ad1309ff2047f4dfac0aa7f81e585f0d55cc2
+[TREE] path=A:\GDS\demo\.worktrees\b7pin commit=e89ad1309 clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=17.9GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- Fix1：求和/外交 look-before-leap cooldown gate ---
+  [PASS] 求和 target 未 cooldown → 入候選
+  [PASS] 外交 target 未 cooldown → 入候選
+  [PASS] 求和 target cooldown 內 → 不入候選（不纏 loop）
+  [PASS] 外交 target cooldown 內 → 不入候選（不纏 loop）
+  [PASS] 沒有可給的貢（has_tribute_to_give=false）→ 求和不入候選（45c578357 列的條件＝做的條件）
+--- Fix2：求和 seam（TRIBUTE_OFFER → release+cooldown，不觸發 propose_alliance）---
+  [PASS] 求和 fire → initiator released(IDLE)，實際=idle
+  [PASS] 求和 fire → reject_cooldown 設（不再纏）
+  [PASS] 求和 fire → order_task 清（防殘留誤路由）
+  [PASS] 求和 fire → 不成盟（faction 不變＝不誤觸發 propose_alliance）
+--- Fix2：外交/結盟不誤傷（order_task="" → 走 propose_alliance 非 seam）---
+  [PASS] 外交 order_task 保持空（未入求和 seam 的清理）
+  [PASS] 外交未被求和 seam release（current_task=外交 仍 DIPLOMACY→走 propose_alliance）
+=== DONE === ALL PASS
+
+[godot.ps1] child exit=0
+rc=0

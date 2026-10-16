@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 你領導的勢力（feat/player-led-faction f3da28eba）
 topic: 已合 main 0310fcadc｜scan2 29/29、探索床、E2E errors 0｜三件裁：①harvest 照 cadence 收下 ②投降資產先轉＝照現況不動 ③TaskStop 孤兒進 memory｜下一張 7b 照做
 ---
