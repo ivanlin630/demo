@@ -93,4 +93,17 @@ func _run() -> void:
 		print("V8|  %s = %d" % [k, _c(k)])
 	if ks.is_empty():
 		print("V8|  （無 subteam.arrival.* 鍵）")
+	# ★§三之三：新點缺料進同一本需求帳（隊日數＝每隊每日一次的 tap；修前樹沒有這些鍵 ⇒ 逐鍵印、缺鍵印 0）
+	print("V8|--- §三之三 新點需求 ---")
+	for k in ["need.new_outpost.walk", "need.new_outpost.walk.main", "need.new_outpost.walk.sub",
+			"need.new_outpost.gather", "need.new_outpost.gather.main", "need.new_outpost.gather.sub", "need.new_outpost.gather.not_ct",
+			"g1.shortage_buy.new_outpost", "g1.shortage_buy.new_outpost.main", "g1.shortage_buy.new_outpost.sub",
+			"order.new_outpost.filled", "order.new_outpost.abandoned", "construct.absorb", "construct.gather_done", "construct.gather_abort"]:
+		print("V8|  %s = %d" % [k, _c(k)])
+	print("V8|  construct.absorbed 累計=%.1f" % Probe.amount("construct.absorbed"))
+	var _fd: int = _c("order.new_outpost.filled")
+	var _ab: int = _c("order.new_outpost.abandoned")
+	print("V8|  新點料單成交比例 filled/(filled+abandoned)=%s｜採段轉築段 gather_done/(done+abort)=%s（★全工地，不只新點需求那幾隊）" % [
+		("%.2f" % (float(_fd) / float(_fd + _ab))) if _fd + _ab > 0 else "—",
+		("%.2f" % (float(_c("construct.gather_done")) / float(_c("construct.gather_done") + _c("construct.gather_abort")))) if _c("construct.gather_done") + _c("construct.gather_abort") > 0 else "—"])
 	print("=== build_site_census DONE ===")
