@@ -4,7 +4,7 @@
 > WHAT：
 > - 藍圖 2026-10-14-blueprint-to-systems-RULING-structure-round-before-deep-batch-one-verb-one-body-events-carry-source（結構輪範圍五條、探針兩個、停損）。
 > - 藍圖 2026-10-14-blueprint-to-systems-TICKET-L1-needs-material-gathered-on-site-and-three-entries-merge-into-one-verb（用戶裁「L1 要材料」、就地採不是備料、三入口一個動詞）。
-> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。§三之二（用戶裁乙＋丙）R²c M8＋兩條已補，審查註明補完不需再審。§三之三（用戶裁「好」：新點缺料進同一本需求帳，藍圖 2026-10-16-blueprint-to-systems-TICKET-new-outpost-material-shortfall-enters-same-need-ledger）R²d ISSUES M9–M13＋小項已補，待審查再看 §三之三 diff。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
+> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。§三之二（用戶裁乙＋丙）R²c M8＋兩條已補，審查註明補完不需再審。§三之三（用戶裁「好」：新點缺料進同一本需求帳，藍圖 2026-10-16-blueprint-to-systems-TICKET-new-outpost-material-shortfall-enters-same-need-ledger）R²d ISSUES M9–M13＋小項已補；R²e CLEAN，S1／S2 兩處小補已補，審查註明補完不需再審 ⇒ GO。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
 > 位置：玩家可見批（真玩小修、我的掛單與押貨、玩家勢力目標）之後，深層批之前。
 > 本票只做兩個探針。結構輪第 ③④ 條（玩家事件帶來源、子隊事件走信使）是下一張，不在本票。
 
@@ -202,11 +202,14 @@
     - 用整筆、不先扣持有：與設施那一支同語意。need_keep 是「要留多少」，扣持有是讀者的事（買單 `reserve − holding`、買料效用 `need − holding`）。
   - **② 採段中**（R²d M12）：
     - 讀哪一格：子隊讀 `team.tile_pos` 那格（子隊站在工地上採料、不離格）；母隊讀 `team.corvee_site` 那格（可能已離格去買料）。
-    - 條件：那格 `construction_target` 的 `gather_left.material > 0`，而且本隊是那格的施工隊。「施工隊」的定義與 `_tick_construction` 找 `active_team` 的方式同一個（`outpost_system.gd:376-381`：同格的 `TASK_BUILD` 隊；母隊離格時以 `corvee_site` 認領）。實作端把這個認定抽成一支，兩邊都呼它，不各寫一份。
+    - 條件：那格 `construction_target` 的 `gather_left.material > 0`，而且本隊是那格的施工隊。
+    - 「施工隊」抽成**逐隊謂詞**（R²e S1），`_tick_construction` 找 `active_team` 的迴圈（`outpost_system.gd:376-381`）與②都呼它：`(team.tile_pos == 該格 ∧ TASK_BUILD) ∨ (construction_team_id == team ∧ corvee_site == 該格)`。
+      - 共用的是謂詞，不是那支掃全隊的找隊迴圈。②在 `need_keep` 熱路徑上只對自己呼一次，維持 O(1)。
+      - 殘差：同一工地若有兩支隊都滿足謂詞（例：原施工隊與接手工人同格），兩支各自算一份②，需求雙算。今天不修，交件信印次數（N3b）。
     - 量＝`gather_left[res]`。開工時已抵掉帶來的料，剩下的才是缺口。
     - ①②互斥：有工地就只算②。
   - 感知：兩樣都是隊自己的承諾與自己的工地帳。`gather_left` 只在施工隊在格時才會變（§二），隊不在格時讀到的就是它離開時的數，不是 god-view。
-- `NeedOracle._construction_need(state, team, res)`＝新點那一支＋設施那一支，**上限分配：已承諾的新點先占，設施吃剩下的額度**。
+- `NeedOracle._construction_need(state, team, res, leader_values)`（R²e S2：設施那一支要 lv，`need_oracle.gd:160`）＝新點那一支＋設施那一支，**上限分配：已承諾的新點先占，設施吃剩下的額度**。
   - 寫法：`n = minf(_new_outpost_need, CAP)`；`f = minf(_construction_facility_need, CAP − n)`；回 `n + f`。
   - 理由：免得一座還沒開工的設施把已經上路的新點削掉。今天兩支的母體不重疊（設施那一支要自家據點 `outpost_level > 0`），但規則先寫下來。
   - `need_keep` 的第三個加數改呼它（`need_oracle.gd:122`）。
@@ -301,6 +304,7 @@
 - **N2 沒承諾就不算**：同一支隊、任務不是 `TASK_BUILD`（例如閒置或採集）⇒ 新點那一支為 0，`need_keep(material)` 與修前逐數相同。
 - **N2b 三種不是①的 `TASK_BUILD` ⇒ 新點那一支＝0**（M9）：①「建設」選項、目標＝腳下、`outpost_level == 0`；②復工工人，目標格有別隊的工地；③升級設施，目標格 `outpost_level > 0`。
 - **N3 採段的需求＝剩下的缺口**：工地 `gather_left=30` ⇒ 新點那一支＝30；同時不再加①的整筆；`need.new_outpost.gather > 0`。子隊讀 `tile_pos`、母隊離格讀 `corvee_site`，兩列都測。
+- **N3b 雙算殘差可見**（R²e S1）：同一工地兩支隊都滿足施工隊謂詞 ⇒ 計數 >0 被印出（不斷言值）。
 - **N4 採段吃帶來的料**：採段中施工隊帶 20 料 ⇒ 那一 tick `gather_left −20`、`site_stock +20`、隊上 material −20；帶的料 ≥ `gather_left` ⇒ 當 tick 轉築段。守恆走 `InvariantAudit`，不手算加總。
 - **N4b 接手的工人也吃料**（M12）：復工工人（不是 `construction_team_id`）帶 20 料站上別隊的採段工地 ⇒ 抵進該工地、隊上 −20；同樣走 `InvariantAudit`。
 - **N5 守料**（M13 拆兩格）：
@@ -359,6 +363,7 @@
 | n24 ②迫切的 `carried` 傳 0（不傳 `site_stock`） | N6b |
 | n25 吃料只認 `construction_team_id` | N4b |
 | n26 上限改成先設施後新點 | N6c |
+| n27 ②改成共用掃全隊的找隊迴圈 | `perf.need_keep.us` 前後對比超出基線的雜訊帶（同 `option_term_cost_bed` 的碼表） |
 
 ## 給藍圖（已另寄）
 - L1 要材料＋就地採＋現在的生成上限 ⇒ 新點只有森林（約 7 日）、山地（約 22 日）採得夠；平原約 72 日，超過 30 日採段期限 ⇒ 不帶料就蓋不成。

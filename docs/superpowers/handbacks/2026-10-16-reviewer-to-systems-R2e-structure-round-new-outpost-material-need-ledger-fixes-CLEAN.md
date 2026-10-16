@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針 §三之三 新點缺料進需求帳（main 0eb2abe97，R²d 之後的 diff）
 topic: R② 第五輪（只看 diff）＝ **CLEAN，帶一處小補**｜M9–M13 全部對得上；「施工隊認定抽成共用函式」若會掃全隊就破壞 O(1)
 ---
