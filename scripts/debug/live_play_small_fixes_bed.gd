@@ -457,12 +457,15 @@ func _t() -> void:
 	_check("T2 對方接 ⇒ 關", not node._trade_mode)
 	_cell("T2")
 	await _drop(node)
-	# T1b：玩家隊在移動中送出被拒的出價 ⇒ 面板仍開（舊判準看 pending 會被移動清掉）
+	# T1b：玩家隊在移動中送出被拒的出價 ⇒ 面板仍開。
+	#   ★移動換格會清掉 pending_trade_target（text_ui_main 換格那一段）⇒ 佈置照那個結果：pending 已被清、出價送出被拒
+	#   ⇒ 判準若是「pending 不見了＝成交」就會把這次拒絕誤判成成交而關面板（負對照 n8）
 	node = await _build()
 	st = node._bridge.get_state()
 	var pt: TeamData = st.teams[st.get_player_team_id()]
 	_trade_setup(node, {})
 	pt.move_target = pt.tile_pos + Vector2i(1, 0)
+	st.player_state.erase("pending_trade_target")
 	await _press(node, "enter")
 	await _settle(node)
 	print("   T1b 移動中 ⇒ 面板 %s｜結果行「%s」" % [str(node._trade_mode), _fb(node)])
@@ -538,9 +541,11 @@ func _h() -> void:
 			"home": "家" + pad, "camp": "營" + pad, "food": "6.8 天" + pad,
 			"threat": PlayerApiMapper.THREAT_ENEMY % [11, 0], "pending": "0 道"}
 		var miss: Array = TextUiView.TOP_ORDER.filter(func(k): return not TextUiView.top_shown(v).has(k))
-		var want: Array = TextUiView.TOP_DROP_ORDER.slice(0, miss.size())
+		# ★期望順序寫 spec 的字面，不讀 TOP_DROP_ORDER（讀它＝同源比較恆真；負對照 n9 改常數這格要紅）
+		var SPEC_ORDER: Array = ["home", "camp", "team", "pop", "food"]
+		var want: Array = SPEC_ORDER.slice(0, miss.size())
 		var ordered: Array = []
-		for k in TextUiView.TOP_DROP_ORDER:
+		for k in SPEC_ORDER:
 			if miss.has(k): ordered.append(k)
 		if ordered != want: prefix = false
 		if miss.size() < prev: mono = false
