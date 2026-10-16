@@ -895,6 +895,10 @@ static func map_members_detail(state: WorldState) -> Array:
 			"body_parts": m.body_parts.duplicate(true),
 			"equipped":   m.equipment.duplicate(true),
 			"inventory":  inventory,
+			# ★餉（spec live-play-small-fixes §二）：期望值與發餉同一支；隊長不在發餉迴圈（只發 named_members）⇒ 算 skipped
+			"salary":       m.salary,
+			"fair_salary":  SalarySystem.fair_salary(m),
+			"wage_skipped": mid == t.leader_id or SalarySystem.wage_skipped(m, t.leader_id),
 		})
 	return result
 

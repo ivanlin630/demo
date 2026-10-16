@@ -1055,7 +1055,10 @@ func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_
 	if p == null:
 		return { "ok": false, "msg": "拔擢失敗（無可拔擢 anon）" }
 	state.add_member(pt, p.id)   # 拔擢 anon→named（leader 不變,新增 named 成員）
-	return { "ok": true, "msg": "拔擢 %s 為記名成員" % p.person_name }
+	# ★說餉（spec live-play-small-fixes §二）：新人 salary 預設 0，欠薪每 7 天掉忠誠 ⇒ 結果句要講期望值與去哪設。
+	#   ★句子要短：底部結果行 clip_to(COLS−7) 會默默切句尾（床 P4 用最長人名量）
+	return { "ok": true, "msg": "拔擢 %s；期望餉 %.1f，現 %.1f（成員頁 [Y] 設餉）" % [
+		p.person_name, SalarySystem.fair_salary(p), p.salary] }
 
 # ★票 T（spec 2026-10-06 ticket-t-fatigue §1③）：玩家下令休息 ⇒ 原地停下（TASK_REST）
 #   ⇒ 疲勞分類落「不耗力」⇒ 回復；★不移動（move_target 清空）——休息就是停下來

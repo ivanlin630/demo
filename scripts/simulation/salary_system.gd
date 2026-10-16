@@ -111,6 +111,15 @@ static func estimated_payroll(state: WorldState, team: TeamData) -> float:
 	named_payroll *= (1.0 - _rate0)
 	return named_payroll + AnonTierSystem.total_wage(team)
 
+# ★公開殼（spec 2026-10-15-live-play-small-fixes §二）：成員頁與拔擢結果句讀的「期望餉」＝發餉時算 wage_ratio 的同一支。
+#   ★不另抽、不在 UI 端自己算——兩邊各算一次，改了技能公式後兩邊就不相等。
+static func fair_salary(p: PersonData) -> float:
+	return _calc_fair_salary(p)
+
+# ★被發餉跳過的人（與 _pay_salary 迴圈同一條判準）：成員頁不對他標「欠」
+static func wage_skipped(p: PersonData, leader_id: int) -> bool:
+	return _has_master_memory(p, leader_id)
+
 static func _calc_fair_salary(p: PersonData) -> float:
 	var total: float = 0.0
 	for v in p.skills.values():
