@@ -146,6 +146,23 @@
     - 禁止估算端另寫一份 `min()`。
   - 刪 **`BuildAfford.shortfall` 這個函式**（非 debug 碼只有 :5500 呼叫）。`BuildAfford` 這個檔留著：`can_afford` 還有 `faction_ai_system.gd:5662/5998/6503/6598` 四處、`:3218` 讀 `MARGIN_MAX`、`build_afford_persona_test.gd`。
 
+### 三之二、選址秤讀採料天數（藍圖 RULING 2026-10-16-blueprint-to-systems-RULING-plains-outpost-material-site-valuation-counts-gather-days-limit-stays，用戶裁乙＋丙）
+- 期限 30 日不動（`gather_window_days` 照 §二）。
+- **先答藍圖的前提：NPC 派隊能不能真的帶料出發？能。**
+  - 派子隊：`_dispatch_builder` 派出後 `_fund_subteam_from_vault`（:5968-5985）／`_fund_subteam_cost`（:5953-5965）把材料從公庫＋母隊私產撥給子隊，量＝`min(缺口, 有的)`。本票抽成 `fundable_carry`（§三 M7），估算與撥料同呼。
+  - 紮根：施工隊就是自己，`start_build` 先扣自己私產（§一）。
+  - 運量：撥料今天不看載重。超重的後果走既有移動物理（`MovementSystem.get_carry_capacity`／`calc_total_weight`），本票不另加上限。交件信印「6 人子隊的載重」與「帶 50／80 料後的總重」兩個數，讓藍圖看帶料是否被運量卡住。
+  - 誠實限：母隊得先有料。材料只在 L1+ 據點的格採得到（`resource_system.gd:82`），只有營地的隊沒有材料收入 ⇒ 第一座據點的紮根若在平原，照樣蓋不成。這是「平原留給帶料的隊」的字面後果，交件信印電池裡「紮根時帶料 >0」的比例。
+- **派子隊選址**（`faction_ai_system.gd:6031 _site_candidate_score`，`_evaluate_new_outpost_location` 呼它）加一項：
+  - `gather_days` ＝ `build_eta_total_days` 的採段那一半；`carried` ＝ `fundable_carry(...)` 的 material（母隊此刻撥得出多少）；`site` ＝ `site_prior(terrain)`。
+  - 項 ＝ `− min(gather_days, gather_window_days()) × SITE_DAY_COST × w`。
+    - `SITE_DAY_COST` ＝ 5.0，與同函式「每格距離 −5」同量級（測試值，一個常數）。
+    - `w` ＝ `0.5 + 野心`（連續、中性 0.5 ⇒ 1.0；急著擴張的人更不願等）。人格選哪一軸是 HOW，測試值。
+    - 夾在期限：採不完的格扣滿一個期限的分，不是 −∞（禁硬門）；真要派時 `_dispatch_builder` 的 `site_barren` 是物理，照 §三。
+  - 回傳 dict 加 `gather_term`，`[Site]` 那一行印出來（同 `known_term`）。
+- **紮根選址**（`decision_context.gd:876 settle_eta_days`）：`settle_eta_days` 改用 `build_eta_total_days`（§三 已列），`carried` ＝隊自己私產的 material，`site` 照 §三 的規則（站在格上讀真值、否則先驗）。採段長 ⇒ ETA 長 ⇒ 紮根的效用自然低；不加門。實作端確認 `settle_eta_days` 進效用的方式沒有除以零或 INF 爆掉（INF 時夾到期限）。
+- 擴點估值（`decision_context.gd:915` `expand_build_cost`）同樣改讀總天數（§三 已列），`carried` 用 `fundable_carry`。
+
 ### 四、玩家面
 - 紮根與建設的回句：「開始建 {名}：需材 {N}，帶料抵 {K}，腳下可採約 {M} 天，之後築約 {D} 天」。
   - `M` 用 `build_eta_total_days` 的採段那一半（站在格上 ⇒ 真值）；`M=INF` ⇒「腳下的料 {窗} 天內採不夠，不帶料會被取消」，開工照樣成立（不擋）。要蓋得成就開工前帶料；開工後再搬料進工地的動作不在本票。
@@ -202,6 +219,7 @@
 - **V9 玩家面**：玩家紮根回句含「需材」「可採約」，不含「免材料」；頂列 `phase` 兩段印得出來。
 - **G9 玩家優先序**：玩家紮根、建設之後，施工中 `task_priority == PRIO_PLAYER`。
 - **V8b 撥料與估算同源**（M7）：同一個平原目標，母隊庫存 0 ⇒ `site_barren`；庫存 ≥ need ⇒ 過這道閘、子隊開工時 `gather_left == 0`。
+- **V11 選址秤讀採料天數**：同一支母隊、同距離的森林格與平原格（其他項床內設成相等），母隊料 0 ⇒ 森林的分數 − 平原的分數 ＝ 兩格 `gather_term` 之差 > 0；母隊料 ≥ need ⇒ 兩格 `gather_term` 都是 0。野心 0.2 與 0.8 兩支隊 ⇒ 後者差距較大。
 - **V10 玩家子隊建設不擋料**（M5）：玩家子隊帶 0 料派往森林格 ⇒ `precheck_subteam_build` ok，回句含「需材」「可採約」。
 - **P1 持守看得到採段**（M3）：同一支隊、`food_runway` 固定，兩個進行中工地：`gather_left=0` 與 `gather_left=need` ⇒ 後者 `safe_factor` 較小、`_progress` 較小。
 
@@ -238,12 +256,15 @@
 | n11 `persist_strength` 只讀 `ticks_left` | P1 |
 | n12 `on_arrival` SETTLE 改回舊 NPC 判準（`faction_id` 相等，含 -1 == -1） | S1 ④ |
 | n14 糧橋估算 `carried` 傳 0（不呼 `fundable_carry`） | V8b 後者 |
+| n15 `_site_candidate_score` 不加 `gather_term` | V11 |
+| n16 `gather_term` 的 carried 傳 0 | V11 第二格 |
 | n13 `precheck_subteam_build` 留著料門 | V10 |
 
 ## 給藍圖（已另寄）
 - L1 要材料＋就地採＋現在的生成上限 ⇒ 新點只有森林（約 7 日）、山地（約 22 日）採得夠；平原約 72 日，超過 30 日採段期限 ⇒ 不帶料就蓋不成。
 - 這是 WHAT 後果，不是 bug：農地開不出新點，除非先備料。NPC 選址偏農地（`decision_context.gd:868`）⇒ V8 可能大半倒在 `site_barren`。
 - 規格照現值寫（期限 30 日、不連動選址）；藍圖若要改，只動 `gather_window_days` 或選址的估值，身體不變。
+- ⇒ 用戶裁乙＋丙（期限不動、選址秤讀採料天數），寫進 §三之二。
 
 ## 範圍外
 - 玩家事件帶來源、子隊事件走信使、回報對象改母隊：結構輪第 ③④ 條，下一張。
@@ -263,6 +284,8 @@
 - `:6702` 估的是什麼、改了沒有。
 - `BuildAfford.shortfall` 刪了沒有，沒刪的話誰在用。
 - 電池裡 `subteam.arrival.*` 各鍵次數（NPC `refused` 單獨列）。
-- 三種地形缺 50 料的採段天數（用真函式、真先驗算），給藍圖。
+- 三種地形缺 50 料的採段天數（用真函式、真先驗算），給藍圖；加一欄「帶滿料時平原要幾天」（應＝築段天數，採段 0）。
+- 6 人子隊的載重、帶 50／80 料後的總重；電池裡紮根時帶料 >0 的比例。
+- V8 的地形三列再加一欄 `gather_term` 平均，看選址是否真的往林邊、山邊移。
 - world-fp：抽取那輪（應不變）與全量那輪的新舊值、兩輪 run-id。
 - n1–n7 紅燈原文。
