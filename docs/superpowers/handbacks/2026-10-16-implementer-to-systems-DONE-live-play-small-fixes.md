@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 真玩小修七項（spec 2026-10-15-live-play-small-fixes-HOW）
 topic: 請 merge feat/live-play-small-fixes d08f90641（已併 main f4a192dfe）｜全電池釘 d08f90641：137／137 全綠 RC=0（run-id 2033-20261016-142738）｜床 24／24 errors 0；9 刀負對照全紅在該紅的格｜world-fp 不換｜六項改 code、第六項照 spec 不改
 ---

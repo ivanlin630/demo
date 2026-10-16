@@ -4,7 +4,7 @@
 > WHAT：
 > - 藍圖 2026-10-14-blueprint-to-systems-RULING-structure-round-before-deep-batch-one-verb-one-body-events-carry-source（結構輪範圍五條、探針兩個、停損）。
 > - 藍圖 2026-10-14-blueprint-to-systems-TICKET-L1-needs-material-gathered-on-site-and-three-entries-merge-into-one-verb（用戶裁「L1 要材料」、就地採不是備料、三入口一個動詞）。
-> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
+> 狀態：R² ISSUES（2026-10-16-reviewer-to-systems-R2-structure-round-probes-build-and-subteam-arrival-ISSUES）M1–M6 已補；R²b（2026-10-16-reviewer-to-systems-R2b-…-ISSUES）M7＋三條備註已補，審查註明補完不需再審 ⇒ GO。§三之二（用戶裁乙＋丙）R²c M8＋兩條已補，審查註明補完不需再審。平原新點採不夠料那個後果已轉藍圖（見 §給藍圖）。
 > 位置：玩家可見批（真玩小修、我的掛單與押貨、玩家勢力目標）之後，深層批之前。
 > 本票只做兩個探針。結構輪第 ③④ 條（玩家事件帶來源、子隊事件走信使）是下一張，不在本票。
 
@@ -158,7 +158,11 @@
   - 項 ＝ `− min(gather_days, gather_window_days()) × SITE_DAY_COST × w`。
     - `SITE_DAY_COST` ＝ 5.0，與同函式「每格距離 −5」同量級（測試值，一個常數）。
     - `w` ＝ `0.5 + 野心`（連續、中性 0.5 ⇒ 1.0；急著擴張的人更不願等）。人格選哪一軸是 HOW，測試值。
-    - 夾在期限：採不完的格扣滿一個期限的分，不是 −∞（禁硬門）；真要派時 `_dispatch_builder` 的 `site_barren` 是物理，照 §三。
+    - 夾在期限：採得完的格照天數扣分。
+  - **採不完的格不進候選**（R²c M8）：`_evaluate_new_outpost_location` 的候選迴圈用與 `_dispatch_builder` 同一個判準（`build_eta_total_days` 回 INF，即採段天數 > `gather_window_days()`）先濾掉。
+    - 理由：選址只回最高分一格（`faction_ai_system.gd:6102`）。只扣分的話，平原鄰格有 2-3 個草藥／鐵礦（+60~90）仍會勝出，被 `site_barren` 擋下後每個 `INFRA_INTERVAL` 都選同一格空轉。
+    - 這不是新門：判準就是 `site_barren` 那道物理，提前到選址用同一支，不另寫。Probe `site.filtered_barren`。
+  - **誠實限（量級）**：加上這一項後，`MIN_BUILD_SCORE` 會讓母隊沒料時的候選收斂到好森林（審查端估：低產森林約 44 < 50、山地全被剔）。這是既有最低分門檻兌現出來的結果，不是本票新加的門；但效果上接近「沒料只能在好森林開點」。交件信印候選數與 `infra.stop.3_loc_empty` 修前修後。
   - 回傳 dict 加 `gather_term`，`[Site]` 那一行印出來（同 `known_term`）。
 - **紮根選址**（`decision_context.gd:876 settle_eta_days`）：`settle_eta_days` 改用 `build_eta_total_days`（§三 已列），`carried` ＝隊自己私產的 material，`site` 照 §三 的規則（站在格上讀真值、否則先驗）。採段長 ⇒ ETA 長 ⇒ 紮根的效用自然低；不加門。實作端確認 `settle_eta_days` 進效用的方式沒有除以零或 INF 爆掉（INF 時夾到期限）。
 - 擴點估值（`decision_context.gd:915` `expand_build_cost`）同樣改讀總天數（§三 已列），`carried` 用 `fundable_carry`。
@@ -219,7 +223,11 @@
 - **V9 玩家面**：玩家紮根回句含「需材」「可採約」，不含「免材料」；頂列 `phase` 兩段印得出來。
 - **G9 玩家優先序**：玩家紮根、建設之後，施工中 `task_priority == PRIO_PLAYER`。
 - **V8b 撥料與估算同源**（M7）：同一個平原目標，母隊庫存 0 ⇒ `site_barren`；庫存 ≥ need ⇒ 過這道閘、子隊開工時 `gather_left == 0`。
-- **V11 選址秤讀採料天數**：同一支母隊、同距離的森林格與平原格（其他項床內設成相等），母隊料 0 ⇒ 森林的分數 − 平原的分數 ＝ 兩格 `gather_term` 之差 > 0；母隊料 ≥ need ⇒ 兩格 `gather_term` 都是 0。野心 0.2 與 0.8 兩支隊 ⇒ 後者差距較大。
+- **V11 選址秤讀採料天數**（地形加成固定，「其他項相等」做不到 ⇒ 斷言欄位）：同一支母隊、同距離的森林格與山地格：
+  - 母隊料 0 ⇒ 兩格 `gather_term` < 0，山地的絕對值較大；母隊料 ≥ need ⇒ 兩格 `gather_term` 都是 0。
+  - 野心 0.2 與 0.8 兩支隊 ⇒ 後者 `gather_term` 絕對值較大。
+  - 決勝格：佈置兩格使 `gather_term` 以外的分數差小於 `gather_term` 之差 ⇒ 料 0 時選森林；料 ≥ need 時選另一格。
+- **V11b 採不完不進候選**（M8）：母隊料 0、範圍內只有平原格（含草藥鄰格）⇒ `_evaluate_new_outpost_location` 回空、`site.filtered_barren > 0`、沒有 `site_barren` 派遣失敗；母隊料 ≥ need ⇒ 同一格回得出來。
 - **V10 玩家子隊建設不擋料**（M5）：玩家子隊帶 0 料派往森林格 ⇒ `precheck_subteam_build` ok，回句含「需材」「可採約」。
 - **P1 持守看得到採段**（M3）：同一支隊、`food_runway` 固定，兩個進行中工地：`gather_left=0` 與 `gather_left=need` ⇒ 後者 `safe_factor` 較小、`_progress` 較小。
 
@@ -258,6 +266,7 @@
 | n14 糧橋估算 `carried` 傳 0（不呼 `fundable_carry`） | V8b 後者 |
 | n15 `_site_candidate_score` 不加 `gather_term` | V11 |
 | n16 `gather_term` 的 carried 傳 0 | V11 第二格 |
+| n17 選址迴圈不濾採不完的格 | V11b |
 | n13 `precheck_subteam_build` 留著料門 | V10 |
 
 ## 給藍圖（已另寄）
@@ -287,5 +296,6 @@
 - 三種地形缺 50 料的採段天數（用真函式、真先驗算），給藍圖；加一欄「帶滿料時平原要幾天」（應＝築段天數，採段 0）。
 - 6 人子隊的載重、帶 50／80 料後的總重；電池裡紮根時帶料 >0 的比例。
 - V8 的地形三列再加一欄 `gather_term` 平均，看選址是否真的往林邊、山邊移。
+- 選址候選數、`site.filtered_barren`、`infra.stop.3_loc_empty` 修前修後並排。
 - world-fp：抽取那輪（應不變）與全量那輪的新舊值、兩輪 run-id。
 - n1–n7 紅燈原文。

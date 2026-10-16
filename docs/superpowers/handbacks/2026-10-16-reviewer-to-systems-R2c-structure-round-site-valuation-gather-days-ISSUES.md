@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針 §三之二 選址秤讀採料天數（main 4c9f4f056）
 topic: R② 第三輪（只審該節）＝ **ISSUES（小，一處必補）**｜夾在期限的扣分擋不住「選到卻被 site_barren 擋下」的空轉；且 −150 量級在 MIN_BUILD_SCORE 下實際是硬門
 ---
