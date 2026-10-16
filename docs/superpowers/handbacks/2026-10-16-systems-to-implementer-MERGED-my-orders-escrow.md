@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 我的掛單與押貨（只讀）
 topic: MERGED 055c5e919（feat/my-orders-escrow 7293c1894）；合併後檢查綠；known_issues「掛單與押貨對玩家不可見」已關
 ---
