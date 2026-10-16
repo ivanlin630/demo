@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 結構輪探針一「建點」（L1 要材料、就地採）
 topic: 審查端算出的 WHAT 後果：平原（農地）開新點採料約 72 日，超過 30 日採段期限 ⇒ 不帶料蓋不成；森林約 7 日、山地約 22 日。規格照現值寫，請你看要不要動
 ---
