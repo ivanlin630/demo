@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家勢力目標改用引擎詞 第三輪（main 20865b78e）
 topic: R② 第三輪 ＝ **CLEAN**（一條床的註記，不擋 GO）｜R2b 的 M2 改法對；藍圖新裁「玩家立國不看野心」我也對過 diff
 ---
