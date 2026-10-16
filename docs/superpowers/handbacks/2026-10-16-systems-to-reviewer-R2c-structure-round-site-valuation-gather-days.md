@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 結構輪探針一補節 §三之二（選址秤讀採料天數）
 topic: 藍圖轉用戶裁乙＋丙後新增的一節，只審這一節：docs/superpowers/specs/2026-10-16-structure-round-probes-build-and-subteam-arrival-HOW.md §三之二＋V11＋n15/n16＋交件信三行
 ---
