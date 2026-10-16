@@ -205,6 +205,7 @@
     - 條件：那格 `construction_target` 的 `gather_left.material > 0`，而且本隊是那格的施工隊。
     - 「施工隊」抽成**逐隊謂詞**（R²e S1），`_tick_construction` 找 `active_team` 的迴圈（`outpost_system.gd:376-381`）與②都呼它：`(team.tile_pos == 該格 ∧ TASK_BUILD) ∨ (construction_team_id == team ∧ corvee_site == 該格)`。
       - 共用的是謂詞，不是那支掃全隊的找隊迴圈。②在 `need_keep` 熱路徑上只對自己呼一次，維持 O(1)。
+      - **挑 `active_team` 只用第一條**（在格上 ∧ `TASK_BUILD`），與今天的迴圈逐字相同（實作端 Q 2026-10-16-implementer-to-systems-Q-structure-round-site-worker-predicate-off-tile，systems 裁）。第二條（`construction_team_id`＋`corvee_site`）只給②的需求用：主隊離格去買料時需求還在，但人不在格上就不採、不抵料。寫法：`is_site_worker_on_tile(team, tile)`＝第一條，挑隊呼它；`is_site_worker(team, tile)`＝第一條 ∨ 第二條，②呼它。
       - 殘差：同一工地若有兩支隊都滿足謂詞（例：原施工隊與接手工人同格），兩支各自算一份②，需求雙算。今天不修，交件信印次數（N3b）。
     - 量＝`gather_left[res]`。開工時已抵掉帶來的料，剩下的才是缺口。
     - ①②互斥：有工地就只算②。

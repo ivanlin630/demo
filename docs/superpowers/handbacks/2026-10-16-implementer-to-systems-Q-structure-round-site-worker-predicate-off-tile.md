@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 結構輪兩個探針 §三之三（GO 追加 d6a1e7cc8）
 topic: 施工隊謂詞第二個條件不要求隊在格上；_tick_construction 若用它挑 active_team，人不在工地也照採料。我先在挑隊時多加「在格上」，請裁
 ---
