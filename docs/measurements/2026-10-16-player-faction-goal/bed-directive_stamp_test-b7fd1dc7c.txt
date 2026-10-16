@@ -1,0 +1,23 @@
+tree b7fd1dc7c1c60fd0a0be9361cf207f9972ce5970
+[TREE] path=A:\GDS\demo\.worktrees\b7pin commit=b7fd1dc7c clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=16.4GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== directive stamp honesty test ===
+  PASS ★純重申不蓋戳記（stamp 仍 5000、未跳到 5100）
+  PASS ★成員不被喚醒（directive_fresh=false）
+  PASS ★真變化蓋戳記（stamp=5200＝當前 tick）
+  PASS ★成員當輪被喚醒（directive_fresh=true）
+  PASS ★玩家 override 首次設定 → 蓋戳記（今天這條路完全不蓋＝下令沒人理）
+  PASS 玩家 override 未變 → 不重蓋（重申不喚醒一致）
+  PASS ★玩家 override 改變 → 蓋戳記
+  PASS ★玩家改令 → 成員被喚醒
+  PASS 對照：無事件、cadence 未到 → 不重評
+  PASS ★T0 事件瞬醒不受本刀影響（兩路獨立）
+ALL PASS
+
+[godot.ps1] child exit=0
+rc=0

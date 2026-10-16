@@ -1,0 +1,50 @@
+"""玩家勢力目標負對照：python neg_pfg.py <tree> <n> apply|only"""
+import sys, io
+NEG = {
+ "n1": ("faction_directive_target 忽略 pinned（只回最近）⇒ G1、G3", "_g1,_g3", [
+   ("scripts/simulation/faction_ai_system.gd",
+    "\tif f != null and int(f.player_goal_target) != -1 and String(f.player_goal_override) == word:",
+    "\tif false and f != null and int(f.player_goal_target) != -1 and String(f.player_goal_override) == word:")]),
+ "n2": ("pinned 失效時 fallback 到最近 ⇒ G1b", "_g1", [
+   ("scripts/simulation/faction_ai_system.gd",
+    "\t\t\tif Probe.enabled: Probe.bump(\"directive.pinned.unknown_to_member\")\n\t\t\treturn -1",
+    "\t\t\tif Probe.enabled: Probe.bump(\"directive.pinned.unknown_to_member\")\n\t\t\treturn shared()._nearest_independent(state, team)")]),
+ "n3": ("外交.to_task 改回自己呼 _nearest_independent ⇒ G3 to_task 那半", "_g3", [
+   ("scripts/simulation/decision/options.gd",
+    "\t\t\tvar dt: int = FactionAISystem.faction_directive_target(state, team, state.factions.get(team.faction_id), \"外交\")",
+    "\t\t\tvar dt: int = FactionAISystem.shared()._nearest_independent(state, team)")]),
+ "n4": ("action 不呼 establish_block_reason ⇒ G4", "_g4", [
+   ("scripts/simulation/player_command_system.gd",
+    "\t\tvar why9: String = FactionAISystem.establish_block_reason(state, f9, true)",
+    "\t\tvar why9: String = \"\"")]),
+ "n4b": ("玩家路傳 for_player=false ⇒ G4e", "_g4e", [
+   ("scripts/simulation/player_command_system.gd",
+    "\t\tvar why9: String = FactionAISystem.establish_block_reason(state, f9, true)",
+    "\t\tvar why9: String = FactionAISystem.establish_block_reason(state, f9, false)")]),
+ "n5": ("_declare_established 不清 override ⇒ G4b", "_g4b", [
+   ("scripts/simulation/faction_ai_system.gd",
+    "\tif f.player_goal_override == \"立國\":\n\t\tf.player_goal_override = \"\"",
+    "\tpass")]),
+ "n6": ("G-09 支放回 ⇒ G5", "_g5", [
+   ("scripts/simulation/faction_ai_system.gd",
+    "\tif f.player_goal_override != \"\" or f.player_goal_target != -1:\n\t\tif Probe.enabled: Probe.bump(\"faction.override_cleared_on_handover\")",
+    "\tif not f.player_goal_override.is_empty():\n\t\tf.goals.append(f.player_goal_override)\n\t\treturn\n\tif f.player_goal_override != \"\" or f.player_goal_target != -1:\n\t\tif Probe.enabled: Probe.bump(\"faction.override_cleared_on_handover\")")]),
+ "n7": ("外殼不比 player_goal_target ⇒ G1c", "_g1c", [
+   ("scripts/simulation/faction_ai_system.gd",
+    "\t\tor int(f.player_goal_target) != int(f.applied_goal_target)",
+    "\t\tor false")]),
+}
+tree, n, mode = sys.argv[1], sys.argv[2], sys.argv[3]
+desc, only, cuts = NEG[n]
+if mode == "only":
+    print(only); sys.exit(0)
+for f, old, new in cuts:
+    p = tree + "/" + f
+    t = io.open(p, encoding="utf-8", newline="").read()
+    o, nw = old, new
+    if "\r\n" in t:
+        o, nw = old.replace("\n", "\r\n"), new.replace("\n", "\r\n")
+    if t.count(o) != 1:
+        sys.stdout.buffer.write(("PATCH_FAIL %s %s count=%d\n" % (n, f, t.count(o))).encode("utf-8")); sys.exit(2)
+    io.open(p, "w", encoding="utf-8", newline="").write(t.replace(o, nw))
+sys.stdout.buffer.write(("PATCHED %s：%s\n" % (n, desc)).encode("utf-8"))

@@ -1,0 +1,53 @@
+extends SceneTree
+# @bed-kind: diagnostic
+# 世界指紋拆區比對（玩家勢力目標票：證明 fp 變只是 FD 行多了三欄，不是行為漂移）。
+#   同 world-fp 那一趟（warring_states、seed 20260922、player_id=-1、20000 tick）；
+#   每 1000 tick 印逐域指紋；factions 域另印「拿掉 player_goal_target／applied_goal_override／applied_goal_target 三欄」後的指紋；
+#   終局印 final_fp 與拿掉三欄後的 FD 行原文。兩棵樹的比對在交件信上做。
+const DROP: Array = ["player_goal_target", "applied_goal_override", "applied_goal_target"]
+
+func _initialize() -> void:
+	var ticks: int = int(OS.get_environment("WFP_TICKS")) if OS.has_environment("WFP_TICKS") else 20000
+	seed(20260922)
+	var st := WorldState.new()
+	GameSetup.setup(st, GameSetup.load_config("res://config/warring_states.json"))
+	st.player_id = -1
+	var runner := SimRunner.new()
+	for t in range(ticks):
+		runner.advance_tick(st, Vector2i(-1, -1))
+		if (t + 1) % 1000 == 0:
+			_dump(st, t + 1)
+	print("SPLIT|final_fp=%s" % StateFingerprint.compute(st))
+	var fbuf := PackedStringArray()
+	StateFingerprint._emit_factions(st, fbuf)
+	for line in _strip(fbuf):
+		print("SPLIT|FLINE|%s" % line)
+	print("=== fp_split_probe DONE ===")
+	quit(0)
+
+func _strip(buf: PackedStringArray) -> PackedStringArray:
+	var out := PackedStringArray()
+	for line in buf:
+		if not String(line).begins_with("FD|"):
+			out.append(line)
+			continue
+		var body: String = String(line).substr(3)
+		var kept := PackedStringArray()
+		for part in body.split(";"):
+			var k: String = String(part).split("=")[0]
+			if not (k in DROP):
+				kept.append(part)
+		out.append("FD|" + ";".join(kept))
+	return out
+
+func _dump(st: WorldState, tick: int) -> void:
+	var d: Dictionary = StateFingerprint.compute_domains(st)
+	var keys: Array = d.keys()
+	keys.sort()
+	var parts := PackedStringArray()
+	for k in keys:
+		parts.append("%s=%s" % [String(k), String(d[k]).substr(0, 12)])
+	var fbuf := PackedStringArray()
+	StateFingerprint._emit_factions(st, fbuf)
+	parts.append("factions_drop3=%s" % "\n".join(_strip(fbuf)).md5_text().substr(0, 12))
+	print("SPLIT|t=%d|%s" % [tick, "|".join(parts)])
