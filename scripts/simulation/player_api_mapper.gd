@@ -635,7 +635,11 @@ static func forced_label(action: String, rid: String, state: WorldState, evt: Di
 			var ft: TeamData = state.teams.get(evt.get("from_id", -1))
 			var n: int = ft.population if ft != null else 0
 			if rid == "accept":
-				return "收留（食物 -%.1f,+%d 人）" % [PlayerCommandSystem.JOIN_ONBOARD_MEAL * n, n]
+				# ★列的條件＝做的條件（spec live-play-small-fixes §一）：同一支 SubteamSystem.absorb_block_reason
+				var _why: String = SubteamSystem.absorb_block_reason(state, state.teams.get(state.get_player_team_id()), ft)
+				if _why != "":
+					return "收留（不可：%s）" % _why
+				return "收留（+%d 人，食物 −%.1f）" % [n, PlayerCommandSystem.JOIN_ONBOARD_MEAL * n]
 			return "婉拒"
 		"aid_request":
 			return "施捨 %.0f 糧" % PlayerCommandSystem.AID_GIVE_DEFAULT if rid == "give" else "拒絕"

@@ -121,7 +121,8 @@ func _test_p1_join_request_full_team() -> void:
 	var sentence: String = _respond(bridge, st, eid, "accept")
 	print("   按【接受】之後畫面說：%s" % sentence)
 	_check("★★★句子有【我的決定】那一半（「你選了」）", sentence.contains("你選了"))
-	_check("★★★句子有【世界的結果】那一半（「隊伍已滿」）", sentence.contains("隊伍已滿"))
+	# ★live-play-small-fixes §一：世界的結果那一半改由 absorb_block_reason 給（「上限 {cap}，現有 {n}，對方 {m} 人」）
+	_check("★★★句子有【世界的結果】那一半（「上限…對方…人」）", sentence.contains("上限") and sentence.contains("對方"))
 	_check("★★★句子【不得】說「被拒絕」—— 沒有人拒絕玩家，是世界裝不下",
 		not sentence.contains("被拒絕"))
 	_check("★而它也要說出【沒有生效】（玩家真正在問的那一件）", sentence.contains("沒有生效"))

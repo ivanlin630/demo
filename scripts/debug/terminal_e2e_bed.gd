@@ -1378,7 +1378,7 @@ func _fr_cells() -> void:
 	_check("★FR1 母體地板：四種強制事件都有回應可按（共 %d 個）" % total, total >= FR_KINDS.size() * 2)
 	_check("FR1 每一個回應按下之後結果行＝真結果句（不對：%s）" % str(bad), bad.is_empty() and total > 0)
 	_cells_ran.append("FR1")
-	print("\n── FR2 人口滿上限、接受求投靠 ⇒ 結果行說「隊伍已滿，無法收留」、人口不變 ──")
+	print("\n── FR2 人口滿上限、接受求投靠 ⇒ 結果行說「上限…對方…人」、人口不變 ──")
 	var wf: Dictionary = _new_w(await _build(SEED_A))
 	var stf: WorldState = wf["node"]._bridge._state
 	var ptf: TeamData = stf.teams[stf.get_player_team_id()]
@@ -1398,7 +1398,8 @@ func _fr_cells() -> void:
 	if acc != "":
 		var pr: Array = await _fr_press(wf, acc)
 		print("   按收留 ⇒ 結果行「%s」｜人口 %d → %d" % [pr[0], pop0, ptf.population])
-		_check("FR2 結果行說「隊伍已滿，無法收留」、人口不變", String(pr[0]).contains("隊伍已滿") and ptf.population == pop0)
+		# ★live-play-small-fixes §一：舊句「隊伍已滿，無法收留」改由 absorb_block_reason 的理由句取代（「上限 {cap}，現有 {n}，對方 {m} 人」）
+		_check("FR2 結果行說「上限…對方…人」、人口不變", String(pr[0]).contains("上限") and String(pr[0]).contains("對方") and ptf.population == pop0)
 	_cells_ran.append("FR2")
 	await _drop(wf["node"])
 

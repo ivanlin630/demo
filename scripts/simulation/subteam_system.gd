@@ -318,6 +318,45 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 			print("[Merge] Team%d ← Team%d 容量不足，未轉移人員 (absorber=%d)" % [
 				absorber_id, absorbed_id, absorber.population])
 
+# ★求投靠＝整隊或不成（spec 2026-10-15-live-play-small-fixes §一，藍圖裁：裝不下就不成、不切半隊）。
+#   純判斷：空字串＝可以整隊收；否則是給玩家看的理由。選單（PlayerApiMapper.forced_label）、執行（_accept_join_request）、
+#   absorb_whole_team 自己都呼這一支 ⇒ 列的條件＝做的條件，不留第二份算式。
+#   ★三閘照既有收留路：同格、上限（整隊塞得下）、食物（每人一餐）。
+static func absorb_block_reason(state: WorldState, absorber: TeamData, absorbed: TeamData) -> String:
+	if absorber == null or absorbed == null:
+		return "對象不存在"
+	if absorber.tile_pos != absorbed.tile_pos:
+		return "需同格才能收留"
+	var cap: int = FactionAISystem.effective_pop_cap(state, absorber)
+	var m: int = absorbed.population
+	if absorber.population + m > cap:
+		return "上限 %d，現有 %d，對方 %d 人" % [cap, absorber.population, m]
+	var cost: float = PlayerCommandSystem.JOIN_ONBOARD_MEAL * float(m)
+	if float(absorber.resources.get("food", 0)) < cost:
+		return "食物不足收留（需%.1f）" % cost
+	return ""
+
+# ★整隊併入：block_reason 把關 → 俘虜整組轉到 absorber 名下 → 呼 merge_teams 長分支（帶 transfer 清單）。
+#   ★不另寫搬人：長分支搬隊長＋記名＋全部匿名，minor_population 跟著走，掃光資源與 anon_treasury，pop 歸零才 erase。
+#   ★俘虜要明寫：merge_teams 與 erase_teams 都不碰 captive_groups ⇒ 不先轉就整組蒸發（隊上押著的人跟著來）。
+#   ★不走 _merge_into（那條服務子隊回歸，按容量比例只搬匿名）⇒ 子隊回歸與 NPC 合併路逐位不變。
+#   ★壞掉的樣子：選單說「+4 人」、按下只進 1 人、對方剩半隊留在原地。
+static func absorb_whole_team(state: WorldState, absorber: TeamData, absorbed: TeamData) -> Dictionary:
+	var why: String = absorb_block_reason(state, absorber, absorbed)
+	if why != "":
+		return {"ok": false, "reason": why, "moved": 0}
+	var m: int = absorbed.population
+	var pop0: int = absorber.population
+	for g in absorbed.captive_groups:
+		absorber.captive_groups.append(g)
+	absorbed.captive_groups.clear()
+	var npcs: Array = []
+	if absorbed.leader_id != -1:
+		npcs.append(absorbed.leader_id)
+	npcs.append_array(absorbed.named_members)
+	SubteamSystem.new().merge_teams(state, absorber.team_id, absorbed.team_id, npcs, AnonTierSystem.total_pop(absorbed))
+	return {"ok": true, "reason": "", "moved": absorber.population - pop0, "expected": m}
+
 func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	var absorber: TeamData = state.teams[absorber_id]
 	var absorbed: TeamData = state.teams[absorbed_id]
