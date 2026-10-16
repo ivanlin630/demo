@@ -2,7 +2,7 @@
 
 > systems 2026-10-16。
 > WHAT：藍圖票 2026-10-16-blueprint-to-systems-TICKET-player-faction-goal-uses-engine-vocabulary（用戶裁「好」）。
-> 狀態：待 R²。
+> 狀態：待 R²。藍圖 2026-10-16 同意 §二 對象母體、外交不含「不先動手」、§四 交接清令（b073eb826）。
 > 位置：玩家可見批尾，我的掛單與押貨之後。
 > 關 known_issues「玩家設的勢力目標，成員一個也讀不到」（含其「交接」一行，見 §四）。
 
