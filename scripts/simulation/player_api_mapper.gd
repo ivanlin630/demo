@@ -635,7 +635,11 @@ static func forced_label(action: String, rid: String, state: WorldState, evt: Di
 			var ft: TeamData = state.teams.get(evt.get("from_id", -1))
 			var n: int = ft.population if ft != null else 0
 			if rid == "accept":
-				return "收留（食物 -%.1f,+%d 人）" % [PlayerCommandSystem.JOIN_ONBOARD_MEAL * n, n]
+				# ★列的條件＝做的條件（spec live-play-small-fixes §一）：同一支 SubteamSystem.absorb_block_reason
+				var _why: String = SubteamSystem.absorb_block_reason(state, state.teams.get(state.get_player_team_id()), ft)
+				if _why != "":
+					return "收留（不可：%s）" % _why
+				return "收留（+%d 人，食物 −%.1f）" % [n, PlayerCommandSystem.JOIN_ONBOARD_MEAL * n]
 			return "婉拒"
 		"aid_request":
 			return "施捨 %.0f 糧" % PlayerCommandSystem.AID_GIVE_DEFAULT if rid == "give" else "拒絕"
@@ -891,6 +895,10 @@ static func map_members_detail(state: WorldState) -> Array:
 			"body_parts": m.body_parts.duplicate(true),
 			"equipped":   m.equipment.duplicate(true),
 			"inventory":  inventory,
+			# ★餉（spec live-play-small-fixes §二）：期望值與發餉同一支；隊長不在發餉迴圈（只發 named_members）⇒ 算 skipped
+			"salary":       m.salary,
+			"fair_salary":  SalarySystem.fair_salary(m),
+			"wage_skipped": mid == t.leader_id or SalarySystem.wage_skipped(m, t.leader_id),
 		})
 	return result
 

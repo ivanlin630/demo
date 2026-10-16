@@ -28,10 +28,10 @@ var _lbl_log:         Label   # U11: 戰報（命中/傷害）
 
 var _post_combat: bool = false   # 遭遇戰結束後，等待玩家按 [J] 收編或任意鍵離開
 # ══ ★★★終端戰鬥區（spec 2026-10-07 terminal-battle-screen）══════════════════════════════════════════
-# ★終端沒有 GUI 的彈窗與滑鼠 ⇒ 三樣東西要讓終端讀得到：最後一句訊息、命令選單項目、按鍵分派次數（P10b）
+# ★終端沒有 GUI 的彈窗與滑鼠 ⇒ 兩樣東西要讓終端讀得到：最後一句訊息、按鍵分派次數（P10b）
+#   ★Z 命令選單已拿掉（spec 2026-10-15-live-play-small-fixes §五：跟隨與派信使都沒有消費者）；
+#     深層批「戰鬥模型落地」給命令真消費者時連同 Z 一起加回，不預留空狀態
 var _last_msg: String = ""           # `_log` 的最後一句（GUI 印到 stdout；終端把它放進戰鬥區）
-var _cmd_items: Array = []           # Z 命令選單的項目 [[id, 標籤], …]（空 ＝ 選單沒開）
-var _cmd_popup: PopupMenu = null
 # ★BS2（spec 2026-10-07 battle-screen-asserted §BS）：戰鬥怎麼結束的 —— 回主畫面那一刻結果行要說出是哪一種
 #   ·撤出：玩家單位在場上被標 has_exited（每次刷新時記，因為結算後 encounter_units 會被清）
 #   ·打完：這一場真的結算了（last_encounter_outcome 換了一份 ⇒ is_same 判「是不是這一場的」；野獸戰／平手也有）
@@ -111,7 +111,7 @@ func _build_layout() -> void:
 
 	right.add_child(_make_section_label("行動"))
 	_lbl_actions = Label.new()
-	_lbl_actions.text = "QWEASD:移動(邊界→離場)  R:攻擊\nZ:命令  F:投降  Space:待機"
+	_lbl_actions.text = "QWEASD:移動(邊界→離場)  R:攻擊\nF:投降  Space:待機"
 	right.add_child(_lbl_actions)
 
 	right.add_child(_make_section_label("雙方兵力"))
@@ -223,7 +223,7 @@ func _log_line_for_display(line: String, state: WorldState) -> String:
 
 # ══ ★BS v2（spec 2026-10-07 §票 BS v2，藍圖 27960078b）：戰鬥區要能玩 ══════════════════════════════════
 # 鍵（press-is-do）：R＝立刻攻擊目標欄上的目標；Tab＝換目標；↑↓＝換瞄準部位；QWEASD 只做移動（瞄準模式退場）
-const ACTION_HINTS: String = "QWEASD:移動(邊界→離場)  R:攻擊目標  Tab:換目標  ↑↓:換部位\nZ:命令  F:投降  Space:待機"
+const ACTION_HINTS: String = "QWEASD:移動(邊界→離場)  R:攻擊目標  Tab:換目標  ↑↓:換部位\nF:投降  Space:待機"
 const NO_TARGET_IN_RANGE_MSG: String = "沒有在攻擊範圍內的敵人"
 # 局部地圖的半徑（以主角為中心）：視野 5＋偵查 ⇒ 多一圈讓霧／邊界看得到
 const LOCAL_MAP_RADIUS: int = 6
@@ -547,8 +547,6 @@ func _draw() -> void:
 			draw_circle(center, 12.0 * _zoom, Color(0.4, 0.4, 0.4, 0.8))
 		if is_player:
 			draw_circle(center, 7.0 * _zoom, Color.WHITE)
-		if unit.get("is_messenger", false):
-			draw_circle(center, 4.0 * _zoom, Color.YELLOW)
 		# Prisoner: orange ring around unit
 		if unit.get("is_prisoner", false):
 			draw_arc(center, 14.0 * _zoom, 0.0, TAU, 12, Color.ORANGE, 2.0 * _zoom)
@@ -690,10 +688,6 @@ func terminal_block() -> String:
 			gone.append("%s離場" % String(codes[i]))
 	if not gone.is_empty():
 		lines.append("（%s）" % "、".join(PackedStringArray(gone)))
-	if not _cmd_items.is_empty():
-		lines.append("── 命令（按數字選；Esc 取消）──")
-		for k in range(_cmd_items.size()):
-			lines.append("[%d] %s" % [k + 1, String(_cmd_items[k][1])])
 	lines.append("── 戰報 ──")
 	lines.append_array((_lbl_log.text if _lbl_log != null else "").split("\n"))
 	# ★F1：「訊息：」那一行拿掉 —— 每一鍵的回應只有結果行一個出口（key_reply）
@@ -701,8 +695,6 @@ func terminal_block() -> String:
 
 # 鍵提示 ＝ `_lbl_actions.text`（GUI 顯示的那一句就是綁定的說明，從同一處讀）
 func terminal_keys() -> String:
-	if not _cmd_items.is_empty():
-		return "[1-%d]選命令 [Esc]取消" % _cmd_items.size()
 	return (_lbl_actions.text if _lbl_actions != null else "").replace("\n", "  ")
 
 func _handle_key(keycode: int) -> void:
@@ -713,20 +705,6 @@ func _handle_key(keycode: int) -> void:
 		var _lg: Array = _bridge.get_state().encounter_log
 		_log_mark_size = _lg.size()
 		_log_mark_last = String(_lg.back()) if not _lg.is_empty() else ""
-	# ★終端命令選單（spec §1④）：選單開著時數字選項、Esc 取消；其他鍵說明為什麼
-	if not _cmd_items.is_empty():
-		if keycode == KEY_ESCAPE:
-			_close_command_menu()
-			_log("命令選單已取消")
-		elif keycode >= KEY_1 and keycode <= KEY_9 and keycode - KEY_1 < _cmd_items.size():
-			var cid: int = int(_cmd_items[keycode - KEY_1][0])
-			var st0: WorldState = _bridge.get_state()
-			_close_command_menu()
-			_on_command_selected(cid, _find_player_unit(st0), st0)
-		else:
-			_log("命令選單開著：按數字選一項，或 Esc 取消", true)
-		_refresh_ui()
-		return
 	# 戰後階段：[J]收編、[K]拿戰利品、[L]留下戰利品（皆留在畫面、刷新提示）；其餘任意鍵離開
 	if _post_combat:
 		if keycode == KEY_K:
@@ -820,11 +798,9 @@ func _handle_key(keycode: int) -> void:
 				_refresh_ui()
 			elif keycode == KEY_SPACE:
 				_do_wait(player_unit)
-			elif keycode == KEY_Z:
-				_open_command_menu(player_unit, state)
 			elif keycode != KEY_F:
 				# ★按鍵三態（spec P4）：無作用的鍵說出為什麼，不靜默
-				_log("此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊目標／Tab 換目標／↑↓ 換部位／Z 命令／F 投降／Space 待機）", true)
+				_log("此鍵在戰鬥中無作用（可用：QWEASD 移動／R 攻擊目標／Tab 換目標／↑↓ 換部位／F 投降／Space 待機）", true)
 				_refresh_ui()
 		# ★BS v2：瞄準模式（attack_select）退場 —— R 直接打目標欄的目標、↑↓ 在 idle 換部位
 
@@ -915,82 +891,9 @@ func _describe_hex(pos: Vector2i, state: WorldState) -> String:
 			lines.append("單位: %s" % name_str)
 	return "\n".join(lines)
 
-# ── command menu + sound range ────────────────────────────
-
-const SOUND_RANGE: int = 3   # TEST VALUE
-
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx: int = b.x - a.x; var dy: int = b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
-
-func _open_command_menu(player_unit: Dictionary, state: WorldState) -> void:
-	var player_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
-	var player_tid: int      = player_unit.get("team_id", -1)
-
-	var popup := PopupMenu.new()
-	popup.name = "CommandMenu"
-
-	for i in range(state.encounter_units.size()):
-		var u: Dictionary = state.encounter_units[i]
-		if u.get("team_id", -1) != player_tid: continue
-		if u.get("person_id", -1) == state.player_id: continue
-		var upos: Vector2i = u.get("pos", Vector2i.ZERO)
-		var dist: int = _hex_dist(player_pos, upos)
-		var pid: int  = u.get("person_id", -1)
-		var label: String = "P%d" % pid if pid >= 0 else "匿名%d" % i
-		if dist <= SOUND_RANGE:
-			popup.add_item("命令 %s..." % label, i)
-		else:
-			popup.add_item("超出範圍 %s — 派信使" % label, 1000 + i)
-
-	popup.id_pressed.connect(func(id: int): _on_command_selected(id, player_unit, state))
-	add_child(popup)
-	# ★終端看不到彈窗 ⇒ 把同一份項目記下來印進戰鬥區（項目來源只有上面這一個迴圈）
-	_cmd_popup = popup
-	_cmd_items = []
-	for k in range(popup.item_count):
-		_cmd_items.append([popup.get_item_id(k), popup.get_item_text(k)])
-	if _cmd_items.is_empty():
-		_log("沒有可下令的隊友")
-		_close_command_menu()
-	popup.popup(Rect2(get_viewport().get_mouse_position(), Vector2.ZERO))
-	_waiting_for_player = true
-
-func _close_command_menu() -> void:
-	_cmd_items = []
-	if _cmd_popup != null and is_instance_valid(_cmd_popup):
-		_cmd_popup.queue_free()
-	_cmd_popup = null
-
-func _on_command_selected(id: int, player_unit: Dictionary, state: WorldState) -> void:
-	_cmd_items = []
-	if id >= 1000:
-		var target_idx: int = id - 1000
-		_dispatch_messenger(player_unit, target_idx, state)
-	else:
-		_open_sub_command(id, player_unit, state)
-	_waiting_for_player = true
-
-func _dispatch_messenger(player_unit: Dictionary, target_idx: int, state: WorldState) -> void:
-	var player_tid: int = player_unit.get("team_id", -1)
-	for u in state.encounter_units:
-		if u.get("team_id", -1) != player_tid: continue
-		if u.get("person_id", -1) == state.player_id: continue
-		if u.get("is_messenger", false): continue
-		if u.get("person_id", -1) < 0: continue
-		u["is_messenger"]         = true
-		u["messenger_target_idx"] = target_idx
-		u["current_order"]        = { "type": "messenger", "target": target_idx }
-		print("[Encounter] 派信使 P%d → unit%d" % [u["person_id"], target_idx])
-		queue_redraw()
-		return
-	print("[Encounter] 無可用信使")
-
-func _open_sub_command(unit_idx: int, player_unit: Dictionary, state: WorldState) -> void:
-	if unit_idx < 0 or unit_idx >= state.encounter_units.size(): return
-	var target_unit: Dictionary = state.encounter_units[unit_idx]
-	target_unit["current_order"] = { "type": "follow_player", "target": -1 }
-	print("[Encounter] 命令 unit%d 跟隨" % unit_idx)
 
 func _log(msg: String, refused: bool = false) -> void:
 	_last_msg = msg

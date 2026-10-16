@@ -268,7 +268,7 @@ func _test_p2_top_row_six_named_columns() -> void:
 	_check("★★六欄的錨都在【頂列那一行】上（缺的：%s）" % str(missing), missing.is_empty())
 	_check("★★★欄數 ＝ spec 點名的 6（實測 %d）" % names.size(), names.size() == 6)
 	print("   ★而這一格驗的是【六個具名字面】不是「頂列非空」（spec §3 明文禁後者）。")
-	print("   ★★前兩欄在稿子裡**沒有欄標** ⇒ 它們的錨是日期【形狀】與 `（人口 `，")
+	print("   ★★第一欄在稿子裡**沒有欄標** ⇒ 錨是日期【形狀】；人口格（隊名拆出來之後）錨 ` ｜ 人口 `，")
 	print("     而不是我自己加上去的欄標 —— 守衛要適應被守的東西，不是反過來。")
 	_cell("_test_p2_top_row_six_named_columns")
 

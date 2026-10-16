@@ -318,7 +318,8 @@ func _p3_threat() -> void:
 	print("   寬度 %d／%d｜威脅預留 %d" % [TextUiLayout.display_width(row), TextUiLayout.COLS, TextUiView.threat_reserve()])
 	_check("P3 威脅句整句出現（不以半句結尾）", row.contains("威脅：" + enemy))
 	_check("P3 單列、不超過 %d 欄" % TextUiLayout.COLS, not row.contains("\n") and TextUiLayout.display_width(row) <= TextUiLayout.COLS)
-	_check("P3 長隊名／長家名用「…」截", row.contains("…"))
+	# ★live-play-small-fixes §七（藍圖裁：整格或不顯示）：放不下 ⇒ 整格拿掉（家先走），不截成「…」
+	_check("P3 長隊名／長家名不截字：無「…」、家整格拿掉", not row.contains("…") and not row.contains("家："))
 	_check("P3 真實開局頂列：隊名沒被截（威脅句短時名字放得下）", real_row.contains(String(real.get("team_name", "?"))) and TextUiLayout.display_width(real_row) <= TextUiLayout.COLS)
 	_check("P3 最長的威脅句（%d 欄）也放得進一列" % TextUiView.threat_reserve(), TextUiView.threat_reserve() < TextUiLayout.COLS / 2)
 	# budget ≤ 0 那一格：營地欄超長

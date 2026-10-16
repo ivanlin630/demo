@@ -1057,7 +1057,10 @@ func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_
 	if p == null:
 		return { "ok": false, "msg": "拔擢失敗（無可拔擢 anon）" }
 	state.add_member(pt, p.id)   # 拔擢 anon→named（leader 不變,新增 named 成員）
-	return { "ok": true, "msg": "拔擢 %s 為記名成員" % p.person_name }
+	# ★說餉（spec live-play-small-fixes §二）：新人 salary 預設 0，欠薪每 7 天掉忠誠 ⇒ 結果句要講期望值與去哪設。
+	#   ★句子要短：底部結果行 clip_to(COLS−7) 會默默切句尾（床 P4 用最長人名量）
+	return { "ok": true, "msg": "拔擢 %s；期望餉 %.1f，現 %.1f（成員頁 [Y] 設餉）" % [
+		p.person_name, SalarySystem.fair_salary(p), p.salary] }
 
 # ★票 T（spec 2026-10-06 ticket-t-fatigue §1③）：玩家下令休息 ⇒ 原地停下（TASK_REST）
 #   ⇒ 疲勞分類落「不耗力」⇒ 回復；★不移動（move_target 清空）——休息就是停下來
@@ -1937,24 +1940,11 @@ func _action_clear_member_order(state: WorldState, _target_id: int, pt: TeamData
 func _accept_join_request(state: WorldState, from_id: int) -> Dictionary:
 	var pt: TeamData = _get_player_team(state)
 	var from_team: TeamData = state.teams.get(from_id)
-	if pt == null or from_team == null:
-		return { "ok": false, "msg": "對象不存在" }
-	if pt.tile_pos != from_team.tile_pos:
-		return { "ok": false, "msg": "需同格才能收留" }
-	# 預估可進人數（受 pop_cap 限,與 merge 部分合併同口徑）
-	var leader = state.persons.get(pt.leader_id)
-	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-	var capacity: int = FactionAISystem.effective_pop_cap(state, pt) - pt.population
-	var will_join: int = mini(from_team.population, maxi(capacity, 0))
-	if will_join <= 0:
-		return { "ok": false, "msg": "隊伍已滿，無法收留" }
-	var cost: float = JOIN_ONBOARD_MEAL * float(will_join)
-	if float(pt.resources.get("food", 0)) < cost:
-		return { "ok": false, "msg": "食物不足收留（需%.1f）" % cost }
-	# 量測實際併入（撞 cap 沒進來的不餵、不報）→ 食物按 delta 扣,守恆與 msg 與實際一致
-	var pop_before: int = pt.population
-	SubteamSystem.new().merge_teams(state, pt.team_id, from_id)         # 整團併入：pop/named/tier/treasury 守恆
-	var joined: int = pt.population - pop_before
+	# ★整隊或不成（spec live-play-small-fixes §一）：同一支 block_reason 把關；裝不下不切半隊
+	var r: Dictionary = SubteamSystem.absorb_whole_team(state, pt, from_team)
+	if not bool(r.get("ok", false)):
+		return { "ok": false, "msg": String(r.get("reason", "")), "blocked": true }
+	var joined: int = int(r.get("moved", 0))
 	var actual_cost: float = JOIN_ONBOARD_MEAL * float(joined)
 	ResourceBank.add(pt, "food", -actual_cost, "join_onboard_meal")   # 餵他們進來：吃掉,食物非守恆
 	return { "ok": true, "msg": "收留 %d 人（食物 -%.1f）" % [joined, actual_cost],
@@ -2044,6 +2034,11 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 		"join_request":
 			if response == "accept":
 				result = _accept_join_request(state, fe.get("from_id", -1))
+				# ★按下「不可」：回同一句理由、事件保留（比照 choose_heir 不清的先例）⇒ 玩家可改按婉拒，請求不被吃掉
+				#   句型照「決定與結果分開講」（下方那段的同一個形狀）；選項名取自同一支 label 去掉括號，不另立字表
+				if bool(result.get("blocked", false)):
+					return { "ok": false, "msg": "你選了「%s」，但%s ⇒ 沒有生效（請求還在，可改按婉拒）" % [
+						_label_pre.split("（")[0], String(result.get("msg", ""))] }
 			else:
 				result = { "ok": true, "msg": "婉拒收留" }
 		"aid_request":
