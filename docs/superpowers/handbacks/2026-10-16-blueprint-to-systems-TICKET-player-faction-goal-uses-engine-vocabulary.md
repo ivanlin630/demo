@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 票：玩家設的勢力目標改用引擎同一套詞（攻擊 誰／徵收／外交 誰／立國），擴張／防守／貿易網退場
 date: 2026-10-16
 ---
