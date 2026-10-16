@@ -5726,7 +5726,7 @@ FactionData.player_goal_override 唯一寫者 player_command_system.gd:1543；_r
 出處：R² 2026-10-15-reviewer-to-systems-R2-player-led-faction-ISSUES §3。
 ```
 
-## 掛單與押貨（escrow）對玩家不可見
+## ✅ 掛單與押貨（escrow）對玩家不可見
 
 狀態：已修（我的掛單與押貨 merge `055c5e919`）—— 情報頁第五類「我的掛單與待領」列玩家隊自己的掛單（押在哪、還有多久到期）與待領（在哪格、從何時起）；玩家的貨退回落格發「退貨」事件（附身撤單／到期／撤單三種原因），到場領回發「領回」事件。床 `my-orders-panel`。誠實限：賣單成交的貨款落格只列不發事件；終端仍無掛單／撤單鍵。
 
