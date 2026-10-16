@@ -1,0 +1,31 @@
+tree 6baa1ae93313643b67af1a15c5faf527a51dbccc
+PATCHED n9：頂列先拿隊名（順序錯）⇒ H1／H2
+ scripts/ui/text_ui_view.gd | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=6baa1ae93 clean=NO code-dirty=1 codehash=DCA9504C4333
+[TREE]   *** measuring the WORKING TREE, not commit 6baa1ae93 ***
+[TREE]    M scripts/ui/text_ui_view.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=16.2GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== live_play_small_fixes：真玩小修七項 ===
+★★★BED_ONLY=_h：只跑子集，這一輪不能當驗收
+
+── H 頂列整格或不顯示 ──
+   H1 第 2 天 05:51 ｜ 人口 10 ｜ 糧撐 6.8 天 ｜ 威脅：Team11 敵對，最後所知 0 格 ｜ 待執行 0 道（寬 90）｜拿掉 ["team", "home", "camp"]
+   H2 最後拿掉 ["team", "pop", "home", "camp", "food"]
+   H3 threat_reserve＝30｜時間＋最寬威脅＋待執行 99＋分隔＝71／120｜極端行 第 999 天 23:59 ｜ 人口 9999 ｜ 糧撐 999.9 天 ｜ 威脅：Team99999 敵對，最後所知 99 格 ｜ 待執行 99 道（寬 101）
+  PASS: H3 極端值  無「…」、整格、寬度斷言（71  120）
+   H4 原因最寬 30｜時間＋待執行＋欄標＋最長原因＋分隔＝77／120
+  PASS: H4 故事結束句整句、 COLS、整格（77  120）
+=== live_play_small_fixes DONE === 到場 4／24 errors: 2
+ERROR: [FAIL] H1 真玩那一行  無「…」、拿掉的是家與營地整格、隊名完整、 COLS
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] H2 依序加長  消失順序＝家、營地、隊名、人口、糧撐（前綴、單調、整格、 COLS）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=1
+rc=1

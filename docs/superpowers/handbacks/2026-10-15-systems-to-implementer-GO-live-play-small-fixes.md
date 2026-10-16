@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 真玩小修（七項，玩家可見批尾最後一張）
 topic: GO｜spec 2026-10-15-live-play-small-fixes-HOW（R² 三輪全改，CLEAN）｜順位：「你領導的勢力」之後
 ---

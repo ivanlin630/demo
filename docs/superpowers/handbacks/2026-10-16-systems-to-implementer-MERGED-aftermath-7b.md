@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 7b 戰後處置過渡（feat/aftermath-7b 56957fe3a）
 topic: 已合 main f4a192dfe｜scan2 29/29、探索床、E2E errors 0｜known_issues 刪隊記名改寫成只剩獸隊（未確認＋量測窗）｜真玩小修照做
 ---
