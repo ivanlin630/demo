@@ -1356,6 +1356,7 @@ func _settle_owner_order(owner: TeamData, tile: HexTileData, oid: int, filled: i
 			if int(o["order_id"]) == oid and int(o["qty_remaining"]) <= 0:
 				Probe.bump("g1.order_fulfilled")
 				Probe.bump("order.filled")   # ★filled tap（直接撮合路）
+				if String(o.get("for", "")) == "new_outpost": Probe.bump("order.new_outpost.filled")   # ★結構輪 §三之三
 				continue   # 沖滿移除（不留幽靈）
 			kept.append(o)
 		owner.active_orders = kept

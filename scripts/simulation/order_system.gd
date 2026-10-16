@@ -269,6 +269,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		else:
 			# ★abandoned tap：逾時未成交（帶 order_id + 壽命，事後可串）
 			Probe.bump("order.abandoned")
+			if String(o.get("for", "")) == "new_outpost": Probe.bump("order.new_outpost.abandoned")   # ★結構輪 §三之三
 			# ★★★B-v0 §2：到期退貨是【同一條紅線、換一個方向】――
 			#   賣家不在場，貨【不得】直接回到他的 resources，否則就是【貨物瞬移】。
 			#   ⇒ 落【待領貨帳】，與待領款共用同一個 pending_claims 結構。
@@ -326,8 +327,16 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 				- ResourceSystem.effective_holding(state, team, res)
 			if shortfall < ORDER_POST_MIN:
 				continue
-			post_order(state, team, "buy", res, int(shortfall))
+			var _oid: int = post_order(state, team, "buy", res, int(shortfall))
 			Probe.bump("g1.shortage_buy")
+			# ★結構輪 §三之三：新點那一支 >0 時發的料單帶 "for": "new_outpost"（只是標籤；撮合／看板／存檔不讀它）
+			if res == "material" and _oid != -1 and NeedOracle._new_outpost_need(state, team, "material") > 0.0:
+				for _o in team.active_orders:
+					if int(_o["order_id"]) == _oid:
+						_o["for"] = "new_outpost"
+						break
+				Probe.bump("g1.shortage_buy.new_outpost")
+				Probe.bump("g1.shortage_buy.new_outpost." + ("sub" if team.parent_team_id != -1 else "main"))
 	# food 買單：effective_food 低於人格安全存量目標(天) → 補到 target（統一 food_security_target，廢 FOOD_BUY_DAYS）
 	if not _has_active(team, "buy", "food"):
 		var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
@@ -659,6 +668,7 @@ func settle_orders(team: TeamData, before: Dictionary, _tick: int) -> bool:
 		if int(o["qty_remaining"]) <= 0:
 			Probe.bump("g1.order_fulfilled")
 			Probe.bump("order.filled")   # ★filled tap（qty 歸零完成）
+			if String(o.get("for", "")) == "new_outpost": Probe.bump("order.new_outpost.filled")   # ★結構輪 §三之三
 		else:
 			kept.append(o)
 	team.active_orders = kept

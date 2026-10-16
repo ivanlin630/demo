@@ -1040,7 +1040,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _mat_need: float = NeedOracle.need_keep(state, team, "material", c.leader_values)
 	c.material_need_total = _mat_need
 	c.material_shortfall = maxf(_mat_need - ResourceSystem.effective_holding(state, team, "material"), 0.0)
-	c.material_build_urgency = NeedOracle.max_material_facility_desire(state, team)   # ★v2a：買料 util 繫建設迫切
+	c.material_build_urgency = NeedOracle.material_build_urgency(state, team)   # ★v2a：買料 util 繫建設迫切；★結構輪 §三之三：max(設施, 新點)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.market", _tg)
 	# Fix4 覓食可達性：本格/鄰格有 wild_game tile 才可覓食（鏡射 market 一次性 gather，避每 option 重跑）。
 	var _fg: Vector2i = _fa._find_forage_tile(state, team)

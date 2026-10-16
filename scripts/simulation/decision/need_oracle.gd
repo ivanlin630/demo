@@ -119,7 +119,7 @@ static func need_keep(state: WorldState, team: TeamData, res: String, leader_val
 		_n2 = Time.get_ticks_usec()
 		nk_supply_us += float(_n2 - _n1)
 		nk_supply_n += 1
-	var _c: float = _construction_facility_need(state, team, res, leader_values)
+	var _c: float = _construction_need(state, team, res, leader_values)   # ★結構輪 §三之三：新點先占上限、設施吃剩下
 	if SimRunner.phase_timing:
 		nk_constr_us += float(Time.get_ticks_usec() - _n2)
 		nk_constr_n += 1
@@ -197,7 +197,102 @@ static func _facility_output_res(facility: String) -> Array:
 # ★v2a：team 對 material-facility 的 max 建設迫切（0-1，reuse _facility_deficit 信號）。
 # 買料 util 繫此=買料是建設前置（想建強→買料 util 高，競得過建設），非 shortfall band 墊底（1.7% 敗）。
 # mirror _construction_facility_need 列舉（cost-guard 前置同結構安全），聚合改 max desire 非 sum cost。
-static func max_material_facility_desire(state: WorldState, team: TeamData) -> float:
+# ★結構輪 §三之三：新點缺料進同一本需求帳。只讀這支隊【自己已承諾的那一座】，兩樣都 O(1)、不掃全圖（need_keep 熱路徑）。
+#   回 {} ＝沒承諾；否則 {kind: "walk"|"gather", type, level, tile}。
+#   ① walk（在路上、目標格完全沒有工地）：move_target 真的在走 ∧ 目標格 L0 ∧ construction_team_id == -1，且
+#      子隊：TASK_CONSTRUCT（★派出的建造子隊在途任務是「建造」不是「建設」，faction_ai_system.gd:5550／player_command_system.gd:1587）
+#            ∧ task_extra_data 有 build_type；
+#      母隊：TASK_BUILD ∧ 目標格 camp_team_id == 本隊 ∧ camp_level == 1（同 _commit_settle_site 走回營地那一支）。
+#   ② gather（採段中）：子隊讀 tile_pos 那格、母隊讀 corvee_site 那格；gather_left.material > 0 ∧ OutpostSystem.is_site_worker。
+#   ①②互斥：有工地就只算②。感知：都是隊自己的承諾與自己的工地帳（gather_left 只在施工隊在格時才變）。
+static func new_outpost_commitment(state: WorldState, team: TeamData) -> Dictionary:
+	if state == null or team == null:
+		return {}
+	var is_sub: bool = team.parent_team_id != -1
+	var spos: Vector2i = team.tile_pos if is_sub else team.corvee_site
+	if spos != Vector2i(-1, -1):
+		var st: HexTileData = state.world.tiles.get(spos.x * 1000 + spos.y)
+		if st != null and float((st.construction_target.get("gather_left", {}) as Dictionary).get("material", 0.0)) > 0.0 \
+				and OutpostSystem.is_site_worker(team, st):
+			return {"kind": "gather", "type": String(st.construction_target.get("type", "civilian")),
+				"level": int(st.construction_target.get("level", 1)), "tile": st}
+	var mt: Vector2i = team.move_target
+	if mt == Vector2i(-1, -1) or mt == team.tile_pos:
+		return {}
+	if team.current_task != (TeamData.TASK_CONSTRUCT if is_sub else TeamData.TASK_BUILD):
+		return {}
+	var tt: HexTileData = state.world.tiles.get(mt.x * 1000 + mt.y)
+	if tt == null or tt.outpost_level != 0 or tt.construction_team_id != -1:
+		return {}
+	if is_sub:
+		if not team.task_extra_data.has("build_type"):
+			return {}
+		return {"kind": "walk", "type": String(team.task_extra_data["build_type"]),
+			"level": int(team.task_extra_data.get("level", 1)), "tile": tt}
+	if tt.camp_team_id != team.team_id or tt.camp_level != 1:
+		return {}
+	return {"kind": "walk", "type": FactionAISystem.settle_camp_type(state, team), "level": 1, "tile": tt}
+
+static var _new_outpost_tap_day: Dictionary = {}   # ★觀測去重（每隊每日一次）；只在 Probe.enabled 時讀寫，不進世界
+static func _new_outpost_need(state: WorldState, team: TeamData, res: String) -> float:
+	var c: Dictionary = new_outpost_commitment(state, team)
+	if c.is_empty():
+		return 0.0
+	var q: float
+	if String(c["kind"]) == "gather":
+		q = float(((c["tile"] as HexTileData).construction_target.get("gather_left", {}) as Dictionary).get(res, 0.0))
+	else:
+		q = float((OutpostSystem.OUTPOST_COST[String(c["type"])][int(c["level"]) - 1] as Dictionary).get(res, 0))
+	if Probe.enabled and q > 0.0:
+		var day: int = state.world.current_tick / WorldState.TICKS_PER_DAY
+		var key: String = "%d.%s" % [team.team_id, res]
+		if int(_new_outpost_tap_day.get(key, -1)) != day:
+			_new_outpost_tap_day[key] = day
+			Probe.bump("need.new_outpost." + String(c["kind"]))
+			Probe.bump("need.new_outpost.%s.%s" % [String(c["kind"]), "sub" if team.parent_team_id != -1 else "main"])
+	return q
+
+# ★結構輪 §三之三：建造需求＝新點那一支＋設施那一支；上限分配＝已承諾的新點先占，設施吃剩下的額度。
+static func _construction_need(state: WorldState, team: TeamData, res: String, lv: Dictionary) -> float:
+	if not (res in CONSTRUCTION_COST_RES) or state == null:
+		return 0.0
+	var n: float = minf(_new_outpost_need(state, team, res), CONSTRUCTION_MATERIAL_NEED_CAP)
+	var room: float = CONSTRUCTION_MATERIAL_NEED_CAP - n
+	var f: float = minf(_construction_facility_need(state, team, res, lv), room) if room > 0.0 else 0.0
+	return n + f
+
+# ★結構輪 §三之三：新點迫切＝採段天數 ÷ 總天數（兩半都走 build_eta_total_days 那套；INF ⇒ 1）。
+#   ①：carried＝隊自己的 material；site＝站在目標格讀真值，否則地形先驗。②：carried＝site_stock、site＝腳下真值（工地就在那格）。
+static func new_outpost_urgency(state: WorldState, team: TeamData) -> float:
+	var c: Dictionary = new_outpost_commitment(state, team)
+	if c.is_empty():
+		return 0.0
+	var tile: HexTileData = c["tile"]
+	var type: String = String(c["type"])
+	var level: int = int(c["level"])
+	var carried: float
+	var site: Dictionary
+	if String(c["kind"]) == "gather":
+		carried = float((tile.construction_target.get("site_stock", {}) as Dictionary).get("material", 0.0))
+		site = OutpostSystem.site_of_tile(tile) if team.tile_pos == tile.tile_pos else OutpostSystem.site_prior(tile.terrain)
+	else:
+		carried = float(team.resources.get("material", 0.0))
+		site = OutpostSystem.site_of_tile(tile) if team.tile_pos == tile.tile_pos else OutpostSystem.site_prior(tile.terrain)
+	var need: float = float((OutpostSystem.OUTPOST_COST[type][level - 1] as Dictionary).get("material", 0))
+	var g: float = OutpostSystem.gather_eta_days(state, team, need, carried, site)
+	if g == INF:
+		return 1.0
+	var tot: float = OutpostSystem.build_eta_total_days(state, team, type, level, maxi(team.population, 1), carried, site)
+	if tot == INF:
+		return 1.0
+	return clampf(g / tot, 0.0, 1.0) if tot > 0.0 else 0.0
+
+# ★結構輪 §三之三：買料 util 的建設迫切＝max(設施迫切, 新點迫切)（原 max_material_facility_desire 改名）。
+static func material_build_urgency(state: WorldState, team: TeamData) -> float:
+	return maxf(_facility_build_desire(state, team), new_outpost_urgency(state, team))
+
+# 設施那一支（舊 max_material_facility_desire 本體，逐字不變）
+static func _facility_build_desire(state: WorldState, team: TeamData) -> float:
 	if state == null:
 		return 0.0
 	var own_pos: Vector2i = FactionAISystem.shared()._find_own_outpost(state, team)

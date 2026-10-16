@@ -51,7 +51,7 @@ static func coin_need(state: WorldState, team: TeamData) -> float:
 	var need: float = 0.0
 	# ★material-hold ④：material-buy 對齊 afford×1.5 缺口（非只 need_keep shortfall）→ extraction 拉夠 coin 買足量
 	# 到能 afford（cost×1.5）。cost=想蓋 facility 的 material build-need（_construction_facility_need）。
-	var mat_cost: float = NeedOracle._construction_facility_need(state, team, "material", lv)
+	var mat_cost: float = NeedOracle._construction_need(state, team, "material", lv)   # ★結構輪 §三之三：同一本帳（新點料也留錢）
 	if mat_cost > 0.0:
 		var mat_afford_short: float = maxf(mat_cost * 1.5 \
 			- ResourceSystem.effective_holding(state, team, "material"), 0.0)

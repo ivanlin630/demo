@@ -382,7 +382,7 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	var active_team: TeamData = null
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
-		if t.tile_pos == tile.tile_pos and t.current_task == TeamData.TASK_BUILD:
+		if is_site_worker_on_tile(t, tile):   # ★結構輪 §三之三（systems 裁 5c4f5581c）：挑隊只認在格上∧TASK_BUILD
 			active_team = t
 			break
 	if active_team == null:
@@ -423,8 +423,10 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	# ★結構輪探針 §二 採段：還缺料 ⇒ 這一 tick 只採、不築（ticks_left 不動）。
 	#   ★gain>0 才刷新 last_progress ⇒ 池被別人採光時照既有停工逾時；採太久由 check_construction_timeout 的採段期限取消。
 	if float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", 0.0)) > 0.0:
-		_tick_gather(state, tile, active_team)
-		return
+		# ★§三之三：施工隊（active_team，含接手工人）先把身上帶的料抵進 gather_left，再採；抵滿 ⇒ 當 tick 轉築段。
+		if _absorb_carried(state, tile, active_team) > 0.0:
+			_tick_gather(state, tile, active_team)
+			return
 	tile.construction_last_progress_tick = state.world.current_tick
 	# ★票 T §7：施工進度 × 體力係數（累了做得慢；四捨五入、至少 1）
 	tile.construction_ticks_left -= maxi(roundi(float(maxi(active_team.population, 1)) * SimRunner.stamina_factor(active_team)), 1)
@@ -463,6 +465,41 @@ func _tick_gather(state: WorldState, tile: HexTileData, team: TeamData) -> void:
 	if Probe.enabled:
 		Probe.add_amount("construct.gathered", gain)
 		if left == 0.0: Probe.bump("construct.gather_done")
+
+# ★結構輪 §三之三：施工隊在格上把身上的料抵進工地（同開工時的抵法：min(帶的, gather_left)，site_stock 加同量）。
+#   回抵完後還缺多少（>0 ⇒ 繼續採段）。料走 ResourceBank（守恆由 InvariantAudit 對帳）。
+func _absorb_carried(state: WorldState, tile: HexTileData, team: TeamData) -> float:
+	var gl: Dictionary = tile.construction_target["gather_left"]
+	var left: float = float(gl.get("material", 0.0))
+	var k: float = minf(float(team.resources.get("material", 0.0)), left)
+	if k <= 0.0:
+		return left
+	k = ResourceBank.remove(team, "material", k, "site_absorb")
+	left -= k
+	if left <= 0.000001:
+		left = 0.0
+	gl["material"] = left
+	var ss: Dictionary = tile.construction_target.get("site_stock", {})
+	ss["material"] = float(ss.get("material", 0.0)) + k
+	tile.construction_target["site_stock"] = ss
+	tile.construction_last_progress_tick = state.world.current_tick
+	if Probe.enabled:
+		Probe.bump("construct.absorb")
+		Probe.add_amount("construct.absorbed", k)
+		if team.team_id != tile.construction_team_id: Probe.bump("construct.absorb.not_ct")
+		if left == 0.0: Probe.bump("construct.gather_done")
+	return left
+
+# ★結構輪 §三之三（systems 裁 5c4f5581c）：施工隊兩支逐隊謂詞，O(1)。
+#   on_tile：_tick_construction 挑 active_team（在格上 ∧ TASK_BUILD；與改制前同條件）。
+#   is_site_worker：§三之三 ② 需求「本隊是那格的施工隊」＝on_tile ∨（工地登記是本隊 ∧ corvee_site 是那格；主隊離格買料）。
+static func is_site_worker_on_tile(team: TeamData, tile: HexTileData) -> bool:
+	return team != null and tile != null and team.tile_pos == tile.tile_pos and team.current_task == TeamData.TASK_BUILD
+
+static func is_site_worker(team: TeamData, tile: HexTileData) -> bool:
+	if is_site_worker_on_tile(team, tile):
+		return true
+	return team != null and tile != null and tile.construction_team_id == team.team_id and team.corvee_site == tile.tile_pos
 
 # 施工隊的士氣與隊長工程（material_gain 的兩個隊相依係數；同 resource_system 採集呼叫端 :107 讀隊長）
 static func builder_factors(state: WorldState, team: TeamData) -> Dictionary:
