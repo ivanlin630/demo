@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 結構輪兩個探針：建點一支身體（L1 要材料、就地採）＋子隊到場一支身體
 topic: R² 請審 docs/superpowers/specs/2026-10-16-structure-round-probes-build-and-subteam-arrival-HOW.md
 ---
