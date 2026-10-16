@@ -52,8 +52,14 @@ var known_member_states: Dictionary = {}
 # }}
 
 var player_goal_override: String = ""
-# 玩家設定的勢力目標；"" = 無 override（faction_ai 自動計算）
-# 有效值："expand" / "defend" / "trade_net"
+# 玩家設定的勢力目標；"" = 無 override。有效值＝PlayerCommandSystem.FACTION_GOALS（引擎詞：攻擊／徵收／外交／立國）
+#   ★只在玩家領導時有意義：交出盟主後 _rebuild_goals 清掉（spec 2026-10-16-player-faction-goal-engine-vocabulary §四）
+# ★攻擊／外交的對象（其他詞恆 -1）：只有玩家寫（_action_set_faction_goal）、只有 FactionAISystem.faction_directive_target 讀
+var player_goal_target: int = -1
+# ★命令戳記的「上次套用」兩欄（spec §二 R² M2）：_update_goals 外殼比【現值 vs 上次套用】，不同即蓋戳記叫醒成員；
+#   ★不能用外殼內前後快照：action 先寫了欄位，進外殼時前後已相同（「攻擊 X」改「攻擊 Y」goals 集合不變）
+var applied_goal_override: String = ""
+var applied_goal_target: int = -1
 
 # 策略層（strategic_ai_system 讀寫）
 var strategic_goals: Array = []

@@ -5675,11 +5675,9 @@ encounter_system.gd _spawn_team_units：位置用完就 break（記名迴圈與�
 出處：實作端 FYI 2026-10-15-implementer-to-systems-FYI-massacre-deletes-teams；7b 交件信 2026-10-16-implementer-to-systems-DONE-aftermath-7b。
 ```
 
-## 玩家設的勢力目標，成員一個也讀不到
+## ✅ 玩家設的勢力目標，成員一個也讀不到
 
-狀態：已知未修
-
-回訪：觸發事件 —— 藍圖裁「擴張／防守／貿易網對成員各是什麼加權」的那封信（systems 2026-10-16 已問）；裁下來就開票。
+狀態：已修（玩家勢力目標 merge `9df71f694`）—— 玩家改從電腦同一套詞設：攻擊 誰／徵收／外交 誰／立國；成員當天讀得到（床 player-faction-goal G1／G3：設「攻擊 X」後成員打 X 不打更近的 Y）。成員不知道對象就不跟（不退回別的對象）。立國要過電腦同一道門。誠實限：擴張／防守／貿易網先拿掉，等圍城、通商有實際動作時再回來；無玩家世界的普查咬不到玩家路，玩家路靠床。
 
 ```
 玩家能設：player_command_system.gd FACTION_GOALS＝expand／defend／trade_net（標籤 擴張／防守／貿易網）。
@@ -5714,11 +5712,9 @@ owner 是附身隊時＝AI 替玩家定稅率（#12 同族）。玩家沒有調�
 出處：spec 2026-10-15-player-led-faction-no-ai-goals-and-subjugate-tells-HOW §範圍外。
 ```
 
-## 玩家交出盟主後，他設的勢力目標仍留著驅動 NPC 勢力
+## ✅ 玩家交出盟主後，他設的勢力目標仍留著驅動 NPC 勢力
 
-狀態：已知未修
-
-回訪：觸發事件 —— 「你領導的勢力不自動定目標」merge 時（同一個 _rebuild_goals 分流，順手判要不要在交出時清）。
+狀態：已修（玩家勢力目標 merge `9df71f694`）—— 交出領導時清掉玩家設的目標，NPC 新盟主依人格重建（床 G5）。
 
 ```
 FactionData.player_goal_override 唯一寫者 player_command_system.gd:1543；_rebuild_goals:1939 非空就只放它。

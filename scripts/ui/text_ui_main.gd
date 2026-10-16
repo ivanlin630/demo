@@ -1734,7 +1734,8 @@ func _build_survival_lines(ct: Dictionary, ps: Dictionary) -> Array:
 	#   這裡要的是【那一眼看不完的部分】：為什麼是這個任務（systems 的 HOW 裁定）。
 	#   ⇒ 讀 `faction_goal` 與 `player_goal_override`（查詢面現成的 key）。
 	var _fg: String = str(_cached_snapshot.get("faction_goal", ""))
-	var _pg: String = str(_cached_snapshot.get("player_goal_override", ""))
+	var _pg: String = PlayerCommandSystem.faction_goal_text(str(_cached_snapshot.get("player_goal_override", "")),
+		int(_cached_snapshot.get("player_goal_target", -1)))   # ★帶對象（spec player-faction-goal §一）
 	if _fg != "" or _pg != "":
 		lines.append("目標: %s%s" % [_fg if _fg != "" else "（無勢力目標）",
 			"  ★玩家指定: " + _pg if _pg != "" else ""])
@@ -2892,19 +2893,42 @@ func _handle_faction_mode(keycode: int) -> void:
 				_refresh()
 				return
 			# ★數字選單（追加三）：集合＝sim 側 PlayerCommandSystem.FACTION_GOALS（驗證讀同一份）＋明確的「清除」
+			#   ★兩層（spec player-faction-goal §一）：先選詞；攻擊／外交再選對象（同一個 _open_input 數字選單形狀）
 			var goals: Array = PlayerCommandSystem.FACTION_GOALS + [""]
+			var cands: Array = fp.get("directive_candidates", [])
+			var est_block: String = String(fp.get("establish_block", ""))
+			var _send_goal := func(word: String, tgt: int) -> void:
+				_bridge.set_player_input("faction_goal_input", word)
+				_bridge.set_player_input("faction_goal_target_input", tgt)
+				var r := _bridge.command_player("execute_action",
+					{"action_id": "set_faction_goal", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % r.get("message", ""))
+				_set_feedback(r.get("ok", true), r.get("message", ""))
 			var _cb_in2627 := func(buf: String):
 				var gi: int = int(buf) - 1
 				if gi < 0 or gi >= goals.size():
 					_set_feedback(false, "沒有第 %s 項（1~%d）" % [buf, goals.size()])
 					return
-				_bridge.set_player_input("faction_goal_input", goals[gi])
-				var r := _bridge.command_player("execute_action",
-					{"action_id": "set_faction_goal", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-				_log_event("[勢力] %s" % r.get("message", ""))
-				_set_feedback(r.get("ok", true), r.get("message", ""))
-			_open_input("選勢力目標 (1~%d): " % goals.size(), "numeric", _cb_in2627, false,
-				goals.map(func(g): return PlayerCommandSystem.faction_goal_label(g)))
+				var word: String = String(goals[gi])
+				if word in PlayerCommandSystem.FACTION_GOALS_WITH_TARGET:
+					if cands.is_empty():
+						_set_feedback(false, "%s不可：你知道位置的獨立隊伍：0" % word)
+						return
+					var _cb_tgt := func(b2: String):
+						var ti: int = int(b2) - 1
+						if ti < 0 or ti >= cands.size():
+							_set_feedback(false, "沒有第 %s 項（1~%d）" % [b2, cands.size()])
+							return
+						_send_goal.call(word, int(cands[ti]))
+					_open_input("%s哪一隊 (1~%d): " % [word, cands.size()], "numeric", _cb_tgt, false,
+						cands.map(func(t): return "Team%d" % int(t)))
+					return
+				_send_goal.call(word, -1)
+			# ★選單項用迴圈組（lambda 裡呼本類 static 回 null ⇒ :921 String(null) 腳本錯，terminal_input_prompts P1h 紅）
+			var gmenu: Array = []
+			for g in goals:
+				gmenu.append(goal_menu_label(String(g), cands, est_block))
+			_open_input("選勢力目標 (1~%d): " % goals.size(), "numeric", _cb_in2627, false, gmenu)
 		KEY_B:   # 調整徵收率（Q7-6：僅 leader）
 			if not is_faction_leader:
 				_refresh()
@@ -2998,6 +3022,14 @@ func _handle_faction_mode(keycode: int) -> void:
 					_open_input("下令 Team%d 任務 (1~%d): " % [member_tid, omenu.size()], "numeric", _cb_in2715, false, omenu)
 	_refresh()
 
+# 勢力目標選單的一項（純函數）：攻擊／外交沒有候選 ⇒ 灰＋原因；立國閘不過 ⇒ 灰＋理由（同一支 establish_block_reason）
+static func goal_menu_label(word: String, cands: Array, est_block: String) -> String:
+	if word in PlayerCommandSystem.FACTION_GOALS_WITH_TARGET and cands.is_empty():
+		return "%s（不可：你知道位置的獨立隊伍：0）" % word
+	if word == "立國" and est_block != "":
+		return "立國（不可：%s）" % est_block
+	return PlayerCommandSystem.faction_goal_label(word)
+
 func _build_faction_str() -> String:
 	var fp: Dictionary = _bridge.query_faction_panel().get("data", {}).get("faction_panel", {})
 	if not fp.get("in_faction", false):
@@ -3008,7 +3040,9 @@ func _build_faction_str() -> String:
 	# ★spec player-led-faction 改法 7：玩家領導 ⇒ AI 不再定目標，只有你設的那一個；玩家是成員 ⇒ 印勢力（盟主）的目標
 	if fp.get("player_led", false):
 		var _og: String = String(fp.get("player_goal_override", ""))
-		lines.append("目標：無（等你下令）" if _og == "" else "目標：%s（你設的）" % PlayerCommandSystem.faction_goal_label(_og))
+		var _gt: String = PlayerCommandSystem.faction_goal_text(_og, int(fp.get("player_goal_target", -1)))
+		var _gi: String = String(fp.get("goal_target_invalid", ""))
+		lines.append("目標：無（等你下令）" if _og == "" else "目標：%s（你設的）%s" % [_gt, ("（對象已失效：%s）" % _gi) if _gi != "" else ""])
 	else:
 		var _fg2: String = String(fp.get("faction_goal", ""))
 		lines.append("勢力目標：%s" % (_fg2 if _fg2 != "" else "（無）"))

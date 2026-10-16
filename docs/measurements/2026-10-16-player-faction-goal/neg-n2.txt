@@ -1,0 +1,40 @@
+tree e8412008329c4c74079c0af089df16259633cbf6
+PATCHED n2：pinned 失效時 fallback 到最近 ⇒ G1b
+ scripts/simulation/faction_ai_system.gd | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[TREE] path=A:\GDS\demo\.worktrees\b7pin commit=e84120083 clean=NO code-dirty=1 codehash=B0B80F6E0EB6
+[TREE]   *** measuring the WORKING TREE, not commit e84120083 ***
+[TREE]    M scripts/simulation/faction_ai_system.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=12.8GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== player_faction_goal：玩家勢力目標改用引擎詞 ===
+★★★BED_ONLY=_g1：只跑子集，這一輪不能當驗收
+
+── G1 攻擊 X（Y 比較近）／G1b 成員不知道 X ──
+[MoneyGenesis] 初始 coin 總量 = 3456.0
+   = Σpop(36) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：5 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 3456.0 vs 推導 3456.0（差 0.0000）
+[GameSetup] 完成：5 teams, 1 factions, 5 persons
+  PASS: G1 前提 a：盟主隊 player_controlled、勢力是玩家領導
+  PASS: G1 前提 c：成員有隊長 PersonData
+  PASS: G1 佈置：成員對 X、Y 都有 belief，Y（1 格）比 X（4 格）近
+    設前 util：{ "u": 0, "i": 5, "opt": "攻擊", "d": 0 }｜attack_target_id=3
+  PASS: G1 前提 d（地板）：設前「攻擊」不在 faction_stakes、faction_duty 攻擊分量 0
+[PlayerCmd] set_faction_goal → 攻擊 Team2
+    { "ok": true, "msg": "勢力目標設為 攻擊 Team2" }｜設後 util：{ "u": 0.6669, "i": 5, "opt": "攻擊", "d": 0 }｜attack_target_id=2
+  PASS: G1 設「攻擊 X」 faction_duty 攻擊分量＝1.5、attack_target_id＝X（2），不是更近的 Y
+  PASS: G1b 地板：清之前成員對 X 有 belief 位置
+    G1b 清掉後：faction_attack_target=3 分量 1.5 unknown_to_member 0→1
+=== player_faction_goal DONE === 到場 2／12 errors: 1
+ERROR: [FAIL] G1b 成員不知道 X  faction_attack_target＝-1（不 fallback 到 Y）、faction_duty 攻擊分量 0、Probe 計到
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=1
+rc=1

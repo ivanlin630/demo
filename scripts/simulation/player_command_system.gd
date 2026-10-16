@@ -51,8 +51,11 @@ static func is_subteam_task(t: String) -> bool:
 	return false
 
 # ★勢力目標集合（追加三 ③：原本內聯在 _action_set_faction_goal 的字面）；空字串＝清除指定目標
-const FACTION_GOALS: Array = ["expand", "defend", "trade_net"]
-const FACTION_GOAL_LABELS: Dictionary = {"expand": "擴張", "defend": "防守", "trade_net": "貿易網", "": "清除（不設目標）"}
+# ★引擎同一套詞（spec 2026-10-16-player-faction-goal-engine-vocabulary §一）：成員 faction_stakes 認得的就是這幾個；
+#   expand／defend／trade_net 已刪、不留別名（舊詞沒有任何讀者，玩家設了等於沒設）
+const FACTION_GOALS: Array = ["攻擊", "徵收", "外交", "立國"]
+const FACTION_GOALS_WITH_TARGET: Array = ["攻擊", "外交"]
+const FACTION_GOAL_LABELS: Dictionary = {"": "清除（不設目標）"}
 
 static func faction_goal_label(g: String) -> String:
 	return String(FACTION_GOAL_LABELS.get(g, g))
@@ -1807,16 +1810,42 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 		return { "ok": false, "msg": "玩家不在勢力中" }
 	var goal9: String = str(state.player_state.get("faction_goal_input", ""))
 	if goal9 != "" and goal9 not in FACTION_GOALS:
+		if Probe.enabled: Probe.bump("faction.goal_rejected.word")
 		return { "ok": false, "msg": "無效目標（%s／空字串清除）" % "/".join(FACTION_GOALS) }
 	var f9: FactionData = state.factions.get(pt.faction_id)
 	if f9 == null:
 		return { "ok": false, "msg": "勢力不存在" }
 	if f9.leader_team_id != pt_id:
 		return { "ok": false, "msg": "只有 leader 可設定勢力目標" }
+	var tgt9: int = -1
+	if goal9 in FACTION_GOALS_WITH_TARGET:
+		# ★攻擊／外交對象必填，且在候選集裡（與成員讀法同一個母體：獨立隊＋你有情報）
+		tgt9 = int(state.player_state.get("faction_goal_target_input", -1))
+		if not FactionAISystem.directive_target_candidates(state, pt).has(tgt9):
+			if Probe.enabled: Probe.bump("faction.goal_rejected.target")
+			return { "ok": false, "msg": "%s的對象要是你知道位置的獨立隊伍（Team%d 不是）" % [goal9, tgt9] }
+	if goal9 == "立國":
+		# ★同一道閘（spec §三）：玩家不看野心（藍圖裁 4b77e0823）
+		var why9: String = FactionAISystem.establish_block_reason(state, f9, true)
+		if why9 != "":
+			if Probe.enabled: Probe.bump("faction.goal_rejected.establish")
+			return { "ok": false, "msg": why9 }
 	f9.player_goal_override = goal9
-	var msg9: String = "清除指定目標" if goal9.is_empty() else "勢力目標設為 %s" % goal9
-	print("[PlayerCmd] set_faction_goal → %s" % goal9)
+	f9.player_goal_target = tgt9
+	if Probe.enabled: Probe.bump("faction.goal_set.%s" % (goal9 if goal9 != "" else "clear"))
+	var msg9: String = "清除勢力目標"
+	if goal9 != "":
+		msg9 = "勢力目標設為 %s" % faction_goal_text(goal9, tgt9)
+		if goal9 == "立國":
+			msg9 += "（立國後目標清除）"
+	print("[PlayerCmd] set_faction_goal → %s" % faction_goal_text(goal9, tgt9))
 	return { "ok": true, "msg": msg9 }
+
+# 目標的顯示字（面板、結果句共用）：「攻擊 Team{X}」／「徵收」；空＝""
+static func faction_goal_text(word: String, target: int) -> String:
+	if word == "":
+		return ""
+	return "%s Team%d" % [word, target] if target != -1 else faction_goal_label(word)
 
 func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var member_team_id: int   = int(state.player_state.get("order_member_id", -1))
