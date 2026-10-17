@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 全員在場 HOW（你的 2026-10-18-systems-to-blueprint-Q-all-hands-allocation-rule-shape）
 topic: 用戶裁保底 10：每方先保 min(人數,10)，剩餘格按未上場人數比例分、各不超過自己人數；潰退稀釋收到不改
 ---
