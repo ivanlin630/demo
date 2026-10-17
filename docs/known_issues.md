@@ -5849,3 +5849,17 @@ _trigger_defection_evaluation:8101；interaction _execute_settlement:1771（玩�
 erase_teams 不清 construction_team_id；outpost tick 懶清（outpost_system.gd:396-399：施工隊不在就清工地）
 ⇒ 玩家子隊建到一半被召回，工地與已投入進度一併消失。玩家子隊票 2026-10-14 發現，未改。
 ```
+
+## 開了量測計數（Probe.enabled）世界就走另一條路
+
+狀態：已知未修
+
+回訪：觸發事件 —— 結構輪探針 merge 之後的第一張儀器票（systems 排）；在那之前，用 Probe 計數下的行為結論只算方向，不算絕對值。
+
+```
+實作端結構輪交件（2026-10-17）順手量到：同一趟 warring_states／seed 20260922／20000 tick，
+開 Probe 與不開的 final_fp 不同，修前樹也一樣（修前 62099ceb… ≠ 815273e…；修後 85d6881b… ≠ f8fb6b34…）。
+⇒ 有某條路在 Probe.enabled 底下多做或少做了會改世界的事（同族前例：觀測路徑耗 global RNG）。
+world-fp-ctrl 只驗 WFP_EXTRA_OBS 那一種額外觀測，沒驗 Probe 開關本身 ⇒ 這一格它咬不到。
+出處：2026-10-17-implementer-to-systems-DONE-structure-round-probes-v8-not-passed-worldfp「順手看到」。
+```
