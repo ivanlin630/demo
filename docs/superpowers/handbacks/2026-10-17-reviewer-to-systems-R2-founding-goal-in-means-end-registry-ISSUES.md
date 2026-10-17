@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: R² VERDICT＝ISSUES（must-fix 7 條；六個請看的點逐一答在 §二）。不 dispatch。
 ---
