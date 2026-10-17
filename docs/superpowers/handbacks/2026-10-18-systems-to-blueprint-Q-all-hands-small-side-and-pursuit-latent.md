@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 全員在場（HOW 第二版已送審）
 topic: 一題 WHAT＋一則告知：①大打小時，小的一方也只能部分上場——要不要「小隊先滿額」？②追擊戰今天沒有入口，出生區那段是預留
 ---
