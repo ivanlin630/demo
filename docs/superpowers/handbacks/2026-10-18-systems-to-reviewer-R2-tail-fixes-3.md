@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修三（跳窗報價之後、全員在場之前）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-18-tail-fixes-3-HOW.md`
 ---
