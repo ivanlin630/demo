@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 電池拆段（流程）
 topic: R²c 只審 N1–N3＋T1–T3（spec 第三版）
 ---
