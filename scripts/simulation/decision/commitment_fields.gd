@@ -68,7 +68,11 @@ static func unfinished(state: WorldState, team: TeamData) -> Dictionary:
 	var t: HexTileData = build_tile(state, team)
 	if t != null and t.construction_team_id == team.team_id and t.construction_ticks_left > 0:
 		var total: int = OutpostSystem.construction_ticks_total(t)
-		return {"kind": "construction", "site": "%d,%d" % [t.tile_pos.x, t.tile_pos.y], "measurable": true, "progress": float(maxi(total - t.construction_ticks_left, 0)),
+		# ★結構輪探針：採段期間 ticks_left 不動 ⇒ 只讀它的話停滯偵測會把「正在採料」判成停滯。
+		#   ⇒ 進度加上工地裡採到的料（site_stock − carried；stall_verdict 只看上升，單位不混用到比較裡）。升級／擴建沒有這兩欄 ⇒ +0。
+		var _gathered: float = float((t.construction_target.get("site_stock", {}) as Dictionary).get("material", 0.0)) \
+			- float(t.construction_target.get("carried", 0.0))
+		return {"kind": "construction", "site": "%d,%d" % [t.tile_pos.x, t.tile_pos.y], "measurable": true, "progress": float(maxi(total - t.construction_ticks_left, 0)) + maxf(_gathered, 0.0),
 			"tick": t.construction_started_tick}
 	# ②convoy 在途（任何 phase 都是未結案：貨還在身上或人還沒歸建）
 	var phase: String = String(team.task_extra_data.get("convoy_phase", ""))

@@ -1,4 +1,5 @@
 extends SceneTree
+# @bed-kind: diagnostic
 # 接入 arc §3 三分流診斷床（★診斷先行、只產分流證據）。
 # 報：零採集總數（母/子）、三分流計數、★逐隊歸格（不得只給總數）、camp.applicable_but_idle、
 #     pop=1 村數、紮營/L0→L1/L0 廢棄 相關 tap（供後續 gate3 對照）。
@@ -159,9 +160,9 @@ func _run() -> void:
 		lines.append("  #5求生蓋田閘 pass=%d/%d(樣本,預測變嚴=pass率該降,非死水閘沒執行) reject=%d" % [fp, fc.size(), fc.size()-fp])
 	else:
 		lines.append("  #5求生蓋田閘：本輪無sample(閘完全沒執行到,非『擋住』)")
-	lines.append("  #1/#2/#6紮根funnel：root.won_argmax=%d settlement.l0_to_l1_start=%d construct.complete_crude_camp=%d" % [
+	lines.append("  #1/#2/#6紮根funnel：root.won_argmax=%d settlement.l0_to_l1_start=%d outpost.l0_to_l1=%d" % [
 		int(Probe.counts.get("root.won_argmax", 0)), int(Probe.counts.get("settlement.l0_to_l1_start", 0)),
-		int(Probe.counts.get("construct.complete_crude_camp", 0))])
+		int(Probe.counts.get("outpost.l0_to_l1", 0))])
 	# ★systems票(exact-pair-hitrate)：root.lost_to逐筆(team,winner,target)，算distinct-target數(母體vs樣本分開報)
 	lines.append("★★★exact-pair命中率：root.lost_to逐筆(team,winner,target)：")
 	if Probe.samples.has("root.lost_to.pair"):

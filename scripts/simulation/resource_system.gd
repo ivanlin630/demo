@@ -366,6 +366,19 @@ func flush_forage_episodes(state: WorldState, team_ids: Array) -> Array:
 			out.append("覓食所得 +%d 糧" % int(round(got)))
 	return out
 
+## 一格一段時間採得的 material（純函式；R1 day_fraction 同 consumption cadence）。
+## ★呼叫者：`_collect_from_tile` 的 material 支、工地採段、`OutpostSystem.build_eta_total_days`（估算器同源，禁手抄係數）。
+## ★乘法次序與抽出前逐字相同（world-fp 咬它：抽取若改了次序，浮點尾數會變）。
+## ★人數不在式子裡：`labor_mult` 在非工位格是中性 `LaborSystem.LABOR_SCALE`。
+static func material_gain(productivity: float, current: float, day_fraction: float,
+		outpost_mult: float, labor_mult: float, labor_share: float,
+		work_morale: float, eng_skill: float) -> float:
+	var gain: float = productivity * current * COLLECT_RATE * day_fraction
+	gain *= outpost_mult * labor_mult * labor_share
+	gain *= work_morale
+	gain *= (1.0 + eng_skill * 0.3)
+	return gain
+
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, home_tile: HexTileData,
 		labor_share: float, prod_skill: float, eng_skill: float, gained: Dictionary = {},
@@ -387,23 +400,26 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				Probe.bump_pt("matin.pool_empty", "", team.team_id)   # ★腳下這格沒有料可採
 			continue
 		# R1：harvest 乘 day_fraction（與 consumption 同 cadence 基準，修 24× 供給不對稱）
-		var gain: float = src_tile.productivity * current * COLLECT_RATE * day_fraction
 		# ★統一勞力池：pop_mult→labor_mult(home tile alloc,per gather:res × 本隊池比例)。
 		# 鄰格 reach-out(lvl3)res 非 home workstation→中性 LABOR_SCALE(不受本格池約束)。承載(current)數學不動。
 		var lkey: String = "gather:" + String(res)
 		var lm: float = LaborSystem.labor_mult(home_tile, lkey) if home_tile.labor_alloc.has(lkey) else LaborSystem.LABOR_SCALE
-		gain *= outpost_mult * lm * labor_share
-		gain *= team.work_morale
-		match res:
-			"food":
-				# ★農業a drift 正位：移除 farming_level gather 乘數（farming 不再 boost 野地池採集、
-				#   改驅動獨立農田生產線 farm_yield=雙源獨立）。野地池 food 採集純野地物理。
-				gain *= (1.0 + prod_skill * 0.3)
-				gain *= src_tile.harvest_factor
-			"material":
-				gain *= (1.0 + eng_skill * 0.3)
-			"ore_gold", "ore_silver":
-				gain *= (1.0 + eng_skill * 0.5)
+		var gain: float
+		if res == "material":
+			# ★material 那一支走 material_gain（結構輪探針：工地採段與估算器同呼這一支）
+			gain = material_gain(src_tile.productivity, current, day_fraction, outpost_mult, lm, labor_share, team.work_morale, eng_skill)
+		else:
+			gain = src_tile.productivity * current * COLLECT_RATE * day_fraction
+			gain *= outpost_mult * lm * labor_share
+			gain *= team.work_morale
+			match res:
+				"food":
+					# ★農業a drift 正位：移除 farming_level gather 乘數（farming 不再 boost 野地池採集、
+					#   改驅動獨立農田生產線 farm_yield=雙源獨立）。野地池 food 採集純野地物理。
+					gain *= (1.0 + prod_skill * 0.3)
+					gain *= src_tile.harvest_factor
+				"ore_gold", "ore_silver":
+					gain *= (1.0 + eng_skill * 0.5)
 		var _qty_credited: float = 0.0   # ★實際入帳量（公庫滿時 < gain）
 		# ★★★①（spec 的第一半）我【沒有照字面做】，理由講死：
 		#   spec 寫「採集所得的 material 在自家據點上 → TileBank.deposit 進公庫」。

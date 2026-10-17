@@ -1,4 +1,6 @@
 extends SceneTree
+# @bed-kind: acceptance
+# slice: settlement S2b 紮根工期（結構輪探針後：紮根走 start_build、action build、要材料）
 # settlement S2b TDD — L0→L1 紮根工期（複用 construction spine）。
 # ①站自己 L0 viable→設 construction_target level:1+ticks+TASK_BUILD ②非站 L0/瀕餓不啟
 # ③工期 tick 推 ticks 遞減 ④完工→outpost_level=1+owner+camp_level 清0+居民 tag+fp 反映
@@ -56,7 +58,10 @@ func _t1_viable_starts_corvee() -> void:
 	var team := _mk_l0_team(state, Vector2i(5,5), 100.0, 5)   # food_days=100/(5*0.8)=25，夠付工期
 	_engine_decide(state, team)
 	var tile: HexTileData = state.world.tiles[5005]
-	_ok(tile.construction_target.get("action", "") == "crude_camp", "設 construction_target action=crude_camp")
+	# ★結構輪探針：紮根與建設同一支身體（start_build）⇒ action＝build；紮根要材料（改的是被用戶裁掉的值，不是放寬）
+	_ok(tile.construction_target.get("action", "") == "build", "設 construction_target action=build（建點一支身體）")
+	_ok(float(tile.construction_target.get("need", 0.0)) > 0.0 and float((tile.construction_target.get("gather_left", {}) as Dictionary).get("material", -1.0)) >= 0.0,
+		"紮根要材料：need>0、扣帶來的、餘數進 gather_left（need=%s gather_left=%s）" % [str(tile.construction_target.get("need")), str(tile.construction_target.get("gather_left"))])
 	_ok(int(tile.construction_target.get("level", 0)) == 1 and int(tile.construction_target.get("owner", -1)) == team.team_id, "target level:1 + owner=team")
 	# ★★★S6 phase2 §7⑥：斷言改成【對著錨的絕對值】。
 	#   舊斷言是「等於那條式子」⇒ 式子改它跟著改 ⇒ ★這道 gate 什麼都沒守（綠著說謊）。

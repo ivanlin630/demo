@@ -92,7 +92,12 @@ static func _safe_factor(state: WorldState, team: TeamData, stick: float, flex: 
 		return 1.0   # 無真施工中 → 不調制（safe）
 	# ★工期單一真相源（2026-08-25）：舊式漏掉「一天推進幾次」⇒ 高估 24× ⇒ `safe_ratio = runway/eta`
 	#   分母暴增 ⇒ 提早放手。改讀 `OutpostSystem.build_eta_days`（intended-change：持守會變寬鬆）。
-	var eta_days: float = OutpostSystem.build_eta_days(tile.construction_ticks_left, team.population)
+	# ★結構輪探針 M3：讀總剩餘天數（採段剩下＋築段剩下）——採段期間 ticks_left 還是整張，只讀它就看不到採段。
+	#   site：隊站在工地上 ⇒ 腳下真值；隊離開（corvee_site 那條路）⇒ 地形先驗。INF ⇒ safe_ratio 0（放手）。
+	var _site: Dictionary = OutpostSystem.site_of_tile(tile) if team.tile_pos == tile.tile_pos else OutpostSystem.site_prior(tile.terrain)
+	var eta_days: float = OutpostSystem.site_eta_remaining_days(state, team, tile, team.population, _site)
+	if eta_days == INF:
+		return 0.0   # 窗內採不夠 ⇒ 撐不到完成（同 safe_ratio→0 的極限）
 	if eta_days <= 0.0:
 		return 1.0
 	var safe_ratio: float = team.food_runway / eta_days   # runway 撐得到完成否
@@ -108,9 +113,9 @@ static func _progress(state: WorldState, team: TeamData) -> float:
 	if team.current_task == TeamData.TASK_BUILD:
 		var tile: HexTileData = _build_tile(state, team)   # ★S2b：corvee_site 優先
 		if tile != null and tile.construction_ticks_left > 0:
-			var total: int = OutpostSystem.construction_ticks_total(tile)
-			if total > 0:
-				return clampf(float(total - tile.construction_ticks_left) / float(total), 0.0, 1.0)
+			# ★結構輪探針 M3：分子分母都含採段（一支 OutpostSystem.construction_progress，不在這裡另算）
+			if OutpostSystem.construction_ticks_total(tile) > 0:
+				return OutpostSystem.construction_progress(state, tile)
 	# fallback：committed 時間佔比（戰略意圖/campaign 等無 tile 進度的 committed 動作）。
 	var elapsed: int = state.world.current_tick - team.task_start_tick
 	var horizon: float = COMMIT_HORIZON_DAYS * float(WorldState.TICKS_PER_DAY)

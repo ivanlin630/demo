@@ -131,8 +131,9 @@ func _run() -> void:
 	team2.current_task = TeamData.TASK_BUILD
 	tile2.construction_team_id = team2.team_id
 	tile2.construction_ticks_left = OutpostSystem.build_person_hours("settle", 1)
-	tile2.construction_target = {"action": "crude_camp", "type": "civilian", "level": 1,
-		"owner": team2.team_id, "person_hours": OutpostSystem.build_person_hours("settle", 1)}
+	# ★結構輪探針：crude_camp 退場（紮根走 start_build ⇒ action build；工期由 type/level 查同一個入口＝錨）
+	tile2.construction_target = {"action": "build", "type": "civilian", "level": 1,
+		"owner": team2.team_id}
 	tile2.construction_started_tick = 0
 	tile2.construction_last_progress_tick = 0
 	var os2 := OutpostSystem.new()
@@ -164,10 +165,12 @@ func _run() -> void:
 ⑤b timeout 三點對照（FLOOR 夾 / 中段變動 / CEIL 夾）")
 	var probe := _mk_tile(_mk_state(), Vector2i(9, 9))
 	var pts: Array = []
-	for cs in [["camp", 10, "FLOOR"], ["settle", 10, "中段"], ["settle", 1, "CEIL"]]:
+	# ★結構輪探針：crude_camp（讀 target.person_hours）退場 ⇒ 三點改用 action build（工期＝L1 據點＝錨），只動凍結 pop：
+	#   pop 100 ⇒ 3×0.3 天 被 FLOOR 夾；pop 10 ⇒ 9 天 中段；pop 1 ⇒ 90 天 被 CEIL 夾
+	for cs in [["civilian", 100, "FLOOR"], ["civilian", 10, "中段"], ["civilian", 1, "CEIL"]]:
 		var kind2: String = String(cs[0]); var p0: int = int(cs[1])
 		var ph2: int = OutpostSystem.build_person_hours(kind2, 1)
-		probe.construction_target = {"action": "crude_camp", "person_hours": ph2, "start_pop": p0}
+		probe.construction_target = {"action": "build", "type": kind2, "level": 1, "start_pop": p0}
 		var d: float = OutpostSystem.construction_timeout_days(probe)
 		var raw: float = OutpostSystem.CONSTRUCTION_TIMEOUT_K * OutpostSystem.build_eta_days(ph2, p0)
 		pts.append(d)

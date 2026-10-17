@@ -134,7 +134,7 @@ static func reserve(team: TeamData, res: String, leader_values: Dictionary, stat
 	# ★material-hold-protection（脫貧第三腿）：material 有 active construction-need（想蓋 facility 缺料）
 	# → 用 food-only factor（對 coin_urg 免疫）→ 守住要蓋的料不被 coin 焦慮逼賣（本 case 病治）；acute food 仍釋放(守護)。
 	if res == "material" and state != null \
-			and NeedOracle._construction_facility_need(state, team, "material", leader_values) > 0.0:
+			and NeedOracle._construction_need(state, team, "material", leader_values) > 0.0:   # ★結構輪 §三之三：新點承諾也守料
 		return NeedOracle.need_keep(state, team, res, leader_values) * _reserve_factor_food_only(team, leader_values, state)
 	# 非活命品：need_keep（自用+供應鏈）× 液化（貪婪守/絕境鬆手＝可賣餘量轉換層安全網）。
 	# goods need_keep=0 → reserve=0 → 可賣餘量=holding（有 demand 才賣，死鎖解）。
