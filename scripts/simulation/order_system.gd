@@ -215,7 +215,7 @@ func release_order_escrow(state: WorldState, o: Dictionary, why: String) -> void
 			var _q: float = float(_e.get("qty", 0.0))
 			if _q > 0.0:
 				var _owner: int = int(_e.get("owner_team", -1))
-				InteractionSystem.add_pending_claim(_etile, "goods", String(_e.get("res", "")), _q,
+				InteractionSystem.add_pending_claim(state, _etile, "goods", String(_e.get("res", "")), _q,
 					_owner, state.world.current_tick)
 				_etile.market_escrow.erase(int(o["order_id"]))
 				# ★只對玩家隊發（spec §二 R² M1）：判準＝get_player_team_id()，不是 .possessed——

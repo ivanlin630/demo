@@ -995,9 +995,9 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	#   那正是本專案有前科的【手不聽腦】（committed 求生卻不 dispatch 的同族，只是這次在下游）。
 	#   ★★而它掛在【到場】這一刻：訪客站上這個市集 ⇒ 結清他自己的待領資產。
 	#   ★★★紅線的另一半：領取【必須是本人到場】—— 而這一段就是「不在場不給」的執行證明。
-	# ★票 A3：領取＋到場落空記號 ＝ `claim_on_arrival`（入口的自家市集分支也呼同一支，產生者只有一份）
-	#   ★排在「自家市集不自交易」之前：那條規矩管交易，領回自己的待領不是交易
-	claim_on_arrival(state, visitor, tile)
+	# ★票 A3′（spec 2026-10-07-a3prime-claims-settle-when-owner-stands-on-the-market-HOW §1①）：
+	#   到場領取搬出 resolver ⇒ `sim_runner._step3c_read_market_board` 的迴圈最前面、不看任務（任何抵達市集的隊都結清）
+	#   ⇒ 這裡不再呼 claim_on_arrival：留著的話 TRADE 隊同 tick 結清兩次，第二次必空而誤記「領取」落空
 	var owner_id: int = tile.outpost_owner
 	# ★票 A2（藍圖裁 eeca99661）：「不自交易」從【地點】改成【單】—— 自家市集照常跟別人的單成交，
 	#   只跳過 origin_team ＝ 自己的那幾張（見下面撮合迴圈）
@@ -1095,23 +1095,33 @@ func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData,
 #   ⇒ ★★而【行為級驗收仍然要分開量】：抽象共用【不代表】它們會被同等使用，而那正是要量的東西。
 # ★★★同 owner+kind+res 的合併：★不合併會讓「一隊有 30 筆 1 元」與「一隊有 1 筆 30 元」
 #   在【筆數】上長得完全不同，而【領取念頭】要秤的是【額】不是【筆】。
-static func add_pending_claim(tile: HexTileData, kind: String, res: String, amt: float,
+static func add_pending_claim(state: WorldState, tile: HexTileData, kind: String, res: String, amt: float,
 		owner_team: int, tick: int) -> void:
 	if amt <= 0.0 or owner_team < 0:
 		return
+	var merged: bool = false
 	for c in tile.pending_claims:
 		if String(c.get("kind", "")) == kind and String(c.get("res", "")) == res 				and int(c.get("owner_team", -1)) == owner_team:
 			c["amt"] = float(c["amt"]) + amt
 			if Probe.enabled:
 				Probe.bump("mkt.claim.merged")
 				Probe.add_amount("mkt.claim.added." + kind, amt)
-			return
-	tile.pending_claims.append({"kind": kind, "res": res, "amt": amt,
-		"owner_team": owner_team, "since_tick": tick})
-	if Probe.enabled:
-		Probe.bump("mkt.claim.opened")
-		Probe.bump("mkt.claim.opened." + kind)
-		Probe.add_amount("mkt.claim.added." + kind, amt)
+			merged = true
+			break
+	if not merged:
+		tile.pending_claims.append({"kind": kind, "res": res, "amt": amt,
+			"owner_team": owner_team, "since_tick": tick})
+		if Probe.enabled:
+			Probe.bump("mkt.claim.opened")
+			Probe.bump("mkt.claim.opened." + kind)
+			Probe.add_amount("mkt.claim.added." + kind, amt)
+	# ★票 A3′ §1②：本人在場 ＝ 不需要待領（待領存在的理由就是「不在場」）⇒ 當場走同一支結清
+	#   ★不改成直接 ResourceBank.add：opened／taken 兩欄要能對帳，繞過會讓「產生幾筆」與「領走幾筆」各少一邊
+	#   ★站著不動的本人不會「抵達」⇒ 只看抵達的話永遠不結清（Team14 那一型）
+	if state != null and state.is_live_team(owner_team):
+		var _ot: TeamData = state.teams[owner_team]
+		if _ot.tile_pos == tile.tile_pos:
+			_claim_pending_here(state, _ot, tile)
 
 # ★★★領取：把【這個 tile 上、屬於這隊】的待領資產交還本人（★到場才給）。
 #   ★款 ⇒ 進 `team.resources["coin"]`；貨 ⇒ 進 `team.resources[res]`
@@ -1246,7 +1256,7 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 		_esc["qty"] = float(_esc["qty"]) - float(q)
 		if float(_esc["qty"]) <= 0.0:
 			tile.market_escrow.erase(oid)
-		add_pending_claim(tile, "coin", "coin", float(q) * ask, int(_esc.get("owner_team", -1)),
+		add_pending_claim(state, tile, "coin", "coin", float(q) * ask, int(_esc.get("owner_team", -1)),
 			state.world.current_tick)
 		if Probe.enabled:
 			Probe.bump("mkt.escrow.filled")
