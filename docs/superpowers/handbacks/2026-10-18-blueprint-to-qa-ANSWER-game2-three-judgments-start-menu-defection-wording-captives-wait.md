@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 slice: 第五輪第二局真玩（你的 2026-10-18-qa-to-blueprint-live-play-round5-game2-faction-leader-start）
 topic: 三件判定：①開局要能選（開票）；②別勢力成員隊投過來是設計內的「改投」，錯的是句子與交代；③俘虜等記名俘虜帳做了再驗，不專門找
 ---
