@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 批尾小修三（藍圖票 2026-10-18-…-TICKET-tail-fixes-3-…）③結算交代全部人 的前提量測
 topic: 回放 QA 第二局，量兩件：①敗仗後人口 10→2、結算只交代 2 人，另外 8 人去哪了（逐筆帳）；②Team2 離開勢力 0 沒有事件，是哪一支寫的
 ---

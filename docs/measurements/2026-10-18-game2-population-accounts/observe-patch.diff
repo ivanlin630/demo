@@ -1,0 +1,185 @@
+diff --git a/scripts/data/world_state.gd b/scripts/data/world_state.gd
+index d3373d209..3d32cb833 100644
+--- a/scripts/data/world_state.gd
++++ b/scripts/data/world_state.gd
+@@ -599,6 +599,7 @@ func set_team_faction(team: TeamData, fid: int, reason: String = LEAVE_UNSET) ->
+ 		else:
+ 			Probe.bump("faction.join")
+ 			Probe.bump("faction.join." + (reason if reason in JOIN_REASONS else "unknown_reason"))
++	ResourceBank.mx("FACTION team=%d %d->%d reason=%s | %s" % [team.team_id, team.faction_id, fid, reason, ResourceBank.mx_stack(2, 6)]) if (team.team_id == 2 or team.team_id == ResourceBank._mx_ptid) else null
+ 	var old_fid: int = team.faction_id
+ 	if team.faction_id != -1 and factions.has(team.faction_id):
+ 		factions[team.faction_id].member_team_ids.erase(team.team_id)
+@@ -709,6 +710,7 @@ func add_member(team: TeamData, pid: int) -> void:
+ 		sync_possession()   # ★#12 事實欄：玩家換隊
+ 
+ func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void:
++	ResourceBank.mx_t(team, "remove_member", "pid=%d clear_team_id=%s" % [pid, str(clear_team_id)])
+ 	team.named_members.erase(pid)
+ 	if clear_team_id:
+ 		var p: PersonData = persons.get(pid)
+diff --git a/scripts/simulation/anon_tier_system.gd b/scripts/simulation/anon_tier_system.gd
+index 9154c2068..18b1ea0f3 100644
+--- a/scripts/simulation/anon_tier_system.gd
++++ b/scripts/simulation/anon_tier_system.gd
+@@ -79,6 +79,7 @@ static func add_anon(team: TeamData, tier: String, count: int) -> void:
+ 	AnonCohort.add(team.anon_cohorts, tier, "healthy", count)
+ 
+ static func remove_anon(team: TeamData, tier: String, count: int) -> int:
++	ResourceBank.mx_t(team, "remove_anon", "tier=%s count=%d" % [tier, count])
+ 	if count <= 0 or tier not in TIER_ORDER:
+ 		return 0
+ 	return AnonCohort.remove(team.anon_cohorts, tier, "healthy", count)
+@@ -118,6 +119,7 @@ static func add_exp(team: TeamData, tier: String, exp: float, source: String) ->
+ # weighted random 依各 tier count（× 選用 tier_weight）抽，不減 named。回 { tier: 死亡數 }
+ # tier_weight 空 = 現行 count 比例（不破既有 caller）；非空 = 各 tier 抽中權重 ∝ count × tier_weight[tier]。
+ static func kill_random(team: TeamData, count: int, _source: String, tier_weight: Dictionary = {}) -> Dictionary:
++	ResourceBank.mx_t(team, "kill_random", "count=%d src=%s" % [count, _source])
+ 	var killed: Dictionary = {}
+ 	for tier in TIER_ORDER:
+ 		killed[tier] = 0
+@@ -182,6 +184,7 @@ static func heal_random(team: TeamData, n: int) -> int:
+ 
+ # 傷兵死亡 n 人：weighted 從 wounded 桶移除。回實際移除數
+ static func kill_wounded(team: TeamData, n: int) -> int:
++	ResourceBank.mx_t(team, "kill_wounded", "n=%d" % n)
+ 	var done: int = 0
+ 	for _i in range(n):
+ 		var tier: String = _weighted_tier(team, "wounded")
+@@ -193,6 +196,8 @@ static func kill_wounded(team: TeamData, n: int) -> int:
+ 
+ # 按比例從 from 抽 count 人到 to（戰俘 / 投靠 / 拆團）。health-aware：兩桶都搬，保 tier+health。回各 tier 轉移數
+ static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> Dictionary:
++	ResourceBank.mx_t(from, "transfer_out", "to=%d count=%d" % [to.team_id if to != null else -1, count])
++	ResourceBank.mx_t(to, "transfer_in", "from=%d count=%d" % [from.team_id if from != null else -1, count])
+ 	var moved: Dictionary = {}
+ 	for tier in TIER_ORDER:
+ 		moved[tier] = 0
+@@ -235,6 +240,7 @@ static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> D
+ # 守恆：loser anon 移除量 == captive_group cohorts 總量（轉移非憑空）。captive 不入 holder.anon_cohorts（非戰力）。
+ # 保留來源 tier|health 鍵。回擄走總數。
+ static func absorb_as_captive(_state: WorldState, holder: TeamData, loser: TeamData, rate: float) -> int:
++	ResourceBank.mx_t(loser, "absorb_as_captive_loser", "holder=%d rate=%.2f" % [holder.team_id if holder != null else -1, rate])
+ 	if holder == null or loser == null or rate <= 0.0:
+ 		return 0
+ 	var captured: Dictionary = {}   # "tier|health" → count
+@@ -273,6 +279,7 @@ static func _new_captive_group(captured: Dictionary, origin_faction: int, entry:
+ #   （_capture_from_health 的薄包裝；守恆：搬出量＝group 總量）。上限由呼叫端以 ManpowerSystem.captive_room 夾。
+ #   treatment：玩家 holder 由玩家選（厚待／苛待）；NPC holder 留空（manpower 照既有讀人格）。回實搬人數。
+ static func absorb_wounded_as_captive(holder: TeamData, loser: TeamData, k: int, entry: String, treatment: String = "") -> int:
++	ResourceBank.mx_t(loser, "absorb_wounded_loser", "holder=%d k=%d entry=%s treat=%s" % [holder.team_id if holder != null else -1, k, entry, treatment])
+ 	if holder == null or loser == null or k <= 0:
+ 		return 0
+ 	var captured: Dictionary = {}
+@@ -293,6 +300,7 @@ static func absorb_wounded_as_captive(holder: TeamData, loser: TeamData, k: int,
+ # 守恆：從 retreater 桶 remove == winner.captive_groups add（轉移非憑空）。captive 不入 winner 戰力 pop（隔離）。
+ # 回實際俘虜數。
+ static func capture_routed_as_captive(state: WorldState, winner: TeamData, retreater: TeamData) -> int:
++	ResourceBank.mx_t(retreater, "capture_routed_retreater", "winner=%d" % [winner.team_id if winner != null else -1])
+ 	if winner == null or retreater == null:
+ 		return 0
+ 	var wounded_total: int = AnonCohort.by_health(retreater.anon_cohorts, "wounded")
+@@ -370,6 +378,7 @@ static func _capture_from_health(source: Dictionary, health: String, want: int,
+ # 同化：captive_group.cohorts 各桶 AnonCohort.add 進 holder.anon_cohorts（captive → free pop，守恆）。
+ # 解 (a)：同化後 holder.population getter 漲（captive 轉戰力 pop）。erase 該 group。回同化總數。
+ static func assimilate_captives(holder: TeamData, group: Dictionary) -> int:
++	ResourceBank.mx_t(holder, "assimilate_captives", "")
+ 	if holder == null or group == null:
+ 		return 0
+ 	var moved: int = 0
+@@ -389,6 +398,7 @@ static func assimilate_captives(holder: TeamData, group: Dictionary) -> int:
+ # 暴動/逃：captive_group 部分（fraction）脫離 holder（從 group.cohorts remove）。
+ # 守恆：回脫離的 cohorts dict（caller 路由成獨立隊/流民/戰損，非憑空消）。group 清空則 erase。
+ static func detach_captives(holder: TeamData, group: Dictionary, fraction: float) -> Dictionary:
++	ResourceBank.mx_t(holder, "detach_captives", "fraction=%.2f" % fraction)
+ 	var detached: Dictionary = {}
+ 	if holder == null or group == null or fraction <= 0.0:
+ 		return detached
+diff --git a/scripts/simulation/diplomatic_ai_system.gd b/scripts/simulation/diplomatic_ai_system.gd
+index 714760466..624932f64 100644
+--- a/scripts/simulation/diplomatic_ai_system.gd
++++ b/scripts/simulation/diplomatic_ai_system.gd
+@@ -589,6 +589,7 @@ func consider_betrayal(state: WorldState, self_team: TeamData,
+ 
+ func _execute_betrayal(state: WorldState, self_team: TeamData,
+ 		ally_team: TeamData) -> void:
++	ResourceBank.mx("BETRAYAL exec self=%d (faction %d) ally=%d (faction %d) player_team=%d player_faction=%d" % [self_team.team_id, self_team.faction_id, ally_team.team_id, ally_team.faction_id, state.get_player_team_id(), (state.teams[state.get_player_team_id()] as TeamData).faction_id if state.teams.has(state.get_player_team_id()) else -9])
+ 	state.clear_team_faction(self_team, WorldState.LEAVE_BETRAYAL)   # 背叛離團（雙向同步）
+ 	# ★T0-A1 ②第五個 chokepoint（R² 抓到的漏網）：本函式全檔零 emit_message、卻有 player_alerts
+ 	# 通知玩家 → 玩家立刻知道自己被背叛、NPC 受害者卻不會＝玩家中心家族。這裡把受害方喚醒。
+diff --git a/scripts/simulation/resource_bank.gd b/scripts/simulation/resource_bank.gd
+index db5e56832..51e95970a 100644
+--- a/scripts/simulation/resource_bank.gd
++++ b/scripts/simulation/resource_bank.gd
+@@ -30,6 +30,32 @@ static func _tap_coin(res: String, delta: float, reason: String) -> void:
+ 	Probe.add_amount("coin.flow.by." + reason, absf(delta))
+ 	Probe.bump("coin.flow.n")
+ 
++# ★MX 量測專用（game2-accounts worktree，不進 main）：純觀測、零 RNG。env GDS_MX_LOG 未設 => 不寫
++static var _mx_tick: int = 0
++static var _mx_ptid: int = -1
++static func mx(line: String) -> void:
++	var p: String = OS.get_environment("GDS_MX_LOG")
++	if p == "":
++		return
++	var f := FileAccess.open(p, FileAccess.READ_WRITE if FileAccess.file_exists(p) else FileAccess.WRITE)
++	if f == null:
++		return
++	f.seek_end()
++	f.store_line("t=%d %s" % [_mx_tick, line])
++	f.close()
++
++static func mx_stack(skip: int = 2, n: int = 5) -> String:
++	var st: Array = get_stack()
++	var out: Array = []
++	for i in range(skip, mini(st.size(), skip + n)):
++		out.append("%s:%d" % [String(st[i].get("function", "?")), int(st[i].get("line", 0))])
++	return " < ".join(out)
++
++static func mx_t(team: TeamData, label: String, args: String) -> void:
++	if team == null or team.team_id != _mx_ptid:
++		return
++	mx("CALL %s team=%d pop_before=%d anon_total=%d captives=%d named=%d leader=%d %s | %s" % [label, team.team_id, team.population, AnonTierSystem.total_pop(team), AnonTierSystem.total_captives(team), team.named_members.size(), team.leader_id, args, mx_stack(2, 5)])
++
+ static func add(team: TeamData, res: String, amt: float, reason: String) -> void:
+ 	team.resources[res] = float(team.resources.get(res, 0.0)) + amt
+ 	_tally_food(team, res, amt)
+diff --git a/scripts/simulation/sim_runner.gd b/scripts/simulation/sim_runner.gd
+index 326cf2961..1913c0a13 100644
+--- a/scripts/simulation/sim_runner.gd
++++ b/scripts/simulation/sim_runner.gd
+@@ -109,7 +109,34 @@ func _init() -> void:
+ # 放 production 而非床裡：放床裡的斷言依賴的正是它要抓的那份紀律（床沒清 player_id，多半也不會呼斷言）。
+ static var _observer_guard_warned: bool = false
+ 
++
++var _mx_last: Dictionary = {}
++func _mx_pre(state: WorldState) -> void:
++	ResourceBank._mx_tick = state.world.current_tick
++	var ptid: int = state.get_player_team_id()
++	ResourceBank._mx_ptid = ptid
++	var pt: TeamData = state.teams.get(ptid)
++	var t2: TeamData = state.teams.get(2)
++	if t2 != null:
++		var f2: int = t2.faction_id
++		if _mx_last.has("f2") and int(_mx_last["f2"]) != f2:
++			ResourceBank.mx("F2DIFF faction_id %d->%d (snapshot; FACTION line with same tick = via set_team_faction, absence = bypass)" % [int(_mx_last["f2"]), f2])
++		_mx_last["f2"] = f2
++	if pt == null:
++		return
++	var snap: Dictionary = {"pop": pt.population, "leader": pt.leader_id, "named": pt.named_members.duplicate(), "anon": AnonTierSystem.total_pop(pt),
++		"wounded": AnonCohort.by_health(pt.anon_cohorts, "wounded"), "captives": AnonTierSystem.total_captives(pt), "minor": pt.minor_population,
++		"enc": state.encounter_active, "coh": pt.anon_cohorts.duplicate()}
++	if _mx_last.has("p"):
++		var o: Dictionary = _mx_last["p"]
++		if int(o["pop"]) != int(snap["pop"]) or o["leader"] != snap["leader"] or o["named"] != snap["named"] or int(o["anon"]) != int(snap["anon"]) or int(o["wounded"]) != int(snap["wounded"]) or int(o["captives"]) != int(snap["captives"]):
++			ResourceBank.mx("PDIFF team=%d pop %d->%d | leader %d->%d | named %s->%s | anon %d->%d (wounded %d->%d) | captives %d->%d | enc=%s | coh %s->%s" % [ptid, int(o["pop"]), int(snap["pop"]), int(o["leader"]), int(snap["leader"]), str(o["named"]), str(snap["named"]), int(o["anon"]), int(snap["anon"]), int(o["wounded"]), int(snap["wounded"]), int(o["captives"]), int(snap["captives"]), str(snap["enc"]), str(o["coh"]), str(snap["coh"])])
++	elif true:
++		ResourceBank.mx("PINIT " + str(snap))
++	_mx_last["p"] = snap
++
+ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
++	_mx_pre(state)
+ 	if player_pos == Vector2i(-1, -1) and state.player_id != -1 and not _observer_guard_warned:
+ 		_observer_guard_warned = true
+ 		print("[ObserverGuard] 呼叫端宣稱無玩家（player_pos=(-1,-1)）但 state.player_id=%d ——" % state.player_id

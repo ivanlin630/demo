@@ -1,0 +1,48 @@
+# 逐鍵回放：一鍵送出 → 等一幀（EOT 0x04 結尾）→ 再送下一鍵。與 QA 錄影逐幀對齊用。
+# 用法：python replay.py <worktree> <keys.txt> <out.txt> [max_keys]
+# 每幀輸出前加一行 "#### key[i]=<鍵> frame=<n>"。
+import subprocess, sys, io, os, time, threading, queue
+wt, keys_f, out_f = sys.argv[1], sys.argv[2], sys.argv[3]
+maxk = int(sys.argv[4]) if len(sys.argv) > 4 else 10**9
+keys = [l.rstrip("\r\n") for l in io.open(keys_f, encoding="utf-8")]
+env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1", PSExecutionPolicyPreference="Bypass")
+p = subprocess.Popen([sys.executable, "tools/play.py"], cwd=wt, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                     stderr=subprocess.STDOUT, env=env)
+q = queue.Queue()
+def rd():
+    import os as _os
+    fd = p.stdout.fileno()
+    buf = b""
+    while True:
+        c = _os.read(fd, 65536)
+        if not c:
+            break
+        buf += c
+        if buf.endswith(b"> "):
+            q.put(buf.decode("utf-8", "replace")); buf = b""
+    q.put(None)
+threading.Thread(target=rd, daemon=True).start()
+out = io.open(out_f, "w", encoding="utf-8", newline="\n")
+def get(timeout):
+    try:
+        return q.get(timeout=timeout)
+    except queue.Empty:
+        return "<<TIMEOUT>>"
+first = get(240)           # 開場畫面（造世界要幾秒）
+out.write("#### frame0\n" + str(first) + "\n"); out.flush()
+for i, k in enumerate(keys[:maxk]):
+    if k == "":   # 空行＝不送鍵、只讀目前畫面（QA keys.txt 約定）⇒ 回放不送，記一筆標記
+        out.write("#### key[%d]=<blank-read-only>\n" % i); out.flush()
+        continue
+    p.stdin.write((k + "\n").encode("utf-8")); p.stdin.flush()
+    fr = get(300)
+    out.write("#### key[%d]=%s\n%s\n" % (i, k, fr)); out.flush()
+    if fr is None or fr == "<<TIMEOUT>>":
+        out.write("#### STOP at %d\n" % i); break
+try:
+    p.stdin.close()
+except Exception:
+    pass
+time.sleep(1)
+p.kill()
+out.close()
