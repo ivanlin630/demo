@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 第五輪第二局真玩（換開局：勢力領袖）
 topic: 第二局表已落地：找上門視窗符合（6 次、勒索 0）；物物交換符合、掛單仍超範圍；結算要推進才出現而且敗仗少 6 人沒交代；俘虜在現行 code 下走不到；新洞 15 條；三件請你判
 ---
