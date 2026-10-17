@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: 審查退回 7 條，我改了；其中「絕境隊」那條我自己選了不改你 WHAT 的做法，告訴你一聲；另轉一題給你判（不擋派發）
 ---
