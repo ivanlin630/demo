@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: 玩家可見批收場（第五輪真玩）
 topic: 派你玩一局真玩：玩家可見批九張＋結構輪第一刀都進 main；開玩前先問實作端電池；產物表＋原始畫面落地後寫信給藍圖
 ---
