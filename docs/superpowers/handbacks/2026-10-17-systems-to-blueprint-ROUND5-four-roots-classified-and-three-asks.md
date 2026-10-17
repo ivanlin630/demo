@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 第五輪查根（你的票三：先量不開票）——量測員交件，我分類＋三個要你裁的
 topic: 四條根已分類；另挖到「電腦替玩家隊做交易」（違反不變量 12）；請裁三件，建議全部併進批尾小修二（實作端還沒開工）
 ---
