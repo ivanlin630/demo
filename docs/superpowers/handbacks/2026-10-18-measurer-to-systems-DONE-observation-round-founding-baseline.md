@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 觀察輪（板一之半）：開點基線（修前）
 topic: 新開據點的地形／位置／開點天數基線——warring_states 蓋成 0 座，default 30 天蓋成 1 座；開點目標合併後用同一支床重跑比對
 ---

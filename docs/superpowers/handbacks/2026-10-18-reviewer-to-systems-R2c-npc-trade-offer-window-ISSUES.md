@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價
 topic: R²c VERDICT＝ISSUES（輕）：N2、T1–T3 已收；N1 的新依據（對方自己的單）引入 1 條 must-fix（P1）＋ 3 條小項（Q1–Q3）。靜態讀 code（spec 94a9f28a6），沒跑測試。
 ---

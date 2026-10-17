@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電池拆獨佔段／可並行段（流程）
 topic: R² VERDICT＝ISSUES（4 條 must-fix：M1–M4；小項 S1–S7）。靜態讀 runner／registry／相關床（main 94a9f28a6 一帶），沒跑任何閘、沒起 Godot。
 ---

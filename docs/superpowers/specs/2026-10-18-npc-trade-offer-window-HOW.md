@@ -1,4 +1,4 @@
-# 電腦隊想跟你換 ⇒ 跳視窗報價 — HOW（第三版，依 R² M1–M5／S1–S6、R²b N1–N2／T1–T3）
+# 電腦隊想跟你換 ⇒ 跳視窗報價 — HOW（第四版，依 R² M1–M5／S1–S6、R²b N1–N2／T1–T3、R²c P1／Q1–Q3）
 
 - WHAT：藍圖票 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-TICKET-npc-trade-offer-to-player-opens-window.md`（用戶裁 2026-10-17 甲）。
 - 審查：R² `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2-npc-trade-offer-window-ISSUES.md`。各段標了對應的 M／S。
@@ -29,13 +29,14 @@
 - 新一支 `TradeValuation.npc_offer(state, npc, player_side) -> Dictionary`（放 `trade_valuation.gd`，估值單一源）。回空字典＝不提。
 - **感知**：只讀 `npc` 自己的東西＋玩家方領袖 id（面對面知道是誰，同今天 `ask_price` 的 `buyer_leader_id` 恩怨入口）。**不讀玩家方的庫存、錢、人口、標籤、估價**（D7 要拔掉的就是那個）。
 - **依據＝對方自己掛著的單**（R²b N1）：TRADE 隊出門本來就帶著 `active_orders`（`order_system.gd:46-58`：`kind` buy／sell、`res`、`qty_remaining`、`created_tick`）。那是它自己秤過、決定要買或要賣的東西——WHAT 1「對方自己秤過划算才提」最直接的來源。
-  - 取 `created_tick` 最早、`qty_remaining > 0` 的那一張（同隊最舊的心願先問）。
+  - 依 `created_tick` 由舊到新，**依序跳過**：`escrowed == true`（貨已押在市集，`order_system.gd:129-140`，`settle_orders` 對它只認撮合事件 `:654-658`）、`expire_tick <= now`、`qty_remaining <= 0`、賣單而對方身上該 res 庫存為 0；取第一張有效的。全部無效才走後備（R²c P1）。
   - **賣單 res＝A** ⇒ **對方賣**：`unit = ask_price(npc, A, …, player_leader_id)`（同今天賣方，含恩怨），量＝min(`qty_remaining`, 對方身上 A 的庫存取整)。
   - **買單 res＝B** ⇒ **對方買**：`bid = bid_price(npc, B, …)`，量＝min(`qty_remaining`, 錢÷bid, 載運空間)。量 ≥ 1 ⇒ 報。
     - 錢不夠（量 < 1）⇒ **以物易物**：取對方餘裕價值最大、且 ≠ B 的 res＝A（餘裕＝庫存−`reserve`，同今天 `:1420-1422`；價值＝餘裕×`local_value`）。式子（R²b T1）：
       - `k = 1 − disc_buy`
       - `want_qty = min(qty_remaining, floor(surplus(A) × lv(A) ÷ (lv(B) × k)))`
       - `give_qty = floor(want_qty × lv(B) × k ÷ lv(A))`
+      - `lv(A) ≤ 0` 或 `lv(B) ≤ 0`（不在 `BASE_PRICE` 的 res，`trade_valuation.gd:251-255`）⇒ 無效（R²c Q1）。
       - 兩者 ≥ 1、`give_qty ≤ surplus(A)`，且 `give_qty × lv(A) ≤ want_qty × lv(B) × k`（對方以自己的估價不虧）才報。`lv` 都是 `local_value(npc, ·)`。
   - **沒有任何單** ⇒ 後備：**對方賣**餘裕價值最大的 res（同上賣的算法，量＝餘裕取整）。不做「依缺口買」——人均目標有二十一種，幾乎每支隊都有缺口，用它當依據會讓報價幾乎全是「想買你一樣你沒有的東西」（R²b N1）。
   - 都無效 ⇒ 空。
@@ -83,6 +84,7 @@
   - `_settle_inventory_sale(state, seller, buyer, item, qty, price)`＝商隊存貨賣出（`:1407-1411`：三行帳＋`item["qty"]` 遞減）。`:1398-1413` 迴圈改成呼叫它。
   - `_settle_barter(a, b, give_res, give_qty, pay_res, pay_qty)`＝`:1491-1494` 四行帳＋那一行 print／tap。
   - ⇒ reason 字串、恩情消耗、存貨簿與今天逐字相同；寫入點只此一處。
+- **結單**（R²c P1）：接受路徑對電腦那一側照今天同格互換的形狀——成交前 `_snapshot_order_res(npc)`、成交後 `OrderSystem.new().settle_orders(npc, before, now)`（同 `_market_peer_trade` `:1077-1084`）。⇒ 那張單的 `qty_remaining` 照實減少／結清，下一次相遇不會以同一量重報。玩家方不走 `settle_orders`（玩家的單只走板上撮合）。
 - 接受當下**重驗物理**（不重算價錢，價錢是對方開的）：
   - 兩隊都還在、還在同一格；否則 `{ok: false, msg: "對方已經離開"}`。
   - 量夾到：對方此刻的存量／錢、玩家方此刻的存量／錢、收貨方載運空間。夾到 0 ⇒ `{ok: false}`，句子由夾住的那一項決定：「你的錢不夠」／「你沒有這些貨」／「對方已經沒有這些貨」／「對方沒有錢了」／「放不下」（S6）。
@@ -106,7 +108,9 @@
 | O3 | T3：電腦 TRADE 訪客到玩家所在市集格；玩家方當訪客到有電腦 TRADE peer 的市集格 ⇒ 各一張；運糧子隊到玩家所在市集格 ⇒ 不報 |
 | O3b | 市集格一次到場只出一張（T1 不報）；`trade.offer.dedup` 在那一拍為 0 |
 | O4a／b／c | 三種各一格，各用自然構造（真的電腦 TRADE 隊、讓它照引擎掛單）：**賣**（對方有賣單）、**買**（對方有買單、有錢）、**換**（對方有買單、錢不夠、有別種餘裕）；另一格「沒有單 ⇒ 賣餘裕最大的」；`trade.offer.kind.*` 各 ≥1 |
-| O4e | 普查（不需玩家）：沒有玩家的世界跑到電腦 TRADE 隊相遇 ≥ 200 對，每對呼 `npc_offer`（只算不寫事件），印 kind 分佈（賣／買／換／空）與 res 分佈；賣與買各 ≥ `OFFER_KIND_MIN_SHARE`＝10%（具名常數）。另在床裡（只讀、不進決策）印「報價的 res 在對方那一方身上有沒有」的比例，給 QA 看玩家面有多少報價接不了（R²b T2） |
+| O4f | 對方最舊的是押貨賣單、次舊是普通買單 ⇒ 報次舊那張；最舊是過期單 ⇒ 同樣跳過 |
+| O4g | 接受後那張單 `qty_remaining` 減少（或結清）；過一個 T1 週期、新相遇 ⇒ 不再以原量重報 |
+| O4e | 普查（不需玩家）：沒有玩家的世界跑到電腦 TRADE 隊相遇 ≥ 200 對，每對呼 `npc_offer`（只算不寫事件），印 kind 分佈（賣／買／換／空）與 res 分佈；賣與買各 ≥ `OFFER_KIND_MIN_SHARE`＝10%（具名常數）。另在床裡（只讀、不進決策）印「報價要的 res 在**玩家方（普查裡＝配對的另一隊）**身上有沒有」的比例（R²c Q2）。普查會呼 `ask_price`／`grudge_multiplier` 而灌 `trade.grudge_markup.*` 計數（`trade_valuation.gd:241-246`）⇒ 普查那一跑的 Probe 計數不拿去當別的量測基準，交件信註明（Q3），給 QA 看玩家面有多少報價接不了（R²b T2） |
 | O4d | 接受 ⇒ 帳本 reason、恩情邊消耗量、商隊買方的存貨簿與今天電腦對電腦同種交易逐字相同；量與單價＝報價；買價 ≤ 對方 `local_value`；玩家當賣方、電腦領袖對玩家領袖有恩情邊 ⇒ 玩家領袖的恩情邊不變、電腦的也不被消耗（買價不帶恩怨）|
 | O5 | 拒絕 ⇒ 帳 0 筆、雙方關係值與對方任務修前修後相同、一句「拒絕 Team X 的交換」；逾時同拒絕、句子讀得懂、`trade.offer.timeout`=1 |
 | O6 | 拒絕後同格再推 6 小時 ⇒ 不再跳；**接受**後同格再推 6 小時 ⇒ 不再跳；對方離開（離開期間沒有任何試報價）、超過一個 T1 週期後回來 ⇒ 再跳一次；同一支電腦隊先遇主隊被拒、再遇玩家子隊 ⇒ 子隊那張照跳 |
@@ -125,6 +129,8 @@
   - n6：順序倒回「賣第一」⇒ O4b、O4c 紅
   - n7：拿掉 T1 的市集格排除 ⇒ O3b 紅
   - n8：依據改回「缺口價值最大」⇒ O4e 的賣占比 < 10% 紅
+  - n10：接受不結單（不呼 `settle_orders`）⇒ O4g 紅
+  - n11：取單不跳押貨單 ⇒ O4f 紅
   - n9：買價除以恩怨乘數 ⇒ O4d「買價 ≤ local_value」紅（對恩人那格）
 - world-fp：照常跑閘。預期不變；變了歸因到第一個分歧 tick，不直接換值。
 - 舊床：抽函式後，跑有交易的現成床（交件信列名單與修前修後）。

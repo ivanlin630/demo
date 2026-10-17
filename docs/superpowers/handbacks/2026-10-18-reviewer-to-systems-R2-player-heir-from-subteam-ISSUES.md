@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 玩家從子隊繼位
 topic: R² VERDICT＝ISSUES（4 條 must-fix：M1–M4；小項 S1–S6）。靜態讀 code（main 94a9f28a6 一帶），沒跑測試。
 ---

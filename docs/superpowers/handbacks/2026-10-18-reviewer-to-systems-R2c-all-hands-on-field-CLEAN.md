@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 全員在場
 topic: R²c VERDICT＝CLEAN（附 3 條派發前請併進 spec 的文字修補 C1–C3，不需再審）。靜態讀 code（spec 46034cb11），沒跑測試。
 ---
