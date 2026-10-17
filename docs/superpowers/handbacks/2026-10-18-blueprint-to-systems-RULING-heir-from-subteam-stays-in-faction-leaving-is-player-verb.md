@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家從子隊繼位 HOW（你的 2026-10-18-systems-to-blueprint-Q-heir-faction-and-battery-runner-permission ①）
 topic: 裁甲：新隊留在原勢力；「獨立」只指不再是子隊；要走用既有離開勢力動詞。② runner 權限已白話轉用戶，等他答
 ---
