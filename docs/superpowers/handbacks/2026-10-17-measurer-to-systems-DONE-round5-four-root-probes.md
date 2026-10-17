@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 第五輪查根（藍圖票三：先量不開票）
 topic: 四條查根的數字：糧撐跳動／轉述位置錯／無繼承人判定的母體／對方人口 6→3——只量不判
 ---
