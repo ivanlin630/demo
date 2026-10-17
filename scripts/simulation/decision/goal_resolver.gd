@@ -1584,8 +1584,17 @@ static func _estimate_delay_days(state: WorldState, team: TeamData, to_task: Dic
 			or to_task.has("build_type") or to_task.has("facility"):
 		# 代表性工期＝一級民用據點的 person-ticks，除以【這支隊自己的人力】（同一把尺）
 		# ★S6 phase2：改讀唯一入口（原本讀【另一張表】⇒ 錨推不動它）
-		days += OutpostSystem.build_eta_days(
-			OutpostSystem.build_person_hours("civilian", 1), team.population if team != null else 1)
+		# ★結構輪探針 §三：新點（紮根／建設／派建造隊）讀總天數＝採段＋築段；設施擴建不是新點，照舊
+		if to_task.has("facility") or team == null:
+			days += OutpostSystem.build_eta_days(
+				OutpostSystem.build_person_hours("civilian", 1), team.population if team != null else 1)
+		else:
+			var _pos: Vector2i = target if (target is Vector2i and target != Vector2i(-1, -1)) else team.tile_pos
+			var _carried: float = float(team.resources.get("material", 0))
+			if to_task.has("build_type"):
+				_carried = float(FactionAISystem.fundable_carry(FactionAISystem.shared()._home_vault(state, team), team.resources, {},
+					OutpostSystem.OUTPOST_COST["civilian"][0]).get("material", 0.0))
+			days += OutpostSystem.new_site_eta_days(state, team, "civilian", _pos, team.population, _carried)
 	return days
 
 # ★人格折現率 rate（WHAT §6「人格=折現率」，權重非 gate）：絕境→高(短視,遠 candidate 折趨零不走遠路)/

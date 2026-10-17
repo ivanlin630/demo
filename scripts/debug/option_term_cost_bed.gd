@@ -142,7 +142,7 @@ func _initialize() -> void:
 		["①-b need_keep（＝下面三個加數）", GoalResolver.rp_nk_n, GoalResolver.rp_nk_us],
 		["　├ _self_use", NeedOracle.nk_self_n, NeedOracle.nk_self_us],
 		["　├ _supply_chain", NeedOracle.nk_supply_n, NeedOracle.nk_supply_us],
-		["　└ _construction_facility_need", NeedOracle.nk_constr_n, NeedOracle.nk_constr_us]]
+		["　└ _construction_need（新點＋設施，結構輪 §三之三）", NeedOracle.nk_constr_n, NeedOracle.nk_constr_us]]
 	for row in nk:
 		if int(row[1]) == 0:
 			print("%-40s %10s %12.3f %14s" % [row[0], "★0 次", float(row[2]) / 1e6, "不可判"])
@@ -291,7 +291,7 @@ func _initialize() -> void:
 		"ON" if probe_on else "OFF"])
 	if not probe_on:
 		print("★fp=%s" % StateFingerprint.compute(st))
-		print("=== DONE === SECTIONS=1/1 FAILS=0（★Probe 關 ⇒ 只有這一支碼表有數字）")
+		print("=== DONE === SECTIONS=1/1（★Probe 關 ⇒ 只有這一支碼表有數字）")
 		quit()
 	var calls: int = int(Probe.counts.get("optterm.calls", 0))
 	var opt_rows: Array = []
@@ -378,5 +378,5 @@ func _initialize() -> void:
 			Probe.amount("ctxseg.sort." + sn2) / n3,
 			Probe.amount("ctxseg.options." + sn2) / n3])
 	print("★★★fp=%s" % StateFingerprint.compute(st))
-	print("=== DONE === SECTIONS=1/1 FAILS=0")
+	print("=== DONE === SECTIONS=1/1")
 	quit()

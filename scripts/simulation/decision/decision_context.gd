@@ -873,8 +873,13 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 		#   真正要幾天取決於這支隊有幾個人；舊式等於假設 pop≈10。
 		# ★S6 phase2：CORVEE 常數退場 —— 工期讀唯一入口（錨），不再乘 TICKS_PER_DAY
 		#   ★★舊式那個乘號同時承擔【時間換算】與【假設 pop≈10】兩個語意，換根只動了時間那半
-		c.settle_eta_days = OutpostSystem.build_eta_days(
-			OutpostSystem.build_person_hours("settle", 1), team.population) + float(_dist)
+		# ★結構輪探針 §三之二：新點總天數＝採段＋築段（L1 要材料、缺的就地採）。carried＝隊自己私產的 material；
+		#   進行中的工地（回頭續建）carried＝工地裡已有的（site_stock）。站在格上讀真值、否則先驗。INF 夾到期限。
+		var _stype: String = FactionAISystem.settle_camp_type(state, team)
+		var _carried: float = float(team.resources.get("material", 0))
+		if _site.construction_team_id == team.team_id and _site.construction_target.has("site_stock"):
+			_carried = float((_site.construction_target["site_stock"] as Dictionary).get("material", 0.0))
+		c.settle_eta_days = OutpostSystem.new_site_eta_days(state, team, _stype, _site_pos, team.population, _carried) + float(_dist)
 	# ★§4b 擴點素材。★idle_labor 只當篩選/早退（idle 高＝值得算），★不進 util 公式本體
 	#   （手數 vs 食物/日 量綱不符、進公式會逼出換算係數＝偷藏新旋鈕）。
 	#   選址評估是 O(tiles)＝用既有 INFRA_INTERVAL cadence 快取，不每次 gather 跑。
@@ -912,8 +917,10 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			# 建置成本：工期期間分點零產出，用既有規劃視野攤提（工期唯一入口 + PLANNING_HORIZON_DAYS，零新常數）
 			# ★工期單一真相源（2026-08-25）：舊式除的是整日 tick、而且連 pop 都沒除 ⇒ 與真值差一個量級。
 			# ★S6 phase2：改讀唯一入口（原本讀的是【另一張表】⇒ 錨推不動它＝腦不知手）
-			var _build_days: float = OutpostSystem.build_eta_days(
-				OutpostSystem.build_person_hours("civilian", 1), _settler)
+			# ★結構輪探針 §三之二：總天數（採段＋築段），carried＝fundable_carry（母隊此刻撥得出多少，同撥料那一支）
+			var _xcost: Dictionary = OutpostSystem.OUTPOST_COST["civilian"][0]
+			var _xcarry: float = float(FactionAISystem.fundable_carry(_fa._home_vault(state, team), team.resources, {}, _xcost).get("material", 0.0))
+			var _build_days: float = OutpostSystem.new_site_eta_days(state, team, "civilian", _cand_pos, _settler, _xcarry)
 			c.expand_build_cost = c.expand_site_marginal 				* clampf(_build_days / MarginalEconomy.PLANNING_HORIZON_DAYS, 0.0, 1.0)
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
@@ -928,7 +935,8 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 			# ★★★S6 phase2：舊式把 L0_TO_L1_CORVEE_DAYS 直接【當天數】加，
 			#   而同檔 :361 把同一顆常數當【person_hours 的來源】——同一顆在同一檔被當兩種單位用。
 			#   ⇒ 改成與 :361 同源、且 pop-aware（人多蓋得快，這裡本來完全看不到人力）。
-			c.camp_flow_delay_days = float(FactionAISystem._hex_dist(team.tile_pos, _ft)) 				+ OutpostSystem.build_eta_days(OutpostSystem.build_person_hours("settle", 1), team.population)
+			# ★結構輪探針 §三之二：紮營靶之後紮根成點 ⇒ 總天數（採段＋築段），carried＝隊自己私產、site＝遠端先驗
+			c.camp_flow_delay_days = float(FactionAISystem._hex_dist(team.tile_pos, _ft)) 				+ OutpostSystem.new_site_eta_days(state, team, FactionAISystem.settle_camp_type(state, team), _ft, team.population, float(team.resources.get("material", 0)))
 	c.camp_forage_floor = ResourceSystem._forage_subsist_buffer(team) / ResourceSystem.FORAGE_FLOOR_DAYS   # 日產同源
 	# ★折現原語（第一磚）需要的三個【真實現狀】量：基準線不再用「假想覓食吃得飽」。
 	c.passive_food_daily = 0.0
@@ -1032,7 +1040,7 @@ static func gather(state: WorldState, team: TeamData, advance: bool = false) -> 
 	var _mat_need: float = NeedOracle.need_keep(state, team, "material", c.leader_values)
 	c.material_need_total = _mat_need
 	c.material_shortfall = maxf(_mat_need - ResourceSystem.effective_holding(state, team, "material"), 0.0)
-	c.material_build_urgency = NeedOracle.max_material_facility_desire(state, team)   # ★v2a：買料 util 繫建設迫切
+	c.material_build_urgency = NeedOracle.material_build_urgency(state, team)   # ★v2a：買料 util 繫建設迫切；★結構輪 §三之三：max(設施, 新點)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.market", _tg)
 	# Fix4 覓食可達性：本格/鄰格有 wild_game tile 才可覓食（鏡射 market 一次性 gather，避每 option 重跑）。
 	var _fg: Vector2i = _fa._find_forage_tile(state, team)

@@ -1129,6 +1129,15 @@ func _cursor_line() -> String:
 	return head + "｜".join(PackedStringArray(parts))
 
 
+# ★結構輪探針 §四：工地進度分兩段（純函數；床直接驗）。採料段「採料 {site_stock}/{need}」；建造段「建造 {百分比}」
+static func construction_progress_line(op: Dictionary) -> String:
+	if String(op.get("phase", "")) == "gather":
+		return "施工中：採料 %d/%d" % [int(floor(float(op.get("site_stock", 0.0)))), int(op.get("need", 0.0))]
+	var tot: int = int(op.get("ticks_total", 0))
+	var left: int = int(op.get("ticks_left", 0))
+	var pct: int = int(round(100.0 * float(tot - left) / float(tot))) if tot > 0 else 0
+	return "施工中：建造 %d%%" % clampi(pct, 0, 100)
+
 # ★F8 營地欄：附身者沒有隊 ⇒「—」；快照沒有 camp_pos 鍵（沒有寫入者）⇒「？」；null ⇒「無」
 static func _camp_text(ct: Dictionary) -> String:
 	if ct.is_empty():
@@ -3205,7 +3214,7 @@ func _build_outpost_str() -> String:
 		"Team%d" % owner if owner >= 0 else "無",
 		"是" if op.get("has_control", false) else "否"])
 	if op.get("construction_in_progress", false):
-		lines.append("施工中：剩餘 %d Tick" % op.get("ticks_left", 0))
+		lines.append(construction_progress_line(op))
 	lines.append("")
 	lines.append("── 可用行動 ──")
 	const ACTION_LABELS: Dictionary = {

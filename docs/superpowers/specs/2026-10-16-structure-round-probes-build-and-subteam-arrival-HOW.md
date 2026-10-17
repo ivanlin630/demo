@@ -313,7 +313,8 @@
   - (b) 斷言行為：②狀態（`corvee_site` 工地 `gather_left > 0`），隊暫時去做交易類任務、持料 60、`coin` 急而糧不急 ⇒ 賣盤不發 material。
 - **N6 買料效用**：同一支在路上的隊、有市集有錢 ⇒ `buymaterial_drive > 0`；帶料 ≥ 成本 ⇒ 0。平原目標（採不完）⇒ urgency 為 1。
 - **N6b 採段中迫切隨進度降**（M10）：同一個森林工地，`gather_left = 70` 與 `5` ⇒ 後者迫切嚴格較小、且 ≥ 0。
-- **N6c 上限分配**：強造重疊（設施 80＋新點 80）⇒ `_construction_need == 100`，新點那一筆 80 全留、設施得 20。
+- **N6c 上限**：強造重疊（設施 80＋新點 80）⇒ `_construction_need == 100`。
+  - （2026-10-17 訂正：原寫「新點 80 全留、設施得 20」。但五個讀者都只讀總和，`min(n+f, CAP)` 與先後順序無關，所以順序在任何讀者端都看不見。n26 在交件時沒紅，就是這個原因，不是守衛壞了。順序要等出現一個分開讀兩筆的讀者才有意義；今天沒有這個讀者，所以只斷言總和。）
 - **N7 設施那一支不變**：既有床 `material_hold_test.gd` 與設施買料相關斷言照綠、不改。
 - **N8 承諾不被自己的需求換掉**（M11）：走回營地的母隊 ⇒ `goal_resolver` 的 maintain_material 變 active，且 `TASK_BUILD` 在接下來的決策輪不因此被換掉（task 不變，或 `persist.hold` 計數有增）。
 - **P1 持守看得到採段**（M3）：同一支隊、`food_runway` 固定，兩個進行中工地：`gather_left=0` 與 `gather_left=need` ⇒ 後者 `safe_factor` 較小、`_progress` 較小。
@@ -363,7 +364,7 @@
 | n23 ①不看 `move_target`／`construction_team_id` | N2b |
 | n24 ②迫切的 `carried` 傳 0（不傳 `site_stock`） | N6b |
 | n25 吃料只認 `construction_team_id` | N4b |
-| n26 上限改成先設施後新點 | N6c |
+| ~~n26 上限改成先設施後新點~~（退場 2026-10-17：順序在讀者端看不見，見 N6c） | — |
 | n27 ②改成共用掃全隊的找隊迴圈 | `perf.need_keep.us` 前後對比超出基線的雜訊帶（同 `option_term_cost_bed` 的碼表） |
 
 ## 給藍圖（已另寄）

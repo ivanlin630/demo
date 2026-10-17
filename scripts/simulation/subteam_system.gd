@@ -8,6 +8,49 @@ const MIGRANT_RATION_DAYS: float = 15.0   # ★移民旅途口糧天數（TEST V
 const FOUNDING_TIMEOUT_MULT: float = 6.0
 const FOUNDING_TIMEOUT_FLOOR_DAYS: int = 12       # TEST VALUE — 步行信使追移動 target 的收斂下限
 
+# ★結構輪探針 §五：子隊到場一支身體（NPC 子隊與玩家子隊同呼）。
+#   ★只做世界動作：不發事件、不 release、不排併回（那些是腦的事，留在兩邊的呼叫端）。
+#   回 {outcome: "done"|"refused"|"none", reason}。CONSTRUCT／UPGRADE／EXPAND 的開工已是一支
+#   （movement 抵達 → begin_subteam_construction）⇒ 這裡 none、不重複。
+static func on_arrival(state: WorldState, sub: TeamData) -> Dictionary:
+	var side: String = "player" if sub.player_controlled else "npc"
+	var out: Dictionary = {"outcome": "none", "reason": ""}
+	match sub.current_task:
+		TeamData.TASK_CAMP:
+			if FactionAISystem.shared().establish_crude_camp(state, sub):
+				out = {"outcome": "done", "reason": ""}
+			else:
+				out = {"outcome": "refused", "reason": "(%d,%d) 紮不了營" % [sub.tile_pos.x, sub.tile_pos.y]}
+			if Probe.enabled: Probe.bump("subteam.arrival.camp.%s.%s" % [String(out["outcome"]), side])
+		TeamData.TASK_SETTLE:
+			# 母隊在 ⇒ 照母隊判；母隊已亡 ⇒ 用子隊自己的勢力判（不要一律 refused）
+			var subj: TeamData = state.teams.get(sub.parent_team_id)
+			if subj == null:
+				subj = sub
+			var why: String = settle_refuse_reason(state, subj, sub.tile_pos)
+			if why == "":
+				InteractionSystem.new()._convert_to_resident(state, sub)
+				out = {"outcome": "done", "reason": ""}
+			else:
+				out = {"outcome": "refused", "reason": why}
+			if Probe.enabled: Probe.bump("subteam.arrival.settle.%s.%s" % [String(out["outcome"]), side])
+	return out
+
+# ★結構輪探針 §五（M6）：移居判準一支（原 PlayerCommandSystem.own_outpost_reason，搬來這裡不依賴玩家層）。
+#   出發前（玩家派遣 precheck）與到場（on_arrival）同呼。純讀。
+#   格有據點（level>0）且主人是 team 自己，或主人與 team 同勢力且勢力≠-1 ⇒ ""；否則回原因。
+static func settle_refuse_reason(state: WorldState, team: TeamData, pos: Vector2i) -> String:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	var not_own: String = "(%d,%d) 不是你的據點" % [pos.x, pos.y]
+	if team == null or tile == null or tile.outpost_level <= 0 or tile.outpost_owner == -1:
+		return not_own
+	if tile.outpost_owner == team.team_id:
+		return ""
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	if owner != null and team.faction_id != -1 and owner.faction_id == team.faction_id:
+		return ""
+	return not_own
+
 static func founding_timeout(dist: int) -> int:
 	return maxi(int(float(dist) * float(MovementSystem.BASE_MOVE_TICKS) * FOUNDING_TIMEOUT_MULT),
 		FOUNDING_TIMEOUT_FLOOR_DAYS * WorldState.TICKS_PER_DAY)

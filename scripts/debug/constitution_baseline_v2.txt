@@ -62,6 +62,7 @@ scripts/simulation/outpost_system.gd::start_build::taskarbiter  # gate-ok: task 
 scripts/simulation/outpost_system.gd::start_demolish::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/outpost_system.gd::start_upgrade_level::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/player_command_system.gd::_action_settle::taskarbiter  # gate-ok: 玩家指令 PRIO_PLAYER（友善度 F8：舊 _action_camp 那一行搬來——紮營改當場立營、開工程的是紮根；交件信呈報 systems）
+scripts/simulation/player_command_system.gd::_action_build_outpost::taskarbiter  # gate-ok: 玩家指令 PRIO_PLAYER（結構輪 G9：start_build 內部 transition 是 PRIO_DISPATCH，玩家建設施工中要蓋回玩家優先序，同 _action_settle；交件信呈報 systems）
 scripts/simulation/player_command_system.gd::_action_rest::taskarbiter  # gate-ok: 玩家指令 PRIO_PLAYER（票 T 休息，同 _action_camp；交件信呈報 systems）
 scripts/simulation/player_command_system.gd::move_to::taskarbiter  # gate-ok: 玩家指令 PRIO_PLAYER（多格移動票：M 改走 arbiter 設 TASK_TRAVEL，不再直寫 move_target——#12 寫入側咽喉；用戶 2026-10-13 在 systems 終端直接准）
 scripts/simulation/player_command_system.gd::_action_order_subteam::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
