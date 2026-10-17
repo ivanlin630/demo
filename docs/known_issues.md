@@ -6060,7 +6060,7 @@ subteam_system.gd:158 set_team_faction(sub, parent.faction_id, JOIN_SUBTEAM_INHE
 
 ## 隊在兩場仗之間少一人、換了隊長，沒有任何事件記原因
 
-狀態：未量（一筆樣本，可觀測性缺口）
+狀態：未確認（一筆樣本，可觀測性缺口；回訪＝量測窗）
 
 ```
 量測員第五輪查根 §4 末：Team11 tick 1440–1500（不在戰鬥中）真人口 7→6、leader 31→43，日誌無對應事件。

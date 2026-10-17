@@ -39,14 +39,14 @@ classify() {  # $1=path $2=branch(or DETACHED)
     t=$(git log --format='%ct%x09%s' -20 "refs/heads/$b" 2>/dev/null         | grep -v "worktree-sweep 固定 WIP" | head -1 | cut -f1)
     if [ -n "$t" ] && [ $(( NOW - t )) -lt $ACTIVE_WINDOW ]; then echo "ACTIVE"; return; fi
   fi
-  wip=$(git -C "$p" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  wip=$(git --no-optional-locks -C "$p" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   if [ "${wip:-1}" -ne 0 ]; then
     # ★EXHAUST：branch 已 merge 進 main，而未 commit 的東西【全部不是原始碼/文件】
     #   ⇒ 那些是【量測產物】（.jsonl / _temp.txt / specimen），不是工作。
     #   ★★blueprint 裁 2026-09-08，且【前置對帳】已做：verdicts/measurements 對這些樹的
     #     exact-path 引用已逐筆查過，被引用的證物已搬 docs/measurements/_archive。
     if [ "$b" != "DETACHED" ] && git merge-base --is-ancestor "$b" main 2>/dev/null; then
-      if [ "$(git -C "$p" status --porcelain 2>/dev/null | awk '{print $NF}' | grep -cE '[.](gd|ps1|sh|md|tscn)$')" = "0" ]; then
+      if [ "$(git --no-optional-locks -C "$p" status --porcelain 2>/dev/null | awk '{print $NF}' | grep -cE '[.](gd|ps1|sh|md|tscn)$')" = "0" ]; then
         echo "EXHAUST:$wip"; return
       fi
     fi
