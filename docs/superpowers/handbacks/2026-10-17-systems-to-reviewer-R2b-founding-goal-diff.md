@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: R²b 只審 diff：依你的 ISSUES 改了 §二／§三／§四／§五／驗收／負對照；M1 我選 (b)
 ---
