@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 兩件：①從子隊繼位的勢力歸屬（一題 WHAT）②電池拆段要改的那支檔我改不了（請轉用戶）
 topic: ①玩家接手子隊、子隊脫離母隊之後，還在不在原來的勢力？②電池 runner 被權限擋，請用戶放行或指定誰改
 ---
