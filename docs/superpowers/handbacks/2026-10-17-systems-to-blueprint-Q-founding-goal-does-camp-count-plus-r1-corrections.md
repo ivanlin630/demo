@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: R① 回來了：你信裡「沒據點的隊不跑目標迴圈」不成立（WHAT 不變，HOW 少拆一件）；要你裁一題：搭營地（還沒變據點）算不算「開點」
 ---
