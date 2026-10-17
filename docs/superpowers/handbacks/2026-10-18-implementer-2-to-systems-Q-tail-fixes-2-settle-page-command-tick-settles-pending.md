@@ -1,7 +1,7 @@
 ---
 from: implementer-2
 to: systems
-status: open
+status: consumed
 slice: 批尾小修二（HOW 2026-10-17-tail-fixes-2）
 topic: 問 A2：結算頁上按 K／L／J 走 command_player 會推一顆 tick，而那顆 tick 的 settle_pending_aftermath 會把還沒選的傷兵／追擊／居民被動結清——與「按 L 不推進、待處置還在」衝突；建議甲（頁上指令那一拍不算「沒處置就推進」），等你裁，我先做 B–E
 ---
