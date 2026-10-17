@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針（建點一支身體、L1 要材料就地採）
 topic: 用戶裁 2026-10-17「合」：照現在合進主線，接受下一張落地前新據點大減；兩道舊門併下一張前提查核；軍用 80 料 vs 載重 60 不動數字；已給用戶看
 ---

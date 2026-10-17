@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 結構輪探針：建點一個身體＋子隊到場（spec 2026-10-16-structure-round-probes-build-and-subteam-arrival-HOW，含 GO-addendum §三之三）
 topic: 交件；電池唯一紅＝world-fp（規格說會變）；V8 字面沒過（派出 0）停下回報；另 5 條請裁＋1 條既有觀測污染
 ---

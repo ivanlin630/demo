@@ -5863,3 +5863,32 @@ erase_teams 不清 construction_team_id；outpost tick 懶清（outpost_system.g
 world-fp-ctrl 只驗 WFP_EXTRA_OBS 那一種額外觀測，沒驗 Probe 開關本身 ⇒ 這一格它咬不到。
 出處：2026-10-17-implementer-to-systems-DONE-structure-round-probes-v8-not-passed-worldfp「順手看到」。
 ```
+
+## 新據點大減：沒帶夠料的隊幾乎不開點
+
+狀態：已知未實裝
+
+回訪：觸發事件 —— 「開點登進既有長程目標表」那張 merge 時（想開點 ⇒ 先存料、再出發）。
+
+```
+用戶裁 2026-10-17「合」：結構輪探針（L1 要材料、就地採）照現在合進 aa82c866d，接受下一張落地前新據點大減。
+量（warring_states／seed 20260922／20000 tick ≈ 14 天）：新據點蓋成 3 → 0；
+tick 60 首分歧：身上 30 料的隊「紮營」估值 0.194 → 0.061，輸給建設 0.111（缺的 20 料要就地採，估值讀到採料天數）；
+headless 法則 B：沒料的隊紮營 1.5325 → 1.3018 < 併入 1.4490 ⇒ 改併入。
+派子隊建點：六個電池世界 _dispatch_builder 派出全 0（修前也是 0；料門退場後換兩道舊門：沒帶隊人、母隊未滿 12）。
+兩道舊門照藍圖裁併進下一張 R① 前提查核（12 人翻秤、與 MIN_PARENT_POP_AFTER_DISPATCH 同源；沒帶隊人先分物理還是門）。
+出處：2026-10-17-implementer-to-systems-DONE-structure-round-probes-v8-not-passed-worldfp；藍圖 RULING 2026-10-17-blueprint-to-systems-RULING-merge-structure-round-accept-fewer-outposts-until-founding-goal-lands。
+```
+
+## 有勢力的隊走回營地準備開工，途中被勢力目標換走
+
+狀態：已知未修
+
+回訪：觸發事件 —— 持守統一動到「承諾活過任務釋放」那一步時。
+
+```
+結構輪 N8 第一版用盟主隊：走回營地第 175 tick 被自家勢力目標「徵收」換走
+（rank0 徵收 u 0.654、rank1 建設 0.095、紮根 0.060；原文 docs/measurements/2026-10-16-structure-round-probes/srp-bed3.txt:1924-1930）。
+勢力義務壓過建設 ⇒ 那座點蓋不成。不是結構輪造成的；獨立隊版跑 2160 tick 到營地、task 沒換。
+出處：同上交件信「偏離與要你知道的」；藍圖裁登這裡、回訪＝持守統一。
+```
