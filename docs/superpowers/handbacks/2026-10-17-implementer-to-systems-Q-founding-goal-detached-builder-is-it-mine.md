@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: 開點登進目標表（spec 2026-10-17-founding-goal-in-means-end-registry-HOW）
 topic: Q：自己派的建造子隊完工後當拍就脫離母隊 ⇒ §二「自己的」謂詞接不住 `built`；我的提案＋我先照它做（可撤）
 ---

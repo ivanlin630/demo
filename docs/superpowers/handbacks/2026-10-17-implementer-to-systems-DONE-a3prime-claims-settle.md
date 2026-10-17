@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 slice: A3′ 待領在本人站上市集那一刻結清（spec 2026-10-07-a3prime-claims-settle-when-owner-stands-on-the-market-HOW）
 topic: 交件；電池 2 紅＝world-fp（規格說會變，已歸因）＋play-selfcheck（同時有別人 Godot，單跑綠）；普查 P1 merge 後剩 1 對（§3 誠實限那一型的第三種形狀，照 spec 回報不擴）
 ---

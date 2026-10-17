@@ -6019,3 +6019,17 @@ tiles 迴圈的 gate-ok: legit-geo（:6167、:6188）只涵蓋讀地形。R² 20
 不算隊伍能知道的事、不補豁免；選址評分只讀這支隊記得的（含時間戳 belief）或地形先驗（同 site_prior），與估算器同一來源；腳下格照舊親見。
 格記憶今天不存資源量 ⇒ 不在這張補欄位，先驗就是全部；被採光的格先驗會錯 ⇒ 到場後被期限取消，construct.gather_abort 要數。
 ```
+
+## 半路踏上市集、同拍換目標的隊，待領不會結清（A3′ 合併後普查剩 1 對）
+
+狀態：已知未修（systems 2026-10-17 裁：不在 A3′ 擴，記一行）
+
+```
+A3′ 結清名單＝arrived_ids（走到自己 move_target 的隊）。隊踏上市集格的同一拍換了 move_target ⇒ 不在名單 ⇒ 待領掛著。
+血證：fp 世界（20000 tick）隊 4 @(2,21) goods material 22，tick 17880..18179（300 tick）；
+診斷 docs/measurements/2026-10-17-a3prime-claims-settle/a3p8-diag-team4.txt（實作端交件信 2026-10-17-implementer-to-systems-DONE-a3prime-claims-settle §P1）。
+修法候選（一行等級）：名單改成「站在 outpost_level>0、腳下有自己 amt>0 待領的活隊」，不靠 arrived。
+★同一份診斷另一個病（沒查）：那 300 tick 隊停在 (2,21)、move_target=(2,20) 相鄰卻不動。
+```
+
+回訪：深層批（商業）開工時一起看；或故事稽核出現第二個樣本。不插玩家可見批之前（用戶序：UI 先）。
