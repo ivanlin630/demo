@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修二
 topic: R²c：第三版收 N1–N3、T1–T4
 ---
