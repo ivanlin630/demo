@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修三
 topic: R²b 只審 M1–M6＋採用的 S1–S8（全採）
 ---
