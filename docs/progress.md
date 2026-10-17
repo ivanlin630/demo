@@ -3793,3 +3793,8 @@ A2c 停在乾淨點（深層批）：branch feat/a2c-trade-target-off-market tip
 - 玩家可見：附身隊站在市集上取消寄賣或寄賣到期 ⇒ 貨當場回手（以前要離開再回來）
 - world-fp 換 3f3ace84（首分歧 tick 9689：隊 40 的 15 material 當場結清、改決策貿易＝本票語意）；床 a3prime_claims_settle_bed（註冊 a3prime-claims-settle）
 - 剩一型沒接：半路踏上市集、同拍換目標（known_issues 一筆，不擴）
+
+### 第五輪收場三票（藍圖 1f7679c26；systems 2026-10-17）
+- 票一 批尾小修二：HOW `docs/superpowers/specs/2026-10-17-tail-fixes-2-HOW.md` 送 R²；開點目標交件後派
+- 票二 全員在場（自深層批 1 抽出）：排票一之後，HOW 屆時寫；出生帶靜默掉人那封一起處理
+- 票三 四條查根：已派量測員（51874b5b9），量完轉藍圖決定開不開票

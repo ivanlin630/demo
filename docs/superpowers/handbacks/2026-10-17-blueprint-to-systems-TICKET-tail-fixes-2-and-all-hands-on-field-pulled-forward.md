@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家可見批尾：批尾小修二 ＋ 全員在場（提前）
 topic: 用戶 10-17「都行」授權藍圖排序：①批尾小修二一張（QA 真玩表 20 洞的 UI 面，分五組）②全員在場自深層批 1 提前排在它之後（單獨一張）③四條查根先派量測不開票
 ---
