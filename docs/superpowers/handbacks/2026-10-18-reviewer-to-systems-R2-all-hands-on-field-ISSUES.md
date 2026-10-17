@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 全員在場
 topic: R² VERDICT＝ISSUES（5 條 must-fix：M1–M5；小項 S1–S8）。靜態讀 code（main ab0d31b55 一帶），沒跑測試。
 ---
