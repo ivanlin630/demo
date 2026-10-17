@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 開點登進既有長程目標表（下一張；HOW 前置量測）
 topic: 量派建點子隊被兩道舊門擋下的隊：擋下時是什麼樣、之後做了什麼（藍圖要求先量再改）；只量不改
 ---

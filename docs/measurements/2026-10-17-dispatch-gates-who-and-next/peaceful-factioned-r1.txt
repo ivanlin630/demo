@@ -1,0 +1,1789 @@
+[TREE] e4caa61f0 + worktree patch config=peaceful_economy_factioned seed=1337 days=30 r1 (GODOT_TIMEOUT=3000)
+[TREE] path=. commit=e4caa61f0 clean=NO code-dirty=2 codehash=DA3B61E11A5E
+[TREE]   *** measuring the WORKING TREE, not commit e4caa61f0 ***
+[TREE]    M scripts/simulation/faction_ai_system.gd
+[TREE]   ?? scripts/debug/gate_who_next_bed.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=13GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== gate_who_next：config=peaceful_economy_factioned days=30 seed=1337 ===
+[MoneyGenesis] 初始 coin 總量 = 6912.0
+   = Σpop(72) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：12 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 6912.0 vs 推導 6912.0（差 0.0000）
+[GameSetup] 完成：12 teams, 3 factions, 24 persons
+[Site] Faction0 派工失敗: pop 不足: 6 < 12 (需 { "material": 50, "tools": 0 })
+[Outpost] Team3 設施施工 apothecary → Lv1 at (8,10)
+[Sub] Team0 派出子隊 Team12 leader=P1 advisors=[] (pop=1 cap=1 task=偵查)
+[Tick 60] Person 0 (leader/team0) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 67] Person 6 (leader/team3) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 67] Person 7 (civilian/team3) → P2_produce | stress=0.00 loyalty=0.80
+[Combat Start] Team-1000000 vs Team11
+[Ambush] NPC Team11 被 bear 伏擊
+[Tick 71] Person 22 (leader/team11) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 71] Person 23 (civilian/team11) → P2_produce | stress=0.00 loyalty=0.80
+[Sub] Team4 派出子隊 Team13 leader=P9 advisors=[] (pop=1 cap=1 task=偵查)
+[Tick 73] Person 8 (leader/team4) → P2_produce | stress=0.00 loyalty=0.90
+[Sub] Team8 派出子隊 Team14 leader=P17 advisors=[] (pop=1 cap=1 task=偵查)
+[Tick 74] Person 12 (leader/team6) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 74] Person 13 (civilian/team6) → P4_expand | stress=0.00 loyalty=0.80
+[Tick 74] Person 16 (leader/team8) → P1_comply | stress=0.00 loyalty=0.91
+[Tick 77] Person 20 (leader/team10) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 77] Person 21 (civilian/team10) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 80] Person 10 (leader/team5) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 80] Person 11 (civilian/team5) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 84] Person 18 (leader/team9) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 84] Person 19 (civilian/team9) → P2_produce | stress=0.00 loyalty=0.80
+[Outpost] Team4 設施施工 stable → Lv1 at (6,10)
+[Outpost] Team5 設施施工 mint → Lv1 at (10,6)
+[Tick 91] Person 2 (leader/team1) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 91] Person 3 (civilian/team1) → P2_produce | stress=0.00 loyalty=0.80
+[Tick 98] Person 14 (leader/team7) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 98] Person 15 (civilian/team7) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 114] Person 4 (leader/team2) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 114] Person 5 (civilian/team2) → P2_produce | stress=0.00 loyalty=0.80
+[StrategicAI] Faction0 首要目標: defend target=12
+[StrategicAI] Faction1 首要目標: defend target=13
+[StrategicAI] Faction2 首要目標: defend target=14
+[Tick 133] Person 1 (civilian/team12) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 149] Person 17 (civilian/team14) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 154] Person 9 (civilian/team13) → P1_comply | stress=0.00 loyalty=0.81
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Site] 選址 (4, 9) score=456 周邊資源={ "ore_silver": 113.941004220199, "ore_iron": 54, "wild_horses": 5 } terrain=mountain 已知據點項=0.0 採料項=-109.9 用到的據點=[]
+[Site] Faction2 派工失敗: pop 不足: 5 < 12 (需 { "material": 50, "tools": 0 })
+[Harvest] Tick360 季節=春 base=1.1
+[Tick 418] Person 24 (member/team8) → P1_comply | stress=0.00 loyalty=0.64
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Tribute] Team8 徵收 Team14 rate=0.03
+[Order] Team11 sell food ×71 (oid=1)
+[Order] Team11 buy weapon_melee_low ×3 (oid=2)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=3)
+[Order] Team11 buy material ×42 (oid=4)
+[Order] Team0 sell food ×76 (oid=5)
+[Order] Team0 sell tools ×1 (oid=6)
+[Order] Team0 buy weapon_melee_low ×3 (oid=7)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=8)
+[Order] Team0 buy material ×64 (oid=9)
+[Order] Team3 sell food ×120 (oid=10)
+[Order] Team3 buy weapon_melee_low ×3 (oid=11)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team8 sell goods ×69 (oid=13)
+[Order] Team8 buy weapon_melee_low ×3 (oid=14)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=15)
+[Order] Team8 buy tools ×1 (oid=16)
+[Order] Team9 sell food ×70 (oid=17)
+[Order] Team9 buy weapon_melee_low ×3 (oid=18)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=19)
+[Order] Team9 buy material ×44 (oid=20)
+[Order] Team4 sell food ×99 (oid=21)
+[Order] Team4 buy weapon_melee_low ×3 (oid=22)
+[Order] Team4 buy weapon_ranged_low ×2 (oid=23)
+[Order] Team13 sell material ×2 (oid=24)
+[Order] Team13 sell tools ×4 (oid=25)
+[Order] Team2 sell food ×91 (oid=26)
+[Order] Team2 sell tools ×1 (oid=27)
+[Order] Team2 buy weapon_melee_low ×3 (oid=28)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=29)
+[Order] Team2 buy material ×64 (oid=30)
+[Order] Team1 sell food ×90 (oid=31)
+[Order] Team1 sell tools ×1 (oid=32)
+[Order] Team1 buy weapon_melee_low ×3 (oid=33)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=34)
+[Order] Team1 buy material ×60 (oid=35)
+[Order] Team10 sell food ×70 (oid=36)
+[Order] Team10 buy weapon_melee_low ×3 (oid=37)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=38)
+[Order] Team10 buy material ×44 (oid=39)
+[Order] Team6 sell food ×322 (oid=40)
+[Order] Team6 buy weapon_melee_low ×3 (oid=41)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=42)
+[Order] Team6 buy material ×63 (oid=43)
+[Order] Team6 buy tools ×3 (oid=44)
+[Order] Team14 sell goods ×10 (oid=45)
+[Order] Team7 sell goods ×20 (oid=46)
+[Order] Team7 sell material ×335 (oid=47)
+[Order] Team7 sell food ×8 (oid=48)
+[Order] Team7 sell tools ×1 (oid=49)
+[Order] Team7 buy weapon_melee_low ×3 (oid=50)
+[Order] Team7 buy weapon_ranged_low ×3 (oid=51)
+[DayNight] Day 1 開始
+[Horse] Outpost (6, 8) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 11) 捕野馬 +1
+[Horse] Outpost (8, 6) 捕野馬 +1
+[TickPerf] day=1 avg=801 us max=58618 us ticks=1440 teams=15 factions=3 | ★>2s 幀數=0/1440
+GW|progress day 1 events 12 watches 1
+[Order] Team5 sell food ×118 (oid=52)
+[Order] Team5 buy weapon_melee_low ×3 (oid=53)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=54)
+[Move] Team 8 抵達 (6,8)
+[Sub] Team4 派出子隊 Team15 leader=P26 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team4 派運輸子隊 Team15 送 material×60 → demand 市場(5,9)
+[Reaction] Person25 離團自立流亡 Team16 at (6,8)
+[Tick 1541] Person 25 (leader/team16) → N1_flee | stress=0.15 loyalty=0.41
+[StrategicAI] Faction1 首要目標: defend target=15
+[Tick 1572] Person 26 (member/team15) → N1_flee | stress=0.10 loyalty=0.35
+[Tick 1583] Person 25 (leader/team16) → P4_expand | stress=0.20 loyalty=0.39
+[SoloAI] Team16 → 覓食 (覓食)
+[Tick 1627] Person 26 (member/team15) → P4_expand | stress=0.05 loyalty=0.35
+[SoloAI] Team16 → 覓食 (覓食)
+[Move] Team 13 抵達 (10,6)
+[StrategicAI] Faction1 首要目標: defend target=13
+[Move] Team 16 抵達 (5,8)
+[Move] Team 14 抵達 (6,6)
+[StrategicAI] Faction1 首要目標: defend target=15
+[Order] Team15 sell material ×60 (oid=55)
+[Order] Team15 sell tools ×9 (oid=56)
+[Move] Team 12 抵達 (10,6)
+[Move] Team 13 抵達 (10,8)
+[Outpost] Team7 設施施工 apothecary → Lv1 at (11,9)
+[Move] Team 8 抵達 (8,8)
+[DayNight] Day 2 開始
+[Horse] Outpost (6, 8) 捕野馬 +1
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 11) 捕野馬 +1
+[TickPerf] day=2 avg=809 us max=59743 us ticks=1440 teams=17 factions=3 | ★>2s 幀數=0/2880
+GW|progress day 2 events 12 watches 0
+[Move] Team 15 抵達 (5,9)
+[Sub] Team8 派出子隊 Team17 leader=P24 advisors=[] (pop=1 cap=10 task=偵查)
+[Tribute] Team8 徵收 Team17 rate=0.04
+[StrategicAI] Faction2 首要目標: defend target=17
+[Sub] Team0 派出子隊 Team18 leader=P27 advisors=[] (pop=1 cap=4 task=偵查)
+[Sub] Team4 派出子隊 Team19 leader=P28 advisors=[] (pop=1 cap=12 task=偵查)
+[StrategicAI] Faction0 首要目標: defend target=18
+[Tick 3086] Person 28 (member/team19) → P4_expand | stress=0.40 loyalty=0.41
+[Move] Team 13 抵達 (12,6)
+[Move] Team 18 抵達 (6,8)
+[Tick 3392] Person 27 (member/team18) → P4_expand | stress=0.15 loyalty=0.35
+[Move] Team 14 抵達 (8,6)
+[Tick 3443] Person 27 (member/team18) → P1_comply | stress=0.10 loyalty=0.36
+[Tick 3448] Person 28 (member/team19) → P1_comply | stress=0.10 loyalty=0.42
+[Move] Team 12 抵達 (12,4)
+[Move] Team 18 抵達 (6,8)
+[Order] Team17 sell goods ×13 (oid=57)
+[Order] Team19 sell material ×15 (oid=58)
+[Order] Team19 sell tools ×4 (oid=59)
+[Move] Team 18 抵達 (6,8)
+[Combat Start] Team-1000001 vs Team13
+[Ambush] NPC Team13 被 boar 伏擊
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 3 開始
+[Move] Team 14 抵達 (10,4)
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 11) 捕野馬 +1
+[TickPerf] day=3 avg=782 us max=19882 us ticks=1440 teams=20 factions=3 | ★>2s 幀數=0/4320
+GW|progress day 3 events 12 watches 0
+[Site] 選址 (4, 9) score=401 周邊資源={ "ore_silver": 113.048722255062, "ore_iron": 54, "wild_horses": 5 } terrain=mountain 已知據點項=17.0 採料項=-57.3 用到的據點=["(8, 6)/T2/g1.00"]
+[Site] Faction0 派工失敗: pop 不足: 3 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 4339] Person 29 (member/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Order] Team7 buy food ×1 (oid=60)
+[Move] Team 15 抵達 (3,11)
+[Move] Team 18 抵達 (6,8)
+[Reaction] Person30 離團自立流亡 Team20 at (6,8)
+[Tick 4461] Person 30 (leader/team20) → N1_flee | stress=0.15 loyalty=0.41
+[Move] Team 12 抵達 (13,2)
+[Move] Team 13 抵達 (14,4)
+[Diplomacy] Team20 與 Team8 結盟
+[Faction] Team8 外交 Team20 accept → 勢力2
+[StrategicAI] Faction2 首要目標: defend target=20
+[Reaction] Person31 離團自立流亡 Team21 at (6,10)
+[Tick 4519] Person 31 (leader/team21) → N1_flee | stress=0.15 loyalty=0.37
+[SoloAI] Team21 → 覓食 (覓食)
+[SoloAI] Team21 → 覓食 (覓食)
+[Move] Team 18 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[Move] Team 20 抵達 (5,9)
+[Combat Start] Team-1000002 vs Team17
+[Ambush] NPC Team17 被 boar 伏擊
+[Move] Team 21 抵達 (5,11)
+[Move] Team 15 抵達 (2,12)
+[Move] Team 17 抵達 (10,10)
+[Move] Team 20 抵達 (5,9)
+[StrategicAI] Faction2 首要目標: defend target=17
+[Order] Team18 sell goods ×6 (oid=61)
+[Combat Start] Team-1000003 vs Team12
+[Ambush] NPC Team12 被 bear 伏擊
+[Move] Team 14 抵達 (12,2)
+[Site] Faction-1 派工失敗: 地禿: 帶料 0／需 50，plains 先驗採不完（期限 30 天） (需 { "material": 50, "tools": 0 })
+[Move] Team 18 抵達 (4,10)
+[Move] Team 20 抵達 (5,9)
+[Order] Team20 buy food ×2 (oid=62)
+[Order] Team6 sell material ×2 (oid=63)
+[Tick 5676] Person 31 (leader/team21) → P1_comply | stress=0.08 loyalty=0.26
+[DayNight] Day 4 開始
+[Move] Team 20 抵達 (5,9)
+[Horse] Outpost (6, 10) 捕野馬 +1
+[Horse] Outpost (7, 11) 捕野馬 +1
+[TickPerf] day=4 avg=1038 us max=42749 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/5760
+GW|progress day 4 events 13 watches 1
+[Site] Faction-1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Move] Team 17 抵達 (11,9)
+[Move] Team 14 抵達 (13,1)
+[Sub] Team8 派出子隊 Team22 leader=P32 advisors=[] (pop=1 cap=18 task=偵查)
+[StrategicAI] Faction2 首要目標: defend target=22
+[Move] Team 8 抵達 (6,8)
+[Move] Team 18 抵達 (3,11)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[SoloAI] Team16 → 投靠 (併入)
+[Tick 6074] Person 32 (member/team22) → P4_expand | stress=0.30 loyalty=0.38
+[Outpost] Team6 設施施工 stable → Lv1 at (5,9)
+[StrategicAI] Faction0 受威脅，尋求結盟
+[Move] Team 16 抵達 (5,9)
+[Move] Team 20 抵達 (5,9)
+[Merge] Team6 ← Team16 完全合併 (absorber_pop=7)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 17 抵達 (13,9)
+[Move] Team 19 抵達 (11,9)
+[StrategicAI] Faction1 首要目標: defend target=19
+[Move] Team 20 抵達 (5,8)
+[StrategicAI] Faction2 首要目標: defend target=20
+[Move] Team 18 抵達 (1,13)
+[StrategicAI] Faction0 首要目標: defend target=12
+[Order] Team22 sell goods ×16 (oid=64)
+[DayNight] Day 5 開始
+[Move] Team 13 抵達 (8,10)
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=5 avg=1120 us max=49353 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/7200
+GW|progress day 5 events 16 watches 3
+[Combat Start] Team-1000004 vs Team14
+[Ambush] NPC Team14 被 boar 伏擊
+[Move] Team 8 抵達 (6,8)
+[Move] Team 19 抵達 (10,10)
+[Tick 7348] Person 30 (leader/team20) → P4_expand | stress=0.05 loyalty=0.00
+[Outpost] 設施完工 apothecary Lv1 at (8,10)
+[Tick 7422] Person 33 (member/team20) → N1_flee | stress=0.15 loyalty=0.42
+[Tick 7447] Person 33 (member/team20) → P1_comply | stress=0.10 loyalty=0.43
+[Merge] Team0 ← Team12 完全合併 (pop=4)
+[Order] Team3 sell material ×285 (oid=65)
+[Order] Team3 sell tools ×23 (oid=66)
+[Move] Team 15 抵達 (6,10)
+[Move] Team 17 抵達 (15,9)
+[Merge] Team4 ← Team15 完全合併 (pop=2)
+[Tick 7596] Person 26 (member/team4) → P2_produce | stress=0.00 loyalty=0.35
+[Move] Team 20 抵達 (8,8)
+[Move] Team 8 抵達 (5,8)
+[Move] Team 13 抵達 (6,12)
+[Order] Team0 sell food ×63 (oid=67)
+[Order] Team0 sell tools ×1 (oid=68)
+[Order] Team0 buy weapon_melee_low ×2 (oid=69)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=70)
+[Order] Team0 buy material ×63 (oid=71)
+[Order] Team3 sell food ×95 (oid=72)
+[Order] Team3 buy weapon_melee_low ×3 (oid=73)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=74)
+[Move] Team 22 抵達 (7,11)
+[Order] Team8 sell goods ×33 (oid=75)
+[Order] Team13 sell material ×2 (oid=76)
+[Order] Team13 sell tools ×4 (oid=77)
+[Site] Faction2 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Order] Team11 sell food ×52 (oid=78)
+[Order] Team11 buy weapon_melee_low ×3 (oid=79)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=80)
+[Order] Team11 buy material ×15 (oid=81)
+[Order] Team21 buy food ×1 (oid=82)
+[SoloAI] Team21 → 投靠 (併入)
+[DayNight] Day 6 開始
+[Move] Team 14 抵達 (10,6)
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=6 avg=1133 us max=31526 us ticks=1440 teams=20 factions=3 | ★>2s 幀數=0/8640
+GW|progress day 6 events 17 watches 1
+[Order] Team4 sell food ×78 (oid=83)
+[Order] Team4 buy weapon_melee_low ×1 (oid=84)
+[Order] Team4 buy weapon_ranged_low ×1 (oid=85)
+[Order] Team2 sell food ×81 (oid=86)
+[Order] Team2 sell tools ×1 (oid=87)
+[Order] Team2 buy weapon_melee_low ×3 (oid=88)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=89)
+[Order] Team2 buy material ×57 (oid=90)
+[Move] Team 8 抵達 (6,8)
+[Order] Team14 sell goods ×10 (oid=91)
+[Move] Team 13 抵達 (4,14)
+[Sub] Team0 派出子隊 Team23 leader=P1 advisors=[] (pop=1 cap=1 task=偵查)
+[Order] Team5 sell food ×93 (oid=92)
+[Order] Team5 buy weapon_melee_low ×3 (oid=93)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=94)
+[StrategicAI] Faction0 首要目標: defend target=23
+[Order] Team9 sell food ×51 (oid=95)
+[Order] Team9 buy weapon_melee_low ×3 (oid=96)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=97)
+[Order] Team9 buy material ×37 (oid=98)
+[Move] Team 22 抵達 (8,10)
+[Order] Team6 sell food ×316 (oid=99)
+[Order] Team6 buy weapon_melee_low ×4 (oid=100)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=101)
+[Order] Team6 buy material ×31 (oid=102)
+[Order] Team6 buy tools ×3 (oid=103)
+[Sub] Team4 派出子隊 Team24 leader=P26 advisors=[] (pop=1 cap=26 task=偵查)
+[Tick 9029] Person 26 (member/team24) → P4_expand | stress=0.00 loyalty=0.35
+[Move] Team 20 抵達 (6,8)
+[Merge] Team0 ← Team18 完全合併 (pop=4)
+[Sub] Team20 派出子隊 Team25 leader=P33 advisors=[] (pop=1 cap=4 task=信使)
+[Order] Team25 傳令 Team8 → idle
+[SubAI] Team25 引擎→乞食 (乞食)
+[Order] Team1 sell food ×77 (oid=104)
+[Order] Team1 sell tools ×1 (oid=105)
+[Order] Team1 buy weapon_melee_low ×3 (oid=106)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=107)
+[Order] Team1 buy material ×22 (oid=108)
+[Order] Team7 buy weapon_melee_low ×3 (oid=109)
+[Order] Team7 buy weapon_ranged_low ×2 (oid=110)
+[Order] Team10 sell food ×50 (oid=111)
+[Order] Team10 buy weapon_melee_low ×3 (oid=112)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=113)
+[Order] Team10 buy material ×41 (oid=114)
+[SoloAI] Team21 → 覓食 (覓食)
+[SurvivalMergeIn] team=Team25 → 併入 Team6
+[SurvivalMergeIn] team=Team25 → 併入 Team2
+[Move] Team 20 抵達 (5,9)
+[SurvivalMergeIn] team=Team20 → 併入 Team3
+[SurvivalMergeIn] team=Team25 → 併入 Team2
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[SurvivalMergeIn] team=Team20 → 併入 Team3
+[Move] Team 19 抵達 (12,10)
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[SurvivalMergeIn] team=Team20 → 併入 Team3
+[Move] Team 21 抵達 (8,9)
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[SurvivalMergeIn] team=Team20 → 併入 Team3
+[Move] Team 14 抵達 (12,4)
+[SurvivalMergeIn] team=Team20 → 併入 Team1
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[SurvivalMergeIn] team=Team20 → 併入 Team1
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[Order] Team24 sell material ×15 (oid=115)
+[Order] Team24 sell tools ×9 (oid=116)
+[SurvivalMergeIn] team=Team20 → 併入 Team1
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[Outpost] 設施完工 apothecary Lv1 at (11,9)
+[SurvivalMergeIn] team=Team20 → 併入 Team1
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[Move] Team 25 抵達 (7,6)
+[SurvivalMergeIn] team=Team20 → 併入 Team1
+[Order] Team25 buy food ×3 (oid=117)
+[SurvivalForage] team=Team25 pop=1 → 覓食 @(7,6)
+[Survival] Team25 urgent days_left=0.0 idle→覓食
+[SubAI] Team20 紀律失效，脫離成獨立
+[Tick 9961] Person 30 (leader/team20) → N2_riot | stress=1.00 loyalty=0.42
+[DayNight] Day 7 開始
+[Move] Team 20 抵達 (6,9)
+[Move] Team 22 抵達 (6,12)
+[TickPerf] day=7 avg=1976 us max=52358 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/10080
+GW|progress day 7 events 17 watches 0
+[Salary] Team3 薪水結算 coin=588.7
+[Salary] Team0 薪水結算 coin=466.2
+[Move] Team 8 抵達 (5,10)
+[SubAI] Team25 紀律失效，脫離成獨立
+[Move] Team 17 抵達 (10,8)
+[Salary] Team19 薪水結算 coin=98.7
+[Faction] Team7 脫離勢力1
+[Move] Team 14 抵達 (14,2)
+[Move] Team 23 抵達 (10,8)
+[Move] Team 25 抵達 (6,8)
+[Combat Start] Team-1000005 vs Team14
+[Ambush] NPC Team14 被 bear 伏擊
+[Order] Team7 sell goods ×20 (oid=118)
+[Order] Team7 sell material ×312 (oid=119)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 22 抵達 (4,14)
+[Outpost] Team3 設施施工 apothecary → Lv2 at (8,10)
+[Salary] Team8 薪水結算 coin=183.9
+[Move] Team 19 抵達 (14,10)
+[Move] Team 17 抵達 (10,6)
+[Site] 選址 (4, 9) score=517 周邊資源={ "ore_silver": 111.438841445161, "ore_iron": 54, "wild_horses": 5 } terrain=mountain 已知據點項=68.0 採料項=-0.0 用到的據點=["(5, 9)/T6/g1.00"]
+[Site] Faction1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Order] Team19 sell material ×15 (oid=120)
+[Order] Team19 sell tools ×4 (oid=121)
+[Combat Start] Team-1000006 vs Team14
+[Ambush] NPC Team14 被 bear 伏擊
+[Move] Team 23 抵達 (10,6)
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Move] Team 13 抵達 (9,14)
+[TickPerf] day=8 avg=2069 us max=80994 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/11520
+GW|progress day 8 events 39 watches 16
+[Salary] Team11 薪水結算 coin=588.4
+[Move] Team 8 抵達 (3,12)
+[Move] Team 19 抵達 (14,10)
+[Move] Team 20 抵達 (10,8)
+[Sub] Team0 派出子隊 Team26 leader=P27 advisors=[] (pop=1 cap=4 task=偵查)
+[StrategicAI] Faction0 首要目標: defend target=26
+[Order] Team17 sell goods ×13 (oid=122)
+[Move] Team 20 抵達 (10,8)
+[Salary] Team1 薪水結算 coin=588.6
+[Market] Team14 <-> Team23 巧遇成交
+[Market] Team23 <-> Team14 巧遇成交
+[Market] Team23 <-> Team14 巧遇成交
+[Market] Team14 <-> Team17 巧遇成交
+[Market] Team14 <-> Team23 巧遇成交
+[Salary] Team10 薪水結算 coin=588.4
+[Outpost] Team7 設施施工 farming → Lv1 at (11,9)
+[Tick 12109] Person 14 (leader/team7) → P1_comply | stress=0.10 loyalty=0.89
+[Move] Team 26 抵達 (7,8)
+[Market] Team23 <-> Team14 巧遇成交
+[Order] Team7 buy food ×26 (oid=123)
+[Move] Team 20 抵達 (10,8)
+[Market] Team14 <-> Team23 巧遇成交
+[Order] Team23 sell goods ×6 (oid=124)
+[Move] Team 17 抵達 (12,4)
+[Move] Team 25 抵達 (7,11)
+[Market] Team23 <-> Team14 巧遇成交
+[Tick 12261] Person 14 (leader/team7) → P2_produce | stress=0.40 loyalty=0.85
+[Market] Team14 <-> Team23 巧遇成交
+[Move] Team 19 抵達 (14,10)
+[Market] Team23 <-> Team14 巧遇成交
+[Move] Team 13 抵達 (9,12)
+[Move] Team 20 抵達 (10,8)
+[Move] Team 23 抵達 (12,4)
+[Tick 12496] Person 15 (civilian/team7) → N2_riot | stress=0.80 loyalty=0.91
+[Move] Team 24 抵達 (10,6)
+[Move] Team 20 抵達 (10,8)
+[Tick 12941] Person 14 (leader/team7) → N2_riot | stress=1.00 loyalty=0.63
+[DayNight] Day 9 開始
+[Move] Team 13 抵達 (9,12)
+[Move] Team 14 抵達 (10,6)
+[Barter] Team14 4xgoods <-> Team24 15xmaterial
+[TickPerf] day=9 avg=2727 us max=263750 us ticks=1440 teams=23 factions=3 | ★>2s 幀數=0/12960
+GW|progress day 9 events 54 watches 15
+[SubAI] Team14 引擎→外交 (外交)
+[Move] Team 22 抵達 (5,9)
+[Salary] Team22 薪水結算 coin=92.0
+[Move] Team 8 抵達 (1,14)
+[Move] Team 17 抵達 (14,2)
+[Move] Team 19 抵達 (14,10)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 20 抵達 (10,8)
+[SoloAI] Team21 → 投靠 (併入)
+[SoloAI] Team21 → 投靠 (併入)
+[SoloAI] Team21 → 投靠 (併入)
+[Order] Team14 sell material ×15 (oid=125)
+[Move] Team 14 抵達 (10,7)
+[Move] Team 20 抵達 (10,8)
+[Move] Team 23 抵達 (14,2)
+[SoloAI] Team21 → 投靠 (併入)
+[Salary] Team13 薪水結算 coin=98.7
+[Order] Team24 sell goods ×4 (oid=126)
+[SoloAI] Team21 → 投靠 (併入)
+[SoloAI] Team21 → 投靠 (併入)
+[Order] Team17 buy food ×1 (oid=127)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team21 → 投靠 (併入)
+[Move] Team 20 抵達 (10,8)
+[Order] Team20 buy food ×2 (oid=128)
+[Salary] Team14 薪水結算 coin=32.7
+[SurvivalCamp] team=Team17 → 紮營 @(15,2)
+[Survival] Team17 warning days_left=3.0 偵查→紮營
+[Move] Team 17 抵達 (15,2)
+[Move] Team 24 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SurvivalCamp] team=Team17 → 紮營 @(15,2)
+[Survival] Team17 warning days_left=2.9 idle→紮營
+[Move] Team 13 抵達 (9,12)
+[Move] Team 14 抵達 (12,7)
+[Move] Team 19 抵達 (14,10)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Outpost] Team1 設施施工 farming → Lv1 at (10,8)
+[CampL0] Team17 紮營 L0 @(15,2)
+[Move] Team 20 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 乞食 (乞食)
+[Salary] Team9 薪水結算 coin=588.2
+[Merge] Team1 ← Team20 完全合併 (absorber_pop=7)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 投靠 (併入)
+[Reaction] Person30 離團自立流亡 Team27 at (10,8)
+[Tick 13944] Person 30 (leader/team27) → N1_flee | stress=0.65 loyalty=0.00
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 乞食 (乞食)
+[SoloAI] Team27 → 覓食 (覓食)
+[Salary] Team23 薪水結算 coin=124.5
+[SoloAI] Team21 → 乞食 (乞食)
+[SoloAI] Team27 → 覓食 (覓食)
+[SoloAI] Team21 → 乞食 (乞食)
+[Tick 14125] Person 14 (leader/team7) → N1_flee | stress=0.70 loyalty=0.23
+[Move] Team 25 抵達 (6,8)
+[SoloAI] Team21 → 乞食 (乞食)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 22 抵達 (3,9)
+[Tick 14230] Person 14 (leader/team7) → P2_produce | stress=0.60 loyalty=0.19
+[Tick 14284] Person 14 (leader/team7) → N1_flee | stress=0.40 loyalty=0.17
+[Tick 14373] Person 14 (leader/team7) → P2_produce | stress=0.50 loyalty=0.15
+[DayNight] Day 10 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Move] Team 27 抵達 (10,9)
+[TickPerf] day=10 avg=2063 us max=66634 us ticks=1440 teams=23 factions=3 | ★>2s 幀數=0/14400
+GW|progress day 10 events 56 watches 1
+[Tick 14409] Person 14 (leader/team7) → N1_flee | stress=0.30 loyalty=0.13
+[Ambition] Team23 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 覓食 (覓食)
+[Tick 14485] Person 14 (leader/team7) → P2_produce | stress=0.40 loyalty=0.11
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 覓食 (覓食)
+[Tick 14623] Person 14 (leader/team7) → N1_flee | stress=0.30 loyalty=0.07
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 覓食 (覓食)
+[Tick 14666] Person 14 (leader/team7) → P2_produce | stress=0.40 loyalty=0.05
+[Reaction] Person15 離團自立流亡 Team28 at (11,9)
+[Tick 14666] Person 15 (leader/team28) → N1_flee | stress=0.70 loyalty=0.19
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 覓食 (覓食)
+[SoloAI] Team28 → 覓食 (覓食)
+[Move] Team 23 抵達 (16,0)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 覓食 (覓食)
+[SoloAI] Team28 → 覓食 (覓食)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 14 抵達 (14,7)
+[Move] Team 21 抵達 (5,8)
+[Move] Team 25 抵達 (5,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team21 → 覓食 (覓食)
+[Combat Start] Team-1000007 vs Team14
+[Ambush] NPC Team14 被 boar 伏擊
+[Ambition] Team14 rung 0→1 (商業 cap=2)
+[Salary] Team6 薪水結算 coin=583.0
+[Move] Team 28 抵達 (12,8)
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 23 抵達 (16,1)
+[Move] Team 21 抵達 (5,8)
+[Move] Team 22 抵達 (2,8)
+[Combat Start] Team-1000008 vs Team14
+[Ambush] NPC Team14 被 boar 伏擊
+[Salary] Team24 薪水結算 coin=197.5
+[Move] Team 13 抵達 (9,12)
+[Tick 15590] Person 30 (leader/team27) → P4_expand | stress=0.00 loyalty=0.00
+[Move] Team 23 抵達 (16,1)
+[Order] Team0 sell food ×40 (oid=129)
+[Order] Team0 buy weapon_melee_low ×1 (oid=130)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=131)
+[Order] Team0 buy material ×62 (oid=132)
+[DayNight] Day 11 開始
+[MsgPrune] 刪除過期訊息 global=3 known=17
+[Move] Team 24 抵達 (12,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=11 avg=1798 us max=75703 us ticks=1440 teams=24 factions=3 | ★>2s 幀數=0/15840
+GW|progress day 11 events 57 watches 1
+[Salary] Team17 薪水結算 coin=79.2
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 23 抵達 (16,1)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 sell food ×69 (oid=133)
+[Order] Team5 buy weapon_melee_low ×3 (oid=134)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=135)
+[Order] Team4 sell food ×34 (oid=136)
+[Order] Team11 sell food ×33 (oid=137)
+[Order] Team11 buy weapon_melee_low ×3 (oid=138)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=139)
+[Order] Team11 buy material ×4 (oid=140)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team13 sell material ×2 (oid=141)
+[Order] Team13 sell tools ×4 (oid=142)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 sell food ×79 (oid=143)
+[Order] Team2 sell tools ×1 (oid=144)
+[Order] Team2 buy weapon_melee_low ×3 (oid=145)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=146)
+[Order] Team2 buy material ×50 (oid=147)
+[Order] Team3 sell food ×82 (oid=148)
+[Order] Team3 buy weapon_melee_low ×3 (oid=149)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=150)
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team14 sell goods ×3 (oid=151)
+[Order] Team8 sell goods ×33 (oid=152)
+[Move] Team 23 抵達 (16,1)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team9 sell food ×33 (oid=153)
+[Order] Team9 buy weapon_melee_low ×3 (oid=154)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=155)
+[Order] Team9 buy material ×30 (oid=156)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Site] Faction-1 派工失敗: 地禿: 帶料 0／需 50，plains 先驗採不完（期限 30 天） (需 { "material": 50, "tools": 0 })
+[Order] Team6 sell food ×317 (oid=157)
+[Order] Team6 buy weapon_melee_low ×4 (oid=158)
+[Order] Team6 buy weapon_ranged_low ×3 (oid=159)
+[Order] Team6 buy material ×18 (oid=160)
+[Order] Team6 buy tools ×3 (oid=161)
+[Tick 16535] Person 15 (leader/team28) → P4_expand | stress=0.05 loyalty=0.00
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[Move] Team 17 抵達 (8,10)
+[Move] Team 23 抵達 (16,1)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team25 薪水結算 coin=0.0
+[Order] Team10 sell food ×31 (oid=162)
+[Order] Team10 buy weapon_melee_low ×3 (oid=163)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=164)
+[Order] Team10 buy material ×39 (oid=165)
+[Move] Team 14 抵達 (10,8)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 23 抵達 (16,1)
+[Move] Team 24 抵達 (14,8)
+[Order] Team1 sell food ×60 (oid=166)
+[Order] Team1 buy weapon_melee_low ×3 (oid=167)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=168)
+[Order] Team1 buy material ×18 (oid=169)
+[Order] Team24 sell tools ×9 (oid=170)
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=2220 us max=84996 us ticks=1440 teams=24 factions=3 | ★>2s 幀數=0/17280
+GW|progress day 12 events 60 watches 3
+[Order] Team25 buy food ×3 (oid=171)
+[Move] Team 13 抵達 (9,12)
+[Outpost] 設施完工 farming Lv1 at (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 25 抵達 (5,9)
+[SoloAI] Team27 → 投靠 (併入)
+[SubAI] Team25 引擎→rest (休息)
+[Survival] Team25 urgent days_left=0.0 rest→覓食
+[Move] Team 14 抵達 (8,10)
+[SoloAI] Team27 → 投靠 (併入)
+[Order] Team1 sell tools ×1 (oid=172)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 24 抵達 (15,8)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 27 抵達 (11,9)
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Move] Team 25 抵達 (5,9)
+[Merge] Team6 ← Team25 完全合併 (pop=8)
+[Salary] Team5 薪水結算 coin=588.3
+[Salary] Team7 薪水結算 coin=592.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Order] Team21 buy food ×1 (oid=173)
+[SoloAI] Team21 → 投靠 (併入)
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Move] Team 19 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Move] Team 17 抵達 (8,6)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 24 抵達 (16,8)
+[Combat Start] Team-1000009 vs Team24
+[Ambush] NPC Team24 被 boar 伏擊
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Order] Team19 sell material ×15 (oid=174)
+[Order] Team19 sell tools ×4 (oid=175)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Combat Start] Team-1000010 vs Team24
+[Ambush] NPC Team24 被 boar 伏擊
+[DayNight] Day 13 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Move] Team 14 抵達 (6,12)
+[Move] Team 21 抵達 (5,9)
+[TickPerf] day=13 avg=2182 us max=86572 us ticks=1440 teams=23 factions=3 | ★>2s 幀數=0/18720
+GW|progress day 13 events 62 watches 2
+[Merge] Team6 ← Team21 完全合併 (pop=9)
+[Move] Team 8 抵達 (5,10)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 27 抵達 (10,8)
+[Move] Team 22 抵達 (10,8)
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Move] Team 17 抵達 (8,4)
+[SoloAI] Team27 → 迎戰 (迎戰)
+[Move] Team 19 抵達 (8,8)
+[SoloAI] Team27 → 投靠 (併入)
+[Salary] Team4 薪水結算 coin=197.5
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 27 抵達 (10,8)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 14 抵達 (4,13)
+[Move] Team 24 抵達 (16,8)
+[SoloAI] Team27 → 投靠 (併入)
+[Order] Team28 buy food ×1 (oid=176)
+[SoloAI] Team28 → 乞食 (乞食)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Survival] Team22 warning days_left=3.0 偵查→投靠
+[Order] Team27 buy food ×1 (oid=177)
+[SoloAI] Team27 → 投靠 (併入)
+[Order] Team7 buy food ×4 (oid=178)
+[Move] Team 27 抵達 (10,8)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Move] Team 13 抵達 (9,12)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Order] Team23 sell goods ×6 (oid=179)
+[Move] Team 28 抵達 (12,8)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Move] Team 19 抵達 (7,8)
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Survival] Team17 warning days_left=3.0 偵查→建設
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Survival] Team17 warning days_left=2.9 建設→idle
+[Move] Team 8 抵達 (5,9)
+[Move] Team 13 抵達 (9,12)
+[Market@(5, 9)] Team8  outpost owner Team6 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Salary] Team2 薪水結算 coin=587.5
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team1
+[Survival] Team17 warning days_left=2.9 貿易→idle
+[Combat Start] Team-1000011 vs Team14
+[Ambush] NPC Team14 被 bear 伏擊
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team17 → 併入 Team2
+[Survival] Team17 warning days_left=2.8 貿易→投靠
+[SurvivalMergeIn] team=Team22 → 併入 Team1
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[SurvivalMergeIn] team=Team17 → 併入 Team2
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team1
+[DayNight] Day 14 開始
+[Move] Team 22 抵達 (10,8)
+[Move] Team 27 抵達 (10,8)
+[SoloAI] Team27 → 投靠 (併入)
+[TickPerf] day=14 avg=2627 us max=74092 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/20160
+GW|progress day 14 events 62 watches 0
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Survival] Team22 warning days_left=2.5 idle→投靠
+[StrategicAI] Faction0 首要目標: defend target=23
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team1
+[Move] Team 13 抵達 (9,12)
+[Merge] Team0 ← Team26 完全合併 (pop=4)
+[SoloAI] Team27 → 投靠 (併入)
+[Order] Team0 sell tools ×1 (oid=180)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Salary] Team19 薪水結算 coin=98.7
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team1
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Salary] Team9 薪水結算 coin=583.3
+[Order] Team22 buy food ×1 (oid=181)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[SurvivalMergeIn] team=Team22 → 併入 Team5
+[Sub] Team0 派出子隊 Team29 leader=P27 advisors=[] (pop=1 cap=4 task=偵查)
+[Move] Team 19 抵達 (5,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction0 首要目標: defend target=29
+[Survival] Team22 warning days_left=2.2 貿易→idle
+[Survival] Team22 warning days_left=2.1 偵查→貿易
+[Survival] Team22 warning days_left=2.1 貿易→idle
+[Survival] Team22 warning days_left=2.1 偵查→貿易
+[Move] Team 22 抵達 (10,8)
+[Market@(10, 8)] Team22  outpost owner Team1 成交
+[StrategicAI] Faction0 首要目標: defend target=23
+[SoloAI] Team27 → 投靠 (併入)
+[SubAI] Team22 引擎→外交 (求和)
+[Salary] Team24 薪水結算 coin=197.5
+[Move] Team 17 抵達 (8,6)
+[Move] Team 27 抵達 (10,8)
+[Merge] Team0 ← Team23 完全合併 (pop=4)
+[Move] Team 13 抵達 (9,12)
+[Order] Team24 sell goods ×4 (oid=182)
+[Outpost] 設施完工 stable Lv1 at (5,9)
+[Outpost] Team6 設施施工 farming → Lv1 at (5,9)
+[Order] Team7 sell goods ×20 (oid=183)
+[Order] Team7 sell material ×295 (oid=184)
+[Order] Team7 sell tools ×1 (oid=185)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 27 抵達 (10,8)
+[Ambition] Team6 rung 0→1 (定居 cap=2)
+[Move] Team 13 抵達 (9,12)
+[Salary] Team17 薪水結算 coin=79.2
+[Move] Team 14 抵達 (5,9)
+[Move] Team 19 抵達 (3,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Site] Faction0 派工失敗: pop 不足: 4 < 12 (需 { "material": 50, "tools": 0 })
+[Ambition] Team0 rung 0→1 (定居 cap=2)
+[Order] Team0 sell goods ×6 (oid=186)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=61 known=1033
+[Move] Team 22 抵達 (10,6)
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=15 avg=2267 us max=189901 us ticks=1440 teams=21 factions=3 | ★>2s 幀數=0/21600
+GW|progress day 15 events 63 watches 1
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 27 抵達 (10,8)
+[Market] Team17 <-> Team29 巧遇成交
+[Market] Team29 <-> Team17 巧遇成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Market] Team29 <-> Team17 巧遇成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Market] Team17 <-> Team29 巧遇成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Market] Team29 <-> Team17 巧遇成交
+[Salary] Team22 薪水結算 coin=96.2
+[Move] Team 13 抵達 (9,12)
+[Move] Team 27 抵達 (10,8)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 29 抵達 (10,8)
+[StrategicAI] Faction0 首要目標: defend target=29
+[SoloAI] Team27 → 投靠 (併入)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 19 抵達 (1,8)
+[SoloAI] Team27 → 投靠 (併入)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 27 抵達 (10,8)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 14 抵達 (3,9)
+[Move] Team 27 抵達 (10,8)
+[Move] Team 8 抵達 (8,10)
+[Move] Team 13 抵達 (9,12)
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[Move] Team 17 抵達 (11,9)
+[Move] Team 22 抵達 (12,4)
+[Market@(11, 9)] Team17  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team17 引擎→外交 (外交)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=583.8
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=5 known=93
+[Move] Team 27 抵達 (10,8)
+[TickPerf] day=16 avg=2146 us max=174253 us ticks=1440 teams=21 factions=3 | ★>2s 幀數=0/23040
+GW|progress day 16 events 63 watches 0
+[SoloAI] Team28 → 紮營 (紮營)
+[Move] Team 13 抵達 (9,12)
+[CampL0] Team28 紮營 L0 @(12,8)
+[Outpost] Team28 開始建 civilian Lv1 at (12,8)（需 720 person-ticks，需材 50 帶料抵 0 待採 50）
+[SoloAI] Team28 → 建設 (紮根)
+[Order] Team17 sell goods ×4 (oid=187)
+[Order] Team17 sell tools ×2 (oid=188)
+[Salary] Team6 薪水結算 coin=524.7
+[Move] Team 14 抵達 (3,8)
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 sell food ×30 (oid=189)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team13 sell material ×2 (oid=190)
+[Order] Team13 sell tools ×4 (oid=191)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team6 rung 1→2 (定居 cap=2)
+[Sub] Team0 派出子隊 Team30 leader=P1 advisors=[] (pop=1 cap=1 task=偵查)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 27 抵達 (10,8)
+[StrategicAI] Faction0 首要目標: defend target=30
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team27 → 投靠 (併入)
+[Order] Team0 sell food ×45 (oid=192)
+[Order] Team0 buy weapon_melee_low ×1 (oid=193)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=194)
+[Order] Team0 buy material ×61 (oid=195)
+[Order] Team3 sell food ×85 (oid=196)
+[Order] Team3 buy weapon_melee_low ×3 (oid=197)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=198)
+[Tag] Team28 -流亡（恢復）
+[Move] Team 22 抵達 (14,2)
+[Move] Team 24 抵達 (8,10)
+[Order] Team5 sell food ×44 (oid=199)
+[Order] Team5 buy weapon_melee_low ×3 (oid=200)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=201)
+[Salary] Team10 薪水結算 coin=582.9
+[Site] Faction0 派工失敗: pop 不足: 3 < 12 (需 { "material": 50, "tools": 0 })
+[Order] Team8 sell goods ×33 (oid=202)
+[Order] Team28 buy material ×29 (oid=203)
+[Site] Faction-1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Move] Team 27 抵達 (10,8)
+[Salary] Team0 薪水結算 coin=349.9
+[Order] Team2 sell food ×75 (oid=204)
+[Order] Team2 sell tools ×1 (oid=205)
+[Order] Team2 buy weapon_melee_low ×3 (oid=206)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=207)
+[Order] Team2 buy material ×43 (oid=208)
+[Order] Team11 sell food ×14 (oid=209)
+[Order] Team11 buy weapon_melee_low ×3 (oid=210)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=211)
+[Order] Team11 buy material ×2 (oid=212)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 17 抵達 (11,11)
+[Move] Team 29 抵達 (5,9)
+[Move] Team 14 抵達 (1,8)
+[Move] Team 27 抵達 (10,8)
+[Move] Team 30 抵達 (8,6)
+[Order] Team6 sell food ×320 (oid=213)
+[Order] Team6 buy weapon_melee_low ×5 (oid=214)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=215)
+[Order] Team6 buy material ×34 (oid=216)
+[Order] Team6 buy tools ×4 (oid=217)
+[Combat Start] Team-1000012 vs Team17
+[Ambush] NPC Team17 被 bear 伏擊
+[Ambition] Team17 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (10,10)
+[Move] Team 13 抵達 (9,12)
+[Order] Team9 sell food ×15 (oid=218)
+[Order] Team9 buy weapon_melee_low ×3 (oid=219)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=220)
+[Order] Team9 buy material ×23 (oid=221)
+[Order] Team10 sell food ×14 (oid=222)
+[Order] Team10 buy weapon_melee_low ×3 (oid=223)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=224)
+[Order] Team10 buy material ×36 (oid=225)
+[Move] Team 22 抵達 (15,1)
+[Combat Start] Team-1000013 vs Team17
+[Ambush] NPC Team17 被 bear 伏擊
+[Order] Team30 sell goods ×1 (oid=226)
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=4 known=76
+[Move] Team 14 抵達 (0,8)
+[Move] Team 19 抵達 (6,8)
+[Move] Team 27 抵達 (10,8)
+[TickPerf] day=17 avg=1648 us max=45867 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/24480
+GW|progress day 17 events 70 watches 6
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team27 → 覓食 (覓食)
+[Move] Team 17 抵達 (11,12)
+[Move] Team 27 抵達 (10,9)
+[Order] Team8 buy food ×1 (oid=227)
+[Move] Team 14 抵達 (0,8)
+[Move] Team 24 抵達 (6,12)
+[Merge] Team0 ← Team30 完全合併 (pop=4)
+[Move] Team 17 抵達 (11,13)
+[Move] Team 13 抵達 (9,12)
+[Order] Team24 sell tools ×6 (oid=228)
+[Sub] Team0 派出子隊 Team31 leader=P1 advisors=[] (pop=1 cap=1 task=偵查)
+[StrategicAI] Faction0 首要目標: defend target=31
+[Move] Team 29 抵達 (3,11)
+[Move] Team 14 抵達 (0,8)
+[SurvivalForage] team=Team24 pop=1 → 覓食 @(4,13)
+[Survival] Team24 warning days_left=3.0 偵查→覓食
+[Order] Team1 sell food ×36 (oid=229)
+[Order] Team1 sell tools ×1 (oid=230)
+[Order] Team1 buy weapon_melee_low ×3 (oid=231)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=232)
+[Order] Team1 buy material ×8 (oid=233)
+[Move] Team 19 抵達 (8,8)
+[SurvivalForage] team=Team24 pop=1 → 覓食 @(4,13)
+[SurvivalForage] team=Team24 pop=1 → 覓食 @(4,13)
+[Move] Team 13 抵達 (9,12)
+[SurvivalForage] team=Team24 pop=1 → 覓食 @(4,13)
+[Move] Team 29 抵達 (2,12)
+[SurvivalForage] team=Team24 pop=1 → 覓食 @(4,13)
+[Salary] Team27 薪水結算 coin=0.0
+[Move] Team 14 抵達 (0,8)
+[Move] Team 24 抵達 (4,13)
+[SurvivalForage] team=Team24 pop=1 → 覓食 @(3,14)
+[Order] Team31 sell goods ×1 (oid=234)
+[Move] Team 8 抵達 (8,10)
+[Move] Team 13 抵達 (9,12)
+[Salary] Team14 薪水結算 coin=32.7
+[Move] Team 19 抵達 (9,8)
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=6 known=74
+[Move] Team 14 抵達 (0,8)
+[TickPerf] day=18 avg=1747 us max=53513 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/25920
+GW|progress day 18 events 70 watches 0
+[Salary] Team2 薪水結算 coin=582.2
+[Move] Team 24 抵達 (3,14)
+[Outpost] 設施完工 farming Lv1 at (11,9)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 14 抵達 (0,8)
+[SurvivalForage] team=Team22 pop=1 → 覓食 @(11,3)
+[Survival] Team22 warning days_left=3.0 貿易→覓食
+[SurvivalForage] team=Team22 pop=1 → 覓食 @(11,3)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 19 抵達 (9,8)
+[Move] Team 24 抵達 (4,13)
+[Move] Team 14 抵達 (0,8)
+[Move] Team 22 抵達 (11,3)
+[Move] Team 31 抵達 (8,10)
+[SurvivalForage] team=Team22 pop=1 → 覓食 @(11,3)
+[Survival] Team22 warning days_left=2.8 idle→覓食
+[Market@(8, 10)] Team31  outpost owner Team3 成交
+[Move] Team 13 抵達 (9,12)
+[Salary] Team7 薪水結算 coin=592.5
+[Move] Team 14 抵達 (0,8)
+[Move] Team 17 抵達 (11,9)
+[Market@(11, 9)] Team17  outpost owner Team7 成交
+[Salary] Team11 薪水結算 coin=583.0
+[SubAI] Team17 引擎→徵收 (徵收)
+[Move] Team 19 抵達 (9,8)
+[Move] Team 24 抵達 (4,13)
+[Move] Team 22 抵達 (11,3)
+[Move] Team 13 抵達 (9,12)
+[Site] Faction-1 派工失敗: 地禿: 帶料 1／需 50，plains 先驗採不完（期限 30 天） (需 { "material": 50, "tools": 0 })
+[Move] Team 17 抵達 (10,10)
+[Order] Team7 sell food ×1 (oid=235)
+[DayNight] Day 19 開始
+[MsgPrune] 刪除過期訊息 global=4 known=57
+[Move] Team 24 抵達 (4,13)
+[SoloAI] Team27 → 投靠 (併入)
+[TickPerf] day=19 avg=2076 us max=150489 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/27360
+GW|progress day 19 events 70 watches 0
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team27 → 投靠 (併入)
+[SoloAI] Team27 → 投靠 (併入)
+[StrategicAI] Faction0 首要目標: defend target=29
+[SoloAI] Team27 → 投靠 (併入)
+[SoloAI] Team27 → 投靠 (併入)
+[Move] Team 19 抵達 (11,8)
+[Move] Team 27 抵達 (10,8)
+[Merge] Team1 ← Team27 完全合併 (absorber_pop=7)
+[Tick 27751] Person 30 (leader/team1) → P2_produce | stress=0.00 loyalty=0.00
+[Move] Team 8 抵達 (11,9)
+[Move] Team 13 抵達 (9,12)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Sub] Team0 派出子隊 Team32 leader=P29 advisors=[] (pop=1 cap=5 task=偵查)
+[Move] Team 31 抵達 (5,9)
+[StrategicAI] Faction0 首要目標: defend target=32
+[Move] Team 17 抵達 (8,12)
+[Outpost] 設施完工 farming Lv1 at (5,9)
+[Site] Faction-1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Move] Team 13 抵達 (9,12)
+[Site] Faction0 派工失敗: pop 不足: 2 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 28203] Person 34 (member/team0) → P2_produce | stress=0.00 loyalty=0.68
+[Salary] Team1 薪水結算 coin=571.3
+[Salary] Team8 薪水結算 coin=238.4
+[Order] Team32 sell goods ×1 (oid=236)
+[Order] Team32 sell material ×1 (oid=237)
+[Move] Team 19 抵達 (12,8)
+[Salary] Team13 薪水結算 coin=98.7
+[Move] Team 13 抵達 (9,12)
+[Market] Team22 <-> Team32 巧遇成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team7 sell goods ×20 (oid=238)
+[Order] Team7 sell material ×255 (oid=239)
+[Market] Team22 <-> Team32 巧遇成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Market] Team22 <-> Team32 巧遇成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team22 sell goods ×1 (oid=240)
+[Order] Team22 sell material ×1 (oid=241)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=21 known=336
+[Move] Team 29 抵達 (11,9)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[TickPerf] day=20 avg=2540 us max=205076 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/28800
+GW|progress day 20 events 76 watches 3
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 22 抵達 (6,8)
+[Claim] Team22 於 (6, 8) 領回 coin=0.00 goods=16.0
+[Market@(6, 8)] Team22  outpost owner Team0 成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SubAI] Team22 引擎→逃跑 (survival)
+[Merge] Team4 ← Team24 完全合併 (pop=2)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Tick 29015] Person 26 (member/team4) → P2_produce | stress=0.00 loyalty=0.34
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team0 sell goods ×2 (oid=242)
+[Move] Team 19 抵達 (14,8)
+[Move] Team 31 抵達 (3,9)
+[Barter] Team28 60xfood <-> Team8 20xgoods
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team1 sell material ×2 (oid=243)
+[Move] Team 8 抵達 (10,10)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team29 sell goods ×7 (oid=244)
+[Move] Team 29 抵達 (13,7)
+[Move] Team 14 抵達 (5,10)
+[Order] Team4 buy weapon_melee_low ×1 (oid=245)
+[Order] Team4 buy weapon_ranged_low ×1 (oid=246)
+[Move] Team 17 抵達 (11,9)
+[Market@(11, 9)] Team17  outpost owner Team7 成交
+[SubAI] Team17 引擎→逃跑 (survival)
+[Sub] Team4 派出子隊 Team33 leader=P26 advisors=[] (pop=1 cap=50 task=偵查)
+[Ambition] Team22 rung 0→1 (商業 cap=3)
+[Move] Team 13 抵達 (9,12)
+[Tick 29596] Person 26 (member/team33) → P4_expand | stress=0.00 loyalty=0.30
+[Move] Team 32 抵達 (10,8)
+[Salary] Team3 薪水結算 coin=502.3
+[Move] Team 17 抵達 (10,10)
+[Salary] Team28 薪水結算 coin=0.0
+[Move] Team 28 抵達 (10,8)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SurvivalMergeIn] team=Team32 → 併入 Team5
+[Survival] Team32 warning days_left=3.0 偵查→投靠
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team28 sell goods ×20 (oid=247)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SurvivalMergeIn] team=Team32 → 併入 Team5
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Salary] Team4 薪水結算 coin=214.2
+[SurvivalCamp] team=Team32 → 紮營 @(10,7)
+[Outpost] Team1 設施施工 stable → Lv1 at (10,8)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[CampL0] Team32 紮營 L0 @(10,7)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=40 known=619
+[Move] Team 8 抵達 (10,12)
+[Move] Team 29 抵達 (15,5)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[TickPerf] day=21 avg=2641 us max=226342 us ticks=1440 teams=22 factions=3 | ★>2s 幀數=0/30240
+GW|progress day 21 events 90 watches 13
+[Move] Team 28 抵達 (10,8)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team33 sell material ×8 (oid=248)
+[Order] Team33 sell tools ×8 (oid=249)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 14 抵達 (5,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 17 抵達 (11,9)
+[Market@(11, 9)] Team17  outpost owner Team7 成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team11 buy food ×1 (oid=250)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 28 抵達 (10,8)
+[Move] Team 31 抵達 (1,9)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Combat Start] Team-1000014 vs Team31
+[Ambush] NPC Team31 被 boar 伏擊
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 17 抵達 (11,9)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team10 buy food ×1 (oid=251)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team4 sell food ×11 (oid=252)
+[Move] Team 28 抵達 (10,8)
+[Sub] Team0 派出子隊 Team34 leader=P34 advisors=[] (pop=1 cap=10 task=偵查)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team9 buy food ×1 (oid=253)
+[Move] Team 17 抵達 (11,9)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Tick 30978] Person 34 (member/team34) → P1_comply | stress=0.00 loyalty=0.69
+[SubAI] Team17 引擎→逃跑 (survival)
+[Order] Team3 sell food ×87 (oid=254)
+[Order] Team3 buy weapon_melee_low ×3 (oid=255)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=256)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team13 sell material ×2 (oid=257)
+[Order] Team13 sell tools ×4 (oid=258)
+[Move] Team 14 抵達 (5,13)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team11 buy weapon_melee_low ×3 (oid=259)
+[Order] Team11 buy weapon_ranged_low ×3 (oid=260)
+[Site] Faction0 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 17 抵達 (10,10)
+[Move] Team 28 抵達 (10,8)
+[Merge] Team8 ← Team17 完全合併 (pop=2)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team5 sell food ×18 (oid=261)
+[Order] Team5 buy weapon_melee_low ×3 (oid=262)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=263)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team8 sell goods ×10 (oid=264)
+[Order] Team8 sell tools ×2 (oid=265)
+[Site] Faction2 派工失敗: pop 不足: 2 < 12 (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×15 (oid=266)
+[Order] Team0 buy material ×61 (oid=267)
+[Merge] Team0 ← Team32 完全合併 (pop=2)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team2 sell food ×73 (oid=268)
+[Order] Team2 sell tools ×1 (oid=269)
+[Order] Team2 buy weapon_melee_low ×3 (oid=270)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=271)
+[Order] Team2 buy material ×36 (oid=272)
+[Order] Team28 buy material ×26 (oid=273)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 14 抵達 (5,14)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team10 buy weapon_melee_low ×3 (oid=274)
+[Order] Team10 buy weapon_ranged_low ×3 (oid=275)
+[Order] Team10 buy material ×33 (oid=276)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=6 known=108
+[Move] Team 28 抵達 (10,8)
+[Move] Team 34 抵達 (8,6)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[TickPerf] day=22 avg=2367 us max=200280 us ticks=1440 teams=21 factions=3 | ★>2s 幀數=0/31680
+GW|progress day 22 events 93 watches 3
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team0 buy weapon_melee_low ×1 (oid=277)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=278)
+[Salary] Team11 薪水結算 coin=577.3
+[Move] Team 19 抵達 (7,11)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team9 buy weapon_melee_low ×3 (oid=279)
+[Order] Team9 buy weapon_ranged_low ×3 (oid=280)
+[Order] Team9 buy material ×15 (oid=281)
+[Order] Team6 sell food ×334 (oid=282)
+[Order] Team6 buy weapon_melee_low ×5 (oid=283)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=284)
+[Order] Team6 buy material ×21 (oid=285)
+[Order] Team6 buy tools ×4 (oid=286)
+[Move] Team 8 抵達 (11,9)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 28 抵達 (10,8)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team34 sell goods ×1 (oid=287)
+[Order] Team34 sell material ×1 (oid=288)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 8 抵達 (11,9)
+[Merge] Team0 ← Team34 完全合併 (pop=3)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 28 抵達 (10,8)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team28 buy food ×1 (oid=289)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Sub] Team0 派出子隊 Team35 leader=P29 advisors=[] (pop=1 cap=5 task=偵查)
+[Ambition] Team29 rung 0→1 (定居 cap=3)
+[StrategicAI] Faction0 首要目標: defend target=35
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Sub] Team8 派出子隊 Team36 leader=P24 advisors=[] (pop=1 cap=10 task=偵查)
+[Move] Team 13 抵達 (9,12)
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 8 抵達 (11,9)
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 28 抵達 (10,8)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Outpost] 設施完工 apothecary Lv2 at (8,10)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team3 sell material ×188 (oid=290)
+[Order] Team3 sell tools ×18 (oid=291)
+[SurvivalCamp] team=Team19 → 紮營 @(6,12)
+[Survival] Team19 warning days_left=3.0 偵查→紮營
+[SoloAI] Team28 → 迎戰 (迎戰)
+[CampL0] Team19 紮營 L0 @(6,12)
+[Move] Team 13 抵達 (9,12)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Merge] Team0 ← Team31 完全合併 (pop=3)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Salary] Team5 薪水結算 coin=578.8
+[Move] Team 8 抵達 (11,9)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Move] Team 22 抵達 (10,10)
+[Move] Team 33 抵達 (10,6)
+[SoloAI] Team28 → 迎戰 (迎戰)
+[Order] Team1 sell food ×8 (oid=292)
+[Order] Team1 buy weapon_melee_low ×4 (oid=293)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=294)
+[Order] Team1 buy material ×15 (oid=295)
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=3 known=54
+[Move] Team 28 抵達 (10,8)
+[SoloAI] Team28 → 投靠 (併入)
+[TickPerf] day=23 avg=2352 us max=117997 us ticks=1440 teams=21 factions=3 | ★>2s 幀數=0/33120
+GW|progress day 23 events 93 watches 0
+[SoloAI] Team28 → 投靠 (併入)
+[Salary] Team2 薪水結算 coin=576.5
+[Move] Team 13 抵達 (9,12)
+[Merge] Team1 ← Team28 完全合併 (absorber_pop=8)
+[Tick 33287] Person 15 (leader/team1) → P2_produce | stress=0.00 loyalty=0.00
+[Merge] Team4 ← Team19 完全合併 (pop=2)
+[Salary] Team22 薪水結算 coin=34.5
+[Salary] Team13 薪水結算 coin=98.7
+[Move] Team 13 抵達 (9,12)
+[Order] Team7 buy food ×1 (oid=296)
+[Move] Team 33 抵達 (10,5)
+[Move] Team 29 抵達 (5,12)
+[Move] Team 22 抵達 (11,9)
+[Market@(11, 9)] Team22  outpost owner Team7 成交
+[Merge] Team8 ← Team22 完全合併 (pop=2)
+[Move] Team 35 抵達 (8,10)
+[Site] Faction1 派工失敗: pop 不足: 2 < 12 (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (11,9)
+[Move] Team 13 抵達 (9,12)
+[Sub] Team4 派出子隊 Team37 leader=P28 advisors=[] (pop=1 cap=12 task=偵查)
+[Salary] Team8 薪水結算 coin=326.8
+[Move] Team 14 抵達 (11,9)
+[Claim] Team14 於 (11, 9) 領回 coin=0.00 goods=3.0
+[Barter] Team14 6xfood <-> Team8 6xgoods
+[Barter] Team14 1xgoods <-> Team8 3xfood
+[Market@(11, 9)] Team14  outpost owner Team7 成交
+[Merge] Team8 ← Team14 完全合併 (pop=3)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 33 抵達 (10,6)
+[SubAI] Team33 引擎→外交 (求和)
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=6 known=59
+[TickPerf] day=24 avg=1516 us max=158674 us ticks=1440 teams=18 factions=3 | ★>2s 幀數=0/34560
+GW|progress day 24 events 94 watches 1
+[Move] Team 13 抵達 (9,12)
+[Order] Team11 sell material ×1 (oid=297)
+[Move] Team 29 抵達 (3,14)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 37 抵達 (5,9)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy food ×1 (oid=298)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 33 抵達 (10,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team37 sell material ×4 (oid=299)
+[Order] Team37 sell tools ×4 (oid=300)
+[Move] Team 36 抵達 (6,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[Market@(6, 6)] Team36  outpost owner Team9 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team8 sell material ×1 (oid=301)
+[SubAI] Team36 引擎→外交 (外交)
+[Move] Team 8 抵達 (11,9)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team7 sell food ×1 (oid=302)
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team0 派出子隊 Team38 leader=P1 advisors=[] (pop=1 cap=1 task=偵查)
+[StrategicAI] Faction0 首要目標: defend target=38
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[Move] Team 35 抵達 (5,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team8 派出子隊 Team39 leader=P17 advisors=[] (pop=1 cap=1 task=偵查)
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 首要目標: defend target=36
+[Move] Team 8 抵達 (11,9)
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Market@(11, 9)] Team8  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team29 薪水結算 coin=123.5
+[Move] Team 33 抵達 (10,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team3 薪水結算 coin=496.6
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 39 抵達 (10,10)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 首要目標: defend target=39
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team39 引擎→外交 (外交)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team33 引擎→外交 (求和)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=4 known=56
+[Move] Team 8 抵達 (11,9)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=25 avg=1963 us max=119695 us ticks=1440 teams=20 factions=3 | ★>2s 幀數=0/36000
+GW|progress day 25 events 94 watches 0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Site] Faction1 派工失敗: 無 advisor 可派可升 (需 { "material": 50, "tools": 0 })
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 29 抵達 (7,11)
+[Market@(7, 11)] Team29  outpost owner Team11 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team29 引擎→徵收 (徵收)
+[Order] Team11 buy food ×13 (oid=303)
+[Move] Team 33 抵達 (10,6)
+[Move] Team 35 抵達 (5,7)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team38 sell goods ×1 (oid=304)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=519.9
+[Move] Team 39 抵達 (11,9)
+[Merge] Team8 ← Team39 完全合併 (pop=3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team0 sell goods ×2 (oid=305)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Barter] Team33 2xtools <-> Team36 6xmaterial
+[Market@(10, 6)] Team33  outpost owner Team5 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team7 sell goods ×20 (oid=306)
+[Order] Team7 sell material ×255 (oid=307)
+[Order] Team36 sell material ×1 (oid=308)
+[Order] Team36 sell tools ×2 (oid=309)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=501.3
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team8 派出子隊 Team40 leader=P17 advisors=[] (pop=1 cap=1 task=偵查)
+[Market] Team8 <-> Team40 巧遇成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 首要目標: defend target=40
+[Salary] Team0 薪水結算 coin=298.6
+[Move] Team 38 抵達 (10,8)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Market] Team8 <-> Team40 巧遇成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Market] Team8 <-> Team40 巧遇成交
+[Outpost] Team3 設施施工 workshop → Lv1 at (8,10)
+[Move] Team 13 抵達 (9,12)
+[Site] Faction0 派工失敗: pop 不足: 2 < 12 (需 { "material": 50, "tools": 0 })
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=38 known=472
+[Move] Team 35 抵達 (5,5)
+[Merge] Team8 ← Team40 完全合併 (pop=3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=26 avg=1768 us max=129431 us ticks=1440 teams=19 factions=3 | ★>2s 幀數=0/37440
+GW|progress day 26 events 96 watches 2
+[Order] Team38 sell material ×1 (oid=310)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team4 薪水結算 coin=160.2
+[Move] Team 8 抵達 (8,10)
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team33 sell material ×7 (oid=311)
+[Order] Team33 sell tools ×6 (oid=312)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 36 抵達 (11,9)
+[Move] Team 29 抵達 (6,8)
+[Merge] Team0 ← Team29 完全合併 (pop=3)
+[Site] Faction2 派工失敗: pop 不足: 3 < 12 (需 { "material": 50, "tools": 0 })
+[Move] Team 37 抵達 (13,6)
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team0 派出子隊 Team41 leader=P27 advisors=[] (pop=1 cap=4 task=偵查)
+[Sub] Team8 派出子隊 Team42 leader=P17 advisors=[] (pop=1 cap=1 task=偵查)
+[StrategicAI] Faction0 首要目標: defend target=41
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 首要目標: defend target=42
+[Order] Team11 buy weapon_melee_low ×3 (oid=313)
+[Order] Team11 buy weapon_ranged_low ×2 (oid=314)
+[Order] Team5 buy food ×2 (oid=315)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team10 buy food ×18 (oid=316)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 sell food ×82 (oid=317)
+[Order] Team3 buy weapon_melee_low ×3 (oid=318)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=319)
+[Move] Team 8 抵達 (10,10)
+[Move] Team 36 抵達 (13,9)
+[Move] Team 37 抵達 (14,5)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 sell food ×1 (oid=320)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team13 sell material ×2 (oid=321)
+[Order] Team13 sell tools ×4 (oid=322)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team9 sell material ×5 (oid=323)
+[Order] Team9 buy food ×18 (oid=324)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=6 known=67
+[Move] Team 33 抵達 (5,9)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=27 avg=1281 us max=42979 us ticks=1440 teams=20 factions=3 | ★>2s 幀數=0/38880
+GW|progress day 27 events 97 watches 0
+[Order] Team42 sell goods ×2 (oid=325)
+[Order] Team8 sell goods ×5 (oid=326)
+[Move] Team 38 抵達 (13,4)
+[Market@(5, 9)] Team33  outpost owner Team6 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team33 引擎→外交 (求和)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 41 抵達 (8,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team33 薪水結算 coin=375.1
+[Order] Team5 buy weapon_melee_low ×3 (oid=327)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=328)
+[Move] Team 36 抵達 (11,9)
+[Market@(11, 9)] Team36  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team36 引擎→逃跑 (survival)
+[Order] Team2 sell food ×71 (oid=329)
+[Order] Team2 sell tools ×1 (oid=330)
+[Order] Team2 buy weapon_melee_low ×3 (oid=331)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=332)
+[Order] Team2 buy material ×28 (oid=333)
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[Move] Team 42 抵達 (7,11)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 37 抵達 (13,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SubAI] Team42 引擎→貿易 (maintain_food:resource)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team0 sell food ×15 (oid=334)
+[Order] Team0 buy weapon_melee_low ×1 (oid=335)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=336)
+[Order] Team0 buy material ×59 (oid=337)
+[Order] Team41 sell material ×1 (oid=338)
+[Order] Team9 buy weapon_melee_low ×2 (oid=339)
+[Order] Team9 buy weapon_ranged_low ×2 (oid=340)
+[Move] Team 36 抵達 (10,10)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 首要目標: defend target=36
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team10 buy weapon_melee_low ×2 (oid=341)
+[Order] Team10 buy weapon_ranged_low ×2 (oid=342)
+[Order] Team10 buy material ×8 (oid=343)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=553.0
+[Faction] Team11 脫離勢力2
+[Merge] Team0 ← Team41 完全合併 (pop=3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team38 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (8,10)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 38 抵達 (14,3)
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Faction] Team9 脫離勢力2
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Sub] Team0 派出子隊 Team43 leader=P27 advisors=[] (pop=1 cap=4 task=偵查)
+[Sub] Team8 派出子隊 Team44 leader=P32 advisors=[] (pop=1 cap=50 task=偵查)
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[StrategicAI] Faction0 首要目標: defend target=43
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Faction] Team10 脫離勢力2
+[Salary] Team9 薪水結算 coin=569.7
+[Move] Team 33 抵達 (3,11)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[SurvivalForage] team=Team42 pop=1 → 覓食 @(8,9)
+[Survival] Team42 warning days_left=3.0 偵查→覓食
+[Move] Team 36 抵達 (9,10)
+[Move] Team 38 抵達 (13,4)
+[Merge] Team8 ← Team36 完全合併 (pop=2)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Move] Team 44 抵達 (9,10)
+[Merge] Team8 ← Team44 完全合併 (pop=3)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Order] Team6 sell food ×299 (oid=344)
+[Order] Team6 buy weapon_melee_low ×5 (oid=345)
+[Order] Team6 buy weapon_ranged_low ×4 (oid=346)
+[Salary] Team10 薪水結算 coin=577.1
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×4 (oid=347)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=348)
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=6 known=89
+[Move] Team 42 抵達 (8,9)
+[StrategicAI] Faction0 首要目標: defend target=35
+[TickPerf] day=28 avg=2012 us max=67987 us ticks=1440 teams=19 factions=3 | ★>2s 幀數=0/40320
+GW|progress day 28 events 99 watches 2
+[SurvivalForage] team=Team42 pop=1 → 覓食 @(8,9)
+[Survival] Team42 warning days_left=2.8 idle→覓食
+[Order] Team10 sell tools ×1 (oid=349)
+[Move] Team 13 抵達 (9,12)
+[Move] Team 8 抵達 (10,10)
+[Move] Team 37 抵達 (15,4)
+[Claim] Team8 於 (10, 10) 領回 coin=0.00 goods=12.0
+[Market@(10, 10)] Team8  outpost owner Team10 成交
+[Move] Team 42 抵達 (8,9)
+[Order] Team8 sell tools ×2 (oid=350)
+[Order] Team11 sell tools ×1 (oid=351)
+[Order] Team9 sell tools ×1 (oid=352)
+[Move] Team 13 抵達 (9,12)
+[Order] Team6 sell material ×1 (oid=353)
+[Order] Team43 sell material ×1 (oid=354)
+[Move] Team 33 抵達 (1,13)
+[Move] Team 38 抵達 (13,4)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Move] Team 13 抵達 (9,12)
+[Move] Team 8 抵達 (9,10)
+[Move] Team 43 抵達 (8,10)
+[StrategicAI] Faction0 首要目標: defend target=43
+[Sub] Team8 派出子隊 Team45 leader=P24 advisors=[] (pop=1 cap=10 task=偵查)
+[Tribute] Team8 徵收 Team45 rate=0.04
+[StrategicAI] Faction2 首要目標: defend target=45
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Salary] Team35 薪水結算 coin=137.7
+[Move] Team 33 抵達 (1,13)
+[Market] Team8 <-> Team45 巧遇成交
+[Market] Team45 <-> Team8 巧遇成交
+[Market] Team8 <-> Team45 巧遇成交
+[Move] Team 13 抵達 (9,12)
+[Move] Team 35 抵達 (12,8)
+[Move] Team 38 抵達 (13,4)
+[Salary] Team8 薪水結算 coin=438.8
+[Salary] Team37 薪水結算 coin=160.2
+[Survival] Team33 warning days_left=3.0 外交→貿易
+[Survival] Team33 warning days_left=2.9 貿易→idle
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=8 known=103
+[Move] Team 8 抵達 (8,10)
+[Move] Team 37 抵達 (13,6)
+[Move] Team 45 抵達 (9,10)
+[Market@(8, 10)] Team8  outpost owner Team3 成交
+[StrategicAI] Faction2 受威脅，尋求結盟
+[TickPerf] day=29 avg=2128 us max=78734 us ticks=1440 teams=20 factions=3 | ★>2s 幀數=0/41760
+GW|progress day 29 events 100 watches 0
+[Survival] Team33 warning days_left=2.8 貿易→idle
+[SurvivalForage] team=Team13 pop=1 → 覓食 @(9,11)
+[Survival] Team13 warning days_left=3.0 偵查→覓食
+[Salary] Team6 薪水結算 coin=344.9
+[Move] Team 13 抵達 (9,11)
+[SurvivalForage] team=Team13 pop=1 → 覓食 @(9,11)
+[Survival] Team13 warning days_left=2.9 idle→覓食
+[Move] Team 35 抵達 (11,9)
+[Market@(11, 9)] Team35  outpost owner Team7 成交
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Survival] Team33 warning days_left=2.8 貿易→idle
+[SubAI] Team35 引擎→逃跑 (survival)
+[Move] Team 45 抵達 (9,10)
+[Survival] Team33 warning days_left=2.7 貿易→idle
+[Move] Team 8 抵達 (7,11)
+[Move] Team 37 抵達 (13,6)
+[StrategicAI] Faction2 受威脅，尋求結盟
+[Order] Team1 sell material ×49 (oid=355)
+[Order] Team1 sell tools ×2 (oid=356)
+[Order] Team35 sell material ×1 (oid=357)
+[Order] Team45 sell goods ×2 (oid=358)
+[Move] Team 13 抵達 (9,11)
+[Survival] Team33 warning days_left=2.6 貿易→idle
+[Move] Team 38 抵達 (13,4)
+[Survival] Team33 warning days_left=2.5 貿易→idle
+[Move] Team 37 抵達 (13,6)
+[Move] Team 45 抵達 (9,10)
+[Survival] Team33 warning days_left=2.4 貿易→idle
+[Event] Team 1 領袖替換：Person 2 → Person 30（統領=0.54）
+[Move] Team 13 抵達 (9,12)
+[Survival] Team33 warning days_left=2.3 貿易→idle
+[Move] Team 43 抵達 (5,9)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team0 派出子隊 Team46 leader=P34 advisors=[] (pop=1 cap=10 task=偵查)
+[Survival] Team33 warning days_left=2.3 貿易→idle
+[Move] Team 37 抵達 (13,6)
+[Survival] Team33 warning days_left=2.2 貿易→idle
+[Move] Team 13 抵達 (9,12)
+[Move] Team 45 抵達 (9,10)
+[Survival] Team33 warning days_left=2.1 貿易→idle
+[Move] Team 38 抵達 (13,4)
+[Order] Team7 sell food ×2 (oid=359)
+[Move] Team 35 抵達 (8,10)
+[Survival] Team33 warning days_left=2.0 貿易→idle
+[Salary] Team38 薪水結算 coin=151.9
+[Extract] Team9 徵用 2 coin (飢餓緊急)
+[Extract] Team9 徵用 1 coin (飢餓緊急)
+[Tick 43101] Person 18 (leader/team9) → P1_comply | stress=0.06 loyalty=0.90
+[Tick 43101] Person 19 (civilian/team9) → P1_comply | stress=0.06 loyalty=0.81
+[Salary] Team7 薪水結算 coin=497.1
+[Order] Team33 buy food ×1 (oid=360)
+[Order] Team11 sell material ×42 (oid=361)
+[Survival] Team33 warning days_left=1.9 貿易→idle
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=2 known=31
+[Move] Team 8 抵達 (5,13)
+[Move] Team 37 抵達 (13,6)
+[Horse] Outpost (6, 10) 捕野馬 +1
+[TickPerf] day=30 avg=2357 us max=48237 us ticks=1440 teams=21 factions=3 | ★>2s 幀數=0/43200
+GW|progress day 30 events 101 watches 2
+GW|teams=21 tick=43200
+GW|--- 全部事件（含糧橋／subteam_dispatch，因升人在它們之前）---
+GW|  gate pop                = 27
+GW|  gate no_advisor         = 74
+GW|  funnel 對帳 pop=27 no_advisor=74 food_bridge=0
+GW|--- 1. 人數門（pop）---
+GW|  gap3-6   次數 10｜不同隊 2
+GW|  gap7+    次數 17｜不同隊 3
+GW|  同隊被擋次數分布（隊數）：{ "11次+": 1, "4-10次": 2, "1次": 1 }｜最多一支 16 次
+GW|  被擋時 pop 分布（pop→次）：["2→8", "3→6", "4→1", "5→2", "6→10"]
+GW|--- 2. 帶隊人門（no_advisor）---
+GW|  次數 74｜不同隊 5
+GW|  被擋時 pop 分布（pop→次）：["1→74"]
+GW|  有無 leader：{ "has_leader": 74 }
+GW|  同隊被擋次數分布（隊數）：{ "11次+": 2, "4-10次": 2, "1次": 1 }｜最多一支 37 次
+GW|  ★疑記帳 bug（pop>1 或 anon0>0 卻無 advisor）：0 次
+GW|--- 3. 被擋之後 1 天內（第一個變成的 task/option）---
+GW|  [pop] 事件 27
+GW|    stayed                                           8
+GW|    → 偵查/偵查                                          5
+GW|    → 治理/駐守                                          5
+GW|    → idle/徵收                                        2
+GW|    → 偵查/maintain_material:resource                  2
+GW|    → idle/貿易                                        1
+GW|    window_end                                       1
+GW|    換成的 option 平均 task_util=0.422（n=12）
+GW|    換 option 花的 tick 中位=0（1 天=1440）
+GW|    留原任務細項：{ "貿易/maintain_material:resource": 5, "貿易/build_apothecary:resource": 2, "建設/貿易": 1 }
+GW|  [no_advisor] 事件 74
+GW|    stayed                                           44
+GW|    → 投靠/併入                                          15
+GW|    → 覓食/迎戰                                          7
+GW|    → 迎戰/迎戰                                          3
+GW|    → idle/maintain_food:resource                    2
+GW|    → idle/survival                                  1
+GW|    換成的 option 平均 task_util=0.673（n=26）
+GW|    換 option 花的 tick 中位=780（1 天=1440）
+GW|    留原任務細項：{ "覓食/覓食": 1, "覓食/迎戰": 14, "貿易/貿易": 6, "建設/徵收": 1, "建設/貿易": 6, "建設/紮根": 3, "迎戰/迎戰": 12, "貿易/build_apothecary:resource": 1 }
+GW|--- 4. 順序副作用：同一次嘗試已升了一個人（named_members +1）後被擋 ---
+GW|  pop                擋下 27 次｜其中已升人 3 次｜涉 2 支隊
+GW|  food_bridge        擋下 0 次｜其中已升人 0 次｜涉 0 支隊
+GW|  subteam_dispatch   擋下 0 次｜其中已升人 0 次｜涉 0 支隊
+GW|  no_advisor         擋下 74 次｜其中已升人 0 次｜涉 0 支隊
+GW|  （參考）所有被擋事件中升人合計 3 / 101
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
+[godot.ps1] child exit=0

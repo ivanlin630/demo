@@ -1,0 +1,55 @@
+diff --git a/scripts/simulation/faction_ai_system.gd b/scripts/simulation/faction_ai_system.gd
+index 4b0e03200..661e6b270 100644
+--- a/scripts/simulation/faction_ai_system.gd
++++ b/scripts/simulation/faction_ai_system.gd
+@@ -5499,6 +5499,16 @@ func _log_dispatch_fail(faction_id: int, reason: String, cost: Dictionary) -> vo
+ 	print("[Site] Faction%d 派工失敗: %s (需 %s)" % [faction_id, reason, str(cost)])
+ 
+ # 選一名非 leader 的記名成員當子隊 leader（建造/升級/擴建 crew）
++# ★MX 量測專用（只在 gates-measure worktree，不進 main）：純觀測、零 RNG
++static var _mx_log: Array = []
++func _mx(gate: String, team: TeamData, named0: int, anon0: int, extra: Dictionary = {}) -> void:
++	var d: Dictionary = {"gate": gate, "tid": team.team_id, "fid": team.faction_id, "pop": team.population,
++		"named0": named0, "named1": team.named_members.size(), "anon0": anon0, "minor": team.minor_population,
++		"leader": team.leader_id, "task": team.current_task, "opt": team.current_option,
++		"tick": 0}
++	for k in extra: d[k] = extra[k]
++	_mx_log.append(d)
++
+ func _pick_advisor(team: TeamData) -> int:
+ 	for pid in team.named_members:
+ 		if pid != team.leader_id:
+@@ -5576,13 +5586,17 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
+ 			Probe.bump("funnel.build_gate.site_barren")   # ★同族計數：六道閘照樣能相加對帳
+ 			Probe.bump("funnel.build_gate.site_barren." + (target_tile.terrain if target_tile != null else "none"))
+ 		return false
++	var _mx_n0: int = leader_team.named_members.size()
++	var _mx_a0: int = leader_team.population - ((1 if leader_team.leader_id != -1 else 0) + _mx_n0)
+ 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
+ 	if advisor_id == -1:
++		_mx("no_advisor", leader_team, _mx_n0, _mx_a0, {"tick": state.world.current_tick})
+ 		_log_dispatch_fail(leader_team.faction_id, "無 advisor 可派可升", cost)
+ 		if Probe.enabled: Probe.bump("funnel.build_gate.no_advisor")
+ 		return false
+ 	var pop: int = maxi(6, level * 4)   # TEST VALUE — 建造隊最小 6 人；pop*2 門檻=12(lv1)
+ 	if leader_team.population < pop * 2:
++		_mx("pop", leader_team, _mx_n0, _mx_a0, {"tick": state.world.current_tick, "need": pop * 2})
+ 		# ★逐筆 detail（照同函式材料軸 :4722 的同款式）：★★聚合 counter 說得出「被擋幾次」，
+ 		#   說不出【差多少人、誰在擋、當時多大】—— 而那正是「這個門檻該不該是 pop*2」要看的東西。
+ 		#   ★★★而門檻本身（pop*2、TEST VALUE）本票【不動】，只是讓它變得可量。
+@@ -5608,6 +5622,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
+ 		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
+ 	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
+ 	if _avail_food < _need_food:
++		_mx("food_bridge", leader_team, _mx_n0, _mx_a0, {"tick": state.world.current_tick})
+ 		_log_dispatch_fail(leader_team.faction_id,
+ 			"糧橋不足: food %.0f < 需 %.0f(burn×ETA %.1f 天)" % [_avail_food, _need_food, _eta_travel + _eta_build], cost)
+ 		if Probe.enabled:
+@@ -5617,6 +5632,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
+ 	var sub_id: int = SubteamSystem.new().dispatch(
+ 		state, leader_team.team_id, advisor_id, pop, TeamData.TASK_CONSTRUCT, target_pos)
+ 	if sub_id == -1:
++		_mx("subteam_dispatch", leader_team, _mx_n0, _mx_a0, {"tick": state.world.current_tick})
+ 		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
+ 		if Probe.enabled: Probe.bump("funnel.build_gate.subteam_dispatch")
+ 		return false

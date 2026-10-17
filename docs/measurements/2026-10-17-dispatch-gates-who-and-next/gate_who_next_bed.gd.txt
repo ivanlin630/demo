@@ -1,0 +1,179 @@
+extends SceneTree
+# @bed-kind: diagnostic
+# 量測（只觀測、不判決；不進 main）：派建點子隊被「人數門 pop*2」與「沒帶隊人」擋下的隊——誰、差多少、之後 1 天去哪、升人副作用。
+# 依賴 worktree 內 faction_ai_system.gd 的 _mx / _mx_log 觀測補丁（零 RNG）。
+# env：LW_CONFIG（warring_states）／PERF_SEED（1337）／ADHOC_DAYS（30）
+# ★誠實限：Probe 世界走另一條路（known_issues「開了量測計數世界就走另一條路」）⇒ 絕對值只算方向。
+
+func _initialize() -> void:
+	_run()
+	quit()
+
+func _env(k: String, d: String) -> String:
+	var v: String = OS.get_environment(k)
+	return v if v != "" else d
+
+func _c(k: String) -> int:
+	return int(Probe.counts.get(k, 0))
+
+func _run() -> void:
+	var cfg: String = _env("LW_CONFIG", "warring_states")
+	var days: int = int(_env("ADHOC_DAYS", "30"))
+	var sd: int = int(_env("PERF_SEED", "1337"))
+	print("=== gate_who_next：config=%s days=%d seed=%d ===" % [cfg, days, sd])
+	seed(sd)
+	FactionAISystem._a2b_remote_tribute_payers.clear()
+	FactionAISystem._mx_log.clear()
+	var runner := SimRunner.new()
+	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg)
+	config["seed"] = sd
+	var state: WorldState = MeasureBedHelper.arm_and_setup(config, false)
+	var tpd: int = WorldState.TICKS_PER_DAY
+	var seen: int = 0
+	var watches: Array = []     # 開著的 {tid, gate, t0, task0, opt0}
+	var done: Array = []        # 結案 {gate, tid, result, task, opt, util, dt}
+	for _t in range(days * tpd):
+		runner.advance_tick(state, Vector2i(-1, -1))
+		if state.encounter_active and state.encounter_tick > 800:
+			runner._encounter_system.resolve_encounter_end(state, "draw")
+		var now: int = state.world.current_tick
+		if now % tpd == 0: print("GW|progress day %d events %d watches %d" % [now / tpd, FactionAISystem._mx_log.size(), watches.size()])
+		# 新事件 → 開 watch（只追人數門與帶隊人門）
+		var lg: Array = FactionAISystem._mx_log
+		while seen < lg.size():
+			var e: Dictionary = lg[seen]
+			seen += 1
+			if e["gate"] == "pop" or e["gate"] == "no_advisor":
+				watches.append({"tid": e["tid"], "gate": e["gate"], "t0": int(e["tick"]), "task0": e["task"], "opt0": e["opt"]})
+		# 追蹤
+		var keep: Array = []
+		for w in watches:
+			var tm: TeamData = state.teams.get(w["tid"])
+			if tm == null:
+				done.append({"gate": w["gate"], "tid": w["tid"], "result": "gone", "task": "", "opt": "", "util": -1.0, "dt": now - int(w["t0"])})
+			elif tm.current_task != w["task0"] or tm.current_option != w["opt0"]:
+				done.append({"gate": w["gate"], "tid": w["tid"], "result": "changed", "task": tm.current_task, "opt": tm.current_option, "util": tm.task_util, "dt": now - int(w["t0"])})
+			elif now - int(w["t0"]) >= tpd:
+				done.append({"gate": w["gate"], "tid": w["tid"], "result": "stayed", "task": tm.current_task, "opt": tm.current_option, "util": tm.task_util, "dt": tpd})
+			else:
+				keep.append(w)
+		watches = keep
+		if state.teams.is_empty():
+			break
+	var end_tick: int = state.world.current_tick
+	for w in watches:   # 窗尾未滿 1 天的，單獨標
+		done.append({"gate": w["gate"], "tid": w["tid"], "result": "window_end", "task": "", "opt": "", "util": -1.0, "dt": end_tick - int(w["t0"])})
+	print("GW|teams=%d tick=%d" % [state.teams.size(), end_tick])
+	_report(FactionAISystem._mx_log, done)
+
+func _bucket(g: int) -> String:
+	if g <= 0: return "gap<=0"
+	if g <= 2: return "gap1-2"
+	if g <= 6: return "gap3-6"
+	return "gap7+"
+
+func _report(lg: Array, done: Array) -> void:
+	var by_gate: Dictionary = {}
+	for e in lg:
+		by_gate[e["gate"]] = int(by_gate.get(e["gate"], 0)) + 1
+	print("GW|--- 全部事件（含糧橋／subteam_dispatch，因升人在它們之前）---")
+	for g in by_gate:
+		print("GW|  gate %-18s = %d" % [g, by_gate[g]])
+	print("GW|  funnel 對帳 pop=%d no_advisor=%d food_bridge=%d" % [_c("funnel.build_gate.pop"), _c("funnel.build_gate.no_advisor"), _c("funnel.build_gate.food_bridge")])
+	# 1. 人數門
+	print("GW|--- 1. 人數門（pop）---")
+	var gb: Dictionary = {}; var gt: Dictionary = {}; var per_team: Dictionary = {}
+	var pops: Dictionary = {}
+	for e in lg:
+		if e["gate"] != "pop": continue
+		var b: String = _bucket(int(e["need"]) - int(e["pop"]))
+		gb[b] = int(gb.get(b, 0)) + 1
+		if not gt.has(b): gt[b] = {}
+		gt[b][e["tid"]] = true
+		per_team[e["tid"]] = int(per_team.get(e["tid"], 0)) + 1
+		pops[int(e["pop"])] = int(pops.get(int(e["pop"]), 0)) + 1
+	for b in ["gap1-2", "gap3-6", "gap7+", "gap<=0"]:
+		if gb.has(b): print("GW|  %-8s 次數 %d｜不同隊 %d" % [b, gb[b], (gt[b] as Dictionary).size()])
+	_print_repeat(per_team)
+	print("GW|  被擋時 pop 分布（pop→次）：%s" % str(_sorted(pops)))
+	# 2. 帶隊人門
+	print("GW|--- 2. 帶隊人門（no_advisor）---")
+	var na_pop: Dictionary = {}; var na_team: Dictionary = {}; var na_big: Array = []
+	var na_leader: Dictionary = {}
+	for e in lg:
+		if e["gate"] != "no_advisor": continue
+		na_pop[int(e["pop"])] = int(na_pop.get(int(e["pop"]), 0)) + 1
+		na_team[e["tid"]] = int(na_team.get(e["tid"], 0)) + 1
+		na_leader["has_leader" if int(e["leader"]) != -1 else "no_leader"] = int(na_leader.get("has_leader" if int(e["leader"]) != -1 else "no_leader", 0)) + 1
+		if int(e["pop"]) > 1 or int(e["anon0"]) > 0:
+			na_big.append(e)
+	print("GW|  次數 %d｜不同隊 %d" % [by_gate.get("no_advisor", 0), na_team.size()])
+	print("GW|  被擋時 pop 分布（pop→次）：%s" % str(_sorted(na_pop)))
+	print("GW|  有無 leader：%s" % str(na_leader))
+	_print_repeat(na_team)
+	print("GW|  ★疑記帳 bug（pop>1 或 anon0>0 卻無 advisor）：%d 次" % na_big.size())
+	for i in range(mini(na_big.size(), 15)):
+		var e: Dictionary = na_big[i]
+		print("GW|    team %d f%d pop=%d named0=%d anon0=%d minor=%d leader=%d tick=%d" % [e["tid"], e["fid"], e["pop"], e["named0"], e["anon0"], e["minor"], e["leader"], e["tick"]])
+	# 3. 被擋之後
+	print("GW|--- 3. 被擋之後 1 天內（第一個變成的 task/option）---")
+	for g in ["pop", "no_advisor"]:
+		var cnt: Dictionary = {}; var tot: int = 0; var gone_t: Dictionary = {}; var util_sum: float = 0.0; var util_n: int = 0
+		var stay_opt: Dictionary = {}; var dts: Array = []
+		for d in done:
+			if d["gate"] != g: continue
+			tot += 1
+			var k: String = String(d["result"])
+			if k == "changed":
+				k = "→ %s/%s" % [d["task"], d["opt"]]
+				if float(d["util"]) >= 0.0:
+					util_sum += float(d["util"]); util_n += 1
+				dts.append(int(d["dt"]))
+			elif k == "stayed":
+				stay_opt["%s/%s" % [d["task"], d["opt"]]] = int(stay_opt.get("%s/%s" % [d["task"], d["opt"]], 0)) + 1
+			cnt[k] = int(cnt.get(k, 0)) + 1
+		print("GW|  [%s] 事件 %d" % [g, tot])
+		var keys: Array = cnt.keys()
+		keys.sort_custom(func(a, b): return cnt[a] > cnt[b])
+		var nres: int = 0
+		for k in keys:
+			if String(k).begins_with("→ ") and nres >= 5: continue
+			if String(k).begins_with("→ "): nres += 1
+			print("GW|    %-48s %d" % [k, cnt[k]])
+		if util_n > 0: print("GW|    換成的 option 平均 task_util=%.3f（n=%d）" % [util_sum / util_n, util_n])
+		if dts.size() > 0:
+			dts.sort()
+			print("GW|    換 option 花的 tick 中位=%d（1 天=%d）" % [dts[dts.size() / 2], WorldState.TICKS_PER_DAY])
+		if stay_opt.size() > 0: print("GW|    留原任務細項：%s" % str(stay_opt))
+	# 4. 升人副作用
+	print("GW|--- 4. 順序副作用：同一次嘗試已升了一個人（named_members +1）後被擋 ---")
+	for g in ["pop", "food_bridge", "subteam_dispatch", "no_advisor"]:
+		var n: int = 0; var up: int = 0; var up_t: Dictionary = {}
+		for e in lg:
+			if e["gate"] != g: continue
+			n += 1
+			if int(e["named1"]) == int(e["named0"]) + 1:
+				up += 1
+				up_t[e["tid"]] = int(up_t.get(e["tid"], 0)) + 1
+		print("GW|  %-18s 擋下 %d 次｜其中已升人 %d 次｜涉 %d 支隊" % [g, n, up, up_t.size()])
+	var tot_up: int = 0
+	for e in lg:
+		if int(e["named1"]) == int(e["named0"]) + 1: tot_up += 1
+	print("GW|  （參考）所有被擋事件中升人合計 %d / %d" % [tot_up, lg.size()])
+
+func _print_repeat(m: Dictionary) -> void:
+	var rep: Dictionary = {}
+	var mx: int = 0
+	for t in m:
+		var n: int = int(m[t])
+		var b: String = "1次" if n == 1 else ("2-3次" if n <= 3 else ("4-10次" if n <= 10 else "11次+"))
+		rep[b] = int(rep.get(b, 0)) + 1
+		mx = maxi(mx, n)
+	print("GW|  同隊被擋次數分布（隊數）：%s｜最多一支 %d 次" % [str(rep), mx])
+
+func _sorted(d: Dictionary) -> Array:
+	var ks: Array = d.keys()
+	ks.sort()
+	var out: Array = []
+	for k in ks: out.append("%s→%d" % [str(k), d[k]])
+	return out
