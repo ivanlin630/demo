@@ -111,10 +111,13 @@ func _p1() -> void:
 	_market(st, y, tile)
 	var x: TeamData = _team(st, X, tile.tile_pos, 30.0)
 	var oid: int = OrderSystem.new().post_order(st, x, "sell", "food", 12)
+	# ★A3′：本人站在市集上 ⇒ 待領當場結清（不留待領列）⇒ 掛完單 X、Y 都離場，量的是「外地寄賣」那一型
+	x.tile_pos = _pt(st).tile_pos
+	y.tile_pos = _pt(st).tile_pos
 	var esc: Dictionary = tile.market_escrow.get(oid, {})
 	print("   佈置：Team%d 在 Team%d 的市集 (%d,%d) 寄賣糧 12，押貨 %s" % [X, Y, tile.tile_pos.x, tile.tile_pos.y, str(esc)])
 	_check("P1 佈置：真押貨 12", float(esc.get("qty", 0)) == 12.0)
-	InteractionSystem.add_pending_claim(tile, "goods", "material", 5.0, Y, st.world.current_tick)   # 同格別隊的待領（n3）
+	InteractionSystem.add_pending_claim(st, tile, "goods", "material", 5.0, Y, st.world.current_tick)   # 同格別隊的待領（n3）
 	var seq0: int = st.player_event_seq
 	st.player_id = x.leader_id
 	st.sync_possession()   # ★真實的附身邊（先撤單、後設 possessed）
@@ -213,8 +216,8 @@ func _e3() -> void:
 	var st: WorldState = _world()
 	var pt: TeamData = _pt(st)
 	var tile: HexTileData = _free_tile(st, [pt.tile_pos])
-	InteractionSystem.add_pending_claim(tile, "goods", "food", 12.0, pt.team_id, st.world.current_tick)
-	InteractionSystem.add_pending_claim(tile, "coin", "coin", 3.0, pt.team_id, st.world.current_tick)
+	InteractionSystem.add_pending_claim(st, tile, "goods", "food", 12.0, pt.team_id, st.world.current_tick)
+	InteractionSystem.add_pending_claim(st, tile, "coin", "coin", 3.0, pt.team_id, st.world.current_tick)
 	var f0: float = float(pt.resources.get("food", 0))
 	var c0: float = float(pt.resources.get("coin", 0))
 	var before: Array = _section(_intel(st))
@@ -246,6 +249,7 @@ func _e4_e5() -> void:
 				st.create_faction(pt.team_id)
 			st.set_team_faction(x, pt.faction_id, WorldState.JOIN_SETUP)
 		OrderSystem.new().post_order(st, x, "sell", "food", 12)
+		x.tile_pos = pt.tile_pos   # ★A3′：本人在場會當場領回 ⇒ 離場，量「退貨落格」那一型
 		var exp1: int = int(x.active_orders[0].get("expire_tick", 0))
 		st.world.current_tick = exp1
 		var seq0: int = st.player_event_seq
@@ -276,7 +280,7 @@ func _cap_scan() -> void:
 	while n < 8:
 		var t: HexTileData = _free_tile(st, used)
 		used.append(t.tile_pos)
-		InteractionSystem.add_pending_claim(t, "goods", String(ress[n % ress.size()]), 2.0, pt.team_id, n)
+		InteractionSystem.add_pending_claim(st, t, "goods", String(ress[n % ress.size()]), 2.0, pt.team_id, n)
 		n += 1
 	var sec: Array = _section(_intel(st))
 	print("   CAP %s" % str(sec))

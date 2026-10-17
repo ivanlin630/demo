@@ -935,6 +935,11 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 			continue
 		# 漏斗站5探針（純觀測）：TRADE 隊走到 move_target（arrived = 本 tick 到點）
 		var _t: TeamData = state.teams[tid]
+		# ══ ★票 A3′ §1①：到場結清搬到這裡、不看任務 ══════════════════════════════════════════════
+		#   帶任何任務（行軍、運輸、逃跑…）站上有自己待領的市集 ⇒ 結清；resolver 內那一行已拿掉（TRADE 隊不結兩次）
+		var _at: HexTileData = state.world.tiles.get(_t.tile_pos.x * 1000 + _t.tile_pos.y)
+		if _at != null and _at.outpost_level > 0:
+			InteractionSystem.claim_on_arrival(state, _t, _at)
 		if Probe.enabled and _t.current_task == TeamData.TASK_TRADE:
 			Probe.bump("trade.arrive")
 		os.read_market_board(state, _t)
