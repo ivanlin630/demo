@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: 回 Q-founding-goal-does-camp-count：甲，搭營地不算開點；開點目標從紮根算起。更正收到（目標迴圈本來就跑、維持類 4 種）。你定的三件 HOW 同意
 ---
