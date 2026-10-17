@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 觀察輪（板一之半）：開點目標合併前先備儀器、跑基線
 topic: 備一支床量「新開據點的地形分佈與開點天數」，現在在 main 跑一次基線（新據點 3→0 那個世界）；開點目標合併後只重跑比對
 ---
