@@ -1,4 +1,4 @@
-# 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）— HOW（第三版，依 R² M1–M8／S1–S6、R²b N1–N3／T1–T4）
+# 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）— HOW（定稿，依 R² M1–M8／S1–S6、R²b N1–N3／T1–T4、R²c C1–C3）
 
 - WHAT：藍圖票 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-TICKET-tail-fixes-2-and-all-hands-on-field-pulled-forward.md` 票一（五組 A–E）；裁決檔 `docs/playtest/round5-verdict.md`。
 - 來源表：`docs/playtest/2026-10-17-round5-qa-live-play.md` §二 ★1–★20、21、22。
@@ -175,10 +175,13 @@
 - 現況：候選只讀本隊 `named_members`（`event_system.gd:79-103`），另外還有兩處同樣只認本隊：
   - `player_command_system.gd:2018-2027` 的候選過濾；
   - `set_leader` 會把人的隊改成母隊（`world_state.gd:765-780`）。
-- 本票只改句子。「玩家絕後」今天有兩個產生者（T3）：`event_system.gd:88` 與 `player_command_system.gd:2100`。收成一支 `EventSystem.story_end_reason(state, team)`，兩處都呼它：
+- 本票只改句子。「玩家絕後」今天有兩個產生者（T3）：`event_system.gd:88` 與 `player_command_system.gd:2100`。收成一支 `EventSystem.story_end_reason(state, team)`，兩處都呼它（R²c C2）：
+  - 回的字串就是 `game_over_reason`，UI 直接顯示（`text_ui_main.gd:1001-1002`，前綴「故事已結束：」由 UI 加）⇒ 下面兩句**不帶**「故事結束：」前綴；
+  - `player_command_system.gd:2098-2100` 那支 team 可能是 null ⇒ 回「你沒有可以接手的人（隊已滅）」；
+  - `game_over_reason` 不在 `state_fingerprint`，world-fp 不動。
   - 本隊沒有記名成員、但現有子隊（`subteam_ids`）有時，故事結束句改成：
-    「故事結束：本隊沒有記名成員可以接手（子隊 <名> 有記名成員，從子隊接手還沒做）」。
-  - 兩邊都沒有：「故事結束：你沒有可以接手的人」。
+    「本隊沒有記名成員可以接手（子隊 <名> 有記名成員，從子隊接手還沒做）」。
+  - 兩邊都沒有：「你沒有可以接手的人」。
   - 判定本身不改。
 - 子隊繼承：等藍圖裁「子隊變成什麼」、量測員票三③回來後另開一張。
 
@@ -260,6 +263,10 @@
   - ⇒ 本票選 (a)：**喚醒維持舊基準不動**（`_known_pos` 與 `:310` 原樣），新基準只放在玩家文字路徑。
   - 也就是 `:334` 那一支 `obs_id == 玩家隊` 決定「要不要進玩家事件」時才用。
   - ⇒ NPC 世界不變，world-fp 不應因 D5 變。
+  - **怎麼拿掉**（R²c C1，選 (b)）：玩家事件是在 emit（`:340`）裡進佇列的，同一個呼叫也帶 `_wake`。
+    - ⇒ emit 加一個參數 `player_visible: bool`。`:310` 成立時照舊呼 emit、`_wake` 照舊算。
+    - 只有玩家隊時，`player_visible` 由新基準決定；NPC 恆為 true，沒有玩家事件可進，所以無作用。
+    - `player_visible == false` ⇒ 不進玩家事件佇列，其餘（喚醒、Probe）不變。
 - 改：
   - 「你看到」是親見事件，進玩家事件的條件＝新位置與**這位觀察者對這個目標最近一筆親見的位置**不同。
     - 新的安靜查詢 `last_firsthand_pos(state, obs_id, tgt_id)`，不抬 Probe 計數，放在 `best_value_quiet`（`:247-249`）旁。
@@ -360,7 +367,7 @@
 |---|---|
 | A1 | 進入戰後階段那一幀（結算頁**還開著**），事件區已有結算句 |
 | A2 | 結算頁上按 Space ⇒ 回「面板開著」、頁還在、tick 不動、待處置還在；按 L ⇒ 留戰利品（不推進）；按未綁鍵 ⇒ 頁還在；Esc 關頁後推進 ⇒「你沒有處置」；終端 `press_on` 不卡 |
-| A3 | 你方六欄有數；正常戰鬥差額＝0，對照仗至少三種：你贏、NPC 贏且有傷兵處置、NPC 贏且有追擊；人為移走一名 ⇒「其他離隊 1」；後備連坐 ⇒ 落「後備陣亡」不落「其他」；記名重傷算進傷；對方沒有人口差欄 |
+| A3 | 你方六欄有數；正常戰鬥差額＝0，對照仗至少三種：你贏、NPC 贏且有傷兵處置、NPC 贏且有追擊（構造時 `can_pursue` 要為真，`encounter_system.gd:1547-1553`；R²c C3）；三場各印自己非 0 的欄位當母體地板（處置場 `fate_*`>0、追擊場 `pursuit_killed`>0），否則該場不算數；人為移走一名 ⇒「其他離隊 1」；後備連坐 ⇒ 落「後備陣亡」不落「其他」；記名重傷算進傷；對方沒有人口差欄 |
 | A3b | 收割回句含資源名與數量 |
 | A4 | 超長句：畫面列串起來＝原句全文 |
 | A5 | 有傷兵時頂列與生存頁都有數；0 時頂列無此格；窄終端讓位順序 |
@@ -373,7 +380,7 @@
 | D2 | 攻擊對象沒有自家子隊（含玩家獨立時派出、後來建勢力的那種） |
 | D3 | 同格求投靠的隊在 J 頁與攻擊對象裡 |
 | D4 | 同格 6 小時，親見分鐘數 ≤ 60 |
-| D5 | 高可信度舊轉述＋同格 24 小時 ⇒「你看到它」≤ 1；一句不重複；同 fixture 下 NPC 觀察者的 `_wake` 次數修前＝修後 |
+| D5 | 高可信度舊轉述＋同格 24 小時 ⇒「你看到它」≤ 1；一句不重複；同 fixture 下 `_wake` 次數修前＝修後，NPC 觀察者與玩家隊分開印 |
 | D6 | 附庸收到情報 ⇒ 玩家事件區無那句；grep＝0 |
 | E1 | 戰鬥中無行動的一拍，GUI 與終端結果區都不是開戰前那句；無「?」 |
 | E2 | 據點名逐字相同；走過畫面 miss＝0；grep＝0 |
@@ -398,6 +405,7 @@
   - `terminal_e2e_bed.gd:216` 等「按任意鍵離開戰後畫面」的步驟 ⇒ 改按 Esc
   - `ui_flow_test.gd` 快照
   - `possessed_famine_stop_bed`
+  - `live_play_small_fixes_bed.gd:571-572`、`terminal_selfcheck_bed.gd:149`（故事結束句，R²c C2）
   - `scripted_exploration_bed`（畫面行數變了；探索記錄檔照舊 `git checkout` 還原）
   - 動到 `_outpost_pending_abandon`／`_faction_extract_pending`／`_rest_confirm_armed` 的床
 - world-fp：D1 的清除點、B1／B2 新欄、D5 的新基準都只在玩家世界作用（D5 依 N2 選 (a)）。fp 若變，歸因到第一個分歧 tick，不直接換值。
