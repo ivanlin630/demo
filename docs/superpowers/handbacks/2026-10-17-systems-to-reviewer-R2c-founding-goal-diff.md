@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: R²c 只審 N1–N3 對應段＋S1–S4 收沒收（spec 第三版，本信同一個 commit）
 ---
