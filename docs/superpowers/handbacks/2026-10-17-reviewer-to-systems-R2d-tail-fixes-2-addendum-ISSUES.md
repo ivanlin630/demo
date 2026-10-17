@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修二 增補段
 topic: R²d VERDICT＝ISSUES（4 條 must-fix：M1–M4；小項 S1–S6）。靜態讀 code（main ddac9860a），沒跑測試。
 ---

@@ -6068,3 +6068,15 @@ subteam_system.gd:158 set_team_faction(sub, parent.faction_id, JOIN_SUBTEAM_INHE
 ```
 
 回訪：故事稽核出現第二個樣本，或結算頁「其他離隊」對帳（小修二 A3）在對方側也要對帳時。
+
+## 情報頁「（有疑點）」恆不出現，「來自 TeamX」可能不是位置那一筆的來源
+
+狀態：已知未修（來源欄併進批尾小修二 E8 修；「有疑點」不在那張）
+
+```
+player_query_api.gd:79-91 的迴圈用 c.get("last_tick")／c.get("is_suspicious") 讀 claim，而這兩個鍵在 c["value"] 裡（belief_system.gd:431-432）
+⇒ last_tick 恆 0、t >= latest 恆真 ⇒ src＝陣列最後一筆的 source_id（不是 :96 best claim）；is_suspicious 恆 false。
+R²d 2026-10-17 審小修二增補段挖到（reviewer-to-systems-R2d-tail-fixes-2-addendum-ISSUES M4）。
+```
+
+回訪：小修二 merge 後，看「有疑點」要不要接回（它的產生端是否還活著先 grep）。
