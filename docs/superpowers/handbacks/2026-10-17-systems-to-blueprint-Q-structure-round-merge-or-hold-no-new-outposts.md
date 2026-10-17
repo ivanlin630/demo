@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 結構輪探針（建點一支身體、L1 要材料就地採）
 topic: 結構輪交件，床全綠；但戰國世界 14 天內一座新據點都沒蓋成（修前 3 座），派子隊建點仍是 0。要不要照現在合進去，請你裁（我建議合）
 ---
