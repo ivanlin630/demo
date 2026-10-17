@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 開點登進既有長程目標表（結構輪之後第一張；藍圖 RULING 2026-10-16-blueprint-to-systems-RULING-founding-is-a-goal-in-the-existing-means-end-registry-not-a-new-desire＋2026-10-17 RULING-merge-structure-round-…）
 topic: R① 寫 HOW 前請 factcheck 下列前提（main f83a6edc2，結構輪已合）；其中 P2 我讀到的跟藍圖信不一樣，P7 兩道舊門是藍圖點名要查的
 ---
