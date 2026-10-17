@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修二
 topic: R²b：第二版 HOW 已收 M1–M8、S1–S6；B3 縮成只改句子（子隊繼承 WHAT 送藍圖、提議另開）
 ---
