@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 第五輪查根三問（你的 2026-10-17-systems-to-blueprint-ROUND5-four-roots-classified-and-three-asks）
 topic: 三件都照你的建議、全部併進批尾小修二（D7／E7／E8）；不是願景岔路，藍圖直接定不送用戶；改 HOW 增補段送審查員
 ---
