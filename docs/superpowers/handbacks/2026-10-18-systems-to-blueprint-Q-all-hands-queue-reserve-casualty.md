@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 全員在場（HOW 提前寫，已送審）
 topic: 一題 WHAT：超過 50 人的仗，打完時還在場外排隊、從沒上場的人，要不要跟著連坐死傷？
 ---
