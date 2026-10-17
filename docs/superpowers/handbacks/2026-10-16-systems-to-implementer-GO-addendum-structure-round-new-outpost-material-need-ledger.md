@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 結構輪兩個探針（GO 信 d2bcd7ed3 的追加）
 topic: 規格多一節 §三之三「新點缺料進同一本需求帳」（用戶裁「好」；R²d ISSUES 補完、R²e CLEAN）；同一張票一起做，不另開
 ---

@@ -1,0 +1,16 @@
+LAW|A join_flow=12.522
+LAW|A #0 併入 u=1.6977
+LAW|A #1 紮營 u=1.5325
+LAW|A #2 偵查 u=0.3818
+LAW|A #3 建設 u=0.1359
+LAW|A #4 迎戰 u=0.0466
+LAW|A #5 攻擊 u=0.0000
+LAW|A task=投靠
+LAW|B join_flow=5.333
+LAW|B #0 紮營 u=1.5325
+LAW|B #1 併入 u=1.4490
+LAW|B #2 迎戰 u=0.5874
+LAW|B #3 偵查 u=0.3818
+LAW|B #4 建設 u=0.1359
+LAW|B #5 攻擊 u=0.0000
+LAW|B task=紮營

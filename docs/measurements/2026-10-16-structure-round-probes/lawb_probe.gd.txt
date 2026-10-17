@@ -1,0 +1,67 @@
+extends SceneTree
+# @bed-kind: diagnostic
+# 法條B 逐選項 util dump（headless_test _test_join_vs_camp_law 方向 B 的同一個場景）；只印不判。
+func _initialize() -> void:
+	var vals: Dictionary = {"義氣": 0.9, "信義": 0.8, "求生欲": 0.8}
+	for case in [[2, 16, "A"], [1, 30, "B"]]:
+		var s := WorldState.new(); s.world = WorldData.new()
+		var j := _mk_d(s, Vector2i(2,2), vals)
+		var capv: float = float(OS.get_environment("LAW_CAP")) if OS.get_environment("LAW_CAP") != "" else -1.0
+		if OS.get_environment("LAW_MAT") != "":
+			j.resources["material"] = float(OS.get_environment("LAW_MAT"))
+			print("LAW|team material=%s" % OS.get_environment("LAW_MAT"))
+		var ctx0 := DecisionContext.gather(s, j)
+		print("LAW|camp_flow_delay_days=%.2f settle_eta_days=%.2f" % [ctx0.camp_flow_delay_days, ctx0.settle_eta_days])
+		if capv >= 0.0:
+			var jt: HexTileData = s.world.tiles.get(2002)
+			jt.resource_cap["material"] = capv; jt.resources["material"] = capv
+			print("LAW|tile cap=%.1f prod=%.2f" % [capv, jt.productivity])
+		_mk_h(s, Vector2i(3,2), j, int(case[0]), int(case[1]))
+		var ctx := DecisionContext.gather(s, j)
+		print("LAW|%s join_flow=%.3f" % [case[2], ctx.join_host_flow])
+		var r: Array = DecisionEngine.rank_scored(s, j, "lawb_probe")
+		for i in range(mini(10, r.size())):
+			var e: Dictionary = r[i]
+			var o = e.get("opt")
+			var nm: String = String(o.get("name")) if o is Object else str(o)
+			print("LAW|%s #%d %s u=%.4f" % [case[2], i, nm, float(e.get("u", 0.0))])
+		FactionAISystem.new()._decide_unified(s, j)
+		print("LAW|%s task=%s" % [case[2], j.current_task])
+	quit(0)
+static func _seed_pop(team: TeamData, n: int) -> void:
+	var named_in: int = team.named_members.size() + (1 if team.leader_id != -1 else 0)
+	var want_anon: int = maxi(n - named_in, 0)
+	AnonCohort.add(team.anon_cohorts, "平民", "healthy", want_anon)
+func _place(state: WorldState, pos: Vector2i) -> void:
+	var tid: int = pos.x * 1000 + pos.y
+	var t: HexTileData = state.world.tiles.get(tid)
+	if t == null:
+		t = HexTileData.new(); t.tile_id = tid; t.tile_pos = pos; state.world.tiles[tid] = t
+	t.terrain = "plains"
+func _mk_d(state: WorldState, pos: Vector2i, values: Dictionary) -> TeamData:
+	var tid: int = 700 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = pos; t.leader_id = tid * 10
+	_seed_pop(t, 10)
+	t.resources = {"food": 8.0, "goods": 0.0, "coin": 0.0}
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = values
+	state.persons[ldr.id] = ldr
+	_place(state, pos)
+	return t
+func _mk_h(state: WorldState, pos: Vector2i, target: TeamData, lvl: int, pop: int) -> TeamData:
+	var tid: int = 700 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tile_pos = pos; t.faction_id = -1
+	_seed_pop(t, pop)
+	t.resources = {"food": 100.0}
+	state.teams[tid] = t
+	_place(state, pos)
+	var ht: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	ht.outpost_level = lvl; ht.outpost_owner = tid
+	state.team_discovered[target.team_id].append(tid)
+	BeliefSystem.record_claim(state, target.team_id, tid, target.team_id, "親見",
+		{"population_est": pop, "tile_pos": t.tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
+	return t

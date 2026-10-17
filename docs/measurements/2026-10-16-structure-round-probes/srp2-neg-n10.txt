@@ -1,0 +1,1156 @@
+tree 3290a6e9a906b19e2eae78cb2895a78b7f87d21f neg n10
+PATCHED n10：執行端不加採段期限 ⇒ V5b
+BED_ONLY=_v5b
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=3290a6e9a clean=NO code-dirty=1 codehash=F515A98EA820
+[TREE]   *** measuring the WORKING TREE, not commit 3290a6e9a ***
+[TREE]    M scripts/simulation/outpost_system.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=22GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== build_verb_one_body：建點一支身體＋子隊到場一支身體 ===
+
+── V5b 真平原格、帶 0 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+  PASS: ★V5b 地板：找得到生成的平原格
+    平原 cap=16.0 productivity=1.179  build_eta_total_days=inf
+[Outpost] Team0 開始建 civilian Lv1 at (0,12)（需 720 person-ticks，需材 50 帶料抵 0 待採 50）
+[PlayerCmd] build_outpost type=civilian
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 97001 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97002 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97003 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[PlayerCmd] forced_event 到達: Team6 找上門：求投靠
+[Tutorial] 投奔者小隊 Team6 求投靠玩家
+[Tick 67] Person 3 (leader/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 73] Person 4 (leader/team4) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team4 → 覓食 (覓食)
+[Tick 80] Person 5 (leader/team5) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Tick 91] Person 1 (leader/team1) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 91] Person 97004 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97005 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97006 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 2 (leader/team2) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 135] Person 97007 (leader/team6) → P1_comply | stress=0.10 loyalty=0.89
+[SoloAI] Team6 → 乞食 (乞食)
+[SoloAI] Team6 → 乞食 (乞食)
+[Harvest] Tick360 季節=春 base=1.1
+[Tick 467] Person 97007 (leader/team6) → N1_flee | stress=0.30 loyalty=0.83
+[Move] Team 6 抵達 (0,12)
+[Tick 511] Person 97007 (leader/team6) → P1_comply | stress=0.40 loyalty=0.82
+[Tick 644] Person 97007 (leader/team6) → N1_flee | stress=0.30 loyalty=0.79
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team5 → 建設 (建設)
+[Tick 712] Person 97007 (leader/team6) → P1_comply | stress=0.40 loyalty=0.78
+[Move] Team 0 抵達 (0,12)
+[Order] Team3 buy weapon_melee_low ×4 (oid=1)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team3 buy tools ×2 (oid=3)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 4 抵達 (11,3)
+[Move] Team 5 抵達 (2,2)
+[Tick 818] Person 97007 (leader/team6) → N2_riot | stress=0.60 loyalty=0.75
+[Order] Team4 buy weapon_melee_low ×4 (oid=4)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=5)
+[Order] Team4 buy tools ×2 (oid=6)
+[SoloAI] Team4 → 覓食 (覓食)
+[Order] Team2 buy weapon_melee_low ×4 (oid=7)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=8)
+[Order] Team2 buy tools ×2 (oid=9)
+[Order] Team1 buy weapon_melee_low ×13 (oid=10)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=11)
+[Order] Team1 buy tools ×6 (oid=12)
+[Order] Team6 buy food ×6 (oid=13)
+[SoloAI] Team6 → 乞食 (乞食)
+[DayNight] Day 1 開始
+[PopMgmt] Team6 超額 1 人無 advisor，獨立流亡 Team7
+[TickPerf] day=1 avg=208 us max=9543 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/1440
+[Order] Team5 buy weapon_melee_low ×4 (oid=14)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=15)
+[Order] Team5 buy tools ×2 (oid=16)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 乞食 (乞食)
+[SoloAI] Team7 → 乞食 (乞食)
+[Tick 1546] Person 97008 (leader/team7) → P1_comply | stress=0.10 loyalty=0.76
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team7 → 乞食 (乞食)
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 2253] Person 97008 (leader/team7) → N2_riot | stress=1.00 loyalty=0.56
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Site] 選址 (0, 14) score=180 周邊資源={ "herb": 8, "ore_silver": 23 } terrain=forest 已知據點項=0.0 採料項=-37.0 用到的據點=[]
+[Site] Faction1 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 2478] Person 97009 (member/team3) → P1_comply | stress=0.00 loyalty=0.68
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 乞食 (乞食)
+[Order] Team7 buy food ×3 (oid=17)
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 2 開始
+[Move] Team 4 抵達 (11,3)
+[Move] Team 6 抵達 (0,12)
+[TickPerf] day=2 avg=290 us max=16795 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/2880
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team7 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 3 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=3 avg=256 us max=7449 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/4320
+[Site] 選址 (1, 13) score=110 周邊資源={ "ore_silver": 23, "herb": 8 } terrain=mountain 已知據點項=0.0 採料項=-109.9 用到的據點=[]
+[Sub] Team1 派出子隊 Team8 leader=P97004 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team8 → (1,13) civilian Lv1
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction0 首要目標: defend target=8
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 8 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[Move] Team 6 抵達 (0,12)
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team8 buy weapon_melee_low ×3 (oid=18)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=19)
+[Order] Team8 buy tools ×1 (oid=20)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 4 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=4 avg=350 us max=106057 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/5760
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[Move] Team 7 抵達 (0,12)
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team6 → 乞食 (乞食)
+[SoloAI] Team7 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 5 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=5 avg=345 us max=109193 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/7200
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=21)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=22)
+[Order] Team3 buy tools ×2 (oid=23)
+[SoloAI] Team7 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 6 開始
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=6 avg=410 us max=107921 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/8640
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=24)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=25)
+[Order] Team4 buy tools ×2 (oid=26)
+[SoloAI] Team4 → 覓食 (覓食)
+[Order] Team2 buy weapon_melee_low ×4 (oid=27)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=28)
+[Order] Team2 buy tools ×2 (oid=29)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=30)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=31)
+[Order] Team5 buy tools ×2 (oid=32)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team6 buy food ×3 (oid=33)
+[SoloAI] Team6 → 紮營 (紮營)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[CampL0] Team6 紮營 L0 @(0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×10 (oid=34)
+[Order] Team1 buy weapon_ranged_low ×8 (oid=35)
+[Order] Team1 buy tools ×5 (oid=36)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[DayNight] Day 7 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=7 avg=364 us max=107571 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/10080
+[Salary] Team3 薪水結算 coin=761.0
+[Salary] Team0 薪水結算 coin=955.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 10214] Person 97008 (leader/team7) → P2_produce | stress=0.00 loyalty=0.00
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team8 薪水結算 coin=498.4
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 8 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=8 avg=339 us max=107578 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/11520
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[SoloAI] Team6 → 迎戰 (迎戰)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1410.4
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → rest (休息)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 9 開始
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=9 avg=414 us max=108154 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/12960
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team8 buy weapon_melee_low ×3 (oid=37)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=38)
+[Order] Team8 buy tools ×1 (oid=39)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 10 開始
+[Move] Team 3 抵達 (0,12)
+[TickPerf] day=10 avg=341 us max=106564 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/14400
+[FactionAI] CONSTRUCT 子隊 Team8 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team8 完全合併 (pop=23)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 11 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=11 avg=259 us max=12867 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/15840
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=40)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=41)
+[Order] Team5 buy tools ×2 (oid=42)
+[SoloAI] Team5 → 建設 (建設)
+[Order] Team4 buy weapon_melee_low ×4 (oid=43)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=44)
+[Order] Team4 buy tools ×2 (oid=45)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 buy weapon_melee_low ×4 (oid=46)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=47)
+[Order] Team2 buy tools ×2 (oid=48)
+[Order] Team3 buy weapon_melee_low ×4 (oid=49)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=50)
+[Order] Team3 buy tools ×2 (oid=51)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[Order] Team1 buy weapon_melee_low ×13 (oid=52)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=53)
+[Order] Team1 buy tools ×6 (oid=54)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 12 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=12 avg=274 us max=9547 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/17280
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=764.5
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 13 開始
+[Move] Team 3 抵達 (0,12)
+[TickPerf] day=13 avg=247 us max=6996 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/18720
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team4 薪水結算 coin=764.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team2 薪水結算 coin=764.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=255 us max=13333 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/20160
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 1→2 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team9 leader=P97005 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team9 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=9
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=13 known=24
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=15 avg=270 us max=7747 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/21600
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 9 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team9 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team9 完全合併 (pop=23)
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=761.0
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=16 avg=258 us max=7263 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/23040
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=55)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=56)
+[Order] Team4 buy tools ×2 (oid=57)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=58)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=59)
+[Order] Team3 buy tools ×2 (oid=60)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=61)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=62)
+[Order] Team5 buy tools ×2 (oid=63)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team10 leader=P97006 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team10 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=10
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team0 薪水結算 coin=951.0
+[Order] Team2 buy weapon_melee_low ×4 (oid=64)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=65)
+[Order] Team2 buy tools ×2 (oid=66)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 10 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team10 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team10 完全合併 (pop=23)
+[DayNight] Day 17 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=17 avg=275 us max=9588 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/24480
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → rest (休息)
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×13 (oid=67)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=68)
+[Order] Team1 buy tools ×6 (oid=69)
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=3 known=0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=18 avg=259 us max=7961 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/25920
+[Salary] Team2 薪水結算 coin=761.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 19 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=19 avg=236 us max=7479 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/27360
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team11 leader=P97004 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team11 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=11
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1402.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=20 avg=259 us max=7150 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/28800
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 11 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[FactionAI] CONSTRUCT 子隊 Team11 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team11 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team3 薪水結算 coin=753.9
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 0→1 (商業 cap=2)
+[Salary] Team4 薪水結算 coin=761.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=13 known=13
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=21 avg=264 us max=8824 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/30240
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=70)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=71)
+[Order] Team4 buy tools ×2 (oid=72)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=73)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=74)
+[Order] Team3 buy tools ×2 (oid=75)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team12 leader=P97005 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team12 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=12
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=76)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=77)
+[Order] Team5 buy tools ×2 (oid=78)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 buy weapon_melee_low ×4 (oid=79)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=80)
+[Order] Team2 buy tools ×2 (oid=81)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 22 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=22 avg=264 us max=9706 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/31680
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 12 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team12 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team12 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=757.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×13 (oid=82)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=83)
+[Order] Team1 buy tools ×6 (oid=84)
+[DayNight] Day 23 開始
+[TickPerf] day=23 avg=253 us max=7113 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/33120
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team2 薪水結算 coin=757.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 1→2 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=3 known=0
+[TickPerf] day=24 avg=253 us max=7552 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/34560
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team3 薪水結算 coin=746.9
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 25 開始
+[TickPerf] day=25 avg=240 us max=6914 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/36000
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team0 薪水結算 coin=946.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team13 leader=P97006 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team13 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=13
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=15 known=15
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=26 avg=257 us max=7900 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/37440
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team4 薪水結算 coin=757.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team13 buy weapon_melee_low ×3 (oid=85)
+[Order] Team13 buy weapon_ranged_low ×2 (oid=86)
+[Order] Team13 buy material ×30 (oid=87)
+[Order] Team13 buy tools ×1 (oid=88)
+[Move] Team 13 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team13 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team13 完全合併 (pop=23)
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=89)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=90)
+[Order] Team3 buy tools ×2 (oid=91)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=92)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=93)
+[Order] Team4 buy tools ×2 (oid=94)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 27 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=27 avg=263 us max=9916 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/38880
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=95)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=96)
+[Order] Team5 buy tools ×2 (oid=97)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 buy weapon_melee_low ×4 (oid=98)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=99)
+[Order] Team2 buy tools ×2 (oid=100)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1887.8
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×13 (oid=101)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=102)
+[Order] Team1 buy tools ×6 (oid=103)
+[DayNight] Day 28 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=28 avg=254 us max=7093 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/40320
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 29 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=29 avg=248 us max=7645 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/41760
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team14 leader=P97004 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team14 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=14
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 14 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team14 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team14 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 30 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=30 avg=272 us max=12617 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/43200
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team15 leader=P97005 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team15 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=15
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team2 薪水結算 coin=754.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team4 薪水結算 coin=754.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=12 known=12
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=31 avg=264 us max=8526 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/44640
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 15 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team15 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team15 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1875.7
+[Site] 選址 (2, 13) score=194 周邊資源={ "wild_horses": 9, "ore_silver": 23, "herb": 4 } terrain=forest 已知據點項=0.0 採料項=-37.0 用到的據點=[]
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 32 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=32 avg=256 us max=7352 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/46080
+    取消於第 -1.00 天｜gather_abort +0｜取消前 site_stock=30.14 退 0.00
+  PASS: V5b 估算 INF
+=== build_verb_one_body DONE === 到場 1／1 errors: 1
+ERROR: [FAIL] V5b 實跑在期限內被取消（gather_abort +1）、退 site_stock 50%%
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=1
+rc=1

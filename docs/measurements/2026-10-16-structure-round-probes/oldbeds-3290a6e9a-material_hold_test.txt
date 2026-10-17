@@ -1,0 +1,28 @@
+tree 3290a6e9a906b19e2eae78cb2895a78b7f87d21f
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=3290a6e9a clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=22.2GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- construction+coin poor+food OK→reserve 高 ---
+  [PASS] food-only factor(0.60) > max-urgency factor(0.20)（coin_urg 免疫，守料不賣）
+  [PASS] reserve(material)=60.0 用 food-only（>coin 壓的 20.0，守要蓋的料）
+--- ★acute food→reserve 降釋放（守護）---
+  [PASS] acute food reserve(20.0) < food OK reserve(60.0)（food_urg 降 factor→protected material 釋放賣糧求生，不抱料餓死）
+--- 非-construction→照舊 ---
+  [PASS] 無 construction-need → reserve=need_keep×_reserve_factor（照舊 max 兩 urgency，got 0.00）
+--- coin_need material=cost×1.5-holding ---
+  [PASS] 有 construction material cost（想蓋 weaponsmith，got 100）
+  [PASS] coin_need=87=afford×1.5 缺口(cost×1.5-90=87 對齊 afford，非舊 shortfall 15)
+--- 守恆 ---
+[Extract] Team1 徵用 200 coin (need_driven)
+  [PASS] coin+treasury 前 200.0 == 後 200.0（守恆）
+--- urgency decouple ---
+  [PASS] food-only factor coin 免疫（poor 0.60 == rich 0.60，decouple）
+  [PASS] max-urgency factor 受 coin（poor 0.20 < rich 0.60，coin 焦慮壓賣）
+=== DONE === ALL PASS
+
+[godot.ps1] child exit=0
+rc=0

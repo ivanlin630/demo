@@ -1,0 +1,25 @@
+tree d4ba72e99fb9845aaf5980a1d1d5303436a92848 (+probe copy, 6 名匿名平民)
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=d4ba72e99 clean=NO code-dirty=1 codehash=EFFDC212491F
+[TREE]   *** measuring the WORKING TREE, not commit d4ba72e99 ***
+[TREE]   ?? scripts/debug/srp_numbers_probe.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=21.2GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+NUM|population=6
+NUM|work_morale=1.000｜gather_window_days=30.0
+NUM|civilian need=50｜plains   prior cap=12.5 prod=1.100｜缺 50 料採段=INF 天｜帶滿料總天數=5.000（築段 5.000）
+NUM|civilian need=50｜forest   prior cap=150.0 prod=0.900｜缺 50 料採段=7.407 天｜帶滿料總天數=5.000（築段 5.000）
+NUM|civilian need=50｜mountain prior cap=65.0 prod=0.700｜缺 50 料採段=21.978 天｜帶滿料總天數=5.000（築段 5.000）
+NUM|military need=80｜plains   prior cap=12.5 prod=1.100｜缺 80 料採段=INF 天｜帶滿料總天數=5.000（築段 5.000）
+NUM|military need=80｜forest   prior cap=150.0 prod=0.900｜缺 80 料採段=11.852 天｜帶滿料總天數=5.000（築段 5.000）
+NUM|military need=80｜mountain prior cap=65.0 prod=0.700｜缺 80 料採段=INF 天｜帶滿料總天數=5.000（築段 5.000）
+NUM|6 人子隊載重 carry_cap=60.0（BASE_CARRY=10.0）
+NUM|帶 50 料：總重=50.0（只算料）
+NUM|帶 80 料：總重=80.0（只算料）
+=== srp_numbers_probe DONE ===
+
+[godot.ps1] child exit=0
+rc=0

@@ -1,0 +1,36 @@
+tree 3290a6e9a906b19e2eae78cb2895a78b7f87d21f
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=3290a6e9a clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=22.3GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- tools construction need（tools 進 build-cost scope）---
+  [PASS] 單一想建 weaponsmith → construction need(tools)=weaponsmith tools cost 3（material-only 舊碼=0，got 3.0）
+--- 無 build-need → need_keep(tools)=self_use only ---
+  [PASS] 無 outpost → need_keep(tools)=self_use pop×0.5=8.0（construction=0 無迴歸，got 8.0）
+--- ★遞迴守衛（output-guard + re-entrancy）---
+  [PASS] (a) output-guard:workshop outputs 含 tools（算 tools-need 跳 workshop 自指邊）
+  [PASS] (a) weaponsmith(special)outputs=[]（不誤跳，其不產 material/tools）
+  [PASS] (b) re-entrancy:visiting[material] 中再入 → 切回 0.0（graph-independent 切環，got 0.0）
+  [PASS] (b) 正常 call 後 visiting[material] 清空（balanced，無 leak）
+  [PASS] 深 need_keep(material) 有界完成不 hang（守衛終結遞迴，got 100.0）
+--- material 路徑仍 fire ---
+  [PASS] mil 想建 → construction need(material)>0（泛化不破 material 半修，got 100.0）
+--- tools 買單發出 ---
+[Order] Team1 buy weapon_melee_low ×3 (oid=1)
+[Order] Team1 buy weapon_ranged_low ×2 (oid=2)
+[Order] Team1 buy material ×19 (oid=3)
+[Order] Team1 buy tools ×2 (oid=4)
+[Order] Team1 buy food ×51 (oid=5)
+  [PASS] reserve(tools)>holding(0) → 發 tools 買單（demand-routing 接通；proxy 前無 tools）
+--- 軍用專屬設施同族同價 ---
+  [PASS] 軍用專屬設施家族 2 個成員（母體非空真，got ["armorsmith", "smeltery", "weaponsmith"]）
+  [PASS] 同族同價：軍用專屬設施 ["armorsmith", "smeltery", "weaponsmith"] 的 material 成本一致（[70, 70, 70]）
+  [PASS] weaponsmith 屬於軍用專屬家族（上一條的 70 就是家族價）
+=== DONE === ALL PASS
+[TEST-SUITE-COMPLETE]
+
+[godot.ps1] child exit=0
+rc=0

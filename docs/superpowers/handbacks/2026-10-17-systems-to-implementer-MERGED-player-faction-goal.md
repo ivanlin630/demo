@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 玩家勢力目標改用引擎同一套詞
 topic: 已 merge 9df71f694；world-fp 換基準 815273e（我改註冊表），你不用再跑；接著做結構輪
 ---

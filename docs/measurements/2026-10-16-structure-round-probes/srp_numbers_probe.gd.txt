@@ -1,0 +1,27 @@
+extends SceneTree
+# @bed-kind: diagnostic
+# 結構輪交件信數字：三地形缺 50 料的採段天數（真函式 gather_eta_days＋site_prior 先驗）、帶滿料平原總天數、6 人子隊載重與帶 50／80 料總重。
+#   隊＝裸 TeamData（無隊長 ⇒ 工程 0、士氣取預設 work_morale）；只印數，不判。
+
+func _initialize() -> void:
+	var st := WorldState.new()
+	var t := TeamData.new()
+	t.team_id = 1
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 6)   # ★population 是成員推導（裸設 6 不生效）⇒ 補 6 名匿名平民
+	print("NUM|population=%d" % t.population)
+	print("NUM|work_morale=%.3f｜gather_window_days=%.1f" % [t.work_morale, OutpostSystem.gather_window_days()])
+	for type in ["civilian", "military"]:
+		var need: float = float((OutpostSystem.OUTPOST_COST[type][0] as Dictionary).get("material", 0))
+		var bd: float = OutpostSystem.build_eta_days(OutpostSystem.build_person_hours(type, 1), 6)
+		for terr in ["plains", "forest", "mountain"]:
+			var pr: Dictionary = OutpostSystem.site_prior(terr)
+			var g0: float = OutpostSystem.gather_eta_days(st, t, need, 0.0, pr)
+			var tot_full: float = OutpostSystem.build_eta_total_days(st, t, type, 1, 6, need, pr)
+			print("NUM|%s need=%.0f｜%-8s prior cap=%.1f prod=%.3f｜缺 %.0f 料採段=%s 天｜帶滿料總天數=%.3f（築段 %.3f）" % [type, need, terr,
+				float(pr["cap"]), float(pr["productivity"]), need, ("INF" if g0 == INF else "%.3f" % g0), tot_full, bd])
+	print("NUM|6 人子隊載重 carry_cap=%.1f（BASE_CARRY=%.1f）" % [MovementSystem.get_carry_capacity_pure(t), MovementSystem.BASE_CARRY])
+	for m in [50.0, 80.0]:
+		t.resources = {"material": m}
+		print("NUM|帶 %.0f 料：總重=%.1f（只算料）" % [m, MovementSystem.calc_total_weight_pure(t)])
+	print("=== srp_numbers_probe DONE ===")
+	quit(0)

@@ -1,0 +1,25 @@
+tree 3290a6e9a906b19e2eae78cb2895a78b7f87d21f
+[TREE] path=A:\GDS\demo\.worktrees\mm2neg commit=3290a6e9a clean=yes codehash=clean
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=22.3GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+--- full build-need（desire=gate 非稀釋）---
+  [PASS] 單一想建 weaponsmith → construction need=full 70（tools-demand cost80→70；非 ×desire 稀釋，got 70.0）
+--- cap 防疊爆 ---
+  [PASS] 多 facility(full-cost 疊)→ total=CAP 100（防 over-buy，got 100.0）
+--- buymaterial_drive 繫建設迫切 ---
+  [PASS] 建設迫切高(0.9) drive > 低(0.3)（買料繫建設前置，got hi=0.72 lo=0.24）
+  [PASS] 無 material 市場 → drive=0
+--- ★food-ok gate（防餓隊買料餓死）---
+  [PASS] 餓隊(food<DESPERATION) → 買料 not applicable（鏡射買糧互斥，餓時只買糧=防餓死）
+  [PASS] 食足(food>=DESPERATION)+缺料+市場+籌碼 → 買料 applicable
+  [PASS] 食足但不缺料 → not applicable（不亂買）
+--- 循環守衛 need_keep(material) 不遞迴爆 ---
+  [PASS] need_keep(material) 一次完成回有限值（cost-guard 前置=無遞迴，got 100.0）
+=== DONE === ALL PASS｜到場點名 5／5
+
+[godot.ps1] child exit=0
+rc=0

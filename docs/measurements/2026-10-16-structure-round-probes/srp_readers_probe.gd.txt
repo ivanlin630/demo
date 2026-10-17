@@ -1,0 +1,89 @@
+extends SceneTree
+# @bed-kind: diagnostic
+# 結構輪 §三之三 讀者（交件信要列）：同普查世界（peaceful_economy／1337／30 天）每日一次，
+#   ①有新點承諾的隊日數 × maintain_material active 的隊日數；②labor gather:material 權重（LaborSystem._workstation_need，與 compute_alloc 同一份共址隊）。
+# ★修前樹沒有 new_outpost_commitment ⇒ 用 script 方法表判，缺就印 0（不呼新 API，修前樹也跑得動）。
+# ★觀測路徑只讀：need_keep 只動 perf 碼表 static，不耗 RNG、不寫世界。
+
+func _initialize() -> void:
+	_run()
+	quit()
+
+func _run() -> void:
+	var sd: int = 1337
+	var days: int = 30
+	print("=== srp_readers_probe：config=peaceful_economy days=%d seed=%d ===" % [days, sd])
+	seed(sd)
+	FactionAISystem._a2b_remote_tribute_payers.clear()
+	var runner := SimRunner.new()
+	var config: Dictionary = GameSetup.load_config("res://config/peaceful_economy.json")
+	config["seed"] = sd
+	var state: WorldState = MeasureBedHelper.arm_and_setup(config, false)
+	var no: Script = load("res://scripts/simulation/decision/need_oracle.gd")
+	var has_commit: bool = false
+	for m in no.get_script_method_list():
+		if String(m.get("name", "")) == "new_outpost_commitment":
+			has_commit = true
+	print("RD|new_outpost_commitment 存在=%s" % str(has_commit))
+	var team_days: int = 0
+	var commit_days: int = 0
+	var commit_walk: int = 0
+	var commit_gather: int = 0
+	var mm_active: int = 0
+	var both: int = 0
+	var commit_not_mm: int = 0
+	var w_sum: float = 0.0
+	var w_tiles: int = 0
+	var share_sum: float = 0.0
+	for _t in range(days * WorldState.TICKS_PER_DAY):
+		runner.advance_tick(state, Vector2i(-1, -1))
+		if state.encounter_active and state.encounter_tick > 800:
+			runner._encounter_system.resolve_encounter_end(state, "draw")
+		if state.teams.is_empty():
+			break
+		if state.world.current_tick % WorldState.TICKS_PER_DAY != 0:
+			continue
+		var day: int = int(state.world.current_tick / WorldState.TICKS_PER_DAY)
+		var d_commit: int = 0
+		var d_mm: int = 0
+		var d_w: float = 0.0
+		for tid in state.teams:
+			var t: TeamData = state.teams[tid]
+			team_days += 1
+			var c: Dictionary = {}
+			if has_commit:
+				c = no.call("new_outpost_commitment", state, t)
+			var act: bool = false
+			for g in t.goal_state:
+				if String(g.get("goal_type", "")) == "maintain_material" and String(g.get("status", "")) == "active":
+					act = true
+			if not c.is_empty():
+				commit_days += 1; d_commit += 1
+				if String(c.get("kind", "")) == "walk": commit_walk += 1
+				else: commit_gather += 1
+				if act: both += 1
+				else: commit_not_mm += 1
+			if act:
+				mm_active += 1; d_mm += 1
+		# labor gather:material 權重：有採料工位的格（同 compute_alloc 的共址隊）
+		for tk in state.world.tiles:
+			var tile: HexTileData = state.world.tiles[tk]
+			if float(tile.resources.get("material", 0)) <= 0.0:
+				continue
+			var teams: Array = []
+			for tid in state.teams:
+				var t2: TeamData = state.teams[tid]
+				if t2.tile_pos == tile.tile_pos and TeamData.TAG_PRODUCE in t2.tags and LaborSystem._in_pool(state, t2, tile):
+					teams.append(t2)
+			if teams.is_empty():
+				continue
+			var w: float = LaborSystem._workstation_need(state, teams, "gather:material", tile)
+			d_w += w; w_sum += w; w_tiles += 1
+			share_sum += float((tile.labor_alloc.get("gather:material", {}) as Dictionary).get("share", 0.0))
+		print("RD|day %02d teams=%d 承諾=%d mm_active=%d gather:material 權重和=%.1f" % [day, state.teams.size(), d_commit, d_mm, d_w])
+	print("RD|--- 合計 ---")
+	print("RD|隊日數=%d｜有新點承諾=%d（walk %d／gather %d）｜maintain_material active=%d｜承諾∧active=%d｜承諾∧非active=%d" % [
+		team_days, commit_days, commit_walk, commit_gather, mm_active, both, commit_not_mm])
+	print("RD|gather:material 權重：格日數=%d｜權重和=%.1f｜平均=%s｜labor_alloc share 和=%.2f" % [
+		w_tiles, w_sum, ("%.2f" % (w_sum / float(w_tiles))) if w_tiles > 0 else "—", share_sum])
+	print("=== srp_readers_probe DONE ===")

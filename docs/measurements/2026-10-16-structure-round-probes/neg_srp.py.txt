@@ -1,0 +1,108 @@
+"""結構輪探針負對照：python neg_srp.py <tree> <n> apply|only"""
+import sys, io
+OS_ = "scripts/simulation/outpost_system.gd"
+FA = "scripts/simulation/faction_ai_system.gd"
+SUB = "scripts/simulation/subteam_system.gd"
+PS = "scripts/simulation/decision/persist_strength.gd"
+PC = "scripts/simulation/player_command_system.gd"
+NEG = {
+ "n1": ("start_build 放回 _can_afford 硬門 ⇒ V1", "_v1", [
+   (OS_, "\tvar paid: Dictionary = {}\n\tvar short: Dictionary = {}\n",
+         "\tif not _can_afford(team, tile, cost, \"start_build\"):\n\t\treturn false\n\tvar paid: Dictionary = {}\n\tvar short: Dictionary = {}\n")]),
+ "n2": ("採段也減 ticks_left ⇒ V3", "_v3", [
+   (OS_, "\t\t\t_tick_gather(state, tile, active_team)\n\t\t\treturn\n",
+         "\t\t\t_tick_gather(state, tile, active_team)\n\t\t\ttile.construction_ticks_left -= 1\n\t\t\treturn\n")]),
+ "n3": ("估算器採段寫死 0 天 ⇒ V6", "_v6", [
+   (OS_, "\tvar need_left: float = maxf(need_material - carried_material, 0.0)\n\tif need_left <= 0.0:\n\t\treturn 0.0\n",
+         "\tvar need_left: float = maxf(need_material - carried_material, 0.0)\n\tif true:\n\t\treturn 0.0\n")]),
+ "n4": ("紮根照舊走專用開工（不呼 start_build、寫舊 action）⇒ V2、V1", "_v1,_v2", [
+   (FA, "\tif OutpostSystem.new().start_build(state, team, camp_type, 1, team.team_id):\n\t\tif Probe.enabled: Probe.bump(\"settlement.l0_to_l1_start\")\n",
+        "\tstart_settle_construction(state, team, tile, camp_type)\n\nfunc start_settle_construction(state: WorldState, team: TeamData, tile: HexTileData, camp_type: String) -> void:\n\ttile.construction_target = {\"action\": \"crude_camp\", \"type\": camp_type, \"level\": 1, \"owner\": team.team_id}\n\ttile.construction_ticks_left = OutpostSystem.build_person_hours(\"settle\", 1)\n\ttile.construction_team_id = team.team_id\n\ttile.construction_started_tick = state.world.current_tick\n\ttile.construction_last_progress_tick = state.world.current_tick\n\tteam.corvee_site = tile.tile_pos\n")]),
+ "n5": ("完工拿掉 camp_level>0 那段 ⇒ V7 營地格", "_v7", [
+   (OS_, "\t\t\tif tile.camp_level > 0:\n\t\t\t\ttile.camp_level = 0 ", "\t\t\tif false:\n\t\t\t\ttile.camp_level = 0 ")]),
+ "n6": ("NPC SETTLE 不呼 on_arrival、保留 inline ⇒ S3、S4", "_s3,_s4", [
+   (FA, "\t\tvar arr: Dictionary = SubteamSystem.on_arrival(state, sub)\n\t\tif String(arr[\"outcome\"]) == \"refused\":\n\t\t\tTaskArbiter.release(sub, \"arrival\")\n\t\t\tmerge_queue.append(sub.team_id)\n\t\treturn",
+        "\t\tvar settle_tile: HexTileData = state.world.tiles.get(sub.tile_pos.x * 1000 + sub.tile_pos.y)\n\t\tif settle_tile != null and settle_tile.outpost_owner != -1:\n\t\t\tvar o: TeamData = state.teams.get(settle_tile.outpost_owner)\n\t\t\tif o != null and o.faction_id == sub.faction_id:\n\t\t\t\tInteractionSystem.new()._convert_to_resident(state, sub)\n\t\treturn")]),
+ "n7": ("on_arrival SETTLE 不看勢力（只看母隊）⇒ S1 ②", "_s1", [
+   (SUB, "\tif owner != null and team.faction_id != -1 and owner.faction_id == team.faction_id:\n\t\treturn \"\"\n\treturn not_own",
+         "\tif false and owner != null and team.faction_id != -1 and owner.faction_id == team.faction_id:\n\t\treturn \"\"\n\treturn not_own")]),
+ "n8": ("NPC SETTLE 不加「到了」的門 ⇒ S5", "_s5", [
+   (FA, "\t\tif sub.move_target != Vector2i(-1, -1):\n\t\t\treturn\n\t\t# 到場一支身體", "\t\t# 到場一支身體")]),
+ "n9": ("採段每 tick 都刷新 last_progress ⇒ V5", "_v5", [
+   (OS_, "\tgain = minf(gain, minf(cur, left))\n", "\tgain = minf(gain, minf(cur, left))\n\ttile.construction_last_progress_tick = state.world.current_tick\n")]),
+ "n10": ("執行端不加採段期限 ⇒ V5b", "_v5b", [
+   (OS_, "\tvar _gather_abort: bool = float(", "\tvar _gather_abort: bool = false and float(")]),
+ "n11": ("persist_strength 只讀 ticks_left ⇒ P1", "_p1", [
+   (PS, "\tvar eta_days: float = OutpostSystem.site_eta_remaining_days(state, team, tile, team.population, _site)",
+        "\tvar eta_days: float = OutpostSystem.build_eta_days(tile.construction_ticks_left, team.population)"),
+   (PS, "\t\t\tif OutpostSystem.construction_ticks_total(tile) > 0:\n\t\t\t\treturn OutpostSystem.construction_progress(state, tile)",
+        "\t\t\tvar total: int = OutpostSystem.construction_ticks_total(tile)\n\t\t\tif total > 0:\n\t\t\t\treturn clampf(float(total - tile.construction_ticks_left) / float(total), 0.0, 1.0)")]),
+ "n12": ("on_arrival SETTLE 改回舊 NPC 判準（faction 相等含 -1==-1）⇒ S1 ④", "_s1", [
+   (SUB, "\tvar not_own: String = \"(%d,%d) 不是你的據點\" % [pos.x, pos.y]\n\tif team == null",
+         "\tvar not_own: String = \"(%d,%d) 不是你的據點\" % [pos.x, pos.y]\n\tif team != null and tile != null and tile.outpost_owner != -1 and state.teams.get(tile.outpost_owner) != null and (state.teams.get(tile.outpost_owner) as TeamData).faction_id == team.faction_id:\n\t\treturn \"\"\n\tif team == null")]),
+ "n13": ("precheck_subteam_build 留著料門 ⇒ V10", "_v10", [
+   (PC, "\tvar bt: String = _sub_build_type(state)\n\treturn {\"ok\": true, \"reason\": \"\", \"note\":",
+        "\tvar bt: String = _sub_build_type(state)\n\tif carried < float(OutpostSystem.OUTPOST_COST[bt][0][\"material\"]):\n\t\treturn {\"ok\": false, \"reason\": \"子隊帶料不足\"}\n\treturn {\"ok\": true, \"reason\": \"\", \"note\":")]),
+ "n14": ("糧橋估算 carried 傳 0（不呼 fundable_carry）⇒ V8b 後者", "_v8b", [
+   (FA, "\tvar _carried_m: float = float(_carry.get(\"material\", 0.0))", "\tvar _carried_m: float = 0.0")]),
+ "n15": ("_site_candidate_score 不加 gather_term ⇒ V11", "_v11", [
+   (FA, "\tscore += gather_term   # ★結構輪探針 §三之二（≤0）", "\tpass")]),
+ "n16": ("gather_term 的 carried 傳 0 ⇒ V11 第二格", "_v11", [
+   (FA, "\tvar carried: float = float(fundable_carry(vault, leader_team.resources, {}, cost).get(\"material\", 0.0))",
+        "\tvar carried: float = 0.0")]),
+ "n17": ("選址迴圈不濾採不完的格 ⇒ V11b", "_v11b", [
+   (FA, "\t\tif gdays == INF:\n\t\t\tif Probe.enabled: Probe.bump(\"site.filtered_barren\")\n\t\t\tcontinue",
+        "\t\tif gdays == INF:\n\t\t\tgdays = OutpostSystem.gather_window_days()")]),
+}
+
+NO = "scripts/simulation/decision/need_oracle.gd"
+TV = "scripts/simulation/trade_valuation.gd"
+NEG.update({
+ "n18": ("_construction_need 不加新點那一支 ⇒ N1、N3", "_n1,_n3", [
+   (NO, "\tvar n: float = minf(_new_outpost_need(state, team, res), CONSTRUCTION_MATERIAL_NEED_CAP)\n",
+        "\tvar n: float = 0.0\n")]),
+ "n19": ("新點那一支不看承諾、對每支隊都算 L1 成本 ⇒ N2", "_n2", [
+   (NO, "\tvar c: Dictionary = new_outpost_commitment(state, team)\n\tif c.is_empty():\n\t\treturn 0.0\n\tvar q: float\n",
+        "\tvar c: Dictionary = {\"kind\": \"walk\", \"type\": \"civilian\", \"level\": 1, \"tile\": null}\n\tvar q: float\n")]),
+ "n20": ("採段不抵隊上帶的料 ⇒ N4", "_n4", [
+   (OS_, "\t\tif _absorb_carried(state, tile, active_team) > 0.0:\n", "\t\tif true:\n")]),
+ "n21": ("trade_valuation 照舊只看設施那一支 ⇒ N5 (a)(b)", "_n5", [
+   (TV, "NeedOracle._construction_need(state, team, \"material\", leader_values) > 0.0:", "NeedOracle._construction_facility_need(state, team, \"material\", leader_values) > 0.0:")]),
+ "n22": ("新點迫切改讀 persist_strength ⇒ N6（剛承諾時為 0）", "_n6", [
+   (NO, "\treturn maxf(_facility_build_desire(state, team), new_outpost_urgency(state, team))",
+        "\treturn maxf(_facility_build_desire(state, team), clampf(team.persist_strength, 0.0, 1.0) if not new_outpost_commitment(state, team).is_empty() else 0.0)")]),
+ "n23": ("①不看 move_target／construction_team_id ⇒ N2b", "_n2b", [
+   (NO, "\tif mt == Vector2i(-1, -1) or mt == team.tile_pos:\n", "\tif mt == Vector2i(-1, -1):\n"),
+   (NO, "\tif tt == null or tt.outpost_level != 0 or tt.construction_team_id != -1:\n", "\tif tt == null or tt.outpost_level != 0:\n")]),
+ "n24": ("②迫切的 carried 傳 0（不傳 site_stock）⇒ N6b", "_n6b", [
+   (NO, "\t\tcarried = float((tile.construction_target.get(\"site_stock\", {}) as Dictionary).get(\"material\", 0.0))\n",
+        "\t\tcarried = 0.0\n")]),
+ "n25": ("吃料只認 construction_team_id ⇒ N4b", "_n4b", [
+   (OS_, "\ttile.construction_team_id = active_team.team_id\n",
+         "\tvar _ct0: TeamData = state.teams.get(tile.construction_team_id)\n\ttile.construction_team_id = active_team.team_id\n"),
+   (OS_, "\t\tif _absorb_carried(state, tile, active_team) > 0.0:\n",
+         "\t\tif _absorb_carried(state, tile, _ct0 if _ct0 != null else active_team) > 0.0:\n")]),
+ "n26": ("上限改成先設施後新點 ⇒ N6c", "_n6c", [
+   (NO, "\tvar n: float = minf(_new_outpost_need(state, team, res), CONSTRUCTION_MATERIAL_NEED_CAP)\n\tvar room: float = CONSTRUCTION_MATERIAL_NEED_CAP - n\n\tvar f: float = minf(_construction_facility_need(state, team, res, lv), room) if room > 0.0 else 0.0\n",
+        "\tvar f: float = minf(_construction_facility_need(state, team, res, lv), CONSTRUCTION_MATERIAL_NEED_CAP)\n\tvar n: float = minf(_new_outpost_need(state, team, res), CONSTRUCTION_MATERIAL_NEED_CAP - f)\n")]),
+ "n27": ("②改成共用掃全隊的找隊迴圈 ⇒ perf.need_keep.us 對比", "PERF", [
+   (NO, "\t\t\t\tand OutpostSystem.is_site_worker(team, st):\n",
+        "\t\t\t\tand _scan_worker(state, st) == team:\n"),
+   (NO, "static var _new_outpost_tap_day: Dictionary = {}",
+        "static func _scan_worker(state: WorldState, tile: HexTileData) -> TeamData:\n\tfor tid in state.teams:\n\t\tvar t: TeamData = state.teams[tid]\n\t\tif OutpostSystem.is_site_worker(t, tile):\n\t\t\treturn t\n\treturn null\n\nstatic var _new_outpost_tap_day: Dictionary = {}")]),
+})
+tree, n, mode = sys.argv[1], sys.argv[2], sys.argv[3]
+desc, only, cuts = NEG[n]
+if mode == "only":
+    print(only); sys.exit(0)
+for f, old, new in cuts:
+    p = tree + "/" + f
+    t = io.open(p, encoding="utf-8", newline="").read()
+    o, nw = old, new
+    if "\r\n" in t:
+        o, nw = old.replace("\n", "\r\n"), new.replace("\n", "\r\n")
+    if t.count(o) != 1:
+        sys.stdout.buffer.write(("PATCH_FAIL %s %s count=%d\n" % (n, f, t.count(o))).encode("utf-8")); sys.exit(2)
+    t = t.replace(o, nw)
+    io.open(p, "w", encoding="utf-8", newline="").write(t)
+sys.stdout.buffer.write(("PATCHED %s：%s\n" % (n, desc)).encode("utf-8"))

@@ -1,0 +1,60 @@
+extends SceneTree
+# @bed-kind: diagnostic
+# 結構輪 world-fp 歸因：同 world-fp 那一趟（warring_states、seed 20260922、player_id=-1、20000 tick）。
+#   每 STEP tick 印逐域指紋（找首分歧 tick 與域）；DUMP_T>0 時在那一 tick 印 teams／tiles 原文行（兩棵樹 diff 看是哪些欄）。
+#   PROBE=1 ⇒ arm Probe 後跑同一趟，終局印各節是否真的 fire（§一 開工入口、§二 採段、§五 到場）＋final_fp（觀測不改被觀測物的旁證）。
+func _initialize() -> void:
+	var ticks: int = int(OS.get_environment("WFP_TICKS")) if OS.has_environment("WFP_TICKS") else 20000
+	var step: int = int(OS.get_environment("STEP")) if OS.has_environment("STEP") else 100
+	var dump_t: int = int(OS.get_environment("DUMP_T")) if OS.has_environment("DUMP_T") else -1
+	var probe: bool = OS.get_environment("PROBE") == "1"
+	if probe:
+		Probe.enabled = true
+	seed(20260922)
+	var st := WorldState.new()
+	GameSetup.setup(st, GameSetup.load_config("res://config/warring_states.json"))
+	st.player_id = -1
+	var runner := SimRunner.new()
+	for t in range(ticks):
+		var rank_t: int = int(OS.get_environment("RANK_T")) if OS.has_environment("RANK_T") else -1
+		if t + 1 == rank_t:
+			# ★RANK_T：那一 tick 決策前印 RANK_TEAM 的 per-option util（只在終局前一刻呼；之後 quit，不影響被比較的 fp）
+			var rt: TeamData = st.teams.get(int(OS.get_environment("RANK_TEAM")))
+			if rt != null:
+				print("RANK|pre-tick team=%d task=%s opt=%s pos=%s material=%s" % [rt.team_id, rt.current_task, rt.current_option, str(rt.tile_pos), str(rt.resources.get("material", 0))])
+				var rk: Array = DecisionEngine.rank_scored(st, rt, "wfp_rank_dump")
+				for j in range(rk.size()):
+					print("RANK|rank%d %s" % [j, str(rk[j])])
+		runner.advance_tick(st, Vector2i(-1, -1))
+		var tk: int = t + 1
+		if not probe and tk % step == 0:
+			var d: Dictionary = StateFingerprint.compute_domains(st)
+			var keys: Array = d.keys()
+			keys.sort()
+			var parts := PackedStringArray()
+			for k in keys:
+				parts.append("%s=%s" % [String(k), String(d[k]).substr(0, 12)])
+			print("ATTR|t=%d|%s" % [tk, "|".join(parts)])
+		if tk == dump_t:
+			var buf := PackedStringArray()
+			StateFingerprint._emit_teams(st, buf)
+			StateFingerprint._emit_tiles(st, buf)
+			StateFingerprint._emit_persons(st, buf)
+			StateFingerprint._emit_world(st, buf)
+			for line in buf:
+				print("DUMP|%s" % line)
+	print("ATTR|final_fp=%s" % StateFingerprint.compute(st))
+	if probe:
+		var ks: Array = []
+		for k in Probe.counts.keys():
+			var s: String = String(k)
+			if s.begins_with("construct.") or s.begins_with("subteam.arrival") or s.begins_with("settlement.") \
+					or s.begins_with("funnel.build_gate") or s.begins_with("dispatch_builder.attempt") or s.begins_with("outpost.") \
+					or s.begins_with("need.new_outpost") or s.begins_with("order.new_outpost") or s.begins_with("g1.shortage_buy.new_outpost") \
+					or s.begins_with("site.") or s.begins_with("survival.") :
+				ks.append(s)
+		ks.sort()
+		for k in ks:
+			print("ATTR|PROBE|%s=%d" % [k, int(Probe.counts[k])])
+	print("=== wfp_attr_probe DONE ===")
+	quit(0)

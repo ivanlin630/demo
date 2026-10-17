@@ -1,0 +1,6 @@
+[HEADLESS] HARD-FAILS ＝ 3 ｜ baseline ＝ 3
+[HEADLESS] ★FAIL：失敗【清單】與 baseline 不同（★數量可能一樣 —— 一紅一綠會抵消）
+   5a6
+   > 1 SCRIPT ERROR: Assertion failed: 應記資源不足，實際=無 advisor 可派可升
+   7a9
+   > 1 SCRIPT ERROR: Assertion failed: 退 N% material，實際=N

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 結構輪兩個探針：建點一支身體（L1 要材料、就地採）＋子隊到場一支身體
 topic: GO（R² 兩輪 CLEAN 條件已滿）；順序在你手上三張玩家可見票（真玩小修、我的掛單與押貨、玩家勢力目標）之後
 ---

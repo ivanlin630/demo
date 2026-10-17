@@ -1,0 +1,1938 @@
+[TREE] path=A:\GDS\demo\.worktrees\srp commit=e9665a0ed clean=NO code-dirty=1 codehash=D48D9CF8AED4
+[TREE]   *** measuring the WORKING TREE, not commit e9665a0ed ***
+[TREE]    M scripts/debug/build_verb_one_body_bed.gd
+[HW] cpu=AMD Ryzen 7 5800X3D 8-Core Processor cores=8 threads=16 mem_free=12.9GB/31.9GB
+[HW]   *** a TIME figure is only comparable to one carrying this same cpu= line ***
+[SCALE] TICKS_PER_HOUR=60 TICKS_PER_DAY=1440  |  1000t=0.69d  10000t=6.9d  43200t=30d(1 month)
+[SCALE]   *** a tick count without its day-conversion is not a number ***
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== build_verb_one_body：建點一支身體＋子隊到場一支身體 ===
+
+── V1 五入口同數（森林、池 150、帶 20 料）──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team1 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+    V1|NPC紮根|action=build type=civilian level=1 gather_left=30.0 ticks_left=720 扣料=20.0 owner=1 施工隊=1
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+    玩家紮根回句：開始紮根成村落：需材 50，帶料抵 20，腳下可採約 4.4 天，之後築約 2.3 天
+    V1|玩家紮根|action=build type=civilian level=1 gather_left=30.0 ticks_left=720 扣料=20.0 owner=0 施工隊=0
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+[PlayerCmd] build_outpost type=civilian
+    玩家建設回句：開始建 村落：需材 50，帶料抵 20，腳下可採約 4.4 天，之後築約 2.3 天
+    V1|玩家建設|action=build type=civilian level=1 gather_left=30.0 ticks_left=720 扣料=20.0 owner=-1 施工隊=0
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97022 advisors=[] (pop=6 cap=32 task=建造)
+[Outpost] Team6 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+    V1|NPC子隊抵達|action=build type=civilian level=1 gather_left=30.0 ticks_left=720 扣料=20.0 owner=-1 施工隊=6
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    派遣前 母隊 pop=13 料=66.67
+[Sub] Team0 派出子隊 Team6 leader=P97025 advisors=[] (pop=3 cap=32 task=建造)
+[Outpost] Team6 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 15 待採 35）
+    玩家子隊派遣回句：派出子隊 Team6：到 (8,8) 建民用據點（需材 50，帶料抵 15，腳下可採約 5.1 天，之後築約 10.0 天）
+    V1|玩家子隊腳下|action=build type=civilian level=1 gather_left=34.6 ticks_left=720 扣料=20.0 owner=0 施工隊=6
+  PASS: V1 owner：紮根／建設＝施工隊、玩家子隊＝母隊、NPC 子隊＝缺省（true true true true true）
+
+── V2 寫入點只有一處 ──
+    "action": "build"=1｜舊紮根開工函式=0｜"crude_camp"=0
+  PASS: V2 寫入 1 處、舊函式 0、crude_camp 0
+
+── V3 採段守恆、採段不築 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 0 待採 50）
+[PlayerCmd] build_outpost type=civilian
+    採段 217 tick｜違反 0｜ticks_left 720→707｜採完後第一 tick 減=true｜site_stock=50.00
+  PASS: V3 採段每 tick ticks_left 不動、三量相等（217 tick 違反 0）
+  PASS: V3 採完之後 ticks_left 開始減
+
+── V4 帶夠料 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 50 待採 0）
+[PlayerCmd] build_outpost type=civilian
+    gather_left=0.0｜ticks_left 720→707｜剩料 10.0
+  PASS: V4 帶 60  50  gather_left 0、第一 tick 就築、只扣 50
+
+── V5 池 0、停回生  停工逾時 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+[PlayerCmd] build_outpost type=civilian
+[Infra] 工地逾時取消 at (8,8) 退料 50%
+    last_progress 0→0（30 tick 後）｜逾時 6.92 天｜取消=true｜site_stock=20.0 退 10.0｜gather_abort +0
+  PASS: V5 池 0  last_progress 不刷新
+  PASS: V5 停工逾時取消、退 site_stock 的 50%（10.0／20.0）
+
+── V5b 真平原格、帶 0 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+  PASS: ★V5b 地板：找得到生成的平原格
+    平原 cap=16.0 productivity=1.179  build_eta_total_days=inf
+[Outpost] Team0 開始建 civilian Lv1 at (0,12)（需 720 person-ticks，需材 50 帶料抵 0 待採 50）
+[PlayerCmd] build_outpost type=civilian
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 97049 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97050 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97051 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[PlayerCmd] forced_event 到達: Team6 找上門：求投靠
+[Tutorial] 投奔者小隊 Team6 求投靠玩家
+[Tick 67] Person 3 (leader/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 73] Person 4 (leader/team4) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team4 → 覓食 (覓食)
+[Tick 80] Person 5 (leader/team5) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Tick 91] Person 1 (leader/team1) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 91] Person 97052 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97053 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97054 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 2 (leader/team2) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 135] Person 97055 (leader/team6) → P1_comply | stress=0.10 loyalty=0.89
+[SoloAI] Team6 → 乞食 (乞食)
+[SoloAI] Team6 → 乞食 (乞食)
+[Harvest] Tick360 季節=春 base=1.1
+[Tick 467] Person 97055 (leader/team6) → N1_flee | stress=0.30 loyalty=0.83
+[Move] Team 6 抵達 (0,12)
+[Tick 511] Person 97055 (leader/team6) → P1_comply | stress=0.40 loyalty=0.82
+[Tick 644] Person 97055 (leader/team6) → N1_flee | stress=0.30 loyalty=0.79
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team5 → 建設 (建設)
+[Tick 712] Person 97055 (leader/team6) → P1_comply | stress=0.40 loyalty=0.78
+[Move] Team 0 抵達 (0,12)
+[Order] Team3 buy weapon_melee_low ×4 (oid=1)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team3 buy tools ×2 (oid=3)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 4 抵達 (11,3)
+[Move] Team 5 抵達 (2,2)
+[Tick 818] Person 97055 (leader/team6) → N2_riot | stress=0.60 loyalty=0.75
+[Order] Team4 buy weapon_melee_low ×4 (oid=4)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=5)
+[Order] Team4 buy tools ×2 (oid=6)
+[SoloAI] Team4 → 覓食 (覓食)
+[Order] Team2 buy weapon_melee_low ×4 (oid=7)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=8)
+[Order] Team2 buy tools ×2 (oid=9)
+[Order] Team1 buy weapon_melee_low ×13 (oid=10)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=11)
+[Order] Team1 buy tools ×6 (oid=12)
+[Order] Team6 buy food ×6 (oid=13)
+[SoloAI] Team6 → 乞食 (乞食)
+[DayNight] Day 1 開始
+[PopMgmt] Team6 超額 1 人無 advisor，獨立流亡 Team7
+[TickPerf] day=1 avg=225 us max=11526 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/1440
+[Order] Team5 buy weapon_melee_low ×4 (oid=14)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=15)
+[Order] Team5 buy tools ×2 (oid=16)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 乞食 (乞食)
+[SoloAI] Team7 → 乞食 (乞食)
+[Tick 1546] Person 97056 (leader/team7) → P1_comply | stress=0.10 loyalty=0.76
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team7 → 乞食 (乞食)
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 2253] Person 97056 (leader/team7) → N2_riot | stress=1.00 loyalty=0.56
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Site] 選址 (0, 14) score=180 周邊資源={ "herb": 8, "ore_silver": 23 } terrain=forest 已知據點項=0.0 採料項=-37.0 用到的據點=[]
+[Site] Faction1 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 2478] Person 97057 (member/team3) → P1_comply | stress=0.00 loyalty=0.68
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 乞食 (乞食)
+[Order] Team7 buy food ×3 (oid=17)
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 2 開始
+[Move] Team 4 抵達 (11,3)
+[Move] Team 6 抵達 (0,12)
+[TickPerf] day=2 avg=304 us max=17274 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/2880
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team7 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 3 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=3 avg=281 us max=8257 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/4320
+[Site] 選址 (1, 13) score=110 周邊資源={ "ore_silver": 23, "herb": 8 } terrain=mountain 已知據點項=0.0 採料項=-109.9 用到的據點=[]
+[Sub] Team1 派出子隊 Team8 leader=P97052 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team8 → (1,13) civilian Lv1
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction0 首要目標: defend target=8
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 8 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[Move] Team 6 抵達 (0,12)
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team8 buy weapon_melee_low ×3 (oid=18)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=19)
+[Order] Team8 buy tools ×1 (oid=20)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 4 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=4 avg=398 us max=118385 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/5760
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team7 → 乞食 (乞食)
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[Move] Team 7 抵達 (0,12)
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team6 → 乞食 (乞食)
+[SoloAI] Team7 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 5 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=5 avg=386 us max=116694 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/7200
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[SoloAI] Team6 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=21)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=22)
+[Order] Team3 buy tools ×2 (oid=23)
+[SoloAI] Team7 → 乞食 (乞食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 6 開始
+[Move] Team 7 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=6 avg=453 us max=120586 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/8640
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=24)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=25)
+[Order] Team4 buy tools ×2 (oid=26)
+[SoloAI] Team4 → 覓食 (覓食)
+[Order] Team2 buy weapon_melee_low ×4 (oid=27)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=28)
+[Order] Team2 buy tools ×2 (oid=29)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=30)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=31)
+[Order] Team5 buy tools ×2 (oid=32)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team6 buy food ×3 (oid=33)
+[SoloAI] Team6 → 紮營 (紮營)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[CampL0] Team6 紮營 L0 @(0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×10 (oid=34)
+[Order] Team1 buy weapon_ranged_low ×8 (oid=35)
+[Order] Team1 buy tools ×5 (oid=36)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[DayNight] Day 7 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=7 avg=417 us max=115455 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/10080
+[Salary] Team3 薪水結算 coin=761.0
+[Salary] Team0 薪水結算 coin=955.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Tick 10214] Person 97056 (leader/team7) → P2_produce | stress=0.00 loyalty=0.00
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team8 薪水結算 coin=498.4
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → 覓食 (覓食)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 8 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=8 avg=384 us max=122435 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/11520
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[SoloAI] Team6 → 迎戰 (迎戰)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1410.4
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team4 → rest (休息)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 4 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 9 開始
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=9 avg=492 us max=127027 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/12960
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team8 buy weapon_melee_low ×3 (oid=37)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=38)
+[Order] Team8 buy tools ×1 (oid=39)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 10 開始
+[Move] Team 3 抵達 (0,12)
+[TickPerf] day=10 avg=408 us max=120391 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/14400
+[FactionAI] CONSTRUCT 子隊 Team8 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team8 完全合併 (pop=23)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 11 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=11 avg=295 us max=14699 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/15840
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=40)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=41)
+[Order] Team5 buy tools ×2 (oid=42)
+[SoloAI] Team5 → 建設 (建設)
+[Order] Team4 buy weapon_melee_low ×4 (oid=43)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=44)
+[Order] Team4 buy tools ×2 (oid=45)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 buy weapon_melee_low ×4 (oid=46)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=47)
+[Order] Team2 buy tools ×2 (oid=48)
+[Order] Team3 buy weapon_melee_low ×4 (oid=49)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=50)
+[Order] Team3 buy tools ×2 (oid=51)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 0→1 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[Order] Team1 buy weapon_melee_low ×13 (oid=52)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=53)
+[Order] Team1 buy tools ×6 (oid=54)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 12 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=12 avg=335 us max=11294 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/17280
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=764.5
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 13 開始
+[Move] Team 3 抵達 (0,12)
+[TickPerf] day=13 avg=289 us max=8833 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/18720
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team4 薪水結算 coin=764.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team2 薪水結算 coin=764.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=321 us max=14739 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/20160
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 1→2 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team9 leader=P97053 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team9 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=9
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=13 known=24
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=15 avg=310 us max=10624 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/21600
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 9 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team9 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team9 完全合併 (pop=23)
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=761.0
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=16 avg=306 us max=9411 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/23040
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=55)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=56)
+[Order] Team4 buy tools ×2 (oid=57)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=58)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=59)
+[Order] Team3 buy tools ×2 (oid=60)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=61)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=62)
+[Order] Team5 buy tools ×2 (oid=63)
+[SoloAI] Team5 → 建設 (建設)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team10 leader=P97054 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team10 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=10
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team0 薪水結算 coin=951.0
+[Order] Team2 buy weapon_melee_low ×4 (oid=64)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=65)
+[Order] Team2 buy tools ×2 (oid=66)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 10 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team10 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team10 完全合併 (pop=23)
+[DayNight] Day 17 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=17 avg=326 us max=11694 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/24480
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team5 → rest (休息)
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×13 (oid=67)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=68)
+[Order] Team1 buy tools ×6 (oid=69)
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=3 known=0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=18 avg=296 us max=8776 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/25920
+[Salary] Team2 薪水結算 coin=761.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[Move] Team 3 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 19 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=19 avg=286 us max=9193 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/27360
+[Move] Team 2 抵達 (11,3)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team11 leader=P97052 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team11 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=11
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1402.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=20 avg=312 us max=9612 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/28800
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 11 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[FactionAI] CONSTRUCT 子隊 Team11 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team11 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 1 抵達 (2,6)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team3 薪水結算 coin=753.9
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 0→1 (商業 cap=2)
+[Salary] Team4 薪水結算 coin=761.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=13 known=13
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=21 avg=317 us max=10954 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/30240
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=70)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=71)
+[Order] Team4 buy tools ×2 (oid=72)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=73)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=74)
+[Order] Team3 buy tools ×2 (oid=75)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team12 leader=P97053 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team12 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=12
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=76)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=77)
+[Order] Team5 buy tools ×2 (oid=78)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 buy weapon_melee_low ×4 (oid=79)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=80)
+[Order] Team2 buy tools ×2 (oid=81)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 22 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=22 avg=308 us max=11692 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/31680
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 12 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team12 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team12 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team5 薪水結算 coin=757.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×13 (oid=82)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=83)
+[Order] Team1 buy tools ×6 (oid=84)
+[DayNight] Day 23 開始
+[TickPerf] day=23 avg=340 us max=9581 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/33120
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team2 薪水結算 coin=757.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Ambition] Team1 rung 1→2 (商業 cap=2)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=3 known=0
+[TickPerf] day=24 avg=313 us max=9917 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/34560
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team3 薪水結算 coin=746.9
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 25 開始
+[TickPerf] day=25 avg=303 us max=10209 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/36000
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team0 薪水結算 coin=946.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team13 leader=P97054 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team13 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=13
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=15 known=15
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=26 avg=341 us max=10307 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/37440
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team4 薪水結算 coin=757.5
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team13 buy weapon_melee_low ×3 (oid=85)
+[Order] Team13 buy weapon_ranged_low ×2 (oid=86)
+[Order] Team13 buy material ×30 (oid=87)
+[Order] Team13 buy tools ×1 (oid=88)
+[Move] Team 13 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team13 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team13 完全合併 (pop=23)
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team3 buy weapon_melee_low ×4 (oid=89)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=90)
+[Order] Team3 buy tools ×2 (oid=91)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team4 buy weapon_melee_low ×4 (oid=92)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=93)
+[Order] Team4 buy tools ×2 (oid=94)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 27 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=27 avg=320 us max=11280 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/38880
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team5 buy weapon_melee_low ×4 (oid=95)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=96)
+[Order] Team5 buy tools ×2 (oid=97)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team2 buy weapon_melee_low ×4 (oid=98)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=99)
+[Order] Team2 buy tools ×2 (oid=100)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team1 薪水結算 coin=1887.8
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Order] Team1 buy weapon_melee_low ×13 (oid=101)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=102)
+[Order] Team1 buy tools ×6 (oid=103)
+[DayNight] Day 28 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=28 avg=296 us max=9833 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/40320
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 29 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=29 avg=296 us max=10519 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/41760
+[Salary] Team6 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Sub] Team1 派出子隊 Team14 leader=P97052 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team14 → (1,13) civilian Lv1
+[StrategicAI] Faction0 首要目標: defend target=14
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[SoloAI] Team6 → 迎戰 (迎戰)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 6 抵達 (0,12)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Move] Team 14 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[StrategicAI] Faction1 受威脅，尋求結盟
+[FactionAI] CONSTRUCT 子隊 Team14 抵達後逾時未開工 → 強制 release/merge
+[Merge] Team1 ← Team14 完全合併 (pop=23)
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[StrategicAI] Faction1 受威脅，尋求結盟
+[Salary] Team7 薪水結算 coin=0.0
+[StrategicAI] Faction1 受威脅，尋求結盟
+[DayNight] Day 30 開始
+[StrategicAI] Faction1 受威脅，尋求結盟
+[TickPerf] day=30 avg=321 us max=14528 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/43200
+[Infra] 工地逾時取消 at (0,12) 退料 50%
+[StrategicAI] Faction1 受威脅，尋求結盟
+    取消於第 30.04 天｜gather_abort +1｜取消前 site_stock=28.29 退 14.15
+  PASS: V5b 估算 INF
+  PASS: V5b 實跑在期限內被取消（gather_abort +1）、退 site_stock 50%%
+
+── V6 估算 vs 實跑（森林、帶 20）──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+[PlayerCmd] build_outpost type=civilian
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 97055 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97056 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97057 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[PlayerCmd] forced_event 到達: Team6 找上門：求投靠
+[Tutorial] 投奔者小隊 Team6 求投靠玩家
+[Tick 67] Person 3 (leader/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 73] Person 4 (leader/team4) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team4 → 覓食 (覓食)
+[Tick 80] Person 5 (leader/team5) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Tick 91] Person 1 (leader/team1) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 91] Person 97058 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97059 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97060 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 2 (leader/team2) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 135] Person 97061 (leader/team6) → P1_comply | stress=0.10 loyalty=0.89
+[SoloAI] Team6 → 覓食 (覓食)
+[SoloAI] Team6 → 覓食 (覓食)
+[Harvest] Tick360 季節=春 base=1.1
+[Tick 467] Person 97061 (leader/team6) → N1_flee | stress=0.30 loyalty=0.83
+[Tick 511] Person 97061 (leader/team6) → P1_comply | stress=0.40 loyalty=0.82
+[Move] Team 6 抵達 (7,9)
+[SoloAI] Team4 → 覓食 (覓食)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 0 抵達 (8,8)
+[Combat Start] Team-1000000 vs Team6
+[Ambush] NPC Team6 被 boar 伏擊
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[Order] Team3 buy weapon_melee_low ×4 (oid=1)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team3 buy tools ×2 (oid=3)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 3 抵達 (2,10)
+[Move] Team 4 抵達 (11,3)
+[Move] Team 5 抵達 (2,2)
+[Order] Team4 buy weapon_melee_low ×4 (oid=4)
+[Order] Team4 buy weapon_ranged_low ×3 (oid=5)
+[Order] Team4 buy tools ×2 (oid=6)
+[SoloAI] Team4 → 覓食 (覓食)
+[Order] Team2 buy weapon_melee_low ×4 (oid=7)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=8)
+[Order] Team2 buy tools ×2 (oid=9)
+[Order] Team1 buy weapon_melee_low ×13 (oid=10)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=11)
+[Order] Team1 buy tools ×6 (oid=12)
+[DayNight] Day 1 開始
+[PopMgmt] Team6 超額 2 人無 advisor，獨立流亡 Team7
+[TickPerf] day=1 avg=227 us max=10523 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/1440
+[Order] Team5 buy weapon_melee_low ×4 (oid=13)
+[Order] Team5 buy weapon_ranged_low ×3 (oid=14)
+[Order] Team5 buy tools ×2 (oid=15)
+[SoloAI] Team5 → 建設 (建設)
+[Site] Faction-1 派工失敗: 地禿: 帶料 0／需 50，plains 先驗採不完（期限 30 天） (需 { "material": 50, "tools": 0 })
+[Tick 1546] Person 97062 (leader/team7) → P1_comply | stress=0.00 loyalty=0.70
+[Move] Team 4 抵達 (11,3)
+[Move] Team 7 抵達 (8,8)
+[Move] Team 5 抵達 (2,2)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 3 抵達 (2,10)
+[SoloAI] Team5 → 建設 (建設)
+[DayNight] Day 2 開始
+[Move] Team 4 抵達 (11,3)
+[TickPerf] day=2 avg=254 us max=11583 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/2880
+[Move] Team 5 抵達 (2,2)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 1 抵達 (2,6)
+[Order] Team7 buy food ×1 (oid=16)
+[SoloAI] Team7 → 迎戰 (迎戰)
+[Move] Team 2 抵達 (11,3)
+[Move] Team 3 抵達 (2,10)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 4 抵達 (11,3)
+[Move] Team 7 抵達 (8,8)
+[SoloAI] Team7 → 迎戰 (迎戰)
+[SoloAI] Team6 → 覓食 (覓食)
+[DayNight] Day 3 開始
+[TickPerf] day=3 avg=240 us max=8816 us ticks=1440 teams=8 factions=2 | ★>2s 幀數=0/4320
+[Site] 選址 (1, 13) score=110 周邊資源={ "ore_silver": 23, "herb": 8 } terrain=mountain 已知據點項=0.0 採料項=-109.9 用到的據點=[]
+[Sub] Team1 派出子隊 Team8 leader=P97058 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team8 → (1,13) civilian Lv1
+[Move] Team 5 抵達 (2,2)
+[StrategicAI] Faction0 首要目標: defend target=8
+[Move] Team 1 抵達 (2,6)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 6 抵達 (6,10)
+[Move] Team 7 抵達 (8,8)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Move] Team 3 抵達 (2,10)
+[SoloAI] Team5 → 建設 (建設)
+[Move] Team 8 stuck at (2,6) target=(1,13), task=建造, sa={  }
+[Move] Team 4 抵達 (11,3)
+[SoloAI] Team7 → 迎戰 (迎戰)
+[Move] Team 5 抵達 (2,2)
+[Order] Team8 buy weapon_melee_low ×3 (oid=17)
+[Order] Team8 buy weapon_ranged_low ×2 (oid=18)
+[Order] Team8 buy tools ×1 (oid=19)
+[SoloAI] Team4 → 覓食 (覓食)
+[DayNight] Day 4 開始
+[TickPerf] day=4 avg=338 us max=111548 us ticks=1440 teams=9 factions=2 | ★>2s 幀數=0/5760
+[Move] Team 7 抵達 (8,8)
+[Move] Team 3 抵達 (2,10)
+[SoloAI] Team5 → 建設 (建設)
+[Site] 選址 (6, 11) score=183 周邊資源={ "herb": 4, "ore_iron": 78, "ore_silver": 75 } terrain=forest 已知據點項=0.0 採料項=-37.0 用到的據點=[]
+[Site] Faction1 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[Move] Team 1 抵達 (2,6)
+[Move] Team 2 stuck at (11,3) target=(2,6), task=徵收, sa={  }
+[Tick 6233] Person 97063 (member/team3) → P1_comply | stress=0.00 loyalty=0.91
+[Move] Team 4 抵達 (11,3)
+    V6|估算採段 4.444 天（總 6.752）｜實跑採段 4.458 天
+  PASS: V6 採段估算與實跑差  1 日（4.444 vs 4.458）
+
+── V6b 停採 24 小時池回 cap ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    第一次回補 12.00（REGEN_RATE 12.00）｜24 次後池 150.00／cap 150.00
+  PASS: V6b 每次回補＝REGEN_RATE（不乘 day_fraction）、24 小時後回到 cap
+
+── V7 完工一支 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team1 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 50 待採 0）
+[Outpost] Team1 建成 村落（Lv1）at (8,8)
+    營地格：L1 owner=1 營地欄清=true food_cap=40.0 訊息=true 主隊 task=idle corvee=(-1, -1)
+  PASS: V7 營地格完工：營地四欄清、food cap 40、outpost_built、owner＝施工隊、主隊 release、corvee 清
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 50 待採 0）
+[PlayerCmd] build_outpost type=civilian
+[Outpost] Team0 建成 村落（Lv1）at (8,8)
+    非營地格：L1 camp_ticks_left=77
+  PASS: V7 非營地格完工：營地欄不被碰（camp_ticks_left 仍 77）
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97082 advisors=[] (pop=6 cap=32 task=建造)
+[Outpost] Team6 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 50 待採 0）
+[Outpost] Team6 建成 村落（Lv1）at (8,8)
+[Outpost] Team6 完工後就地安頓 (8,8)（civilian）
+    NPC 子隊：settle_builder +1 tags=["生產"] parent=-1
+  PASS: V7 NPC 子隊完工  _auto_settle_builder（PRODUCE tag、脫母團）
+
+── V8b 撥料與估算同源（平原目標）──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Site] Faction0 派工失敗: 地禿: 帶料 0／需 50，plains 先驗採不完（期限 30 天） (需 { "material": 50, "tools": 0 })
+    母隊料 0  派出=false site_barren +1｜到場開工 gather_left=-1.0
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97094 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team6 → (8,6) civilian Lv1
+[Outpost] Team6 開始建 civilian Lv1 at (8,6)（需 720 person-ticks，需材 50 帶料抵 50 待採 0）
+    母隊料 200  派出=true site_barren +0｜到場開工 gather_left=0.0
+  PASS: V8b 母隊料 0  site_barren
+  PASS: V8b 母隊料  need  過閘、子隊開工 gather_left 0
+
+── V9 玩家面 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 10 待採 40）
+    回句：開始紮根成村落：需材 50，帶料抵 10，腳下可採約 5.9 天，之後築約 2.3 天
+    phase=gather「施工中：採料 10/50」→ phase=build「施工中：建造 2%」
+  PASS: V9 紮根回句含「需材」「可採約」、不含「免材料」
+  PASS: V9 工地 phase 兩段：gather「採料」→ build「建造」
+
+── G9 玩家優先序 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 97103 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97104 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97105 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[PlayerCmd] forced_event 到達: Team6 找上門：求投靠
+[Tutorial] 投奔者小隊 Team6 求投靠玩家
+[Tick 67] Person 3 (leader/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 73] Person 4 (leader/team4) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team4 → 覓食 (覓食)
+[Tick 80] Person 5 (leader/team5) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Tick 91] Person 1 (leader/team1) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 91] Person 97106 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97107 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97108 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 2 (leader/team2) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 135] Person 97109 (leader/team6) → P1_comply | stress=0.00 loyalty=0.91
+[SoloAI] Team6 → 乞食 (乞食)
+    settle：當下 prio=60、3 小時後 task=建設 prio=60
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 20 待採 30）
+[PlayerCmd] build_outpost type=civilian
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 97109 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97110 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97111 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[PlayerCmd] forced_event 到達: Team6 找上門：求投靠
+[Tutorial] 投奔者小隊 Team6 求投靠玩家
+[Tick 67] Person 3 (leader/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 73] Person 4 (leader/team4) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team4 → 覓食 (覓食)
+[Tick 80] Person 5 (leader/team5) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Tick 91] Person 1 (leader/team1) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 91] Person 97112 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97113 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97114 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 2 (leader/team2) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 135] Person 97115 (leader/team6) → P1_comply | stress=0.10 loyalty=0.89
+[SoloAI] Team6 → 覓食 (覓食)
+    build：當下 prio=60、3 小時後 task=建設 prio=60
+  PASS: G9 玩家紮根、建設施工中 task_priority == PRIO_PLAYER
+
+── V10 玩家子隊帶 0 料派往森林 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    precheck={ "ok": true, "reason": "", "note": "需材 50，帶料抵 0，那裡可採約 7.4 天，之後築約 10.0 天" }
+  PASS: V10 precheck ok、回句含「需材」「可採約」
+
+── V11 選址 gather_term ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    V11|母隊料 0｜森林 gather_term=-37.04 score=64.0｜山地 gather_term=-109.89 score=26.1  選森林
+    V11|母隊料 200｜森林 gather_term=-0.00 score=101.0｜山地 gather_term=-0.00 score=136.0  選山地
+    野心 0.2  -25.93｜0.8  -48.15
+  PASS: V11 料 0  兩格 gather_term<0、山地絕對值大
+  PASS: V11 料  need  兩格 gather_term 都 0
+  PASS: V11 野心 0.8 比 0.2 絕對值大
+  PASS: V11 決勝格：料 0 選森林、料  need 選山地
+
+── V11b 範圍內只有平原 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    母隊料 0  選址=空 filtered_barren +51
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Site] 選址 (6, 11) score=245 周邊資源={ "herb": 4, "ore_iron": 78, "ore_silver": 75 } terrain=plains 已知據點項=0.0 採料項=-0.0 用到的據點=[]
+    母隊料 200  選址=(6, 11) filtered_barren +0
+  PASS: V11b 料 0  選址回空、filtered_barren>0
+  PASS: V11b 料  need  回得出來、不濾
+
+── P1 持守看得到採段 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    gather_left=0  safe_factor=1.000 _progress=0.850
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    gather_left=need  safe_factor=0.126 _progress=0.000
+  PASS: P1 gather_left=need 的 safe_factor 較小
+  PASS: P1 gather_left=need 的 _progress 較小
+
+── S1 SETTLE 兩種子隊同結果 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97154 advisors=[] (pop=3 cap=32 task=安頓)
+[Settle] Team6 安頓於 (5,8) 變居民
+    S1|母隊據點|NPC子隊｜新=done「」｜舊 NPC 判準=會轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97162 advisors=[] (pop=3 cap=32 task=安頓)
+[Settle] Team6 安頓於 (5,8) 變居民
+    S1|同勢力別隊|NPC子隊｜新=done「」｜舊 NPC 判準=會轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97170 advisors=[] (pop=3 cap=32 task=安頓)
+    S1|外勢力|NPC子隊｜新=refused「(5,8) 不是你的據點」｜舊 NPC 判準=不轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97178 advisors=[] (pop=3 cap=32 task=安頓)
+[Settle] Team6 安頓於 (5,8) 變居民
+    S1|母隊已亡、同勢力|NPC子隊｜新=done「」｜舊 NPC 判準=會轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97186 advisors=[] (pop=3 cap=32 task=安頓)
+[Settle] Team6 安頓於 (5,8) 變居民
+    S1|母隊據點|玩家子隊｜新=done「」｜舊 NPC 判準=會轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97194 advisors=[] (pop=3 cap=32 task=安頓)
+[Settle] Team6 安頓於 (5,8) 變居民
+    S1|同勢力別隊|玩家子隊｜新=done「」｜舊 NPC 判準=會轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97202 advisors=[] (pop=3 cap=32 task=安頓)
+    S1|外勢力|玩家子隊｜新=refused「(5,8) 不是你的據點」｜舊 NPC 判準=不轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97210 advisors=[] (pop=3 cap=32 task=安頓)
+[Settle] Team6 安頓於 (5,8) 變居民
+    S1|母隊已亡、同勢力|玩家子隊｜新=done「」｜舊 NPC 判準=會轉
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team4 派出子隊 Team6 leader=P97221 advisors=[] (pop=3 cap=32 task=安頓)
+    S1|獨立對獨立|NPC子隊｜新=refused「(5,8) 不是你的據點」｜舊 NPC 判準=會轉
+  PASS: S1  done、 refused（NPC 與玩家子隊同結果）
+  PASS: S1  兩邊 reason 相同
+  PASS: S1  獨立 NPC 子隊到另一獨立隊據點  refused（修前會轉）
+
+── S2 CAMP ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team0 派出子隊 Team6 leader=P97223 advisors=[] (pop=3 cap=32 task=紮營)
+[CampL0] Team6 紮營 L0 @(8,8)
+[Sub] Team0 派出子隊 Team7 leader=P97224 advisors=[] (pop=3 cap=32 task=紮營)
+    空地  done｜已有營地  refused，事件=true
+  PASS: S2 空地 done、已有營地 refused、玩家側發 camp_refused 事件
+
+── S3 子隊段寫入點 ──
+    func _evaluate_subteam( … 直呼 0 次
+    func _tick_player_subteam( … 直呼 0 次
+  PASS: S3 子隊段零直呼、身體在 SubteamSystem.on_arrival
+
+── S4 NPC 住不進去  回母隊 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97232 advisors=[] (pop=3 cap=32 task=安頓)
+    merge_queue=[6] task=idle
+  PASS: S4 外勢力據點  release＋進 merge_queue
+
+── S5 途中不判 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97238 advisors=[] (pop=3 cap=32 task=安頓)
+    20 tick 交替站在自家／外勢力據點、仍在路上  偏離 0、轉居民 0
+  PASS: S5 途中仍 SETTLE、不 merge、不轉居民
+
+── N1 在路上的承諾進需求帳 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Order] Team1 buy weapon_melee_low ×13 (oid=1)
+[Order] Team1 buy weapon_ranged_low ×11 (oid=2)
+[Order] Team1 buy material ×30 (oid=3)
+[Order] Team1 buy tools ×6 (oid=4)
+    主隊走回營地｜型別 civilian 成本 50｜新點那一支 50.0 設施那一支 0.0｜need_keep 50.0｜reserve 30.0｜買單 qty=30 for=new_outpost｜walk +1
+  PASS: N1 主隊在路上  新點那一支＝L1 成本、need_keep  成本
+  PASS: N1 料單 for=new_outpost、量＝reserve持有（★reserve＝need_keep×液化係數）
+  PASS: N1 need.new_outpost.walk 有數
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97250 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team6 → (8,6) civilian Lv1
+    子隊在路上｜派出=true｜task=建造 move_target=(8, 6) 帶料 0.0｜新點那一支 50.0
+  PASS: N1 子隊在路上  新點那一支＝整筆成本（不扣持有）
+
+── N2 沒承諾就不算 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    task=idle｜新點 0.0｜_construction_need 0.0 == 設施那一支 0.0
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    task=覓食｜新點 0.0｜_construction_need 0.0 == 設施那一支 0.0
+  PASS: N2 任務不是 TASK_BUILD  新點 0、建造需求與修前同式（只剩設施那一支）
+
+── N2b 三種不是的 TASK_BUILD ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    目標＝腳下  新點 0.0
+    目標格有別隊工地  新點 0.0
+    目標格已是據點  新點 0.0
+  PASS: N2b 三種都是 0
+
+── N3 採段的需求＝剩下的缺口 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97286 advisors=[] (pop=6 cap=32 task=建設)
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    子隊在格  30.0｜母隊離格（corvee_site）＋move_target 指向自家營地  30.0｜gather +1
+  PASS: N3 子隊讀 tile_pos  30
+  PASS: N3 母隊讀 corvee_site  30、不再加的整筆
+  PASS: N3 need.new_outpost.gather 有數
+
+── N3b 雙算殘差可見（不斷言值）──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team2 派出子隊 Team6 leader=P97301 advisors=[] (pop=3 cap=32 task=建設)
+    同一工地滿足施工隊謂詞的隊數 2｜need.new_outpost.gather.not_ct +1
+  PASS: N3b 計數被印出（>0）
+
+── N4 採段吃帶來的料 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Outpost] Team0 開始建 civilian Lv1 at (8,8)（需 720 person-ticks，需材 50 帶料抵 0 待採 50）
+[PlayerCmd] build_outpost type=civilian
+    帶 20  gather_left 50.0→30.0｜site_stock +20.0｜隊上 20.0｜InvariantAudit 違反 0（★它沒有材料守恆項，守恆用三量相等驗）
+  PASS: N4 gather_left 20、site_stock +20、隊上 20
+    帶 100  剩 30.0  gather_left=0.0｜ticks_left 720→707｜隊上剩 70.0
+  PASS: N4 帶的料  gather_left  當 tick 轉築段
+
+── N4b 接手的工人也吃料 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team2 派出子隊 Team6 leader=P97315 advisors=[] (pop=3 cap=32 task=建設)
+    工人（非原施工隊）帶 20  gather_left 40.0→20.0｜site_stock +20.0｜工人剩 0.0｜原施工隊剩 0.0
+  PASS: N4b 接手工人帶的料抵進工地、工人 20
+
+── N5 守料 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    (a) 有承諾：reserve 30.00｜need_keep 50.00 × 只看糧急 0.600 ＝ 30.00（全急迫係數 0.200）｜沒承諾 reserve 0.00
+  PASS: N5(a) 有承諾  reserve＝need_keep×只看糧急係數；沒承諾不同
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Order] Team1 buy weapon_melee_low ×4 (oid=1)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team1 buy material ×5 (oid=3)
+[Order] Team1 buy tools ×2 (oid=4)
+    (b) 工地 gather_left 50｜持料 25｜reserve 30.00｜賣盤 material 0
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Order] Team1 sell material ×25 (oid=1)
+[Order] Team1 buy weapon_melee_low ×4 (oid=2)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=3)
+[Order] Team1 buy tools ×2 (oid=4)
+    (b) 沒工地（對照）｜持料 25｜reserve 0.00｜賣盤 material 25
+  PASS: N5(b) 狀態去交易  賣盤不發 material；沒工地的對照會賣
+
+── N6 買料效用 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    在路上料 0：urgency 0.850 drive 0.850｜帶 200：drive 0.000｜平原營地 urgency 1.000
+  PASS: N6 在路上料 0  drive > 0
+  PASS: N6 帶料  成本  drive 0
+  PASS: N6 平原目標（採不完） urgency 1
+
+── N6b 採段中迫切隨進度降 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97362 advisors=[] (pop=6 cap=32 task=建設)
+    gather_left=70  新點迫切 0.6747
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97368 advisors=[] (pop=6 cap=32 task=建設)
+    gather_left=5  新點迫切 0.1290
+  PASS: N6b gather_left 5 的迫切嚴格小於 70、且  0
+
+── N6c 上限分配（新點先占）──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+    新點 80.0｜設施（原值）100.0｜_construction_need 100.0（上限 100）
+  PASS: N6c 新點 80 全留、設施得剩下的 20、合計 100
+
+── N8 承諾不被自己的需求換掉 ──
+[MoneyGenesis] 初始 coin 總量 = 5952.0
+   = Σpop(62) × FOOD_PER_PERSON_PER_DAY(0.80, resource_system.gd:3)
+     × 每月天數(30, TICKS_PER_MONTH/TICKS_PER_DAY) × BASE_PRICE[food](2.0, trade_valuation.gd:8)
+     × k(2.0) ★而 k 同時吸收【交易佔消費的比例】—— 不只是「幾個月週轉」
+   分配：6 隊；其中【拿到 0】的 0 隊（★生產隊 by design，用戶定「農隊0」）
+   ★對帳：實發 5952.0 vs 推導 5952.0（差 0.0000）
+[GameSetup] 完成：6 teams, 2 factions, 6 persons
+[Sub] Team1 派出子隊 Team6 leader=P97380 advisors=[] (pop=6 cap=32 task=建造)
+[Infra] Team1 派建造子隊 Team6 → (5,7) civilian Lv1
+[Tick 60] Person 0 (leader/team0) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 60] Person 97377 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97378 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 60] Person 97379 (civilian/team0) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 67] Person 3 (leader/team3) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 73] Person 4 (leader/team4) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team4 → 覓食 (覓食)
+[Tick 80] Person 5 (leader/team5) → P1_comply | stress=0.00 loyalty=0.81
+[SoloAI] Team5 → 建設 (建設)
+[Tick 91] Person 1 (leader/team1) → P1_comply | stress=0.00 loyalty=0.81
+[Tick 91] Person 97381 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 91] Person 97382 (civilian/team1) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 114] Person 2 (leader/team2) → P1_comply | stress=0.00 loyalty=0.81
+[StrategicAI] Faction0 首要目標: defend target=6
+[Tick 135] Person 97380 (civilian/team6) → P1_comply | stress=0.00 loyalty=1.00
+    換掉那一刻：faction=0 goals=["徵收"] stakes=-｜need material=0.0｜urgency=0.000
+      rank0 { "u": 0.65436, "i": 4, "opt": "徵收", "d": 0 }
+      rank1 { "u": 0.09504042499978, "i": 0, "opt": "建設", "d": 0 }
+      rank2 { "u": 0.05997733874931, "i": 3, "opt": "紮根", "d": 0 }
+      rank3 { "u": 0.00209800414996, "i": 2, "opt": "休息", "d": 0 }
+      rank4 { "u": 0, "i": 1, "opt": "掠奪", "d": 0 }
+    maintain_material=active｜跑 175 tick｜task 換成=徵收｜persist.hold +0｜到營地=false
+  PASS: N8 maintain_material active
+=== build_verb_one_body DONE === 到場 33／33 errors: 2
+ERROR: [FAIL] V1 五入口 action/type/level/gather_left(30)/ticks_left/扣料(20) 逐數相同
+   at: push_error (core/variant/variant_utility.cpp:1091)
+ERROR: [FAIL] N8 TASK_BUILD 沒被換掉（或 persist.hold 有增）
+   at: push_error (core/variant/variant_utility.cpp:1091)
+
+[godot.ps1] child exit=1

@@ -1,0 +1,20 @@
+LAW|team material=0
+LAW|camp_flow_delay_days=33.00 settle_eta_days=0.00
+LAW|A #0 併入 u=1.6977
+LAW|A #1 紮營 u=1.3018
+LAW|A task=投靠
+LAW|team material=0
+LAW|camp_flow_delay_days=33.00 settle_eta_days=0.00
+LAW|B #0 併入 u=1.4490
+LAW|B #1 紮營 u=1.3018
+LAW|B task=投靠
+LAW|team material=50
+LAW|camp_flow_delay_days=3.00 settle_eta_days=0.00
+LAW|A #0 併入 u=1.6977
+LAW|A #1 紮營 u=1.5325
+LAW|A task=投靠
+LAW|team material=50
+LAW|camp_flow_delay_days=3.00 settle_eta_days=0.00
+LAW|B #0 紮營 u=1.5325
+LAW|B #1 併入 u=1.4490
+LAW|B task=紮營

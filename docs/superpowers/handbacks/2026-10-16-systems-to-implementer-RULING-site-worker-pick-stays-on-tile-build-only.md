@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 結構輪兩個探針 §三之三
 topic: 裁：挑 active_team 完全不變（在格上 ∧ TASK_BUILD）；第二條只給 ② 需求用；規格已改
 ---
