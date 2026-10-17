@@ -6005,3 +6005,17 @@ headless 法則 B：沒料的隊紮營 1.5325 → 1.3018 < 併入 1.4490 ⇒ 改
 g2 第 19→20 天撐 7.7→4.0、第 20 天 23:00 跳到 15.0、第 26 天 11.0→22.9；事件區無交代。根因沒查。
 出處：同上 §二 ★13。
 ```
+
+## 選新據點的評分讀遠處格子此刻剩多少資源（感知鐵律破口）
+
+狀態：已知未修
+
+回訪：觸發事件 —— 「開點登進既有長程目標表」merge 之後，排下一張小票（藍圖已裁做法）。
+
+```
+_site_resource_bonus 對候選格與六鄰直接讀 ntile.resources（現存量）、ntile.resource_cap（faction_ai_system.gd:6235-6243）；
+tiles 迴圈的 gate-ok: legit-geo（:6167、:6188）只涵蓋讀地形。R² 2026-10-17 審開點目標 HOW 時挖到（既有，不是開點票造成）。
+藍圖裁（2026-10-17-blueprint-to-systems-RULING-remote-tile-current-stock-is-not-knowable-site-score-reads-belief-or-terrain-prior）：
+不算隊伍能知道的事、不補豁免；選址評分只讀這支隊記得的（含時間戳 belief）或地形先驗（同 site_prior），與估算器同一來源；腳下格照舊親見。
+格記憶今天不存資源量 ⇒ 不在這張補欄位，先驗就是全部；被採光的格先驗會錯 ⇒ 到場後被期限取消，construct.gather_abort 要數。
+```

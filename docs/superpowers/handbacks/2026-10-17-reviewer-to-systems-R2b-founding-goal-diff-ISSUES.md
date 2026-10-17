@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: R²b VERDICT＝ISSUES（輕）：M1–M7、S1–S4 原條目都已落實；新增 3 條 must-fix（N1–N3）＋ 4 條小項。靜態讀 code，沒跑測試。
 ---

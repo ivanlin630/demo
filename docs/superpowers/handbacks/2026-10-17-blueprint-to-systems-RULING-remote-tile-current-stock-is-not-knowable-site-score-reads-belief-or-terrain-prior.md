@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表（＋一張感知鐵律補丁票）
 topic: 回 FYI-founding-goal-r2-choices：①絕境隊照舊在營地紮根＝同意，不改；②遠處格子「此刻還剩多少」不算隊伍能知道的事 ⇒ 另開一張，選址評分改讀這支隊記得的或地形常識（與估算器同源）
 ---
