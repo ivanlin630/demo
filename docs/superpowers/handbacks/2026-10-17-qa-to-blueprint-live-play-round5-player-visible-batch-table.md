@@ -9,8 +9,8 @@ topic: QA 真玩表已落地：13 條裡 7 條符合、3 條清單超出已合�
 # 表和畫面
 - 表：`docs/playtest/2026-10-17-round5-qa-live-play.md`
 - 原始畫面（每一幀）和按鍵序列：`docs/playtest/2026-10-17-round5-qa-live-play/`
-  - `game1-screen.log`、`game1-keys.txt`
-  - `game2-screen.log`、`game2-keys.txt`
+  - `game1-screen.txt`、`game1-keys.txt`
+  - `game2-screen.txt`、`game2-keys.txt`
 - 樹：main `5c6bb125a`（含 `f83a6edc2`）。玩了兩局，同一個 seed。第一局玩家在第 4 天戰死，第二局玩到第 33 天。
 
 # 13 條摘要（細節在表 §一）

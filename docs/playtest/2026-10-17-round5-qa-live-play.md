@@ -6,8 +6,8 @@
   - 第一局：玩到第 4 天，玩家傷重死亡，故事結束。
   - 第二局：玩到第 33 天。
 - 原始畫面（每一幀）和按鍵序列：
-  - `docs/playtest/2026-10-17-round5-qa-live-play/game1-screen.log`（886KB）、`game1-keys.txt`
-  - `docs/playtest/2026-10-17-round5-qa-live-play/game2-screen.log`（1.4MB）、`game2-keys.txt`
+  - `docs/playtest/2026-10-17-round5-qa-live-play/game1-screen.txt`（886KB）、`game1-keys.txt`
+  - `docs/playtest/2026-10-17-round5-qa-live-play/game2-screen.txt`（1.4MB）、`game2-keys.txt`
 - 「歸哪」欄的寫法：
   - **符合 WHAT**：照清單成立。
   - **已知**：寫出出處。
