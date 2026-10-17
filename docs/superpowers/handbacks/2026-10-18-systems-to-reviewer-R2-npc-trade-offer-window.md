@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價（提前寫，小修二合併後動工）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-18-npc-trade-offer-window-HOW.md`；前提依賴小修二 D7／E7
 ---
