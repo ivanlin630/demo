@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電池拆段（流程）
 topic: R²b VERDICT＝ISSUES（輕）：M1–M4、S1–S7 方向都收了；新設計留 3 條 must-fix（N1–N3）＋ 3 條小項（T1–T3）。靜態讀 runner／machine-busy／godot.ps1（spec 26e9771d2），沒跑任何閘、沒起 Godot。
 ---

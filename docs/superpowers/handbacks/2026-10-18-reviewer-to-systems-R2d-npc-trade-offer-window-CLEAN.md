@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價
 topic: R²d VERDICT＝CLEAN（可排實作，不需再審；1 條實作提醒）。靜態讀 code（spec 26e9771d2），沒跑測試。
 ---

@@ -1,4 +1,6 @@
-# 電池拆成獨佔段與可並行段 — HOW（流程；第二版，依 R² M1–M4／S1–S7）
+# 電池拆成獨佔段與可並行段 — HOW（流程；第三版，依 R² M1–M4／S1–S7、R²b N1–N3／T1–T3）
+
+- 審查：R²b `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2b-battery-split-ISSUES.md`。
 
 - WHAT：藍圖票 `docs/superpowers/handbacks/2026-10-18-blueprint-to-systems-TICKET-split-battery-into-exclusive-timing-section-and-parallel-safe-section.md`（用戶裁 2026-10-18「拆」）。
 - 審查：R² `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2-battery-split-ISSUES.md`。
@@ -44,16 +46,23 @@
 ## 四、runner
 
 ### 1. 標記與存活判斷（M1）
-- 所有「標記主人活著嗎」共用一支：把 `machine-busy.sh` 的 `_mb_alive`（含 `tasklist` 分支）抽到一個共用檔（例如 `.claude/hooks/lib-alive.sh`），runner 與 machine-busy 都 source 它。runner `:118` 的 `kill -0` 改用它。不准再寫第二份。
+- 所有「標記主人活著嗎」共用一支 `_mb_marker_alive(winpid, since)`，放共用檔（例如 `.claude/hooks/lib-alive.sh`），runner 與 machine-busy 都 source 它。runner `:118` 的 `kill -0` 改用它。不准再寫第二份。
+  - 判活要三條同時成立（R²b N2：pid 會被 Windows 重用，`machine-busy.sh:105` 已記過血證）：該 winpid 的行程存在、行程名是 runner 會是的那幾種（`bash`／`sh`；實作端以真跑時的實際名字為準並寫進註解）、行程 `StartTime ≤ since + 120 秒`（同 `machine-busy.sh` 對 Godot 信標的容差）。任一不成立 ⇒ 殘骸標記，印「舊標記…接手」。
 - 標記一律落 main 工作樹的 `.claude/hooks/`，內容一行 `winpid=<n> tree=<路徑> role=<角色> section=<excl|par> state=<狀態> since=<時間>`；讀端掃所有 worktree（沿用今天掃樹的寫法，舊位置也讀）。
 - 狀態（M2）：
   - par：`queued`（拿不到份數、在等）／`running-gate`（正在跑某一支，另記 `gate=<id>`）／`paused`（停在兩支之間讓獨佔段）。
   - excl：`waiting`（在等安靜）／`running`。
 - 舊標記 `.merge-gates-running`：讀端當成 `excl running` 認（舊版 runner 還在別的樹上時）；寫端不再寫。
 
+### 1b. 取得與釋放要原子（R²b N1）
+- 「讀所有標記 → 判斷能不能進 → 寫自己的標記」整段包在一個臨界區：`mkdir "$_mg_root/.claude/hooks/.merge-gates-gate.d"`（建目錄在 NTFS 上是原子的；已存在 ⇒ 等 1 秒重試，最多 60 次，仍不成 ⇒ 看該目錄的 mtime 是否 >120 秒且沒有活著的取得者 ⇒ 當殘骸刪掉重試，印一行），做完 `rmdir`。
+- 改自己的狀態（`running-gate`→`paused` 等）也在臨界區內寫。
+- ⇒ 兩份 par 不會同時各看到「0 份」都進；兩份 excl 不會同時都判可開跑。
+
 ### 2. 參數與順序
 - `MG_SECTION=all|par|excl`，預設 `all`＝先 `par` 段、再 `excl` 段。摘要逐格多印一欄段別。
 - `MG_FROM`／`MG_TO` 仍以**註冊表列號**為準，在各段內過濾；`PARTIAL` 橫幅不變（S2）。
+- `MG_SECTION=par` 或 `excl` 單跑 ⇒ 開頭與結語都印橫幅「只跑 par／excl 段 ⇒ 不可當 merge 判決」，不寫基線（R²b T1）。
 - 建議用法（S3）：在釘死 HEAD 的 worktree 跑（今天就是這樣）。在 main 上跑時，excl 段開始等待前重驗一次 HEAD；變了 ⇒ 照今天「開跑與結束 HEAD 不同 ⇒ 不可判」的規則處理。
 
 ### 3. 可並行段
@@ -68,7 +77,10 @@
 
 ### 4. 獨佔段（M2）
 - 一進入就寫 `excl waiting` 標記（不是通過剎車後才寫），讓 par 看得到它在等。
-- 開跑條件：沒有 par 在 `running-gate` **且** Godot 行程數＝0。不是「par 份數＝0」——停在兩支之間（`paused`）的 par 不擋獨佔段，這樣不會互等。
+- 開跑條件（三條，臨界區內判）：
+  1. **沒有別的 excl 在 `running`**（保住今天「全機只准一份獨佔」；R²b N1——少了這條，A 的 excl 在兩支閘之間 Godot＝0 的空檔，B 的 excl 可插進來，正是 2026-09-23 兩輪交錯的形狀）；
+  2. 自己是 `waiting` 隊列的**隊首**：依標記的 `since` 由早到晚，同秒比 winpid 小者先；
+  3. 沒有 par 在 `running-gate` **且** Godot 行程數＝0。不是「par 份數＝0」——停在兩支之間（`paused`）的 par 不擋獨佔段，這樣不會互等。
 - 等待中每 60 秒檢查一次阻擋者並印出：
   - 只有 par 在 `running-gate` ⇒ 等它跑完當下那一支（par 看到 `waiting` 會在下一支前停）。
   - 有不是電池起的 Godot（QA 的遊戲、用戶的遊戲、孤兒）⇒ 印歸屬；**par 不停**（停了也等不到安靜，只會讓兩條線白等）；獨佔段繼續等。
@@ -82,6 +94,7 @@
 - 重跑通過**不是無聲綠**：摘要那一格印「PASS（並行超時後獨佔重跑通過）」，並進 carry（`MG_CARRY_RE` 加這個字面，selfcheck 給陽性對照）；這一輪結語不得寫「全部乾淨通過」。
 - 同一輪有幾支「超時（並行中）」印出數量。重跑自己也超時 ⇒ 紅。
 - ⇒ 間歇性卡死不會被洗掉：它至少留下一次落檔的超時輸出與一格非乾淨的 PASS。
+- 獨佔段「等不到安靜」⇒ 排在它尾巴的重跑也不會跑 ⇒ 那些「超時（並行中）」的閘仍未結案；**整輪結論＝不可判**（不是綠、不是紅），結語列出未結案的閘名（R²b T2）。
 
 ### 6. 基線寫入
 - 基線（`:499-530`）只在 `MG_SECTION=all` 且兩段都跑完時寫（同今天「分批跑不寫基線」）。
@@ -107,7 +120,9 @@
   - 三者互不等待（獨佔段除外）；印每條的等待秒數；三份標記同時存在時第三份真的印出「等待」並附秒數（M1-3）。
   - 獨佔段的數字（`player-entry-smoke` 牆鐘、`play-selfcheck` 行程數）與單跑時一致。
   - 全程 FreeMB 最低值印出；不出現 2026-09-23 那種被收割。
-- **par 分類的對照**（M4）：同一個 par 段跑兩次——一次機器安靜、一次同時開合成負載（一個空轉的 Godot headless＋一個吃 CPU 的子行程）；兩次的**逐格判決**逐字相同（時間欄不比）。不同 ⇒ 那支改 `excl` 並記一筆。
+- **par 分類的對照**（M4；R²b N3）：同一個 par 段跑兩次——一次機器安靜、一次同時開合成負載（一個空轉的 Godot headless＋一個吃 CPU 的子行程）；兩次的**逐格判決**逐字相同（時間欄不比）。不同 ⇒ 那支改 `excl` 並記一筆。
+  - **負載強度地板**：負載那一跑的逐格耗時中位數 ÷ 安靜那一跑 ≥ `LOAD_RATIO_MIN = 1.3`（TEST VALUE）；不到 ⇒ 這次對照不算數（負載沒真的壓上去），印比值。
+  - **陽性對照**：同一個負載下，另跑兩支只給對照用的小腳本（放 `scripts/debug/`，不進註冊表）——一支斷言「全機 Godot 行程數＝1（只有自己）」、一支斷言「固定工作量在 N 秒預算內做完」（N 取安靜時實測耗時 ×1.1）。負載下兩支都必須**不綠**；綠了 ⇒ 負載沒有壓到「會讓 excl 型閘變判決」的程度，整個對照不算數。
 - 分類複核：交件信列每一支 `excl` 的理由（file:line）、「讀時間但留 par」三支的負載實測、`ui-flow`／`terminal-e2e` 與 helper 的掃描結果、超時判定兩類（直接／包裝）的名單。
 
 ## 誠實限
@@ -116,3 +131,4 @@
 - 份數上限與記憶體門檻是保守的測試值，沒有用真跑校過；第一輪真跑後再調。
 - 記憶體只在每支閘前後檢查，擋不住兩份 par＋QA 的遊戲在同一支閘中途一起膨脹（2026-09-23 的收割就是中途發生）。
 - 分類以靜態讀＋一次負載對照為準；對照只蓋那一次跑到的路徑。
+- 舊版 runner：讀端認舊標記（當 `excl running`）只保護「新版看舊版」。還在別的樹上跑的舊版 runner 只看 `.merge-gates-running` 與 Godot＝0，看不到新標記，可能在 par 兩支閘的空檔開跑（同 `merge-gates.sh:106-112` 註解「依賴大家都跑新版的守衛不是守衛」）。落地前清點仍在用舊 runner 的樹（`runner-self` 雜湊，`:211-212`），交件信列出；落地後通知兩條實作線 merge origin/main（R²b T3）。

@@ -1,4 +1,4 @@
-# 電腦隊想跟你換 ⇒ 跳視窗報價 — HOW（第四版，依 R² M1–M5／S1–S6、R²b N1–N2／T1–T3、R²c P1／Q1–Q3）
+# 電腦隊想跟你換 ⇒ 跳視窗報價 — HOW（定稿：R² M1–M5／S1–S6、R²b N1–N2／T1–T3、R²c P1／Q1–Q3、R²d CLEAN）
 
 - WHAT：藍圖票 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-TICKET-npc-trade-offer-to-player-opens-window.md`（用戶裁 2026-10-17 甲）。
 - 審查：R² `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2-npc-trade-offer-window-ISSUES.md`。各段標了對應的 M／S。
@@ -108,8 +108,8 @@
 | O3 | T3：電腦 TRADE 訪客到玩家所在市集格；玩家方當訪客到有電腦 TRADE peer 的市集格 ⇒ 各一張；運糧子隊到玩家所在市集格 ⇒ 不報 |
 | O3b | 市集格一次到場只出一張（T1 不報）；`trade.offer.dedup` 在那一拍為 0 |
 | O4a／b／c | 三種各一格，各用自然構造（真的電腦 TRADE 隊、讓它照引擎掛單）：**賣**（對方有賣單）、**買**（對方有買單、有錢）、**換**（對方有買單、錢不夠、有別種餘裕）；另一格「沒有單 ⇒ 賣餘裕最大的」；`trade.offer.kind.*` 各 ≥1 |
-| O4f | 對方最舊的是押貨賣單、次舊是普通買單 ⇒ 報次舊那張；最舊是過期單 ⇒ 同樣跳過 |
-| O4g | 接受後那張單 `qty_remaining` 減少（或結清）；過一個 T1 週期、新相遇 ⇒ 不再以原量重報 |
+| O4f | 對方最舊的是押貨賣單（用引擎自然寄賣構造，不手寫 `escrowed`）、次舊是普通買單 ⇒ 報次舊那張；最舊是過期單 ⇒ 同樣跳過 |
+| O4g | 接受後那張單 `qty_remaining` 減少量＝**實際成交量**（夾過量時按夾後的量）（或結清）；過一個 T1 週期、新相遇 ⇒ 不再以原量重報 |
 | O4e | 普查（不需玩家）：沒有玩家的世界跑到電腦 TRADE 隊相遇 ≥ 200 對，每對呼 `npc_offer`（只算不寫事件），印 kind 分佈（賣／買／換／空）與 res 分佈；賣與買各 ≥ `OFFER_KIND_MIN_SHARE`＝10%（具名常數）。另在床裡（只讀、不進決策）印「報價要的 res 在**玩家方（普查裡＝配對的另一隊）**身上有沒有」的比例（R²c Q2）。普查會呼 `ask_price`／`grudge_multiplier` 而灌 `trade.grudge_markup.*` 計數（`trade_valuation.gd:241-246`）⇒ 普查那一跑的 Probe 計數不拿去當別的量測基準，交件信註明（Q3），給 QA 看玩家面有多少報價接不了（R²b T2） |
 | O4d | 接受 ⇒ 帳本 reason、恩情邊消耗量、商隊買方的存貨簿與今天電腦對電腦同種交易逐字相同；量與單價＝報價；買價 ≤ 對方 `local_value`；玩家當賣方、電腦領袖對玩家領袖有恩情邊 ⇒ 玩家領袖的恩情邊不變、電腦的也不被消耗（買價不帶恩怨）|
 | O5 | 拒絕 ⇒ 帳 0 筆、雙方關係值與對方任務修前修後相同、一句「拒絕 Team X 的交換」；逾時同拒絕、句子讀得懂、`trade.offer.timeout`=1 |

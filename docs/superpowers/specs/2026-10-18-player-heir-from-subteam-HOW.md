@@ -1,4 +1,4 @@
-# 玩家從子隊繼位（子隊獨立成玩家的新本隊）— HOW（第二版，依 R² M1–M4／S1–S6）
+# 玩家從子隊繼位（子隊獨立成玩家的新本隊）— HOW（定稿：R² M1–M4／S1–S6、R²b CLEAN＋C1–C3）
 
 - 審查：R² `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2-player-heir-from-subteam-ISSUES.md`。
 
@@ -54,6 +54,7 @@ WHAT 寫「不得被電腦母隊召回或併掉」。召回與 `try_merge_back` 
   - `_try_merge`／`_resolve_mergein` 入口再守一次：被吸者是玩家方 ⇒ 放手，`TaskArbiter.release(merger)`（同現有 reject 分支）。
 - 三處同一支謂詞（D7 的「玩家方」），不另寫。
 - 這兩條是全專案附身隊的通用洞（不只繼位之後）；堵了之後，玩家附身的隊不再被電腦併或吸納——這就是不變量 12 的寫入端排除，不是新的設計。交件信寫一句；它會讓「玩家投靠電腦隊」只剩玩家自己下令的那條路（`join` 類動詞），不受影響。
+- ★不變量升級（R²b C3）：合併本張時 systems 把「附身中的隊也不得被電腦併入／吸納／重掛（被寫的是它的隊籍與成員，不只是 task）」加進 `docs/invariants.md` 第 12 條；交件信列出 (A)(B) 三處守的 file:line 供引用。
 
 ## 四、小修二 B3 那句
 
@@ -78,7 +79,8 @@ WHAT 寫「不得被電腦母隊召回或併掉」。召回與 `try_merge_back` 
 | S4 | 兩支子隊都有候選 ⇒ 視窗列兩支、各帶子隊名；選第二支 ⇒ 第二支變本隊，第一支仍是母隊的子隊、`player_controlled` 為假（改由電腦帶） |
 | S5 | 子隊候選是記名而非隊長 ⇒ 他接位、原隊長降記名、仍在同一隊 |
 | S6a | 原母隊與新隊同勢力、同格、都閒置，推 3 天 ⇒ 新隊仍在、人數不變（**修前先紅**：印修前新隊被併的 tick） |
-| S6b | 原母隊人多、新隊人少、母隊的吸納候選含新隊（修前），推到母隊抵達 ⇒ 新隊仍獨立、任務沒被 release（**修前先紅**） |
+| S6b1 | 直接單元呼叫 `_find_absorb_target`，母體含一支玩家方隊（人少、可達、有 belief）⇒ 回傳不得是它；母體地板：同 fixture 修前回傳它（印修前回傳值） |
+| S6b2 | 強制 `TASK_MERGE`（`order_target` 指向玩家方隊）推到抵達 ⇒ 玩家方隊不被溶、不被重掛、任務沒被 `release`（修前先紅） |
 | S6c | 弱斷言（只作回歸）：`try_merge_back` 對新隊 0 次；新隊照原任務走 |
 | S7 | 開視窗後、選之前那個子隊候選死了 ⇒ 過濾掉（同今天 N-2 的寫法）；全死 ⇒ 故事結束句 |
 | S8 | 本隊與子隊都沒人 ⇒ 故事結束句「你沒有可以接手的人」 |
@@ -94,10 +96,11 @@ WHAT 寫「不得被電腦母隊召回或併掉」。召回與 `try_merge_back` 
   - n2：候選不讀子隊 `leader_id`（只讀子隊 `named_members`）⇒ S2 紅
   - n3：子隊那支走 `set_leader(team, heir)`（舊路）⇒ S3 紅（人被拉回母隊）
   - n4：不 `detach_subteam` ⇒ S3 紅（`parent_team_id`／母隊 `subteam_ids`）
-  - n6：拿掉 (A) 的守 ⇒ S6a 紅
-  - n7：拿掉 (B) 的守 ⇒ S6b 紅
-  - n8：`_action_choose_heir` 合法性改回 `fe.candidates.has(heir_id)` ⇒ S2–S5 全紅（恆「非合法候選」）（被召回或併掉）
   - n5：本隊有人時也列子隊 ⇒ S1 紅
+  - n6：拿掉 (A) 的守 ⇒ S6a 紅
+  - n7a：拿掉 `_find_absorb_target` 的排除 ⇒ S6b1 紅
+  - n7b：拿掉 `_try_merge`／`_resolve_mergein` 入口的守 ⇒ S6b2 紅
+  - n8：`_action_choose_heir` 合法性改回 `fe.candidates.has(heir_id)` ⇒ S2–S5 全紅（恆「非合法候選」）
 - world-fp：照常跑閘，預期不變；變了歸因。
 - 驗收後 QA 真玩：同一 seed 第一局第 4 天那一刻（量測員那筆樣本），應該開視窗、能選子隊隊長。
 
