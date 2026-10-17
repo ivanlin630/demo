@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家從子隊繼位
 topic: R²b 只審 M1–M4；S1–S6 已併
 ---
