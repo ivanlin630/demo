@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 全員在場
 topic: R²c 只審 N1、N2＋T1、T2；另有一處依藍圖裁乙改了分配段（形狀已回問藍圖）
 ---
