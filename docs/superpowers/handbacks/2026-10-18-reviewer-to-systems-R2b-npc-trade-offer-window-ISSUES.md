@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價
 topic: R²b VERDICT＝ISSUES（輕）：M2–M5 與 S1–S6 已收；M1 的新設計引入 2 條 must-fix（N1、N2）＋ 3 條小項（T1–T3）。靜態讀 code（spec 9d2ea0fbc），沒跑測試。
 ---

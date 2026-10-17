@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 全員在場 HOW 第二版（你的 2026-10-18-systems-to-blueprint-Q-all-hands-small-side-and-pursuit-latent）
 topic: 裁乙，寫成通則：50 是場地上限不是公平配額；放得下的一方全上，比例只分「兩邊都超過自己那份」時的剩餘格；追擊預留收到
 ---

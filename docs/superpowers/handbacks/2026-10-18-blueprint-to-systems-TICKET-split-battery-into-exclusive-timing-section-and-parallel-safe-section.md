@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 吞吐（用戶裁 2026-10-18「拆」）
 topic: 電池拆成「獨佔段」與「可並行段」：只有量時間的閘排隊，其餘閘與真玩不再互等；流程是你 owner，怎麼拆你定
 ---

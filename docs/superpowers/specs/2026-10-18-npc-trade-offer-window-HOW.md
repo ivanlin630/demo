@@ -1,4 +1,4 @@
-# 電腦隊想跟你換 ⇒ 跳視窗報價 — HOW（第二版，依 R² M1–M5／S1–S6）
+# 電腦隊想跟你換 ⇒ 跳視窗報價 — HOW（第三版，依 R² M1–M5／S1–S6、R²b N1–N2／T1–T3）
 
 - WHAT：藍圖票 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-TICKET-npc-trade-offer-to-player-opens-window.md`（用戶裁 2026-10-17 甲）。
 - 審查：R² `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2-npc-trade-offer-window-ISSUES.md`。各段標了對應的 M／S。
@@ -28,20 +28,20 @@
 
 - 新一支 `TradeValuation.npc_offer(state, npc, player_side) -> Dictionary`（放 `trade_valuation.gd`，估值單一源）。回空字典＝不提。
 - **感知**：只讀 `npc` 自己的東西＋玩家方領袖 id（面對面知道是誰，同今天 `ask_price` 的 `buyer_leader_id` 恩怨入口）。**不讀玩家方的庫存、錢、人口、標籤、估價**（D7 要拔掉的就是那個）。
-- **一把尺**（全部對 `npc`、與 `local_value` 同源）：
-  - 缺口 `deficit(res) = maxf(npc.population × TARGET_PER_POP.get(res, 1.0) − ResourceSystem.effective_holding(state, npc, res), 0)`（同 `trade_valuation.gd:271-272` 的短缺；`reserve` 是保留線不是需求，對非活命品恆 0，不用它算缺口）。
-  - 餘裕 `surplus(res) = maxf(庫存 − reserve(npc, res), 0)`（同今天 `:1420-1422`）。
-  - 缺口價值＝`deficit × local_value`；餘裕價值＝`surplus × ask_price`。
-- **種類與順序**：
-  1. 取缺口價值最大的 res＝B。有 B ⇒
-     - **對方買**：`bid = bid_price(npc, B, …, player_leader_id)`（下一點），量＝min(缺口取整, 錢÷bid, 載運空間)。量 ≥ 1 ⇒ 報這一種。
-     - 錢不夠（量 < 1）⇒ **以物易物**：取餘裕價值最大、且 ≠ B 的 res＝A；對方給 A×`give_qty`，要 B×`want_qty`。`want_qty = min(缺口, floor(give_qty × local_value(A) ÷ local_value(B) × (1 − disc_buy)))`、`give_qty` 從 A 的餘裕起算並在 `want_qty` 夾過後回推。兩者 ≥ 1 ⇒ 報這一種。
-  2. 沒有 B、或買與換都無效 ⇒ **對方賣**：取餘裕價值最大的 res＝A；`unit = ask_price(npc, A, …, player_leader_id)`，量＝A 的餘裕取整。商隊存貨（`merchant_inventory`）一筆一筆算進候選，單價同樣 `ask_price`。
+- **依據＝對方自己掛著的單**（R²b N1）：TRADE 隊出門本來就帶著 `active_orders`（`order_system.gd:46-58`：`kind` buy／sell、`res`、`qty_remaining`、`created_tick`）。那是它自己秤過、決定要買或要賣的東西——WHAT 1「對方自己秤過划算才提」最直接的來源。
+  - 取 `created_tick` 最早、`qty_remaining > 0` 的那一張（同隊最舊的心願先問）。
+  - **賣單 res＝A** ⇒ **對方賣**：`unit = ask_price(npc, A, …, player_leader_id)`（同今天賣方，含恩怨），量＝min(`qty_remaining`, 對方身上 A 的庫存取整)。
+  - **買單 res＝B** ⇒ **對方買**：`bid = bid_price(npc, B, …)`，量＝min(`qty_remaining`, 錢÷bid, 載運空間)。量 ≥ 1 ⇒ 報。
+    - 錢不夠（量 < 1）⇒ **以物易物**：取對方餘裕價值最大、且 ≠ B 的 res＝A（餘裕＝庫存−`reserve`，同今天 `:1420-1422`；價值＝餘裕×`local_value`）。式子（R²b T1）：
+      - `k = 1 − disc_buy`
+      - `want_qty = min(qty_remaining, floor(surplus(A) × lv(A) ÷ (lv(B) × k)))`
+      - `give_qty = floor(want_qty × lv(B) × k ÷ lv(A))`
+      - 兩者 ≥ 1、`give_qty ≤ surplus(A)`，且 `give_qty × lv(A) ≤ want_qty × lv(B) × k`（對方以自己的估價不虧）才報。`lv` 都是 `local_value(npc, ·)`。
+  - **沒有任何單** ⇒ 後備：**對方賣**餘裕價值最大的 res（同上賣的算法，量＝餘裕取整）。不做「依缺口買」——人均目標有二十一種，幾乎每支隊都有缺口，用它當依據會讓報價幾乎全是「想買你一樣你沒有的東西」（R²b N1）。
   - 都無效 ⇒ 空。
-- **買價**（新一支 `bid_price`，與 `ask_price` 同檔並列、共用折讓的寫法）：
-  - `disc_buy = clampf(commerce × COMMERCE_DISCOUNT_K + (greed − 0.5) × GREED_HOLD_K, 0, DISCOUNT_MAX)`——商業技能與貪婪讓買方壓價；急迫不讓買方壓價（急著要的人不壓價），所以不含 `_urgency` 項。
-  - `bid = local_value(npc, B) × (1 − disc_buy) ÷ grudge_multiplier(npc, lv, state, player_leader_id)`——對仇人出價更低、對恩人更高。
-  - ⇒ 對方以自己的估價有利可圖（`bid ≤ local_value`），WHAT 1「對方自己秤過划算才提」。
+- **買價**（新一支 `bid_price`，與 `ask_price` 同檔並列）：
+  - `disc_buy = clampf(commerce × COMMERCE_DISCOUNT_K + (greed − 0.5) × GREED_HOLD_K, 0, DISCOUNT_MAX)`——商業技能與貪婪讓買方壓價；不含急迫項（急著要的人不壓價）。
+  - `bid = local_value(npc, B) × (1 − disc_buy)`。**不帶恩怨**：今天的引擎裡恩怨只作用在賣方的 ask（`trade_valuation.gd:207-213`），買方不帶；報價照同一個不對稱（R²b N2(a)）。⇒ `bid ≤ local_value` 恆成立。
 - 報價內容：`{kind: sell|buy|barter, npc_id, side_id（玩家方那支隊 id）, give_res, give_qty, want_res, want_qty, unit_price, tile}`。`sell`＝對方給貨要你錢；`buy`＝對方給錢要你貨；`barter`＝對方給 A 要你 B。
 
 ## 三、強制事件與去重
@@ -78,6 +78,8 @@
 
 - 今天「同意之後」不只寫帳。把**整段**抽成共用函式，今天的撮合與報價接受都呼叫它：
   - `_settle_goods_sale(state, seller, buyer, res, qty, price)`＝`_execute_transfer`（`:1454`）＋`NpcAiSystem.repay_gratitude(state, seller, buyer.leader_id)`（`:1456`）＋買方是商隊時進存貨簿（`:1459-1463`）。`_attempt_trade_direction` 的 `:1454-1463` 改成呼叫它。
+    - **報恩只在賣方是電腦時呼叫**（寫成字面：`if not is_player_side(seller): repay_gratitude(...)`）。賣方的折價來自賣方的恩情；玩家當賣方時沒有電腦的折價可消耗，也不准誤消耗玩家領袖的恩情邊（R²b N2）。電腦對電腦照今天。
+  - 不共用的：`_market_visitor_buy／_sell`（`:1247`、`:1328`）是板上單成交，價格由掛單方自報、reason 是 `market_buy_in` 等另一組——不收進這幾支（R²b T3）。
   - `_settle_inventory_sale(state, seller, buyer, item, qty, price)`＝商隊存貨賣出（`:1407-1411`：三行帳＋`item["qty"]` 遞減）。`:1398-1413` 迴圈改成呼叫它。
   - `_settle_barter(a, b, give_res, give_qty, pay_res, pay_qty)`＝`:1491-1494` 四行帳＋那一行 print／tap。
   - ⇒ reason 字串、恩情消耗、存貨簿與今天逐字相同；寫入點只此一處。
@@ -103,8 +105,9 @@
 | O2 | T2：玩家派出的子隊路遇電腦 TRADE 隊 ⇒ 視窗帶子隊；同勢力主隊同一格 |
 | O3 | T3：電腦 TRADE 訪客到玩家所在市集格；玩家方當訪客到有電腦 TRADE peer 的市集格 ⇒ 各一張；運糧子隊到玩家所在市集格 ⇒ 不報 |
 | O3b | 市集格一次到場只出一張（T1 不報）；`trade.offer.dedup` 在那一拍為 0 |
-| O4a／b／c | 三種各一格，各走真路徑造出：**賣**（對方無缺口有餘裕）、**買**（對方有缺口有錢）、**換**（對方有缺口沒錢、有另一種餘裕）；`trade.offer.kind.*` 各 ≥1 |
-| O4d | 接受 ⇒ 帳本 reason、恩情邊消耗量、商隊買方的存貨簿與今天電腦對電腦同種交易逐字相同；量與單價＝報價；買價 ≤ 對方 `local_value` |
+| O4a／b／c | 三種各一格，各用自然構造（真的電腦 TRADE 隊、讓它照引擎掛單）：**賣**（對方有賣單）、**買**（對方有買單、有錢）、**換**（對方有買單、錢不夠、有別種餘裕）；另一格「沒有單 ⇒ 賣餘裕最大的」；`trade.offer.kind.*` 各 ≥1 |
+| O4e | 普查（不需玩家）：沒有玩家的世界跑到電腦 TRADE 隊相遇 ≥ 200 對，每對呼 `npc_offer`（只算不寫事件），印 kind 分佈（賣／買／換／空）與 res 分佈；賣與買各 ≥ `OFFER_KIND_MIN_SHARE`＝10%（具名常數）。另在床裡（只讀、不進決策）印「報價的 res 在對方那一方身上有沒有」的比例，給 QA 看玩家面有多少報價接不了（R²b T2） |
+| O4d | 接受 ⇒ 帳本 reason、恩情邊消耗量、商隊買方的存貨簿與今天電腦對電腦同種交易逐字相同；量與單價＝報價；買價 ≤ 對方 `local_value`；玩家當賣方、電腦領袖對玩家領袖有恩情邊 ⇒ 玩家領袖的恩情邊不變、電腦的也不被消耗（買價不帶恩怨）|
 | O5 | 拒絕 ⇒ 帳 0 筆、雙方關係值與對方任務修前修後相同、一句「拒絕 Team X 的交換」；逾時同拒絕、句子讀得懂、`trade.offer.timeout`=1 |
 | O6 | 拒絕後同格再推 6 小時 ⇒ 不再跳；**接受**後同格再推 6 小時 ⇒ 不再跳；對方離開（離開期間沒有任何試報價）、超過一個 T1 週期後回來 ⇒ 再跳一次；同一支電腦隊先遇主隊被拒、再遇玩家子隊 ⇒ 子隊那張照跳 |
 | O7 | 已有勒索視窗時對方 TRADE 到場 ⇒ 勒索視窗不被蓋、`dropped_busy`=1（印這段期間 T1 被呼叫次數 >0，S5）；勒索處理完、仍同格 ⇒ 之後能跳報價 |
@@ -121,6 +124,8 @@
   - n5：T1 那支報完就 return（不走路徑 4）⇒ O1「仍在可互動名單」紅
   - n6：順序倒回「賣第一」⇒ O4b、O4c 紅
   - n7：拿掉 T1 的市集格排除 ⇒ O3b 紅
+  - n8：依據改回「缺口價值最大」⇒ O4e 的賣占比 < 10% 紅
+  - n9：買價除以恩怨乘數 ⇒ O4d「買價 ≤ local_value」紅（對恩人那格）
 - world-fp：照常跑閘。預期不變；變了歸因到第一個分歧 tick，不直接換值。
 - 舊床：抽函式後，跑有交易的現成床（交件信列名單與修前修後）。
 
@@ -128,5 +133,6 @@
 
 - 一次相遇一次提案，效果上是一種重複上限（以 T1 週期判新相遇）；同一支電腦隊在附近來回換格，會一直問。頻率等 QA 玩一局再談（WHAT 不做門檻／上限／別再問）。
 - 對方開價不看玩家有沒有錢、有沒有貨 ⇒ 會出現玩家付不起或給不出的報價；接受時才說。這是感知鐵律的代價，不是 bug。
-- 買價折讓不含急迫項——急著要的買方不壓價；這是我在 HOW 定的，若藍圖要另一種，改 `bid_price` 一處。
+- 買價折讓不含急迫項——急著要的買方不壓價；買價不帶恩怨（同今天）。這是我在 HOW 定的，若藍圖要另一種，改 `bid_price` 一處。
+- 報價只看最舊的一張單；身上有好幾張單的隊，後面的單要等前面那張成交或過期才會被問到。
 - 「排隊」不做：撞上別的視窗那次只留一個重試旗，不留報價內容。

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 全員在場
 topic: R²b VERDICT＝ISSUES（輕）：M2–M4、S2–S8 已收；M1 的撤退謂詞與 M5 的 H12 基準式各留 1 條 must-fix（N1、N2）。靜態讀 code（spec 6c684d58c），沒跑測試。
 ---
