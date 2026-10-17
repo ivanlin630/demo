@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修三
 topic: R²b VERDICT＝CLEAN（附 4 條派發前請併進 spec 的文字修補 C1–C4，不需再審）。靜態讀 spec 5f5837341 與相關 code，沒跑測試、沒起 Godot。
 ---

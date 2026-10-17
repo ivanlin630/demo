@@ -1,4 +1,4 @@
-# 批尾小修三（第五輪第二局 QA）— HOW（第二版，依 R² M1–M6／S1–S8）
+# 批尾小修三（第五輪第二局 QA）— HOW（定稿：R² M1–M6／S1–S8、R²b CLEAN＋C1–C4）
 
 - 審查：R² `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2-tail-fixes-3-ISSUES.md`。
 
@@ -40,7 +40,7 @@
   | 項 | 讀者 | 接掌後 |
   |---|---|---|
   | 家 | `player_api_mapper.gd:72-78` `_home_tile` → `state.own_outpost_tile` | 該隊擁有據點（`game_setup.gd:418-420` 以 `first_team_id`＝領袖隊建）⇒ 第 0 tick 有值 |
-  | 支配權／公庫 | `player_api_mapper.gd:1209`、`:1167-1168` 比 `outpost_owner == pt.team_id` | 同上 ⇒ 第 0 tick 有值 |
+  | 支配權／公庫 | `player_api_mapper.gd:1204`、`:1167-1168` 比 `outpost_owner == pt.team_id` | 同上 ⇒ 第 0 tick 有值 |
   | 附近已知據點 | `player_query_api.gd:536-545`：`own_outpost_tile` ＋ `known_outposts` | 自家據點那一項第 0 tick 有值 |
   | 已知對象（情報頁） | `BeliefSystem.known_targets`（`player_query_api.gd:72`） | 開局全世界的信念都是空的（`create_team` 給空、隨機模式不播，R² 查過）⇒ 第 0 tick＝0，第一次視野／勢力相位後才有。不是接掌的洞，所有開局都一樣 |
   | 自家成員關係 | `known_reputations`（`player_query_api.gd:103-106`） | 開局全世界都沒有 ⇒「不明」。同上 |
@@ -50,7 +50,7 @@
 
 ### 1e 加入既有勢力的新隊要知道自家（R² M3 重寫）
 - 不往 belief 複製（會灌 `intel_arrived`、設 `pending_rethink`、時間戳錯，`belief_system.gd:310-340,421,430`），也不讀開局時是空的 `known_member_states`。
-- 先 dump：選 3 開局，第 0 tick 與 24 小時後各印一次「新隊畫面上缺哪幾項、各項的讀者是誰」（家、附近已知據點、情報頁、成員列、勢力面板）。
+- 先 dump：選 3 開局，第 0 tick 與 24 小時後各印一次「新隊畫面上缺哪幾項、各項的讀者是誰」（家、附近已知據點、情報頁、成員列、勢力面板）。dump 出的缺項清單**先寫進交件信**，再固化成床的預期（R²b C2）；清單 ≥1 項才進 T3（母體地板）。**缺項 0 ⇒ 1e 結案、T3 與 n2 刪掉**，交件信寫明。
 - 修**讀者**，不複製資料：同勢力的成員與據點今天已有直接讀者（`belief_pos` 對同勢力走 `known_member_states`，`belief_system.gd:128-133,191`；`query_memory_panel` 的據點列讀自家勢力名冊，`player_query_api.gd:110-120`）。dump 裡缺的那幾項，讀者改成同樣讀勢力名冊（`FactionData.member_team_ids` → 各成員 `own_outpost_tile`；勢力成員彼此知道的事）。
   - 只改玩家查詢（`player_query_api`／`player_api_mapper`），不改 NPC 決策讀的函式（`_known_outpost_relations` 等）⇒ world-fp 不動。
 - 加入者沒有自己的據點 ⇒「家：（無）」、支配權否、公庫不可用是正確的（別人的據點）。交件信寫明。
@@ -59,7 +59,7 @@
 - `player_query_api.gd:125` 寫死 `"faction_relations": []`。勢力之間的關係今天沒有資料（`FactionData.relations` 全站無讀者）⇒ 改成列「自家勢力成員」（隊名、對他的 `known_reputations`），標題改「勢力成員」；勢力之間那欄印「勢力之間的關係還沒做」，不印「尚無」（尚無像是查過了是空的）。
 
 ### 1g config 路的 `new_faction`（S3）
-- 全庫沒有 config 或床用它（R² 搜過）。改成走接掌路徑：`join_mode: new_faction` ⇒ 以 state 取成員總人口最小的勢力，走 1d；`_find_weakest_faction` 讀 config weights 那支刪掉。沒有勢力 ⇒ `push_error`＋開局事件一句「找不到可接掌的勢力，改為獨立開局」。
+- 全庫沒有 config 或床用它（R² 搜過）。改成走接掌路徑：`join_mode: new_faction` ⇒ 以 state 取成員總人口最小的勢力（同人口取 faction id 最小者；R²b C4），走 1d；`_find_weakest_faction` 讀 config weights 那支刪掉。沒有勢力 ⇒ `push_error`＋開局事件一句「找不到可接掌的勢力，改為獨立開局」。
 
 ## 二、改投視窗說真做的事（★N6、★N7、★N5）
 
@@ -78,7 +78,7 @@
   - 放在 `_on_faction_changed` 的 `LEAVE_FACTION_DISSOLVED` 早返回（`:642-643`）之後：解散時不逐隊發。
   - 領袖離開會先跑 `succeed_or_disband_faction`（`:644-646`）；鉤子句排在它之後。
 - 發法：看得到 ⇒ `WorldEvents.emit(state, "faction_member_left", [玩家隊 id], false, {team, from_faction, to_faction, reason})`——subjects 放玩家隊（離開的那隊此時已不是同勢力，放它會被 `_player_perceives` 擋掉，`world_events.gd:354-356`），`wake_thinking=false`，句子主詞從 info 的 `team` 取。看不到（含觀察者世界）⇒ **不呼 emit**（emit 會無條件設 `pending_rethink`，`:187-191`），只 `Probe.bump("faction.member_left.unseen." + reason)`。
-- 註冊：`faction_member_left` 進 `FUNC_KINDS`（`:34-84`）、`KIND_LABEL`（`:103-117`，短名「離開勢力」）。推進停點（`ADVANCE_STOP_KINDS`，`:124-126`）：原因是背叛或起義、而且離開的是玩家的勢力 ⇒ 停；其餘不停——我定的設計預設，已告知藍圖。
+- 註冊：拆成兩個 kind（R²b C3：`ADVANCE_STOP_KINDS` 只比 kind、看不到 reason）——`faction_member_revolted`（原因是背叛或起義、而且離開的是玩家的勢力）與 `faction_member_left`（其餘）。兩個都進 `FUNC_KINDS`（`:34-84`）、`KIND_LABEL`（`:103-117`，短名「叛離」「離開勢力」）；只有 `faction_member_revolted` 進 `ADVANCE_STOP_KINDS`（`:124-126`）。藍圖已同意（背叛／起義停、其他不停）。kind 由鉤子依 reason 選，一處。
 - 各呼叫者現有的玩家句與鉤子怎麼辦（交件信逐列填修前修後句子）：
 
 | 呼叫者 | reason | 現有玩家可見句 | 鉤子 |
@@ -94,7 +94,8 @@
 | `interaction_system.gd:1761/1790` 吸收／定居 | `JOIN_ABSORB`／`JOIN_SETTLE` | 無 | 鉤子出 |
 | `world_state.gd:525` 解散 | `LEAVE_FACTION_DISSOLVED` | — | 不發 |
 
-  - 「讓位」寫成 reason＋玩家角色的判斷，在鉤子一處，不在呼叫端各寫。
+  - 「讓位」的判準（R²b C1）＝**同一件事已有另一個產生者會對玩家發句**，不是「玩家是不是收編方」：例如收編的勝方是玩家勢力內的盟友（不是玩家本隊）時，`subjugate_sentence` 會出第三人稱句——那就讓位；沒有任何既有句會對玩家發，鉤子才出。判斷寫在鉤子一處，讀既有產生者的條件（同一支謂詞），不在呼叫端各寫。
+  - `betrayed` 在玩家流的抑制：在 `WorldEvents._feed_player`（玩家流入口）依 kind 過濾掉 `betrayed`，**不動 emit 本身** ⇒ `pending_rethink` 照設、NPC 受害方照醒。床驗兩件：玩家流沒有 `betrayed` 句、受害方的 `pending_rethink` 仍被設。
 - **死亡不發離開句**（S5）：滅團（`faction_ai_system.gd:5329-5331`）與 `erase_teams`（`world_state.gd:1004-1008`）不經 `set_team_faction`，各有 `team_extinct`／`teams_erased`，不補。
 - reason → 人話放 names.tsv（小修二 E2 那張）；沒對到 ⇒ unmapped tap，床斷言走過的世界 0。
 - **★N7 背叛句沒到畫面**：量測員證實 `betrayed` 已 emit、subject 是玩家隊，`_player_perceives` 按理放行（`:349-350`）⇒ 缺口在 emit 之後（事件區容量／顯示，或警示列在終端不出現）。實作端先查原因；**修法取決於原因**——鉤子換產生者本身不會修好「畫面看不到」。交件信寫原因與修法。
@@ -118,6 +119,7 @@
 - 主因「TeamN 收到了情報」：小修二 D6 已刪。本票先驗 D6 之後還會不會擠（一次性回放，同 §三的同世界證明）。
 - 加一道保證：**結算句置頂**。事件區的產生者在可見列頂留一格：
   - 釘的 kind：`combat_end` 且 info 帶 `aftermath`（小修二 A1 的戰鬥結算句，`world_events.gd:478-481,573-634`）、`forced_event_resolved`（找上門的結果句）。不是 `aftermath_settled`（那是下一次推進時的「你沒有處置」，`player_command_system.gd:865`）——它要不要釘另議，本票不釘。
+  - 置頂只有一格：兩個 kind 同時在 ⇒ `combat_end` 留在置頂、`forced_event_resolved` 照一般事件排在下面（戰鬥結算是最容易被擠掉、也最重要的那一句；R²b C4）。
   - 釋放：自那一句**第一次被畫出**那一幀起，①遊戲時間過了 1 小時（TEST VALUE）且 ②玩家按過至少一個鍵；第一次畫出之前按的鍵（關結算頁的 Esc、推進鍵）不算。
 - tap：`ui.event_pin.set.<kind>`、`ui.event_pin.released`。
 
@@ -150,14 +152,14 @@
 | T4 | config 路 `new_faction` ⇒ 走接掌路徑（同 T2 前三項）；沒勢力 ⇒ 開局事件那一句 |
 | T5 | world-fp：改之前在 HEAD 先印一次 world-fp 存檔；改完比對相同（S2） |
 | T6 | 別勢力成員隊提結盟 ⇒ 標題與預告寫「脫離勢力3、加入你的勢力0」；接受 ⇒ 結果句同；開窗期間世界變了 ⇒ 結果句照重算並附「跟視窗寫的不同」；領袖隊提 ⇒ 照舊「兩勢力之間的結盟還沒做」 |
-| T7 | 表上每一列各一格：該 reason 離開玩家勢力 ⇒ 玩家流恰好一句（讓位的列＝原有句子一句、鉤子 0 句）；觀察者世界同事件 ⇒ emit 0 次、`faction.member_left.unseen.*` >0；`betrayed` 對 NPC 受害方照樣喚醒（`t0_event_bus_test` 綠） |
-| T7b | 同 tick 三隊背叛 ⇒ 玩家畫面可見（依實作端查到的原因修完之後）；推進停下 |
+| T7 | 表上每一列 × 三種角色（玩家本隊／玩家勢力內盟友／第三方）各一格：玩家流對同一件事恰好一句（有既有句的＝既有句一句、鉤子 0 句；沒有的＝鉤子一句）；`betrayed` 不進玩家流但受害方 `pending_rethink` 有設；觀察者世界同事件 ⇒ emit 0 次、`faction.member_left.unseen.*` >0；`betrayed` 對 NPC 受害方照樣喚醒（`t0_event_bus_test` 綠） |
+| T7b | 同 tick 三隊背叛 ⇒ 玩家畫面可見（依實作端查到的原因修完之後）；推進停下（正格）。成員被挖角離開 ⇒ 一句、推進不停（反格） |
 | T8 | ★N5 依實作端找到的原因寫的格（交件信定） |
 | T9 | 置頂：真打一場仗到結算 ⇒ 被釘的是 `combat_end`（印 kind）；之後兩小時每小時塞 8 則其他事件 ⇒ 結算句始終可見；第一次畫出前按的鍵不算；畫出後過 1 小時且按過鍵 ⇒ 釋放 |
 | T11 | ★N8／N9／N10（只驗）／N11／N12／N13／N14／N15 各一格；N9 用「估計與真值落在 1.5 倍門檻兩側」的構造（印兩值當母體地板）；無估計 ⇒ 不灰掉 |
 | T13 | 記名被俘 ⇒ 結算句有名字 |
 
-- 負對照：n1 選 2 改回「另生新隊」⇒ T2 紅；n2 拿掉 1e 的讀者修改 ⇒ T3 紅；n3 鉤子不發 ⇒ T7 紅；n3b 觀察者世界也呼 emit ⇒ T7「emit 0 次」紅；n4 置頂拿掉 ⇒ T9 紅；n4b 釘成 `aftermath_settled` ⇒ T9「印 kind」紅；n4c 第一次畫出前的鍵也算 ⇒ T9 紅；n5 N9 判定改回真值 ⇒ T11 N9 格紅（須在兩側構造下）。
+- 負對照：n1 選 2 改回「另生新隊」⇒ T2 紅；n2 拿掉 1e 的讀者修改 ⇒ T3 紅；n3 鉤子不發 ⇒ T7 紅；n3c 停點改成全部離開都停 ⇒ T7b 反格紅；n3b 觀察者世界也呼 emit ⇒ T7「emit 0 次」紅；n4 置頂拿掉 ⇒ T9 紅；n4b 釘成 `aftermath_settled` ⇒ T9「印 kind」紅；n4c 第一次畫出前的鍵也算 ⇒ T9 紅；n5 N9 判定改回真值 ⇒ T11 N9 格紅（須在兩側構造下）。
 - 一次性回放（§三、§四）：印在交件信，不進常駐閘。
 - 舊床遷移：開局參數（REPL／driver 預設 `independent`，舊床不變）；改投句子相關的外交床；`faction_relations` 讀者。交件信逐一列。
 - world-fp：本票預期不變（§一拆 setup 驗 T5；§二 鉤子觀察者世界不呼 emit；1e 只改玩家查詢）；變了歸因到第一個分歧 tick，不直接換值。
