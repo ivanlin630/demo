@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 吞吐（用戶裁 2026-10-18「好 開」）：第二個實作端
 topic: 啟動指令、通訊錄、分工規則都好了；CLAUDE.md 不用動；第一刀＝實作一續開點目標、實作二接批尾小修二（派件信已改 to）；另三條閒線已派（三張 HOW 我寫、QA 第二局、量測員觀察輪儀器）
 ---
