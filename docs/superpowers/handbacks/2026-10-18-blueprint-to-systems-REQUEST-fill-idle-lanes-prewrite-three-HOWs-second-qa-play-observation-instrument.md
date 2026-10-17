@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 吞吐（用戶 2026-10-18：進度與用量偏低，要把閒著的角色填滿）
 topic: 實作端是唯一串列瓶頸；其餘四角色閒著 ⇒ 把已裁好 WHAT 的三張 HOW 提前寫、派 QA 第二局不同開局、量測員先備觀察輪儀器；不開新 WHAT
 ---

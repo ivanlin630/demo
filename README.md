@@ -32,7 +32,7 @@ Godot 4.2.2 GDScript 世界模擬器:**無玩家也要好玩**——世界自己
 #   ①wrapper 有硬 timeout（godot.ps1:84 預設 360s）⇒ 一玩就超過六分鐘會被砍
 #   ②wrapper 把 stdout/stderr 導到暫存檔（:300 -RedirectStandardOutput）等結束才吐
 #     ⇒ ★玩家看不到【即時的】SCRIPT ERROR，而用戶兩輪玩測的回報靠的就是即時看到那些行
-.\tools\godot\Godot_v4.2.2-stable_win64.exe --path A:\GDS\demo
+.\tools\godot\Godot_v4.2.2-stable_win64.exe --path A:GDSdemo
 
 # 觀測 GUI(主要看世界用):god-view 地圖+事件 ticker+隊伍 inspect+速度四檔
 .\tools\godot.ps1 scenes/ObserverMain.tscn -- --obs-seed=1337
@@ -58,6 +58,8 @@ bash .claude/hooks/merge-gates.sh
 $env:SESSION_ROLE='blueprint'; $env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'; claude
 # 實作端（多帶一行）
 $env:SESSION_ROLE='implementer'; $env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'; claude
+# 第二個實作端（用戶裁 2026-10-18；比第一個多帶 SESSION_LANE）
+$env:SESSION_ROLE='implementer'; $env:SESSION_LANE='2'; $env:CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP='1'; claude
 # 其餘四個
 $env:SESSION_ROLE='systems'; claude
 $env:SESSION_ROLE='reviewer'; claude
@@ -68,6 +70,7 @@ $env:SESSION_ROLE='qa'; claude
 - 多帶那一行的作用：電腦記憶體吃緊時，Claude 不會把這個終端的背景程式（藍圖的看門狗、實作端等電池結果的那支）收掉。
   被收掉的話它會停在那裡、沒人叫醒，看起來就像停工（藍圖 2026-09-24、實作端 2026-10-07 各發生過）。
 - ★**這一行只能在啟動 `claude` 之前設**；開了之後才在裡面設沒有用 ⇒ 忘了帶就只能關掉那個終端重開。
+- 第二個實作端：一樣開在 `A:\GDS\demo`，自己會開 worktree。信箱地址是 `implementer-2`，跟第一個分開收信；兩條怎麼分工見 `docs/process/03_implementer.md` §兩條實作線。
 - 接續原本的對話：在 `claude` 後面加 `--resume <session id>`（id 在 `bash .claude/hooks/peers.sh` 的 SESSION_ID 欄）。
 - 理由與其他選項 → `docs/process/07_mailbox_trigger.md`
 

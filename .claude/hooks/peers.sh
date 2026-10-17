@@ -26,7 +26,7 @@
 #   `?`  登記超過 24h ⇒ 可能已經換 session，地址可疑
 set -u
 STALE_S="${PEERS_STALE_S:-140}"     # = inbox-watch POLL(20) + 120
-ROLES="blueprint systems reviewer qa measurer implementer"
+ROLES="blueprint systems reviewer qa measurer implementer implementer-2"   # ★implementer-2＝第二條實作線（用戶裁 2026-10-18；鍵見 lib-role-key.sh）
 
 _MAIN_REPO="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" 2>/dev/null)"
 HOOK_DIR="${_MAIN_REPO:-${CLAUDE_PROJECT_DIR:-.}}/.claude/hooks"

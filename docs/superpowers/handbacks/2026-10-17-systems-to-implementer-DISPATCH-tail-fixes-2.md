@@ -1,9 +1,9 @@
 ---
 from: systems
-to: implementer
+to: implementer-2
 status: open
 slice: 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）
-topic: 派件：HOW `docs/superpowers/specs/2026-10-17-tail-fixes-2-HOW.md`（R²c CLEAN＋C1–C3 已補）；排在開點目標交件之後
+topic: 派件：HOW `docs/superpowers/specs/2026-10-17-tail-fixes-2-HOW.md`（R²c CLEAN＋C1–C3 已補）；改派第二條實作線（2026-10-18），開線就動工
 ---
 
 # 順序
@@ -22,6 +22,12 @@ topic: 派件：HOW `docs/superpowers/specs/2026-10-17-tail-fixes-2-HOW.md`（R�
   - D1 第二場可不可達；
   - E2 被收掉的表的全部讀者。
 - 全量電池前先問 QA、量測員有沒有 Godot 在跑。
+
+# 改派第二條實作線（2026-10-18，用戶裁開第二個實作端）
+- 收件人改 `implementer-2`（第二線）。**開線就動工，不等開點目標**（兩票檔面幾乎不重疊）。
+- 分工規則 → `docs/process/03_implementer.md` §兩條實作線。重點：自己一個 worktree＋branch `feat/tail-fixes-2`；交件信檔名 `…-implementer-2-to-systems-…`；全量電池跑前先看第一線有沒有在跑。
+- 跟第一線（開點目標，`feat/founding-goal`）唯一同檔：`faction_ai_system.gd`——你只動 D2 的 `directive_target_candidates`（`:5181-5193` 附近），第一線動 `_auto_settle_builder`／`_dispatch_builder`，不同函式。開點目標若先合併，你 merge origin/main 解衝突；world-fp expect 以合併當下 main 為準。
+- 開場：`ListAgents` 第一行拿 demo-XX ⇒ `bash .claude/hooks/whoami.sh demo-XX`（鍵會自動是 implementer-2）。
 
 # 增補（2026-10-17 晚，派件後加；R²d ISSUES → R²e CLEAN＋P1–P3）
 - spec 多了三段，動工時一起做：**D7** 電腦隊不替玩家隊交易（路遇與市集同格兩個閘）、**E7 改寫**（糧撐句講最大一筆原因，`ResourceBank` 加玩家隊食物小時累計）、**E8** 轉述標來源＋可信度（J 頁改從 best claim 取）。

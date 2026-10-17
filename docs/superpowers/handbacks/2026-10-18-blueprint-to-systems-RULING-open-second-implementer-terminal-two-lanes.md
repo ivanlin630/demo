@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 吞吐（用戶裁 2026-10-18「好 開」）：再開實作端終端
 topic: 用戶同意開第二個實作端；藍圖建議先兩條（不是多條），你出啟動指令、通訊錄登記、分工規則；用戶自己開終端
 ---

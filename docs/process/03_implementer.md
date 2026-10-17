@@ -1,6 +1,16 @@
 **子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
 > ★**每一節的詳細／案例都在 `detail/03_implementer-cases.md` 的【同標題節】。**（systems 2026-09-22：原本重複 8 行收成 1 行——付 invariants 新增一條的行數。）
 
+
+## ★兩條實作線（用戶裁 2026-10-18「好 開」；systems 定分工）
+- 身分：兩個終端 `SESSION_ROLE` 都是 `implementer`（所有依角色的 hook 對兩線一樣）；第二線多帶 `SESSION_LANE=2` ⇒ 信箱與通訊錄鍵＝`implementer-2`（`.claude/hooks/lib-role-key.sh` 唯一產生者）。啟動指令 → README §開六個角色終端。
+- 派件：派件信 `to:` 點名哪一線（`implementer`＝第一線、`implementer-2`＝第二線）。一張票不拆兩線。
+- 一線一 worktree 一 branch；兩線不共用 worktree。
+- 交件信檔名用 `…-implementer-to-…`／`…-implementer-2-to-…`，不互蓋。
+- 撞檔：共檔衝突歸**先合併者**贏，後合併的那線 merge origin/main 解衝突（不 rebase 已推的 branch 以外的東西）。**同一支函式兩線都要改 ⇒ systems 排先後，不平行**（派件信會寫）。
+- Godot：全量電池同一時間只跑一線；跑前看另一線與 QA／量測員有沒有 Godot 在跑（`bash .claude/hooks/machine-busy.sh` 看得到誰在跑）。
+- 第三條線的條件（藍圖 2026-10-18）：審過待派 HOW 穩定 ≥3 張，且兩線連續兩張票沒互撞；到時藍圖再問用戶。
+
 ## ★現況檔 ⏸已停更（開工/完工自更，01 監控用）
 > **⏸ 停更中（2026-08-21）**：本現況檔的更新義務已停（手寫狀態不會過期，所以爛了）。〔詳 03_implementer-cases.md#impl-status-stopped〕
 > **改用**：`bash .claude/hooks/peers.sh`（誰在線＝讀 lock 租約，**推導不手寫**）＋ watchdog v4 的 `open 信/長工作/commit` 分類。

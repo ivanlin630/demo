@@ -504,7 +504,7 @@ while true; do
       case "${_to_ct:-0}" in (*[!0-9]*|'') _to_ct=0 ;; esac
       # ★實作端的產出不只信：它在 feat/* 分支上的 commit 也是產出（藍圖 2026-10-07 報：實作端連做兩張、分支 4 分鐘前才推，
       #   而這裡只看信 ⇒ 判 1h26m 無產出）。歸屬是結構的：只有實作端在 worktree／feat 分支上寫 code（00_roles）。
-      if [ "$to" = "implementer" ]; then
+      if [ "$to" = "implementer" ] || [ "$to" = "implementer-2" ]; then
         _lane_ct=$(git -C "$ROOT" for-each-ref --sort=-committerdate --count=1 --format='%(committerdate:unix)' refs/remotes/origin/feat refs/heads/feat 2>/dev/null)
         case "${_lane_ct:-0}" in (*[!0-9]*|'') _lane_ct=0 ;; esac
         [ "$_lane_ct" -gt "$_to_ct" ] && _to_ct=$_lane_ct
@@ -590,7 +590,7 @@ while true; do
     #   ⇒ ★★★在2026-09-22之後，活性訊號不看【誰 commit 的】，看【誰的東西進了 HEAD】。
     #   ★誠實限：本欄看不到【還沒 commit 的工作】⇒ 下面另印 worktree 檔案變動補那一面。
     echo "  最後產出（該角色的信進 HEAD 的時間，★不論是誰 commit 的）："
-    for _r in blueprint systems reviewer qa measurer implementer; do
+    for _r in blueprint systems reviewer qa measurer implementer implementer-2; do
       _rct=$(git -C "$ROOT" log -1 --format=%ct --all -- "docs/superpowers/handbacks/*-${_r}-to-*" 2>/dev/null)
       case "${_rct:-0}" in (*[!0-9]*|'') _rct=0 ;; esac
       if [ "$_rct" -gt 0 ]; then

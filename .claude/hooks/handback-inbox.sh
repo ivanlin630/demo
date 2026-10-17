@@ -16,7 +16,7 @@ case "${SESSION_ROLE:-}" in
   qa|驗收)        ROLE_KEY="qa" ;;
   reviewer|審查)  ROLE_KEY="reviewer" ;;
   measurer|量測)  ROLE_KEY="measurer" ;;
-  implementer|實作) ROLE_KEY="implementer" ;;
+  implementer|實作) . "$(dirname "$0")/lib-role-key.sh"; ROLE_KEY="$(role_key implementer)" ;;   # ★第二線 ⇒ implementer-2
   *) exit 0 ;;   # 無角色 → 不掃（不打擾）
 esac
 [ -d "$HANDBACK_DIR" ] || exit 0

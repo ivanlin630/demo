@@ -18,6 +18,7 @@
 set -u
 ADDR="${1:-}"
 ROLE="${SESSION_ROLE:-}"
+. "$(dirname "$0")/lib-role-key.sh"; ROLE="$(role_key "$ROLE")"   # ★第二條實作線 SESSION_LANE=2 ⇒ implementer-2（不互蓋通訊錄）
 case "$ADDR" in
   "")        echo "⛔ whoami：要給 session 名（ListAgents 第一行的 demo-XX）"; exit 2 ;;
   demo-*)    : ;;

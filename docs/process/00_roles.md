@@ -13,7 +13,7 @@
 
 ## 六角色（★每格的職責本體在各自的 doc，這裡只列名字與 owner）
 
-**藍圖**(WHAT｜`game-design.md`)｜**系統**(HOW｜`invariants.md`／流程 docs／`01_architect.md`)｜**實作**(`03_implementer.md`)｜**審查**(`02_reviewer.md`)｜**量測員**(`03b_measurer.md`)｜**QA**(`04_qa.md`／`05_acceptance.md`)
+**藍圖**(WHAT｜`game-design.md`)｜**系統**(HOW｜`invariants.md`／流程 docs／`01_architect.md`)｜**實作**(`03_implementer.md`；兩條線 `implementer`／`implementer-2`，分工 → 該檔 §兩條實作線)｜**審查**(`02_reviewer.md`)｜**量測員**(`03b_measurer.md`)｜**QA**(`04_qa.md`／`05_acceptance.md`)
 
 ## 接力流向（同一 feature 不同階段，非同時）
 
