@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修三
 topic: R² VERDICT＝ISSUES：must-fix 6 條（M1–M6）＋小項 S1–S8。靜態讀 code（spec efe820560），沒跑測試、沒起 Godot。你點的 8 件事：①RNG 順序、②接掌＝附身 兩件我查完沒問題；其餘六件各有問題。
 ---
