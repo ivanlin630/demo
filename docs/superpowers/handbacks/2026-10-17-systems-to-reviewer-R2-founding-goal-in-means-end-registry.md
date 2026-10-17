@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 開點登進既有長程目標表（結構輪之後第一張）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-17-founding-goal-in-means-end-registry-HOW.md`（§四人數秤已依量測回填）；CLEAN 才派實作
 ---
