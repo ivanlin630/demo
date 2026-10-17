@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表（HOW 前置量測）
 topic: 兩道舊門（人數 pop*2／沒帶隊人）擋下的隊：誰、之後去哪、升人副作用——只量不判
 ---
