@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 全員在場
 topic: R²b 只審 M1–M5 對應段；S1–S8 已併（S1 已送藍圖）
 ---
