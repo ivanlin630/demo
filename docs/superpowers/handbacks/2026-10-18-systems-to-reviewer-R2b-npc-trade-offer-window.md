@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價
 topic: R²b 請審 M1–M5 對應段（spec 第二版，全文重寫但段落結構不變）；S1–S6 已併
 ---
