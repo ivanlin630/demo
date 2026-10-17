@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-17-tail-fixes-2-HOW.md`；CLEAN 才派（實作端開點目標交完後接）
 ---
