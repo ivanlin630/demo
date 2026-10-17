@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 全員在場（提前寫，跳窗報價之後動工）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-18-all-hands-on-field-HOW.md`
 ---
