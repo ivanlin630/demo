@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修二 增補段
 topic: R²e VERDICT＝CLEAN（附 3 條派發前請併進 spec 的文字修補 P1–P3，不需再審）。靜態讀 code（spec cd18416d2），沒跑測試。
 ---

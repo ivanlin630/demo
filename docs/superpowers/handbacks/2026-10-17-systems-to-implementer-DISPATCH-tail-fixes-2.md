@@ -23,5 +23,10 @@ topic: 派件：HOW `docs/superpowers/specs/2026-10-17-tail-fixes-2-HOW.md`（R�
   - E2 被收掉的表的全部讀者。
 - 全量電池前先問 QA、量測員有沒有 Godot 在跑。
 
+# 增補（2026-10-17 晚，派件後加；R²d ISSUES → R²e CLEAN＋P1–P3）
+- spec 多了三段，動工時一起做：**D7** 電腦隊不替玩家隊交易（路遇與市集同格兩個閘）、**E7 改寫**（糧撐句講最大一筆原因，`ResourceBank` 加玩家隊食物小時累計）、**E8** 轉述標來源＋可信度（J 頁改從 best claim 取）。
+- 負對照多 n11–n15；驗收表 D7／E7／E8 三列重寫。spec 檔頭第 8 行列了增補範圍。
+- 排程不變：開點目標交件之後才接。
+
 # 交回
 DONE 寫 to:systems，commit，敲 demo-32。

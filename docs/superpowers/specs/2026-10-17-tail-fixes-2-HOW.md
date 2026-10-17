@@ -5,7 +5,7 @@
 - 審查：R² `docs/superpowers/handbacks/2026-10-17-reviewer-to-systems-R2-tail-fixes-2-ISSUES.md`、R²b `…-R2b-tail-fixes-2-ISSUES.md`。本版各段標了對應的 M／S／N／T。
 - 排序：開點目標票交件之後（藍圖 2026-10-17 確認不插隊）。
 - 範圍：玩家面。世界行為只動兩處，都是 WHAT 已裁的：D1 收割不消滅敗者狀態；D7 電腦隊不替玩家隊交易。
-- **增補段（第五輪查根後加，R²d 只審這幾段）**：D7、E7（改寫）、E8，以及驗收表、負對照 n11–n14、誠實限裡對應的行（R²d ISSUES M1–M4／S1–S6 已改，R²e 只審 M1–M4 段）。裁決 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-RULING-three-root-asks-all-into-tail-fixes-2-exclude-possessed-from-npc-trade.md`；量測 `2026-10-17-measurer-to-systems-DONE-round5-four-root-probes.md`。增補段的 file:line 在 main `7ed640a66` 上讀。
+- **增補段（第五輪查根後加，R²d 只審這幾段）**：D7、E7（改寫）、E8，以及驗收表、負對照 n11–n14、誠實限裡對應的行（R²d ISSUES M1–M4／S1–S6 已改；R²e CLEAN＋P1–P3 已併）。裁決 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-RULING-three-root-asks-all-into-tail-fixes-2-exclude-possessed-from-npc-trade.md`；量測 `2026-10-17-measurer-to-systems-DONE-round5-four-root-probes.md`。增補段的 file:line 在 main `7ed640a66` 上讀。
   - B3「繼承人看子隊」這版**縮成只改句子**。子隊繼承有一題 WHAT 缺口，已送藍圖（`2026-10-17-systems-to-blueprint-Q-heir-from-subteam-what.md`），提議另開一張。
 - file:line 是 main `1f7679c26` 上靜態讀的，動工時先重對一次。
 - 共同規則：
@@ -433,15 +433,15 @@
 | D4 | 同格 6 小時，親見分鐘數 ≤ 60 |
 | D5 | 高可信度舊轉述＋同格 24 小時 ⇒「你看到它」≤ 1；一句不重複；同 fixture 下 `_wake` 次數修前＝修後，NPC 觀察者與玩家隊分開印 |
 | D6 | 附庸收到情報 ⇒ 玩家事件區無那句；grep＝0 |
-| D7 | 寫入端 reason 全集（`trade_goods_*`、`trade_coin_*`、`barter_*`、`market_inv_*`）對玩家方的筆數。三種 fixture：(a) 附身主隊當市集同格 peer、電腦訪客到場；(b) 玩家派出的子隊與電腦 TRADE 隊在非市集格相遇；(c) 同勢力附身主隊與電腦 TRADE 隊在非市集格相遇。**每格修前先紅**（印修前筆數，≥1 才算 fixture 有效），修後 0。★反向：兩支電腦隊同 fixture 照常成交（成交 ≥1）；玩家掛單被訪客吃照常成交；親屬子隊（非玩家派）照常成交。★不吞別的：玩家子隊與一支 BEG／JOIN 隊同格 ⇒ 事件與狀態修前修後逐字相同 |
+| D7 | 寫入端 reason 全集（`trade_goods_*`、`trade_coin_*`、`barter_*`、`market_inv_*`）對玩家方的筆數。三種 fixture：(a) 附身主隊當市集同格 peer、電腦訪客到場；(b) 玩家派出的子隊與電腦 TRADE 隊在非市集格相遇；(c) 同勢力附身主隊與電腦 TRADE 隊在非市集格相遇。**每格修前先紅**（印修前筆數，≥1 才算 fixture 有效），修後 0。★反向：兩支電腦隊同 fixture 照常成交（成交 ≥1）；玩家掛單被訪客吃照常成交；親屬子隊（非玩家派）照常成交。★不吞別的：玩家子隊與一支 BEG／JOIN 隊同格 ⇒ 事件與狀態修前修後逐字相同（母體地板：BEG／JOIN 到達修前至少發生 1 次，否則該格不算數）|
 | E1 | 戰鬥中無行動的一拍，GUI 與終端結果區都不是開戰前那句；無「?」 |
 | E2 | 據點名逐字相同；走過畫面 miss＝0；grep＝0 |
 | E3 | 成員面板總人數＝頂列人口；畫面無「Tick」 |
 | E4 | 逐鍵驅動：命中集合 ⊆ 鍵列，母體 26 |
 | E5 | 打聽提示 N＝列出題數 |
 | E6 | 離開工地有句、N＝逾時函式；逾時取消有句 |
-| E7 | 人為讓存糧掉一半 ⇒ 一句、兩項拆分正確；三格各走真路徑造一類（戰利品、獵物、玩家掛單成交）⇒ 印對的類名；人口驅動的跳動 ⇒ 不帶「吃掉」原因；**Probe 關**下也出句；`ui.food_reason.n` >0 且 unmapped＝0；`remove` 夾位與 `set_amt` 兩格對帳差額＝0；對帳差額小時數印出 |
-| E8 | 低可信度轉述 ⇒ 事件句與 J 頁都有「不太可靠」與管道名；高可信度（隊友，或口碑高的商旅）⇒ 無形容；商旅在 0.5 兩側各一筆 ⇒ 一標一不標；J 頁一列的位置、管道、來源隊來自同一筆 claim（構造兩筆不同來源的 claim，勝出的不是最後一筆）；同 fixture `distorted` 真／假（其餘相同）⇒ 事件句與 J 列逐字相同；`_iinfo` 與 J 列的鍵不含 `distorted`；N 小時前親見再轉述 ⇒ 印 N；過幾天後 J 頁與當時事件句的「不太可靠」一致 |
+| E7 | 人為讓存糧掉一半 ⇒ 一句、兩項拆分正確；三格各走真路徑造一類（戰利品、獵物、玩家掛單成交）⇒ 印對的類名；人口驅動的跳動 ⇒ 不帶「吃掉」原因；**Probe 關**下也出句；`ui.food_reason.n` >0 且 unmapped＝0；`remove` 夾位與 `set_amt` 兩格對帳差額＝0；對帳差額小時數印出。★拆兩跑：Probe 開 ⇒ 斷言 `ui.food_reason.n`>0、unmapped＝0、對帳；Probe 關 ⇒ 只斷言句子與類名（計數器是 `Probe.bump`，關時讀不到）|
+| E8 | 低可信度轉述 ⇒ 事件句與 J 頁都有「不太可靠」與管道名；高可信度（隊友，或口碑高的商旅）⇒ 無形容；商旅在 0.5 兩側各一筆 ⇒ 一標一不標；J 頁一列的位置、管道、來源隊來自同一筆 claim（構造兩筆不同來源的 claim，勝出的不是最後一筆）；同 fixture `distorted` 真／假（其餘相同）⇒ 事件句與 J 列逐字相同；`_iinfo` 與 J 列的鍵不含 `distorted`；N 小時前親見再轉述 ⇒ 印 N；過幾天後 J 頁與當時事件句的「不太可靠」一致（fixture 只有單一 claim）|
 
 - **負對照**（各拿掉一刀，該格要紅）：
   - n1：`settled` 不接 drain ⇒ A1 紅
@@ -458,6 +458,7 @@
   - n12：E7 類表清空 ⇒ E7「類名」紅、unmapped＞0
   - n13：E8 門檻設 0 ⇒ E8「不太可靠」紅
   - n14：`_tap_player_food` 直接 return ⇒ E7 類名格紅、對帳差額小時數＞0
+  - n15：D7 路上相遇的閘搬到 `:360` 之前 ⇒ D7「不吞別的」格紅
 - **舊床遷移**（交件信逐一列修前／修後，列到鍵層，S1）：
   - `terminal_e2e_bed.gd:216` 等「按任意鍵離開戰後畫面」的步驟 ⇒ 改按 Esc
   - `ui_flow_test.gd` 快照
@@ -476,6 +477,7 @@
 - B3 只改句子；子隊繼承等藍圖。
 - E7 的原因只來自經過 `ResourceBank` 的寫入；繞過的寫入點只會變成對帳差額＋「其他」，本票不追。
 - E8 的可靠度只是這筆 claim 的 credibility，不是真假；可信度高的也可能錯。
+- E8 事件句標的是「這次寫入那筆」，J 頁標的是「勝出那筆」；同一目標有多筆 claim 時兩處可以不一致——是對的，不是 bug。
 - E8 的可信度實際由管道決定大半：`CRED_BASE` 流民 0.3／商旅 0.6／隊友 0.8（`belief_system.gd:14`）乘口碑係數 ⇒ 流民轉述恆標「不太可靠」、隊友恆不標，只有商旅隨口碑分流。這是設計，不是 bug。
 - `ResourceBank` 處現有三個食物累計器（`_tally_food` 每日流量、driver-ledger、E7 小時字典），各自服務不同讀者；真值仍只有 `team.resources`。
 - J 頁「（有疑點）」因 `c.get("is_suspicious")` 讀錯層恆不出現，不在本票修（known_issues）。
