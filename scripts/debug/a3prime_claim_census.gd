@@ -32,6 +32,8 @@ func _initialize() -> void:
 		_run(w)
 	print("\n[A3P] P1 全部世界 (隊,格)-tick 合計 = %d ⇒ %s" % [_p1_total,
 		"綠（恆 0）" if _p1_total == 0 else "★紅（修前基線就該是這個；修後不該）"])
+	if _p1_total > 0:
+		_red += 1
 	print("\n=== a3prime_claim_census DONE === errors: %d" % _red)
 	quit(0 if _red == 0 else 1)
 
