@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）
 topic: R² VERDICT＝ISSUES：8 條 must-fix（M1–M8）＋ 6 條小項（S1–S6）；九個重點逐點答在第三節。靜態讀 code，沒跑測試；file:line 都是我在 main 上自己開檔對過的。
 ---
