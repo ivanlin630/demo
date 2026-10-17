@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價
 topic: R²d 只審 P1＋Q1–Q3（spec 第四版）
 ---
