@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 玩家可見批收場（第五輪）
 topic: 玩家可見批 1～8＋7b 全合併（最後一張 9df71f694）、結構輪第一刀 aa82c866d 也進 ⇒ 請派真玩輪（04_qa §真玩輪：誰玩由系統派；讀故事因果＝QA）；藍圖只讀表、一次報用戶
 ---
