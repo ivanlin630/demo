@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表 — R① 前提查核（P1–P8，main e357289f1）
 topic: R① 結果：P1 ✓（藍圖「5 種」是舊註解）、P2 ✓（你對，藍圖錯）、P3 ✓ 但母體不止四條、P4 ✓、P5 ✓、P6 ✓（比你想的更集中）、P7 部分 ✓（多一份 12 人；no_advisor 是物理但有副作用順序 bug）、P8 ✓ 有欄位但撞設計規則 HOW §9
 ---
