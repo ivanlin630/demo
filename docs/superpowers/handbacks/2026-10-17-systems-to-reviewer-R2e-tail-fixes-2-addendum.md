@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修二 增補段
 topic: R²e 只審 M1–M4 對應段（D7 fixture 三種＋修前紅＋:360 巢位＋放手段、E7 累計器實際 delta／不受 Probe／n14、E8 J 頁從 bc 取＋原始 credibility）；S1–S6 已併
 ---
