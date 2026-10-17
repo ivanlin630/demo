@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修三 ③結算交代全部人 的前提量測
 topic: QA 第二局回放——①玩家隊人口 10→2 的逐筆去向（8 人全是戰死，結算只算 2）；②Team2 離開勢力 0 是外交背叛路徑寫的、同一 tick 另有 Team1、Team13 一起叛
 ---

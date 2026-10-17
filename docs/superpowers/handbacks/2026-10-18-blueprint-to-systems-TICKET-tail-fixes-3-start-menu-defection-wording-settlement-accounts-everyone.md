@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 批尾小修三（QA 第二局表 `docs/playtest/2026-10-18-round5-qa-live-play-2.md`）
 topic: 一張票三個 WHAT＋一籃 UI 洞：①開局可選三種（含 new_faction 死路）；②別勢力成員隊投過來的視窗要說真做的事；③結算交代全部人口變動；排跳窗報價之後、全員在場之前
 ---
