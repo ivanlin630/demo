@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 slice: 第五輪查根（藍圖票三：先量不開票）
 topic: 四條查根：糧撐跳動／轉述位置錯／「無繼承人」但子隊長記名／對方人口 6→3 結算沒交代；只量不改
 ---
