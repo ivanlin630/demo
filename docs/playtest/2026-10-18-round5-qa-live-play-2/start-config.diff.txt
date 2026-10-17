@@ -1,0 +1,23 @@
+diff --git a/config/default.json b/config/default.json
+index fb00ce68e..ada8c92fd 100644
+--- a/config/default.json
++++ b/config/default.json
+@@ -16,7 +16,8 @@
+   },
+ 
+   "factions": {
+-    "teams_per_faction_range": [2, 4]
++    "teams_per_faction_range": [2, 4],
++    "weights": [2, 3, 3, 3]
+   },
+ 
+   "independent_teams": {
+@@ -29,7 +30,7 @@
+   },
+ 
+   "player": {
+-    "join_mode": "independent",
++    "join_mode": "new_faction",
+     "population": 10,
+     "starting_named_count": 1,
+     "starting_resources": {

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 slice: 第五輪第二局真玩（藍圖 2026-10-18 填閒線）
 topic: 換一種開局再玩一局；重點走第一局沒走到的三條（結算單、俘虜處置、通商）＋找上門的視窗（外交／勒索）；表格同第一局
 ---
