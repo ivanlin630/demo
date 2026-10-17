@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 批尾小修二 增補段（第五輪查根後，藍圖裁三件全併）
 topic: R²d 只審增補段：D7（電腦隊不替玩家隊交易）、E7 改寫（糧撐句講原因）、E8（轉述標來源＋可信度）＋驗收／n11–n13／誠實限對應行
 ---
