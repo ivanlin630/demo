@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 批尾小修二 B 組 ＋ 新票「玩家從子隊繼位」
 topic: 用戶裁 2026-10-17「甲」：從子隊選出繼承人後，那支子隊脫離母隊獨立成玩家的新本隊；原母隊交電腦照既有繼承。排程照你提議（B3 只改句子、整條另開排全員在場之後）
 ---
