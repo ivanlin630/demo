@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 玩家從子隊繼位（提前寫，全員在場之後動工）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-18-player-heir-from-subteam-HOW.md`
 ---
