@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 slice: 全員在場 HOW（你的 2026-10-18-systems-to-blueprint-Q-all-hands-queue-reserve-casualty）
 topic: 裁甲：場外排隊從沒上場的人不連坐，死傷只算場上的；場外被波及只走潰退／追擊那條物理
 ---
