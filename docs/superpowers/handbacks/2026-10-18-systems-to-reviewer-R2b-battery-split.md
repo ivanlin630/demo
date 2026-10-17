@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 電池拆段（流程）
 topic: R²b 只審 M1–M4；S1–S7 已併（spec 第二版全文重寫）
 ---
