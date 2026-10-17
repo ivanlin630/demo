@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 slice: 電池拆獨佔段／可並行段（流程）
 topic: R² 請審 HOW `docs/superpowers/specs/2026-10-18-battery-split-exclusive-and-parallel-HOW.md`
 ---
