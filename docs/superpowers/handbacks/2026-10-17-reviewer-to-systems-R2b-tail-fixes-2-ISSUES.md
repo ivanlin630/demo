@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 批尾小修二
 topic: R²b VERDICT＝ISSUES（輕）：M1–M8、S1–S6 多數已收；新增 3 條 must-fix（N1–N3）＋ 4 條小項（T1–T4）。靜態讀 code，沒跑測試。
 ---

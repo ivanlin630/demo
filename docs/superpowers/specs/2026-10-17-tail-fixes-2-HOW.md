@@ -1,8 +1,8 @@
-# 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）— HOW（第二版，依 R² M1–M8／S1–S6）
+# 批尾小修二（第五輪 QA 真玩 UI 面 20 洞）— HOW（第三版，依 R² M1–M8／S1–S6、R²b N1–N3／T1–T4）
 
 - WHAT：藍圖票 `docs/superpowers/handbacks/2026-10-17-blueprint-to-systems-TICKET-tail-fixes-2-and-all-hands-on-field-pulled-forward.md` 票一（五組 A–E）；裁決檔 `docs/playtest/round5-verdict.md`。
 - 來源表：`docs/playtest/2026-10-17-round5-qa-live-play.md` §二 ★1–★20、21、22。
-- 審查：R² `docs/superpowers/handbacks/2026-10-17-reviewer-to-systems-R2-tail-fixes-2-ISSUES.md`。本版各段標了對應的 M／S。
+- 審查：R² `docs/superpowers/handbacks/2026-10-17-reviewer-to-systems-R2-tail-fixes-2-ISSUES.md`、R²b `…-R2b-tail-fixes-2-ISSUES.md`。本版各段標了對應的 M／S／N／T。
 - 排序：開點目標票交件之後（藍圖 2026-10-17 確認不插隊）。
 - 範圍：玩家面。世界行為只動一處，是 WHAT 已裁的：D1 收割不消滅敗者狀態。
   - B3「繼承人看子隊」這版**縮成只改句子**。子隊繼承有一題 WHAT 缺口，已送藍圖（`2026-10-17-systems-to-blueprint-Q-heir-from-subteam-what.md`），提議另開一張。
@@ -81,8 +81,14 @@
     - **傷**＝匿名傷兵增量（`wounded_mid − wounded0`）＋記名成員**開戰時**不是重傷、結算時是重傷的人數，名字附括號。
       - before 取在 `_spawn`，因為重傷是戰鬥中轉入的。
       - 「重傷」判準＝`_get_hp_status`（`text_ui_main.gd:1186-1197`／`player_api_mapper.gd:845`）。把它搬到模擬側一支 static，兩邊共用，不寫第二份。
+    - **戰後處置與追擊**（N1）：NPC 留場時，`_aftermath_captives_fate_pursuit`（`:1324`）會在 `pop1` 之前當場減你的人口：
+      - 傷兵被殺：`fate_killed`（`:1540`）；
+      - 傷兵被俘走：`fate_captured`（`:1542`），與 `held_by_enemy` 是兩個欄；
+      - 追擊陣亡：`pursuit_killed`（`:1548-1553`）。
+      - 這三項今天句子已有（`world_events.gd:613-625`），保留成獨立子句，併進對帳。
   - **人數對帳**（第二個獨立來源，不是餘數恆等式）：
-    `人口差（before − after）` 對上 `死 ＋ 後備陣亡 ＋ 被俘`。
+    `人口差（before − after）` 對上 `死 ＋ 後備陣亡 ＋ 被俘（held_by_enemy）＋ fate_killed ＋ fate_captured ＋ pursuit_killed`。
+    - `resolve_negative_flags`／`resolve_anon_units`（`:1213-1214`）若另有扣人口的路，由對照仗抓出來，不靠靜態讀。
     - 正常戰鬥兩邊必相等。
     - 不等時，差額印成「其他離隊 N（原因未記）」，並 `Probe.bump_sample("combat.pop_unreconciled", {...})`。
     - ★床格斷言的是「正常戰鬥差額＝0」，以及「人為移走一名成員 ⇒ 差額＝1、句子有那一欄」。不是斷言等式成立。
@@ -138,8 +144,14 @@
 
 ### B2 玩家死亡＝停點，主詞是「你」（M4）
 - 發事件的位置：`handle_player_succession`（`event_system.gd:79-`），**在 `player_id == -1` 早退（`:85-86`）之後**，觀察者世界不發。
+- 只在**死的是玩家本人**時發（T4）：`on_leader_death` 的玩家分支判的是「這支隊是玩家隊」（`event_system.gd:34`）。
+  - 實作端先確認玩家是否恆為領袖。
+  - 若玩家可以是非領袖成員，領袖死而玩家活著時不發「你倒下了」，走既有的 NPC 繼承句。
+  - 交件信寫結論。
 - 一次性：WorldState 新欄 `player_death_announced: Dictionary`，鍵＝`team_id`，值＝死亡 tick。
   - 同一支隊同一次死亡只發一次。
+  - **清除**（N3）：繼承完成時，在 `_action_choose_heir`（`player_command_system.gd:2252-2280`）清 `player_forced_event` 的同一處，清掉該隊的鍵。
+  - 進存檔，因為「已宣告但還沒選繼承人」時存檔重載不重發；不進 fp，只有玩家世界寫它。
   - 三個呼叫者都經過同一支函式，所以守衛只放這裡：
     - `event_system.gd:40`
     - `encounter_system.gd:1585` `_check_player_wiped`
@@ -155,6 +167,7 @@
   - 戰鬥中玩家戰死 ⇒ 停、句子「你倒下了」、沒有「領袖死了」；
   - `_check_player_wiped` 路徑 ⇒ 停；
   - 絕後後再推 N tick ⇒ `player_died` 不重發；
+  - 死→選繼承人→再死 ⇒ 兩次都停；
   - 觀察者世界（無玩家）⇒ 0 則。
 - tap：`stop.player_died`。
 
@@ -162,7 +175,7 @@
 - 現況：候選只讀本隊 `named_members`（`event_system.gd:79-103`），另外還有兩處同樣只認本隊：
   - `player_command_system.gd:2018-2027` 的候選過濾；
   - `set_leader` 會把人的隊改成母隊（`world_state.gd:765-780`）。
-- 本票只改句子：
+- 本票只改句子。「玩家絕後」今天有兩個產生者（T3）：`event_system.gd:88` 與 `player_command_system.gd:2100`。收成一支 `EventSystem.story_end_reason(state, team)`，兩處都呼它：
   - 本隊沒有記名成員、但現有子隊（`subteam_ids`）有時，故事結束句改成：
     「故事結束：本隊沒有記名成員可以接手（子隊 <名> 有記名成員，從子隊接手還沒做）」。
   - 兩邊都沒有：「故事結束：你沒有可以接手的人」。
@@ -179,7 +192,9 @@
   - TextUI 和 `encounter_view` 各持一個實例，呼叫同一支類別。提示句與判斷只在這裡寫一次。
 - `ACTION_SHAPE`（`player_command_system.gd:456-533`）的列加欄位 `confirm`，值三種：
   - `"irreversible"`：每次都確認；
-  - `"conditional"`：條件成立才確認，條件函式掛在列上；
+  - `"conditional"`：條件成立才確認。
+    - 列上放條件的**名字**（字串，例 `"hostile_adjacent"`、`"extract_over_half"`），由 `ConfirmGate` 旁一支分派函式求值。
+    - `ACTION_SHAPE` 是常數字典，放不進 Callable（T1）；實作端先開檔確認。
   - 不填：不確認。
 - 進這一層的動作：
   - 不可逆：
@@ -196,7 +211,7 @@
   - `_outpost_pending_abandon`
   - `_faction_extract_pending`
   - `_rest_confirm_armed`
-  - 床格 grep 這三個名字＝0。
+  - 床格 grep 這三個名字＝0。重置點 `text_ui_main.gd:3975-3976` 一起改成重置 `ConfirmGate`。
 - 處決俘虜 `interaction_system.gd:1537` 沒有玩家動詞，不在本票。日後加動詞時，它的列必帶 `confirm: "irreversible"`。
 - **鍵位**：
   - 帶 `confirm` 的動作，其鍵不准是：
@@ -223,7 +238,8 @@
 - 床格：
   - 勝仗後先收割再收編 ⇒ 成功；
   - 屠村後 ⇒ 不列收編；
-  - 勝仗→收割→再打一場獸戰 ⇒ J 不列、戰果摘要不是舊的那場；
+  - 勝仗→收割→再打一場獸戰 ⇒ J 不列、戰果摘要不是舊的那場；獸戰後 `_post_combat_summary` 在結果為空時不印空殼（`encounter_view.gd:151-153`）；
+  - T2：結算頁開著（前一場待處置未結清）時能不能觸發第二場？可達 ⇒ 加一格證實不丟居民處置（`_abandon_occupation`）；不可達 ⇒ 交件信寫為什麼不可達；
   - 「列為可做的每一項都去按，結果不准是『不行』」。
 
 ### D2 攻擊對象排除自家子隊（★6）
@@ -240,11 +256,17 @@
 
 ### D5 「你看到」去重、不每小時重報（M8）
 - 現況：`_known_pos`（`belief_system.gd:305-309`）取第一筆有位置的 claim。前面若有一筆舊轉述，每次親見都會判成「位置變了」。
+- ★`:310` 那個 if 同時包住 NPC 的喚醒（`_wake`，`:324-327`；emit 的第四個參數 `:340`），對全部隊執行（N2）。
+  - ⇒ 本票選 (a)：**喚醒維持舊基準不動**（`_known_pos` 與 `:310` 原樣），新基準只放在玩家文字路徑。
+  - 也就是 `:334` 那一支 `obs_id == 玩家隊` 決定「要不要進玩家事件」時才用。
+  - ⇒ NPC 世界不變，world-fp 不應因 D5 變。
 - 改：
-  - 「你看到」是親見事件，比對基準＝**這位觀察者對這個目標最近一筆親見的位置**。
+  - 「你看到」是親見事件，進玩家事件的條件＝新位置與**這位觀察者對這個目標最近一筆親見的位置**不同。
     - 新的安靜查詢 `last_firsthand_pos(state, obs_id, tgt_id)`，不抬 Probe 計數，放在 `best_value_quiet`（`:247-249`）旁。
+    - 親見判準用同檔 `:336` 的 `source_type == "親見" and source_id == obs_id`，不寫第三種。
     - 不用 `best_claim`／`_pick_best`：它們挑可信度最高的那一筆，基準會在轉述與親見之間來回跳。
   - 沒有前一筆親見 ⇒ 發；位置不同 ⇒ 發；相同 ⇒ 不發。
+  - 轉述抵達（source ≠ 觀察者）：玩家事件照舊用舊基準（`:310` 的結果），本票不動。
   - 折句（`world_events.gd:527-542`）按目標去重。
 - 床 fixture：
   - 一筆**可信度較高、位置不同**的舊轉述；
@@ -338,20 +360,20 @@
 |---|---|
 | A1 | 進入戰後階段那一幀（結算頁**還開著**），事件區已有結算句 |
 | A2 | 結算頁上按 Space ⇒ 回「面板開著」、頁還在、tick 不動、待處置還在；按 L ⇒ 留戰利品（不推進）；按未綁鍵 ⇒ 頁還在；Esc 關頁後推進 ⇒「你沒有處置」；終端 `press_on` 不卡 |
-| A3 | 你方六欄有數；正常戰鬥差額＝0；人為移走一名 ⇒「其他離隊 1」；後備連坐 ⇒ 落「後備陣亡」不落「其他」；記名重傷算進傷；對方沒有人口差欄 |
+| A3 | 你方六欄有數；正常戰鬥差額＝0，對照仗至少三種：你贏、NPC 贏且有傷兵處置、NPC 贏且有追擊；人為移走一名 ⇒「其他離隊 1」；後備連坐 ⇒ 落「後備陣亡」不落「其他」；記名重傷算進傷；對方沒有人口差欄 |
 | A3b | 收割回句含資源名與數量 |
 | A4 | 超長句：畫面列串起來＝原句全文 |
 | A5 | 有傷兵時頂列與生存頁都有數；0 時頂列無此格；窄終端讓位順序 |
 | B0 | person 已 erase 的戰死窗口，停點照停 |
 | B1 | 轉入重傷那拍停、句子「你重傷」；不重發；存檔重載後不重發 |
-| B2 | 戰死 ⇒ 停、「你倒下了」、無「領袖死了」；`_check_player_wiped` 路徑停；絕後後再推 N tick 不重發；觀察者世界 0 則 |
+| B2 | 戰死 ⇒ 停、「你倒下了」、無「領袖死了」；`_check_player_wiped` 路徑停；絕後後再推 N tick 不重發；死→選繼承人→再死兩次都停；觀察者世界 0 則 |
 | B3 | 本隊無記名、子隊有 ⇒ 句子提到子隊；兩邊都無 ⇒ 另一句 |
 | C | 八個動作（含結算頁兩個）逐一：按 ⇒ 確認句、非 Y ⇒ 世界不變、Y ⇒ 生效；條件確認的兩個在條件不成立時不確認；帶 confirm 的鍵 ∩ 移動／推進／Y＝空；三個舊旗名 grep＝0 |
 | D1 | 收割後收編成功；屠村後不列；勝仗→收割→獸戰 ⇒ 不列、摘要非舊；列為可做的都按得成 |
 | D2 | 攻擊對象沒有自家子隊（含玩家獨立時派出、後來建勢力的那種） |
 | D3 | 同格求投靠的隊在 J 頁與攻擊對象裡 |
 | D4 | 同格 6 小時，親見分鐘數 ≤ 60 |
-| D5 | 高可信度舊轉述＋同格 24 小時 ⇒「你看到它」≤ 1；一句不重複 |
+| D5 | 高可信度舊轉述＋同格 24 小時 ⇒「你看到它」≤ 1；一句不重複；同 fixture 下 NPC 觀察者的 `_wake` 次數修前＝修後 |
 | D6 | 附庸收到情報 ⇒ 玩家事件區無那句；grep＝0 |
 | E1 | 戰鬥中無行動的一拍，GUI 與終端結果區都不是開戰前那句；無「?」 |
 | E2 | 據點名逐字相同；走過畫面 miss＝0；grep＝0 |
@@ -378,7 +400,7 @@
   - `possessed_famine_stop_bed`
   - `scripted_exploration_bed`（畫面行數變了；探索記錄檔照舊 `git checkout` 還原）
   - 動到 `_outpost_pending_abandon`／`_faction_extract_pending`／`_rest_confirm_armed` 的床
-- world-fp：D1 的清除點與 B1／B2 新欄只在玩家世界作用。fp 若變，歸因到第一個分歧 tick，不直接換值。
+- world-fp：D1 的清除點、B1／B2 新欄、D5 的新基準都只在玩家世界作用（D5 依 N2 選 (a)）。fp 若變，歸因到第一個分歧 tick，不直接換值。
 - 全量電池：跑前先問 QA、量測員有沒有 Godot 在跑。
 - 驗收後 QA 真玩複驗：同一 seed 第一局那場仗，加第二局第二場勝仗。
 
