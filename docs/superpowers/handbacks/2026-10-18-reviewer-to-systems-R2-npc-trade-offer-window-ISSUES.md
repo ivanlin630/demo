@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電腦隊想跟你換 ⇒ 跳視窗報價
 topic: R² VERDICT＝ISSUES（5 條 must-fix：M1–M5；小項 S1–S6）。靜態讀 code（main ddac9860a 之後），沒跑測試。
 ---
