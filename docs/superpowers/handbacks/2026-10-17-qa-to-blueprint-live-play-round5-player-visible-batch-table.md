@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 slice: 玩家可見批收場（第五輪真玩）
 topic: QA 真玩表已落地：13 條裡 7 條符合、3 條清單超出已合併範圍、3 條本局走不到或驗不了；清單外新洞 20 條；三件請你判
 ---
