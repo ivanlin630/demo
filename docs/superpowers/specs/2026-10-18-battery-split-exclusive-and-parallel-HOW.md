@@ -1,4 +1,4 @@
-# 電池拆成獨佔段與可並行段 — HOW（流程；第三版，依 R² M1–M4／S1–S7、R²b N1–N3／T1–T3）
+# 電池拆成獨佔段與可並行段 — HOW（流程；定稿：R² M1–M4／S1–S7、R²b N1–N3／T1–T3、R²c CLEAN＋C1–C3）
 
 - 審查：R²b `docs/superpowers/handbacks/2026-10-18-reviewer-to-systems-R2b-battery-split-ISSUES.md`。
 
@@ -48,14 +48,15 @@
 ### 1. 標記與存活判斷（M1）
 - 所有「標記主人活著嗎」共用一支 `_mb_marker_alive(winpid, since)`，放共用檔（例如 `.claude/hooks/lib-alive.sh`），runner 與 machine-busy 都 source 它。runner `:118` 的 `kill -0` 改用它。不准再寫第二份。
   - 判活要三條同時成立（R²b N2：pid 會被 Windows 重用，`machine-busy.sh:105` 已記過血證）：該 winpid 的行程存在、行程名是 runner 會是的那幾種（`bash`／`sh`；實作端以真跑時的實際名字為準並寫進註解）、行程 `StartTime ≤ since + 120 秒`（同 `machine-busy.sh` 對 Godot 信標的容差）。任一不成立 ⇒ 殘骸標記，印「舊標記…接手」。
-- 標記一律落 main 工作樹的 `.claude/hooks/`，內容一行 `winpid=<n> tree=<路徑> role=<角色> section=<excl|par> state=<狀態> since=<時間>`；讀端掃所有 worktree（沿用今天掃樹的寫法，舊位置也讀）。
+- 標記一律落 main 工作樹的 `.claude/hooks/`，內容一行 `winpid=<n> tree=<路徑> role=<角色> section=<excl|par> state=<狀態> since=<出生時間> state_since=<進入目前狀態的時間>`。`since` 出生後不變（存活判斷用）；`state_since` 每次改狀態才更新（R²c C2）；讀端掃所有 worktree（沿用今天掃樹的寫法，舊位置也讀）。
 - 狀態（M2）：
   - par：`queued`（拿不到份數、在等）／`running-gate`（正在跑某一支，另記 `gate=<id>`）／`paused`（停在兩支之間讓獨佔段）。
   - excl：`waiting`（在等安靜）／`running`。
 - 舊標記 `.merge-gates-running`：讀端當成 `excl running` 認（舊版 runner 還在別的樹上時）；寫端不再寫。
 
 ### 1b. 取得與釋放要原子（R²b N1）
-- 「讀所有標記 → 判斷能不能進 → 寫自己的標記」整段包在一個臨界區：`mkdir "$_mg_root/.claude/hooks/.merge-gates-gate.d"`（建目錄在 NTFS 上是原子的；已存在 ⇒ 等 1 秒重試，最多 60 次，仍不成 ⇒ 看該目錄的 mtime 是否 >120 秒且沒有活著的取得者 ⇒ 當殘骸刪掉重試，印一行），做完 `rmdir`。
+- 「讀所有標記 → 判斷能不能進 → 寫自己的標記」整段包在一個臨界區：`mkdir "$_mg_root/.claude/hooks/.merge-gates-gate.d"`（建目錄在 NTFS 上是原子的；已存在 ⇒ 等 1 秒重試，最多 60 次，仍不成 ⇒ 判殘骸），做完刪 owner 檔再 `rmdir`。
+  - 取得後**立刻**在目錄內寫 `owner` 檔（`winpid=<n> since=<時間>`）。殘骸＝目錄 mtime > 120 秒**且**（`owner` 檔不在，或 `_mb_marker_alive` 判它死）⇒ 刪掉重試，印一行（R²c C1：空目錄沒有主人資訊，不寫 owner 就無從判「沒有活著的取得者」）。
 - 改自己的狀態（`running-gate`→`paused` 等）也在臨界區內寫。
 - ⇒ 兩份 par 不會同時各看到「0 份」都進；兩份 excl 不會同時都判可開跑。
 
@@ -79,7 +80,7 @@
 - 一進入就寫 `excl waiting` 標記（不是通過剎車後才寫），讓 par 看得到它在等。
 - 開跑條件（三條，臨界區內判）：
   1. **沒有別的 excl 在 `running`**（保住今天「全機只准一份獨佔」；R²b N1——少了這條，A 的 excl 在兩支閘之間 Godot＝0 的空檔，B 的 excl 可插進來，正是 2026-09-23 兩輪交錯的形狀）；
-  2. 自己是 `waiting` 隊列的**隊首**：依標記的 `since` 由早到晚，同秒比 winpid 小者先；
+  2. 自己是 `waiting` 隊列的**隊首**：依進入 `waiting` 的時間（`state_since`，進入後在 waiting 期間不重寫）由早到晚，同秒比 winpid 小者先；
   3. 沒有 par 在 `running-gate` **且** Godot 行程數＝0。不是「par 份數＝0」——停在兩支之間（`paused`）的 par 不擋獨佔段，這樣不會互等。
 - 等待中每 60 秒檢查一次阻擋者並印出：
   - 只有 par 在 `running-gate` ⇒ 等它跑完當下那一支（par 看到 `waiting` 會在下一支前停）。
@@ -113,6 +114,7 @@
   - 段別：假註冊表五列（`par`／`excl`／空／`PAR`／欄數 4）⇒ 讀對、空與不認得的當 excl 並印、欄數錯的報錯。
   - 存活（M1）：起一個背景子行程，讀它的 `/proc/<pid>/winpid` 寫進假標記 ⇒ 判活；用已結束行程的 winpid ⇒ 判死。兩個方向都要，不准用 `$$`。
   - 份數：兩份活 par（真 winpid）⇒ 第三份 `queued`；同 tree 兩份 ⇒ 第二份等。
+  - 臨界區殘骸（C1）：owner 活著、目錄 mtime 調舊到 200 秒 ⇒ 不得被刪；owner 死了＋mtime 舊 ⇒ 刪。
   - 互等（M2）：par `paused`＋excl `waiting` ⇒ excl 判「可開跑」（不死鎖）；excl `waiting` 時新 par 不拿份數；阻擋者含非電池 Godot ⇒ par 不停。
   - 超時（M3）：假輸出行首有標記＋RC 98 ⇒ 記「超時（並行中）」；標記不在行首（轉述）⇒ 不算；重跑通過 ⇒ 該格字面是「PASS（並行超時後獨佔重跑通過）」且 carry 接到。
 - 真跑一次（判準照藍圖票）：
@@ -122,7 +124,7 @@
   - 全程 FreeMB 最低值印出；不出現 2026-09-23 那種被收割。
 - **par 分類的對照**（M4；R²b N3）：同一個 par 段跑兩次——一次機器安靜、一次同時開合成負載（一個空轉的 Godot headless＋一個吃 CPU 的子行程）；兩次的**逐格判決**逐字相同（時間欄不比）。不同 ⇒ 那支改 `excl` 並記一筆。
   - **負載強度地板**：負載那一跑的逐格耗時中位數 ÷ 安靜那一跑 ≥ `LOAD_RATIO_MIN = 1.3`（TEST VALUE）；不到 ⇒ 這次對照不算數（負載沒真的壓上去），印比值。
-  - **陽性對照**：同一個負載下，另跑兩支只給對照用的小腳本（放 `scripts/debug/`，不進註冊表）——一支斷言「全機 Godot 行程數＝1（只有自己）」、一支斷言「固定工作量在 N 秒預算內做完」（N 取安靜時實測耗時 ×1.1）。負載下兩支都必須**不綠**；綠了 ⇒ 負載沒有壓到「會讓 excl 型閘變判決」的程度，整個對照不算數。
+  - **陽性對照**：同一個負載下，另跑兩支只給對照用的小腳本（放 `scripts/debug/`，不進註冊表）——一支斷言「全機 Godot 行程數＝1（只有自己）」、一支斷言「固定工作量在 N 秒預算內做完」（N 取安靜時實測耗時 ×1.1）。負載下兩支都必須**不綠**；綠了 ⇒ 負載沒有壓到「會讓 excl 型閘變判決」的程度，整個對照不算數。安靜時兩支要**連跑 3 次皆綠**（R²c C3：否則一支在預算 ×1.1 邊緣抖動的壞腳本也能「通過」對照）。
 - 分類複核：交件信列每一支 `excl` 的理由（file:line）、「讀時間但留 par」三支的負載實測、`ui-flow`／`terminal-e2e` 與 helper 的掃描結果、超時判定兩類（直接／包裝）的名單。
 
 ## 誠實限

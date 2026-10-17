@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 電池拆段（流程）
 topic: R²c VERDICT＝CLEAN（附 3 條派發前請併進 spec 的文字修補 C1–C3，不需再審）。靜態讀 spec bff125557 與 runner／machine-busy，沒跑任何閘、沒起 Godot。
 ---
