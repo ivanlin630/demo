@@ -48,7 +48,6 @@
     - **進場條件放寬**（R²b N2，選 (a)）：今天的 if 是 `has_own_outpost ∧ idle_labor > 0 ∧ 非玩家`（`:886`）。`idle_labor > 0` 是舊「擴點」的**動機**（閒勞力沒事做），不是開點的通則；③④ 沒有這一條。擴點退場後拿掉它，改成「有自家據點 ∧ 屬 §二掛的母體」。否則能開點的隊會悄悄縮到有閒勞力的隊。
     - 代價：掃全圖的隊變多（今天 ② 只有有閒勞力的隊、④ 每勢力一支）。F8 的 perf 項要特別印 `INFRA_INTERVAL` 那一拍。
     - 快取第一次寫入要等一個 `INFRA_INTERVAL`，在那之前讀到 (-1,-1) ⇒ 不掛。無害；F2 的床先推一個 `INFRA_INTERVAL`。`ensure_maintain_goals` 裡**不**每隊重掃全圖。`type` 走 `_pick_outpost_type`。
-    - ⇒ 全圖掃描次數 ≤ 今天：② 的快取照舊；④ 每勢力一次那一份退場（§五）。
   - 沒據點、有自己的營地（`own_camp_pos`）：`target` ＝ 營地；`type` ＝ `settle_camp_type`。不掃圖。
   - 兩者都沒有：不掛（照今天的路先搭營地，藍圖裁甲）。
 - **值**（R² M3，走 (a)）：開點列的 payoff 跟別的目標列同一種單位（錢），餵既有的 `_candidate_util`，**只在那裡**正規化一次、折現一次。
@@ -75,7 +74,7 @@
   - **「自己的」**（R² M4）＝ 本隊或本隊的子隊（`subteam_ids`，含在途與施工中）。工地看 `construction_team_id`，據點看 `outpost_owner`。判法走既有的一跳親緣謂詞（`world_state.gd:801 registered_or_parent_at` 那一族；`outpost_system.gd:1061-1064` 註解：不得再手寫 `owner == parent_team_id`）。若沒有現成的「這個 team_id 是不是我或我的子隊」謂詞，就在 `world_state.gd` 那一族旁邊新寫一支，§二、§三、§五三處共用。
 - **感知**（R² M6，訂正）：選址秤**有讀遠端格的現存量**。`_site_resource_bonus` 對候選格與六鄰讀 `ntile.resources`（現存量）、`ntile.resource_cap`（`faction_ai_system.gd:6235-6243`）。tiles 迴圈上的 `gate-ok: legit-geo`（`:6167`、`:6188`）標的是讀地形，不涵蓋這兩讀。採料天數那一項才走 `site_prior`（`:6204`）。
   - 本票不改選址秤（既有 code）。
-  - 本票對這兩讀的使用範圍：快取母體照 ②（有據點的隊、`INFRA_INTERVAL`），④ 那份退場 ⇒ 讀的次數不增加。
+  - 本票對這兩讀的使用範圍（R²c C2 訂正）：N2 放寬快取母體後，讀的次數**會增加**（今天只有有閒勞力的隊與每勢力一支）。藍圖已裁另開一張改來源，所以本票不擋；F8 的 perf 項照印。
   - 藍圖裁（2026-10-17 RULING remote-tile-current-stock-is-not-knowable）：這兩讀不算隊伍能知道的事，不補豁免；另開一張小票排在本票之後（見範圍外）。
   - 交件信列出這一列讀到的每一個遠端量，各標來源，先寫這兩項。
 
@@ -100,7 +99,7 @@
   - 升人副作用 9／165、3／27 次（每隊最多一次）。被擋後沒有隊消失。
 - **`FoundingCrew`**（新檔 `scripts/simulation/decision/founding_crew.gd`，static，純查詢、零 RNG、零世界寫入）
   - `plan(state, team, site_pos, type, level) -> {ok, crew, carried, payoff, delay_days, reason}`。
-  - 只有四個地方呼它，派出人數一律讀 `plan.crew`：§二的值、§五的執行候選、`_dispatch_builder`、`_delegate_variant`（只限紮根，見下）。
+  - 只有五個地方呼它，派出人數一律讀 `plan.crew`：§二的值、§五的執行候選、`_dispatch_builder`、`_delegate_variant`（只限紮根，見下）、`_dispatch_goal_delegate` generic 分支（只限 `is_founding_task`，升人前重呼；R²c C1）。
   - **`_delegate_variant` 的範圍**（R²b N1，選 (a)）：它包所有 TASK_BUILD／TASK_SETTLE 自候選（`goal_resolver.gd:564`）。TASK_BUILD 有三個 option：
     - 紮根（`to_task` 有 `settle_site`，有 type／level）⇒ 走 `plan`；
     - 「建設」（`options.gd:70-78`，在自家格 bootstrap 或升級）、「自救建田」（`:89-100`，在自家格蓋產糧設施）⇒ 不是開點，照原本的 `clampi(pop/4,2,5)` 與 `MIN_PARENT_POP_AFTER_DISPATCH` 檢查，不動；範圍外列一條。
@@ -108,7 +107,7 @@
   - **涵蓋派遣端全部六道閘**（R² M2）。依序；不成立就 `ok=false`，`reason` 為括號內的名字：
     0. `no_crew`（R²b N3：排在最前，**在 n 迴圈之前**）：pop ≤ 1，或沒有人能當帶隊人（純查詢 `_pick_advisor != -1 ∨ 匿名人 > 0`，與 `person_generator.gd:86-91` 同一條件，抽成一支）。n 範圍是空的時候一定先落在這裡，**不得**落進 `site_barren`／`food_bridge`（否則今天 257 次的物理失敗會被記成「等料」，灌水 `wait_material`）。
     1. `in_flight`：本隊已有 CONSTRUCT／BUILD 子隊（掃 `subteam_ids`，同 `:5544-5551`）。§三 S2 共用這一支。
-    2. `tile_occupied`：目標格有工地（同 `:5553-5556`），或目標格是「別人的」（§二的親緣謂詞）。
+    2. `tile_occupied`：目標格**有工地且不是自己的**，或目標格是別人的據點（§二的親緣謂詞）。自己的工地不擋：紮根續建（`settle_resume_site`）回到自家工地時必須通過（R²c C4）。
     3. 對每個 n ∈ [1, pop − 1]（母隊至少留隊長一人）：
        - `carried(n) = min(fundable_carry(...).material, n × MovementSystem.BASE_CARRY)`（讀常數；坐騎、車不分給子隊，照今天撥料的實況）。
        - `delay(n)`：`build_eta_total_days(..., n, carried(n), site)` 是 INF ⇒ 排除這個 n。
@@ -127,11 +126,12 @@
     - 「母隊剩多少才夠」不再是門檻，改由 `baseline_daily` 承擔：派走的人越多、家裡越虧。
     - R² 點 2 的誠實限：`_inflow_est` 只算產糧，不算守備、孩童。秤會不會自己停，要看它對 n 是不是凸，F8 直接印出來。
     - TASK_SETTLE 那一支（搭營地／落腳，藍圖裁甲不在本票）照舊用 `clampi`，註解寫明它不是開點。
-  - **派遣端**：`_dispatch_builder` 開頭重呼 `plan`（同 tick 同輸入 ⇒ 同答案）。`ok=false` ⇒ `funnel.build_gate.<reason>` ＋ return false。原本六道各自的 if 全刪。鍵名對照（R²b S2）：`in_flight` 沿用舊鍵 `busy_subteam`；`tile_occupied`、`site_barren`、`food_bridge` 照舊；`no_crew` 是新鍵，取代 `pop` 與 `no_advisor` 兩個舊鍵；`value_nonpositive` 是新鍵。交件信附這張對照，F9 用新鍵名。
+  - **派遣端**：`_dispatch_builder` 開頭重呼 `plan`（同 tick 同輸入 ⇒ 同答案）。`ok=false` ⇒ `funnel.build_gate.<reason>` ＋ return false。原本六道各自的 if 全刪。鍵名對照（R²b S2）：`in_flight` 沿用舊鍵 `busy_subteam`；`tile_occupied`、`site_barren`、`food_bridge` 照舊；`no_crew` 是新鍵，取代 `pop` 與 `no_advisor` 兩個舊鍵；`value_nonpositive` 是新鍵。交件信附這張對照。F9 寫 reason 名時旁邊並寫實際的鍵名（`in_flight`＝鍵 `funnel.build_gate.busy_subteam`），免得去查一個恆 0 的不存在鍵（R²c C3）。
   - **趟數**：本票恆一趟。多趟運料不新寫；缺的料走就地採或 §三的「先買夠再走」（範圍外列一條）。
 - **升人移到最後**：`_pick_or_promote_advisor` 有兩處都在派出前升人，兩處都移到 `plan.ok` 之後、`SubteamSystem.dispatch` 之前；失敗的嘗試不再有世界寫入（F7）。
   - `_dispatch_builder`（`:5579`）；
-  - `_dispatch_goal_delegate` generic 分支（`:5904`，紮根委派變體 ①' 走這裡；R²b S4）。M1(b) 之後營地紮根委派變體仍會被產生（紮根 option 沒動），所以這一支要改。建設、自救建田的委派也走這支；它們沒有 `plan`，那就移到它們自己原本的檢查之後。
+  - `_dispatch_goal_delegate` generic 分支（`:5902-5914`，紮根委派變體 ①' 走這裡；R²b S4）。M1(b) 之後營地紮根委派變體仍會被產生（紮根 option 沒動），所以這一支要改。
+    - 這一支今天**沒有** `plan` 呼叫（R²c C1）：`is_founding_task(td)` 成立時，升人前重呼 `plan`；`ok=false` ⇒ `funnel.build_gate.<reason>` ＋ 不派。派出人數讀 `plan.crew`，不讀 `td.settler`。建設、自救建田的委派也走這支；它們沒有 `plan`，那就移到它們自己原本的檢查之後。
 - **誠實限**：
   - 量測只有一個 seed、Probe 世界；也沒量「不被擋本來會派什麼」。本節不靠量測挑數字，只用它確認兩件事：沒帶隊人是物理；被擋的是候選端沒查人數的小隊。
   - 1–3 人的小隊在新秤下**可能**派得出 1–2 人的子隊（今天派不出）。pop = 2 派 1 人之後母隊只剩 1 人，下次回到 `no_crew`，不會死循環（R² 點 2）。不另加下限；F8 印分布。
@@ -186,6 +186,7 @@
 - **F7 失敗的嘗試沒有世界寫入**：讓 `plan` 不成立 ⇒ `state.persons.size()` 與 `named_members.size()` 嘗試前後相同。`_dispatch_builder` 與 generic 分支（紮根委派變體）各驗一次。
 - **F9 候選端與派遣端同一支 `plan`**（R² M7）：
   - **單隊構造床**：三支隊 pop = 1／3／40，有據點、選址有效。逐支斷言「候選端有沒有執行候選」與 `plan.ok` 一致；pop = 1 那支 `reason == no_crew`。
+    - 另加一格（R²c C1）：營地上的紮根委派變體走 generic 分支。讓 `plan` 不成立（例如 pop = 1）⇒ generic 分支不派、`named_members.size()` 不變、`funnel.build_gate.no_crew` +1。
   - 進場計數：`founding_crew.plan.call` > 0（候選端與派遣端各一顆鍵），`dispatch_builder.attempt` > 0。任一為 0 ⇒ 本格不算過。
   - 電池補充：六個世界 30 天，`funnel.build_gate.*` **依 reason 分列**；`no_crew`／`value_nonpositive`／`site_barren`／`food_bridge` 四鍵在派遣端應為 0；`in_flight`／`tile_occupied` 列出但不設 0（同 tick 別的路徑可能改了世界，列出來看）。同一隊同一格連續失敗最長串**依 reason 分列**印出（修前 pop 門 51）。
 - **F8 量測（電池世界 30 天；修前＝本票 merge 前的 main）**：

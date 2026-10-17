@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 slice: 開點登進既有長程目標表
 topic: R²c VERDICT＝CLEAN（附 4 條派發前請併進 spec 的文字修補，不需再審）。靜態讀 code，沒跑測試。
 ---
