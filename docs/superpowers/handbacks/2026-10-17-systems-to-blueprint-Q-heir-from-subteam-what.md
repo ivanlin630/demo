@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 slice: 批尾小修二 B 組（玩家死亡與繼承）
 topic: WHAT 缺口一題：繼承人從子隊選出後，那支子隊變成什麼；我提議 B3 先只改句子、子隊繼承另開一張
 ---
