@@ -1,0 +1,6 @@
+tree d4a92989b78383f664b4e8b78bbc0d79d5948ac8  2026-10-17 15:43:46
+$ git grep -n "claim_on_arrival(" -- scripts/simulation/sim_runner.gd
+scripts/simulation/sim_runner.gd:942:			InteractionSystem.claim_on_arrival(state, _t, _at)
+rc=0
+$ git grep -n "outpost_owner != _t.team_id" -- scripts/simulation/sim_runner.gd
+rc=1

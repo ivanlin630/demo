@@ -1,0 +1,14 @@
+import sys
+n=sys.argv[1]
+def sub(p,old,new):
+    s=open(p,encoding='utf-8',newline='').read()
+    o=old.replace('\n','\r\n') if '\r\n' in s else old
+    nn=new.replace('\n','\r\n') if '\r\n' in s else new
+    assert s.count(o)==1,(p,old[:40]); s=s.replace(o,nn); open(p,'w',encoding='utf-8',newline='').write(s)
+if n=='n1':   # 拿掉②
+    sub('scripts/simulation/interaction_system.gd','\t\tif _ot.tile_pos == tile.tile_pos:\n\t\t\t_claim_pending_here(state, _ot, tile)\n','\t\tif false and _ot.tile_pos == tile.tile_pos:\n\t\t\t_claim_pending_here(state, _ot, tile)\n')
+elif n=='n2': # ①改回只看 TRADE
+    sub('scripts/simulation/sim_runner.gd','\t\tif _at != null and _at.outpost_level > 0:\n\t\t\tInteractionSystem.claim_on_arrival','\t\tif _at != null and _at.outpost_level > 0 and _t.current_task == TeamData.TASK_TRADE:\n\t\t\tInteractionSystem.claim_on_arrival')
+elif n=='n3': # resolver 那一行放回
+    sub('scripts/simulation/interaction_system.gd','\t#   ⇒ 這裡不再呼 claim_on_arrival：留著的話 TRADE 隊同 tick 結清兩次，第二次必空而誤記「領取」落空\n','\t#   ⇒ 這裡不再呼 claim_on_arrival：留著的話 TRADE 隊同 tick 結清兩次，第二次必空而誤記「領取」落空\n\tclaim_on_arrival(state, visitor, tile)\n')
+print('applied',n)

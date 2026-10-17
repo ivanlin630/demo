@@ -1,0 +1,28 @@
+extends SceneTree
+# 診斷（不進閘）：普查 fp 世界那一對 4@(2,21) 是怎麼站上去的。同普查 fp 世界設定（arm_and_setup strip=true、seed 20260922）。
+const T0: int = 17860
+const T1: int = 17890
+const TID: int = 4
+const POS := Vector2i(2, 21)
+func _initialize() -> void:
+	seed(20260922)
+	var ws: WorldState = MeasureBedHelper.arm_and_setup("res://config/warring_states.json", true)
+	var runner := SimRunner.new()
+	var tile: HexTileData = ws.world.tiles.get(POS.x * 1000 + POS.y)
+	for _i in range(T1):
+		var prev: Vector2i = ws.teams[TID].tile_pos if ws.teams.has(TID) else Vector2i(-9, -9)
+		runner.advance_tick(ws, Vector2i(-1, -1))
+		if ws.encounter_active and ws.encounter_tick > 800:
+			runner._encounter_system.resolve_encounter_end(ws, "draw")
+		var now: int = ws.world.current_tick
+		if now < T0:
+			continue
+		var t: TeamData = ws.teams.get(TID)
+		var cl: Array = []
+		for c in tile.pending_claims:
+			cl.append("%s/%s amt=%.1f owner=%d since=%d" % [c.get("kind"), c.get("res"), float(c.get("amt", 0)), int(c.get("owner_team", -1)), int(c.get("since_tick", -1))])
+		print("DIAG|t=%d|prev=%s pos=%s task=%s opt=%s mt=%s live=%s|tile lvl=%d owner=%d|claims=%s" % [now, str(prev),
+			str(t.tile_pos) if t else "-", String(t.current_task) if t else "-", String(t.current_option) if t else "-",
+			str(t.move_target) if t else "-", str(ws.is_live_team(TID)), tile.outpost_level, tile.outpost_owner, str(cl)])
+	print("=== a3p_diag_team4 DONE ===")
+	quit(0)

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 結構輪探針
 topic: 用戶裁「合」，已 merge aa82c866d；world-fp 換 f8fb6b3（我改註冊表）；分支可以收了；你照做 a3prime
 ---

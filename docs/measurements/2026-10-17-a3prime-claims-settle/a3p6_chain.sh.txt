@@ -1,0 +1,25 @@
+#!/bin/bash
+export PSExecutionPolicyPreference=Bypass
+export GIT_OPTIONAL_LOCKS=0
+S=/c/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/440df8b3-945b-4cc6-bd63-9750aeb25aee/scratchpad
+GS="git --no-optional-locks"
+TIP=ba569a70a
+T=/a/GDS/demo/.worktrees/mm2neg
+L=/a/GDS/demo/.git/worktrees/mm2neg/index.lock
+G="powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot.ps1"
+unlock() { while [ -e "$L" ]; do if [ "$(tasklist | grep -ci git.exe)" -eq 0 ] && [ ! -s "$L" ]; then echo "unlock $L $(date +%T)" >> $S/srp2-unlock.log; rm -f "$L"; else sleep 3; fi; done; }
+gwait() { local ok=0; while [ $ok -lt 4 ]; do if [ "$(tasklist | grep -ci godot)" -eq 0 ]; then ok=$((ok+1)); else ok=0; fi; sleep 5; done; }
+cd $T
+unlock; git checkout -q -- .; git clean -qfd scripts/debug >/dev/null 2>&1
+unlock; git checkout -q --detach $TIP
+H=$($GS rev-parse HEAD)
+gwait; $G --headless --import > /dev/null 2>&1
+unlock; gwait
+out=$S/battery-a3p-$H.txt
+echo "tree $H $($GS status --porcelain | wc -l)" > $out
+bash .claude/hooks/merge-gates.sh >> $out 2>&1
+echo "BATTERY_RC=$?" >> $out
+$GS status --porcelain >> $out
+echo "tree-after $($GS rev-parse HEAD)" >> $out
+unlock; git checkout -q -- .
+echo A3P6_DONE

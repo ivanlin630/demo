@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: A3′ 待領資產在本人站上那個市集的那一刻結清
 topic: ★派工，R² CLEAN（`d92850e51`，兩輪）｜spec ＝ `A:/GDS/demo/docs/superpowers/specs/2026-10-07-a3prime-claims-settle-when-owner-stands-on-the-market-HOW.md`｜★序 ＝ … → 節律 → **本票** → 觀察輪重跑｜★★P0 守衛：動工前兩條 grep 必須＝0（A2 已落地），否則不動工回報
 ---

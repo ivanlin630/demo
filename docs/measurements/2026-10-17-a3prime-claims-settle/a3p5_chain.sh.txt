@@ -1,0 +1,25 @@
+#!/bin/bash
+export PSExecutionPolicyPreference=Bypass
+export GIT_OPTIONAL_LOCKS=0
+S=/c/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/440df8b3-945b-4cc6-bd63-9750aeb25aee/scratchpad
+G="powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot.ps1"
+gwait() { local ok=0; while [ $ok -lt 4 ]; do if [ "$(tasklist | grep -ci godot)" -eq 0 ]; then ok=$((ok+1)); else ok=0; fi; sleep 5; done; }
+cd /a/GDS/demo/.worktrees/a3p
+H=$(git --no-optional-locks rev-parse --short HEAD)
+for n in n1 n2 n3; do
+  python $S/neg_a3p.py $n > $S/a3p5-neg-$n.txt
+  echo "tree $H neg $n" >> $S/a3p5-neg-$n.txt
+  git --no-optional-locks diff --stat >> $S/a3p5-neg-$n.txt
+  gwait; GODOT_TIMEOUT=900 $G --headless --script scripts/debug/a3prime_claims_settle_bed.gd >> $S/a3p5-neg-$n.txt 2>&1
+  echo "rc=$?" >> $S/a3p5-neg-$n.txt
+  if [ $n = n1 ]; then
+    echo "tree $H neg n1" > $S/a3p5-census-n1.txt
+    gwait; GODOT_TIMEOUT=3600 $G --headless --script scripts/debug/a3prime_claim_census.gd >> $S/a3p5-census-n1.txt 2>&1
+    echo "rc=$?" >> $S/a3p5-census-n1.txt
+  fi
+  git checkout -q -- scripts/simulation
+done
+echo "tree $H $(git --no-optional-locks status --porcelain | wc -l)" > $S/a3p5-census-post.txt
+gwait; GODOT_TIMEOUT=3600 $G --headless --script scripts/debug/a3prime_claim_census.gd >> $S/a3p5-census-post.txt 2>&1
+echo "rc=$?" >> $S/a3p5-census-post.txt
+echo A3P5_DONE

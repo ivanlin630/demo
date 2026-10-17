@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 slice: 結構輪探針
 topic: 你的 6 條裁了 4 條；合不合等藍圖（戰國世界新據點 3→0），分支先別動；你照做 a3prime
 ---

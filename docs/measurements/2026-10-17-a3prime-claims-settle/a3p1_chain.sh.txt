@@ -1,0 +1,13 @@
+#!/bin/bash
+export PSExecutionPolicyPreference=Bypass
+export GIT_OPTIONAL_LOCKS=0
+S=/c/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/440df8b3-945b-4cc6-bd63-9750aeb25aee/scratchpad
+G="powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot.ps1"
+gwait() { local ok=0; while [ $ok -lt 4 ]; do if [ "$(tasklist | grep -ci godot)" -eq 0 ]; then ok=$((ok+1)); else ok=0; fi; sleep 5; done; }
+cd /a/GDS/demo/.worktrees/a3p
+gwait; $G --headless --import > /dev/null 2>&1
+out=$S/a3p-census-pre.txt
+echo "tree $(git --no-optional-locks rev-parse HEAD) (+census uncommitted) $(git --no-optional-locks status --porcelain | tr '\n' ' ')" > $out
+gwait; GODOT_TIMEOUT=3600 $G --headless --script scripts/debug/a3prime_claim_census.gd >> $out 2>&1
+echo "rc=$?" >> $out
+echo A3P1_DONE

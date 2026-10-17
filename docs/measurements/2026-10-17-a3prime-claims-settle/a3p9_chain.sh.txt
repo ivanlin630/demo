@@ -1,0 +1,17 @@
+#!/bin/bash
+export PSExecutionPolicyPreference=Bypass
+export GIT_OPTIONAL_LOCKS=0
+S=/c/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/440df8b3-945b-4cc6-bd63-9750aeb25aee/scratchpad
+G="powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot.ps1"
+gwait() { local ok=0; while [ $ok -lt 4 ]; do if [ "$(tasklist | grep -ci godot)" -eq 0 ]; then ok=$((ok+1)); else ok=0; fi; sleep 5; done; }
+for w in a3pbase a3p; do
+  cd /a/GDS/demo/.worktrees/$w; o=$S/a3p9-attr1-$w.txt; echo "tree $(git --no-optional-locks rev-parse HEAD)" > $o
+  gwait; GODOT_TIMEOUT=3600 WFP_TICKS=9700 STEP=1 $G --headless --script scripts/debug/wfp_attr_probe.gd 2>&1 | grep -E "^ATTR\|t=9[6-7]|DONE|SCRIPT ERROR" >> $o
+done
+T=$(diff <(grep "^ATTR|t=" $S/a3p9-attr1-a3pbase.txt) <(grep "^ATTR|t=" $S/a3p9-attr1-a3p.txt) | grep "^<" | head -1 | sed -E 's/.*t=([0-9]+).*/\1/')
+echo "first_div=$T" > $S/a3p9-firstdiv.txt
+for w in a3pbase a3p; do
+  cd /a/GDS/demo/.worktrees/$w; o=$S/a3p9-dump-$w.txt; echo "tree $(git --no-optional-locks rev-parse HEAD) T=$T" > $o
+  gwait; GODOT_TIMEOUT=3600 WFP_TICKS=$T STEP=100000 DUMP_T=$T $G --headless --script scripts/debug/wfp_attr_probe.gd 2>&1 | grep -E "^DUMP|DONE|SCRIPT ERROR" >> $o
+done
+echo A3P9_DONE

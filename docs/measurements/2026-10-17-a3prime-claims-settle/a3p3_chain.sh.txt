@@ -1,0 +1,14 @@
+#!/bin/bash
+export PSExecutionPolicyPreference=Bypass
+export GIT_OPTIONAL_LOCKS=0
+S=/c/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/440df8b3-945b-4cc6-bd63-9750aeb25aee/scratchpad
+G="powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot.ps1"
+gwait() { local ok=0; while [ $ok -lt 4 ]; do if [ "$(tasklist | grep -ci godot)" -eq 0 ]; then ok=$((ok+1)); else ok=0; fi; sleep 5; done; }
+cd /a/GDS/demo/.worktrees/a3p
+H="$(git --no-optional-locks rev-parse --short HEAD) dirty=$(git --no-optional-locks status --porcelain | wc -l)"
+for b in a3prime_claims_settle_bed claim_at_own_market_bed a2_trade_no_deal_bed my_orders_panel_bed possessed_orders_bed bv0_acceptance_bed; do
+  out=$S/a3p3-$b.txt; echo "tree $H" > $out
+  gwait; GODOT_TIMEOUT=1500 $G --headless --script scripts/debug/$b.gd >> $out 2>&1
+  echo "rc=$?" >> $out
+done
+echo A3P3_DONE

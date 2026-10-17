@@ -1,0 +1,26 @@
+#!/bin/bash
+export PSExecutionPolicyPreference=Bypass
+export GIT_OPTIONAL_LOCKS=0
+S=/c/Users/I12/AppData/Local/Temp/claude/A--GDS-demo/440df8b3-945b-4cc6-bd63-9750aeb25aee/scratchpad
+G="powershell -NoProfile -ExecutionPolicy Bypass -File tools/godot.ps1"
+gwait() { local ok=0; while [ $ok -lt 4 ]; do if [ "$(tasklist | grep -ci godot)" -eq 0 ]; then ok=$((ok+1)); else ok=0; fi; sleep 5; done; }
+# 1 play-selfcheck 單跑（釘 d4a92989b）
+cd /a/GDS/demo/.worktrees/mm2neg; o=$S/a3p8-play-selfcheck.txt
+echo "tree $(git --no-optional-locks rev-parse HEAD) $(git --no-optional-locks status --porcelain | wc -l)" > $o
+gwait; echo "godot-before $(tasklist | grep -ci godot) $(date +%T)" >> $o
+python tools/play_selfcheck.py >> $o 2>&1; echo "rc=$?" >> $o; echo "godot-after $(tasklist | grep -ci godot)" >> $o
+git checkout -q -- .
+# 2 診斷 team4
+cd /a/GDS/demo/.worktrees/a3p; o=$S/a3p8-diag-team4.txt
+echo "tree $(git --no-optional-locks rev-parse HEAD)" > $o
+gwait; GODOT_TIMEOUT=3600 $G --headless --script scripts/debug/a3p_diag_team4.gd 2>&1 | grep -E "DIAG|DONE|ERROR|error" >> $o; echo "rc=$?" >> $o
+# 3 base 歸因
+cd /a/GDS/demo/.worktrees/a3pbase; o=$S/a3p8-attr-base.txt
+echo "tree $(git --no-optional-locks rev-parse HEAD)" > $o
+gwait; $G --headless --import > /dev/null 2>&1
+gwait; GODOT_TIMEOUT=3600 STEP=100 $G --headless --script scripts/debug/wfp_attr_probe.gd 2>&1 | grep -E "^ATTR|DONE|SCRIPT ERROR" >> $o
+# 4 a3p 歸因
+cd /a/GDS/demo/.worktrees/a3p; o=$S/a3p8-attr-a3p.txt
+echo "tree $(git --no-optional-locks rev-parse HEAD)" > $o
+gwait; GODOT_TIMEOUT=3600 STEP=100 $G --headless --script scripts/debug/wfp_attr_probe.gd 2>&1 | grep -E "^ATTR|DONE|SCRIPT ERROR" >> $o
+echo A3P8_DONE

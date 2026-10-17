@@ -1,0 +1,5 @@
+tree ac9331482（動工基準）  重印於 2026-10-17 15:43:53（git grep 對 commit，不看工作樹）
+$ git grep -n "claim_on_arrival(" ac9331482 -- scripts/simulation/sim_runner.gd
+rc=1
+$ git grep -n "outpost_owner != _t.team_id" ac9331482 -- scripts/simulation/sim_runner.gd
+rc=1
